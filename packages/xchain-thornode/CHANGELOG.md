@@ -1,3 +1,9 @@
+# v0.3.8 (2023-10-19)
+
+## Update
+
+- Update THORnode to the lastest api spec 1.122.0
+
 # v0.3.7 (2023-10-06)
 
 ## Update

@@ -1,3 +1,9 @@
+# v0.7.6 (2023-10-19)
+
+## Update
+
+- Update deps for thorchain-query & thornode
+
 # v0.7.5 (2023-10-09)
 
 ## Update

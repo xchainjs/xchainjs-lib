@@ -1030,9 +1030,9 @@ export class ThorchainQuery {
       name: thornameRawData.name || '',
       expireBlockHeight: thornameRawData.expire_block_height || 0,
       owner: thornameRawData.owner || '',
-      preferredAsset: thornameRawData.preferred_asset,
+      preferredAsset: thornameRawData.preferred_asset || '',
       affiliateCollectorRune: thornameRawData.affiliate_collector_rune || '',
-      aliases: thornameAliases,
+      aliases: thornameAliases || '',
     }
 
     return thornameDetails // Return the array
