@@ -21,7 +21,7 @@ import {
   Saver,
   SaversApi,
   SaversResponse,
-  ThornameResponse,
+  Thorname,
   ThornamesApi,
   TransactionsApi,
   TxDetailsResponse,
@@ -500,7 +500,7 @@ export class Thornode {
     throw new Error(`THORNode is not responding`)
   }
 
-  async getThornameDetails(thorname: string, height?: number): Promise<ThornameResponse | undefined> {
+  async getThornameDetails(thorname: string, height?: number): Promise<Thorname> {
     for (const api of this.thornamesApi) {
       try {
         const resp = (await api.thorname(thorname, height)).data
@@ -508,7 +508,6 @@ export class Thornode {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (e.response.status == 404) {
-          return undefined
         }
       }
     }
