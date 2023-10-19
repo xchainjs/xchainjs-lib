@@ -1055,7 +1055,7 @@ export class ThorchainQuery {
     )) as unknown as Thorname // TODO: Until integrate THORNode PR
 
     if (thornameDetails && !params.isUpdate) {
-      throw Error('Thorname already reistered')
+      throw Error('Thorname already registered')
     }
 
     const blockData = await this.thorchainCache.thornode.getLastBlock()
