@@ -1031,7 +1031,7 @@ export class ThorchainQuery {
       owner: thornameResp.owner || '',
       preferredAsset: thornameResp.preferred_asset || '',
       affiliateCollectorRune: thornameResp.affiliate_collector_rune || '',
-      aliases: thornameAliases || '',
+      aliases: thornameAliases || [],
     }
 
     return thornameDetails
