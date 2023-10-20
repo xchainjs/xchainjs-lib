@@ -1,3 +1,9 @@
+# v0.6.4 (2023-10-19)
+
+## Update
+
+- standardising the response of getThornameDetails() in case Thorname is not registered
+
 # v0.6.3 (2023-10-06)
 
 ## Update

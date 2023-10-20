@@ -1001,12 +1001,11 @@ export class ThorchainQuery {
    * @param thorname - input param
    * @returns retrieves details for a thorname
    */
-  public async getThornameDetails(thorname: string, height?: number): Promise<ThornameDetails | undefined> {
+  public async getThornameDetails(thorname: string, height?: number): Promise<ThornameDetails> {
     const errors: string[] = []
 
     const thornameResp = await this.thorchainCache.thornode.getThornameDetails(thorname, height)
-    const thornameRawData = thornameResp as unknown as Thorname // TODO: Until integrate THORNode PR
-    const response: { error?: string } = JSON.parse(JSON.stringify(thorname))
+    const response: { error?: string } = JSON.parse(JSON.stringify(thornameResp))
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
       const errorResp: ThornameDetails = {
@@ -1021,21 +1020,21 @@ export class ThorchainQuery {
       return errorResp
     }
 
-    const thornameAliases: ThornameAlias[] = thornameRawData.aliases.map((alias) => ({
+    const thornameAliases: ThornameAlias[] = thornameResp.aliases.map((alias) => ({
       chain: alias.chain as Chain,
       address: alias.address as Address,
     }))
 
     const thornameDetails: ThornameDetails = {
-      name: thornameRawData.name || '',
-      expireBlockHeight: thornameRawData.expire_block_height || 0,
-      owner: thornameRawData.owner || '',
-      preferredAsset: thornameRawData.preferred_asset,
-      affiliateCollectorRune: thornameRawData.affiliate_collector_rune || '',
-      aliases: thornameAliases,
+      name: thornameResp.name || '',
+      expireBlockHeight: thornameResp.expire_block_height || 0,
+      owner: thornameResp.owner || '',
+      preferredAsset: thornameResp.preferred_asset || '',
+      affiliateCollectorRune: thornameResp.affiliate_collector_rune || '',
+      aliases: thornameAliases || [],
     }
 
-    return thornameDetails // Return the array
+    return thornameDetails
   }
 
   /**
@@ -1056,7 +1055,7 @@ export class ThorchainQuery {
     )) as unknown as Thorname // TODO: Until integrate THORNode PR
 
     if (thornameDetails && !params.isUpdate) {
-      throw Error('Thorname already reistered')
+      throw Error('Thorname already registered')
     }
 
     const blockData = await this.thorchainCache.thornode.getLastBlock()

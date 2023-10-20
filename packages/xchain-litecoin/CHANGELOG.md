@@ -1,3 +1,9 @@
+# v0.13.1 (2023-10-20)
+
+## Update
+
+- Change import of UTXO type
+
 # v.0.13.0 (2023-10-25)
 
 - Remove functions `getFee`, `calcFee`, `getDefaultFeesWithRates`, and `getDefaultFees` from utils

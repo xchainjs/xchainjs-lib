@@ -236,10 +236,10 @@ export class TransactionStage {
       const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
       const inboundAmount = txData.tx.tx.coins?.[0].amount
       const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
-      const block = txData.tx.tx.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.block_height)
+      const block = txData.tx.tx.chain == THORChain ? Number(txData.finalised_height) : Number(txData.consensus_height)
 
       const finalizeBlock =
-        txData.tx.tx.chain == THORChain ? Number(txData.finalised_height) : Number(txData.tx.finalise_height)
+        txData.tx.tx.chain == THORChain ? Number(txData.finalised_height) : Number(txData.finalised_height)
 
       const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
@@ -476,7 +476,7 @@ export class TransactionStage {
     let blockDifference: number
     const currentHeight = lastBlockObj.find((obj) => obj.chain == chain)
     const chainHeight = Number(`${currentHeight?.last_observed_in}`)
-    const recordedChainHeight = Number(`${txData.tx.block_height}`)
+    const recordedChainHeight = Number(`${txData.consensus_height}`)
     // If outbound time is required
     if (outboundBlock) {
       const currentHeight = lastBlockObj.find((obj) => obj)
