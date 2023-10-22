@@ -1,3 +1,9 @@
+# v0.6.5 (2023-10-22)
+
+## Update
+
+- address comparion fix, previously failing case matching
+
 # v0.6.4 (2023-10-19)
 
 ## Update

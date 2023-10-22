@@ -770,8 +770,9 @@ export class ThorchainQuery {
     const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
       (item: LastBlock) => item.chain === params.asset.chain,
     )
+    // address comparison is done after conversion to lower case
     const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.symbol}`)).find(
-      (item) => item.asset_address === params.address,
+      (item) => item.asset_address.toLowerCase() === params.address.toLowerCase(),
     )
 
     const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).thornodeDetails
