@@ -1,4 +1,4 @@
-import { LastBlock, Thorname } from '@xchainjs/xchain-thornode'
+import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Address,
   Asset,
@@ -770,8 +770,9 @@ export class ThorchainQuery {
     const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
       (item: LastBlock) => item.chain === params.asset.chain,
     )
+    // address comparison is done after conversion to lower case
     const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.symbol}`)).find(
-      (item) => item.asset_address === params.address,
+      (item) => item.asset_address.toLowerCase() === params.address.toLowerCase(),
     )
 
     const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).thornodeDetails
@@ -1004,10 +1005,38 @@ export class ThorchainQuery {
   public async getThornameDetails(thorname: string, height?: number): Promise<ThornameDetails> {
     const errors: string[] = []
 
-    const thornameResp = await this.thorchainCache.thornode.getThornameDetails(thorname, height)
-    const response: { error?: string } = JSON.parse(JSON.stringify(thornameResp))
-    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
-    if (errors.length > 0) {
+    try {
+      const thornameResp = await this.thorchainCache.thornode.getThornameDetails(thorname, height)
+      const response: { error?: string } = JSON.parse(JSON.stringify(thornameResp))
+      if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
+      if (errors.length > 0) {
+        const errorResp: ThornameDetails = {
+          name: '',
+          expireBlockHeight: 0,
+          owner: '',
+          preferredAsset: '',
+          affiliateCollectorRune: '',
+          aliases: [],
+          error: errors,
+        }
+        return errorResp
+      }
+
+      const thornameAliases: ThornameAlias[] = thornameResp.aliases.map((alias) => ({
+        chain: alias.chain as Chain,
+        address: alias.address as Address,
+      }))
+
+      const thornameDetails: ThornameDetails = {
+        name: thornameResp.name || '',
+        expireBlockHeight: thornameResp.expire_block_height || 0,
+        owner: thornameResp.owner || '',
+        preferredAsset: thornameResp.preferred_asset || '',
+        affiliateCollectorRune: thornameResp.affiliate_collector_rune || '',
+        aliases: thornameAliases || [],
+      }
+      return thornameDetails
+    } catch (e) {
       const errorResp: ThornameDetails = {
         name: '',
         expireBlockHeight: 0,
@@ -1019,22 +1048,6 @@ export class ThorchainQuery {
       }
       return errorResp
     }
-
-    const thornameAliases: ThornameAlias[] = thornameResp.aliases.map((alias) => ({
-      chain: alias.chain as Chain,
-      address: alias.address as Address,
-    }))
-
-    const thornameDetails: ThornameDetails = {
-      name: thornameResp.name || '',
-      expireBlockHeight: thornameResp.expire_block_height || 0,
-      owner: thornameResp.owner || '',
-      preferredAsset: thornameResp.preferred_asset || '',
-      affiliateCollectorRune: thornameResp.affiliate_collector_rune || '',
-      aliases: thornameAliases || [],
-    }
-
-    return thornameDetails
   }
 
   /**
@@ -1050,18 +1063,16 @@ export class ThorchainQuery {
    */
   public async estimateThorname(params: QuoteThornameParams) {
     // CHECK IF ALREADY EXISTS
-    const thornameDetails = (await this.thorchainCache.thornode.getThornameDetails(
-      params.thorname,
-    )) as unknown as Thorname // TODO: Until integrate THORNode PR
+    const thornameDetails = await this.getThornameDetails(params.thorname)
 
-    if (thornameDetails && !params.isUpdate) {
+    if (thornameDetails.owner !== '' && !params.isUpdate) {
       throw Error('Thorname already registered')
     }
 
     const blockData = await this.thorchainCache.thornode.getLastBlock()
     const currentThorchainHeight = blockData[0].thorchain
     const currentHeightForExpirity = params.isUpdate
-      ? (thornameDetails?.expire_block_height as number)
+      ? (thornameDetails?.expireBlockHeight as number)
       : currentThorchainHeight
 
     // DEFAULT EXPIRITY
@@ -1074,8 +1085,8 @@ export class ThorchainQuery {
       const numberOfSecondsToExpire = expirityTimestamp - currentTimestamp
       const numberOfBlocks = Math.round(numberOfSecondsToExpire / 6)
       const newHeightExpirity = currentThorchainHeight + numberOfBlocks
-      numberOfBlocksToAddToExpirity = thornameDetails?.expire_block_height
-        ? newHeightExpirity - thornameDetails?.expire_block_height
+      numberOfBlocksToAddToExpirity = thornameDetails?.expireBlockHeight
+        ? newHeightExpirity - thornameDetails?.expireBlockHeight
         : numberOfBlocks
     }
     // COMPUTE VALUE

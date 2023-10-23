@@ -505,11 +505,7 @@ export class Thornode {
       try {
         const resp = (await api.thorname(thorname, height)).data
         return resp
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (e: any) {
-        if (e.response.status == 404) {
-        }
-      }
+      } catch (e) {}
     }
     throw new Error(`THORNode is not responding`)
   }

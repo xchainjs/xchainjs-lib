@@ -7,10 +7,9 @@
 
 ### Examples
 
-
 ### Using python scripting update package version Minor or Patch
 
-It will only bump version number by 1. i.e for patch > 0.1.1 -> 0.1.2 for Minor > 0.1.1 -> 0.2.0 
+It will only bump version number by 1. i.e for patch > 0.1.1 -> 0.1.2 for Minor > 0.1.1 -> 0.2.0
 
 For the whole library.
 
@@ -26,8 +25,7 @@ For just one package.
 yarn updatePackages minor Update "update rollup config and axios to the latest" avax
 ```
 
-
-## Using Typescript to update package dependencies in other library packages. 
+## Using Typescript to update package dependencies in other library packages.
 
 // For xchainjs packages, will search the library for matching args and update
 yarn updateDeps <packageName> <packageVersion>
@@ -38,7 +36,7 @@ yarn updateDeps client 0.13.7
 
 ### For other packages
 
-For all other package deps flag <true> last arg for script to search for non xchainjs packages 
+For all other package deps flag <true> last arg for script to search for non xchainjs packages
 
 yarn updateDeps <fullpackageName> <packageVersion> <boolean>
 
@@ -46,4 +44,8 @@ yarn updateDeps <fullpackageName> <packageVersion> <boolean>
 yarn updateDeps @psf/bitcoincashjs-lib 4.0.3 true
 ```
 
+### For version comparison between published version & current xchainjs Master version
 
+```
+yarn checkVersion
+```

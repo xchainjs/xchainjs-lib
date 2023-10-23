@@ -41,7 +41,7 @@ describe('Thorchain-query thorname Integration Tests', () => {
   })
   it('Estimate not registered thorname without expirity', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'hippo-2',
+      thorname: 'asgardex',
       chain: BTCChain,
       chainAddress: btcAddress,
       owner: owner,

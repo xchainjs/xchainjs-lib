@@ -14,7 +14,8 @@
     "e2e": "lerna run e2e",
     "lint": "lerna run lint",
     "updateDeps": " ts-node scripts/updateDeps.ts",
-    "updatePackages": "python3 scripts/updatePackageVersion.py ./packages"
+    "updatePackages": "python3 scripts/updatePackageVersion.py ./packages",
+    "checkVersion": "ts-node scripts/checkVersionPublished.ts ./packages"
   },
   "husky": {
     "hooks": {
