@@ -1,13 +1,17 @@
+import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client } from '../src/client'
+import { Client, defaultDogeParams } from '../src/client'
 import { AssetDOGE } from '../src/const'
 
-const dogeClient = new Client()
+const dogeClient = new Client({
+  ...defaultDogeParams,
+  phrase: process.env.PHRASE,
+})
 
 describe('Dogecoin Integration Tests', () => {
   it('should fetch address balance', async () => {
-    const balances = await dogeClient.getBalance('D8ZEVbgf4yPs3MK8dMJJ7PpSyBKsbd66TX')
+    const balances = await dogeClient.getBalance(dogeClient.getAddress())
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
@@ -90,6 +94,26 @@ describe('Dogecoin Integration Tests', () => {
         feeRate: 1,
       })
       console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+  it('Should transfer doge tx fron index 0 to index 1', async () => {
+    try {
+      const dogeclient = new Client({
+        ...defaultDogeParams,
+        phrase: process.env.PHRASE,
+        network: Network.Mainnet,
+      })
+      const amount = assetToBase(assetAmount('10'))
+      const hash = await dogeclient.transfer({
+        recipient: dogeclient.getAddress(1),
+        amount,
+        memo: 'test',
+        feeRate: 40_000,
+      })
+      console.log(hash)
     } catch (err) {
       console.error('ERR running test', err)
       fail()

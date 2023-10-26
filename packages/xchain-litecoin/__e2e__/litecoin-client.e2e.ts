@@ -80,6 +80,21 @@ describe('Litecoin Integration Tests', () => {
       fail()
     }
   })
+  it('should send a LTC transaction', async () => {
+    try {
+      const amount = assetToBase(assetAmount('0.000011'))
+      const txid = await ltcClient.transfer({
+        recipient: ltcClient.getAddress(1),
+        amount,
+        memo: 'test',
+        feeRate: 1,
+      })
+      console.log(JSON.stringify(txid, null, 2))
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
   // it('should send a testnet btc tx', async () => {
   //   try {
   //     const ltcClientTestnet = new Client({

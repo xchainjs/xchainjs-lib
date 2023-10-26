@@ -2,6 +2,7 @@ import {
   AssetInfo,
   FeeRate,
   Network,
+  PreparedTx,
   TxHash,
   TxParams,
   UTXO,
@@ -160,15 +161,19 @@ class Client extends UTXOClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
     checkFeeBounds(this.feeBounds, feeRate)
-    const { psbt } = await this.buildTx({
+
+    const fromAddressIndex = params?.walletIndex || 0
+    const { rawUnsignedTx } = await this.prepareTx({
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
     })
+
     const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)
+    const psbt = Dogecoin.Psbt.fromBase64(rawUnsignedTx, { maximumFeeRate: 7500000 })
+
     psbt.signAllInputs(dogeKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
@@ -181,6 +186,7 @@ class Client extends UTXOClient {
    *
    * @param {BuildParams} params The transaction build options.
    * @returns {Transaction}
+   * @deprecated
    */
   public buildTx = async ({
     amount,
@@ -254,6 +260,7 @@ class Client extends UTXOClient {
    *
    * @param {LedgerTxInfoParams} params The transaction build options.
    * @returns {LedgerTxInfo} The transaction info used for ledger sign.
+   * @deprecated
    */
   public async createTxInfo(params: LedgerTxInfoParams): Promise<LedgerTxInfo> {
     const { psbt, utxos } = await this.buildTx(params)
@@ -268,7 +275,7 @@ class Client extends UTXOClient {
    * Prepare transfer.
    *
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
-   * @returns {string} The raw unsigned transaction.
+   * @returns {PreparedTx} The raw unsigned transaction.
    */
   async prepareTx({
     sender,
@@ -280,7 +287,7 @@ class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-  }): Promise<string> {
+  }): Promise<PreparedTx> {
     const { psbt } = await this.buildTx({
       sender,
       recipient,
@@ -289,7 +296,7 @@ class Client extends UTXOClient {
       memo,
     })
 
-    return psbt.toBase64()
+    return { rawUnsignedTx: psbt.toBase64() }
   }
   /**
    * Compile memo.

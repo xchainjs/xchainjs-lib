@@ -1,3 +1,4 @@
+import cosmosClientCore from '@cosmos-client/core'
 import { Network, TxParams } from '@xchainjs/xchain-client'
 import { AssetATOM, Client as CosmosClient } from '@xchainjs/xchain-cosmos'
 import { assetAmount, assetToBase, assetToString, baseAmount, delay } from '@xchainjs/xchain-util'
@@ -75,12 +76,44 @@ describe('Cosmos Integration Tests', () => {
       throw error
     }
   })
-  it('Prepate transaction', async () => {
-    const unsignedRawTx = await xchainClient.prepareTx({
-      sender: 'cosmos1x4tau5pfrqyyawcewur9ks0jt4e5tnvu8hsag9',
-      recipient: 'cosmos1x4tau5pfrqyyawcewur9ks0jt4e5tnvu8hsag9',
-      amount: assetToBase(assetAmount(0.01, 6)),
+  it('Prepate transaction, sign externally and broadcast', async () => {
+    const sender = xchainClient.getAddress(0)
+    const recipient = xchainClient.getAddress(1)
+
+    console.log('sender', sender)
+    console.log('recipient', recipient)
+
+    const unsignedTxData = await xchainClient.prepareTx({
+      sender,
+      recipient,
+      amount: assetToBase(assetAmount(0.1, 6)),
     })
-    console.log(unsignedRawTx)
+
+    const decodedTx = cosmosClientCore.proto.cosmos.tx.v1beta1.TxRaw.decode(
+      Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
+    )
+
+    const txBuilder = new cosmosClientCore.TxBuilder(
+      xchainClient.getSDKClient().sdk,
+      cosmosClientCore.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
+      cosmosClientCore.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+    )
+
+    const { account_number: accountNumber } = await xchainClient
+      .getSDKClient()
+      .getAccount(cosmosClientCore.AccAddress.fromString(sender))
+
+    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
+
+    const privKey = xchainClient.getSDKClient().getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/118'/0'/0/0")
+
+    const signDocBytes = txBuilder.signDocBytes(accountNumber)
+    txBuilder.addSignature(privKey.sign(signDocBytes))
+
+    const signedTx = txBuilder.txBytes()
+
+    const hash = await xchainClient.broadcastTx(signedTx)
+
+    console.log('hash', hash)
   })
 })

@@ -47,7 +47,7 @@ describe('Kujira client Integration Tests', () => {
     const txDate: TxParams = {
       asset: AssetKUJI,
       amount: baseAmount('1000', 6),
-      recipient: 'kujira1es76p8qspctcxhex79c32nng9fvhuxjn4z6u7k',
+      recipient: xchainClient.getAddress(1),
       memo: 'Rosa melano',
     }
     const txHash = await xchainClient.transfer(txDate)

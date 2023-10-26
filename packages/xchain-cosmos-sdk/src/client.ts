@@ -1,12 +1,14 @@
-import { fromBech32, toBase64 } from '@cosmjs/encoding'
+import { fromBase64, fromBech32, toBase64 } from '@cosmjs/encoding'
+import { DecodedTxRaw, DirectSecp256k1HdWallet, Registry, TxBodyEncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
 import {
-  DirectSecp256k1HdWallet,
-  Registry,
-  TxBodyEncodeObject,
-  encodePubkey,
-  makeAuthInfoBytes,
-} from '@cosmjs/proto-signing'
-import { GasPrice, IndexedTx, SigningStargateClient, StargateClient, StdFee, calculateFee } from '@cosmjs/stargate'
+  GasPrice,
+  IndexedTx,
+  MsgSendEncodeObject,
+  SigningStargateClient,
+  StargateClient,
+  StdFee,
+  calculateFee,
+} from '@cosmjs/stargate'
 import {
   AssetInfo,
   Balance,
@@ -14,6 +16,7 @@ import {
   FeeType,
   Fees,
   Network,
+  PreparedTx,
   Tx,
   TxFrom,
   TxHistoryParams,
@@ -333,28 +336,32 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   public async transfer(params: TxParams): Promise<string> {
-    if (!this.signer) {
-      throw Error('Invalid signer')
-    }
+    if (!this.signer) throw Error('Invalid signer')
 
-    const denom = this.getDenom(params.asset || this.getAssetInfo().asset)
+    const sender = this.getAddress(params.walletIndex || 0)
 
-    if (!denom) {
-      throw Error(
-        `Invalid asset ${params.asset?.symbol} - Only ${this.baseDenom} asset is currently supported to transfer`,
-      )
-    }
-
-    const signer = await this.signer.getValue()
-    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer)
-    const address = await this.getAddress()
-    const amount = { amount: params.amount.amount().toString(), denom }
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender,
+      recipient: params.recipient,
+      asset: params.asset,
+      amount: params.amount,
+      memo: params.memo,
+    })
 
     // TODO: Support fee configuration (subsided fee)
+    const denom = this.getDenom(params.asset || this.getAssetInfo().asset)
     const defaultGasPrice = GasPrice.fromString(`0.025${denom}`)
     const defaultSendFee: StdFee = calculateFee(90_000, defaultGasPrice)
 
-    const tx = await signingClient.sendTokens(address, params.recipient, [amount], defaultSendFee, params.memo)
+    const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
+
+    const signer = await this.signer.getValue()
+    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer)
+
+    const messages: MsgSendEncodeObject[] = unsignedTx.body.messages.map((message) => {
+      return { typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: signingClient.registry.decode(message) }
+    })
+    const tx = await signingClient.signAndBroadcast(sender, messages, defaultSendFee, unsignedTx.body.memo)
 
     return tx.transactionHash
   }
@@ -369,9 +376,15 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * Prepare transfer.
    *
    * @param {TxParams&Address} params The transfer options.
-   * @returns {string} The raw unsigned transaction.
+   * @returns {PreparedTx} The raw unsigned transaction.
    */
-  public async prepareTx({ sender, recipient, asset, amount, memo }: TxParams & { sender: Address }): Promise<string> {
+  public async prepareTx({
+    sender,
+    recipient,
+    asset,
+    amount,
+    memo,
+  }: TxParams & { sender: Address }): Promise<PreparedTx> {
     if (!this.validateAddress(sender)) throw Error('Invalid sender address')
     if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
 
@@ -398,35 +411,10 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       },
     }
 
-    const defaultGasPrice = GasPrice.fromString(`0.025${denom}`)
-    const defaultSendFee: StdFee = calculateFee(90_000, defaultGasPrice)
-
-    const client = await this.startgateClient.getValue()
-    const account = await client.getAccount(sender)
-    if (!account) throw Error('Can not get account from sender')
-    if (!account.pubkey) throw Error('Can not get account from sender')
-
-    const authInfoBytes = makeAuthInfoBytes(
-      [
-        {
-          pubkey: encodePubkey({
-            type: 'tendermint/PubKeySecp256k1',
-            value: toBase64(account.pubkey.value),
-          }),
-          sequence: account.sequence,
-        },
-      ],
-      defaultSendFee.amount,
-      Number(defaultSendFee.gas),
-      defaultSendFee.granter,
-      defaultSendFee.payer,
-    )
-
     const rawTx = TxRaw.fromPartial({
       bodyBytes: new Registry().encode(txBody),
-      authInfoBytes,
     })
-    return toBase64(TxRaw.encode(rawTx).finish())
+    return { rawUnsignedTx: toBase64(TxRaw.encode(rawTx).finish()) }
   }
 
   abstract getAssetInfo(): AssetInfo

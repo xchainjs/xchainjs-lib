@@ -269,16 +269,45 @@ describe('thorchain Integration Tests', () => {
   })
   it('should prepare transaction', async () => {
     try {
-      const from = 'thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9'
-      const to = 'thor1nx3yxgdw94nfw0uzwns2ay5ap85nk9p6hjaqn9'
-      const amount = baseAmount('0.0001')
-      const rawUnsignedTransaction = await thorClient.prepareTx({
-        sender: from,
-        recipient: to,
+      const sender = thorClient.getAddress(0)
+      const recipient = thorClient.getAddress(1)
+
+      const amount = baseAmount('10000')
+      const unsignedTxData = await thorClient.prepareTx({
+        sender,
+        recipient,
         amount,
         memo: 'test',
       })
-      console.log(rawUnsignedTransaction)
+
+      const decodedTx = cosmosclient.proto.cosmos.tx.v1beta1.TxRaw.decode(
+        Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
+      )
+
+      const txBuilder = new cosmosclient.TxBuilder(
+        thorClient.getCosmosClient().sdk,
+        cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
+        cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+      )
+
+      const { account_number: accountNumber } = await thorClient
+        .getCosmosClient()
+        .getAccount(cosmosclient.AccAddress.fromString(sender))
+
+      if (!accountNumber) throw Error(`Transfer failed - missing account number`)
+
+      const privKey = thorClient
+        .getCosmosClient()
+        .getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/931'/0'/0/0")
+
+      const signDocBytes = txBuilder.signDocBytes(accountNumber)
+      txBuilder.addSignature(privKey.sign(signDocBytes))
+
+      const signedTx = txBuilder.txBytes()
+
+      const hash = await thorClient.broadcastTx(signedTx)
+
+      console.log('hash', hash)
     } catch (err) {
       console.error('ERR running test', err)
       fail()

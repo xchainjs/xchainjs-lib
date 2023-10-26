@@ -3,6 +3,7 @@ import {
   FeeOption,
   FeeRate,
   Network,
+  PreparedTx,
   TxHash,
   TxParams,
   UTXO,
@@ -63,7 +64,6 @@ export const defaultLtcParams: UtxoClientParams & {
 class Client extends UTXOClient {
   private nodeUrls: NodeUrls
   private nodeAuth?: NodeAuth
-
   /**
    * Constructor
    * Client is initialised with network type
@@ -178,20 +178,23 @@ class Client extends UTXOClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    const fromAddressIndex = params?.walletIndex || 0
-
     // set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
-    const { psbt } = await this.buildTx({
+    const fromAddressIndex = params.walletIndex || 0
+    const { rawUnsignedTx } = await this.prepareTx({
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
     })
+
+    const psbt = Litecoin.Psbt.fromBase64(rawUnsignedTx)
     const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
+
     psbt.signAllInputs(ltcKeys) // Sign all inputs
     psbt.finalizeAllInputs() // Finalise inputs
+
     const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
 
     return await Utils.broadcastTx({
@@ -201,6 +204,12 @@ class Client extends UTXOClient {
     })
   }
 
+  /**
+   *
+   * @param {BuildParams} params The transaction build options.
+   * @returns {Transaction}
+   * @deprecated
+   */
   async buildTx({
     amount,
     recipient,
@@ -269,7 +278,7 @@ class Client extends UTXOClient {
    * Prepare transfer.
    *
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
-   * @returns {string} The raw unsigned transaction.
+   * @returns {PreparedTx} The raw unsigned transaction.
    */
   async prepareTx({
     sender,
@@ -281,7 +290,7 @@ class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-  }): Promise<string> {
+  }): Promise<PreparedTx> {
     const { psbt } = await this.buildTx({
       sender,
       recipient,
@@ -290,7 +299,7 @@ class Client extends UTXOClient {
       memo,
     })
 
-    return psbt.toBase64()
+    return { rawUnsignedTx: psbt.toBase64() }
   }
   /**
    * Compile memo.

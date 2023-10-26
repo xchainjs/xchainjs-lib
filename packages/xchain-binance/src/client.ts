@@ -1,7 +1,6 @@
 import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
 import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
-import Transaction from '@binance-chain/javascript-sdk/lib/tx'
-import { AminoPrefix, SignedSend } from '@binance-chain/javascript-sdk/lib/types'
+import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
   AssetInfo,
   Balance,
@@ -9,6 +8,7 @@ import {
   FeeType,
   Fees,
   Network,
+  PreparedTx,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -503,50 +503,10 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * Prepare transfer.
    *
    * @param {TxParams&Address} params The transfer options.
-   * @returns {string} The raw unsigned transaction.
+   * @returns {PreparedTx} The unsigned transaction data.
    */
-  async prepareTx({ sender, recipient, asset, amount, memo }: TxParams & { sender: Address }): Promise<string> {
-    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
-    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
-
-    await this.bncClient.initChain()
-    const senderAccCode = crypto.decodeAddress(sender)
-    const recipientAccCode = crypto.decodeAddress(recipient)
-
-    const coin = {
-      denom: asset || AssetBNB,
-      amount: amount,
-    }
-
-    const msg = {
-      inputs: [
-        {
-          address: senderAccCode,
-          coins: [coin],
-        },
-      ],
-      outputs: [
-        {
-          address: recipientAccCode,
-          coins: [coin],
-        },
-      ],
-      aminoPrefix: AminoPrefix.MsgSend,
-    }
-
-    const account = await this.getAccount(sender)
-    if (!account) throw Error('Can not get sender account')
-
-    const tx = new Transaction({
-      accountNumber: account.account_number,
-      chainId: this.bncClient.chainId as string,
-      memo: memo || '',
-      msg,
-      sequence: account.sequence,
-      source: this.bncClient._source,
-    })
-
-    return tx.serialize()
+  async prepareTx(): Promise<PreparedTx> {
+    throw Error(' Function not suported for BNB chain')
   }
 }
 

@@ -108,13 +108,24 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     const txHash = await client.transfer({ amount, recipient, memo })
     console.log(txHash)
   })
-  it('should transfer 0.01 RIP(ERC-20) between wallet 0 and 1, with a memo', async () => {
+  it('should transfer 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     //ERC20 address The Crypt (RIP)
 
-    const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
-    const txHash = await client.transfer({ amount, recipient, asset: assetRIP, memo })
+    const txHash = await client.transfer({ amount, recipient, asset: assetRIP })
+    console.log(txHash)
+  })
+  it('should approve 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
+    const recipient = client.getAddress(1)
+    const amount = assetToBase(assetAmount('0.01', 6))
+    //ERC20 address The Crypt (RIP)
+
+    const txHash = await client.approve({
+      amount,
+      contractAddress: '0x224695ba2a98e4a096a519b503336e06d9116e48',
+      spenderAddress: recipient,
+    })
     console.log(txHash)
   })
   it('should test erc-20 approvals ', async () => {

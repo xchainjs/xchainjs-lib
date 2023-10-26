@@ -83,8 +83,8 @@ describe('Dash Integration Tests', () => {
   })
   it('should prepare transaction', async () => {
     try {
-      const from = 'yeRZBWYfeNE4yVUHV4ZLs83Ppn9aMRH57A'
-      const to = 'yeRZBWYfeNE4yVUHV4ZLs83Ppn9aMRH57A'
+      const from = dashClientTestnet.getAddress(0)
+      const to = dashClientTestnet.getAddress(1)
       const amount = assetToBase(assetAmount('0.0001'))
       const rawUnsignedTransaction = await dashClientTestnet.prepareTx({
         asset: AssetDASH,

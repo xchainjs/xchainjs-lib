@@ -5,7 +5,7 @@ import { AssetKUJI, DEFAULT_FEE } from './const'
 
 export const getDefaultClientUrls = (): Record<Network, string> => {
   return {
-    [Network.Testnet]: 'https://test-rpc-kujira.mintthemoon.xyz/',
+    [Network.Testnet]: 'https://kujira-testnet-rpc.polkachu.com/',
     [Network.Stagenet]: 'https://rpc.cosmos.directory/kujira/',
     [Network.Mainnet]: 'https://rpc.cosmos.directory/kujira/',
   }
