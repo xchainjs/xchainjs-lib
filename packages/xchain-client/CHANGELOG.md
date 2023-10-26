@@ -1,3 +1,9 @@
+# v0.15.1 (2023-10-26)
+
+## Update
+
+- prepareTx transaction
+
 # v.0.15.0 (2023-10-25)
 
 - Remove function `getFeesWithMemo` from UTXOClient

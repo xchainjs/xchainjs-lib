@@ -1,3 +1,9 @@
+# v0.17.2 (2023-10-26)
+
+## Update
+
+- Refactor transfer method to use prepareTx
+
 # v.0.17.0 (2023-10-25)
 
 - Remove functions `getFee`, `calcFee`, `getDefaultFeesWithRates`, and `getDefaultFees` from utils

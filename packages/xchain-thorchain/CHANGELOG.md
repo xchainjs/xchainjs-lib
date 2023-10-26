@@ -1,3 +1,9 @@
+# v0.28.10 (2023-10-26)
+
+## Update
+
+- Refactor transfer method to use prepareTx
+
 # v0.28.7 (2023-09-11)
 
 ## Update
