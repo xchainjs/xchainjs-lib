@@ -23,7 +23,8 @@
     }
   },
   "resolutions": {
-    "@babel/traverse": "7.23.2"
+    "@babel/traverse": "7.23.2",
+    "crypto-js": "4.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.1.0",
