@@ -267,4 +267,50 @@ describe('thorchain Integration Tests', () => {
     expect(tx.type).toBe('transfer')
     expect(tx.from[1].amount.amount().toNumber()).toBe(13744300000000)
   })
+  it('should prepare transaction', async () => {
+    try {
+      const sender = thorClient.getAddress(0)
+      const recipient = thorClient.getAddress(1)
+
+      const amount = baseAmount('10000')
+      const unsignedTxData = await thorClient.prepareTx({
+        sender,
+        recipient,
+        amount,
+        memo: 'test',
+      })
+
+      const decodedTx = cosmosclient.proto.cosmos.tx.v1beta1.TxRaw.decode(
+        Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
+      )
+
+      const txBuilder = new cosmosclient.TxBuilder(
+        thorClient.getCosmosClient().sdk,
+        cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
+        cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+      )
+
+      const { account_number: accountNumber } = await thorClient
+        .getCosmosClient()
+        .getAccount(cosmosclient.AccAddress.fromString(sender))
+
+      if (!accountNumber) throw Error(`Transfer failed - missing account number`)
+
+      const privKey = thorClient
+        .getCosmosClient()
+        .getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/931'/0'/0/0")
+
+      const signDocBytes = txBuilder.signDocBytes(accountNumber)
+      txBuilder.addSignature(privKey.sign(signDocBytes))
+
+      const signedTx = txBuilder.txBytes()
+
+      const hash = await thorClient.broadcastTx(signedTx)
+
+      console.log('hash', hash)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
 })

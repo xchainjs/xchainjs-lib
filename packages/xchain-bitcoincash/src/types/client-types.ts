@@ -1,4 +1,4 @@
-import { Balance, FeeOption, Fees, Network, TxHash } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, Fees, Network, PreparedTx, TxHash, UTXO as BaseUTXO } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 
 export type FeeRate = number
@@ -31,3 +31,7 @@ export type GetChangeParams = {
   valueOut: number
   bchBalance: Balance
 }
+
+export type BchPreparedTx = {
+  utxos: BaseUTXO[]
+} & PreparedTx

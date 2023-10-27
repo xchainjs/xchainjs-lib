@@ -34,7 +34,7 @@ const mockAccountsAddress = (
     }
   },
 ) => {
-  nock(url).get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
+  nock(url).persist().get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
 }
 
 const mockGetChainId = (url: string, chainId: string) => {
@@ -473,7 +473,7 @@ describe('Client Test', () => {
   })
 
   it('transfer', async () => {
-    const to_address = 'tthor19kacmmyuf2ysyvq3t9nrl9495l5cvktj5c4eh4'
+    const to_address = thorClient.getAddress(1)
     const send_amount: BaseAmount = baseAmount(10000, 6)
     const memo = 'transfer'
 

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoin",
-  "version": "0.23.0",
+  "version": "0.23.2",
   "description": "Custom Bitcoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@types/wif": "^2.0.2",
-    "@xchainjs/xchain-client": "^0.15.0",
+    "@xchainjs/xchain-client": "^0.15.1",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-utxo-providers": "^0.2.5",
@@ -45,7 +45,7 @@
     "wif": "^2.0.6"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.15.0",
+    "@xchainjs/xchain-client": "^0.15.1",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-utxo-providers": "^0.2.5",

@@ -29,7 +29,7 @@ const mockAccountsAddress = (
     }
   },
 ) => {
-  nock(url).get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
+  nock(url).persist().get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
 }
 
 const mockAccountsBalance = (

@@ -6,6 +6,7 @@ import {
   FeeType,
   Fees,
   Network,
+  PreparedTx,
   Tx,
   TxFrom,
   TxHash,
@@ -746,7 +747,8 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
     sequence,
   }: TxParams & { gasLimit?: BigNumber; sequence?: number }): Promise<TxHash> {
-    const balances = await this.getBalance(this.getAddress(walletIndex))
+    const sender = this.getAddress(walletIndex)
+    const balances = await this.getBalance(sender)
     const runeBalance: BaseAmount =
       balances.filter(({ asset }) => isAssetRuneNative(asset))[0]?.amount ?? baseAmount(0, RUNE_DECIMAL)
     const assetBalance: BaseAmount =
@@ -766,39 +768,41 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
         throw new Error('insufficient funds')
       }
     }
-    const privKey = this.getPrivateKey(walletIndex)
-    const from = this.getAddress(walletIndex)
-    const signerPubkey = privKey.pubKey()
-    const accAddress = cosmosclient.AccAddress.fromString(from)
 
-    const denom = getDenom(asset)
-
-    const txBody = await buildTransferTx({
-      fromAddress: from,
-      toAddress: recipient,
-      memo: memo,
-      assetAmount: amount,
-      assetDenom: denom,
-      chainId: this.getChainId(),
-      nodeUrl: this.getClientUrl().node,
-    })
-    const account = await this.getCosmosClient().getAccount(accAddress)
-    const { account_number: accountNumber } = account
-    if (!accountNumber) throw Error(`Deposit failed - could not get account number ${accountNumber}`)
-
-    const txBuilder = buildUnsignedTx({
-      cosmosSdk: this.getCosmosClient().sdk,
-      txBody: txBody,
-      gasLimit: Long.fromString(gasLimit.toString()),
-      signerPubkey: cosmosclient.codec.instanceToProtoAny(signerPubkey),
-      sequence: sequence ? Long.fromNumber(sequence) : account.sequence || Long.ZERO,
+    const unsignedTxData = await this.prepareTx({
+      sender,
+      asset,
+      amount,
+      recipient,
+      memo,
+      gasLimit,
+      sequence,
     })
 
-    const txHash = await this.cosmosClient.signAndBroadcast(txBuilder, privKey, accountNumber)
+    const decodedTx = cosmosclient.proto.cosmos.tx.v1beta1.TxRaw.decode(
+      Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
+    )
 
-    if (!txHash) throw Error(`Invalid transaction hash: ${txHash}`)
+    const txBuilder = new cosmosclient.TxBuilder(
+      this.getCosmosClient().sdk,
+      cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
+      cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+    )
 
-    return txHash
+    const { account_number: accountNumber } = await this.getCosmosClient().getAccount(
+      cosmosclient.AccAddress.fromString(sender),
+    )
+
+    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
+
+    const privKey = this.getCosmosClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(walletIndex))
+
+    const signDocBytes = txBuilder.signDocBytes(accountNumber)
+    txBuilder.addSignature(privKey.sign(signDocBytes))
+
+    const signedTx = txBuilder.txBytes()
+
+    return this.broadcastTx(signedTx)
   }
 
   async broadcastTx(txHex: string): Promise<TxHash> {
@@ -808,6 +812,7 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   /**
    * Transfer without broadcast balances with MsgSend
    *
+   * @deprecated use instead prepareTx
    * @param {TxOfflineParams} params The transfer offline options.
    * @returns {string} The signed transaction bytes.
    */
@@ -881,6 +886,52 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     } catch {
       return getDefaultFees()
     }
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&BigNumber} params The transfer options.
+   * @returns {PreparedTx} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    recipient,
+    amount,
+    memo,
+    asset = AssetRuneNative,
+    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
+    sequence,
+  }: TxParams & { sender: Address; gasLimit?: BigNumber; sequence?: number }): Promise<PreparedTx> {
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
+
+    const denom = getDenom(asset)
+
+    const txBody = await buildTransferTx({
+      fromAddress: sender,
+      toAddress: recipient,
+      memo,
+      assetAmount: amount,
+      assetDenom: denom,
+      chainId: this.getChainId(),
+      nodeUrl: this.getClientUrl().node,
+    })
+
+    const account = await this.getCosmosClient().getAccount(cosmosclient.AccAddress.fromString(sender))
+    const { pub_key: pubkey } = account
+
+    if (!pubkey) throw Error(`Transfer failed - missing pub key`)
+
+    const txBuilder = buildUnsignedTx({
+      cosmosSdk: this.getCosmosClient().sdk,
+      txBody,
+      gasLimit: Long.fromString(gasLimit.toString()),
+      signerPubkey: pubkey as cosmosclient.proto.google.protobuf.Any,
+      sequence: sequence ? Long.fromNumber(sequence) : account.sequence || Long.ZERO,
+    })
+
+    return { rawUnsignedTx: txBuilder.txBytes() }
   }
 }
 

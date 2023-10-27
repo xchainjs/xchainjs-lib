@@ -1,3 +1,4 @@
+import cosmosclient from '@cosmos-client/core'
 import { proto } from '@cosmos-client/core/cjs/module'
 import {
   AssetInfo,
@@ -6,6 +7,7 @@ import {
   FeeType,
   Fees,
   Network,
+  PreparedTx,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -30,6 +32,7 @@ import {
   getDenom,
   getTxsFromHistory,
   protoFee,
+  protoTxBody,
 } from './utils'
 
 /**
@@ -259,7 +262,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer({
-    walletIndex,
+    walletIndex = 0,
     asset = AssetATOM,
     amount,
     recipient,
@@ -267,24 +270,41 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
     feeAmount = DEFAULT_FEE,
   }: TxParams & { gasLimit?: BigNumber; feeAmount?: BaseAmount }): Promise<TxHash> {
-    const fromAddressIndex = walletIndex || 0
+    const sender = this.getAddress(walletIndex || 0)
 
-    const denom = getDenom(asset)
-
-    if (!denom)
-      throw Error(`Invalid asset ${assetToString(asset)} - Only ATOM asset is currently supported to transfer`)
-
-    const fee = protoFee({ denom, amount: feeAmount, gasLimit })
-
-    return this.getSDKClient().transfer({
-      privkey: this.getPrivateKey(fromAddressIndex),
-      from: this.getAddress(fromAddressIndex),
-      to: recipient,
+    const unsignedTxData = await this.prepareTx({
+      sender,
+      asset,
       amount,
-      denom,
+      recipient,
       memo,
-      fee,
+      gasLimit,
+      feeAmount,
     })
+
+    const decodedTx = cosmosclient.proto.cosmos.tx.v1beta1.TxRaw.decode(
+      Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
+    )
+
+    const txBuilder = new cosmosclient.TxBuilder(
+      this.getSDKClient().sdk,
+      cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
+      cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+    )
+
+    const address = cosmosclient.AccAddress.fromString(sender)
+    const { account_number: accountNumber } = await this.sdkClient.getAccount(address)
+
+    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
+
+    const privKey = this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(walletIndex))
+
+    const signDocBytes = txBuilder.signDocBytes(accountNumber)
+    txBuilder.addSignature(privKey.sign(signDocBytes))
+
+    const signedTx = txBuilder.txBytes()
+
+    return this.broadcastTx(signedTx)
   }
 
   /**
@@ -349,6 +369,59 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     } catch (error) {
       return singleFee(FeeType.FlatFee, DEFAULT_FEE)
     }
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&BaseAmount&BigNumber} params The transfer options.
+   * @returns {PreparedTx} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    recipient,
+    amount,
+    memo,
+    asset = AssetATOM,
+    feeAmount = DEFAULT_FEE,
+    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
+  }: TxParams & { sender: Address; feeAmount?: BaseAmount; gasLimit?: BigNumber }): Promise<PreparedTx> {
+    const denom = getDenom(asset)
+
+    if (!denom)
+      throw Error(`Invalid asset ${assetToString(asset)} - Only ATOM asset is currently supported to transfer`)
+
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
+
+    this.sdkClient.setPrefix()
+
+    const address = cosmosclient.AccAddress.fromString(sender)
+    const account = await this.sdkClient.getAccount(address)
+
+    const { sequence, account_number: accountNumber, pub_key: pubkey } = account
+    if (!sequence) throw Error(`Transfer failed - missing sequence`)
+    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
+    if (!pubkey) throw Error(`Transfer failed - missing pub key`)
+    const txBody = protoTxBody({ from: sender, to: recipient, amount, denom, memo })
+    const fee = protoFee({ denom, amount: feeAmount, gasLimit })
+
+    const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
+      fee,
+      signer_infos: [
+        {
+          public_key: pubkey,
+          mode_info: {
+            single: {
+              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+            },
+          },
+          sequence,
+        },
+      ],
+    })
+
+    return { rawUnsignedTx: new cosmosclient.TxBuilder(this.sdkClient.sdk, txBody, authInfo).txBytes() }
   }
 }
 

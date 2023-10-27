@@ -13,6 +13,7 @@ export type UTXO = {
   value: number
   witnessUtxo?: Witness
   txHex?: string
+  scriptPubKey?: string
 }
 
 export interface OnlineDataProvider {

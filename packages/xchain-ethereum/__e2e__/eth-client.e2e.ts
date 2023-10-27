@@ -151,4 +151,60 @@ describe('xchain-evm (Eth) Integration Tests', () => {
     expect(gasPrices.fastest.gte(gasPrices.average)).toBe(true)
     expect(gasPrices.fastest.gte(gasPrices.fast)).toBe(true)
   })
+  it('should prepate transaction', async () => {
+    try {
+      const from = '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF'
+      const to = '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF'
+      const amount = assetToBase(assetAmount('0.0001'))
+      const rawUnsignedTransaction = await clientTestnet.prepareTx({
+        sender: from,
+        recipient: to,
+        amount,
+        memo: 'test',
+      })
+      console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+  it('should prepare ERC20 transaction', async () => {
+    const from = '0x66d8d1b4132c07f4861cbc2Ea6323a2acd5Dd893'
+    const to = '0x66d8d1b4132c07f4861cbc2Ea6323a2acd5Dd893'
+    const erc20Address = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+    try {
+      const unsignedRawTx = await clientTestnet.prepareTx({
+        sender: from,
+        recipient: to,
+        asset: {
+          chain: 'ETH',
+          symbol: `ETH-${erc20Address}`,
+          ticker: 'ETH',
+          synth: false,
+        },
+        amount: assetToBase(assetAmount(0.1, 6)),
+      })
+      console.log(unsignedRawTx)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+  it('should prepare ERC20 Approve', async () => {
+    const from = '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF'
+    const to = '0x66d8d1b4132c07f4861cbc2Ea6323a2acd5Dd893'
+    const erc20Address = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+    try {
+      const unsignedRawTx = await clientTestnet.prepareApprove({
+        sender: from,
+        spenderAddress: to,
+        contractAddress: erc20Address,
+        amount: assetToBase(assetAmount(0.1, 6)),
+      })
+      console.log(unsignedRawTx)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
 })

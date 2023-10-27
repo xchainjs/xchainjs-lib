@@ -31,7 +31,7 @@ const mockAccountsAddress = (
     }
   },
 ) => {
-  nock(url).get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
+  nock(url).persist().get(`/cosmos/auth/v1beta1/accounts/${address}`).reply(200, result)
 }
 
 const mockGetChainId = (url: string, chainId: string) => {
@@ -413,7 +413,7 @@ describe('Client Test', () => {
   })
 
   it('transfer', async () => {
-    const to_address = 'tmaya17gw75axcnr8747pkanye45pnrwk7p9c3uquyle'
+    const to_address = mayaClient.getAddress(1)
     const send_amount: BaseAmount = baseAmount(10000, 6)
     const memo = 'transfer'
 

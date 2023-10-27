@@ -115,4 +115,22 @@ describe('Bitcoin Integration Tests for Haskoin', () => {
       fail()
     }
   })
+  it('should prepare transaction', async () => {
+    try {
+      const from = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
+      const to = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
+      const amount = assetToBase(assetAmount('0.0001'))
+      const rawUnsignedTransaction = await btcClientTestnet.prepareTx({
+        sender: from,
+        recipient: to,
+        amount,
+        memo: 'test',
+        feeRate: 1,
+      })
+      console.log(rawUnsignedTransaction)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
 })

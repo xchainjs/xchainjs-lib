@@ -72,6 +72,7 @@ export const buildTx = async ({
     hash: x.txid,
     index: x.vout,
     value: x.satoshis,
+    scriptPubKey: x.scriptPubKey,
   }))
 
   const feeRateWhole = Number(feeRate.toFixed(0))

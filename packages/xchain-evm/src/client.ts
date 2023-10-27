@@ -10,6 +10,7 @@ import {
   Fees,
   Network,
   OnlineDataProviders,
+  PreparedTx,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -396,6 +397,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
     walletIndex = 0,
     signer: txSigner,
   }: ApproveParams): Promise<TransactionResponse> {
+    const sender = this.getAddress(walletIndex || 0)
+
     const gasPrice: BigNumber = BigNumber.from(
       (await this.estimateGasPrices().then((prices) => prices[feeOption]))
         // .catch(() => getDefaultGasPrices()[feeOption])
@@ -403,34 +406,33 @@ export default class Client extends BaseXChainClient implements XChainClient {
         .toFixed(),
     )
 
-    const signer = txSigner || this.getWallet(walletIndex)
-
-    const fromAddress = await signer.getAddress()
+    checkFeeBounds(this.feeBounds, gasPrice.toNumber())
 
     const gasLimit: BigNumber = await this.estimateApprove({
       spenderAddress,
       contractAddress,
-      fromAddress,
+      fromAddress: sender,
       amount,
     }).catch(() => {
       return BigNumber.from(this.config.defaults[this.network].approveGasLimit)
     })
 
-    checkFeeBounds(this.feeBounds, gasPrice.toNumber())
-
-    const valueToApprove: BigNumber = getApprovalAmount(amount)
-
-    const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
-
-    /* as same as ethers.TransactionResponse expected by `sendTransaction` */
-    const unsignedTx: ethers.PopulatedTransaction = await contract.populateTransaction.approve(
+    const { rawUnsignedTx } = await this.prepareApprove({
+      contractAddress,
       spenderAddress,
-      valueToApprove,
-    )
+      amount,
+      sender,
+    })
+
+    const transaction = ethers.utils.parseTransaction(rawUnsignedTx)
+
+    const signer = txSigner || this.getWallet(walletIndex)
 
     const result = await signer.sendTransaction({
-      ...unsignedTx,
-      from: fromAddress,
+      from: transaction.from,
+      to: transaction.to,
+      value: transaction.value,
+      data: transaction.data,
       gasPrice,
       gasLimit,
     })
@@ -495,26 +497,22 @@ export default class Client extends BaseXChainClient implements XChainClient {
     gasPrice?: BaseAmount
     gasLimit?: BigNumber
   }): Promise<TxHash> {
-    if (asset.chain !== this.chain)
-      throw Error(`this client can only transfer assets on chain: ${this.chain}. Bad asset: ${assetToString(asset)}`)
-
-    const isGasAsset = this.isGasAsset(asset)
-
     const txGasPrice: BigNumber = gasPrice
       ? BigNumber.from(gasPrice.amount().toFixed())
       : await this.estimateGasPrices()
           .then((prices) => prices[feeOption])
           .then((gp) => BigNumber.from(gp.amount().toFixed()))
 
-    const defaultGasLimit: ethers.BigNumber = isGasAsset
-      ? this.defaults[this.network].transferGasAssetGasLimit
-      : this.defaults[this.network].transferTokenGasLimit
+    const sender = this.getAddress(walletIndex || 0)
+
     let txGasLimit: BigNumber
     if (!gasLimit) {
       try {
-        txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo })
+        txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo, from: sender })
       } catch (error) {
-        txGasLimit = defaultGasLimit
+        txGasLimit = this.isGasAsset(asset)
+          ? this.defaults[this.network].transferGasAssetGasLimit
+          : this.defaults[this.network].transferTokenGasLimit
       }
     } else {
       txGasLimit = gasLimit
@@ -528,36 +526,27 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
 
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender,
+      recipient,
+      amount,
+      asset,
+      memo,
+    })
+
+    const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
+
     const signer = txSigner || this.getWallet(walletIndex)
-    const txAmount = BigNumber.from(amount.amount().toFixed())
 
-    // Transfer ETH
-    if (isGasAsset) {
-      const transactionRequest = Object.assign(
-        { to: recipient, value: txAmount },
-        {
-          ...overrides,
-          data: memo ? toUtf8Bytes(memo) : undefined,
-        },
-      )
+    const { hash } = await signer.sendTransaction({
+      from: transactionRequest.from,
+      to: transactionRequest.to,
+      data: transactionRequest.data,
+      value: transactionRequest.value,
+      ...overrides,
+    })
 
-      const { hash } = await signer.sendTransaction(transactionRequest)
-
-      return hash
-    } else {
-      const assetAddress = getTokenAddress(asset)
-      if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
-      // Transfer ERC20
-      const { hash } = await this.call<TransactionResponse>({
-        signer,
-        contractAddress: assetAddress,
-        abi: erc20ABI,
-        funcName: 'transfer',
-        funcParams: [recipient, txAmount, Object.assign({}, overrides)],
-      })
-
-      return hash
-    }
+    return hash
   }
 
   async broadcastTx(txHex: string): Promise<TxHash> {
@@ -615,7 +604,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
    *
    * @returns {BaseAmount} The estimated gas fee.
    */
-  async estimateGasLimit({ asset, recipient, amount, memo }: TxParams): Promise<BigNumber> {
+  async estimateGasLimit({ asset, recipient, amount, memo, from }: TxParams & { from?: Address }): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
     const theAsset = asset ?? this.gasAsset
     let gasEstimate: BigNumber
@@ -626,12 +615,12 @@ export default class Client extends BaseXChainClient implements XChainClient {
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
       gasEstimate = await contract.estimateGas.transfer(recipient, txAmount, {
-        from: this.getAddress(),
+        from: from || this.getAddress(),
       })
     } else {
       // ETH gas estimate
       const transactionRequest = {
-        from: this.getAddress(),
+        from: from || this.getAddress(),
         to: recipient,
         value: txAmount,
         data: memo ? toUtf8Bytes(memo) : undefined,
@@ -726,6 +715,77 @@ export default class Client extends BaseXChainClient implements XChainClient {
       }
     }
     throw Error('no provider able to GetTransactions')
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&FeeOption&BaseAmount&BigNumber} params The transfer options.
+   * @returns {PreparedTx} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    asset = this.gasAsset,
+    memo,
+    amount,
+    recipient,
+  }: TxParams & {
+    sender: Address
+    feeOption?: FeeOption
+    gasPrice?: BaseAmount
+    gasLimit?: BigNumber
+  }): Promise<PreparedTx> {
+    if (asset.chain !== this.chain)
+      throw Error(`This client can only prepare transactions on chain: ${this.chain}. Bad asset: ${asset.chain}`)
+
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
+
+    if (this.isGasAsset(asset)) {
+      return {
+        rawUnsignedTx: ethers.utils.serializeTransaction({
+          to: recipient,
+          value: BigNumber.from(amount.amount().toFixed()),
+          data: memo ? toUtf8Bytes(memo) : undefined,
+        }),
+      }
+    } else {
+      const assetAddress = getTokenAddress(asset)
+      if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
+
+      const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
+      /* as same as ethers.TransactionResponse expected by `sendTransaction` */
+      const unsignedTx: ethers.PopulatedTransaction = await contract.populateTransaction.transfer(
+        recipient,
+        BigNumber.from(amount.amount().toFixed()),
+      )
+
+      return { rawUnsignedTx: ethers.utils.serializeTransaction(unsignedTx) }
+    }
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {ApproveParams&Address&FeeOption&BaseAmount&BigNumber} params The transfer options.
+   * @returns {PreparedTx} The raw unsigned transaction.
+   */
+  public async prepareApprove({
+    contractAddress,
+    spenderAddress,
+    amount,
+    sender,
+  }: ApproveParams & { sender: string }): Promise<PreparedTx> {
+    if (!this.validateAddress(contractAddress)) throw Error('Invalid contractAddress address')
+    if (!this.validateAddress(spenderAddress)) throw Error('Invalid spenderAddress address')
+    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+
+    const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
+    const valueToApprove = getApprovalAmount(amount)
+
+    const unsignedTx = await contract.populateTransaction.approve(spenderAddress, valueToApprove)
+
+    return { rawUnsignedTx: ethers.utils.serializeTransaction(unsignedTx) }
   }
 }
 

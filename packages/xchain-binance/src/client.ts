@@ -8,6 +8,7 @@ import {
   FeeType,
   Fees,
   Network,
+  PreparedTx,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -496,6 +497,16 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
         fastest: multiTxFee,
       } as Fees,
     }
+  }
+
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address} params The transfer options.
+   * @returns {PreparedTx} The unsigned transaction data.
+   */
+  async prepareTx(): Promise<PreparedTx> {
+    throw Error(' Function not suported for BNB chain')
   }
 }
 

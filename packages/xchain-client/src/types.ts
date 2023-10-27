@@ -100,6 +100,10 @@ export type XChainClientParams = {
   rootDerivationPaths?: RootDerivationPaths
 }
 
+export type PreparedTx = {
+  rawUnsignedTx: string
+}
+
 export interface XChainClient {
   setNetwork(net: Network): void
   getNetwork(): Network
@@ -124,7 +128,7 @@ export interface XChainClient {
   getFees(options?: FeeEstimateOptions): Promise<Fees>
 
   transfer(params: TxParams): Promise<TxHash>
-  // prepareTx(params: TxParams): Promise<UnsignedTx>
+  prepareTx(params: TxParams): Promise<PreparedTx>
   // signTx(params: UnsignedTx, signer: Signer): Promise<SignedTx>
   broadcastTx(txHex: string): Promise<TxHash>
 

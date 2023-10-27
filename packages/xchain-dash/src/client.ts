@@ -1,4 +1,5 @@
 import * as dashcore from '@dashevo/dashcore-lib'
+import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
 import {
   AssetInfo,
   Balance,
@@ -34,6 +35,7 @@ import {
 } from './const'
 import * as insight from './insight-api'
 import { InsightTxResponse } from './insight-api'
+import { DashPreparedTx } from './types'
 import * as Utils from './utils'
 
 export type NodeAuth = {
@@ -241,17 +243,43 @@ class Client extends UTXOClient {
   }
 
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
     checkFeeBounds(this.feeBounds, feeRate)
-    const { tx } = await Utils.buildTx({
+
+    const fromAddressIndex = params.walletIndex || 0
+    const { rawUnsignedTx, utxos } = await this.prepareTx({
       ...params,
       feeRate,
       sender: this.getAddress(fromAddressIndex),
-      network: this.network,
     })
+
+    const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.inputs.forEach((input: any, index: number) => {
+      const insightUtxo = utxos.find((utxo) => {
+        return utxo.hash === input.prevTxId.toString('hex') && utxo.index == input.outputIndex
+      })
+      if (!insightUtxo) {
+        throw new Error('Unable to match accumulative inputs with insight utxos')
+      }
+      const scriptBuffer: Buffer = Buffer.from(insightUtxo.scriptPubKey || '', 'hex')
+      const script = new dashcore.Script(scriptBuffer)
+      tx.inputs[index] = new dashcore.Transaction.Input.PublicKeyHash({
+        prevTxId: Buffer.from(insightUtxo.hash, 'hex'),
+        outputIndex: insightUtxo.index,
+        script: '',
+        output: new dashcore.Transaction.Output({
+          satoshis: insightUtxo.value,
+          script,
+        }),
+      })
+    })
+
     const dashKeys = this.getDashKeys(this.phrase, fromAddressIndex)
-    tx.sign(`${dashKeys?.privateKey?.toString('hex')}`)
+
+    tx.sign(`${dashKeys.privateKey?.toString('hex')}`)
+
     const txHex = tx.checkedSerialize({})
     return await nodeApi.broadcastTx({
       txHex,
@@ -259,7 +287,33 @@ class Client extends UTXOClient {
       auth: this.nodeAuth,
     })
   }
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&FeeRate} params The transfer options.
+   * @returns {string} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    memo,
+    amount,
+    recipient,
+    feeRate,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+  }): Promise<DashPreparedTx> {
+    const { tx, utxos } = await Utils.buildTx({
+      sender,
+      recipient,
+      memo,
+      amount,
+      feeRate,
+      network: this.network,
+    })
 
+    return { rawUnsignedTx: tx.toString(), utxos }
+  }
   /**
    * Compile memo.
    *

@@ -25,7 +25,8 @@ import {
   UPPER_FEE_BOUND,
   explorerProviders,
 } from './const'
-import { KeyPair, TransactionBuilder } from './types/bitcoincashjs-types'
+import { BchPreparedTx } from './types'
+import { KeyPair, Transaction, TransactionBuilder } from './types/bitcoincashjs-types'
 import * as Utils from './utils'
 
 export const defaultBchParams: UtxoClientParams = {
@@ -139,29 +140,53 @@ class Client extends UTXOClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    const index = params.walletIndex || 0
-    const derivationPath = this.getFullDerivationPath(index)
-
     // set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
-    const { builder, inputs } = await this.buildTx({
+    const fromAddressIndex = params.walletIndex || 0
+
+    const { rawUnsignedTx, utxos } = await this.prepareTx({
       ...params,
       feeRate,
-      sender: this.getAddress(index),
+      sender: this.getAddress(fromAddressIndex),
     })
 
+    const tx: Transaction = bitcash.Transaction.fromHex(rawUnsignedTx)
+
+    const builder: TransactionBuilder = new bitcash.TransactionBuilder(Utils.bchNetwork(this.network))
+
+    tx.ins.forEach((input) => {
+      const utxo = utxos.find(
+        (utxo) =>
+          Buffer.compare(Buffer.from(utxo.hash, 'hex').reverse(), input.hash) === 0 && input.index === utxo.index,
+      )
+      if (!utxo) throw Error('Can not find UTXO')
+      builder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex || '', 'hex')), utxo.index)
+    })
+
+    tx.outs.forEach((output) => {
+      builder.addOutput(output.script, output.value)
+    })
+
+    const derivationPath = this.getFullDerivationPath(fromAddressIndex)
     const keyPair = this.getBCHKeys(this.phrase, derivationPath)
 
-    inputs.forEach((utxo, index) => {
-      builder.sign(index, keyPair, undefined, 0x41, utxo.witnessUtxo?.value)
+    builder.inputs.forEach((input: { value: number }, index: number) => {
+      builder.sign(index, keyPair, undefined, 0x41, input.value)
     })
 
     const txHex = builder.build().toHex()
 
     return await this.roundRobinBroadcastTx(txHex)
   }
+
+  /**
+   *
+   * @param {BuildParams} params The transaction build options.
+   * @returns {Transaction}
+   * @deprecated
+   */
   async buildTx({
     amount,
     recipient,
@@ -241,6 +266,32 @@ class Client extends UTXOClient {
     }
   }
 
+  /**
+   * Prepare transfer.
+   *
+   * @param {TxParams&Address&FeeRate} params The transfer options.
+   * @returns {PreparedTx} The raw unsigned transaction.
+   */
+  async prepareTx({
+    sender,
+    memo,
+    amount,
+    recipient,
+    feeRate,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+  }): Promise<BchPreparedTx> {
+    const { builder, utxos } = await this.buildTx({
+      sender,
+      recipient,
+      amount,
+      memo,
+      feeRate,
+    })
+
+    return { rawUnsignedTx: builder.buildIncomplete().toHex(), utxos }
+  }
   /**
    * Compile memo.
    *

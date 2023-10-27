@@ -1,3 +1,9 @@
+# v5.7.4 (2023-10-26)
+
+## Update
+
+- Throw error not supported for prepareTx
+
 # v5.7.2 (2023-09-11)
 
 ## Update
