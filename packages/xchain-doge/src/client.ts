@@ -161,13 +161,8 @@ class Client extends UTXOClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    let feeRate: number
-    if (params.feeRate) {
-      feeRate = params.feeRate
-      checkFeeBounds(this.feeBounds, feeRate)
-    } else {
-      feeRate = await this.getSuggestedFeeRate()
-    }
+    const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
+    checkFeeBounds(this.feeBounds, feeRate)
 
     const fromAddressIndex = params?.walletIndex || 0
     const { rawUnsignedTx } = await this.prepareTx({
