@@ -224,6 +224,8 @@ export type EstimateWithdrawSaver = {
   expiry: Date
   toAddress: Address
   memo: string
+  inboundDelayBlocks: number
+  inboundDelaySeconds: number
   outBoundDelayBlocks: number
   outBoundDelaySeconds: number
   slipBasisPoints: number

@@ -127,7 +127,10 @@ function printWithdrawSaver(saver: EstimateWithdrawSaver) {
     expiry: saver.expiry,
     toAddress: saver.toAddress,
     memo: saver.memo,
+    inboundDelaySeconds: saver.inboundDelaySeconds,
+    inboundDelayBlocks: saver.inboundDelayBlocks,
     outBoundDelaySeconds: saver.outBoundDelaySeconds,
+    outBoundDelayBlocks: saver.outBoundDelayBlocks,
     error: saver.errors,
   }
   console.log(expanded)
