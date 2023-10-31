@@ -89,11 +89,12 @@ export class ThorchainQuery {
     height,
   }: QuoteSwapParams): Promise<TxDetails> {
     const errors: string[] = []
-    const validAssetDecimals = this.isValidAssetDecimals(fromAsset, amount)
+    const validAssetDecimals = await this.isValidAssetDecimals(fromAsset, amount)
     // validates swap, and pushes error if there is one
-    if (!validAssetDecimals) {
-      errors.push(validAssetDecimals)
+    if (validAssetDecimals) {
+      errors.push(`${validAssetDecimals}`)
     }
+
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
     const inputAmount = getBaseAmountWithDiffDecimals(amount, 8)
