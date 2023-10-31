@@ -1,3 +1,9 @@
+# v0.7.8 (2023-10-31)
+
+## Update
+
+- Bumped deps for Doge and Query
+
 # v0.7.7 (2023-10-26)
 
 ## Update

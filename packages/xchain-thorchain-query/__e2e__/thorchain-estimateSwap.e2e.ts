@@ -5,7 +5,7 @@ import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { QuoteSwapParams, SwapEstimate, TxDetails } from '../src/types'
-import { AssetRuneNative } from '../src/utils'
+import { AssetRuneNative, assetUSDC } from '../src/utils'
 import { Thornode } from '../src/utils/thornode'
 
 const thorchainCache = new ThorchainCache(new Thornode(Network.Mainnet))
@@ -326,5 +326,20 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
     expect(estimate.txEstimate.canSwap).toBe(true)
+  })
+  it(`Should fail estimate if asset details are incorrect`, async () => {
+    const swapParams: QuoteSwapParams = {
+      fromAsset: assetUSDC,
+      amount: new CryptoAmount(assetToBase(assetAmount('40', 8)), assetUSDC),
+      destinationAsset: AssetETH,
+      destinationAddress: ethAddress,
+      streamingInterval: 10, // time between swaps
+      streamingQuantity: 10, // how many swaps in this stream
+      toleranceBps: 10000,
+      fromAddress: ethAddress,
+    }
+    const estimate = await thorchainQuery.quoteSwap(swapParams)
+    printTx(estimate, swapParams.amount)
+    expect(estimate.txEstimate.canSwap).toBe(false)
   })
 })

@@ -1,3 +1,9 @@
+# v0.6.6 (2023-10-31)
+
+## Update
+
+- Updated return object for estimateWithdraw(), added validate asset in QuoteSwap()
+
 # v0.6.5 (2023-10-22)
 
 ## Update

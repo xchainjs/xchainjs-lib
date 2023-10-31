@@ -89,6 +89,11 @@ export class ThorchainQuery {
     height,
   }: QuoteSwapParams): Promise<TxDetails> {
     const errors: string[] = []
+    const validAssetDecimals = await this.isValidAssetDecimals(fromAsset, amount)
+    // validates swap, and pushes error if there is one
+    if (validAssetDecimals) {
+      errors.push(`${validAssetDecimals}`)
+    }
 
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
@@ -183,6 +188,25 @@ export class ThorchainQuery {
       },
     }
     return txDetails
+  }
+
+  /**
+   *
+   * @param params - quote swap params
+   * @returns boolean
+   */
+  private async isValidAssetDecimals(fromAsset: Asset, inputAmount: CryptoAmount): Promise<string | undefined> {
+    if (isAssetRuneNative(fromAsset) || fromAsset.synth) {
+      if (inputAmount.baseAmount.decimal !== 8) {
+        return `input asset ${assetToString(fromAsset)} must have decimals of 8`
+      }
+    } else {
+      const nativeDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(fromAsset)
+      if (nativeDecimals && nativeDecimals !== -1 && inputAmount.baseAmount.decimal !== nativeDecimals) {
+        return `input asset ${assetToString(fromAsset)} must have decimals of ${nativeDecimals}`
+      }
+    }
+    return undefined // Explicitly return undefined if no conditions are met
   }
 
   /**
@@ -702,6 +726,8 @@ export class ThorchainQuery {
         expiry: new Date(0),
         toAddress: '',
         memo: '',
+        inboundDelayBlocks: 0,
+        inboundDelaySeconds: 0,
         outBoundDelayBlocks: 0,
         outBoundDelaySeconds: 0,
         slipBasisPoints: -1,
@@ -729,6 +755,8 @@ export class ThorchainQuery {
         expiry: new Date(0),
         toAddress: '',
         memo: '',
+        inboundDelayBlocks: 0,
+        inboundDelaySeconds: 0,
         outBoundDelayBlocks: 0,
         outBoundDelaySeconds: 0,
         slipBasisPoints: -1,
@@ -751,8 +779,10 @@ export class ThorchainQuery {
       expiry: new Date(withdrawQuote.expiry),
       toAddress: withdrawQuote.inbound_address,
       memo: withdrawQuote.memo,
-      outBoundDelayBlocks: withdrawQuote.inbound_confirmation_blocks || 0,
-      outBoundDelaySeconds: withdrawQuote.inbound_confirmation_seconds || 0,
+      inboundDelayBlocks: withdrawQuote.inbound_confirmation_blocks || 0,
+      inboundDelaySeconds: withdrawQuote.inbound_confirmation_seconds || 0,
+      outBoundDelayBlocks: withdrawQuote.outbound_delay_blocks || 0,
+      outBoundDelaySeconds: withdrawQuote.outbound_delay_seconds || 0,
       slipBasisPoints: withdrawQuote.slippage_bps,
       errors,
     }
