@@ -13,7 +13,7 @@ import {
  */
 export const MIN_TX_FEE = 100000
 export const DOGE_DECIMAL = 8
-export const LOWER_FEE_BOUND = 40_000
+export const LOWER_FEE_BOUND = 100 // https://github.com/dogecoin/dogecoin/blob/master/doc/fee-recommendation.md
 export const UPPER_FEE_BOUND = 20_000_000
 
 /**

@@ -1,3 +1,9 @@
+# v0.7.3 (2023-10-30)
+
+## Update
+
+- DOGE lower fee bound updated
+
 # v0.7.2 (2023-10-26)
 
 ## Update
