@@ -1,5 +1,13 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import { Balance, OnlineDataProvider, Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
+import {
+  Balance,
+  EvmOnlineDataProvider,
+  FeeOption,
+  FeeRates,
+  Tx,
+  TxHistoryParams,
+  TxsPage,
+} from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumber, ethers } from 'ethers'
@@ -8,7 +16,7 @@ import erc20ABI from './erc20.json'
 import * as etherscanAPI from './etherscan-api'
 import { ERC20Tx, GetERC20TxsResponse } from './types'
 
-export class EtherscanProvider implements OnlineDataProvider {
+export class EtherscanProvider implements EvmOnlineDataProvider {
   private provider: Provider
   private baseUrl: string
   private apiKey: string
@@ -183,5 +191,15 @@ export class EtherscanProvider implements OnlineDataProvider {
     if (!tx) throw new Error('Could not get transaction history')
 
     return tx
+  }
+
+  async getFeeRates(): Promise<FeeRates> {
+    const gasOracleResponse = await etherscanAPI.getGasOracle(this.baseUrl, this.apiKey)
+
+    return {
+      [FeeOption.Average]: BigNumber.from(gasOracleResponse.SafeGasPrice).toNumber() * 10 ** 9,
+      [FeeOption.Fast]: BigNumber.from(gasOracleResponse.ProposeGasPrice).toNumber() * 10 ** 9,
+      [FeeOption.Fastest]: BigNumber.from(gasOracleResponse.FastGasPrice).toNumber() * 10 ** 9,
+    }
   }
 }
