@@ -197,9 +197,9 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     const gasOracleResponse = await etherscanAPI.getGasOracle(this.baseUrl, this.apiKey)
 
     return {
-      [FeeOption.Average]: BigNumber.from(gasOracleResponse.SafeGasPrice).toNumber() * 10 ** 9,
-      [FeeOption.Fast]: BigNumber.from(gasOracleResponse.ProposeGasPrice).toNumber() * 10 ** 9,
-      [FeeOption.Fastest]: BigNumber.from(gasOracleResponse.FastGasPrice).toNumber() * 10 ** 9,
+      [FeeOption.Average]: Number(gasOracleResponse.SafeGasPrice) * 10 ** 9,
+      [FeeOption.Fast]: Number(gasOracleResponse.ProposeGasPrice) * 10 ** 9,
+      [FeeOption.Fastest]: Number(gasOracleResponse.FastGasPrice) * 10 ** 9,
     }
   }
 }
