@@ -1,3 +1,9 @@
+# v0.7.9 (2023-11-02)
+
+## Update
+
+- Force Thorchain estimations
+
 # v0.7.8 (2023-10-31)
 
 ## Update

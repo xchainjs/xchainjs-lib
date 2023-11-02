@@ -1,3 +1,9 @@
+# v0.3.4 (2023-11-02)
+
+## Update
+
+- Estimations can be done with data provider
+
 # v0.3.3 (2023-10-26)
 
 ## Update
