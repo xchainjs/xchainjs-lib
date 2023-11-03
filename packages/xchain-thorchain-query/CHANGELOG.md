@@ -1,3 +1,9 @@
+# v0.6.7 (2023-11-03)
+
+## Update
+
+- Native asset for dustAmount and dustThreshold
+
 # v0.6.6 (2023-10-31)
 
 ## Update
