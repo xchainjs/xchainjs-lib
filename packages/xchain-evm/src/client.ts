@@ -34,7 +34,6 @@ import {
   FeesWithGasPricesAndLimits,
   GasPrices,
   IsApprovedParams,
-  TxOverrides,
 } from './types'
 import {
   call,
@@ -493,18 +492,47 @@ export default class Client extends BaseXChainClient implements XChainClient {
     recipient,
     feeOption = FeeOption.Fast,
     gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
     gasLimit,
   }: TxParams & {
     signer?: Signer
     feeOption?: FeeOption
     gasPrice?: BaseAmount
+    maxFeePerGas?: BaseAmount
+    maxPriorityFeePerGas?: BaseAmount
     gasLimit?: BigNumber
   }): Promise<TxHash> {
-    const txGasPrice: BigNumber = gasPrice
-      ? BigNumber.from(gasPrice.amount().toFixed())
-      : await this.estimateGasPrices()
-          .then((prices) => prices[feeOption])
-          .then((gp) => BigNumber.from(gp.amount().toFixed()))
+    if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
+      throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
+    }
+
+    const feeData: ethers.providers.FeeData = {
+      lastBaseFeePerGas: null,
+      maxFeePerGas: null,
+      maxPriorityFeePerGas: null,
+      gasPrice: null,
+    }
+
+    if (maxFeePerGas || maxPriorityFeePerGas) {
+      const feeInfo = await this.getProvider().getFeeData()
+      if (maxFeePerGas) {
+        feeData.maxFeePerGas = BigNumber.from(maxFeePerGas.amount().toFixed())
+      } else if (maxPriorityFeePerGas && feeInfo.lastBaseFeePerGas) {
+        feeData.maxFeePerGas = feeInfo.lastBaseFeePerGas.mul(2).add(maxPriorityFeePerGas.amount().toFixed())
+      }
+      feeData.maxPriorityFeePerGas = maxPriorityFeePerGas
+        ? BigNumber.from(maxPriorityFeePerGas.amount().toFixed())
+        : feeInfo.maxPriorityFeePerGas
+    } else {
+      const txGasPrice: BigNumber = gasPrice
+        ? BigNumber.from(gasPrice.amount().toFixed())
+        : await this.estimateGasPrices()
+            .then((prices) => prices[feeOption])
+            .then((gp) => BigNumber.from(gp.amount().toFixed()))
+      checkFeeBounds(this.feeBounds, txGasPrice.toNumber())
+      feeData.gasPrice = txGasPrice
+    }
 
     const sender = this.getAddress(walletIndex || 0)
 
@@ -521,14 +549,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
       txGasLimit = gasLimit
     }
 
-    type SafeTxOverrides = Omit<TxOverrides, 'gasPrice'> & { gasPrice: ethers.BigNumber }
-    const overrides: SafeTxOverrides = {
-      gasLimit: txGasLimit,
-      gasPrice: txGasPrice,
-    }
-
-    checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
-
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient,
@@ -541,13 +561,17 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     const signer = txSigner || this.getWallet(walletIndex)
 
-    const { hash } = await signer.sendTransaction({
+    const tx = await signer.populateTransaction({
       from: transactionRequest.from,
       to: transactionRequest.to,
       data: transactionRequest.data,
       value: transactionRequest.value,
-      ...overrides,
+      gasLimit: txGasLimit,
+      gasPrice: feeData.gasPrice || undefined,
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
+      maxFeePerGas: feeData.maxFeePerGas || undefined,
     })
+    const { hash } = await signer.sendTransaction(tx)
 
     return hash
   }
