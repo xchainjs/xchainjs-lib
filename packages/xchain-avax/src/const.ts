@@ -38,7 +38,7 @@ const ethersJSProviders = {
 const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   AVALANCHE_TESTNET_ETHERS_PROVIDER,
   'https://api-testnet.snowtrace.io',
-  process.env['SNOWTRACE_API_KEY'] || '',
+  process.env.SNOWTRACE_API_KEY || '',
   AVAXChain,
   AssetAVAX,
   18,
@@ -46,7 +46,7 @@ const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
 const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
   'https://api.snowtrace.io',
-  process.env['SNOWTRACE_API_KEY'] || '',
+  process.env.SNOWTRACE_API_KEY || '',
   AVAXChain,
   AssetAVAX,
   18,

@@ -29,7 +29,7 @@ const chainIds = {
 
 const mayaClient = new MayaClient({
   network: Network.Mainnet,
-  phrase: process.env.PHRASE_MAYA,
+  phrase: process.env.PHRASE,
   chainIds: chainIds,
 })
 const mayachainClient = mayaClient

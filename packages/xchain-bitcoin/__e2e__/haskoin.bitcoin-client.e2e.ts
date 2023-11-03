@@ -33,7 +33,7 @@ const btcClient = new Client({
 const btcClientTestnet = new Client({
   ...defaultBTCParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.PHRASE,
 })
 describe('Bitcoin Integration Tests for Haskoin', () => {
   it('should fetch address balance using haskoin', async () => {

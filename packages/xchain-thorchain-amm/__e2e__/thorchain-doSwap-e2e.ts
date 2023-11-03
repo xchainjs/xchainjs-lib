@@ -30,8 +30,8 @@ const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 const thorchainCacheStagenet = new ThorchainCache(new Thornode(Network.Stagenet), midgardQueryStagenet)
 const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
 
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
-const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
+const mainnetWallet = new Wallet(process.env.PHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const stagenetWallet = new Wallet(process.env.PHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
 
 const mainnetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)

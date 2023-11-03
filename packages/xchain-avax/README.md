@@ -41,6 +41,7 @@ Etherscan API rate limits: https://snowtrace.io/apis
 
 // set in env variables so default config can access.
 `SNOWTRACE_API_KEY={YOURKEY}`
+`SNOWTRACE_API_KEY={YOURKEY}`
 
 //Default config can access.
-process.env["SNOWTRACE_API_KEY"]
+process.env.SNOWTRACE_API_KEY

@@ -105,14 +105,14 @@ SochainDataProviders[Network.Mainnet].apiKey = 'YOU_SOCHAIN_API_KEY'
 `SOCHAIN_API_KEY={YOURKEY}`
 `BLOCKCYPHER_API_KEY={YOURKEY}`
 //Default config can access.
-process.env["BLOCKCYPHER_API_KEY"]
-process.env["SOCHAIN_API_KEY"]
+process.env.BLOCKCYPHER_API_KEY
+process.env.SOCHAIN_API_KEY
 
 //overridde the default init params with your onfig
 const initParams: UtxoClientParams = {
   ...defaultBTCParams,
   dataProviders: [SochainDataProviders, BlockcypherDataProviders]// use sochain first and blockcypher as fallback
-  phrase: process.env.YOURPHRASE,
+  phrase: process.env.PHRASE,
 }
 const btcClient = new Client(sochainParams)
 

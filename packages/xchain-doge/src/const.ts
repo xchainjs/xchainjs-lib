@@ -54,7 +54,7 @@ export const blockstreamExplorerProviders = {
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   DOGEChain,
   AssetDOGE,
   8,
@@ -62,7 +62,7 @@ const testnetSochainProvider = new SochainProvider(
 )
 const mainnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   DOGEChain,
   AssetDOGE,
   8,
@@ -84,7 +84,7 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   AssetDOGE,
   8,
   BlockcypherNetwork.DOGE,
-  process.env['BlOCKCYPHER_API_KEY'] || '',
+  process.env.BLOCKCYPHER_API_KEY || '',
 )
 export const blockcypherDataProviders = {
   [Network.Testnet]: undefined, //no provider here

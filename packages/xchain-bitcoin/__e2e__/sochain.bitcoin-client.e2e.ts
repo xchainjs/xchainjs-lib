@@ -10,7 +10,7 @@ const btcClient = new Client(sochainParams)
 const btcClientTestnet = new Client({
   ...sochainParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE || '',
+  phrase: process.env.PHRASE,
 })
 describe('Bitcoin Integration Sochain Tests', () => {
   it('should fetch address balance', async () => {

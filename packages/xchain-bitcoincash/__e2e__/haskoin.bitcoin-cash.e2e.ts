@@ -27,7 +27,7 @@ const bchClient = new Client({
 const bchClientTestnet = new Client({
   ...defaultBCHParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.PHRASE,
 })
 
 // const bchAddress = 'qqqmwluxjte4u83lkqmare5klap5t38eyq8gdzxhhm'
