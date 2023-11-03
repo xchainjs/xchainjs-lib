@@ -108,7 +108,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     const txHash = await client.transfer({ amount, recipient, memo })
     console.log(txHash)
   })
-  it('should transfer 0.01 AVAX following EIP1559 because maxFeePerGas', async () => {
+  it('should transfer 0.01 AVAX following EIP1559 because of maxFeePerGas', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const txHash = await client.transfer({
@@ -118,7 +118,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     })
     console.log(txHash)
   })
-  it('should transfer 0.01 AVAX following EIP1559 because maxPriorityFeePerGas', async () => {
+  it('should transfer 0.01 AVAX following EIP1559 because of maxPriorityFeePerGas', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const txHash = await client.transfer({
