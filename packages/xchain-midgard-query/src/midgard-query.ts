@@ -92,12 +92,11 @@ export class MidgardQuery {
    * @returns {number} Number of decimals from Midgard https://gitlab.com/thorchain/midgard#refresh-native-decimals
    */
   public async getDecimalForAsset(asset: Asset): Promise<number> {
-    if (!isAssetRuneNative(asset)) {
-      const pool = await this.getPool(assetToString(asset))
-      const decimals = Number(pool.nativeDecimal)
-      if (decimals > 0) return decimals
-      else return DEFAULT_THORCHAIN_DECIMALS
-    }
-    return DEFAULT_THORCHAIN_DECIMALS
+    if (isAssetRuneNative(asset) || asset.synth) return DEFAULT_THORCHAIN_DECIMALS
+
+    const pool = await this.getPool(assetToString(asset))
+    const decimals = Number(pool.nativeDecimal)
+
+    return decimals > 0 ? decimals : DEFAULT_THORCHAIN_DECIMALS
   }
 }

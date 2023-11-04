@@ -1,6 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { THORNameDetails } from '@xchainjs/xchain-midgard'
 
+import { assetFromStringEx } from '@xchainjs/xchain-util'
 import { MidgardCache } from '../src/midgard-cache'
 import { MidgardQuery } from '../src/midgard-query'
 import { SaversPosition, getSaver } from '../src/types'
@@ -74,5 +75,15 @@ describe('Midgard-query liquidity action end to end Tests', () => {
       'thor138yxnksuhm37j9qqcugt3xzh8cykgvmmtgt63u',
     )
     console.log('thornames', thornames)
+  })
+  it(`Shoud return decimals by asset`, async () => {
+    const atomDecimals = await midgardQuery.getDecimalForAsset(AssetATOM)
+    const avaxDecimals = await midgardQuery.getDecimalForAsset(AssetAVAX)
+    const btcDecimals = await midgardQuery.getDecimalForAsset(AssetBTC)
+    const synthBtcDecimals = await midgardQuery.getDecimalForAsset(assetFromStringEx('BTC/BTC'))
+    console.log(`AssetATOM decimals: ${atomDecimals}`)
+    console.log(`AssetAVAX decimals: ${avaxDecimals}`)
+    console.log(`AssetBTC decimals: ${btcDecimals}`)
+    console.log(`Synth AssetBTC decimals: ${synthBtcDecimals}`)
   })
 })
