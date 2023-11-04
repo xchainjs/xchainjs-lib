@@ -22,7 +22,7 @@ const AssetBNB: Asset = {
 }
 
 defaultEthParams.network = Network.Testnet
-defaultEthParams.phrase = process.env.PHRASE
+defaultEthParams.phrase = process.env.TESTNET_PHRASE
 
 //const clientMainnet = new BscClient(defaultBscParams)
 const clientTestnet = new Client(defaultEthParams)

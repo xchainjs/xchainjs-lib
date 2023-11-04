@@ -7,7 +7,7 @@ let xchainClient: CosmosClient = new CosmosClient({})
 
 describe('Cosmos Integration Tests', () => {
   beforeEach(() => {
-    const settings = { network: Network.Testnet, phrase: process.env.PHRASE }
+    const settings = { network: Network.Testnet, phrase: process.env.TESTNET_PHRASE }
     xchainClient = new CosmosClient(settings)
   })
   it('should fetch cosmos balances', async () => {
@@ -105,7 +105,9 @@ describe('Cosmos Integration Tests', () => {
 
     if (!accountNumber) throw Error(`Transfer failed - missing account number`)
 
-    const privKey = xchainClient.getSDKClient().getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/118'/0'/0/0")
+    const privKey = xchainClient
+      .getSDKClient()
+      .getPrivKeyFromMnemonic(process.env.TESTNET_PHRASE as string, "44'/118'/0'/0/0")
 
     const signDocBytes = txBuilder.signDocBytes(accountNumber)
     txBuilder.addSignature(privKey.sign(signDocBytes))

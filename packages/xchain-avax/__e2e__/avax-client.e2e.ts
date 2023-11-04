@@ -46,7 +46,7 @@ const fakeProviders = {
 }
 
 defaultAvaxParams.network = Network.Testnet
-defaultAvaxParams.phrase = process.env.PHRASE
+defaultAvaxParams.phrase = process.env.TESTNET_PHRASE
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
 const client = new AvaxClient(defaultAvaxParams)

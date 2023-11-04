@@ -17,7 +17,7 @@ describe('Kujira client Integration Tests', () => {
   beforeEach(() => {
     xchainClient = new KujiraClient({
       network: Network.Testnet,
-      phrase: process.env.PHRASE,
+      phrase: process.env.TESTNET_PHRASE,
     })
   })
   it('should fetch balances kujira', async () => {

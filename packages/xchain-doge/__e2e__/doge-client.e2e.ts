@@ -6,7 +6,7 @@ import { AssetDOGE } from '../src/const'
 
 const dogeClient = new Client({
   ...defaultDogeParams,
-  phrase: process.env.PHRASE,
+  phrase: process.env.MAINNET_PHRASE,
 })
 
 describe('Dogecoin Integration Tests', () => {
@@ -103,7 +103,7 @@ describe('Dogecoin Integration Tests', () => {
     try {
       const dogeclient = new Client({
         ...defaultDogeParams,
-        phrase: process.env.PHRASE,
+        phrase: process.env.MAINNET_PHRASE,
         network: Network.Mainnet,
       })
       const amount = assetToBase(assetAmount('10'))

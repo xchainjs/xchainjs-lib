@@ -11,7 +11,7 @@ const dashClient = new Client({
 const dashClientTestnet = new Client({
   ...defaultDashParams,
   network: Network.Testnet,
-  phrase: process.env.PHRASE,
+  phrase: process.env.TESTNET_PHRASE,
 })
 
 describe('Dash Integration Tests', () => {

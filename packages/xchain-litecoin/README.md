@@ -109,11 +109,11 @@ import { SochainNetwork,  SochainProvider } from '@xchainjs/xchain-utxo-provider
 import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 
 // override with your API key
-SochainDataProviders[Network.Mainnet].apiKey = 'YOU_SOCHAIN_API_KEY'
+SochainDataProviders[Network.Mainnet].apiKey = 'YOUR_SOCHAIN_API_KEY'
 
 // or set in env variables so default config can access.
-`SOCHAIN_API_KEY={YOURKEY}`
-`BLOCKCYPHER_API_KEY={YOURKEY}`
+`SOCHAIN_API_KEY={YOUR_SOCHAIN_API_KEY}`
+`BLOCKCYPHER_API_KEY={YOUR_BLOCKCYPHER_API_KEY}`
 //so default config can access.
 process.env.BLOCKCYPHER_API_KEY
 process.env.SOCHAIN_API_KEY

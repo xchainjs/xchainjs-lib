@@ -45,7 +45,7 @@ describe('Cosmos SDK client Integration Tests', () => {
   beforeEach(() => {
     const settings = {
       network: Network.Testnet,
-      phrase: process.env.MAINNETPHRASE,
+      phrase: process.env.TESTNET_PHRASE,
       chain: AssetKUJI.chain,
       defaultDecimals: 6,
       prefix: 'kujira',
