@@ -703,8 +703,8 @@ export class ThorchainQuery {
         errors.push(checkPositon.errors[i])
       }
       return {
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-        dustThreshold: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+        dustAmount: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
+        dustThreshold: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
         expectedAssetAmount: new CryptoAmount(
           assetToBase(assetAmount(checkPositon.redeemableValue.assetAmount.amount())),
           withdrawParams.asset,
@@ -742,8 +742,8 @@ export class ThorchainQuery {
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
       return {
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-        dustThreshold: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+        dustAmount: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
+        dustThreshold: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
         expectedAssetAmount: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
         fee: {
           affiliate: new CryptoAmount(baseAmount(0), withdrawParams.asset),
@@ -766,8 +766,11 @@ export class ThorchainQuery {
 
     const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
-      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), withdrawParams.asset),
-      dustThreshold: new CryptoAmount(baseAmount(withdrawQuote.dust_threshold), withdrawParams.asset),
+      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), getChainAsset(withdrawParams.asset.chain)),
+      dustThreshold: new CryptoAmount(
+        baseAmount(withdrawQuote.dust_threshold),
+        getChainAsset(withdrawParams.asset.chain),
+      ),
       expectedAssetAmount: new CryptoAmount(baseAmount(withdrawQuote.expected_amount_out), withdrawParams.asset),
       fee: {
         affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate), withdrawAsset),
