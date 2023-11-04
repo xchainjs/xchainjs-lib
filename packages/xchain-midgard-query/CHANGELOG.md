@@ -1,3 +1,9 @@
+# v0.1.4 (2023-11-04)
+
+## Update
+
+- getDecimalForAsset can handle synth assets
+
 # v0.1.3 (2023-10-06)
 
 ## Update
