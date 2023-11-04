@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { THORNameDetails } from '@xchainjs/xchain-midgard'
-
 import { assetFromStringEx } from '@xchainjs/xchain-util'
+
 import { MidgardCache } from '../src/midgard-cache'
 import { MidgardQuery } from '../src/midgard-query'
 import { SaversPosition, getSaver } from '../src/types'
