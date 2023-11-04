@@ -1,9 +1,7 @@
 import {
   Balance,
-  FeeOption,
-  FeeType,
-  Fees,
-  OnlineDataProvider,
+  EvmOnlineDataProvider,
+  FeeRates,
   Tx,
   TxFrom,
   TxHistoryParams,
@@ -25,7 +23,7 @@ import {
 const AVAXChain: Chain = 'AVAX'
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
 
-export class CovalentProvider implements OnlineDataProvider {
+export class CovalentProvider implements EvmOnlineDataProvider {
   private baseUrl = 'https://api.covalenthq.com'
   private apiKey: string
   private chainId: number
@@ -203,12 +201,8 @@ export class CovalentProvider implements OnlineDataProvider {
       hash: '',
     }
   }
-  async getFees(): Promise<Fees> {
-    return {
-      [FeeOption.Average]: baseAmount(1),
-      [FeeOption.Fast]: baseAmount(1),
-      [FeeOption.Fastest]: baseAmount(1),
-      type: FeeType.PerByte,
-    }
+
+  getFeeRates(): Promise<FeeRates> {
+    throw new Error('Method not implemented.')
   }
 }

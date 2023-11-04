@@ -116,8 +116,11 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo, chain: Chain
  */
 export const getGasOracle = async (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
   const url = baseUrl + '/api?module=gastracker&action=gasoracle'
+  const result = (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
 
-  return (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
+  if (typeof result === 'string') throw Error(`Can not retrieve gasOracle: ${result}`)
+
+  return result
 }
 
 /**
