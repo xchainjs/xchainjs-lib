@@ -1,3 +1,9 @@
+# v0.7.12 (2023-11-05)
+
+## Update
+
+- Wallet can be initialised with a custom config by chain
+
 # v0.7.11 (2023-11-04)
 
 ## Update
