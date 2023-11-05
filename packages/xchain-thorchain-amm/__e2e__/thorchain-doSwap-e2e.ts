@@ -8,13 +8,16 @@ import { AssetLTC } from '@xchainjs/xchain-litecoin'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainCache, ThorchainQuery, Thornode, TxDetails } from '@xchainjs/xchain-thorchain-query'
-import { Asset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
 import { fail } from 'assert'
+import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
 import { EvmHelper } from '../src/utils/evm-helper'
 import { Wallet } from '../src/wallet'
+
+register9Rheader(axios)
 
 require('dotenv').config()
 
@@ -414,5 +417,19 @@ describe('xchain-swap doSwap Integration Tests', () => {
     } catch (error) {
       console.error(error)
     }
+  })
+  it('Should fail estimate swap from BTC to RUNE because of amount decimals', async () => {
+    const estimateSwapParams = {
+      fromAsset: AssetBTC,
+      amount: new CryptoAmount(assetToBase(assetAmount('0.5', 7)), AssetBTC),
+      destinationAsset: AssetRuneNative,
+      destinationAddress: 'thorrecipientaddress',
+      wallet: mainnetWallet,
+      walletIndex: 0,
+    }
+
+    const estimation = await mainnetThorchainAmm.estimateSwap(estimateSwapParams)
+    print(estimation)
+    expect(estimation.txEstimate.errors[0]).toBe('Invalid number of decimals: BTC.BTC must have 8 decimals')
   })
 })
