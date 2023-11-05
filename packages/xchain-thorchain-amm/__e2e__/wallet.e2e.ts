@@ -1,5 +1,5 @@
 import cosmosclient from '@cosmos-client/core'
-import { Network } from '@xchainjs/xchain-client'
+import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import {
   AssetBTC,
   AssetETH,
@@ -13,7 +13,7 @@ import {
 import { baseToAsset, formatAssetAmountCurrency, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
-import { Wallet } from '../src/wallet'
+import { ChainConfigs, Wallet } from '../src/wallet'
 
 require('dotenv').config()
 
@@ -123,6 +123,45 @@ describe('xchain-swap wallet Tests', () => {
         owner: 'thor1k5at9pzfjsqfys380cgu3v9gz2s4vgsyzl2tue',
       })
       console.log('hash', hash)
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  it(`Can init wallet with custom config`, async () => {
+    try {
+      const customConfig: ChainConfigs = {
+        [BTCChain]: {
+          explorerProviders: {
+            [Network.Mainnet]: new ExplorerProvider(
+              'https://custom.mainnet.provider',
+              'https://custom.mainnet.provider/address/%%ADDRESS%%',
+              'https://custom.mainnet.provider/tx/%%TX_ID%%',
+            ),
+            [Network.Testnet]: new ExplorerProvider(
+              'https://custom.testnet.provider',
+              'https://custom.testnet.provider/address/%%ADDRESS%%',
+              'https://custom.testnet.provider/tx/%%TX_ID%%',
+            ),
+            [Network.Stagenet]: new ExplorerProvider(
+              'https://custom.stagenet.provider',
+              'https://custom.stagenet.provider/address/%%ADDRESS%%',
+              'https://custom.stagenet.provider/tx/%%TX_ID%%',
+            ),
+          },
+          dataProviders: [],
+        },
+      }
+      const wallet = new Wallet(
+        process.env.MAINNETPHRASE || 'you forgot to set the phrase',
+        thorchainQueryMainnet,
+        customConfig,
+      )
+      for (const [chain, client] of Object.entries(wallet.clients)) {
+        console.log(`${chain} config`)
+        console.log(`Network: ${client.getNetwork()}`)
+        console.log(`Explorer provider: ${client.getExplorerUrl()}`)
+      }
     } catch (e) {
       console.error(e)
     }
