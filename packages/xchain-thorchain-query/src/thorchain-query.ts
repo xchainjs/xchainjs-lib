@@ -1133,7 +1133,7 @@ export class ThorchainQuery {
       params.owner ? params.owner : ''
     }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${
       params.isUpdate ? '' : currentHeightForExpirity + numberOfBlocksToAddToExpirity
-    }`
+    }`.replace(/^:+|:+$/g, '')
     return {
       memo: thornameMemo,
       value: totalCost,
