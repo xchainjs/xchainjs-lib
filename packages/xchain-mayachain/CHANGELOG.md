@@ -1,3 +1,9 @@
+# v0.2.9 (2023-11-07)
+
+## Fix
+
+- Prepare tx with no initilized addresses
+
 # v0.2.8 (2023-10-26)
 
 ## Update
