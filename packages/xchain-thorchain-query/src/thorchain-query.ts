@@ -88,12 +88,11 @@ export class ThorchainQuery {
     affiliateAddress,
     height,
   }: QuoteSwapParams): Promise<TxDetails> {
-    const errors: string[] = []
-    const validAssetDecimals = await this.isValidAssetDecimals(fromAsset, amount)
     // validates swap, and pushes error if there is one
-    if (validAssetDecimals) {
-      errors.push(`${validAssetDecimals}`)
-    }
+    const errors: string[] = []
+
+    const error = await this.validateAmount(amount)
+    if (error) errors.push(error.message)
 
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
@@ -191,22 +190,16 @@ export class ThorchainQuery {
   }
 
   /**
-   *
-   * @param params - quote swap params
-   * @returns boolean
+   * Validate a cryptoAmount is well formed
+   * @param {CryptoAmount} cryptoAmount - CryptoAmount to validate
+   * @returns {void | Error} Error if the cryptoAmount is not well formed
    */
-  private async isValidAssetDecimals(fromAsset: Asset, inputAmount: CryptoAmount): Promise<string | undefined> {
-    if (isAssetRuneNative(fromAsset) || fromAsset.synth) {
-      if (inputAmount.baseAmount.decimal !== 8) {
-        return `input asset ${assetToString(fromAsset)} must have decimals of 8`
-      }
-    } else {
-      const nativeDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(fromAsset)
-      if (nativeDecimals && nativeDecimals !== -1 && inputAmount.baseAmount.decimal !== nativeDecimals) {
-        return `input asset ${assetToString(fromAsset)} must have decimals of ${nativeDecimals}`
-      }
-    }
-    return undefined // Explicitly return undefined if no conditions are met
+  public async validateAmount(cryptoAmount: CryptoAmount): Promise<Error | void> {
+    const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(cryptoAmount.asset)
+    if (cryptoAmount.baseAmount.decimal !== assetDecimals)
+      return new Error(
+        `Invalid number of decimals: ${assetToString(cryptoAmount.asset)} must have ${assetDecimals} decimals`,
+      )
   }
 
   /**

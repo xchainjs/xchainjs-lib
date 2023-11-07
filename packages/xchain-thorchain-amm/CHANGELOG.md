@@ -1,8 +1,14 @@
-# v0.7.12 (2023-11-05)
+# v0.7.13 (2023-11-05)
 
 ## Update
 
 - Wallet can be initialised with a custom config by chain
+
+# v0.7.12 (2023-11-05)
+
+## Update
+
+- Update deps for xchain-thorchain-query
 
 # v0.7.11 (2023-11-04)
 
@@ -15,6 +21,7 @@
 ## Update
 
 - Force Thorchain estimations
+
 # v0.7.9 (2023-11-03)
 
 ## Update
