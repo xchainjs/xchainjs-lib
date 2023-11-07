@@ -1,3 +1,9 @@
+# v0.7.14 (2023-11-07)
+
+## Update
+
+- Update thorname estimation and prepareTx cosmos chains
+
 # v0.7.13 (2023-11-05)
 
 ## Update
