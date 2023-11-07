@@ -286,18 +286,23 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
       Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
     )
 
+    const privKey = this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(walletIndex))
+    const authInfo = cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
+
+    if (!authInfo.signer_infos[0].public_key) {
+      authInfo.signer_infos[0].public_key = cosmosclient.codec.instanceToProtoAny(privKey.pubKey())
+    }
+
     const txBuilder = new cosmosclient.TxBuilder(
       this.getSDKClient().sdk,
       cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
-      cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+      authInfo,
     )
 
     const address = cosmosclient.AccAddress.fromString(sender)
     const { account_number: accountNumber } = await this.sdkClient.getAccount(address)
 
     if (!accountNumber) throw Error(`Transfer failed - missing account number`)
-
-    const privKey = this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(walletIndex))
 
     const signDocBytes = txBuilder.signDocBytes(accountNumber)
     txBuilder.addSignature(privKey.sign(signDocBytes))
@@ -402,7 +407,6 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     const { sequence, account_number: accountNumber, pub_key: pubkey } = account
     if (!sequence) throw Error(`Transfer failed - missing sequence`)
     if (!accountNumber) throw Error(`Transfer failed - missing account number`)
-    if (!pubkey) throw Error(`Transfer failed - missing pub key`)
     const txBody = protoTxBody({ from: sender, to: recipient, amount, denom, memo })
     const fee = protoFee({ denom, amount: feeAmount, gasLimit })
 

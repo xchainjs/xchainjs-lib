@@ -75,7 +75,7 @@ describe('thorchain Integration Tests', () => {
       expect(error.toString().includes('account sequence mismatch')).toBe(true)
     }
   })
-  it('should xfer rune from wallet 0 -> 1, with a memo', async () => {
+  it('should transfer rune from wallet 0 -> 1, with a memo x', async () => {
     try {
       const addressTo = thorClient.getAddress(1)
       const transferTx: TxParams = {
@@ -269,10 +269,10 @@ describe('thorchain Integration Tests', () => {
   })
   it('should prepare transaction', async () => {
     try {
-      const sender = thorClient.getAddress(0)
-      const recipient = thorClient.getAddress(1)
+      const sender = thorClient.getAddress(3)
+      const recipient = thorClient.getAddress(0)
 
-      const amount = baseAmount('10000')
+      const amount = baseAmount('80000000')
       const unsignedTxData = await thorClient.prepareTx({
         sender,
         recipient,
@@ -284,10 +284,20 @@ describe('thorchain Integration Tests', () => {
         Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
       )
 
+      const privKey = thorClient
+        .getCosmosClient()
+        .getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/931'/0'/0/3")
+
+      const authInfo = cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
+
+      if (!authInfo.signer_infos[0].public_key) {
+        authInfo.signer_infos[0].public_key = cosmosclient.codec.instanceToProtoAny(privKey.pubKey())
+      }
+
       const txBuilder = new cosmosclient.TxBuilder(
         thorClient.getCosmosClient().sdk,
         cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
-        cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+        authInfo,
       )
 
       const { account_number: accountNumber } = await thorClient
@@ -295,10 +305,6 @@ describe('thorchain Integration Tests', () => {
         .getAccount(cosmosclient.AccAddress.fromString(sender))
 
       if (!accountNumber) throw Error(`Transfer failed - missing account number`)
-
-      const privKey = thorClient
-        .getCosmosClient()
-        .getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/931'/0'/0/0")
 
       const signDocBytes = txBuilder.signDocBytes(accountNumber)
       txBuilder.addSignature(privKey.sign(signDocBytes))
