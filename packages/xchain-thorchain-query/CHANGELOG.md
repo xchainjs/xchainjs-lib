@@ -1,3 +1,9 @@
+# v0.6.9 (2023-11-07)
+
+## Fix
+
+- Trim memo for thorname registation
+
 # v0.6.8 (2023-11-04)
 
 ## Update

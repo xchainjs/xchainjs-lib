@@ -1,3 +1,9 @@
+# v0.7.12 (2023-11-07)
+
+## Update
+
+- Update thorchain-query dependency
+
 # v0.7.11 (2023-11-04)
 
 ## Update
