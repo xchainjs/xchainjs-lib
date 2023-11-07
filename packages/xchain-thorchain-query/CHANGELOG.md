@@ -1,8 +1,8 @@
-# v0.6.9 (2023-11-07)
+# v0.6.9 (2023-11-05)
 
-## Fix
+## Update
 
-- Trim memo for thorname registation
+- Public validateAmount function
 
 # v0.6.8 (2023-11-04)
 

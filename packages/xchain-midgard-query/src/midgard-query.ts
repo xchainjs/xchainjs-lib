@@ -95,8 +95,6 @@ export class MidgardQuery {
     if (isAssetRuneNative(asset) || asset.synth) return DEFAULT_THORCHAIN_DECIMALS
 
     const pool = await this.getPool(assetToString(asset))
-    const decimals = Number(pool.nativeDecimal)
-
-    return decimals > 0 ? decimals : DEFAULT_THORCHAIN_DECIMALS
+    return Number(pool.nativeDecimal)
   }
 }

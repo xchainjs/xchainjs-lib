@@ -142,6 +142,7 @@
     "assetPrice": "9520.275946383232",
     "assetPriceUSD": "19979.30359435353",
     "liquidityUnits": "484973221764733",
+    "nativeDecimal": "8",
     "poolAPY": "0.053737568449651274",
     "runeDepth": "882827363068316",
     "status": "available",

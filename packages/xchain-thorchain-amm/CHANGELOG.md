@@ -1,8 +1,14 @@
-# v0.7.12 (2023-11-07)
+# v0.7.13 (2023-11-05)
 
 ## Update
 
-- Update thorchain-query dependency
+- Wallet can be initialised with a custom config by chain
+
+# v0.7.12 (2023-11-05)
+
+## Update
+
+- Update deps for xchain-thorchain-query
 
 # v0.7.11 (2023-11-04)
 
