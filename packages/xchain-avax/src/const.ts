@@ -85,14 +85,14 @@ const routescanProviders = {
 
 // =====Explorers=====
 const AVAX_MAINNET_EXPLORER = new ExplorerProvider(
-  'https://avascan.info/',
-  'https://avascan.info/blockchain/c/address/%%ADDRESS%%',
-  'https://avascan.info/blockchain/c/address/%%TX_ID%%',
+  'https://snowtrace.dev/',
+  'https://snowtrace.dev/address/%%ADDRESS%%',
+  'https://snowtrace.dev/tx/%%TX_ID%%',
 )
 const AVAX_TESTNET_EXPLORER = new ExplorerProvider(
-  'https://testnet.avascan.info/',
-  'https://testnet.avascan.info/blockchain/c/address/%%ADDRESS%%',
-  'https://testnet.avascan.info/blockchain/c/tx/%%TX_ID%%',
+  'https://testnet.snowtrace.dev/',
+  'https://testnet.snowtrace.dev/address/%%ADDRESS%%',
+  'https://testnet.snowtrace.dev/tx/%%TX_ID%%',
 )
 const avaxExplorerProviders = {
   [Network.Mainnet]: AVAX_MAINNET_EXPLORER,
