@@ -73,7 +73,7 @@ You can specify own array of providers, whoch will be executed in array-order, t
 ### example sochain v3, blockcypher backup
 
 ```typescript
-import { Client, defaultDogeParams, AssetDOGE, SochainDataProviders, BlockcypherDataProviders } from '@xchainjs/xchain-doge'
+import { Client, defaultDogeParams, AssetDOGE, SochainDataProviders, blockcypherDataProviders } from '@xchainjs/xchain-doge'
 import { SochainNetwork,  SochainProvider } from '@xchainjs/xchain-utxo-providers'
 import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 
