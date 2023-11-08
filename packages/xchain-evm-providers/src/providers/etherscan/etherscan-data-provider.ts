@@ -18,11 +18,11 @@ import { ERC20Tx, GetERC20TxsResponse } from './types'
 
 export class EtherscanProvider implements EvmOnlineDataProvider {
   private provider: Provider
-  private baseUrl: string
   private apiKey: string
-  private chain: Chain
-  private nativeAsset: Asset
-  private nativeAssetDecimals: number
+  protected baseUrl: string
+  protected chain: Chain
+  protected nativeAsset: Asset
+  protected nativeAssetDecimals: number
 
   constructor(
     provider: Provider,
@@ -166,8 +166,9 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
               gasDecimals: this.nativeAssetDecimals,
               baseUrl: this.baseUrl,
               assetAddress,
+              address: txInfo.from,
               startblock: txInfo.blockNumber,
-              endblock: txInfo.blockNumber,
+              endblock: txInfo.blockNumber ? txInfo.blockNumber + 1 : undefined, // To be compatible with Routescan
               apiKey: this.apiKey,
               chain: this.chain,
             })
@@ -180,7 +181,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
               gasDecimals: this.nativeAssetDecimals,
               baseUrl: this.baseUrl,
               startblock: txInfo.blockNumber,
-              endblock: txInfo.blockNumber,
+              endblock: txInfo.blockNumber ? txInfo.blockNumber + 1 : undefined, // To be compatible with Routescan
               apiKey: this.apiKey,
               address: txInfo.from,
             })
