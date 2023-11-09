@@ -66,7 +66,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
       // Get All Erc-20 txs
       const response = (
         await axios.get<GetERC20TxsResponse>(
-          `${this.baseUrl}/api?module=account&action=tokentx&address=${address}&startblock=0&sort=asc&apikey=${this.apiKey}`,
+          `${this.baseUrl}/api?module=account&action=tokentx&address=${address}&sort=asc&apikey=${this.apiKey}`,
         )
       ).data
 
