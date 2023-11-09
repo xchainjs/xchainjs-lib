@@ -534,7 +534,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
       feeData.gasPrice = txGasPrice
     }
 
-    const sender = this.getAddress(walletIndex || 0)
+    const sender = txSigner ? await txSigner.getAddress() : this.getAddress(walletIndex)
 
     let txGasLimit: BigNumber
     if (!gasLimit) {
