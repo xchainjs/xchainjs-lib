@@ -1,3 +1,9 @@
+# v0.7.15 (2023-11-10)
+
+## Update
+
+- Utxo clients version updated
+
 # v0.7.14 (2023-11-07)
 
 ## Update
