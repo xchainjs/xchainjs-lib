@@ -56,5 +56,10 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-app-btc": "^10.0.9",
+    "@ledgerhq/hw-transport-node-hid": "^6.27.22",
+    "@ledgerhq/hw-transport-webusb": "^6.27.20"
   }
 }

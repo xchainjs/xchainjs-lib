@@ -1,7 +1,7 @@
 import { AssetInfo, Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { Client } from '../src/client'
+import { Client } from '../src/clientKeystore'
 import {
   AssetBTC,
   BTC_DECIMAL,
@@ -38,6 +38,8 @@ const btcClientTestnet = new Client({
 describe('Bitcoin Integration Tests for BlockCypher', () => {
   it('should fetch correct asset ', async () => {
     const info = btcClient.getAssetInfo()
+    const address = btcClientTestnet.getAddress()
+    console.log('address', address)
     const correctAssetInf: AssetInfo = {
       asset: AssetBTC,
       decimal: BTC_DECIMAL,
