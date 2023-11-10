@@ -39,10 +39,18 @@ Etherscan API rate limits: https://snowtrace.io/apis
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
 
-// set in env variables so default config can access.
-`SNOWTRACE_API_KEY={YOUR_SNOWTRACE_API_KEY}`
-`COVALENT_API_KEY={YOUR_COVALENT_API_KEY}`
+### Enviroment variables
 
-//Default config can access.
+
+```sh
+SNOWTRACE_API_KEY={YOUR_SNOWTRACE_API_KEY}
+COVALENT_API_KEY={YOUR_COVALENT_API_KEY}
+```
+
+Default config can access.
+
+```sh
 process.env.SNOWTRACE_API_KEY
 process.env.COVALENT_API_KEY
+```
+

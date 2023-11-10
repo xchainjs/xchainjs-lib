@@ -39,8 +39,14 @@ BscScan API rate limits: https://bscscan.com/apis
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
 
-// set in env variables so default config can access.
-`BSCSCAN_API_KEY={YOUR_BSCSCAN_API_KEY}`
+### Enviroment variables
 
-//Default config can access.
+```sh
+BSCSCAN_API_KEY={YOUR_BSCSCAN_API_KEY}
+```
+
+Default config can access.
+
+```sh
 process.env.BSCSCAN_API_KEY
+```

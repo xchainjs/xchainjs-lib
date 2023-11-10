@@ -40,3 +40,15 @@ This package uses the following service providers:
 Etherscan API rate limits: https://info.etherscan.com/api-return-errors/
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
+
+### Enviroment variables
+
+```sh
+ETHERSCAN_API_KEY={YOUR_ETHERSCAN_API_KEY}
+```
+
+Default config can access.
+
+```sh
+process.env.ETHERSCAN_API_KEY
+```
