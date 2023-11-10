@@ -1,3 +1,9 @@
+# v0.13.3 (2023-11-10)
+
+## Update
+
+- BlOCKCYPHER_API_KEY renamed to BLOCKCYPHER_API_KEY
+
 # v0.13.2 (2023-10-26)
 
 ## Update

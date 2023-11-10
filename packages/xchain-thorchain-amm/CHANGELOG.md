@@ -1,3 +1,9 @@
+# v0.7.15 (2023-11-10)
+
+## Update
+
+- Client dependencies updated to work with renamed environment variables
+
 # v0.7.14 (2023-11-07)
 
 ## Update
