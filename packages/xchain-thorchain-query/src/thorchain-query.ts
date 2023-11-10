@@ -88,12 +88,11 @@ export class ThorchainQuery {
     affiliateAddress,
     height,
   }: QuoteSwapParams): Promise<TxDetails> {
-    const errors: string[] = []
-    const validAssetDecimals = await this.isValidAssetDecimals(fromAsset, amount)
     // validates swap, and pushes error if there is one
-    if (validAssetDecimals) {
-      errors.push(`${validAssetDecimals}`)
-    }
+    const errors: string[] = []
+
+    const error = await this.validateAmount(amount)
+    if (error) errors.push(error.message)
 
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
@@ -191,22 +190,16 @@ export class ThorchainQuery {
   }
 
   /**
-   *
-   * @param params - quote swap params
-   * @returns boolean
+   * Validate a cryptoAmount is well formed
+   * @param {CryptoAmount} cryptoAmount - CryptoAmount to validate
+   * @returns {void | Error} Error if the cryptoAmount is not well formed
    */
-  private async isValidAssetDecimals(fromAsset: Asset, inputAmount: CryptoAmount): Promise<string | undefined> {
-    if (isAssetRuneNative(fromAsset) || fromAsset.synth) {
-      if (inputAmount.baseAmount.decimal !== 8) {
-        return `input asset ${assetToString(fromAsset)} must have decimals of 8`
-      }
-    } else {
-      const nativeDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(fromAsset)
-      if (nativeDecimals && nativeDecimals !== -1 && inputAmount.baseAmount.decimal !== nativeDecimals) {
-        return `input asset ${assetToString(fromAsset)} must have decimals of ${nativeDecimals}`
-      }
-    }
-    return undefined // Explicitly return undefined if no conditions are met
+  public async validateAmount(cryptoAmount: CryptoAmount): Promise<Error | void> {
+    const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(cryptoAmount.asset)
+    if (cryptoAmount.baseAmount.decimal !== assetDecimals)
+      return new Error(
+        `Invalid number of decimals: ${assetToString(cryptoAmount.asset)} must have ${assetDecimals} decimals`,
+      )
   }
 
   /**
@@ -703,8 +696,8 @@ export class ThorchainQuery {
         errors.push(checkPositon.errors[i])
       }
       return {
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-        dustThreshold: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+        dustAmount: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
+        dustThreshold: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
         expectedAssetAmount: new CryptoAmount(
           assetToBase(assetAmount(checkPositon.redeemableValue.assetAmount.amount())),
           withdrawParams.asset,
@@ -742,8 +735,8 @@ export class ThorchainQuery {
     if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
     if (errors.length > 0) {
       return {
-        dustAmount: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-        dustThreshold: new CryptoAmount(baseAmount(0), withdrawParams.asset),
+        dustAmount: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
+        dustThreshold: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
         expectedAssetAmount: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
         fee: {
           affiliate: new CryptoAmount(baseAmount(0), withdrawParams.asset),
@@ -766,8 +759,11 @@ export class ThorchainQuery {
 
     const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
-      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), withdrawParams.asset),
-      dustThreshold: new CryptoAmount(baseAmount(withdrawQuote.dust_threshold), withdrawParams.asset),
+      dustAmount: new CryptoAmount(baseAmount(withdrawQuote.dust_amount), getChainAsset(withdrawParams.asset.chain)),
+      dustThreshold: new CryptoAmount(
+        baseAmount(withdrawQuote.dust_threshold),
+        getChainAsset(withdrawParams.asset.chain),
+      ),
       expectedAssetAmount: new CryptoAmount(baseAmount(withdrawQuote.expected_amount_out), withdrawParams.asset),
       fee: {
         affiliate: new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate), withdrawAsset),
@@ -1130,7 +1126,7 @@ export class ThorchainQuery {
       params.owner ? params.owner : ''
     }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${
       params.isUpdate ? '' : currentHeightForExpirity + numberOfBlocksToAddToExpirity
-    }`
+    }`.replace(/^:+|:+$/g, '')
     return {
       memo: thornameMemo,
       value: totalCost,

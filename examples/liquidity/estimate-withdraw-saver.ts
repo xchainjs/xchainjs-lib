@@ -15,6 +15,8 @@ register9Rheader(axios)
 function printWithdrawSaver(saver: EstimateWithdrawSaver) {
   const expanded = {
     assetAmount: saver.expectedAssetAmount.formatedAssetString(),
+    dustAmount: saver.dustAmount.formatedAssetString(),
+    dustThreshold: saver.dustThreshold.formatedAssetString(),
     fee: {
       affiliate: saver.fee.affiliate.formatedAssetString(),
       asset: saver.fee.asset,

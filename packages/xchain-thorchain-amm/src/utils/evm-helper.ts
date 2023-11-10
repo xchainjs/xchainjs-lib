@@ -1,5 +1,5 @@
 import { TxHash, XChainClient } from '@xchainjs/xchain-client'
-import { ApproveParams, Client as EvmClient, MAX_APPROVAL, abi } from '@xchainjs/xchain-evm'
+import { ApproveParams, Client as EvmClient, MAX_APPROVAL, Protocol, abi } from '@xchainjs/xchain-evm'
 import { ThorchainCache } from '@xchainjs/xchain-thorchain-query'
 import { Asset, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
@@ -40,16 +40,17 @@ export class EvmHelper {
     }
 
     const address = this.client.getAddress(params.walletIndex)
-    const gasPrice = await this.evmClient.estimateGasPrices()
+    const gasPrice = await this.evmClient.estimateGasPrices(Protocol.THORCHAIN)
 
     if (eqAsset(params.asset, this.evmClient.config.gasAsset)) {
       // simple transfer
-      return await this.client.transfer({
+      return await this.evmClient.transfer({
         walletIndex: params.walletIndex || 0,
         asset: params.asset,
         amount: params.amount,
         recipient: inboundAsgard.address,
         memo: params.memo,
+        gasPrice: gasPrice.fast,
       })
     } else {
       //erc-20 must be depsited to the router

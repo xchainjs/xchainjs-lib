@@ -3,13 +3,13 @@ import {
   AssetInfo,
   Balance,
   BaseXChainClient,
+  EvmOnlineDataProviders,
   ExplorerProviders,
   FeeOption,
   FeeRates,
   FeeType,
   Fees,
   Network,
-  OnlineDataProviders,
   PreparedTx,
   Tx,
   TxHash,
@@ -34,7 +34,6 @@ import {
   FeesWithGasPricesAndLimits,
   GasPrices,
   IsApprovedParams,
-  TxOverrides,
 } from './types'
 import {
   call,
@@ -47,6 +46,9 @@ import {
   validateAddress,
 } from './utils'
 
+export enum Protocol {
+  THORCHAIN = 1,
+}
 /**
  * Interface for custom EVM client
  */
@@ -78,7 +80,7 @@ export type EVMClientParams = XChainClientParams & {
   defaults: Record<Network, EvmDefaults>
   providers: Record<Network, Provider>
   explorerProviders: ExplorerProviders
-  dataProviders: OnlineDataProviders[]
+  dataProviders: EvmOnlineDataProviders[]
 }
 
 /**
@@ -91,7 +93,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
   private hdNode?: HDNode
   private defaults: Record<Network, EvmDefaults>
   private explorerProviders: ExplorerProviders
-  private dataProviders: OnlineDataProviders[]
+  private dataProviders: EvmOnlineDataProviders[]
   private providers: Record<Network, Provider>
   /**
    * Constructor
@@ -490,18 +492,47 @@ export default class Client extends BaseXChainClient implements XChainClient {
     recipient,
     feeOption = FeeOption.Fast,
     gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
     gasLimit,
   }: TxParams & {
     signer?: Signer
     feeOption?: FeeOption
     gasPrice?: BaseAmount
+    maxFeePerGas?: BaseAmount
+    maxPriorityFeePerGas?: BaseAmount
     gasLimit?: BigNumber
   }): Promise<TxHash> {
-    const txGasPrice: BigNumber = gasPrice
-      ? BigNumber.from(gasPrice.amount().toFixed())
-      : await this.estimateGasPrices()
-          .then((prices) => prices[feeOption])
-          .then((gp) => BigNumber.from(gp.amount().toFixed()))
+    if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
+      throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
+    }
+
+    const feeData: ethers.providers.FeeData = {
+      lastBaseFeePerGas: null,
+      maxFeePerGas: null,
+      maxPriorityFeePerGas: null,
+      gasPrice: null,
+    }
+
+    if (maxFeePerGas || maxPriorityFeePerGas) {
+      const feeInfo = await this.getProvider().getFeeData()
+      if (maxFeePerGas) {
+        feeData.maxFeePerGas = BigNumber.from(maxFeePerGas.amount().toFixed())
+      } else if (maxPriorityFeePerGas && feeInfo.lastBaseFeePerGas) {
+        feeData.maxFeePerGas = feeInfo.lastBaseFeePerGas.mul(2).add(maxPriorityFeePerGas.amount().toFixed())
+      }
+      feeData.maxPriorityFeePerGas = maxPriorityFeePerGas
+        ? BigNumber.from(maxPriorityFeePerGas.amount().toFixed())
+        : feeInfo.maxPriorityFeePerGas
+    } else {
+      const txGasPrice: BigNumber = gasPrice
+        ? BigNumber.from(gasPrice.amount().toFixed())
+        : await this.estimateGasPrices()
+            .then((prices) => prices[feeOption])
+            .then((gp) => BigNumber.from(gp.amount().toFixed()))
+      checkFeeBounds(this.feeBounds, txGasPrice.toNumber())
+      feeData.gasPrice = txGasPrice
+    }
 
     const sender = this.getAddress(walletIndex || 0)
 
@@ -518,14 +549,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
       txGasLimit = gasLimit
     }
 
-    type SafeTxOverrides = Omit<TxOverrides, 'gasPrice'> & { gasPrice: ethers.BigNumber }
-    const overrides: SafeTxOverrides = {
-      gasLimit: txGasLimit,
-      gasPrice: txGasPrice,
-    }
-
-    checkFeeBounds(this.feeBounds, overrides.gasPrice.toNumber())
-
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient,
@@ -538,13 +561,17 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     const signer = txSigner || this.getWallet(walletIndex)
 
-    const { hash } = await signer.sendTransaction({
+    const tx = await signer.populateTransaction({
       from: transactionRequest.from,
       to: transactionRequest.to,
       data: transactionRequest.data,
       value: transactionRequest.value,
-      ...overrides,
+      gasLimit: txGasLimit,
+      gasPrice: feeData.gasPrice || undefined,
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
+      maxFeePerGas: feeData.maxFeePerGas || undefined,
     })
+    const { hash } = await signer.sendTransaction(tx)
 
     return hash
   }
@@ -556,42 +583,47 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
   /**
    * Estimate gas price.
-   * @see https://etherscan.io/apis#gastracker
+   * @param {Protocol} protocol Protocol to interact with. If there's no protocol provided, fee rates are retrieved from chain data providers
    *
    * @returns {GasPrices} The gas prices (average, fast, fastest) in `Wei` (`BaseAmount`)
    */
-  async estimateGasPrices(): Promise<GasPrices> {
-    try {
-      // Note: `rates` are in `gwei`
-      // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
-      // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
-      const ratesInGwei: FeeRates = standardFeeRates(await this.getFeeRateFromThorchain())
-      return {
-        [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
-        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
-        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+  async estimateGasPrices(protocol?: Protocol): Promise<GasPrices> {
+    if (!protocol) {
+      try {
+        const feeRates = await this.roundRobinGetFeeRates()
+        return {
+          [FeeOption.Average]: baseAmount(feeRates.average, this.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(feeRates.fast, this.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(feeRates.fastest, this.gasAssetDecimals),
+        }
+      } catch (error) {
+        console.warn(`Can not round robin over GetFeeRates: ${error}`)
       }
-    } catch (error) {
-      console.warn(error)
     }
 
-    try {
-      const feeRateInWei = await this.providers[this.network].getGasPrice()
-      const feeRateInGWei = feeRateInWei.div(10 ** 9)
-      const ratesInGwei: FeeRates = standardFeeRates(feeRateInGWei.toNumber())
-      return {
-        [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
-        [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
-        [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+    // If chain data providers fail, THORCHAIN as fallback
+    if (!protocol || protocol === Protocol.THORCHAIN) {
+      try {
+        // Note: `rates` are in `gwei`
+        // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
+        // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
+        const ratesInGwei: FeeRates = standardFeeRates(await this.getFeeRateFromThorchain())
+        return {
+          [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+        }
+      } catch (error) {
+        console.warn(error)
       }
-    } catch (error) {
-      console.warn(error)
-      const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
-      return {
-        [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
-        [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
-        [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
-      }
+    }
+
+    // Default fee rates if everything else fails
+    const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
+    return {
+      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
+      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
+      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
     }
   }
 
@@ -715,6 +747,18 @@ export default class Client extends BaseXChainClient implements XChainClient {
       }
     }
     throw Error('no provider able to GetTransactions')
+  }
+
+  protected async roundRobinGetFeeRates(): Promise<FeeRates> {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (prov) return await prov.getFeeRates()
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    throw Error('No provider available to getFeeRates')
   }
 
   /**

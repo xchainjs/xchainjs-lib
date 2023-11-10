@@ -30,13 +30,13 @@ describe('Cosmos Integration Tests', () => {
     expect(address1.length).toBeGreaterThan(0)
     expect(address1.startsWith('cosmos')).toBeTruthy()
   })
-  it('should xfer uatom from wallet 0 -> 1, with a memo', async () => {
+  it('should transfer uatom from wallet 0 -> 1, with a memo', async () => {
     try {
-      const addressTo = xchainClient.getAddress(1)
+      const addressTo = xchainClient.getAddress(2)
       const transferTx: TxParams = {
         walletIndex: 0,
         asset: AssetATOM,
-        amount: baseAmount('100', 6),
+        amount: baseAmount('100000', 6),
         recipient: addressTo,
         memo: 'Hi!',
       }
@@ -77,8 +77,8 @@ describe('Cosmos Integration Tests', () => {
     }
   })
   it('Prepate transaction, sign externally and broadcast', async () => {
-    const sender = xchainClient.getAddress(0)
-    const recipient = xchainClient.getAddress(1)
+    const sender = xchainClient.getAddress(2)
+    const recipient = xchainClient.getAddress(0)
 
     console.log('sender', sender)
     console.log('recipient', recipient)
@@ -86,17 +86,26 @@ describe('Cosmos Integration Tests', () => {
     const unsignedTxData = await xchainClient.prepareTx({
       sender,
       recipient,
-      amount: assetToBase(assetAmount(0.1, 6)),
+      amount: assetToBase(assetAmount(0.09, 6)),
     })
 
     const decodedTx = cosmosClientCore.proto.cosmos.tx.v1beta1.TxRaw.decode(
       Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
     )
 
+    const privKey = xchainClient
+      .getSDKClient()
+      .getPrivKeyFromMnemonic(process.env.TESTNET_PHRASE as string, "44'/118'/0'/0/2")
+    const authInfo = cosmosClientCore.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
+
+    if (!authInfo.signer_infos[0].public_key) {
+      authInfo.signer_infos[0].public_key = cosmosClientCore.codec.instanceToProtoAny(privKey.pubKey())
+    }
+
     const txBuilder = new cosmosClientCore.TxBuilder(
       xchainClient.getSDKClient().sdk,
       cosmosClientCore.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
-      cosmosClientCore.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+      authInfo,
     )
 
     const { account_number: accountNumber } = await xchainClient
@@ -104,10 +113,6 @@ describe('Cosmos Integration Tests', () => {
       .getAccount(cosmosClientCore.AccAddress.fromString(sender))
 
     if (!accountNumber) throw Error(`Transfer failed - missing account number`)
-
-    const privKey = xchainClient
-      .getSDKClient()
-      .getPrivKeyFromMnemonic(process.env.TESTNET_PHRASE as string, "44'/118'/0'/0/0")
 
     const signDocBytes = txBuilder.signDocBytes(accountNumber)
     txBuilder.addSignature(privKey.sign(signDocBytes))

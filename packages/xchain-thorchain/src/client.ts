@@ -783,10 +783,17 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
     )
 
+    const privKey = this.getCosmosClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(walletIndex))
+    const authInfo = cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
+
+    if (!authInfo.signer_infos[0].public_key) {
+      authInfo.signer_infos[0].public_key = cosmosclient.codec.instanceToProtoAny(privKey.pubKey())
+    }
+
     const txBuilder = new cosmosclient.TxBuilder(
       this.getCosmosClient().sdk,
       cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
-      cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes),
+      authInfo,
     )
 
     const { account_number: accountNumber } = await this.getCosmosClient().getAccount(
@@ -794,8 +801,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
     )
 
     if (!accountNumber) throw Error(`Transfer failed - missing account number`)
-
-    const privKey = this.getCosmosClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(walletIndex))
 
     const signDocBytes = txBuilder.signDocBytes(accountNumber)
     txBuilder.addSignature(privKey.sign(signDocBytes))
@@ -920,8 +925,6 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
 
     const account = await this.getCosmosClient().getAccount(cosmosclient.AccAddress.fromString(sender))
     const { pub_key: pubkey } = account
-
-    if (!pubkey) throw Error(`Transfer failed - missing pub key`)
 
     const txBuilder = buildUnsignedTx({
       cosmosSdk: this.getCosmosClient().sdk,

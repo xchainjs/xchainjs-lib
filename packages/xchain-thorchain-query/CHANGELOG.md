@@ -1,3 +1,27 @@
+# v0.6.10 (2023-11-07)
+
+## Fix
+
+- Trim memo for thorname registation
+
+# v0.6.9 (2023-11-05)
+
+## Update
+
+- Public validateAmount function
+
+# v0.6.8 (2023-11-04)
+
+## Update
+
+- midgard-query package from 0.1.3 to 0.1.4
+
+# v0.6.7 (2023-11-03)
+
+## Update
+
+- Native asset for dustAmount and dustThreshold
+
 # v0.6.6 (2023-10-31)
 
 ## Update

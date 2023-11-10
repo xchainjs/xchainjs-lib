@@ -1,3 +1,15 @@
+# v0.3.6 (2023-11-03)
+
+## Update
+
+- EIP1559 params
+
+# v0.3.5 (2023-11-02)
+
+## Update
+
+- estimateGasPrices can difference between protocols and non-protocol interactions
+
 # v0.3.4 (2023-10-26)
 
 ## Update

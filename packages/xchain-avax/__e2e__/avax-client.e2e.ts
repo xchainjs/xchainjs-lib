@@ -1,7 +1,7 @@
 import { Balance, Network, OnlineDataProviders, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
 import { CovalentProvider } from '@xchainjs/xchain-evm-providers'
-import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { Asset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import AvaxClient from '../src/client'
 import { AVAXChain, AssetAVAX, defaultAvaxParams } from '../src/const'
@@ -106,6 +106,26 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     const amount = assetToBase(assetAmount('0.01', 18))
     const memo = `=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000`
     const txHash = await client.transfer({ amount, recipient, memo })
+    console.log(txHash)
+  })
+  it('should transfer 0.01 AVAX following EIP1559 because of maxFeePerGas', async () => {
+    const recipient = client.getAddress(1)
+    const amount = assetToBase(assetAmount('0.01', 18))
+    const txHash = await client.transfer({
+      amount,
+      recipient,
+      maxFeePerGas: baseAmount('51700000000', 18),
+    })
+    console.log(txHash)
+  })
+  it('should transfer 0.01 AVAX following EIP1559 because of maxPriorityFeePerGas', async () => {
+    const recipient = client.getAddress(1)
+    const amount = assetToBase(assetAmount('0.01', 18))
+    const txHash = await client.transfer({
+      amount,
+      recipient,
+      maxPriorityFeePerGas: baseAmount('1700000000', 18),
+    })
     console.log(txHash)
   })
   it('should transfer 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {

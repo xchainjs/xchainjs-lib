@@ -1,3 +1,9 @@
+# v0.15.2 (2023-11-02)
+
+## Update
+
+- EVMOnlineDataProvider interface
+
 # v0.15.1 (2023-10-26)
 
 ## Update

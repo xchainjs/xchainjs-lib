@@ -1,5 +1,5 @@
-import { Balance, Network, TxType } from '@xchainjs/xchain-client'
-import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
+import { Balance, FeeOption, Network, TxType } from '@xchainjs/xchain-client'
+import { ApproveParams, EstimateApproveParams, IsApprovedParams, Protocol } from '@xchainjs/xchain-evm'
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import Client from '../src/client'
@@ -202,6 +202,57 @@ describe('xchain-evm (Eth) Integration Tests', () => {
         amount: assetToBase(assetAmount(0.1, 6)),
       })
       console.log(unsignedRawTx)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+  // Can not retrieve this info over testnet network, sepolia api in etherscan do not support gas Oracle endpoint and there is no testnet for thorchain
+  it('should estimate feeRates with default values', async () => {
+    try {
+      const feeRates = await clientTestnet.estimateGasPrices()
+      console.log({
+        [FeeOption.Average]: feeRates.average.amount().toString(),
+        [FeeOption.Fast]: feeRates.fast.amount().toString(),
+        [FeeOption.Fastest]: feeRates.fastest.amount().toString(),
+      })
+      expect(feeRates.fast.gte(feeRates.average)).toBe(true)
+      expect(feeRates.fastest.gte(feeRates.average)).toBe(true)
+      expect(feeRates.fastest.gte(feeRates.fast)).toBe(true)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+  it('should estimate feeRates using data providers', async () => {
+    try {
+      const client = new Client({ ...defaultEthParams, network: Network.Mainnet })
+      const feeRates = await client.estimateGasPrices()
+      console.log({
+        [FeeOption.Average]: feeRates.average.amount().toString(),
+        [FeeOption.Fast]: feeRates.fast.amount().toString(),
+        [FeeOption.Fastest]: feeRates.fastest.amount().toString(),
+      })
+      expect(feeRates.fast.gte(feeRates.average)).toBe(true)
+      expect(feeRates.fastest.gte(feeRates.average)).toBe(true)
+      expect(feeRates.fastest.gte(feeRates.fast)).toBe(true)
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+  it('should estimate feeRates to interact with Thorchain', async () => {
+    try {
+      const client = new Client({ ...defaultEthParams, network: Network.Mainnet })
+      const feeRates = await client.estimateGasPrices(Protocol.THORCHAIN)
+      console.log({
+        [FeeOption.Average]: feeRates.average.amount().toString(),
+        [FeeOption.Fast]: feeRates.fast.amount().toString(),
+        [FeeOption.Fastest]: feeRates.fastest.amount().toString(),
+      })
+      expect(feeRates.fast.gte(feeRates.average)).toBe(true)
+      expect(feeRates.fastest.gte(feeRates.average)).toBe(true)
+      expect(feeRates.fastest.gte(feeRates.fast)).toBe(true)
     } catch (err) {
       console.error('ERR running test', err)
       fail()

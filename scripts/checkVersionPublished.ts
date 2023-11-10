@@ -10,12 +10,13 @@ interface SimplePackageJson {
 function getLatestVersion(packageName: string): string {
   try {
     return execSync(`npm show ${packageName} version`, { encoding: 'utf-8' }).trim()
-  } catch (e) {
+  } catch {
     return 'unavailable'
   }
 }
 
 const publishCommands: string[] = []
+const localVersions: string[] = []
 
 function compareVersions(packagePath: string, packageName: string, currentVersion: string): void {
   const latestVersion = getLatestVersion(packageName)
@@ -27,18 +28,19 @@ function compareVersions(packagePath: string, packageName: string, currentVersio
   if (currentVersion !== latestVersion) {
     const relativePath = path.relative(process.cwd(), packagePath)
     const publishCommand = `(cd ${relativePath} && npm publish)`
-
-    console.log(
-      `Publish new version for ${packageName} in ${packagePath} from npm version ${latestVersion}  to ${currentVersion}`,
-    )
     publishCommands.push(publishCommand)
+    console.log(
+      `Publish new version for ${packageName} in ${packagePath} from npm version ${latestVersion} to ${currentVersion}`,
+    )
   }
 }
+
 function checkPackageJson(packagePath: string): void {
   const packageJsonPath = path.join(packagePath, 'package.json')
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as SimplePackageJson
 
   const { name, version } = packageJson
+  localVersions.push(`${name}@${version}`)
   compareVersions(packagePath, name, version)
 }
 
@@ -63,9 +65,10 @@ function main(): void {
   const packagesPath = path.join(__dirname, '..', 'packages')
   const packagePaths = getPackagePaths(packagesPath)
 
-  for (const packagePath of packagePaths) {
-    checkPackageJson(packagePath)
-  }
+  packagePaths.forEach((packagePath) => checkPackageJson(packagePath))
+
+  console.log(localVersions.join('\n'))
+
   if (publishCommands.length > 0) {
     console.log('\nPublish Commands:')
     console.log(publishCommands.join('\n'))

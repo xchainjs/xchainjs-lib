@@ -1,3 +1,39 @@
+# v0.7.14 (2023-11-07)
+
+## Update
+
+- Update thorname estimation and prepareTx cosmos chains
+
+# v0.7.13 (2023-11-05)
+
+## Update
+
+- Wallet can be initialised with a custom config by chain
+
+# v0.7.12 (2023-11-05)
+
+## Update
+
+- Update deps for xchain-thorchain-query
+
+# v0.7.11 (2023-11-04)
+
+## Update
+
+- thorchain-query package from 0.6.7 to 0.6.8
+
+# v0.7.10 (2023-11-02)
+
+## Update
+
+- Force Thorchain estimations
+
+# v0.7.9 (2023-11-03)
+
+## Update
+
+- Native asset for dustAmount and dustThreshold
+
 # v0.7.8 (2023-10-31)
 
 ## Update
