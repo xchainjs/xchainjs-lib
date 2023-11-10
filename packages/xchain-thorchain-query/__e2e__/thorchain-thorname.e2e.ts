@@ -74,4 +74,15 @@ describe('Thorchain-query thorname Integration Tests', () => {
     console.log(thorname.value.baseAmount.amount().toString())
     console.log(thorname.memo)
   })
+  it('Remove uneccessary : at the end and start of MEMO', async () => {
+    const thorname = await thorchainQuery.estimateThorname({
+      thorname: 'hippo',
+      chain: BTCChain,
+      chainAddress: btcAddress,
+      owner: owner2,
+      isUpdate: true,
+    })
+    console.log(thorname.value.baseAmount.amount().toString())
+    console.log(thorname.memo)
+  })
 })

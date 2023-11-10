@@ -1,15 +1,16 @@
-import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { Client as BnbClient } from '@xchainjs/xchain-binance'
-import { BTCChain, Client as BtcClient } from '@xchainjs/xchain-bitcoin'
-import { Client as BchClient } from '@xchainjs/xchain-bitcoincash'
-import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
-import { FeeOption, Network, XChainClient } from '@xchainjs/xchain-client'
-import { Client as CosmosClient } from '@xchainjs/xchain-cosmos'
-import { Client as DogeClient } from '@xchainjs/xchain-doge'
-import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { Client as LtcClient } from '@xchainjs/xchain-litecoin'
-import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
-import { Client as ThorClient, THORChain, ThorchainClient } from '@xchainjs/xchain-thorchain'
+import { AVAXChain, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
+import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
+import { BCHChain, Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
+import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { FeeOption, Network, UtxoClientParams, XChainClient, XChainClientParams } from '@xchainjs/xchain-client'
+import { Client as CosmosClient, GAIAChain } from '@xchainjs/xchain-cosmos'
+import { Client as DogeClient, DOGEChain, defaultDogeParams } from '@xchainjs/xchain-doge'
+import { Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { EVMClientParams } from '@xchainjs/xchain-evm'
+import { Client as LtcClient, LTCChain, defaultLtcParams } from '@xchainjs/xchain-litecoin'
+import { Client as MayaClient, MAYAChain, MayachainClientParams } from '@xchainjs/xchain-mayachain'
+import { Client as ThorClient, THORChain, ThorchainClient, ThorchainClientParams } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, Asset, assetFromString } from '@xchainjs/xchain-util'
 
@@ -28,6 +29,19 @@ import { EvmHelper } from './utils/evm-helper'
 
 export type NodeUrls = Record<Network, string>
 
+export type ChainConfigs = Partial<{
+  [BTCChain]: Omit<UtxoClientParams, 'phrase' | 'network'>
+  [BCHChain]: Omit<UtxoClientParams, 'phrase' | 'network'>
+  [LTCChain]: Omit<UtxoClientParams, 'phrase' | 'network'>
+  [DOGEChain]: Omit<UtxoClientParams, 'phrase' | 'network'>
+  [ETHChain]: Omit<EVMClientParams, 'phrase' | 'network'>
+  [AVAXChain]: Omit<EVMClientParams, 'phrase' | 'network'>
+  [BSCChain]: Omit<EVMClientParams, 'phrase' | 'network'>
+  [GAIAChain]: Omit<XChainClientParams, 'phrase' | 'network'>
+  [BNBChain]: Omit<XChainClientParams, 'phrase' | 'network'>
+  [THORChain]: Omit<XChainClientParams & ThorchainClientParams, 'phrase' | 'network'>
+  [MAYAChain]: Omit<XChainClientParams & MayachainClientParams, 'phrase' | 'network'>
+}>
 /**
  * Wallet Class for managing all xchain-* wallets with a mnemonic seed.
  */
@@ -40,33 +54,26 @@ export class Wallet {
    *
    * @param phrase - mnemonic phrase
    * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
+   * @param chainConfigs - Config by chain
    * @returns Wallet
    */
-  constructor(phrase: string, thorchainQuery: ThorchainQuery) {
+  constructor(phrase: string, thorchainQuery: ThorchainQuery, chainConfigs: ChainConfigs = {}) {
     this.thorchainQuery = thorchainQuery
 
     const settings = { network: this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network, phrase }
     this.clients = {
-      BCH: new BchClient(),
-      BTC: new BtcClient(),
-      DOGE: new DogeClient(),
-      LTC: new LtcClient(),
-      THOR: new ThorClient(settings),
-      BNB: new BnbClient(settings),
-      GAIA: new CosmosClient(settings),
-      MAYA: new MayaClient(settings),
-      ETH: new EthClient({ ...defaultEthParams, network: settings.network, phrase }),
-      AVAX: new AvaxClient({ ...defaultAvaxParams, network: settings.network, phrase }),
-      BSC: new BscClient({ ...defaultBscParams, network: settings.network, phrase }),
+      BCH: new BchClient({ ...defaultBchParams, ...chainConfigs[BCHChain], ...settings }),
+      BTC: new BtcClient({ ...defaultBtcParams, ...chainConfigs[BTCChain], ...settings }),
+      DOGE: new DogeClient({ ...defaultDogeParams, ...chainConfigs[DOGEChain], ...settings }),
+      LTC: new LtcClient({ ...defaultLtcParams, ...chainConfigs[LTCChain], ...settings }),
+      THOR: new ThorClient({ ...chainConfigs[THORChain], ...settings }),
+      BNB: new BnbClient({ ...chainConfigs[BNBChain], ...settings }),
+      GAIA: new CosmosClient({ ...chainConfigs[GAIAChain], ...settings }),
+      MAYA: new MayaClient({ ...chainConfigs[MAYAChain], ...settings }),
+      ETH: new EthClient({ ...defaultEthParams, ...chainConfigs[ETHChain], ...settings }),
+      AVAX: new AvaxClient({ ...defaultAvaxParams, ...chainConfigs[AVAXChain], ...settings }),
+      BSC: new BscClient({ ...defaultBscParams, ...chainConfigs[BSCChain], ...settings }),
     }
-    this.clients.BCH.setNetwork(settings.network)
-    this.clients.BCH.setPhrase(settings.phrase, 0)
-    this.clients.BTC.setNetwork(settings.network)
-    this.clients.BTC.setPhrase(settings.phrase, 0)
-    this.clients.DOGE.setNetwork(settings.network)
-    this.clients.DOGE.setPhrase(settings.phrase, 0)
-    this.clients.LTC.setNetwork(settings.network)
-    this.clients.LTC.setPhrase(settings.phrase, 0)
 
     this.evmHelpers = {
       ETH: new EvmHelper(this.clients.ETH, this.thorchainQuery.thorchainCache),

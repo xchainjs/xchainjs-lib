@@ -85,4 +85,18 @@ describe('Thorchain-query tests', () => {
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
   })
+  it('Should validate CryptoAmount', async () => {
+    expect(
+      await thorchainQuery.validateAmount(new CryptoAmount(assetToBase(assetAmount(1, 8)), AssetBTC)),
+    ).toBeUndefined()
+    expect(
+      await thorchainQuery.validateAmount(new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH)),
+    ).toBeUndefined()
+    expect(
+      (await thorchainQuery.validateAmount(new CryptoAmount(assetToBase(assetAmount(1, 7)), AssetsETH)))?.message,
+    ).toBe('Invalid number of decimals: ETH/ETH must have 8 decimals')
+    expect(
+      (await thorchainQuery.validateAmount(new CryptoAmount(assetToBase(assetAmount(1, 17)), AssetETH)))?.message,
+    ).toBe('Invalid number of decimals: ETH.ETH must have 18 decimals')
+  })
 })

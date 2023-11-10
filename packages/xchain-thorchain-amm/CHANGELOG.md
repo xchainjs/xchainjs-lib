@@ -1,8 +1,26 @@
-# v0.7.12 (2023-11-10)
+# v0.7.15 (2023-11-10)
 
 ## Update
 
 - Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
+
+# v0.7.14 (2023-11-07)
+
+## Update
+
+- Update thorname estimation and prepareTx cosmos chains
+
+# v0.7.13 (2023-11-05)
+
+## Update
+
+- Wallet can be initialised with a custom config by chain
+
+# v0.7.12 (2023-11-05)
+
+## Update
+
+- Update deps for xchain-thorchain-query
 
 # v0.7.11 (2023-11-04)
 
