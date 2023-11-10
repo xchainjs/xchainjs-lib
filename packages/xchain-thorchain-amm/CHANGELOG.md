@@ -1,3 +1,9 @@
+# v0.7.12 (2023-11-10)
+
+## Update
+
+- Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
+
 # v0.7.11 (2023-11-04)
 
 ## Update

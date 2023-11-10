@@ -1,3 +1,9 @@
+# v0.3.7 (2023-11-10)
+
+## Update
+
+- Routescan provider
+
 # v0.3.6 (2023-11-03)
 
 ## Update

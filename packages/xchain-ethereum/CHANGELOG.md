@@ -1,3 +1,9 @@
+# v0.30.7 (2023-11-10)
+
+## Update
+
+- Etherscan provider compatible with Routescan
+
 # v0.30.6 (2023-11-03)
 
 ## Update
