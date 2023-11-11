@@ -6,13 +6,11 @@ import {
   PreparedTx,
   TxHash,
   TxParams,
-  UTXO,
-  UTXOClient,
-  UtxoClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
+import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import axios from 'axios'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
