@@ -1,3 +1,9 @@
+# v0.23.3 (2023-11-10)
+
+## Update
+
+- Utxo-providers package from 0.2.5 to 0.2.6
+
 # v0.23.2 (2023-10-26)
 
 ## Update
