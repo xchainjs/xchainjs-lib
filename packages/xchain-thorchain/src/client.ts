@@ -446,20 +446,18 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
       return transaction
     } catch (error) {
       for (const fallback of FallBackUrls) {
-        for (const network of Object.keys(fallback)) {
-          try {
-            const networkObj = fallback[network as keyof typeof fallback]
-            const clientUrl = networkObj.node as string | string[]
-            const cosmosClient = new CosmosSDKClient({
-              server: Array.isArray(clientUrl) ? clientUrl[0] : clientUrl,
-              chainId: this.getChainId(network as Network),
-              prefix: getPrefix(network as Network),
-            })
-            const tx = await cosmosClient.txsHashGet(txId)
-            return tx
-          } catch (error) {
-            // Handle specific error if needed
-          }
+        try {
+          const networkObj = fallback[this.network]
+          const clientUrl = networkObj.node as string | string[]
+          const cosmosClient = new CosmosSDKClient({
+            server: Array.isArray(clientUrl) ? clientUrl[0] : clientUrl,
+            chainId: this.getChainId(this.network),
+            prefix: getPrefix(this.network),
+          })
+          const tx = await cosmosClient.txsHashGet(txId)
+          return tx
+        } catch (error) {
+          // Handle specific error if needed
         }
       }
       return null

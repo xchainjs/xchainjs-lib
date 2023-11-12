@@ -227,6 +227,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
           baseUrl: this.baseUrl,
           network: this.blockcypherNetwork,
           hash,
+          limit: 50, // Temporal approach
         })
         return rawTx
       })

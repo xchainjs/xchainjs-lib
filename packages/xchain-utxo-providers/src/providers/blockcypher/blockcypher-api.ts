@@ -22,8 +22,8 @@ import {
  * @param {string} hash The transaction hash.
  * @returns {Transactions}
  */
-export const getTx = async ({ apiKey, baseUrl, network, hash }: TxHashParams): Promise<Transaction> => {
-  const params: Record<string, string> = { includeHex: 'true' }
+export const getTx = async ({ apiKey, baseUrl, network, hash, limit = 20 }: TxHashParams): Promise<Transaction> => {
+  const params: Record<string, string> = { includeHex: 'true', limit: limit.toString() }
   if (apiKey) params['token'] = apiKey
   const url = `${baseUrl}/${network}/txs/${hash}`
   const response = await axios.get(url, { params })
