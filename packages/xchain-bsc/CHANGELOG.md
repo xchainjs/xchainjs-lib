@@ -1,3 +1,9 @@
+# v0.3.6 (2023-11-09)
+
+## Update
+
+- Transfer bug fix with txSigner, sender address can be retrieved from signer
+
 # v0.3.5 (2023-11-03)
 
 ## Update

@@ -1,3 +1,9 @@
+# v0.7.17 (2023-11-12)
+
+## Update
+
+- Transfer bug fix with txSigner, sender address can be retrieved from signer
+
 # v0.7.16 (2023-11-11)
 
 ## Update
@@ -9,6 +15,7 @@
 ## Update
 
 - Utxo clients version updated
+
 
 # v0.7.14 (2023-11-07)
 

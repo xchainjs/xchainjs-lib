@@ -1,3 +1,9 @@
+# v0.3.7 (2023-11-09)
+
+## Update
+
+- Sender address can be retrieved from signer
+
 # v0.3.6 (2023-11-03)
 
 ## Update
