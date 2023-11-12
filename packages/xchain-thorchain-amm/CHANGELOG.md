@@ -1,3 +1,9 @@
+# v0.7.16 (2023-11-11)
+
+## Update
+
+- Thorchain package version from 0.28.10 to 0.28.11
+
 # v0.7.15 (2023-11-10)
 
 ## Update
