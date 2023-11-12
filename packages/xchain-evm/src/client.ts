@@ -145,6 +145,19 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
+   * @deprecated this function eventually will be removed use getAddressAsync instead
+   */
+  getAddress(walletIndex = 0): Address {
+    if (walletIndex < 0) {
+      throw new Error('index must be greater than or equal to zero')
+    }
+    if (!this.hdNode) {
+      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
+    }
+    return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
+  }
+
+  /**
    * Get the current address.
    *
    * @param {number} walletIndex (optional) HD wallet index
@@ -155,14 +168,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * @throws Error
    * Thrown if wallet index < 0.
    */
-  getAddress(walletIndex = 0): Address {
-    if (walletIndex < 0) {
-      throw new Error('index must be greater than or equal to zero')
-    }
-    if (!this.hdNode) {
-      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
-    }
-    return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
+  async getAddressAsync(walletIndex = 0): Promise<Address> {
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -287,7 +294,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const filteredParams: TxHistoryParams = {
-      address: params?.address || this.getAddress(),
+      address: params?.address || (await this.getAddressAsync()),
       offset: params?.offset,
       limit: params?.limit,
       startTime: params?.startTime,
@@ -399,7 +406,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
     walletIndex = 0,
     signer: txSigner,
   }: ApproveParams): Promise<TransactionResponse> {
-    const sender = this.getAddress(walletIndex || 0)
+    const sender = await this.getAddressAsync(walletIndex || 0)
 
     const gasPrice: BigNumber = BigNumber.from(
       (await this.estimateGasPrices().then((prices) => prices[feeOption]))
@@ -659,12 +666,12 @@ export default class Client extends BaseXChainClient implements XChainClient {
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
       gasEstimate = await contract.estimateGas.transfer(recipient, txAmount, {
-        from: from || this.getAddress(),
+        from: from || (await this.getAddressAsync()),
       })
     } else {
       // ETH gas estimate
       const transactionRequest = {
-        from: from || this.getAddress(),
+        from: from || (await this.getAddressAsync()),
         to: recipient,
         value: txAmount,
         data: memo ? toUtf8Bytes(memo) : undefined,

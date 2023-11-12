@@ -11,7 +11,7 @@ describe('Cosmos Integration Tests', () => {
     xchainClient = new CosmosClient(settings)
   })
   it('should fetch cosmos balances', async () => {
-    const address = xchainClient.getAddress(0)
+    const address = await xchainClient.getAddressAsync(0)
     const balances = await xchainClient.getBalance(address)
 
     balances.forEach((bal) => {
@@ -21,8 +21,8 @@ describe('Cosmos Integration Tests', () => {
   })
 
   it('should generate cosmos addreses', async () => {
-    const address0 = xchainClient.getAddress(0)
-    const address1 = xchainClient.getAddress(1)
+    const address0 = await xchainClient.getAddressAsync(0)
+    const address1 = await xchainClient.getAddressAsync(1)
 
     expect(address0.length).toBeGreaterThan(0)
     expect(address0.startsWith('cosmos')).toBeTruthy()
@@ -32,7 +32,7 @@ describe('Cosmos Integration Tests', () => {
   })
   it('should transfer uatom from wallet 0 -> 1, with a memo', async () => {
     try {
-      const addressTo = xchainClient.getAddress(2)
+      const addressTo = await xchainClient.getAddressAsync(2)
       const transferTx: TxParams = {
         walletIndex: 0,
         asset: AssetATOM,
@@ -46,16 +46,9 @@ describe('Cosmos Integration Tests', () => {
       throw error
     }
   })
-  // it('should fetch cosmos txs', async () => {
-  //   const address = xchainClient.getAddress(0)
-  //   const txPage = await xchainClient.getTransactions({ address })
-
-  //   expect(txPage.total).toBeGreaterThan(0)
-  //   expect(txPage.txs.length).toBeGreaterThan(0)
-  // })
   it('should fail xfer 100000000000 from wallet 0 -> 1', async () => {
     try {
-      const addressTo = xchainClient.getAddress(1)
+      const addressTo = await xchainClient.getAddressAsync(1)
       const transferTx: TxParams = {
         walletIndex: 0,
         asset: AssetATOM,
@@ -77,8 +70,8 @@ describe('Cosmos Integration Tests', () => {
     }
   })
   it('Prepate transaction, sign externally and broadcast', async () => {
-    const sender = xchainClient.getAddress(2)
-    const recipient = xchainClient.getAddress(0)
+    const sender = await xchainClient.getAddressAsync(2)
+    const recipient = await xchainClient.getAddressAsync(0)
 
     console.log('sender', sender)
     console.log('recipient', recipient)
