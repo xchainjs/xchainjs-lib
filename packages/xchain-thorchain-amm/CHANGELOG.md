@@ -1,8 +1,26 @@
-# v0.7.15 (2023-11-10)
+# v0.7.18 (2023-11-12)
 
 ## Update
 
 - Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
+
+# v0.7.17 (2023-11-12)
+
+## Update
+
+- Transfer bug fix with txSigner, sender address can be retrieved from signer
+
+# v0.7.16 (2023-11-11)
+
+## Update
+
+- Thorchain package version from 0.28.10 to 0.28.11
+
+# v0.7.15 (2023-11-10)
+
+## Update
+
+- Utxo clients version updated
 
 # v0.7.14 (2023-11-07)
 

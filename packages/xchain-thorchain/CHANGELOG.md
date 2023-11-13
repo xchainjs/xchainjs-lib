@@ -1,3 +1,9 @@
+# v0.28.11 (2023-11-11)
+
+## Update
+
+- Network loop removed from fetchTransaction
+
 # v0.28.10 (2023-11-07)
 
 ## Fix

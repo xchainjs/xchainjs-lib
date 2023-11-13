@@ -1,8 +1,14 @@
-# v0.30.7 (2023-11-10)
+# v0.30.8 (2023-11-10)
 
 ## Update
 
 - Etherscan provider compatible with Routescan
+
+# v0.30.7 (2023-11-09)
+
+## Update
+
+- Transfer bug fix with txSigner, sender address can be retrieved from signer
 
 # v0.30.6 (2023-11-03)
 

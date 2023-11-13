@@ -29,6 +29,7 @@ export type TxHashParams = {
   baseUrl: string
   network: BlockcypherNetwork
   hash: TxHash
+  limit?: number
 }
 
 export type TxBroadcastParams = {
