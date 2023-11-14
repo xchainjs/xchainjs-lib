@@ -70,7 +70,7 @@ type EvmDefaults = {
   transferGasAssetGasLimit: BigNumber
   transferTokenGasLimit: BigNumber
   approveGasLimit: BigNumber
-  gasPrice: BigNumber
+  gasPrice: BigNumber // BaseAmount Unit
 }
 
 export type EVMClientParams = XChainClientParams & {
@@ -621,9 +621,9 @@ export default class Client extends BaseXChainClient implements XChainClient {
     // Default fee rates if everything else fails
     const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
     return {
-      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
-      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
-      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average], this.gasAssetDecimals),
+      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast], this.gasAssetDecimals),
+      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest], this.gasAssetDecimals),
     }
   }
 
