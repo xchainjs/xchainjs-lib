@@ -1,3 +1,9 @@
+# v0.5.3 (2023-11-14)
+
+## Update
+
+- Updated Midgard api spec to the latest 2.18.2
+
 # v0.5.2 (2023-10-06)
 
 ## Update

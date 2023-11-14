@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-query",
-  "version": "0.6.10",
+  "version": "0.6.11",
   "license": "MIT",
   "description": "Thorchain query module that is resposible for estimating swap calculations and add/remove liquidity for thorchain ",
   "keywords": [
@@ -34,8 +34,8 @@
   },
   "devDependencies": {
     "@xchainjs/xchain-client": "^0.15.1",
-    "@xchainjs/xchain-thornode": "^0.3.8",
-    "@xchainjs/xchain-midgard-query": "^0.1.5",
+    "@xchainjs/xchain-thornode": "^0.3.9",
+    "@xchainjs/xchain-midgard-query": "^0.1.6",
     "@xchainjs/xchain-util": "^0.13.1",
     "axios": "^1.3.6",
     "axios-retry": "^3.2.5",
@@ -43,8 +43,8 @@
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.15.1",
-    "@xchainjs/xchain-thornode": "^0.3.8",
-    "@xchainjs/xchain-midgard-query": "^0.1.5",
+    "@xchainjs/xchain-thornode": "^0.3.9",
+    "@xchainjs/xchain-midgard-query": "^0.1.6",
     "@xchainjs/xchain-util": "^0.13.1",
     "axios": "^1.3.6",
     "axios-retry": "^3.2.5",
