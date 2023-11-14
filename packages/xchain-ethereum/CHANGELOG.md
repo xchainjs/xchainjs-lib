@@ -1,3 +1,9 @@
+# v0.31.0 (2023-11-15)
+
+## Update
+
+- Default gasPrice in baseAmount unit. Changed from GWei to Wei
+
 # v0.30.7 (2023-11-09)
 
 ## Update
