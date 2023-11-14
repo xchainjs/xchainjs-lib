@@ -7,7 +7,7 @@ import { BigNumber, ethers } from 'ethers'
 export const ARB_DECIMAL = 18
 
 export const LOWER_FEE_BOUND = 100_000_000
-export const UPPER_FEE_BOUND = 500_000_000
+export const UPPER_FEE_BOUND = 1_000_000_000
 
 export const ARB_GAS_ASSET_DECIMAL = 18
 
