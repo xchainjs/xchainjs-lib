@@ -1,3 +1,10 @@
+# v0.7.18 (2023-11-16)
+
+## Update
+
+- update Midgard & Query & thornode deps
+- Remove fromAddress from quoteSwap() params - no longer needed
+
 # v0.7.17 (2023-11-12)
 
 ## Update
