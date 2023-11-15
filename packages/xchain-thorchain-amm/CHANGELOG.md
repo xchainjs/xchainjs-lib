@@ -1,7 +1,8 @@
-# v0.7.19 (2023-11-16)
+# v0.7.18 (2023-11-12)
 
 ## Update
 
+- Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
 - update Midgard & Query & thornode deps
 - Remove fromAddress from quoteSwap() params - no longer needed
 
@@ -22,7 +23,6 @@
 ## Update
 
 - Utxo clients version updated
-
 
 # v0.7.14 (2023-11-07)
 
