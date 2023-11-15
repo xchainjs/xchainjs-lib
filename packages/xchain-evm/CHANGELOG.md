@@ -5,6 +5,12 @@
 - Default gasPrice in baseAmount unit. Changed from GWei to Wei
 - Gas price is retrieved from provider as fallback if the getFeeRates round robin fails
 
+# v0.3.8 (2023-11-10)
+
+## Update
+
+- Routescan provider
+
 # v0.3.7 (2023-11-09)
 
 ## Update

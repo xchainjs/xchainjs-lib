@@ -11,6 +11,8 @@ import {
   LogEventParam,
   getTxsParams,
 } from './covalent/types'
+import { RoutescanProvider } from './routescan'
+
 export * from './covalent/covalent-data-provider'
 export {
   GetBalanceResponse as CovalentGetBalanceResponse,
@@ -21,4 +23,5 @@ export {
   GetTransactionsResponse as CovalentGetTransactionsResponse,
   GetTransactionResponse as CovalentGetTransactionResponse,
   getTxsParams as CovalentgetTxsParams,
+  RoutescanProvider,
 }

@@ -4,6 +4,12 @@
 
 - Default gasPrice in baseAmount unit. Changed from GWei to Wei
 
+# v0.3.7 (2023-11-10)
+
+## Update
+
+- Routescan provider
+
 # v0.3.6 (2023-11-09)
 
 ## Update
