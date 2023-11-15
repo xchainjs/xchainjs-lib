@@ -1,3 +1,9 @@
+# v0.7.18 (2023-11-12)
+
+## Update
+
+- Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
+
 # v0.7.17 (2023-11-12)
 
 ## Update
@@ -15,7 +21,6 @@
 ## Update
 
 - Utxo clients version updated
-
 
 # v0.7.14 (2023-11-07)
 
