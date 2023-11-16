@@ -70,7 +70,7 @@ type EvmDefaults = {
   transferGasAssetGasLimit: BigNumber
   transferTokenGasLimit: BigNumber
   approveGasLimit: BigNumber
-  gasPrice: BigNumber
+  gasPrice: BigNumber // BaseAmount Unit
 }
 
 export type EVMClientParams = XChainClientParams & {
@@ -599,6 +599,18 @@ export default class Client extends BaseXChainClient implements XChainClient {
       } catch (error) {
         console.warn(`Can not round robin over GetFeeRates: ${error}`)
       }
+
+      try {
+        const gasPrice = await this.getProvider().getGasPrice()
+        // x2 and x10 is too abusive
+        return {
+          [FeeOption.Average]: baseAmount(gasPrice.toNumber(), this.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(gasPrice.toNumber() * 1.5, this.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(gasPrice.toNumber() * 2, this.gasAssetDecimals),
+        }
+      } catch (error) {
+        console.warn(`Can not get gasPrice from provider: ${error}`)
+      }
     }
 
     // If chain data providers fail, THORCHAIN as fallback
@@ -621,9 +633,9 @@ export default class Client extends BaseXChainClient implements XChainClient {
     // Default fee rates if everything else fails
     const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
     return {
-      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
-      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
-      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average], this.gasAssetDecimals),
+      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast], this.gasAssetDecimals),
+      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest], this.gasAssetDecimals),
     }
   }
 
