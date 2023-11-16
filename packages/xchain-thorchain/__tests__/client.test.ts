@@ -600,26 +600,26 @@ describe('Client Test', () => {
   })
 
   it('should return valid explorer url', () => {
-    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain?network=stagenet')
+    expect(thorClient.getExplorerUrl()).toEqual('https://runescan.io?network=stagenet')
 
     thorClient.setNetwork(Network.Mainnet)
-    expect(thorClient.getExplorerUrl()).toEqual('https://viewblock.io/thorchain')
+    expect(thorClient.getExplorerUrl()).toEqual('https://runescan.io')
   })
 
   it('should return valid explorer address url', () => {
     expect(thorClient.getExplorerAddressUrl('tthorabc')).toEqual(
-      'https://viewblock.io/thorchain/address/tthorabc?network=stagenet',
+      'https://runescan.io/address/tthorabc?network=stagenet',
     )
 
     thorClient.setNetwork(Network.Mainnet)
-    expect(thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://viewblock.io/thorchain/address/thorabc')
+    expect(thorClient.getExplorerAddressUrl('thorabc')).toEqual('https://runescan.io/address/thorabc')
   })
 
   it('should return valid explorer tx url', () => {
-    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash?network=stagenet')
+    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://runescan.io/tx/txhash?network=stagenet')
 
     thorClient.setNetwork(Network.Mainnet)
-    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://viewblock.io/thorchain/tx/txhash')
+    expect(thorClient.getExplorerTxUrl('txhash')).toEqual('https://runescan.io/tx/txhash')
   })
 
   it('fetches fees from client', async () => {

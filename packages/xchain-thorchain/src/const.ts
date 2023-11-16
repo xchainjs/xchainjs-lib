@@ -3,7 +3,7 @@ import { Asset } from '@xchainjs/xchain-util/lib'
 
 import { ExplorerUrls } from './types'
 
-const DEFAULT_EXPLORER_URL = 'https://viewblock.io/thorchain'
+const DEFAULT_EXPLORER_URL = 'https://runescan.io'
 const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
 const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
 const RUNE_TICKER = 'RUNE'
