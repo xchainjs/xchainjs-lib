@@ -39,7 +39,7 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
 describe('Thorchain-amm liquidity action end to end Tests', () => {
   // Check liquidity position
   it(`Should check liquidity position`, async () => {
-    const busdAddress = mainnetWallet.clients[THORChain].getAddress()
+    const busdAddress = await mainnetWallet.clients[THORChain].getAddressAsync()
     const lpPositon = await thorchainQueryMainnet.checkLiquidityPosition(BUSD, busdAddress)
     printliquidityPosition(lpPositon)
   })
@@ -111,7 +111,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const removeLp: WithdrawLiquidityPosition = {
       percentage: percentage,
       asset: BUSD,
-      assetAddress: mainnetWallet.clients[BNBChain].getAddress(),
+      assetAddress: await mainnetWallet.clients[BNBChain].getAddressAsync(),
     }
     const hash = await mainetThorchainAmm.withdrawLiquidityPosition(mainnetWallet, removeLp)
     console.log(hash)
@@ -122,7 +122,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const removeLp: WithdrawLiquidityPosition = {
       percentage: percentage,
       asset: BUSD,
-      runeAddress: mainnetWallet.clients[THORChain].getAddress(),
+      runeAddress: await mainnetWallet.clients[THORChain].getAddressAsync(),
     }
     const hash = await mainetThorchainAmm.withdrawLiquidityPosition(mainnetWallet, removeLp)
     console.log(hash)
@@ -133,8 +133,8 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const removeLp: WithdrawLiquidityPosition = {
       percentage: percentage,
       asset: BUSD,
-      assetAddress: mainnetWallet.clients[BUSD.chain].getAddress(),
-      runeAddress: mainnetWallet.clients[THORChain].getAddress(),
+      assetAddress: await mainnetWallet.clients[BUSD.chain].getAddressAsync(),
+      runeAddress: await mainnetWallet.clients[THORChain].getAddressAsync(),
     }
     const hash = await mainetThorchainAmm.withdrawLiquidityPosition(mainnetWallet, removeLp)
     console.log(hash)
@@ -145,7 +145,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const removeLp: WithdrawLiquidityPosition = {
       percentage: percentage,
       asset: AssetETH,
-      assetAddress: mainnetWallet.clients[ETHChain].getAddress(),
+      assetAddress: await mainnetWallet.clients[ETHChain].getAddressAsync(),
     }
     const hash = await mainetThorchainAmm.withdrawLiquidityPosition(mainnetWallet, removeLp)
     console.log(hash)
@@ -156,7 +156,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     const removeLp: WithdrawLiquidityPosition = {
       percentage: percentage,
       asset: AssetBTC,
-      assetAddress: mainnetWallet.clients[BTCChain].getAddress(),
+      assetAddress: await mainnetWallet.clients[BTCChain].getAddressAsync(),
     }
     const hash = await mainetThorchainAmm.withdrawLiquidityPosition(mainnetWallet, removeLp)
     console.log(hash)

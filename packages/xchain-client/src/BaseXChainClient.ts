@@ -152,6 +152,7 @@ export abstract class BaseXChainClient implements XChainClient {
   //individual clients will need to implement these
   abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex?: number): string
+  abstract getAddressAsync(walletIndex?: number): Promise<string>
   abstract getExplorerUrl(): string
   abstract getExplorerAddressUrl(address: string): string
   abstract getExplorerTxUrl(txID: string): string

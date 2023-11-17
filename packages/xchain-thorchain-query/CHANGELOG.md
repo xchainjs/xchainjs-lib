@@ -1,7 +1,8 @@
-# v0.6.11 (2023-11-14)
+# v0.6.11 (2023-11-16)
 
 ## Update
 
+- Created method getAddressAsync
 - update Midgard dep & thornode dep
 - Remove param fromAddress from quoteSwapParams to align with latest thornode specs 
 

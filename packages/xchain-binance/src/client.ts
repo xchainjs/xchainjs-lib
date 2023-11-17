@@ -211,6 +211,13 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   }
 
   /**
+   * @deprecated this function eventually will be removed use getAddressAsync instead
+   */
+  getAddress(index = 0): string {
+    return crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
+  }
+
+  /**
    * Get the current address.
    *
    * @param {number} index (optional) Account index for the derivation path
@@ -218,9 +225,10 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress(index = 0): string {
-    return crypto.getAddressFromPrivateKey(this.getPrivateKey(index), getPrefix(this.network))
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
   }
+
   /**
    * Validate the given address.
    *
@@ -251,7 +259,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * @returns {Account} account details of given address.
    */
   async getAccount(address?: Address, index = 0): Promise<Account> {
-    const accountAddress = address || this.getAddress(index)
+    const accountAddress = address || (await this.getAddressAsync(index))
     const response = await this.bncClient.getAccount(accountAddress)
     if (!response || !response.result || !isAccount(response.result))
       return Promise.reject(Error(`Could not get account data for address ${accountAddress}`))
@@ -407,7 +415,7 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     await this.bncClient.setPrivateKey(this.getPrivateKey(walletIndex || 0))
 
     const transferResult = await this.bncClient.transfer(
-      this.getAddress(walletIndex),
+      await this.getAddressAsync(walletIndex),
       recipient,
       baseToAsset(amount).amount().toString(),
       asset ? asset.symbol : AssetBNB.symbol,

@@ -94,10 +94,10 @@ describe('BitcoinClient Test', () => {
     expect(btcClient.setPhrase(phraseOne)).toBeUndefined
   })
 
-  it('should validate the right address', () => {
+  it('should validate the right address', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
-    const address = btcClient.getAddress()
+    const address = await btcClient.getAddressAsync()
     const valid = btcClient.validateAddress(address)
     expect(address).toEqual(addyOnePath0)
     expect(valid).toBeTruthy()
@@ -106,7 +106,7 @@ describe('BitcoinClient Test', () => {
   it('all balances test', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
-    const balance = await btcClient.getBalance(btcClient.getAddress())
+    const balance = await btcClient.getBalance(await btcClient.getAddressAsync())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(384776)
   })
@@ -114,7 +114,7 @@ describe('BitcoinClient Test', () => {
   it('confirmed balances only', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
-    const balance = await btcClient.getBalance(btcClient.getAddress(), undefined, true)
+    const balance = await btcClient.getBalance(await btcClient.getAddressAsync(), undefined, true)
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(384776)
   })
@@ -201,7 +201,12 @@ describe('BitcoinClient Test', () => {
 
   it('should purge phrase and utxos', async () => {
     btcClient.purgeClient()
-    expect(() => btcClient.getAddress()).toThrow('Phrase must be provided')
+    try {
+      const address = await btcClient.getAddressAsync()
+      expect(address).toBe('')
+    } catch (e: any) {
+      expect(e.message).toEqual('Phrase must be provided')
+    }
   })
 
   it('should fail with out of bound fees', async () => {
@@ -292,7 +297,7 @@ describe('BitcoinClient Test', () => {
     expect(estimates.average.amount().toString()).toEqual('1794')
     // Estimate with max preccission
     const estimatesWithSender = await btcClient.getFees({
-      sender: btcClient.getAddress(0),
+      sender: await btcClient.getAddressAsync(0),
     })
     expect(estimatesWithSender.fast.amount().toString()).toEqual('9476')
     expect(estimatesWithSender.fastest.amount().toString()).toEqual('47380')
@@ -420,25 +425,25 @@ describe('BitcoinClient Test', () => {
     )
   })
 
-  it('should derivate the address correctly', () => {
+  it('should derivate the address correctly', async () => {
     btcClient.setNetwork(Network.Mainnet)
 
     btcClient.setPhrase(phraseOne)
-    expect(btcClient.getAddress(0)).toEqual(phraseOneMainnet_path0)
-    expect(btcClient.getAddress(1)).toEqual(phraseOneMainnet_path1)
+    expect(await btcClient.getAddressAsync(0)).toEqual(phraseOneMainnet_path0)
+    expect(await btcClient.getAddressAsync(1)).toEqual(phraseOneMainnet_path1)
 
     btcClient.setPhrase(phraseTwo)
-    expect(btcClient.getAddress(0)).toEqual(phraseTwoMainnet_path0)
-    expect(btcClient.getAddress(1)).toEqual(phraseTwoMainnet_path1)
+    expect(await btcClient.getAddressAsync(0)).toEqual(phraseTwoMainnet_path0)
+    expect(await btcClient.getAddressAsync(1)).toEqual(phraseTwoMainnet_path1)
 
     btcClient.setNetwork(Network.Testnet)
 
     btcClient.setPhrase(phraseOne)
-    expect(btcClient.getAddress(0)).toEqual(addyOnePath0)
-    expect(btcClient.getAddress(1)).toEqual(addyOnePath1)
+    expect(await btcClient.getAddressAsync(0)).toEqual(addyOnePath0)
+    expect(await btcClient.getAddressAsync(1)).toEqual(addyOnePath1)
 
     btcClient.setPhrase(phraseTwo)
-    expect(btcClient.getAddress(0)).toEqual(addyThreePath0)
-    expect(btcClient.getAddress(1)).toEqual(addyThreePath1)
+    expect(await btcClient.getAddressAsync(0)).toEqual(addyThreePath0)
+    expect(await btcClient.getAddressAsync(1)).toEqual(addyThreePath1)
   })
 })

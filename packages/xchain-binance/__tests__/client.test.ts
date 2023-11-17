@@ -89,30 +89,30 @@ describe('BinanceClient Test', () => {
 
   it('should start with empty wallet', async () => {
     const bnbClientEmptyMain = new BinanceClient({ phrase, network: 'mainnet' as Network })
-    const addressMain = bnbClientEmptyMain.getAddress()
+    const addressMain = await bnbClientEmptyMain.getAddressAsync()
     expect(addressMain).toEqual(mainnetaddress_path0)
 
     const bnbClientEmptyTest = new BinanceClient({ phrase, network: Network.Testnet })
-    const addressTest = bnbClientEmptyTest.getAddress()
+    const addressTest = await bnbClientEmptyTest.getAddressAsync()
     expect(addressTest).toEqual(testnetaddress_path0)
   })
 
   it('should support derivation index as string', async () => {
     const bnbForTxClientEmptyMain = new BinanceClient({ phrase: phraseForTX, network: Network.Testnet })
-    const address_path0ForTx = bnbForTxClientEmptyMain.getAddress()
+    const address_path0ForTx = await bnbForTxClientEmptyMain.getAddressAsync()
     expect(address_path0ForTx).toEqual(testnetaddress_path0ForTx)
 
     const bnbClientEmptyMain = new BinanceClient({ phrase, network: 'mainnet' as Network })
-    const addressMain = bnbClientEmptyMain.getAddress()
+    const addressMain = await bnbClientEmptyMain.getAddressAsync()
     expect(addressMain).toEqual(mainnetaddress_path0)
     const bnbClientEmptyMain_path1 = new BinanceClient({ phrase, network: 'mainnet' as Network })
-    expect(bnbClientEmptyMain_path1.getAddress(1)).toEqual(mainnetaddress_path1)
+    expect(await bnbClientEmptyMain_path1.getAddressAsync(1)).toEqual(mainnetaddress_path1)
 
     const bnbClientEmptyTest = new BinanceClient({ phrase, network: Network.Testnet })
-    const addressTest = bnbClientEmptyTest.getAddress()
+    const addressTest = await bnbClientEmptyTest.getAddressAsync()
     expect(addressTest).toEqual(testnetaddress_path0)
     const bnbClientEmptyTest_path1 = new BinanceClient({ phrase, network: Network.Testnet })
-    expect(bnbClientEmptyTest_path1.getAddress(1)).toEqual(testnetaddress_path1)
+    expect(await bnbClientEmptyTest_path1.getAddressAsync(1)).toEqual(testnetaddress_path1)
   })
 
   it('should not throw on a client without a phrase', () => {
@@ -134,15 +134,15 @@ describe('BinanceClient Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(bnbClient.getAddress()).toEqual(mainnetaddress_path0)
-    expect(bnbClient.getAddress(1)).toEqual(mainnetaddress_path1)
+    expect(await bnbClient.getAddressAsync()).toEqual(mainnetaddress_path0)
+    expect(await bnbClient.getAddressAsync(1)).toEqual(mainnetaddress_path1)
   })
 
-  it('should update net', () => {
+  it('should update net', async () => {
     const client = new BinanceClient({ phrase, network: 'mainnet' as Network })
     client.setNetwork(Network.Testnet)
     expect(client.getNetwork()).toEqual('testnet')
-    expect(client.getAddress()).toEqual(testnetaddress_path0)
+    expect(await client.getAddressAsync()).toEqual(testnetaddress_path0)
   })
 
   it('setPhrase should return address', () => {
@@ -352,7 +352,7 @@ describe('BinanceClient Test', () => {
 
   it('should broadcast a transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: Network.Testnet })
-    expect(client.getAddress()).toEqual(testnetaddress_path0ForTx)
+    expect(await client.getAddressAsync()).toEqual(testnetaddress_path0ForTx)
 
     mockGetAccount(
       testnetClientURL,
@@ -404,7 +404,7 @@ describe('BinanceClient Test', () => {
       sequence: 0,
     })
 
-    const afterTransfer = await client.getBalance(client.getAddress(0))
+    const afterTransfer = await client.getBalance(await client.getAddressAsync(0))
     expect(afterTransfer.length).toEqual(1)
 
     const expected = beforeTransfer[0].amount
@@ -416,7 +416,7 @@ describe('BinanceClient Test', () => {
 
   it('should broadcast a multi transfer', async () => {
     const client = new BinanceClient({ phrase: phraseForTX, network: Network.Testnet })
-    expect(client.getAddress()).toEqual(testnetaddress_path0ForTx)
+    expect(await client.getAddressAsync()).toEqual(testnetaddress_path0ForTx)
 
     mockGetAccount(
       testnetClientURL,
@@ -494,7 +494,7 @@ describe('BinanceClient Test', () => {
       sequence: 0,
     })
 
-    const afterTransfer = await client.getBalance(client.getAddress(0))
+    const afterTransfer = await client.getBalance(await client.getAddressAsync(0))
     expect(afterTransfer.length).toEqual(1)
 
     const expected = beforeTransfer[0].amount

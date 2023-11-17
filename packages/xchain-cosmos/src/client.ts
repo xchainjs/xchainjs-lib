@@ -151,16 +151,23 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   }
 
   /**
+   * @deprecated this function eventually will be removed use getAddressAsync instead
+   */
+  getAddress(index = 0): string {
+    if (!this.phrase) throw new Error('Phrase not set')
+
+    return this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+  }
+
+  /**
    * Get the current address.
    *
    * @returns {Address} The current address.
    *
    * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
    */
-  getAddress(index = 0): string {
-    if (!this.phrase) throw new Error('Phrase not set')
-
-    return this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
   }
 
   /**
@@ -220,7 +227,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
     const txMinHeight = undefined
     const txMaxHeight = undefined
     const asset = getAsset(params?.asset ?? '') || AssetATOM
-    const messageSender = params?.address ?? this.getAddress()
+    const messageSender = params?.address ?? (await this.getAddressAsync())
 
     const txHistory = await this.getSDKClient().searchTx({
       messageAction,
@@ -340,7 +347,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
 
     return await this.getSDKClient().transferSignedOffline({
       privkey: this.getPrivateKey(fromAddressIndex),
-      from: this.getAddress(fromAddressIndex),
+      from: await this.getAddressAsync(fromAddressIndex),
       from_account_number,
       from_sequence,
       to: recipient,

@@ -39,14 +39,14 @@ describe('DashClient Test', () => {
     expect(dashClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
   })
 
-  it('set phrase with derivation path should return correct address', () => {
+  it('set phrase with derivation path should return correct address', async () => {
     dashClient.setNetwork(Network.Testnet)
     expect(dashClient.setPhrase(phrase)).toEqual(testnet_address_path0)
-    expect(dashClient.getAddress(1)).toEqual(testnet_address_path1)
+    expect(await dashClient.getAddressAsync(1)).toEqual(testnet_address_path1)
 
     dashClient.setNetwork(Network.Mainnet)
     expect(dashClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
-    expect(dashClient.getAddress(1)).toEqual(mainnet_address_path1)
+    expect(await dashClient.getAddressAsync(1)).toEqual(mainnet_address_path1)
   })
 
   it('should throw an error for setting a bad phrase', () => {
@@ -57,8 +57,8 @@ describe('DashClient Test', () => {
     expect(dashClient.setPhrase(phrase)).toBeUndefined
   })
 
-  it('should validate the right address', () => {
-    expect(dashClient.getAddress()).toEqual(testnet_address_path0)
+  it('should validate the right address', async () => {
+    expect(await dashClient.getAddressAsync()).toEqual(testnet_address_path0)
     expect(dashClient.validateAddress(testnet_address_path0)).toBeTruthy()
 
     dashClient.setNetwork(Network.Mainnet)
