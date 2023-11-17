@@ -1,3 +1,9 @@
+# v0.28.13 (2023-11-16)
+
+## Update
+
+- Runescan explorer
+
 # v0.28.12 (2023-11-16)
 
 ## Update
