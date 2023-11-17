@@ -121,7 +121,7 @@ yarn estimateSwap [network (Mainnet | Stagenet)] [swap amount]] [source asset][s
 
 yarn estimateSwap mainnet 0.002 8 BTC.BTC ETH.ETH DESTINATION_ADDRESS # good estimate
 yarn estimateSwap mainnet 2 8 BTC.BTC ETH.ETH DESTINATION_ADDRESS   # Note due to testnet pools being inconsistent with real world prices use mainnet to retrieve accurate estimations
-yarn estimateSwap mainnet 2 8 BTC/BTC THOR.RUNE DESTINATION_ADDRESS FROM_ADDRESS #from address is required since its from a synth
+yarn estimateSwap mainnet 2 8 BTC/BTC THOR.RUNE DESTINATION_ADDRESS  #from address is no longer required
 
 See full Estimate Swap at http://docs.xchainjs.org/xchain-thorchain-query/how-to-use.html
 ```

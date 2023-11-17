@@ -15,6 +15,8 @@
 ## Update
 
 - Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
+- update Midgard & Query & thornode deps
+- Remove fromAddress from quoteSwap() params - no longer needed
 
 # v0.7.17 (2023-11-12)
 
