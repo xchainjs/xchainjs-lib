@@ -87,12 +87,12 @@ describe('Client Test', () => {
 
   it('should start with empty wallet', async () => {
     const cosmosClientEmptyMain = new Client({ phrase, network: Network.Mainnet })
-    expect(cosmosClientEmptyMain.getAddress()).toEqual(address0_mainnet)
-    expect(cosmosClientEmptyMain.getAddress(1)).toEqual(address1_mainnet)
+    expect(await cosmosClientEmptyMain.getAddressAsync()).toEqual(address0_mainnet)
+    expect(await cosmosClientEmptyMain.getAddressAsync(1)).toEqual(address1_mainnet)
 
     const cosmosClientEmptyTest = new Client({ phrase, network: Network.Testnet })
-    expect(cosmosClientEmptyTest.getAddress()).toEqual(address0_testnet)
-    expect(cosmosClientEmptyTest.getAddress(1)).toEqual(address1_testnet)
+    expect(await cosmosClientEmptyTest.getAddressAsync()).toEqual(address0_testnet)
+    expect(await cosmosClientEmptyTest.getAddressAsync(1)).toEqual(address1_testnet)
   })
 
   it('throws an error passing an invalid phrase', async () => {
@@ -112,7 +112,7 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(cosmosClient.getAddress()).toEqual(address0_testnet)
+    expect(await cosmosClient.getAddressAsync()).toEqual(address0_testnet)
   })
 
   it('should update net', async () => {
@@ -120,15 +120,15 @@ describe('Client Test', () => {
     client.setNetwork(Network.Testnet)
     expect(client.getNetwork()).toEqual('testnet')
 
-    const address = client.getAddress()
+    const address = await client.getAddressAsync()
     expect(address).toEqual(address)
   })
 
   it('should init, should have right prefix', async () => {
-    expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
+    expect(cosmosClient.validateAddress(await cosmosClient.getAddressAsync())).toEqual(true)
 
     cosmosClient.setNetwork(Network.Mainnet)
-    expect(cosmosClient.validateAddress(cosmosClient.getAddress())).toEqual(true)
+    expect(cosmosClient.validateAddress(await cosmosClient.getAddressAsync())).toEqual(true)
   })
 
   it('has no balances', async () => {
@@ -273,10 +273,10 @@ describe('Client Test', () => {
       },
     }
 
-    mockAccountsAddress(getClientUrl(cosmosClient), cosmosClient.getAddress(), {
+    mockAccountsAddress(getClientUrl(cosmosClient), await cosmosClient.getAddressAsync(), {
       account: {
         '@type': '/cosmos.auth.v1beta1.BaseAccount',
-        address: cosmosClient.getAddress(),
+        address: await cosmosClient.getAddressAsync(),
         pub_key: {
           '@type': '/cosmos.crypto.secp256k1.PubKey',
           key: 'AyB84hKBjN2wsmdC2eF1Ppz6l3VxlfSKJpYsTaL4VrrE',

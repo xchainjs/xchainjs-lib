@@ -68,15 +68,7 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   * @deprecated this function eventually will be removed use getAddressAsync instead
    */
   getAddress(index = 0): Address {
     if (index < 0) {
@@ -96,6 +88,21 @@ class Client extends UTXOClient {
       return address
     }
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   * Get the current address.
+   *
+   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * The address is then decoded into type P2WPKH and returned.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   */
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
   }
 
   /**
@@ -208,7 +215,11 @@ class Client extends UTXOClient {
     checkFeeBounds(this.feeBounds, feeRate)
 
     const fromAddressIndex = params?.walletIndex || 0
-    const { rawUnsignedTx } = await this.prepareTx({ ...params, sender: this.getAddress(fromAddressIndex), feeRate })
+    const { rawUnsignedTx } = await this.prepareTx({
+      ...params,
+      sender: await this.getAddressAsync(fromAddressIndex),
+      feeRate,
+    })
 
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)

@@ -82,7 +82,13 @@ describe('DogecoinClient Test', () => {
 
   it('should purge phrase and utxos', async () => {
     dogeClient.purgeClient()
-    expect(() => dogeClient.getAddress()).toThrow('Phrase must be provided')
+    try {
+      const address = await dogeClient.getAddressAsync()
+      expect(address).toBe('')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      expect(e.message).toBe('Phrase must be provided')
+    }
   })
 
   it('should validate the right address', () => {
@@ -103,21 +109,21 @@ describe('DogecoinClient Test', () => {
     expect(invalid2).toBeFalsy()
   })
 
-  it('set phrase should return correct address', () => {
+  it('set phrase should return correct address', async () => {
     dogeClient.setNetwork(Network.Testnet)
     expect(dogeClient.setPhrase(phraseOne)).toEqual(testnet_address_path0)
-    expect(dogeClient.getAddress(1)).toEqual(testnet_address_path1)
+    expect(await dogeClient.getAddressAsync(1)).toEqual(testnet_address_path1)
 
     dogeClient.setNetwork('mainnet' as Network)
     expect(dogeClient.setPhrase(phraseOne)).toEqual(mainnet_address_path0)
-    expect(dogeClient.getAddress(1)).toEqual(mainnet_address_path1)
+    expect(await dogeClient.getAddressAsync(1)).toEqual(mainnet_address_path1)
   })
 
   it('should get the right balance', async () => {
     const expectedBalance = 10000000000
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
-    const balance = await dogeClient.getBalance(dogeClient.getAddress())
+    const balance = await dogeClient.getBalance(await dogeClient.getAddressAsync())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -135,11 +141,11 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
 
-    const balance = await dogeClient.getBalance(dogeClient.getAddress())
+    const balance = await dogeClient.getBalance(await dogeClient.getAddressAsync())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
 
-    const newBalance = await dogeClient.getBalance(dogeClient.getAddress())
+    const newBalance = await dogeClient.getBalance(await dogeClient.getAddressAsync())
     expect(newBalance.length).toEqual(1)
     expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })

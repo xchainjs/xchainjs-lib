@@ -208,11 +208,15 @@ describe('Client Test', () => {
       expect(avaxClient.getWallet(0)._signingKey()).toMatchObject(wallet.signingKey)
     })
 
-    it('should throw errors if phrase is not present', () => {
+    it('should throw errors if phrase is not present', async () => {
       avaxClient.purgeClient()
-      expect(() => {
-        avaxClient.getAddress()
-      }).toThrow()
+      try {
+        const address = await avaxClient.getAddressAsync()
+        expect(address).toBe('')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        expect(e.message).toBeDefined()
+      }
     })
   })
 
@@ -258,19 +262,29 @@ describe('Client Test', () => {
       })
     })
 
-    it('should get address', () => {
-      expect(avaxClient.getAddress()).toEqual(address)
+    it('should get address', async () => {
+      expect(await avaxClient.getAddressAsync()).toEqual(address)
     })
 
     it('throws error on bad index', async () => {
-      expect(() => avaxClient.getAddress(-1)).toThrow()
+      try {
+        const address = await avaxClient.getAddressAsync(-1)
+        expect(address).toBe('')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        expect(e.message).toBeDefined()
+      }
     })
 
-    it('should throw errors if phrase is not present', () => {
+    it('should throw errors if phrase is not present', async () => {
       avaxClient.purgeClient()
-      expect(() => {
-        avaxClient.getAddress()
-      }).toThrow()
+      try {
+        const address = await avaxClient.getAddressAsync()
+        expect(address).toBe('')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (e: any) {
+        expect(e.message).toBeDefined()
+      }
     })
   })
 

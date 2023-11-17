@@ -1,3 +1,9 @@
+# v0.23.4 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
 # v0.23.3 (2023-11-10)
 
 ## Update
