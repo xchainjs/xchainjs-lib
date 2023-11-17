@@ -65,7 +65,7 @@ describe('Cosmos SDK client Integration Tests', () => {
     xchainClient = new CustomSdkClient(settings)
   })
   it('should fetch balances cosmos sdk', async () => {
-    const address = await xchainClient.getAddress()
+    const address = await xchainClient.getAddressAsync()
     const balances = await xchainClient.getBalance(address)
 
     balances.forEach((bal) => {
@@ -82,7 +82,7 @@ describe('Cosmos SDK client Integration Tests', () => {
     expect(isValid).toBe(true)
   })
   it('should generate addreses', async () => {
-    const address0 = await xchainClient.getAddress(0)
+    const address0 = await xchainClient.getAddressAsync(0)
     console.log('address0', address0)
   })
   it('should get transactions', async () => {

@@ -94,30 +94,30 @@ describe('LitecoinClient Test', () => {
     }).not.toThrow()
   })
 
-  it('should validate the right address', () => {
+  it('should validate the right address', async () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
-    const address = ltcClient.getAddress()
+    const address = await ltcClient.getAddressAsync()
     const valid = ltcClient.validateAddress(address)
     expect(address).toEqual(addyOne)
     expect(valid).toBeTruthy()
   })
 
-  it('set phrase should return correct address', () => {
+  it('set phrase should return correct address', async () => {
     ltcClient.setNetwork(Network.Testnet)
     expect(ltcClient.setPhrase(phraseOne)).toEqual(testnet_address_path0)
-    expect(ltcClient.getAddress(1)).toEqual(testnet_address_path1)
+    expect(await ltcClient.getAddressAsync(1)).toEqual(testnet_address_path1)
 
     ltcClient.setNetwork(Network.Mainnet)
     expect(ltcClient.setPhrase(phraseOne)).toEqual(mainnet_address_path0)
-    expect(ltcClient.getAddress(1)).toEqual(mainnet_address_path1)
+    expect(await ltcClient.getAddressAsync(1)).toEqual(mainnet_address_path1)
   })
 
   it('should get the right balance', async () => {
     const expectedBalance = 2223
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseThree)
-    const balance = await ltcClient.getBalance(ltcClient.getAddress())
+    const balance = await ltcClient.getBalance(await ltcClient.getAddressAsync())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -127,11 +127,11 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseThree)
 
-    const balance = await ltcClient.getBalance(ltcClient.getAddress())
+    const balance = await ltcClient.getBalance(await ltcClient.getAddressAsync())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toNumber()).toEqual(expectedBalance)
 
-    const newBalance = await ltcClient.getBalance(ltcClient.getAddress())
+    const newBalance = await ltcClient.getBalance(await ltcClient.getAddressAsync())
     expect(newBalance.length).toEqual(1)
     expect(newBalance[0].amount.amount().toNumber()).toEqual(expectedBalance)
   })
@@ -154,7 +154,13 @@ describe('LitecoinClient Test', () => {
 
   it('should purge phrase and utxos', async () => {
     ltcClient.purgeClient()
-    expect(() => ltcClient.getAddress()).toThrow('Phrase must be provided')
+    try {
+      const address = await ltcClient.getAddressAsync()
+      expect(address).toBe('')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      expect(e.message).toBe('Phrase must be provided')
+    }
   })
 
   it('should do broadcast a vault transfer with a memo', async () => {
@@ -233,7 +239,7 @@ describe('LitecoinClient Test', () => {
     expect(estimates.average.amount().toString()).toEqual('13455')
 
     const estimatesWithSender = await ltcClient.getFees({
-      sender: ltcClient.getAddress(0),
+      sender: await ltcClient.getAddressAsync(0),
     })
     expect(estimatesWithSender.fast.amount().toString()).toEqual('71760')
     expect(estimatesWithSender.fastest.amount().toString()).toEqual('358800')

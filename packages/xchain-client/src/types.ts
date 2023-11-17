@@ -114,6 +114,7 @@ export interface XChainClient {
 
   validateAddress(address: string): boolean
   getAddress(walletIndex?: number): Address
+  getAddressAsync(walletIndex?: number): Promise<Address>
 
   setPhrase(phrase: string, walletIndex: number): Address
 

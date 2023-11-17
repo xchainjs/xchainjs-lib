@@ -95,7 +95,7 @@ export abstract class UTXOClient extends Client {
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const filteredParams: TxHistoryParams = {
-      address: params?.address || this.getAddress(),
+      address: params?.address || (await this.getAddress()),
       offset: params?.offset,
       limit: params?.limit,
       startTime: params?.startTime,
