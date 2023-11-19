@@ -138,6 +138,14 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
       throw error
     }
   }
+
+  /**
+   *  @throws {Error} Method not implemented.
+   */
+  getFeeRates(): Promise<FeeRates> {
+    throw new Error('Method not implemented.')
+  }
+
   /**
    *
    * @param utxos
@@ -156,9 +164,5 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
         txHex: await haskoin.getTxHex({ haskoinUrl: this.baseUrl, txId: utxo.txid, network: this.haskoinNetwork }),
       })),
     )
-  }
-
-  getFeeRates(): Promise<FeeRates> {
-    throw new Error('Method not implemented.')
   }
 }

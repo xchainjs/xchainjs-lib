@@ -18,6 +18,10 @@ export class BitgoProvider implements UtxoOnlineDataProvider {
     this.blockchainId = `${config.isTestnet ? 't' : ''}${config.chain.toLowerCase()}`
   }
 
+  /**
+   * Returns a fee rate estimation from Bitgo API service. If low and medium rates can not be retrieve from node, the will be 50% and 75% of fastest fee rate
+   * @returns {FeeRates} Estimated fee rates
+   */
   async getFeeRates(): Promise<FeeRates> {
     const gasFeeEstimateResponse = await getFeeEstimate(`${this.baseUrl}/api/v2/${this.blockchainId}`, {
       numBlocks: 2,
@@ -36,21 +40,44 @@ export class BitgoProvider implements UtxoOnlineDataProvider {
     }
   }
 
+  /**
+   *  @throws {Error} Method not implemented.
+   */
   getConfirmedUnspentTxs(): Promise<UTXO[]> {
     throw new Error('Method not implemented.')
   }
+
+  /**
+   *  @throws {Error} Method not implemented.
+   */
   getUnspentTxs(): Promise<UTXO[]> {
     throw new Error('Method not implemented.')
   }
+
+  /**
+   *  @throws {Error} Method not implemented.
+   */
   broadcastTx(): Promise<string> {
     throw new Error('Method not implemented.')
   }
+
+  /**
+   *  @throws {Error} Method not implemented.
+   */
   getBalance(): Promise<Balance[]> {
     throw new Error('Method not implemented.')
   }
+
+  /**
+   *  @throws {Error} Method not implemented.
+   */
   getTransactions(): Promise<TxsPage> {
     throw new Error('Method not implemented.')
   }
+
+  /**
+   *  @throws {Error} Method not implemented.
+   */
   getTransactionData(): Promise<Tx> {
     throw new Error('Method not implemented.')
   }

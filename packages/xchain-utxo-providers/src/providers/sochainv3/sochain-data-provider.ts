@@ -186,6 +186,9 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     }
   }
 
+  /**
+   *  @throws {Error} Method not implemented.
+   */
   getFeeRates(): Promise<FeeRates> {
     throw new Error('Method not implemented.')
   }
