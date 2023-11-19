@@ -1,5 +1,6 @@
 import {
   Balance,
+  FeeRates,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -155,5 +156,9 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
         txHex: await haskoin.getTxHex({ haskoinUrl: this.baseUrl, txId: utxo.txid, network: this.haskoinNetwork }),
       })),
     )
+  }
+
+  getFeeRates(): Promise<FeeRates> {
+    throw new Error('Method not implemented.')
   }
 }

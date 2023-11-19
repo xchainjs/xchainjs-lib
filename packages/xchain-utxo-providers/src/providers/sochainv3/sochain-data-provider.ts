@@ -1,5 +1,6 @@
 import {
   Balance,
+  FeeRates,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -183,6 +184,10 @@ export class SochainProvider implements UtxoOnlineDataProvider {
       console.error(error)
       throw error
     }
+  }
+
+  getFeeRates(): Promise<FeeRates> {
+    throw new Error('Method not implemented.')
   }
 
   private mapUTXOs(utxos: AddressUTXO[]): UTXO[] {
