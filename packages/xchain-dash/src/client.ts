@@ -20,15 +20,14 @@ import {
 import { getSeed } from '@xchainjs/xchain-crypto'
 import * as nodeApi from '@xchainjs/xchain-dash/src/node-api'
 import { Address, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
-import axios from 'axios'
 import * as Dash from 'bitcoinjs-lib'
 
 import {
   AssetDASH,
+  BitgoProviders,
   BlockcypherDataProviders,
   DASHChain,
   DASH_DECIMAL,
-  DEFAULT_FEE_RATE,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
   explorerProviders,
@@ -52,7 +51,7 @@ export const defaultDashParams: UtxoClientParams & {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
-  dataProviders: [BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/5'/0'/0/`,
     [Network.Stagenet]: `m/44'/5'/0'/0/`,
@@ -238,15 +237,6 @@ class Client extends UTXOClient {
       date: new Date(tx.time * 1000),
       type: TxType.Transfer,
       hash: tx.txid,
-    }
-  }
-
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    try {
-      const response = await axios.get('https://app.bitgo.com/api/v2/dash/tx/fee')
-      return response.data.feePerKb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return DEFAULT_FEE_RATE
     }
   }
 
