@@ -1,6 +1,7 @@
 import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 import {
+  BitgoProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   SochainNetwork,
@@ -87,4 +88,18 @@ export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined,
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+//======================
+// Bitgo
+//======================
+const mainnetBitgoProvider = new BitgoProvider({
+  baseUrl: 'https://app.bitgo.com',
+  chain: LTCChain,
+})
+
+export const BitgoProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined,
+  [Network.Stagenet]: mainnetBitgoProvider,
+  [Network.Mainnet]: mainnetBitgoProvider,
 }
