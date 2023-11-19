@@ -23,11 +23,15 @@ export type UtxoClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
   dataProviders: UtxoOnlineDataProviders[]
 }
+
+export enum Protocol {
+  THORCHAIN,
+}
+
 export abstract class UTXOClient extends Client {
   protected explorerProviders: ExplorerProviders
   protected dataProviders: UtxoOnlineDataProviders[]
 
-  protected abstract getSuggestedFeeRate(): Promise<FeeRate>
   protected abstract compileMemo(memo: string): Buffer
   protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
 
@@ -141,6 +145,7 @@ export abstract class UTXOClient extends Client {
   async getFeesWithRates(options?: FeeEstimateOptions): Promise<FeesWithRates> {
     const rates = await this.getFeeRates()
     return {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       fees: await calcFeesAsync(rates, this.calcFee.bind(this), options),
       rates,
@@ -152,18 +157,33 @@ export abstract class UTXOClient extends Client {
     return fees
   }
 
-  async getFeeRates(): Promise<FeeRates> {
-    const feeRate: FeeRate = await (async () => {
+  /**
+   * Get fee rates
+   * @param {Protocol} protocol Protocol to interact with. If there's no protocol provided, fee rates are retrieved from chain data providers
+   *
+   * @returns {FeeRates} The fee rates (average, fast, fastest) in `Satoshis/byte`
+   */
+  async getFeeRates(protocol?: Protocol): Promise<FeeRates> {
+    if (!protocol) {
       try {
-        return await this.getFeeRateFromThorchain()
+        const feeRates = await this.roundRobinGetFeeRates()
+        return feeRates
       } catch (error) {
-        console.warn(`Rate lookup via Thorchain failed: ${error}`)
+        console.warn('Can not retrieve fee rates from provider')
       }
-      return await this.getSuggestedFeeRate()
-    })()
+    }
 
-    return standardFeeRates(feeRate)
+    if (!protocol || Protocol.THORCHAIN) {
+      try {
+        const feeRate = await this.getFeeRateFromThorchain()
+        return standardFeeRates(feeRate)
+      } catch (error) {
+        console.warn(`Can not retrieve fee rates from Thorchain: ${error}`)
+      }
+    }
+    throw Error('Can not retrieve fee rates')
   }
+
   async broadcastTx(txHex: string): Promise<TxHash> {
     return await this.roundRobinBroadcastTx(txHex)
   }
@@ -224,5 +244,17 @@ export abstract class UTXOClient extends Client {
       }
     }
     throw Error('no provider able to BroadcastTx')
+  }
+
+  protected async roundRobinGetFeeRates(): Promise<FeeRates> {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (prov) return await prov.getFeeRates()
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    throw Error('no provider able to get fee rates')
   }
 }
