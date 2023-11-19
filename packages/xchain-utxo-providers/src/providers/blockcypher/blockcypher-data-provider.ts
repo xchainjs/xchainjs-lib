@@ -121,7 +121,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
 
   async getFeeRates(): Promise<FeeRates> {
     const chainResponse = await blockcypher.getBlockchainData({
-      baseUrl: `${this.baseUrl}/${this.chain.toLowerCase()}`,
+      baseUrl: `${this.baseUrl}/${this.blockcypherNetwork}`,
       apiKey: this._apiKey,
     })
 

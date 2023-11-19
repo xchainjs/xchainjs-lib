@@ -183,7 +183,6 @@ export const getBlockchainData = async ({
 }): Promise<ChainResponse> => {
   const params: Record<string, string> = {}
   if (apiKey) params['token'] = apiKey
-  console.log(`${baseUrl}/main`)
-  const chainResponse = await axios.get<ChainResponse>(`${baseUrl}/main`, { params })
+  const chainResponse = await axios.get<ChainResponse>(`${baseUrl}`, { params })
   return chainResponse.data
 }
