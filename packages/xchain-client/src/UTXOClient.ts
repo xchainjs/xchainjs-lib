@@ -178,9 +178,10 @@ export abstract class UTXOClient extends Client {
         const feeRate = await this.getFeeRateFromThorchain()
         return standardFeeRates(feeRate)
       } catch (error) {
-        console.warn(`Can not retrieve fee rates from Thorchain: ${error}`)
+        console.warn(`Can not retrieve fee rates from Thorchain`)
       }
     }
+    // TODO: Return default value
     throw Error('Can not retrieve fee rates')
   }
 
