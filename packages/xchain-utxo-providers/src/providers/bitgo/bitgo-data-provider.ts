@@ -6,21 +6,22 @@ import { getFeeEstimate } from './bitgo-api'
 export interface BitgoConfig {
   baseUrl: string
   chain: Chain
+  isTestnet?: boolean
 }
 
 export class BitgoProvider implements UtxoOnlineDataProvider {
-  private config: BitgoConfig
+  private baseUrl: string
+  private blockchainId: string
+
   constructor(config: BitgoConfig) {
-    this.config = config
+    this.baseUrl = config.baseUrl
+    this.blockchainId = `${config.isTestnet ? 't' : ''}${config.chain.toLowerCase()}`
   }
 
   async getFeeRates(): Promise<FeeRates> {
-    const gasFeeEstimateResponse = await getFeeEstimate(
-      `${this.config.baseUrl}/api/v2/${this.config.chain.toLowerCase()}`,
-      {
-        numBlocks: 2,
-      },
-    )
+    const gasFeeEstimateResponse = await getFeeEstimate(`${this.baseUrl}/api/v2/${this.blockchainId}`, {
+      numBlocks: 2,
+    })
 
     const fastestRate = gasFeeEstimateResponse.feePerKb / 1000
 
