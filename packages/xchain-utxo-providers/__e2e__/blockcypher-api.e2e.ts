@@ -58,4 +58,8 @@ describe('blockcypher api tests', () => {
     expect(response.to[0].to).toBe('bc1qcwnecmzdg0f0wwrjrmlelxfgvmjtqn7cal0dgx')
     // console.log(JSON.stringify(response, null, 2))
   })
+  it(`Should fetch fee rates`, async () => {
+    const feeRates = await blockcypherProvider.getFeeRates()
+    console.log(feeRates)
+  })
 })

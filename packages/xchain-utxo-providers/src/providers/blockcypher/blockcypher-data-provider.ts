@@ -1,6 +1,8 @@
 import PromisePool from '@supercharge/promise-pool'
 import {
   Balance,
+  FeeOption,
+  FeeRates,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -116,6 +118,20 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
       throw error
     }
   }
+
+  async getFeeRates(): Promise<FeeRates> {
+    const chainResponse = await blockcypher.getBlockchainData({
+      baseUrl: `${this.baseUrl}/${this.chain.toLowerCase()}`,
+      apiKey: this._apiKey,
+    })
+
+    return {
+      [FeeOption.Average]: chainResponse.low_fee_per_kb / 1000,
+      [FeeOption.Fast]: chainResponse.medium_fee_per_kb / 1000,
+      [FeeOption.Fastest]: chainResponse.high_fee_per_kb / 1000,
+    }
+  }
+
   private mapTransactionToTx(rawTx: Transaction): Tx {
     return {
       asset: this.asset,

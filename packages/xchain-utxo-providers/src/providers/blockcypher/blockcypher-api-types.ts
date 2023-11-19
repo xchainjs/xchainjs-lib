@@ -111,3 +111,21 @@ export type TxConfirmedStatus = {
   confirmations: number
   is_confirmed: boolean
 }
+
+export type Blockchain = {
+  name: string // The name of the blockchain represented, in the form of $COIN.$CHAIN
+  height: number // The current height of the blockchain; i.e., the number of blocks in the blockchain
+  hash: string // The hash of the latest confirmed block in the blockchain
+  time: string // The time of the latest update to the blockchain; typically when the latest block was added.
+  latest_url: string // The BlockCypher URL to query for more information on the latest confirmed block; returns a Block
+  previous_hash: string // The hash of the second-to-latest confirmed block in the blockchain
+  previous_url: string // The BlockCypher URL to query for more information on the second-to-latest confirmed block; returns a Block
+  high_fee_per_kb: number // A rolling average of the fee (in satoshis) paid per kilobyte for transactions to be confirmed within 1 to 2 blocks
+  medium_fee_per_kb: number // A rolling average of the fee (in satoshis) paid per kilobyte for transactions to be confirmed within 3 to 6 blocks
+  low_fee_per_kb: number // A rolling average of the fee (in satoshis) paid per kilobyte for transactions to be confirmed in 7 or more blocks
+  unconfirmed_count: number // Number of unconfirmed transactions in memory pool (likely to be included in next block)
+  last_fork_height?: number // The current height of the latest fork to the blockchain; when no competing blockchain fork present, not returned with endpoints that return Blockchains
+  last_fork_hash?: number // The hash of the latest confirmed block in the latest fork of the blockchain; when no competing blockchain fork present, not returned with endpoints that return Blockchains
+}
+
+export type ChainResponse = Blockchain

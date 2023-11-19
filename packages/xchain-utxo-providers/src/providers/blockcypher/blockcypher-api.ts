@@ -6,6 +6,7 @@ import {
   BalanceParams,
   BlockcypherNetwork,
   BroadcastDTO,
+  ChainResponse,
   GetBalanceDTO,
   GetTxsDTO,
   Transaction,
@@ -171,4 +172,18 @@ export const broadcastTx = async ({
   const response = await axios.post(url, { tx: txHex }, { params })
   const broadcastResponse: BroadcastDTO = response.data
   return broadcastResponse.tx.hash
+}
+
+export const getBlockchainData = async ({
+  baseUrl,
+  apiKey,
+}: {
+  baseUrl: string
+  apiKey?: string
+}): Promise<ChainResponse> => {
+  const params: Record<string, string> = {}
+  if (apiKey) params['token'] = apiKey
+  console.log(`${baseUrl}/main`)
+  const chainResponse = await axios.get<ChainResponse>(`${baseUrl}/main`, { params })
+  return chainResponse.data
 }
