@@ -119,6 +119,10 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     }
   }
 
+  /**
+   * Returns a fee rate estimation from Blockcypher API service.
+   * @returns {FeeRates} Estimated fee rates
+   */
   async getFeeRates(): Promise<FeeRates> {
     const chainResponse = await blockcypher.getBlockchainData({
       baseUrl: `${this.baseUrl}/${this.blockcypherNetwork}`,

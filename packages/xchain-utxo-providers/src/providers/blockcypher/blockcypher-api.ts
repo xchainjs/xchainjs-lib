@@ -174,6 +174,12 @@ export const broadcastTx = async ({
   return broadcastResponse.tx.hash
 }
 
+/**
+ * Get general information about a blockchain
+ * @param {string} baseUrl The base url for the chain to interact with.
+ * @param {string} apiKey API key provided by Blockcypher.
+ * @returns {ChainResponse}
+ */
 export const getBlockchainData = async ({
   baseUrl,
   apiKey,
