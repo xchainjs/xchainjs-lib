@@ -25,7 +25,7 @@ export type UtxoClientParams = XChainClientParams & {
 }
 
 export enum Protocol {
-  THORCHAIN,
+  THORCHAIN = 1,
 }
 
 export abstract class UTXOClient extends Client {
