@@ -3,7 +3,15 @@ import { BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { BCHChain, Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
-import { FeeOption, Network, UtxoClientParams, XChainClient, XChainClientParams } from '@xchainjs/xchain-client'
+import {
+  FeeOption,
+  Network,
+  Protocol,
+  UTXOClient,
+  UtxoClientParams,
+  XChainClient,
+  XChainClientParams,
+} from '@xchainjs/xchain-client'
 import { Client as CosmosClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, DOGEChain, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -306,6 +314,23 @@ export class Wallet {
       const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (this.isUTXOChain(assetAmount.asset)) {
+      const feeRates = await (assetClient as UTXOClient).getFeeRates(Protocol.THORCHAIN)
+      const addParams = {
+        wallIndex: 0,
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        recipient: toAddress,
+        memo: memo,
+        feeRate: feeRates.fast,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+      }
     } else {
       const addParams = {
         wallIndex: 0,
@@ -343,6 +368,23 @@ export class Wallet {
       const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (this.isUTXOChain(assetAmount.asset)) {
+      const feeRates = await (assetClient as UTXOClient).getFeeRates(Protocol.THORCHAIN)
+      const addParams = {
+        wallIndex: 0,
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        recipient: toAddress,
+        memo: memo,
+        feeRate: feeRates.fast,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: await assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
+      }
     } else {
       const addParams = {
         wallIndex: 0,
@@ -374,6 +416,23 @@ export class Wallet {
       const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (this.isUTXOChain(params.amount.asset)) {
+      const feeRates = await (assetClient as UTXOClient).getFeeRates(Protocol.THORCHAIN)
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        recipient: params.toAddress,
+        memo: params.memo,
+        feeRate: feeRates.fast,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
+      }
     } else {
       const addParams = {
         wallIndex: 0,
@@ -405,6 +464,23 @@ export class Wallet {
       const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (this.isUTXOChain(params.amount.asset)) {
+      const feeRates = await (assetClient as UTXOClient).getFeeRates(Protocol.THORCHAIN)
+      const addParams = {
+        wallIndex: 0,
+        asset: params.amount.asset,
+        amount: params.amount.baseAmount,
+        recipient: params.toAddress,
+        memo: params.memo,
+        feeRate: feeRates.average,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
+      }
     } else {
       const addParams = {
         wallIndex: 0,
@@ -530,6 +606,23 @@ export class Wallet {
       const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (this.isUTXOChain(params.asset.asset)) {
+      const feeRates = await (assetClient as UTXOClient).getFeeRates(Protocol.THORCHAIN)
+      const addParams = {
+        wallIndex: 0,
+        asset: params.asset.asset,
+        amount: params.asset.baseAmount,
+        recipient: inboundAsgard,
+        memo: constructedMemo,
+        feeRate: feeRates.fast,
+      }
+      try {
+        const hash = await assetClient.transfer(addParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
+      }
     } else {
       const addParams = {
         wallIndex: 0,
@@ -573,6 +666,23 @@ export class Wallet {
       const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(withdrawParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash) }
+    } else if (this.isUTXOChain(params.assetFee.asset)) {
+      const feeRates = await (assetClient as UTXOClient).getFeeRates(Protocol.THORCHAIN)
+      const withdrawParams = {
+        wallIndex: 0,
+        asset: params.assetFee.asset,
+        amount: params.assetFee.baseAmount,
+        recipient: inboundAsgard,
+        memo: constructedMemo,
+        feeRate: feeRates.fast,
+      }
+      try {
+        const hash = await assetClient.transfer(withdrawParams)
+        return { hash, url: assetClient.getExplorerTxUrl(hash) }
+      } catch (err) {
+        const hash = JSON.stringify(err)
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
+      }
     } else {
       const withdrawParams = {
         wallIndex: 0,
@@ -634,5 +744,8 @@ export class Wallet {
   private isEVMChain(asset: Asset): boolean {
     const isEvmChain = ['ETH', 'BSC', 'AVAX'].includes(asset.chain)
     return isEvmChain
+  }
+  private isUTXOChain(asset: Asset): boolean {
+    return ['BTC', 'BCH', 'DOGE'].includes(asset.chain)
   }
 }
