@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client'
+import { Network, Protocol } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client, defaultDogeParams } from '../src/client'
@@ -108,14 +108,32 @@ describe('Dogecoin Integration Tests', () => {
       })
       const amount = assetToBase(assetAmount('10'))
       const hash = await dogeclient.transfer({
-        recipient: dogeclient.getAddress(1),
+        recipient: await dogeclient.getAddressAsync(0),
         amount,
         memo: 'test',
-        feeRate: 40_000,
       })
       console.log(hash)
     } catch (err) {
       console.error('ERR running test', err)
+      fail()
+    }
+  })
+  it('Should fetch fee rates from provider', async () => {
+    try {
+      const feeRates = await dogeClient.getFeeRates()
+      console.log(feeRates)
+    } catch (error) {
+      console.error(`Error running "Should fetch fee rates from provider". ${error}`)
+      fail()
+    }
+  })
+
+  it('Should fetch fee rates from Thorchain', async () => {
+    try {
+      const feeRates = await dogeClient.getFeeRates(Protocol.THORCHAIN)
+      console.log(feeRates)
+    } catch (error) {
+      console.error(`Error running "Should fetch fee rates from Thorchain". ${error}`)
       fail()
     }
   })
