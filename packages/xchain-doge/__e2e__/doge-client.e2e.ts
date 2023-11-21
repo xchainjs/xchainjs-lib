@@ -11,7 +11,7 @@ const dogeClient = new Client({
 
 describe('Dogecoin Integration Tests', () => {
   it('should fetch address balance', async () => {
-    const balances = await dogeClient.getBalance(dogeClient.getAddress())
+    const balances = await dogeClient.getBalance(await dogeClient.getAddressAsync())
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })

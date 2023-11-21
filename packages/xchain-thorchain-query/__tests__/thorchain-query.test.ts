@@ -24,7 +24,6 @@ const AssetETH = assetFromStringEx('ETH.ETH')
 const AssetsETH = assetFromStringEx('ETH/ETH')
 
 const ethAddress = '0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990'
-const btcAddress = 'bc1quk3t999thy4qcck2p208k84s2gtrxel82k5mr3'
 
 function printTx(txDetails: TxDetails, amount: CryptoAmount) {
   const expanded = {
@@ -68,7 +67,6 @@ describe('Thorchain-query tests', () => {
       destinationAddress: ethAddress,
       affiliateAddress: `thor13q9z22fvjkk8r8sxf7hmp2t56jyvn9s7sxx8lx`,
       affiliateBps: 50,
-      fromAddress: btcAddress,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
@@ -80,7 +78,6 @@ describe('Thorchain-query tests', () => {
       fromAsset: AssetsBTC,
       destinationAsset: AssetsETH,
       destinationAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
-      fromAddress: 'thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu',
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)

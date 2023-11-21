@@ -85,19 +85,19 @@ const defaults = {
     approveGasLimit: BigNumber.from(200000),
     transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30),
+    gasPrice: BigNumber.from(30 * 10 ** 9),
   },
   [Network.Testnet]: {
     approveGasLimit: BigNumber.from(200000),
     transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30),
+    gasPrice: BigNumber.from(30 * 10 ** 9),
   },
   [Network.Stagenet]: {
     approveGasLimit: BigNumber.from(200000),
     transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30),
+    gasPrice: BigNumber.from(30 * 10 ** 9),
   },
 }
 

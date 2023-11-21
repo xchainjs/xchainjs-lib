@@ -66,15 +66,7 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   * @deprecated this function eventually will be removed use getAddressAsync instead
    */
   getAddress(index = 0): Address {
     if (!this.phrase) throw new Error('Phrase must be provided')
@@ -86,6 +78,21 @@ class Client extends UTXOClient {
     } catch (error) {
       throw new Error('Address not defined')
     }
+  }
+
+  /**
+   * Get the current address.
+   *
+   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * The address is then decoded into type P2WPKH and returned.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   */
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
   }
 
   /**
@@ -149,7 +156,7 @@ class Client extends UTXOClient {
     const { rawUnsignedTx, utxos } = await this.prepareTx({
       ...params,
       feeRate,
-      sender: this.getAddress(fromAddressIndex),
+      sender: await this.getAddressAsync(fromAddressIndex),
     })
 
     const tx: Transaction = bitcash.Transaction.fromHex(rawUnsignedTx)

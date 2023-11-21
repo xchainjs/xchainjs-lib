@@ -33,7 +33,7 @@ const bchClientTestnet = new Client({
 // const bchAddress = 'qqqmwluxjte4u83lkqmare5klap5t38eyq8gdzxhhm'
 describe('Bitcoincash Integration Tests for Haskoin', () => {
   it('should fetch address balance using haskoin', async () => {
-    const address = bchClient.getAddress()
+    const address = await bchClient.getAddressAsync()
     const balances = await bchClient.getBalance(address)
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
@@ -95,8 +95,7 @@ describe('Bitcoincash Integration Tests for Haskoin', () => {
   })
   it('should send a testnet bch tx using haskoin', async () => {
     try {
-      console.log(bchClientTestnet.getAddress(0))
-      const to = bchClientTestnet.getAddress(1)
+      const to = await bchClientTestnet.getAddressAsync(1)
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await bchClientTestnet.transfer({
         asset: AssetBCH,

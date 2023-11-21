@@ -223,9 +223,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   /**
-   * Get an address derived from the phrase defined in the constructor.
-   * @param {number | undefined} walletIndex derivation path index of address that will be generated
-   * @returns {string} user address at index defined on walletIndex
+   * @deprecated this function eventually will be removed use getAddressAsync instead
    */
   public getAddress(walletIndex?: number | undefined): string {
     const seed = xchainCrypto.getSeed(this.phrase)
@@ -240,6 +238,15 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const words = bech32.toWords(Buffer.from(rawAddress))
     const address = bech32.encode(this.prefix, words)
     return address
+  }
+
+  /**
+   * Get an address derived from the phrase defined in the constructor.
+   * @param {number | undefined} walletIndex derivation path index of address that will be generated
+   * @returns {string} user address at index defined on walletIndex
+   */
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
   }
 
   /**
@@ -338,7 +345,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   public async transfer(params: TxParams): Promise<string> {
     if (!this.signer) throw Error('Invalid signer')
 
-    const sender = this.getAddress(params.walletIndex || 0)
+    const sender = await this.getAddressAsync(params.walletIndex || 0)
 
     const { rawUnsignedTx } = await this.prepareTx({
       sender,

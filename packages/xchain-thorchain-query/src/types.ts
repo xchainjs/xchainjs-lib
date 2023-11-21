@@ -37,7 +37,6 @@ export type QuoteSwapParams = {
   destinationAddress?: string
   streamingInterval?: number
   streamingQuantity?: number
-  fromAddress?: string
   toleranceBps?: number
   affiliateAddress?: string
   affiliateBps?: number

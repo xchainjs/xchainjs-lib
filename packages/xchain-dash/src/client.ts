@@ -86,6 +86,9 @@ class Client extends UTXOClient {
     this.nodeAuth = params.nodeAuth
   }
 
+  /**
+   * @deprecated this function eventually will be removed use getAddressAsync instead
+   */
   getAddress(index = 0): Address {
     if (index < 0) {
       throw new Error('index must be greater than zero')
@@ -108,6 +111,11 @@ class Client extends UTXOClient {
 
     return address
   }
+
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
+  }
+
   /**
    *
    * @returns BTC asset info
@@ -250,7 +258,7 @@ class Client extends UTXOClient {
     const { rawUnsignedTx, utxos } = await this.prepareTx({
       ...params,
       feeRate,
-      sender: this.getAddress(fromAddressIndex),
+      sender: await this.getAddressAsync(fromAddressIndex),
     })
 
     const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)

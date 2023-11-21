@@ -39,7 +39,7 @@ export class EvmHelper {
       throw new Error('Vault address is not defined')
     }
 
-    const address = this.client.getAddress(params.walletIndex)
+    const address = await this.client.getAddressAsync(params.walletIndex)
     const gasPrice = await this.evmClient.estimateGasPrices(Protocol.THORCHAIN)
 
     if (eqAsset(params.asset, this.evmClient.config.gasAsset)) {

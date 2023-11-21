@@ -91,7 +91,7 @@ export class Wallet {
     const allBalances: AllBalances[] = []
 
     for (const [chain, client] of Object.entries(this.clients)) {
-      const address = client.getAddress(0)
+      const address = await client.getAddressAsync(0)
       try {
         const balances = await client.getBalance(address)
         allBalances.push({ chain, address, balances })
@@ -225,8 +225,8 @@ export class Wallet {
     const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundDetails())[params.asset.asset.chain]
       .address
     const thorchainClient = this.clients[params.rune.asset.chain]
-    const addressRune = thorchainClient.getAddress()
-    const addressAsset = assetClient.getAddress()
+    const addressRune = await thorchainClient.getAddressAsync()
+    const addressAsset = await assetClient.getAddressAsync()
     // const waitTimeSeconds = params.waitTimeSeconds
     let constructedMemo = ''
     const txSubmitted: TxSubmitted[] = []
@@ -356,7 +356,7 @@ export class Wallet {
         return { hash, url: assetClient.getExplorerTxUrl(hash) }
       } catch (err) {
         const hash = JSON.stringify(err)
-        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+        return { hash, url: await assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
     }
   }
@@ -387,7 +387,7 @@ export class Wallet {
         return { hash, url: assetClient.getExplorerTxUrl(hash) }
       } catch (err) {
         const hash = JSON.stringify(err)
-        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
     }
   }
@@ -418,7 +418,7 @@ export class Wallet {
         return { hash, url: assetClient.getExplorerTxUrl(hash) }
       } catch (err) {
         const hash = JSON.stringify(err)
-        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
     }
   }
@@ -446,8 +446,8 @@ export class Wallet {
     const thornameEstimation = await this.thorchainQuery.estimateThorname({
       ...params,
       chain: params.chain || BTCChain,
-      chainAddress: params.chainAddress || chainClient.getAddress(),
-      owner: params.owner || thorClient.getAddress(),
+      chainAddress: params.chainAddress || (await chainClient.getAddressAsync()),
+      owner: params.owner || (await thorClient.getAddressAsync()),
     })
 
     const castedThorClient = thorClient as unknown as ThorchainClient
@@ -481,7 +481,7 @@ export class Wallet {
 
     const thornameDetail = await this.thorchainQuery.getThornameDetails(params.thorname)
 
-    if (thornameDetail?.owner !== thorClient.getAddress()) {
+    if (thornameDetail?.owner !== (await thorClient.getAddressAsync())) {
       throw Error('You cannot update a domain that is not yours')
     }
 
@@ -490,7 +490,7 @@ export class Wallet {
       chain: params.chain || BTCChain,
       isUpdate: true,
       preferredAsset: params.preferredAsset || assetFromString(thornameDetail.preferredAsset),
-      chainAddress: params.chainAddress || chainClient.getAddress(),
+      chainAddress: params.chainAddress || (await chainClient.getAddressAsync()),
     })
 
     const castedThorClient = thorClient as unknown as ThorchainClient
@@ -543,7 +543,7 @@ export class Wallet {
         return { hash, url: assetClient.getExplorerTxUrl(hash) }
       } catch (err) {
         const hash = JSON.stringify(err)
-        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
     }
   }
@@ -586,7 +586,7 @@ export class Wallet {
         return { hash, url: assetClient.getExplorerTxUrl(hash) }
       } catch (err) {
         const hash = JSON.stringify(err)
-        return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
+        return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
     }
   }

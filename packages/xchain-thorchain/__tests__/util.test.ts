@@ -138,30 +138,28 @@ describe('thorchain/util', () => {
 
   describe('explorer url', () => {
     it('should return valid explorer url', () => {
-      expect(getExplorerUrl(defaultExplorerUrls, 'testnet' as Network)).toEqual(
-        'https://viewblock.io/thorchain?network=testnet',
-      )
+      expect(getExplorerUrl(defaultExplorerUrls, 'testnet' as Network)).toEqual('https://runescan.io?network=testnet')
 
-      expect(getExplorerUrl(defaultExplorerUrls, 'mainnet' as Network)).toEqual('https://viewblock.io/thorchain')
+      expect(getExplorerUrl(defaultExplorerUrls, 'mainnet' as Network)).toEqual('https://runescan.io')
     })
 
     it('should return valid explorer address url', () => {
       expect(
         getExplorerAddressUrl({ urls: defaultExplorerUrls, network: 'testnet' as Network, address: 'tthorabc' }),
-      ).toEqual('https://viewblock.io/thorchain/address/tthorabc?network=testnet')
+      ).toEqual('https://runescan.io/address/tthorabc?network=testnet')
 
       expect(
         getExplorerAddressUrl({ urls: defaultExplorerUrls, network: 'mainnet' as Network, address: 'thorabc' }),
-      ).toEqual('https://viewblock.io/thorchain/address/thorabc')
+      ).toEqual('https://runescan.io/address/thorabc')
     })
 
     it('should return valid explorer tx url', () => {
       expect(getExplorerTxUrl({ urls: defaultExplorerUrls, network: 'testnet' as Network, txID: 'txhash' })).toEqual(
-        'https://viewblock.io/thorchain/tx/txhash?network=testnet',
+        'https://runescan.io/tx/txhash?network=testnet',
       )
 
       expect(getExplorerTxUrl({ urls: defaultExplorerUrls, network: 'mainnet' as Network, txID: 'txhash' })).toEqual(
-        'https://viewblock.io/thorchain/tx/txhash',
+        'https://runescan.io/tx/txhash',
       )
     })
   })

@@ -79,14 +79,14 @@ describe('xchain-evm (Eth) Integration Tests', () => {
   })
 
   it('should transfer 0.01 eth between wallet 0 and 1, with a memo', async () => {
-    const recipient = clientTestnet.getAddress(1)
+    const recipient = await clientTestnet.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.001', 18))
     const memo = `=:ETH.ETH:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000`
     const txHash = await clientTestnet.transfer({ amount, recipient, asset: AssetBNB, memo })
     console.log(txHash)
   })
   it('should transfer 0.001 eth between wallet 0 and 1, with a memo', async () => {
-    const recipient = clientTestnet.getAddress(1)
+    const recipient = await clientTestnet.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.001', 18))
 
     const memo = '=:ETH.ETH:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
@@ -129,7 +129,7 @@ describe('xchain-evm (Eth) Integration Tests', () => {
   })
   it('should test estimates ', async () => {
     const estimateParams: EstimateApproveParams = {
-      fromAddress: clientTestnet.getAddress(0),
+      fromAddress: await clientTestnet.getAddressAsync(0),
       contractAddress: '0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378', //ETh address
       spenderAddress: '0xdc4904b5f716Ff30d8495e35dC99c109bb5eCf81', //PancakeRouter contract on testnet
       amount: assetToBase(assetAmount('80', 18)),
@@ -138,7 +138,7 @@ describe('xchain-evm (Eth) Integration Tests', () => {
     console.log(gasEstimate.toString())
     expect(gasEstimate.gte(0)).toBe(true)
 
-    const recipient = clientTestnet.getAddress(1)
+    const recipient = await clientTestnet.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
     const gasEstimateWithMemo = await clientTestnet.estimateFeesWithGasPricesAndLimits({ amount, recipient, memo })

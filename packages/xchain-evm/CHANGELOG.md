@@ -1,3 +1,28 @@
+# v0.4.1 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
+# v0.4.0 (2023-11-15)
+
+## Update
+
+- Default gasPrice in baseAmount unit. Changed from GWei to Wei
+- Gas price is retrieved from provider as fallback if the getFeeRates round robin fails
+
+# v0.3.8 (2023-11-10)
+
+## Update
+
+- Routescan provider
+
+# v0.3.7 (2023-11-09)
+
+## Update
+
+- Sender address can be retrieved from signer
+
 # v0.3.6 (2023-11-03)
 
 ## Update

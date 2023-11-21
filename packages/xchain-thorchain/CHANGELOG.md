@@ -1,3 +1,21 @@
+# v0.28.13 (2023-11-16)
+
+## Update
+
+- Runescan explorer
+
+# v0.28.12 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
+# v0.28.11 (2023-11-11)
+
+## Update
+
+- Network loop removed from fetchTransaction
+
 # v0.28.10 (2023-11-07)
 
 ## Fix

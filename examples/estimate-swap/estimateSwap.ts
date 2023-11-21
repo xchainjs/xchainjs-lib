@@ -55,7 +55,6 @@ const estimateSwap = async () => {
     const fromAsset = assetFromString(`${process.argv[5]}`)
     const toAsset = assetFromString(`${process.argv[6]}`)
     const toDestinationAddress = `${process.argv[7]}`
-    const fromAddress = `${process.argv[8]}`
     const midgardCache = new MidgardCache(new Midgard(network))
     const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQuery = new ThorchainQuery(thorchainCache)
@@ -75,7 +74,6 @@ const estimateSwap = async () => {
         destinationAsset: toAsset,
         amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
         destinationAddress: toDestinationAddress,
-        fromAddress: fromAddress,
         toleranceBps,
       }
     }

@@ -21,7 +21,7 @@ describe('Kujira client Integration Tests', () => {
     })
   })
   it('should fetch balances kujira', async () => {
-    const address = await xchainClient.getAddress()
+    const address = await xchainClient.getAddressAsync()
     const balances = await xchainClient.getBalance(address)
 
     balances.forEach((bal) => {

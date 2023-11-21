@@ -1,8 +1,32 @@
-# v0.3.6 (2023-11-10)
+# v0.4.2 (2023-11-21)
 
 ## Update
 
 - BSCCHAIN_API_KEY renamed to BSCSCAN_API_KEY
+
+# v0.4.1 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
+# v0.4.0 (2023-11-15)
+
+## Update
+
+- Default gasPrice in baseAmount unit. Changed from GWei to Wei
+
+# v0.3.7 (2023-11-10)
+
+## Update
+
+- Etherscan provider compatible with Routescan
+
+# v0.3.6 (2023-11-09)
+
+## Update
+
+- Transfer bug fix with txSigner, sender address can be retrieved from signer
 
 # v0.3.5 (2023-11-03)
 

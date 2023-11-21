@@ -70,7 +70,7 @@ type EvmDefaults = {
   transferGasAssetGasLimit: BigNumber
   transferTokenGasLimit: BigNumber
   approveGasLimit: BigNumber
-  gasPrice: BigNumber
+  gasPrice: BigNumber // BaseAmount Unit
 }
 
 export type EVMClientParams = XChainClientParams & {
@@ -145,6 +145,19 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
+   * @deprecated this function eventually will be removed use getAddressAsync instead
+   */
+  getAddress(walletIndex = 0): Address {
+    if (walletIndex < 0) {
+      throw new Error('index must be greater than or equal to zero')
+    }
+    if (!this.hdNode) {
+      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
+    }
+    return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
+  }
+
+  /**
    * Get the current address.
    *
    * @param {number} walletIndex (optional) HD wallet index
@@ -155,14 +168,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * @throws Error
    * Thrown if wallet index < 0.
    */
-  getAddress(walletIndex = 0): Address {
-    if (walletIndex < 0) {
-      throw new Error('index must be greater than or equal to zero')
-    }
-    if (!this.hdNode) {
-      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
-    }
-    return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
+  async getAddressAsync(walletIndex = 0): Promise<Address> {
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -287,7 +294,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const filteredParams: TxHistoryParams = {
-      address: params?.address || this.getAddress(),
+      address: params?.address || (await this.getAddressAsync()),
       offset: params?.offset,
       limit: params?.limit,
       startTime: params?.startTime,
@@ -399,7 +406,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
     walletIndex = 0,
     signer: txSigner,
   }: ApproveParams): Promise<TransactionResponse> {
-    const sender = this.getAddress(walletIndex || 0)
+    const sender = await this.getAddressAsync(walletIndex || 0)
 
     const gasPrice: BigNumber = BigNumber.from(
       (await this.estimateGasPrices().then((prices) => prices[feeOption]))
@@ -534,7 +541,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
       feeData.gasPrice = txGasPrice
     }
 
-    const sender = this.getAddress(walletIndex || 0)
+    const sender = txSigner ? await txSigner.getAddress() : this.getAddress(walletIndex)
 
     let txGasLimit: BigNumber
     if (!gasLimit) {
@@ -599,6 +606,18 @@ export default class Client extends BaseXChainClient implements XChainClient {
       } catch (error) {
         console.warn(`Can not round robin over GetFeeRates: ${error}`)
       }
+
+      try {
+        const gasPrice = await this.getProvider().getGasPrice()
+        // x2 and x10 is too abusive
+        return {
+          [FeeOption.Average]: baseAmount(gasPrice.toNumber(), this.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(gasPrice.toNumber() * 1.5, this.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(gasPrice.toNumber() * 2, this.gasAssetDecimals),
+        }
+      } catch (error) {
+        console.warn(`Can not get gasPrice from provider: ${error}`)
+      }
     }
 
     // If chain data providers fail, THORCHAIN as fallback
@@ -621,9 +640,9 @@ export default class Client extends BaseXChainClient implements XChainClient {
     // Default fee rates if everything else fails
     const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
     return {
-      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
-      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
-      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average], this.gasAssetDecimals),
+      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast], this.gasAssetDecimals),
+      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest], this.gasAssetDecimals),
     }
   }
 
@@ -647,12 +666,12 @@ export default class Client extends BaseXChainClient implements XChainClient {
       const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
 
       gasEstimate = await contract.estimateGas.transfer(recipient, txAmount, {
-        from: from || this.getAddress(),
+        from: from || (await this.getAddressAsync()),
       })
     } else {
       // ETH gas estimate
       const transactionRequest = {
-        from: from || this.getAddress(),
+        from: from || (await this.getAddressAsync()),
         to: recipient,
         value: txAmount,
         data: memo ? toUtf8Bytes(memo) : undefined,

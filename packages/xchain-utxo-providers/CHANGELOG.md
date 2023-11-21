@@ -1,3 +1,15 @@
+# v0.2.7 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
+# v0.2.6 (2023-11-10)
+
+## Update
+
+- Limit parameter for TX Blockcypher endpoint
+
 # v0.2.5 (2023-10-15)
 
 ## Update

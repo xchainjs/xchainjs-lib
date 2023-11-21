@@ -56,7 +56,6 @@ export class ThorchainAMM {
   public async estimateSwap({
     fromAsset,
     amount,
-    fromAddress,
     destinationAsset,
     destinationAddress,
     affiliateAddress = '',
@@ -81,7 +80,6 @@ export class ThorchainAMM {
     const estimate = await this.thorchainQuery.quoteSwap({
       fromAsset,
       amount,
-      fromAddress,
       destinationAsset,
       destinationAddress,
       affiliateAddress,
