@@ -86,7 +86,7 @@ describe('etherscan Integration Tests (BSC)', () => {
   const provider = new EtherscanProvider(
     BSC_TESTNET_ETHERS_PROVIDER,
     'https://api-testnet.bscscan.com',
-    process.env['BSCCHAIN_API_KEY'] || '',
+    process.env.BSCSCAN_API_KEY || '',
     BSCChain,
     AssetBSC,
     18,
@@ -117,10 +117,7 @@ describe('etherscan Integration Tests (BSC)', () => {
 describe('etherscan Integration Tests (ETH)', () => {
   // as per https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider
   const network = ethers.providers.getNetwork('sepolia')
-  const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
-    network,
-    process.env['ETHERSCAN_API'] || '',
-  )
+  const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
 
   // Define here to avoid cyclic dependency
   const ETHChain = 'ETH'
@@ -133,7 +130,7 @@ describe('etherscan Integration Tests (ETH)', () => {
   const provider = new EtherscanProvider(
     ETH_TESTNET_ETHERS_PROVIDER,
     'https://api-sepolia.etherscan.io/',
-    process.env['ETHERSCAN_API'] || '',
+    process.env.ETHERSCAN_API_KEY || '',
     ETHChain,
     AssetETH,
     18,

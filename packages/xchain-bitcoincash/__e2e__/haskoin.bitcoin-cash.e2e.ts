@@ -6,7 +6,7 @@ import { AssetBCH, HaskoinDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explo
 
 const defaultBCHParams: UtxoClientParams = {
   network: Network.Mainnet,
-  phrase: process.env.PHRASE,
+  phrase: process.env.MAINNET_PHRASE,
   explorerProviders: explorerProviders,
   dataProviders: [HaskoinDataProviders],
   rootDerivationPaths: {
@@ -27,7 +27,7 @@ const bchClient = new Client({
 const bchClientTestnet = new Client({
   ...defaultBCHParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.TESTNET_PHRASE,
 })
 
 // const bchAddress = 'qqqmwluxjte4u83lkqmare5klap5t38eyq8gdzxhhm'

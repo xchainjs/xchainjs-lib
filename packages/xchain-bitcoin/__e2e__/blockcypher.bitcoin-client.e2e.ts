@@ -33,7 +33,7 @@ const btcClient = new Client({
 const btcClientTestnet = new Client({
   ...defaultBTCParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.TESTNET_PHRASE,
 })
 describe('Bitcoin Integration Tests for BlockCypher', () => {
   it('should fetch correct asset ', async () => {

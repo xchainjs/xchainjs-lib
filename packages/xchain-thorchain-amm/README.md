@@ -86,6 +86,26 @@ If you plan on using the publically accessible endpoints provided by Nine Realms
 - https://haskoin.ninerealms.com (BTC/BCH/LTC)
 - https://thornode.ninerealms.com
 
+### Setting environment variables
+
+```sh
+SNOWTRACE_API_KEY={YOUR_SNOWTRACE_API_KEY}
+COVALENT_API_KEY={YOUR_COVALENT_API_KEY}
+BLOCKCYPHER_API_KEY={YOUR_BLOCKCYPHER_API_KEY}
+SOCHAIN_API_KEY={YOUR_SOCHAIN_API_KEY}
+BSCSCAN_API_KEY={YOUR_BSCSCAN_API_KEY}
+```
+
+//Default config can access.
+
+```sh
+process.env.SNOWTRACE_API_KEY
+process.env.COVALENT_API_KEY
+process.env.BLOCKCYPHER_API_KEY
+process.env.SOCHAIN_API_KEY
+process.env.BSCSCAN_API_KEY
+```
+
 Example
 
 ```typescript
