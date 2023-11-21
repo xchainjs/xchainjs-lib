@@ -7,7 +7,7 @@ const blockcypherProvider = new BlockcypherProvider(
   AssetBTC,
   8,
   BlockcypherNetwork.BTC,
-  process.env.BLOCKCYHER_API_TOKEN || undefined,
+  process.env.BLOCKCYHER_API_KEY,
 )
 
 describe('blockcypher api tests', () => {

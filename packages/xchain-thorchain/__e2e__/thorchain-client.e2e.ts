@@ -29,11 +29,11 @@ const chainIds = {
 
 const thorClient = new ThorClient({
   network: Network.Mainnet,
-  phrase: process.env.PHRASE,
+  phrase: process.env.MAINNET_PHRASE,
   chainIds: chainIds,
 })
 const thorchainClient = thorClient
-const bnbClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
+const bnbClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.MAINNET_PHRASE })
 
 register9Rheader(axios)
 register9Rheader(cosmosclient.config.globalAxios)
@@ -286,7 +286,7 @@ describe('thorchain Integration Tests', () => {
 
       const privKey = thorClient
         .getCosmosClient()
-        .getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/931'/0'/0/3")
+        .getPrivKeyFromMnemonic(process.env.MAINNET_PHRASE as string, "44'/931'/0'/0/3")
 
       const authInfo = cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
 

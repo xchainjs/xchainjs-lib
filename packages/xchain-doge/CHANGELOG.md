@@ -1,9 +1,15 @@
-# v0.7.6 (2023-11-21)
+# v0.7.7 (2023-11-21)
 
 ## Update
 
 - Round robin fee strategy
 - GetSuggestedFee removed
+
+# v0.7.6 (2023-11-21)
+
+## Update
+
+- BlOCKCYPHER_API_KEY renamed to BLOCKCYPHER_API_KEY
 
 # v0.7.5 (2023-11-16)
 

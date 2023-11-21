@@ -3,7 +3,7 @@ import { SochainNetwork, SochainProvider } from '../src/providers'
 
 const sochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env.SOCHAIN_API_KEY || 'undefined',
+  process.env.SOCHAIN_API_KEY || '',
   BTCChain,
   AssetBTC,
   8,

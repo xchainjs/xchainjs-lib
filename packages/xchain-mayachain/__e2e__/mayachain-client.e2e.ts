@@ -29,11 +29,11 @@ const chainIds = {
 
 const mayaClient = new MayaClient({
   network: Network.Mainnet,
-  phrase: process.env.PHRASE_MAYA,
+  phrase: process.env.MAINNET_PHRASE,
   chainIds: chainIds,
 })
 const mayachainClient = mayaClient
-const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
+const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.MAINNET_PHRASE })
 
 describe('Mayachain Integration Tests', () => {
   it('should fetch mayachain balances', async () => {

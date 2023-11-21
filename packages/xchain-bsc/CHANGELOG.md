@@ -1,3 +1,9 @@
+# v0.4.2 (2023-11-21)
+
+## Update
+
+- BSCCHAIN_API_KEY renamed to BSCSCAN_API_KEY
+
 # v0.4.1 (2023-11-16)
 
 ## Update

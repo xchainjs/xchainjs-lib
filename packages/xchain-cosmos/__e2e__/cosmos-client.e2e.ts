@@ -7,7 +7,7 @@ let xchainClient: CosmosClient = new CosmosClient({})
 
 describe('Cosmos Integration Tests', () => {
   beforeEach(() => {
-    const settings = { network: Network.Testnet, phrase: process.env.PHRASE }
+    const settings = { network: Network.Testnet, phrase: process.env.TESTNET_PHRASE }
     xchainClient = new CosmosClient(settings)
   })
   it('should fetch cosmos balances', async () => {
@@ -86,7 +86,9 @@ describe('Cosmos Integration Tests', () => {
       Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
     )
 
-    const privKey = xchainClient.getSDKClient().getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/118'/0'/0/2")
+    const privKey = xchainClient
+      .getSDKClient()
+      .getPrivKeyFromMnemonic(process.env.TESTNET_PHRASE as string, "44'/118'/0'/0/2")
     const authInfo = cosmosClientCore.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
 
     if (!authInfo.signer_infos[0].public_key) {

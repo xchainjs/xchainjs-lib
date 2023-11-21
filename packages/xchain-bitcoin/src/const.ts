@@ -59,7 +59,7 @@ export const blockstreamExplorerProviders = {
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   BTCChain,
   AssetBTC,
   8,
@@ -67,7 +67,7 @@ const testnetSochainProvider = new SochainProvider(
 )
 const mainnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   BTCChain,
   AssetBTC,
   8,
@@ -104,7 +104,7 @@ const testnetBlockcypherProvider = new BlockcypherProvider(
   AssetBTC,
   8,
   BlockcypherNetwork.BTCTEST,
-  process.env['BlOCKCYPHER_API_KEY'] || '',
+  process.env.BLOCKCYPHER_API_KEY || '',
 )
 
 const mainnetBlockcypherProvider = new BlockcypherProvider(
@@ -113,7 +113,7 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   AssetBTC,
   8,
   BlockcypherNetwork.BTC,
-  process.env['BlOCKCYPHER_API_KEY'] || '',
+  process.env.BLOCKCYPHER_API_KEY || '',
 )
 
 export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
