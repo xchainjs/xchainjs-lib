@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://xchainjs.org/" target="_blank" rel="noopener noreferrer"><img width="400" height="300" src="https://github.com/xchainjs/xchainjs-org.github.io/blob/master/assets/img/logo.png" alt="xchainjs logo"></a>
+  <a href="https://xchainjs.org/" target="_blank" rel="noopener noreferrer"><img width="400" height="300" src="https://avatars.githubusercontent.com/u/73146062?s=200&v=4" alt="xchainjs logo"></a>
 </p>
 <h1 align="center">
     XChainJS - xchainjs Library 
