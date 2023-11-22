@@ -1,0 +1,26 @@
+[
+	{
+		"chain": "BTC",
+		"last_observed_in": 806748,
+		"last_signed_out": 2802474,
+		"mayachain": 2803003
+	},
+	{
+		"chain": "DASH",
+		"last_observed_in": 1935991,
+		"last_signed_out": 2802474,
+		"mayachain": 2803003
+	},
+	{
+		"chain": "ETH",
+		"last_observed_in": 18115062,
+		"last_signed_out": 2802474,
+		"mayachain": 2803003
+	},
+	{
+		"chain": "THOR",
+		"last_observed_in": 12550445,
+		"last_signed_out": 2802474,
+		"mayachain": 2803003
+	}
+]

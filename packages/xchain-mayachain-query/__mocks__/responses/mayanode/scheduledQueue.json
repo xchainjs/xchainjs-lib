@@ -1,0 +1,22 @@
+[
+	{
+		"chain": "ETH",
+		"to_address": "0x9C63a7290c92B1EdB319651C5bc59F7aF390AD63",
+		"vault_pub_key": "mayapub1addwnpepq0q65azgxgt9l88hs3qzyqamhvxyfttg3t70v7z0xpc06h4x3yl026txtlk",
+		"coin": {
+			"asset": "ETH.ETH",
+			"amount": "287168903"
+		},
+		"memo": "OUT:9D034A2485E2297157C9447E862D5E97920D30CE806675D75D2D5D9A035FD297",
+		"max_gas": [
+			{
+				"asset": "ETH.ETH",
+				"amount": "1200000",
+				"decimals": 8
+			}
+		],
+		"gas_rate": 15,
+		"in_hash": "9D034A2485E2297157C9447E862D5E97920D30CE806675D75D2D5D9A035FD297",
+		"height": 2803717
+	}
+]

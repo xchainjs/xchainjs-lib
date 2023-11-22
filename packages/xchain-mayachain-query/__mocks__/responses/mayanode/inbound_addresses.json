@@ -1,0 +1,31 @@
+[
+	{
+		"address": "bc1qzz4mgm2yl5cfhwp5rhgvdyy62z737sm8rc25ac",
+		"chain": "BTC",
+		"gas_rate": "34",
+		"halted": false,
+		"pub_key": "mayapub1addwnpepq0q65azgxgt9l88hs3qzyqamhvxyfttg3t70v7z0xpc06h4x3yl026txtlk"
+	},
+	{
+		"address": "XcCzLaeJJgPmMT39DZsAHemrVMnHtZw7Xd",
+		"chain": "DASH",
+		"gas_rate": "6",
+		"halted": false,
+		"pub_key": "mayapub1addwnpepq0q65azgxgt9l88hs3qzyqamhvxyfttg3t70v7z0xpc06h4x3yl026txtlk"
+	},
+	{
+		"address": "0xe499e7b91d1349a861d09d847551dd9ce9508146",
+		"chain": "ETH",
+		"gas_rate": "1110",
+		"halted": false,
+		"pub_key": "mayapub1addwnpepq0q65azgxgt9l88hs3qzyqamhvxyfttg3t70v7z0xpc06h4x3yl026txtlk",
+		"router": "0xe3985E6b61b814F7Cdb188766562ba71b446B46d"
+	},
+	{
+		"address": "thor1zz4mgm2yl5cfhwp5rhgvdyy62z737sm8n9dyv2",
+		"chain": "THOR",
+		"gas_rate": "3000000",
+		"halted": false,
+		"pub_key": "mayapub1addwnpepq0q65azgxgt9l88hs3qzyqamhvxyfttg3t70v7z0xpc06h4x3yl026txtlk"
+	}
+]

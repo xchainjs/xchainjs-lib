@@ -1,0 +1,129 @@
+import { baseAmount } from '@xchainjs/xchain-util'
+import { BigNumber } from 'bignumber.js'
+
+import { CryptoAmount } from '../crypto-amount'
+import { LiquidityPool } from '../liquidity-pool'
+import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../types'
+
+import { AssetCacao } from './const'
+import { getBaseAmountWithDiffDecimals } from './utils'
+
+/**
+ * https://docs.mayaprotocol.com/dev-docs/mayachain/concepts/math#lp-units-add
+ * @param liquidity - asset amount added
+ * @param pool  - pool depths
+ * @returns liquidity units - ownership of pool
+ */
+export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
+  const baseAmount8decimals = getBaseAmountWithDiffDecimals(liquidity.asset, 8)
+  const P = new BigNumber(pool.pool.liquidityUnits)
+  const r = liquidity.cacao.baseAmount.amount()
+  const a = baseAmount8decimals
+  const R = pool.cacaoBalance.amount()
+  const A = pool.assetBalance.amount()
+  const part1 = R.times(a)
+  const part2 = r.times(A)
+
+  const numerator = P.times(part1.plus(part2))
+  const denominator = R.times(A).times(2)
+  const result = numerator.div(denominator)
+  return result
+}
+/**
+ *
+ * @param unitData - units for both asset and rune
+ * @param pool - pool that the asset is bound to
+ * @returns - pool share of both asset and rune in percentage
+ */
+export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShareDetail => {
+  // formula: (rune * part) / total; (asset * part) / total
+  const units = unitData.liquidityUnits
+  const total = unitData.totalUnits
+  const R = pool.cacaoBalance.amount()
+  const T = pool.assetBalance.amount()
+  const asset = T.times(units).div(total)
+  const rune = R.times(units).div(total)
+  const poolShareDetail = {
+    assetShare: new CryptoAmount(baseAmount(asset), pool.asset),
+    cacaoShare: new CryptoAmount(baseAmount(rune), AssetCacao),
+  }
+  return poolShareDetail
+}
+
+/**
+ *
+ * @param poolShare - the share of asset and rune added to the pool
+ * @param pool - Pool that the asset is attached to
+ * @returns - returns bignumber representing a slip percentage
+ */
+export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
+  const baseAmount8decimals = getBaseAmountWithDiffDecimals(stake.asset, 8)
+  // formula: (t * R - T * r)/ (T*r + R*T)
+  const r = stake.cacao.baseAmount.amount()
+  const t = baseAmount8decimals
+  const R = pool.cacaoBalance.amount()
+  const T = pool.assetBalance.amount()
+  const numerator = t.times(R).minus(T.times(r))
+  const denominator = T.times(r).plus(R.times(T))
+  const result = numerator.div(denominator).abs()
+  return result
+}
+
+/**
+ * https://docs.mayaprotocol.com/deep-dive/how-it-works/impermanent-loss-protection-ilp
+ * @param poolShare - the share of asset and rune added to the pool
+ * @param pool - Pool that the asset is attached to
+ * @param block - blockl object with current, last added and the constant blocksforlossProtection
+ * @returns
+ */
+// Blocks for full protection 1440000 // 100 days
+export const getLiquidityProtectionData = (
+  depositValue: PostionDepositValue,
+  poolShare: PoolShareDetail,
+  block: Block,
+): ILProtectionData => {
+  //Coverage formula coverage=((A0∗P1)+R0)−((A1∗P1)+R1)=>((A0∗R1/A1)+R0)−(R1+R1)
+  //formula: protectionProgress (currentHeight-heightLastAdded)/blocksforfullprotection
+  const R0 = depositValue.cacao.amount() // rune deposit value
+  const A0 = depositValue.asset.amount() // asset deposit value
+  const R1 = poolShare.cacaoShare.baseAmount.amount() // rune amount to redeem
+  const A1 = poolShare.assetShare.baseAmount.amount() // asset amount to redeem
+  const P1 = R1.div(A1) // Pool ratio at withdrawal
+  const part1 = A0.times(P1).plus(R0).minus(A1.times(P1).plus(R1)) // start position minus end position
+  const part2 = A0.times(R1.div(A1)).plus(R0).minus(R1.plus(R1)) // different way to check position
+  const coverage = part1 >= part2 ? part1 : part2 // Coverage represents how much ILP a LP is entitled to
+  const currentHeight = block.current
+  const heightLastAdded = block.lastAdded || 0 //default to zero if undefined
+  const blocksforfullprotection = block.fullProtection
+  const fractionOfFullILPProtection = (currentHeight - heightLastAdded) / blocksforfullprotection
+  const protectionProgress = Math.min(fractionOfFullILPProtection, 1) // percentage of entitlement, max 100%
+  const result = coverage.times(protectionProgress) // impermanent loss protection result
+  const maxILP = result.lt(0) ? new BigNumber(0) : result // max negative ILP to 0
+  const ILProtection: ILProtectionData = {
+    ILProtection: new CryptoAmount(baseAmount(maxILP), AssetCacao),
+    totalDays: (fractionOfFullILPProtection * 100).toFixed(2),
+  }
+  return ILProtection
+}
+
+/**
+ * https://docs.mayaprotocol.com/deep-dive/mayachain-finance/continuous-liquidity-pools#calculating-pool-ownership
+ * @param liquidity - asset amount added
+ * @param pool  - pool depths
+ * @returns liquidity units - % ownership of pool
+ */
+export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): number => {
+  const P = new BigNumber(pool.pool.liquidityUnits)
+  const r = liquidity.cacao.baseAmount.amount()
+  const a = liquidity.asset.baseAmount.amount()
+  const R = pool.cacaoBalance.amount().plus(r) // Must add r first
+  const A = pool.assetBalance.amount().plus(a) // Must add t first
+  const part1 = R.plus(a)
+  const part2 = r.times(A)
+
+  const numerator = P.times(part1.plus(part2))
+  const denominator = R.times(A).times(2)
+  const lpUnits = numerator.div(denominator)
+  const percent = lpUnits.div(P)
+  return percent.toNumber()
+}
