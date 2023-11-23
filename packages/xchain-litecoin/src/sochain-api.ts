@@ -16,8 +16,6 @@ import {
   TxHashParams,
 } from './types/sochain-api-types'
 
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
-
 const toSochainNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
@@ -144,22 +142,5 @@ export const getUnspentTxs = async ({
     return txs.concat(nextBatch)
   } else {
     return txs
-  }
-}
-
-/**
- * Get Litecoin suggested transaction fee.
- *
- * @returns {number} The Litecoin suggested transaction fee per bytes in sat.
- */
-export const getSuggestedTxFee = async (): Promise<number> => {
-  //Note: sochain does not provide fee rate related data
-  //So use Bitgo API for fee estimation
-  //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
-  try {
-    const response = await axios.get('https://app.bitgo.com/api/v2/ltc/tx/fee')
-    return response.data.feePerKb / 1000 // feePerKb to feePerByte
-  } catch (error) {
-    return DEFAULT_SUGGESTED_TRANSACTION_FEE
   }
 }

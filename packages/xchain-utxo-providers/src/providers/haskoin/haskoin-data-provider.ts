@@ -1,5 +1,6 @@
 import {
   Balance,
+  FeeRates,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -137,6 +138,14 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
       throw error
     }
   }
+
+  /**
+   *  @throws {Error} Method not implemented.
+   */
+  getFeeRates(): Promise<FeeRates> {
+    throw new Error('Method not implemented.')
+  }
+
   /**
    *
    * @param utxos

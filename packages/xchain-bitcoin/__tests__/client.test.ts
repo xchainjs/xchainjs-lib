@@ -1,12 +1,14 @@
 import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 
+import mockBitgoApi from '../__mocks__/bitgo'
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
 import { Client } from '../src/client'
 import {
   AssetBTC,
+  BitgoProviders,
   LOWER_FEE_BOUND,
   MIN_TX_FEE,
   SochainDataProviders,
@@ -18,7 +20,7 @@ export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: [SochainDataProviders],
+  dataProviders: [BitgoProviders, SochainDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
     [Network.Testnet]: `84'/1'/0'/0/`,
@@ -36,11 +38,13 @@ describe('BitcoinClient Test', () => {
   beforeEach(() => {
     mockHaskoinApi.init()
     mockSochainApi.init()
+    mockBitgoApi.init()
     btcClient.purgeClient()
   })
   afterEach(() => {
     mockHaskoinApi.restore()
     mockSochainApi.restore()
+    mockBitgoApi.restore()
     btcClient.purgeClient()
   })
 
