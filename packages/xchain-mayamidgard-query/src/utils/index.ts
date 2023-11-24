@@ -1,1 +1,1 @@
-export * from './midgard'
+export * from '../midgard-api'

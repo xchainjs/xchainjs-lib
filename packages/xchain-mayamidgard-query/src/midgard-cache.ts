@@ -1,7 +1,7 @@
 import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
 import { CachedValue } from '@xchainjs/xchain-util'
 
-import { Midgard } from './utils/midgard'
+import { MidgardApi } from './midgard-api'
 
 const MILLISECOND_CACHE_POOLS = 5000
 
@@ -9,17 +9,17 @@ const MILLISECOND_CACHE_POOLS = 5000
  * This class retrieves raw information from Midgard API and cached it
  */
 export class MidgardCache {
-  readonly midgard: Midgard
+  readonly midgardApi: MidgardApi
   private readonly cachedPools: CachedValue<PoolDetail[]>
   /**
    * Constructor to create a ThorchainCache
    *
-   * @param {Midgard} midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
+   * @param {MidgardApi} midgardApi - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
    * @returns MidgardCache
    */
-  constructor(midgard = new Midgard()) {
-    this.midgard = midgard
-    this.cachedPools = new CachedValue<PoolDetail[]>(() => this.midgard.getPools(), MILLISECOND_CACHE_POOLS)
+  constructor(midgardApi = new MidgardApi()) {
+    this.midgardApi = midgardApi
+    this.cachedPools = new CachedValue<PoolDetail[]>(() => this.midgardApi.getPools(), MILLISECOND_CACHE_POOLS)
   }
 
   /**
