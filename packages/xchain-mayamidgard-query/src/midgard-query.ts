@@ -1,7 +1,8 @@
-import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
+import { MemberDetails, PoolDetail, PoolStatsDetail } from '@xchainjs/xchain-mayamidgard'
 import { Asset, assetToString } from '@xchainjs/xchain-util'
 
 import { MidgardCache } from './midgard-cache'
+import { MAYANameDetails, ReverseMAYANames } from './types'
 
 /**
  * Class for getting data and process from Midgard API using MidgardCache for optimize request number (MAYAChain L2 Api).
@@ -50,5 +51,41 @@ export class MidgardQuery {
       throw new Error(`Can't find pool for asset: ${asset}`)
     }
     return pool
+  }
+
+  /**
+   * Function to return pool statistics for a particular asset
+   * @param asset - asset string to query its pool stats
+   * @returns - type object poolStatsDetail
+   */
+  public async getPoolStats(asset: Asset): Promise<PoolStatsDetail> {
+    return this.midgardCache.midgardApi.getPoolStats(assetToString(asset))
+  }
+
+  /**
+   * Get MayaName details
+   * @param {string} mayaName MayaName
+   * @returns an array of chains and their addresses associated with the given THORName
+   */
+  public async getMayaNameDetails(mayaName: string): Promise<MAYANameDetails | undefined> {
+    return this.midgardCache.midgardApi.getMayaNameDetails(mayaName)
+  }
+
+  /**
+   * Gives a list of MayaNames by reverse lookup
+   * @param {string} address to know if it has a MayaName associated with
+   * @returns an array of THORNames associated with the given address
+   */
+  public async getMAYANameReverseLookup(address: string): Promise<ReverseMAYANames | undefined> {
+    return this.midgardCache.midgardApi.getMAYANameReverseLookup(address)
+  }
+
+  /**
+   * Return member details
+   * @param {string} address
+   * @returns an array of statistics for all the liquidity providers associated with a given member address
+   */
+  public getMemberDetails(address: string): Promise<MemberDetails> {
+    return this.midgardCache.midgardApi.getMemberDetails(address)
   }
 }

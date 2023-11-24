@@ -1,5 +1,12 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Configuration, Health, MidgardApi as MidgardClient, PoolDetail } from '@xchainjs/xchain-mayamidgard'
+import {
+  Configuration,
+  Health,
+  MemberDetails,
+  MidgardApi as MidgardClient,
+  PoolDetail,
+  PoolStatsDetail,
+} from '@xchainjs/xchain-mayamidgard'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
@@ -104,6 +111,34 @@ export class MidgardApi {
     for (const client of this.midgardClients) {
       try {
         return (await client.getHealth()).data
+      } catch (e) {}
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   * Function to return pool statistics for a particular asset
+   * @param {string} asset - asset string to query its pool stats
+   * @returns - type object poolStatsDetail
+   */
+  public async getPoolStats(asset: string): Promise<PoolStatsDetail> {
+    for (const client of this.midgardClients) {
+      try {
+        return (await client.getPoolStats(asset)).data
+      } catch (e) {}
+    }
+    throw Error(`Midgard not responding`)
+  }
+
+  /**
+   * Function to return member details based on valid liquidity position
+   * @param {string} member - needed to query for Lp details
+   * @returns - object type of Member Detail
+   */
+  public async getMemberDetails(member: string): Promise<MemberDetails> {
+    for (const client of this.midgardClients) {
+      try {
+        return (await client.getMemberDetail(member)).data
       } catch (e) {}
     }
     throw Error(`Midgard not responding`)
