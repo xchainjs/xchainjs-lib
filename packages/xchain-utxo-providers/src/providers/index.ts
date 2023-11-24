@@ -1,6 +1,7 @@
 export * from './sochainv3/sochain-api-types'
 export * from './sochainv3/sochain-api'
 export * from './sochainv3/sochain-data-provider'
+
 export {
   AddressDTO,
   AddressParams,
@@ -26,5 +27,8 @@ export {
   broadcastTx,
 } from './haskoin/haskoin-api'
 export * from './haskoin/haskoin-data-provider'
+
 export * from './blockcypher/blockcypher-data-provider'
 export { BlockcypherNetwork } from './blockcypher/blockcypher-api-types'
+
+export { BitgoProvider } from './bitgo/bitgo-data-provider'

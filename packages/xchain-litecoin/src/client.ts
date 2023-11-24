@@ -13,12 +13,12 @@ import {
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import axios from 'axios'
 import * as Litecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
 import {
   AssetLTC,
+  BitgoProviders,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   LTCChain,
@@ -30,8 +30,6 @@ import {
 import { NodeAuth } from './types'
 import * as Utils from './utils'
 
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
-
 export type NodeUrls = Record<Network, string>
 
 export const defaultLtcParams: UtxoClientParams & {
@@ -41,7 +39,7 @@ export const defaultLtcParams: UtxoClientParams & {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
-  dataProviders: [BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/84'/2'/0'/0/`,
     [Network.Testnet]: `m/84'/1'/0'/0/`,
@@ -165,17 +163,6 @@ class Client extends UTXOClient {
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
-  }
-
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    //use Bitgo API for fee estimation
-    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
-    try {
-      const response = await axios.get('https://app.bitgo.com/api/v2/ltc/tx/fee')
-      return response.data.feePerKb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return DEFAULT_SUGGESTED_TRANSACTION_FEE
-    }
   }
 
   /**

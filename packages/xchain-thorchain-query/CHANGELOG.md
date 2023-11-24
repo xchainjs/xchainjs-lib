@@ -1,3 +1,9 @@
+# v0.6.12 (2023-11-21)
+
+## Update
+
+- xchain-client dependency
+
 # v0.6.11 (2023-11-16)
 
 ## Update

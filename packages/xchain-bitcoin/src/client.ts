@@ -13,7 +13,6 @@ import {
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import axios from 'axios'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
@@ -21,6 +20,7 @@ import {
   AssetBTC,
   BTCChain,
   BTC_DECIMAL,
+  BitgoProviders,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   MIN_TX_FEE,
@@ -29,13 +29,11 @@ import {
 } from './const'
 import * as Utils from './utils'
 
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 127
-
 export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: [BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
     [Network.Testnet]: `84'/1'/0'/0/`,
@@ -149,17 +147,6 @@ class Client extends UTXOClient {
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
-  }
-
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    //use Bitgo API for fee estimation
-    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
-    try {
-      const response = await axios.get('https://app.bitgo.com/api/v2/btc/tx/fee')
-      return response.data.feePerKb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return DEFAULT_SUGGESTED_TRANSACTION_FEE
-    }
   }
 
   /**

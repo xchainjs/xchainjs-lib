@@ -20,6 +20,7 @@ export interface OnlineDataProvider {
   getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
   getTransactions(params: TxHistoryParams): Promise<TxsPage>
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
+  getFeeRates(): Promise<FeeRates>
 }
 export interface UtxoOnlineDataProvider extends OnlineDataProvider {
   getConfirmedUnspentTxs(address: Address): Promise<UTXO[]>
@@ -27,9 +28,7 @@ export interface UtxoOnlineDataProvider extends OnlineDataProvider {
   broadcastTx(txHex: string): Promise<TxHash>
 }
 
-export interface EvmOnlineDataProvider extends OnlineDataProvider {
-  getFeeRates(): Promise<FeeRates>
-}
+export type EvmOnlineDataProvider = OnlineDataProvider
 
 export type ExplorerProviders = Record<Network, ExplorerProvider>
 export type OnlineDataProviders = Record<Network, OnlineDataProvider | undefined>

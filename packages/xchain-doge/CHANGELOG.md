@@ -1,3 +1,10 @@
+# v0.7.7 (2023-11-21)
+
+## Update
+
+- Round robin fee strategy
+- GetSuggestedFee removed
+
 # v0.7.6 (2023-11-21)
 
 ## Update

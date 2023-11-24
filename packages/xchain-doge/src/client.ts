@@ -1,5 +1,6 @@
 import {
   AssetInfo,
+  FeeOption,
   FeeRate,
   Network,
   PreparedTx,
@@ -12,12 +13,12 @@ import {
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import axios from 'axios'
 import * as Dogecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
 import {
   AssetDOGE,
+  BitgoProviders,
   DOGEChain,
   DOGE_DECIMAL,
   LOWER_FEE_BOUND,
@@ -29,13 +30,11 @@ import {
 import { LedgerTxInfo, LedgerTxInfoParams } from './types/ledger'
 import * as Utils from './utils'
 
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 150000
-
 export const defaultDogeParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: [blockcypherDataProviders],
+  dataProviders: [BitgoProviders, blockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/3'/0'/0/`,
     [Network.Stagenet]: `m/44'/3'/0'/0/`,
@@ -152,15 +151,6 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    try {
-      const response = await axios.get(`https://api.blockcypher.com/v1/doge/main`)
-      return response.data.low_fee_per_kb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return DEFAULT_SUGGESTED_TRANSACTION_FEE
-    }
-  }
-
   /**
    * Transfer Doge.
    *
@@ -168,7 +158,7 @@ class Client extends UTXOClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
     const fromAddressIndex = params?.walletIndex || 0

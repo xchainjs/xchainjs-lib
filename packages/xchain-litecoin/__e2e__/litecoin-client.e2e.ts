@@ -1,11 +1,25 @@
+import { Network, Protocol } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client } from '../src/client'
+import { Client, defaultLtcParams } from '../src/client'
 import { AssetLTC } from '../src/const'
 
-const ltcClient = new Client()
+const ltcClient = new Client({
+  ...defaultLtcParams,
+  network: Network.Mainnet,
+  phrase: process.env.MAINNET_PHRASE,
+})
 
 describe('Litecoin Integration Tests', () => {
+  it('Should get address 0 async', async () => {
+    try {
+      const address = await ltcClient.getAddressAsync()
+      console.log(address)
+    } catch (error) {
+      console.error(`Error running "Should get address 0 async". ${error}`)
+      fail()
+    }
+  })
   it('should fetch address balance', async () => {
     const balances = await ltcClient.getBalance('MRK2xhgBiNpGLkMTNBmTE4yzMiRJPLkGqP')
     balances.forEach((bal) => {
@@ -95,32 +109,22 @@ describe('Litecoin Integration Tests', () => {
       fail()
     }
   })
-  // it('should send a testnet btc tx', async () => {
-  //   try {
-  //     const ltcClientTestnet = new Client({
-  //       haskoinUrl: {
-  //         [Network.Testnet]: 'https://api.haskoin.com/btctest',
-  //         [Network.Mainnet]: 'https://api.haskoin.com/btc',
-  //         [Network.Stagenet]: 'https://api.haskoin.com/btc',
-  //       },
-  //       network: Network.Testnet,
-  //       phrase: process.env.TESTNETPHRASE,
-  //       sochainApiKey: process.env.SOCHAIN_API_KEY || '',
-  //     })
-  //     // const from = ltcClientTestnet.getAddress(0)
-  //     const to = ltcClientTestnet.getAddress(1)
-  //     const amount = assetToBase(assetAmount('0.0001'))
-  //     const txid = await ltcClientTestnet.transfer({
-  //       asset: AssetLTC,
-  //       recipient: to,
-  //       amount,
-  //       memo: 'test',
-  //       feeRate: 1,
-  //     })
-  //     console.log(JSON.stringify(txid, null, 2))
-  //   } catch (err) {
-  //     console.error('ERR running test', err)
-  //     fail()
-  //   }
-  // })
+  it('Should fetch fee rates from provider', async () => {
+    try {
+      const feeRates = await ltcClient.getFeeRates()
+      console.log(feeRates)
+    } catch (error) {
+      console.error(`Error running "Should fetch fee rates from provider". ${error}`)
+      fail()
+    }
+  })
+  it('Should fetch fee rates from Thorchain', async () => {
+    try {
+      const feeRates = await ltcClient.getFeeRates(Protocol.THORCHAIN)
+      console.log(feeRates)
+    } catch (error) {
+      console.error(`Error running "Should fetch fee rates from Thorchain". ${error}`)
+      fail()
+    }
+  })
 })

@@ -13,13 +13,13 @@ import {
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import axios from 'axios'
 import accumulative from 'coinselect/accumulative'
 
 import {
   AssetBCH,
   BCHChain,
   BCH_DECIMAL,
+  BitgoProviders,
   HaskoinDataProviders,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
@@ -33,7 +33,7 @@ export const defaultBchParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
-  dataProviders: [HaskoinDataProviders],
+  dataProviders: [BitgoProviders, HaskoinDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/145'/0'/0/`,
     [Network.Testnet]: `m/44'/1'/0'/0/`,
@@ -134,10 +134,6 @@ class Client extends UTXOClient {
     const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, Utils.bchNetwork(this.network))
 
     return masterHDNode.derivePath(derivationPath).keyPair
-  }
-
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await this.getSuggestedFee()
   }
 
   /**
@@ -258,18 +254,6 @@ class Client extends UTXOClient {
       builder: transactionBuilder,
       utxos,
       inputs,
-    }
-  }
-
-  private async getSuggestedFee(): Promise<number> {
-    //Note: Haskcoin does not provide fee rate related data
-    //So use Bitgo API for fee estimation
-    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
-    try {
-      const response = await axios.get('https://app.bitgo.com/api/v2/bch/tx/fee')
-      return response.data.feePerKb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return Utils.DEFAULT_SUGGESTED_TRANSACTION_FEE
     }
   }
 
