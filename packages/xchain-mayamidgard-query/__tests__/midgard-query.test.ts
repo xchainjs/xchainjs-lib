@@ -13,6 +13,6 @@ describe('Midgard query', () => {
     midgardApi.restore()
   })
   it('Should get pools', async () => {
-    console.log(await midgardQuery.midgardCache.getPools())
+    console.log(await midgardQuery.getPools())
   })
 })
