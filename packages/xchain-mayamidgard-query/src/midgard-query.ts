@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import { MemberDetails, PoolDetail, PoolStatsDetail } from '@xchainjs/xchain-mayamidgard'
 import { Asset, assetToString } from '@xchainjs/xchain-util'
 
@@ -63,11 +64,11 @@ export class MidgardQuery {
   }
 
   /**
-   * Get MayaName details
+   * Get MAYAName details
    * @param {string} mayaName MayaName
    * @returns an array of chains and their addresses associated with the given THORName
    */
-  public async getMayaNameDetails(mayaName: string): Promise<MAYANameDetails | undefined> {
+  public async getMAYANameDetails(mayaName: string): Promise<MAYANameDetails | undefined> {
     return this.midgardCache.midgardApi.getMayaNameDetails(mayaName)
   }
 
@@ -87,5 +88,13 @@ export class MidgardQuery {
    */
   public getMemberDetails(address: string): Promise<MemberDetails> {
     return this.midgardCache.midgardApi.getMemberDetails(address)
+  }
+
+  /**
+   * Get the network midgard query is working with
+   * @returns
+   */
+  public getNetwork(): Network {
+    return this.midgardCache.midgardApi.network
   }
 }

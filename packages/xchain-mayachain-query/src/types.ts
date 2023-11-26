@@ -1,4 +1,5 @@
-import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
+import { BigNumber } from 'bignumber.js'
 
 /**
  * Quote swap types
@@ -36,4 +37,21 @@ export type QuoteSwapParams = {
   toleranceBps?: number
   affiliateBps?: number
   affiliateAddress?: string
+}
+
+/**
+ * Inbound address
+ */
+
+export type InboundDetail = {
+  chain: Chain
+  address: Address
+  router?: Address
+  gasRate: BigNumber
+  gasRateUnits: string
+  outboundTxSize: BigNumber
+  outboundFee: BigNumber
+  haltedChain: boolean
+  haltedTrading: boolean
+  haltedLP: boolean
 }

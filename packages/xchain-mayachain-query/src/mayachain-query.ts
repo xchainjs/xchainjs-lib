@@ -1,8 +1,10 @@
+import { Network } from '@xchainjs/xchain-client'
+import { MAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import { CryptoAmount, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { MayachainCache } from './mayachain-cache'
-import { QuoteSwap, QuoteSwapParams } from './types'
+import { InboundDetail, QuoteSwap, QuoteSwapParams } from './types'
 import {
   BtcAsset,
   BtcChain,
@@ -35,6 +37,14 @@ export class MayachainQuery {
    */
   constructor(mayachainCache = new MayachainCache()) {
     this.mayachainCache = mayachainCache
+  }
+
+  /**
+   * Get the mayachain query is working with
+   * @returns
+   */
+  public getNetwork(): Network {
+    return this.mayachainCache.midgardQuery.getNetwork()
   }
 
   /**
@@ -145,5 +155,22 @@ export class MayachainQuery {
     const dustValue = this.getDustValues()[chain]
     if (!dustValue) throw Error(`No dust value known for ${chain} chain`)
     return dustValue
+  }
+
+  /**
+   * Get MAYAname details
+   * @param {string} MAYAName
+   * @returns {MAYANameDetails | undefined} MAYANames details or undefined it is does not exist
+   */
+  public async getMAYANameDetails(MAYAName: string): Promise<MAYANameDetails | undefined> {
+    return this.mayachainCache.midgardQuery.getMAYANameDetails(MAYAName)
+  }
+
+  /**
+   * Get inbound addresses details
+   * @returns Inbound details
+   */
+  public async getInboundDetails(): Promise<Record<string, InboundDetail>> {
+    return this.mayachainCache.getInboundDetails()
   }
 }
