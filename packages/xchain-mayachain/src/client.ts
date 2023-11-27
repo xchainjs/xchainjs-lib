@@ -40,7 +40,7 @@ import {
   DepositParam,
   ExplorerUrls,
   MayachainClientParams,
-  MayachainConstantsResponse,
+  MayachainMimirResponse,
   NodeUrl,
   TxData,
   TxOfflineParams,
@@ -689,10 +689,8 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   async getFees(): Promise<Fees> {
     try {
       const {
-        data: {
-          int_64_values: { NativeTransactionFee: fee },
-        },
-      } = await axios.get<MayachainConstantsResponse>(`${this.getClientUrl().node}/mayachain/constants`)
+        data: { NATIVETRANSACTIONFEE: fee },
+      } = await axios.get<MayachainMimirResponse>(`${this.getClientUrl().node}/mayachain/mimir`) // Fetching NativeTransactionFee from https://mayanode.mayachain.info/mayachain/mimir
 
       // validate data
       if (!fee || isNaN(fee) || fee < 0) throw Error(`Invalid fee: ${fee.toString()}`)

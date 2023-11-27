@@ -62,6 +62,13 @@ export type MayachainConstantsResponse = {
     NativeTransactionFee: number
   }
 }
+/**
+ * Response from `mayachain/mimir` endpoint
+ */
+export type MayachainMimirResponse = {
+  // We are in fee interested only - ignore all other values
+  NATIVETRANSACTIONFEE: number
+}
 
 /**
  * Response of `/cosmos/base/tendermint/v1beta1/node_info`
