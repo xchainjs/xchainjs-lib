@@ -1,0 +1,9 @@
+*.log
+.DS_Store
+node_modules
+npm-debug.log
+.env
+
+/examples/xchainjs-test/node_modules
+/examples/xchainjs-test/yarn.lock
+
