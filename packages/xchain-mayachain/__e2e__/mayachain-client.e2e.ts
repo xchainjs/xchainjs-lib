@@ -166,6 +166,10 @@ describe('Mayachain Integration Tests', () => {
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
+  it('should fetch mayachain native Tx fee', async () => {
+    const fees = await mayaClient.getFees()
+    expect(fees.average.amount().toNumber()).toEqual(10000000000)
+  })
   it('should fetch mayachain tx data', async () => {
     const txId = '28DA11D33AC96BA87981F45FCB2EC80536C60BB824321E0CAEF097D10B568BA5'
     const tx = await mayaClient.getTransactionData(txId)

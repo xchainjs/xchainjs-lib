@@ -1,3 +1,9 @@
+# v0.2.11 (2023-11-27)
+
+## Update
+
+- changed endpoint for fetchin native tx fees & changed defaultFee
+
 # v0.2.10 (2023-11-16)
 
 ## Update
