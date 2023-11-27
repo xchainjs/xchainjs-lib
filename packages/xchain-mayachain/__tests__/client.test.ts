@@ -53,9 +53,13 @@ const mockAccountsBalance = (
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
 }
 
-const mockMayachainConstants = (url: string) => {
-  const response = require('../__mocks__/responses/mayachain/constants.json')
-  nock(url).get('/mayachain/constants').reply(200, response)
+// const mockMayachainConstants = (url: string) => {
+//   const response = require('../__mocks__/responses/mayachain/constants.json')
+//   nock(url).get('/mayachain/constants').reply(200, response)
+// }
+const mockMayachainMimir = (url: string) => {
+  const response = require('../__mocks__/responses/mayachain/mimir.json')
+  nock(url).get('/mayachain/mimir').reply(200, response)
 }
 
 const assertTxsPost = (
@@ -442,14 +446,14 @@ describe('Client Test', () => {
       balances: [
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
-          amount: '210000000',
+          amount: '210000000000',
         }),
       ],
     })
-    mockMayachainConstants(nodeUrl)
+    mockMayachainMimir(nodeUrl)
     mockTendermintSimulate(nodeUrl, {
       gas_info: {
-        gas_used: '1000000',
+        gas_used: '10000000000',
       },
     })
     assertTxsPost(mayaClient.getClientUrl().node, expected_txsPost_result)
@@ -493,7 +497,7 @@ describe('Client Test', () => {
       balances: [
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'cacao',
-          amount: '210000000',
+          amount: '210000000000',
         }),
       ],
     })
@@ -502,10 +506,10 @@ describe('Client Test', () => {
         network: chainIds[Network.Stagenet],
       },
     })
-    mockMayachainConstants(nodeUrl)
+    mockMayachainMimir(nodeUrl)
     mockTendermintSimulate(nodeUrl, {
       gas_info: {
-        gas_used: '1000000',
+        gas_used: '1000000000',
       },
     })
     assertTxsPost(nodeUrl, expected_txsPost_result)
@@ -564,13 +568,13 @@ describe('Client Test', () => {
 
   it('fetches fees from client', async () => {
     const url = mayaClient.getClientUrl().node
-    mockMayachainConstants(url)
+    mockMayachainMimir(url)
 
     const fees = await mayaClient.getFees()
 
-    expect(fees.average.amount().toString()).toEqual('2000000')
-    expect(fees.fast.amount().toString()).toEqual('2000000')
-    expect(fees.fastest.amount().toString()).toEqual('2000000')
+    expect(fees.average.amount().toString()).toEqual('10000000000')
+    expect(fees.fast.amount().toString()).toEqual('10000000000')
+    expect(fees.fastest.amount().toString()).toEqual('10000000000')
   })
 
   it('returns default fees if client is not available', async () => {
@@ -579,8 +583,8 @@ describe('Client Test', () => {
 
     const fees = await mayaClient.getFees()
 
-    expect(fees.average.amount().toString()).toEqual('200000000')
-    expect(fees.fast.amount().toString()).toEqual('200000000')
-    expect(fees.fastest.amount().toString()).toEqual('200000000')
+    expect(fees.average.amount().toString()).toEqual('10000000000')
+    expect(fees.fast.amount().toString()).toEqual('10000000000')
+    expect(fees.fastest.amount().toString()).toEqual('10000000000')
   })
 })
