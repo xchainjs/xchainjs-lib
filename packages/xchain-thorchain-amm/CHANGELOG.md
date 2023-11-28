@@ -1,3 +1,9 @@
+# v0.8.5 (2023-11-28)
+
+## Update
+
+- bump thorchain-query dep
+
 # v0.8.4 (2023-11-21)
 
 ## Update
