@@ -99,16 +99,8 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
       [Network.Stagenet]: "44'/714'/0'/0/",
       [Network.Testnet]: "44'/714'/0'/0/",
     },
-    legacyRootDerivationPaths = false
-  }: XChainClientParams & { legacyRootDerivationPaths?: boolean } ) {
-    const derivationPaths = legacyRootDerivationPaths
-    ? {
-        [Network.Mainnet]: "44'/931'/0'/0/",
-        [Network.Stagenet]: "44'/931'/0'/0/",
-        [Network.Testnet]: "44'/931'/0'/0/",
-      } 
-    : rootDerivationPaths
-    super(BNBChain, { network, rootDerivationPaths: derivationPaths, phrase })
+  }: XChainClientParams) {
+    super(BNBChain, { network, rootDerivationPaths, phrase })
     this.bncClient = new BncClient(this.getClientUrl())
     this.bncClient.chooseNetwork(this.getNetwork())
   }
