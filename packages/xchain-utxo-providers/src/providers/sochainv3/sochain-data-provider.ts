@@ -1,6 +1,7 @@
-import { Balance, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
+import { Balance, FeeRates, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
-import { UTXO, UtxoOnlineDataProvider } from '@xchainjs/xchain-utxo'
+
+import { UTXO, UtxoOnlineDataProvider } from '../types'
 
 import * as sochain from './sochain-api'
 import { AddressUTXO, SochainNetwork } from './sochain-api-types'

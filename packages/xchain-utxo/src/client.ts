@@ -16,8 +16,9 @@ import {
   standardFeeRates,
 } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { UTXO, UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
-import { UTXO, UtxoClientParams, UtxoOnlineDataProviders } from './types'
+import { UtxoClientParams } from './types'
 
 export enum Protocol {
   THORCHAIN = 1,
@@ -26,19 +27,6 @@ export enum Protocol {
 export abstract class Client extends BaseXChainClient {
   protected explorerProviders: ExplorerProviders
   protected dataProviders: UtxoOnlineDataProviders[]
-
-  protected abstract compileMemo(memo: string): Buffer
-  protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
-
-  protected async calcFee(feeRate: FeeRate, options?: FeeEstimateOptions): Promise<Fee> {
-    let utxos: UTXO[] = []
-    if (options?.sender) {
-      utxos = await this.scanUTXOs(options.sender, false)
-    }
-    const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
-    const fee = this.getFeeFromUtxos(utxos, feeRate, compiledMemo)
-    return baseAmount(fee)
-  }
 
   /**
    * Constructor
@@ -259,7 +247,6 @@ export abstract class Client extends BaseXChainClient {
     throw Error('no provider able to BroadcastTx')
   }
 
-  protected abstract getSuggestedFeeRate(): Promise<FeeRate>
   protected abstract compileMemo(memo: string): Buffer
   protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
   protected async roundRobinGetFeeRates(): Promise<FeeRates> {

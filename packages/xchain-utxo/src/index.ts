@@ -1,4 +1,4 @@
 import { Client } from './client'
-import { UTXO, UtxoClientParams, UtxoOnlineDataProvider, UtxoOnlineDataProviders, Witness } from './types'
+import { UTXO, UtxoClientParams, Witness } from './types'
 
-export { Client, UtxoOnlineDataProvider, UtxoOnlineDataProviders, UTXO, UtxoClientParams, Witness }
+export { Client, UTXO, UtxoClientParams, Witness }

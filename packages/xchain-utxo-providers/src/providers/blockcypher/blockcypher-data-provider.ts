@@ -1,7 +1,8 @@
 import PromisePool from '@supercharge/promise-pool'
-import { Balance, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, FeeRates, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
-import { UTXO, UtxoOnlineDataProvider } from '@xchainjs/xchain-utxo'
+
+import { UTXO, UtxoOnlineDataProvider } from '../types'
 
 import * as blockcypher from './blockcypher-api'
 import { BlockcypherNetwork, Transaction } from './blockcypher-api-types'
