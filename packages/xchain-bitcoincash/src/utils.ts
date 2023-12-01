@@ -7,8 +7,6 @@ import { AssetBCH, BCH_DECIMAL } from './const'
 import { Transaction, TransactionInput, TransactionOutput } from './types'
 import { Network as BCHNetwork } from './types/bitcoincashjs-types'
 
-export const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
-
 export const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10
 export const TX_INPUT_BASE = 32 + 4 + 1 + 4 // 41
 export const TX_INPUT_PUBKEYHASH = 107

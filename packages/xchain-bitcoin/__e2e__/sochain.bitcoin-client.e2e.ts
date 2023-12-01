@@ -10,7 +10,7 @@ const btcClient = new Client(sochainParams)
 const btcClientTestnet = new Client({
   ...sochainParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE || '',
+  phrase: process.env.TESTNET_PHRASE,
 })
 describe('Bitcoin Integration Sochain Tests', () => {
   it('should fetch address balance', async () => {
@@ -76,7 +76,7 @@ describe('Bitcoin Integration Sochain Tests', () => {
   it('should send a testnet btc tx via sochain', async () => {
     try {
       //const from = btcClientTestnet.getAddress(0)
-      const to = btcClientTestnet.getAddress(1)
+      const to = await btcClientTestnet.getAddressAsync(1)
       console.log(JSON.stringify(to, null, 2))
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await btcClientTestnet.transfer({

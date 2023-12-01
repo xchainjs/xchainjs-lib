@@ -17,11 +17,11 @@ describe('Kujira client Integration Tests', () => {
   beforeEach(() => {
     xchainClient = new KujiraClient({
       network: Network.Testnet,
-      phrase: process.env.MAINNETPHRASE,
+      phrase: process.env.TESTNET_PHRASE,
     })
   })
   it('should fetch balances kujira', async () => {
-    const address = await xchainClient.getAddress()
+    const address = await xchainClient.getAddressAsync()
     const balances = await xchainClient.getBalance(address)
 
     balances.forEach((bal) => {

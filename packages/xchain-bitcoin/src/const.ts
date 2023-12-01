@@ -1,6 +1,7 @@
 import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 import {
+  BitgoProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   HaskoinNetwork,
@@ -19,7 +20,7 @@ export const MIN_TX_FEE = 1000
 export const BTC_DECIMAL = 8
 
 export const LOWER_FEE_BOUND = 1
-export const UPPER_FEE_BOUND = 500
+export const UPPER_FEE_BOUND = 1_000
 export const BTC_SYMBOL = '₿'
 export const BTC_SATOSHI_SYMBOL = '⚡'
 
@@ -58,7 +59,7 @@ export const blockstreamExplorerProviders = {
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   BTCChain,
   AssetBTC,
   8,
@@ -66,7 +67,7 @@ const testnetSochainProvider = new SochainProvider(
 )
 const mainnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   BTCChain,
   AssetBTC,
   8,
@@ -103,7 +104,7 @@ const testnetBlockcypherProvider = new BlockcypherProvider(
   AssetBTC,
   8,
   BlockcypherNetwork.BTCTEST,
-  process.env['BlOCKCYPHER_API_KEY'] || '',
+  process.env.BLOCKCYPHER_API_KEY || '',
 )
 
 const mainnetBlockcypherProvider = new BlockcypherProvider(
@@ -112,10 +113,25 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   AssetBTC,
   8,
   BlockcypherNetwork.BTC,
-  process.env['BlOCKCYPHER_API_KEY'] || '',
+  process.env.BLOCKCYPHER_API_KEY || '',
 )
+
 export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetBlockcypherProvider,
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+//======================
+// Bitgo
+//======================
+const mainnetBitgoProvider = new BitgoProvider({
+  baseUrl: 'https://app.bitgo.com',
+  chain: BTCChain,
+})
+
+export const BitgoProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined,
+  [Network.Stagenet]: mainnetBitgoProvider,
+  [Network.Mainnet]: mainnetBitgoProvider,
 }

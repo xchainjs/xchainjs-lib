@@ -6,7 +6,7 @@ import { AssetBCH, HaskoinDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explo
 
 const defaultBCHParams: UtxoClientParams = {
   network: Network.Mainnet,
-  phrase: process.env.PHRASE,
+  phrase: process.env.MAINNET_PHRASE,
   explorerProviders: explorerProviders,
   dataProviders: [HaskoinDataProviders],
   rootDerivationPaths: {
@@ -27,13 +27,13 @@ const bchClient = new Client({
 const bchClientTestnet = new Client({
   ...defaultBCHParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.TESTNET_PHRASE,
 })
 
 // const bchAddress = 'qqqmwluxjte4u83lkqmare5klap5t38eyq8gdzxhhm'
 describe('Bitcoincash Integration Tests for Haskoin', () => {
   it('should fetch address balance using haskoin', async () => {
-    const address = bchClient.getAddress()
+    const address = await bchClient.getAddressAsync()
     const balances = await bchClient.getBalance(address)
     balances.forEach((bal) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
@@ -95,8 +95,7 @@ describe('Bitcoincash Integration Tests for Haskoin', () => {
   })
   it('should send a testnet bch tx using haskoin', async () => {
     try {
-      console.log(bchClientTestnet.getAddress(0))
-      const to = bchClientTestnet.getAddress(1)
+      const to = await bchClientTestnet.getAddressAsync(1)
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await bchClientTestnet.transfer({
         asset: AssetBCH,

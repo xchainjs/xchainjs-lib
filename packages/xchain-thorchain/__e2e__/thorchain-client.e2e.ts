@@ -29,11 +29,11 @@ const chainIds = {
 
 const thorClient = new ThorClient({
   network: Network.Mainnet,
-  phrase: process.env.PHRASE,
+  phrase: process.env.MAINNET_PHRASE,
   chainIds: chainIds,
 })
 const thorchainClient = thorClient
-const bnbClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
+const bnbClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.MAINNET_PHRASE })
 
 register9Rheader(axios)
 register9Rheader(cosmosclient.config.globalAxios)
@@ -50,7 +50,7 @@ register9Rheader(cosmosclient.config.globalAxios)
 
 describe('thorchain Integration Tests', () => {
   it('should fetch thorchain balances', async () => {
-    const address = thorClient.getAddress(0)
+    const address = await thorClient.getAddressAsync(0)
     console.log(address)
     const balances = await thorClient.getBalance('thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu')
     balances.forEach((bal) => {
@@ -60,7 +60,7 @@ describe('thorchain Integration Tests', () => {
   })
   it('should xfer rune from wallet 0 -> 1, with a memo and custom sequence', async () => {
     try {
-      const addressTo = thorClient.getAddress(1)
+      const addressTo = await thorClient.getAddressAsync(1)
       const transferTx = {
         walletIndex: 0,
         asset: AssetRuneNative,
@@ -77,7 +77,7 @@ describe('thorchain Integration Tests', () => {
   })
   it('should transfer rune from wallet 0 -> 1, with a memo x', async () => {
     try {
-      const addressTo = thorClient.getAddress(1)
+      const addressTo = await thorClient.getAddressAsync(1)
       const transferTx: TxParams = {
         walletIndex: 0,
         asset: AssetRuneNative,
@@ -97,7 +97,7 @@ describe('thorchain Integration Tests', () => {
       // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
       await delay(10 * 1000)
 
-      const address = await bnbClient.getAddress()
+      const address = await bnbClient.getAddressAsync()
       const memo = `=:BNB.BNB:${address}`
 
       const hash = await thorchainClient.deposit({
@@ -119,7 +119,7 @@ describe('thorchain Integration Tests', () => {
       // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
       await delay(10 * 1000)
 
-      const address = await thorClient.getAddress()
+      const address = await thorClient.getAddressAsync()
       const memo = `=:BNB/BNB:${address}`
 
       const hash = await thorchainClient.deposit({
@@ -137,7 +137,7 @@ describe('thorchain Integration Tests', () => {
 
   it('should transfer some BNB/BNB', async () => {
     try {
-      const address = await thorClient.getAddress()
+      const address = await thorClient.getAddressAsync()
       const asset = assetFromString('BNB/BNB') as Asset
       const transferTx: TxParams = {
         walletIndex: 0,
@@ -269,8 +269,8 @@ describe('thorchain Integration Tests', () => {
   })
   it('should prepare transaction', async () => {
     try {
-      const sender = thorClient.getAddress(3)
-      const recipient = thorClient.getAddress(0)
+      const sender = await thorClient.getAddressAsync(3)
+      const recipient = await thorClient.getAddressAsync(0)
 
       const amount = baseAmount('80000000')
       const unsignedTxData = await thorClient.prepareTx({
@@ -286,7 +286,7 @@ describe('thorchain Integration Tests', () => {
 
       const privKey = thorClient
         .getCosmosClient()
-        .getPrivKeyFromMnemonic(process.env.PHRASE as string, "44'/931'/0'/0/3")
+        .getPrivKeyFromMnemonic(process.env.MAINNET_PHRASE as string, "44'/931'/0'/0/3")
 
       const authInfo = cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
 

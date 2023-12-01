@@ -33,8 +33,8 @@ const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 const thorchainCacheStagenet = new ThorchainCache(new Thornode(Network.Stagenet), midgardQueryStagenet)
 const thorchainQueryStagenet = new ThorchainQuery(thorchainCacheStagenet)
 
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
-const stagenetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
+const mainnetWallet = new Wallet(process.env.MAINNET_PHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const stagenetWallet = new Wallet(process.env.TESTNET_PHRASE || 'you forgot to set the phrase', thorchainQueryStagenet)
 
 const mainnetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 const stagenetThorchainAmm = new ThorchainAMM(thorchainQueryStagenet)
@@ -83,7 +83,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.0005')), AssetBTC),
       destinationAsset: AssetRuneNative,
-      destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['THOR'].getAddressAsync(),
       // affiliateFeePercent: 0.1,
       wallet: mainnetWallet,
       walletIndex: 0,
@@ -102,7 +102,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.0001')), AssetBTC),
       destinationAsset: AssetRuneNative,
-      destinationAddress: mainnetWallet.clients['BNB'].getAddress(), // Wrong chain to trigger error
+      destinationAddress: await mainnetWallet.clients['BNB'].getAddressAsync(), // Wrong chain to trigger error
       wallet: mainnetWallet,
       walletIndex: 0,
     }
@@ -122,7 +122,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: AssetRuneNative,
       amount: new CryptoAmount(assetToBase(assetAmount(100)), AssetRuneNative),
       destinationAsset: AssetETH,
-      destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['ETH'].getAddressAsync(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
       wallet: mainnetWallet,
@@ -138,7 +138,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: AssetBNB,
       amount: new CryptoAmount(assetToBase(assetAmount('0.002')), AssetBNB),
       destinationAsset: AssetETH,
-      destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['ETH'].getAddressAsync(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
       wallet: mainnetWallet,
@@ -155,7 +155,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: BUSD,
       amount: new CryptoAmount(assetToBase(assetAmount('4')), BUSD),
       destinationAsset: sBTC,
-      destinationAddress: mainnetWallet.clients[THORChain].getAddress(),
+      destinationAddress: await mainnetWallet.clients[THORChain].getAddressAsync(),
       slipLimit: new BigNumber(0.03),
       wallet: mainnetWallet,
       walletIndex: 0,
@@ -179,7 +179,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: sBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.00009')), sBTC),
       destinationAsset: BUSD,
-      destinationAddress: mainnetWallet.clients['BNB'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['BNB'].getAddressAsync(),
       slipLimit: new BigNumber(0.09),
       wallet: mainnetWallet,
       walletIndex: 0,
@@ -199,7 +199,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: sBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.0009')), sBTC),
       destinationAsset: sETH,
-      destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['THOR'].getAddressAsync(),
       slipLimit: new BigNumber(0.5),
       wallet: mainnetWallet,
       walletIndex: 0,
@@ -223,7 +223,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: sBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.0009')), sBTC),
       destinationAsset: sETH,
-      destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['THOR'].getAddressAsync(),
       slipLimit: new BigNumber(0.5),
       wallet: mainnetWallet,
       walletIndex: 0,
@@ -247,7 +247,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount('0.1', 18)), AssetETH),
       destinationAsset: AssetBNB,
-      destinationAddress: mainnetWallet.clients['BNB'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['BNB'].getAddressAsync(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
       wallet: mainnetWallet,
@@ -264,7 +264,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: AssetRuneNative,
       amount: new CryptoAmount(assetToBase(assetAmount('10')), AssetRuneNative),
       destinationAsset: USDT,
-      destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['ETH'].getAddressAsync(),
       slipLimit: new BigNumber(0.5),
       // affiliateFeePercent: 0.1,
       wallet: mainnetWallet,
@@ -282,7 +282,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
         fromAsset: USDT,
         amount: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
         destinationAsset: AssetRuneNative,
-        destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+        destinationAddress: await mainnetWallet.clients['THOR'].getAddressAsync(),
         slipLimit: new BigNumber('0.5'),
         wallet: mainnetWallet,
         walletIndex: 0,
@@ -313,7 +313,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
         fromAsset: USDT,
         amount: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
         destinationAsset: AssetRuneNative,
-        destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+        destinationAddress: await mainnetWallet.clients['THOR'].getAddressAsync(),
         slipLimit: new BigNumber('0.5'),
         wallet: mainnetWallet,
         walletIndex: 0,
@@ -329,7 +329,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       fromAsset: USDT,
       amount: new CryptoAmount(assetToBase(assetAmount('0.005', USDT_DECIMAL)), USDT),
-      destinationAddress: mainnetWallet.clients['ETH'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['ETH'].getAddressAsync(),
       destinationAsset: XRUNE,
       slipLimit: new BigNumber('0.5'),
       wallet: mainnetWallet,
@@ -352,7 +352,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       fromAsset: AssetLTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.01')), AssetLTC),
-      destinationAddress: stagenetWallet.clients[AVAXChain].getAddress(),
+      destinationAddress: await stagenetWallet.clients[AVAXChain].getAddressAsync(),
       destinationAsset: AssetAVAX,
       slipLimit: new BigNumber('0.5'),
       wallet: mainnetWallet,
@@ -366,7 +366,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.01')), AssetLTC),
-      destinationAddress: mainnetWallet.clients['THOR'].getAddress(),
+      destinationAddress: await mainnetWallet.clients['THOR'].getAddressAsync(),
       destinationAsset: AssetRuneNative,
       slipLimit: new BigNumber('0.5'),
       wallet: mainnetWallet,
@@ -380,7 +380,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
     const estimateSwapParams = {
       fromAsset: AssetATOM,
       amount: new CryptoAmount(assetToBase(assetAmount('10')), AssetATOM),
-      destinationAddress: mainnetWallet.clients[THORChain].getAddress(),
+      destinationAddress: await mainnetWallet.clients[THORChain].getAddressAsync(),
       destinationAsset: sATOM,
       slipLimit: new BigNumber('0.05'),
       wallet: mainnetWallet,
@@ -395,7 +395,7 @@ describe('xchain-swap doSwap Integration Tests', () => {
       fromAsset: AssetAVAX,
       amount: new CryptoAmount(assetToBase(assetAmount('0.5', 18)), AssetAVAX),
       destinationAsset: AssetRuneNative,
-      destinationAddress: stagenetWallet.clients[THORChain].getAddress(),
+      destinationAddress: await stagenetWallet.clients[THORChain].getAddressAsync(),
       slipLimit: new BigNumber('0.2'),
     }
     try {

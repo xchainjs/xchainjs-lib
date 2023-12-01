@@ -1,6 +1,7 @@
-import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
+import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 import {
+  BitgoProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   SochainNetwork,
@@ -54,7 +55,7 @@ export const blockstreamExplorerProviders = {
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   DOGEChain,
   AssetDOGE,
   8,
@@ -62,7 +63,7 @@ const testnetSochainProvider = new SochainProvider(
 )
 const mainnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   DOGEChain,
   AssetDOGE,
   8,
@@ -84,10 +85,24 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   AssetDOGE,
   8,
   BlockcypherNetwork.DOGE,
-  process.env['BlOCKCYPHER_API_KEY'] || '',
+  process.env.BLOCKCYPHER_API_KEY || '',
 )
 export const blockcypherDataProviders = {
   [Network.Testnet]: undefined, //no provider here
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+//======================
+// Bitgo
+//======================
+const mainnetBitgoProvider = new BitgoProvider({
+  baseUrl: 'https://app.bitgo.com',
+  chain: DOGEChain,
+})
+
+export const BitgoProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined,
+  [Network.Stagenet]: mainnetBitgoProvider,
+  [Network.Mainnet]: mainnetBitgoProvider,
 }

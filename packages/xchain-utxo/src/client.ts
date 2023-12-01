@@ -19,9 +19,26 @@ import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
 import { UTXO, UtxoClientParams, UtxoOnlineDataProviders } from './types'
 
+export enum Protocol {
+  THORCHAIN = 1,
+}
+
 export abstract class Client extends BaseXChainClient {
   protected explorerProviders: ExplorerProviders
   protected dataProviders: UtxoOnlineDataProviders[]
+
+  protected abstract compileMemo(memo: string): Buffer
+  protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
+
+  protected async calcFee(feeRate: FeeRate, options?: FeeEstimateOptions): Promise<Fee> {
+    let utxos: UTXO[] = []
+    if (options?.sender) {
+      utxos = await this.scanUTXOs(options.sender, false)
+    }
+    const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
+    const fee = this.getFeeFromUtxos(utxos, feeRate, compiledMemo)
+    return baseAmount(fee)
+  }
 
   /**
    * Constructor
@@ -89,7 +106,7 @@ export abstract class Client extends BaseXChainClient {
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const filteredParams: TxHistoryParams = {
-      address: params?.address || this.getAddress(),
+      address: params?.address || (await this.getAddress()),
       offset: params?.offset,
       limit: params?.limit,
       startTime: params?.startTime,
@@ -137,7 +154,7 @@ export abstract class Client extends BaseXChainClient {
     const rates = await this.getFeeRates()
     return {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
+      // @ts-ignore
       fees: await calcFeesAsync(rates, this.calcFee.bind(this), options),
       rates,
     }
@@ -148,17 +165,32 @@ export abstract class Client extends BaseXChainClient {
     return fees
   }
 
-  async getFeeRates(): Promise<FeeRates> {
-    const feeRate: FeeRate = await (async () => {
+  /**
+   * Get fee rates
+   * @param {Protocol} protocol Protocol to interact with. If there's no protocol provided, fee rates are retrieved from chain data providers
+   *
+   * @returns {FeeRates} The fee rates (average, fast, fastest) in `Satoshis/byte`
+   */
+  async getFeeRates(protocol?: Protocol): Promise<FeeRates> {
+    if (!protocol) {
       try {
-        return await this.getFeeRateFromThorchain()
+        const feeRates = await this.roundRobinGetFeeRates()
+        return feeRates
       } catch (error) {
-        console.warn(`Rate lookup via Thorchain failed: ${error}`)
+        console.warn('Can not retrieve fee rates from provider')
       }
-      return await this.getSuggestedFeeRate()
-    })()
+    }
 
-    return standardFeeRates(feeRate)
+    if (!protocol || Protocol.THORCHAIN) {
+      try {
+        const feeRate = await this.getFeeRateFromThorchain()
+        return standardFeeRates(feeRate)
+      } catch (error) {
+        console.warn(`Can not retrieve fee rates from Thorchain`)
+      }
+    }
+    // TODO: Return default value
+    throw Error('Can not retrieve fee rates')
   }
 
   async broadcastTx(txHex: string): Promise<TxHash> {
@@ -230,4 +262,15 @@ export abstract class Client extends BaseXChainClient {
   protected abstract getSuggestedFeeRate(): Promise<FeeRate>
   protected abstract compileMemo(memo: string): Buffer
   protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
+  protected async roundRobinGetFeeRates(): Promise<FeeRates> {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (prov) return await prov.getFeeRates()
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    throw Error('no provider able to get fee rates')
+  }
 }

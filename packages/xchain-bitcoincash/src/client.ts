@@ -3,13 +3,13 @@ import { AssetInfo, FeeOption, FeeRate, Network, TxHash, TxParams, checkFeeBound
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
-import axios from 'axios'
 import accumulative from 'coinselect/accumulative'
 
 import {
   AssetBCH,
   BCHChain,
   BCH_DECIMAL,
+  BitgoProviders,
   HaskoinDataProviders,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
@@ -23,7 +23,7 @@ export const defaultBchParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
-  dataProviders: [HaskoinDataProviders],
+  dataProviders: [BitgoProviders, HaskoinDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/145'/0'/0/`,
     [Network.Testnet]: `m/44'/1'/0'/0/`,
@@ -56,15 +56,7 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   * @deprecated this function eventually will be removed use getAddressAsync instead
    */
   getAddress(index = 0): Address {
     if (!this.phrase) throw new Error('Phrase must be provided')
@@ -76,6 +68,21 @@ class Client extends UTXOClient {
     } catch (error) {
       throw new Error('Address not defined')
     }
+  }
+
+  /**
+   * Get the current address.
+   *
+   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * The address is then decoded into type P2WPKH and returned.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   */
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
   }
 
   /**
@@ -119,10 +126,6 @@ class Client extends UTXOClient {
     return masterHDNode.derivePath(derivationPath).keyPair
   }
 
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    return await this.getSuggestedFee()
-  }
-
   /**
    * Transfer BCH.
    *
@@ -139,7 +142,7 @@ class Client extends UTXOClient {
     const { rawUnsignedTx, utxos } = await this.prepareTx({
       ...params,
       feeRate,
-      sender: this.getAddress(fromAddressIndex),
+      sender: await this.getAddressAsync(fromAddressIndex),
     })
 
     const tx: Transaction = bitcash.Transaction.fromHex(rawUnsignedTx)
@@ -241,18 +244,6 @@ class Client extends UTXOClient {
       builder: transactionBuilder,
       utxos,
       inputs,
-    }
-  }
-
-  private async getSuggestedFee(): Promise<number> {
-    //Note: Haskcoin does not provide fee rate related data
-    //So use Bitgo API for fee estimation
-    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
-    try {
-      const response = await axios.get('https://app.bitgo.com/api/v2/bch/tx/fee')
-      return response.data.feePerKb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return Utils.DEFAULT_SUGGESTED_TRANSACTION_FEE
     }
   }
 

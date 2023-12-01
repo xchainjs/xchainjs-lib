@@ -53,9 +53,13 @@ const mockAccountsBalance = (
   nock(url).get(`/cosmos/bank/v1beta1/balances/${address}`).reply(200, result)
 }
 
-const mockMayachainConstants = (url: string) => {
-  const response = require('../__mocks__/responses/mayachain/constants.json')
-  nock(url).get('/mayachain/constants').reply(200, response)
+// const mockMayachainConstants = (url: string) => {
+//   const response = require('../__mocks__/responses/mayachain/constants.json')
+//   nock(url).get('/mayachain/constants').reply(200, response)
+// }
+const mockMayachainMimir = (url: string) => {
+  const response = require('../__mocks__/responses/mayachain/mimir.json')
+  nock(url).get('/mayachain/mimir').reply(200, response)
 }
 
 const assertTxsPost = (
@@ -110,11 +114,11 @@ describe('Client Test', () => {
 
   it('should start with empty wallet', async () => {
     const mayaClientEmptyMain = new Client({ phrase, network: Network.Mainnet })
-    const addressMain = mayaClientEmptyMain.getAddress()
+    const addressMain = await mayaClientEmptyMain.getAddressAsync()
     expect(addressMain).toEqual(mainnet_address_path0)
 
     const mayaClientEmptyTest = new Client({ phrase, network: Network.Stagenet })
-    const addressTest = mayaClientEmptyTest.getAddress()
+    const addressTest = await mayaClientEmptyTest.getAddressAsync()
     expect(addressTest).toEqual(stagenet_address_path0)
   })
 
@@ -123,34 +127,34 @@ describe('Client Test', () => {
       phrase,
       network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/0" */,
     })
-    const addressMain = mayaClientEmptyMain.getAddress()
+    const addressMain = await mayaClientEmptyMain.getAddressAsync()
     expect(addressMain).toEqual(mainnet_address_path0)
 
-    const viaSetPhraseAddr1 = mayaClientEmptyMain.getAddress(1 /*, "44'/931'/0'/0/1" */)
+    const viaSetPhraseAddr1 = await mayaClientEmptyMain.getAddressAsync(1 /*, "44'/931'/0'/0/1" */)
     expect(viaSetPhraseAddr1).toEqual(mainnet_address_path1)
 
     const mayaClientEmptyTest = new Client({
       phrase,
       network: Network.Stagenet /*, derivationPath: "44'/931'/0'/0/0"*/,
     })
-    const addressTest = mayaClientEmptyTest.getAddress()
+    const addressTest = await mayaClientEmptyTest.getAddressAsync()
     expect(addressTest).toEqual(stagenet_address_path0)
 
-    const viaSetPhraseAddr1Test = mayaClientEmptyTest.getAddress(1 /*, "44'/931'/0'/0/1"*/)
+    const viaSetPhraseAddr1Test = await mayaClientEmptyTest.getAddressAsync(1 /*, "44'/931'/0'/0/1"*/)
     expect(viaSetPhraseAddr1Test).toEqual(stagenet_address_path1)
 
     const mayaClientEmptyMain1 = new Client({
       phrase,
       network: Network.Mainnet /*, derivationPath: "44'/931'/0'/0/1"*/,
     })
-    const addressMain1 = mayaClientEmptyMain1.getAddress(1)
+    const addressMain1 = await mayaClientEmptyMain1.getAddressAsync(1)
     expect(addressMain1).toEqual(mainnet_address_path1)
 
     const mayaClientEmptyTest1 = new Client({
       phrase,
       network: Network.Stagenet /*, derivationPath: "44'/931'/0'/0/1"*/,
     })
-    const addressTest1 = mayaClientEmptyTest1.getAddress(1)
+    const addressTest1 = await mayaClientEmptyTest1.getAddressAsync(1)
     expect(addressTest1).toEqual(stagenet_address_path1)
   })
 
@@ -171,9 +175,9 @@ describe('Client Test', () => {
   })
 
   it('should have right address', async () => {
-    expect(mayaClient.getAddress()).toEqual(stagenet_address_path0)
+    expect(await mayaClient.getAddressAsync()).toEqual(stagenet_address_path0)
 
-    expect(mayaMainClient.getAddress()).toEqual(mainnet_address_path0)
+    expect(await mayaMainClient.getAddressAsync()).toEqual(mainnet_address_path0)
   })
 
   it('should allow to get the CosmosSDKClient', async () => {
@@ -184,18 +188,18 @@ describe('Client Test', () => {
     mayaMainClient.setNetwork(Network.Stagenet)
     expect(mayaMainClient.getNetwork()).toEqual('stagenet')
 
-    const address = await mayaMainClient.getAddress()
+    const address = await mayaMainClient.getAddressAsync()
     expect(address).toEqual(stagenet_address_path0)
   })
 
   it('should init, should have right prefix', async () => {
-    expect(mayaClient.validateAddress(mayaClient.getAddress())).toBeTruthy()
+    expect(mayaClient.validateAddress(await mayaClient.getAddressAsync())).toBeTruthy()
 
     mayaClient.setNetwork(Network.Mainnet)
-    expect(mayaClient.validateAddress(mayaClient.getAddress())).toBeTruthy()
+    expect(mayaClient.validateAddress(await mayaClient.getAddressAsync())).toBeTruthy()
 
     mayaClient.setNetwork(Network.Stagenet)
-    expect(mayaClient.validateAddress(mayaClient.getAddress())).toBeTruthy()
+    expect(mayaClient.validateAddress(await mayaClient.getAddressAsync())).toBeTruthy()
   })
 
   it('should have right client url', async () => {
@@ -271,7 +275,7 @@ describe('Client Test', () => {
     mockAccountsBalance(mayaClient.getClientUrl().node, stagenet_address_path0, {
       balances: [],
     })
-    const result = await mayaClient.getBalance(mayaClient.getAddress(0))
+    const result = await mayaClient.getBalance(await mayaClient.getAddressAsync(0))
     expect(result).toEqual([])
   })
 
@@ -413,7 +417,7 @@ describe('Client Test', () => {
   })
 
   it('transfer', async () => {
-    const to_address = mayaClient.getAddress(1)
+    const to_address = await mayaClient.getAddressAsync(1)
     const send_amount: BaseAmount = baseAmount(10000, 6)
     const memo = 'transfer'
 
@@ -442,14 +446,14 @@ describe('Client Test', () => {
       balances: [
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'rune',
-          amount: '210000000',
+          amount: '210000000000',
         }),
       ],
     })
-    mockMayachainConstants(nodeUrl)
+    mockMayachainMimir(nodeUrl)
     mockTendermintSimulate(nodeUrl, {
       gas_info: {
-        gas_used: '1000000',
+        gas_used: '10000000000',
       },
     })
     assertTxsPost(mayaClient.getClientUrl().node, expected_txsPost_result)
@@ -493,7 +497,7 @@ describe('Client Test', () => {
       balances: [
         new cosmosclient.proto.cosmos.base.v1beta1.Coin({
           denom: 'cacao',
-          amount: '210000000',
+          amount: '210000000000',
         }),
       ],
     })
@@ -502,10 +506,10 @@ describe('Client Test', () => {
         network: chainIds[Network.Stagenet],
       },
     })
-    mockMayachainConstants(nodeUrl)
+    mockMayachainMimir(nodeUrl)
     mockTendermintSimulate(nodeUrl, {
       gas_info: {
-        gas_used: '1000000',
+        gas_used: '1000000000',
       },
     })
     assertTxsPost(nodeUrl, expected_txsPost_result)
@@ -564,13 +568,13 @@ describe('Client Test', () => {
 
   it('fetches fees from client', async () => {
     const url = mayaClient.getClientUrl().node
-    mockMayachainConstants(url)
+    mockMayachainMimir(url)
 
     const fees = await mayaClient.getFees()
 
-    expect(fees.average.amount().toString()).toEqual('2000000')
-    expect(fees.fast.amount().toString()).toEqual('2000000')
-    expect(fees.fastest.amount().toString()).toEqual('2000000')
+    expect(fees.average.amount().toString()).toEqual('10000000000')
+    expect(fees.fast.amount().toString()).toEqual('10000000000')
+    expect(fees.fastest.amount().toString()).toEqual('10000000000')
   })
 
   it('returns default fees if client is not available', async () => {
@@ -579,8 +583,8 @@ describe('Client Test', () => {
 
     const fees = await mayaClient.getFees()
 
-    expect(fees.average.amount().toString()).toEqual('200000000')
-    expect(fees.fast.amount().toString()).toEqual('200000000')
-    expect(fees.fastest.amount().toString()).toEqual('200000000')
+    expect(fees.average.amount().toString()).toEqual('10000000000')
+    expect(fees.fast.amount().toString()).toEqual('10000000000')
+    expect(fees.fastest.amount().toString()).toEqual('10000000000')
   })
 })

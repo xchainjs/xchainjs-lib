@@ -33,7 +33,7 @@ const btcClient = new Client({
 const btcClientTestnet = new Client({
   ...defaultBTCParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.TESTNET_PHRASE,
 })
 describe('Bitcoin Integration Tests for BlockCypher', () => {
   it('should fetch correct asset ', async () => {
@@ -107,7 +107,7 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
   it('should send a testnet btc tx via blockcypher', async () => {
     try {
       // const from = btcClientTestnet.getAddress(0)
-      const to = btcClientTestnet.getAddress(1)
+      const to = await btcClientTestnet.getAddressAsync(1)
       // console.log(JSON.stringify(to, null, 2))
       const amount = assetToBase(assetAmount('0.000011'))
       const txid = await btcClientTestnet.transfer({
@@ -143,8 +143,8 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
   })
   it('Try to send max amount', async () => {
     try {
-      const firstAddress = btcClientTestnet.getAddress(0)
-      const address = btcClientTestnet.getAddress(1)
+      const firstAddress = await btcClientTestnet.getAddressAsync(0)
+      const address = await btcClientTestnet.getAddressAsync(1)
       console.log('address', address)
       const balance = await btcClientTestnet.getBalance(address)
       console.log(balance[0].amount.amount().toString())

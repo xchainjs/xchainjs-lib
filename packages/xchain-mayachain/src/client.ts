@@ -40,7 +40,7 @@ import {
   DepositParam,
   ExplorerUrls,
   MayachainClientParams,
-  MayachainConstantsResponse,
+  MayachainMimirResponse,
   NodeUrl,
   TxData,
   TxOfflineParams,
@@ -277,11 +277,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
+   * @deprecated this function eventually will be removed use getAddressAsync instead
    */
   getAddress(index = 0): string {
     const address = this.cosmosClient.getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
@@ -290,6 +286,17 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     }
 
     return address
+  }
+
+  /**
+   * Get the current address.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
+   */
+  async getAddressAsync(walletIndex = 0): Promise<Address> {
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -338,7 +345,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     const messageAction = undefined
     const offset = params?.offset || 0
     const limit = params?.limit || 10
-    const address = params?.address || this.getAddress()
+    const address = params?.address || (await this.getAddressAsync())
     const txMinHeight = undefined
     const txMaxHeight = undefined
 
@@ -493,7 +500,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     const privKey = this.getPrivateKey(walletIndex)
     const signerPubkey = privKey.pubKey()
 
-    const fromAddress = this.getAddress(walletIndex)
+    const fromAddress = await this.getAddressAsync(walletIndex)
     const fromAddressAcc = cosmosclient.AccAddress.fromString(fromAddress)
 
     const depositTxBody = await buildDepositTx({
@@ -647,7 +654,7 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
     }
 
     const txBody = await buildTransferTx({
-      fromAddress: this.getAddress(walletIndex),
+      fromAddress: await this.getAddressAsync(walletIndex),
       toAddress: recipient,
       memo,
       assetAmount: amount,
@@ -682,10 +689,8 @@ class Client extends BaseXChainClient implements MayachainClient, XChainClient {
   async getFees(): Promise<Fees> {
     try {
       const {
-        data: {
-          int_64_values: { NativeTransactionFee: fee },
-        },
-      } = await axios.get<MayachainConstantsResponse>(`${this.getClientUrl().node}/mayachain/constants`)
+        data: { NATIVETRANSACTIONFEE: fee },
+      } = await axios.get<MayachainMimirResponse>(`${this.getClientUrl().node}/mayachain/mimir`) // Fetching NativeTransactionFee from https://mayanode.mayachain.info/mayachain/mimir
 
       // validate data
       if (!fee || isNaN(fee) || fee < 0) throw Error(`Invalid fee: ${fee.toString()}`)

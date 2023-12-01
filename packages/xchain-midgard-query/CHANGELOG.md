@@ -1,3 +1,15 @@
+# v0.1.7 (2023-11-21)
+
+## Update
+
+- xchain-client dependency increased
+
+# v0.1.6 (2023-11-14)
+
+## Update
+
+- update Midgard dep
+
 # v0.1.5 (2023-11-05)
 
 ## Update

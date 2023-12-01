@@ -7,7 +7,7 @@ const blockcypherProvider = new BlockcypherProvider(
   AssetBTC,
   8,
   BlockcypherNetwork.BTC,
-  process.env.BLOCKCYHER_API_TOKEN || undefined,
+  process.env.BLOCKCYHER_API_KEY,
 )
 
 describe('blockcypher api tests', () => {
@@ -57,5 +57,9 @@ describe('blockcypher api tests', () => {
     expect(response.to[0].amount.amount().toFixed()).toBe('1973081')
     expect(response.to[0].to).toBe('bc1qcwnecmzdg0f0wwrjrmlelxfgvmjtqn7cal0dgx')
     // console.log(JSON.stringify(response, null, 2))
+  })
+  it(`Should fetch fee rates`, async () => {
+    const feeRates = await blockcypherProvider.getFeeRates()
+    console.log(feeRates)
   })
 })

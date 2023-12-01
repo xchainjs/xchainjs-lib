@@ -2,12 +2,12 @@ import { AssetInfo, FeeRate, Network, PreparedTx, TxHash, TxParams, checkFeeBoun
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
-import axios from 'axios'
 import * as Dogecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
 import {
   AssetDOGE,
+  BitgoProviders,
   DOGEChain,
   DOGE_DECIMAL,
   LOWER_FEE_BOUND,
@@ -19,13 +19,11 @@ import {
 import { LedgerTxInfo, LedgerTxInfoParams } from './types/ledger'
 import * as Utils from './utils'
 
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 150000
-
 export const defaultDogeParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: [blockcypherDataProviders],
+  dataProviders: [BitgoProviders, blockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/3'/0'/0/`,
     [Network.Stagenet]: `m/44'/3'/0'/0/`,
@@ -59,15 +57,7 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   * @deprecated this function eventually will be removed use getAddressAsync instead
    */
   getAddress(index = 0): Address {
     if (index < 0) {
@@ -87,6 +77,21 @@ class Client extends UTXOClient {
       return address
     }
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   * Get the current address.
+   *
+   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * The address is then decoded into type P2WPKH and returned.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   */
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
   }
 
   /**
@@ -135,15 +140,6 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    try {
-      const response = await axios.get(`https://api.blockcypher.com/v1/doge/main`)
-      return response.data.low_fee_per_kb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return DEFAULT_SUGGESTED_TRANSACTION_FEE
-    }
-  }
-
   /**
    * Transfer Doge.
    *
@@ -151,14 +147,14 @@ class Client extends UTXOClient {
    * @returns {TxHash} The transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    const feeRate = params.feeRate || (await this.getSuggestedFeeRate())
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
     const fromAddressIndex = params?.walletIndex || 0
     const { rawUnsignedTx } = await this.prepareTx({
       ...params,
       feeRate,
-      sender: this.getAddress(fromAddressIndex),
+      sender: await this.getAddressAsync(fromAddressIndex),
     })
 
     const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)

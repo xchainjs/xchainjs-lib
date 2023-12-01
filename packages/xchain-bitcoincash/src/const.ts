@@ -1,6 +1,6 @@
 import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
-import { HaskoinNetwork, HaskoinProvider } from '@xchainjs/xchain-utxo-providers'
+import { BitgoProvider, HaskoinNetwork, HaskoinProvider } from '@xchainjs/xchain-utxo-providers'
 
 export const LOWER_FEE_BOUND = 1
 export const UPPER_FEE_BOUND = 500
@@ -58,4 +58,18 @@ export const HaskoinDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetHaskoinProvider,
   [Network.Stagenet]: mainnetHaskoinProvider,
   [Network.Mainnet]: mainnetHaskoinProvider,
+}
+
+//======================
+// Bitgo
+//======================
+const mainnetBitgoProvider = new BitgoProvider({
+  baseUrl: 'https://app.bitgo.com',
+  chain: BCHChain,
+})
+
+export const BitgoProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined,
+  [Network.Stagenet]: mainnetBitgoProvider,
+  [Network.Mainnet]: mainnetBitgoProvider,
 }

@@ -73,13 +73,9 @@ const doStreamingSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Net
     const toChain = toAsset.synth ? THORChain : toAsset.chain
     const destinationAddress = wallet.clients[toChain].getAddress()
 
-    const fromChain = fromAsset.synth ? THORChain : fromAsset.chain
-    const fromAddress = wallet.clients[fromChain].getAddress()
-
     const swapParams: AmmEstimateSwapParams = {
       fromAsset,
       amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
-      fromAddress,
       destinationAsset: toAsset,
       destinationAddress,
       streamingInterval,

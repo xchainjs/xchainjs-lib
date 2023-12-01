@@ -1,3 +1,59 @@
+# v0.8.4 (2023-11-21)
+
+## Update
+
+- xchain-client dependency increased
+
+# v0.8.3 (2023-11-21)
+
+## Update
+
+- Client dependencies updated to work with renamed environment variables
+
+# v0.8.2 (2023-11-16)
+
+## Update
+
+- Runescan explorer
+
+# v0.8.1 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
+# v0.8.0 (2023-11-15)
+
+## Update
+
+- Default gasPrice in baseAmount unit. Changed from GWei to Wei
+
+# v0.7.18 (2023-11-12)
+
+## Update
+
+- Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
+- update Midgard & Query & thornode deps
+- Remove fromAddress from quoteSwap() params - no longer needed
+
+# v0.7.17 (2023-11-12)
+
+## Update
+
+- Transfer bug fix with txSigner, sender address can be retrieved from signer
+
+# v0.7.16 (2023-11-11)
+
+## Update
+
+- Thorchain package version from 0.28.10 to 0.28.11
+
+# v0.7.15 (2023-11-10)
+
+## Update
+
+- Utxo clients version updated
+
 # v0.7.14 (2023-11-07)
 
 ## Update

@@ -18,15 +18,14 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import * as nodeApi from '@xchainjs/xchain-dash/src/node-api'
 import { Address, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
-import axios from 'axios'
 import * as Dash from 'bitcoinjs-lib'
 
 import {
   AssetDASH,
+  BitgoProviders,
   BlockcypherDataProviders,
   DASHChain,
   DASH_DECIMAL,
-  DEFAULT_FEE_RATE,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
   explorerProviders,
@@ -50,7 +49,7 @@ export const defaultDashParams: UtxoClientParams & {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
-  dataProviders: [BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/5'/0'/0/`,
     [Network.Stagenet]: `m/44'/5'/0'/0/`,
@@ -84,6 +83,9 @@ class Client extends UTXOClient {
     this.nodeAuth = params.nodeAuth
   }
 
+  /**
+   * @deprecated this function eventually will be removed use getAddressAsync instead
+   */
   getAddress(index = 0): Address {
     if (index < 0) {
       throw new Error('index must be greater than zero')
@@ -106,6 +108,11 @@ class Client extends UTXOClient {
 
     return address
   }
+
+  async getAddressAsync(index = 0): Promise<string> {
+    return this.getAddress(index)
+  }
+
   /**
    *
    * @returns BTC asset info
@@ -231,15 +238,6 @@ class Client extends UTXOClient {
     }
   }
 
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    try {
-      const response = await axios.get('https://app.bitgo.com/api/v2/dash/tx/fee')
-      return response.data.feePerKb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return DEFAULT_FEE_RATE
-    }
-  }
-
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
     checkFeeBounds(this.feeBounds, feeRate)
@@ -248,7 +246,7 @@ class Client extends UTXOClient {
     const { rawUnsignedTx, utxos } = await this.prepareTx({
       ...params,
       feeRate,
-      sender: this.getAddress(fromAddressIndex),
+      sender: await this.getAddressAsync(fromAddressIndex),
     })
 
     const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)

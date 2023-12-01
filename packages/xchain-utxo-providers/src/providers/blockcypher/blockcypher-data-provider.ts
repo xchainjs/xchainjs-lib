@@ -108,6 +108,24 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
       throw error
     }
   }
+
+  /**
+   * Returns a fee rate estimation from Blockcypher API service.
+   * @returns {FeeRates} Estimated fee rates
+   */
+  async getFeeRates(): Promise<FeeRates> {
+    const chainResponse = await blockcypher.getBlockchainData({
+      baseUrl: `${this.baseUrl}/${this.blockcypherNetwork}`,
+      apiKey: this._apiKey,
+    })
+
+    return {
+      [FeeOption.Average]: chainResponse.low_fee_per_kb / 1000,
+      [FeeOption.Fast]: chainResponse.medium_fee_per_kb / 1000,
+      [FeeOption.Fastest]: chainResponse.high_fee_per_kb / 1000,
+    }
+  }
+
   private mapTransactionToTx(rawTx: Transaction): Tx {
     return {
       asset: this.asset,
@@ -219,6 +237,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
           baseUrl: this.baseUrl,
           network: this.blockcypherNetwork,
           hash,
+          limit: 50, // Temporal approach
         })
         return rawTx
       })

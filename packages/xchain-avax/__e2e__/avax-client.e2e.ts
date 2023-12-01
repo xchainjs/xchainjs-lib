@@ -46,7 +46,7 @@ const fakeProviders = {
 }
 
 defaultAvaxParams.network = Network.Testnet
-defaultAvaxParams.phrase = process.env.PHRASE
+defaultAvaxParams.phrase = process.env.TESTNET_PHRASE
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
 const client = new AvaxClient(defaultAvaxParams)
@@ -56,7 +56,7 @@ function delay(ms: number) {
 }
 describe('xchain-evm (Avax) Integration Tests', () => {
   it('should fetch avax balances', async () => {
-    const address = client.getAddress(0)
+    const address = await client.getAddressAsync(0)
     console.log(address)
     const balances = await client.getBalance(address)
     balances.forEach((bal: Balance) => {
@@ -79,9 +79,9 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(tx.asset.chain).toBe(AVAXChain)
     expect(tx.asset.ticker).toBe(AssetAVAX.ticker)
     expect(tx.type).toBe(TxType.Transfer)
-    expect(tx.from[0].from).toBe(client.getAddress(0))
+    expect(tx.from[0].from).toBe(await client.getAddressAsync(0))
     expect(tx.from[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
-    expect(tx.to[0].to).toBe(client.getAddress(1))
+    expect(tx.to[0].to).toBe(await client.getAddressAsync(1))
     expect(tx.to[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
     expect(tx.hash).toBe(txId)
   })
@@ -94,22 +94,22 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(tx.asset.ticker).toBe(assetRIP.ticker)
     expect(tx.asset.symbol).toBe(assetRIP.symbol)
     expect(tx.type).toBe(TxType.Transfer)
-    expect(tx.from[0].from).toBe(client.getAddress(0))
+    expect(tx.from[0].from).toBe(await client.getAddressAsync(0))
     expect(tx.from[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
-    expect(tx.to[0].to).toBe(client.getAddress(1))
+    expect(tx.to[0].to).toBe(await client.getAddressAsync(1))
     expect(tx.to[0].amount.amount().toFixed()).toBe(amount.amount().toFixed())
     expect(tx.hash).toBe(txId)
   })
 
   it('should transfer 0.01 AVAX between wallet 0 and 1, with a memo', async () => {
-    const recipient = client.getAddress(1)
+    const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const memo = `=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000`
     const txHash = await client.transfer({ amount, recipient, memo })
     console.log(txHash)
   })
   it('should transfer 0.01 AVAX following EIP1559 because of maxFeePerGas', async () => {
-    const recipient = client.getAddress(1)
+    const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const txHash = await client.transfer({
       amount,
@@ -119,7 +119,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     console.log(txHash)
   })
   it('should transfer 0.01 AVAX following EIP1559 because of maxPriorityFeePerGas', async () => {
-    const recipient = client.getAddress(1)
+    const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const txHash = await client.transfer({
       amount,
@@ -137,7 +137,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     console.log(txHash)
   })
   it('should approve 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
-    const recipient = client.getAddress(1)
+    const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 6))
     //ERC20 address The Crypt (RIP)
 
@@ -193,7 +193,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     console.log(gasEstimate.toString())
     expect(gasEstimate.gte(0)).toBe(true)
 
-    const recipient = client.getAddress(1)
+    const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
     const gasEstimateWithMemo = await client.estimateFeesWithGasPricesAndLimits({ amount, recipient, memo })

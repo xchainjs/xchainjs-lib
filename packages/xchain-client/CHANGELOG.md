@@ -1,3 +1,16 @@
+# v0.15.4 (2023-11-21)
+
+## Update
+
+- Get fee rates for UTXO data providers and round robin strategy
+- Get suggested fee rate removed for UTXO clients
+
+# v0.15.3 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
 # v0.15.2 (2023-11-02)
 
 ## Update

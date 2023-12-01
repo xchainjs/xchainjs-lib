@@ -29,15 +29,15 @@ const chainIds = {
 
 const mayaClient = new MayaClient({
   network: Network.Mainnet,
-  phrase: process.env.PHRASE_MAYA,
+  phrase: process.env.MAINNET_PHRASE,
   chainIds: chainIds,
 })
 const mayachainClient = mayaClient
-const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.PHRASE })
+const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.MAINNET_PHRASE })
 
 describe('Mayachain Integration Tests', () => {
   it('should fetch mayachain balances', async () => {
-    const address = mayaClient.getAddress(0)
+    const address = await mayaClient.getAddressAsync(0)
     console.log('address', address)
     const balances = await mayaClient.getBalance(address)
     balances.forEach((bal) => {
@@ -47,7 +47,7 @@ describe('Mayachain Integration Tests', () => {
   })
   it('should xfer cacao from wallet 0 -> 1, with a memo and custom sequence', async () => {
     try {
-      const addressTo = mayaClient.getAddress(1)
+      const addressTo = await mayaClient.getAddressAsync(1)
       const transferTx = {
         walletIndex: 0,
         asset: AssetCacao,
@@ -64,7 +64,7 @@ describe('Mayachain Integration Tests', () => {
   })
   it('should transfer cacao from wallet 0 -> 1, with a memo', async () => {
     try {
-      const addressTo = mayaClient.getAddress(1)
+      const addressTo = await mayaClient.getAddressAsync(1)
       const transferTx: TxParams = {
         walletIndex: 0,
         asset: AssetCacao,
@@ -103,7 +103,7 @@ describe('Mayachain Integration Tests', () => {
   })
   it('should swap some ETH/ETH for CACAO', async () => {
     try {
-      const address = await mayachainClient.getAddress()
+      const address = await mayachainClient.getAddressAsync()
       const memo = `=:MAYA.CACAO:${address}`
 
       const hash = await mayachainClient.deposit({
@@ -122,7 +122,7 @@ describe('Mayachain Integration Tests', () => {
 
   it('should transfer some ETH/ETH', async () => {
     try {
-      const address = await mayachainClient.getAddress(1)
+      const address = await mayachainClient.getAddressAsync(1)
       const asset = assetFromString('ETH/ETH') as Asset
       const transferTx: TxParams = {
         walletIndex: 0,
@@ -143,7 +143,7 @@ describe('Mayachain Integration Tests', () => {
       // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
       await delay(10 * 1000)
 
-      const address = await mayachainClient.getAddress()
+      const address = await mayachainClient.getAddressAsync()
       const memo = `=:ETH/ETH:${address}`
 
       const hash = await mayachainClient.deposit({
@@ -161,10 +161,14 @@ describe('Mayachain Integration Tests', () => {
   })
 
   it('should fetch mayachain txs', async () => {
-    const address = mayaClient.getAddress(0)
+    const address = await mayaClient.getAddressAsync(0)
     const txPage = await mayaClient.getTransactions({ address })
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
+  })
+  it('should fetch mayachain native Tx fee', async () => {
+    const fees = await mayaClient.getFees()
+    expect(fees.average.amount().toNumber()).toEqual(10000000000)
   })
   it('should fetch mayachain tx data', async () => {
     const txId = '28DA11D33AC96BA87981F45FCB2EC80536C60BB824321E0CAEF097D10B568BA5'

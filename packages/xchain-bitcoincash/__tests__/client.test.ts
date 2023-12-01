@@ -47,14 +47,14 @@ describe('BCHClient Test', () => {
     expect(bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
   })
 
-  it('set phrase with derivation path should return correct address', () => {
+  it('set phrase with derivation path should return correct address', async () => {
     bchClient.setNetwork(Network.Testnet)
     expect(bchClient.setPhrase(phrase)).toEqual(testnet_address_path0)
-    expect(bchClient.getAddress(1)).toEqual(testnet_address_path1)
+    expect(await bchClient.getAddressAsync(1)).toEqual(testnet_address_path1)
 
     bchClient.setNetwork(Network.Mainnet)
     expect(bchClient.setPhrase(phrase)).toEqual(mainnet_address_path0)
-    expect(bchClient.getAddress(1)).toEqual(mainnet_address_path1)
+    expect(await bchClient.getAddressAsync(1)).toEqual(mainnet_address_path1)
   })
 
   it('should throw an error for setting a bad phrase', () => {
@@ -65,10 +65,10 @@ describe('BCHClient Test', () => {
     expect(bchClient.setPhrase(phrase)).toBeUndefined
   })
 
-  it('should validate the right address', () => {
+  it('should validate the right address', async () => {
     bchClient.setNetwork(Network.Testnet)
     bchClient.setPhrase(phrase)
-    expect(bchClient.getAddress()).toEqual(testnet_address_path0)
+    expect(await bchClient.getAddressAsync()).toEqual(testnet_address_path0)
     expect(bchClient.validateAddress(testnet_address_path0)).toBeTruthy()
 
     bchClient.setNetwork(Network.Mainnet)
@@ -107,7 +107,7 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork(Network.Testnet)
     bchClient.setPhrase(phrase)
 
-    const balance = await bchClient.getBalance(bchClient.getAddress())
+    const balance = await bchClient.getBalance(await bchClient.getAddressAsync())
     expect(balance.length).toEqual(1)
     expect(balance[0].amount.amount().toString()).toEqual('400000000')
   })
@@ -226,7 +226,7 @@ describe('BCHClient Test', () => {
     expect(estimates.average.amount().toString()).toEqual('117')
 
     const estimatesWithSender = await bchClient.getFees({
-      sender: bchClient.getAddress(0),
+      sender: await bchClient.getAddressAsync(0),
     })
     expect(estimatesWithSender.fast.amount().toString()).toEqual('678')
     expect(estimatesWithSender.fastest.amount().toString()).toEqual('3390')

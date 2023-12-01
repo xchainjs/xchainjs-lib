@@ -14,7 +14,7 @@ import { ThorchainAMM } from '../src/thorchain-amm'
 import { Wallet } from '../src/wallet'
 
 const thorchainQueryMainnet = new ThorchainQuery()
-const mainnetWallet = new Wallet(process.env.MAINNETPHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
+const mainnetWallet = new Wallet(process.env.MAINNET_PHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
 const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
 
 // mainnet asset
@@ -58,7 +58,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     console.log(baseToAsset(check[0].amount).amount().toNumber())
   })
   it(`Should withdraw savers position`, async () => {
-    const walletAddress = await mainnetWallet.clients[BNBChain].getAddress()
+    const walletAddress = await mainnetWallet.clients[BNBChain].getAddressAsync()
     const saversWithdraw: SaversWithdraw = {
       height: 8214446,
       asset: AssetBNB,
@@ -79,7 +79,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     }
   })
   it(`Should withdraw AVAX savers position`, async () => {
-    const walletAddress = await mainnetWallet.clients[AVAXChain].getAddress()
+    const walletAddress = await mainnetWallet.clients[AVAXChain].getAddressAsync()
     const saversWithdraw: SaversWithdraw = {
       asset: AssetAVAX,
       address: walletAddress,
@@ -103,7 +103,7 @@ describe('Thorchain-amm liquidity action end to end Tests', () => {
     }
   })
   it(`Should withdraw ATOM savers position`, async () => {
-    const walletAddress = await mainnetWallet.clients[GAIAChain].getAddress()
+    const walletAddress = await mainnetWallet.clients[GAIAChain].getAddressAsync()
     const saversWithdraw: SaversWithdraw = {
       asset: AssetATOM,
       address: walletAddress,

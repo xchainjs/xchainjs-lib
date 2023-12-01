@@ -33,7 +33,7 @@ const btcClient = new Client({
 const btcClientTestnet = new Client({
   ...defaultBTCParams,
   network: Network.Testnet,
-  phrase: process.env.TESTNETPHRASE,
+  phrase: process.env.TESTNET_PHRASE,
 })
 describe('Bitcoin Integration Tests for Haskoin', () => {
   it('should fetch address balance using haskoin', async () => {
@@ -100,7 +100,7 @@ describe('Bitcoin Integration Tests for Haskoin', () => {
     try {
       // const from = btcClientTestnet.getAddress(0)
       // console.log(from)
-      const to = btcClientTestnet.getAddress(1)
+      const to = await btcClientTestnet.getAddressAsync(1)
       const amount = assetToBase(assetAmount('0.00001'))
       const txid = await btcClientTestnet.transfer({
         asset: AssetBTC,

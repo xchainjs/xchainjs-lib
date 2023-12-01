@@ -1,3 +1,22 @@
+# v0.2.5 (2023-11-21)
+
+## Update
+
+- Round robin fee strategy
+- GetSuggestedFee removed
+
+# v0.2.4 (2023-11-16)
+
+## Update
+
+- Created method getAddressAsync
+
+# v0.2.3 (2023-11-10)
+
+## Update
+
+- Utxo-providers package from 0.2.5 to 0.2.6
+
 # v0.2.2 (2023-10-26)
 
 ## Update

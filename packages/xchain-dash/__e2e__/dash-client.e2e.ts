@@ -11,7 +11,7 @@ const dashClient = new Client({
 const dashClientTestnet = new Client({
   ...defaultDashParams,
   network: Network.Testnet,
-  phrase: process.env.PHRASE,
+  phrase: process.env.TESTNET_PHRASE,
 })
 
 describe('Dash Integration Tests', () => {
@@ -23,7 +23,7 @@ describe('Dash Integration Tests', () => {
     expect(balances.length).toBeGreaterThan(0)
   })
   it('should fetch testnet address balance', async () => {
-    const address = dashClientTestnet.getAddress()
+    const address = await dashClientTestnet.getAddressAsync()
     console.log(address)
     const bal = await dashClientTestnet.getBalance(address)
     bal.forEach((bal) => {
@@ -66,7 +66,7 @@ describe('Dash Integration Tests', () => {
   it('should send a testnet dash tx', async () => {
     try {
       // const from = dashClientTestnet.getAddress(0)
-      const to = dashClientTestnet.getAddress(1)
+      const to = await dashClientTestnet.getAddressAsync(1)
       const amount = assetToBase(assetAmount('0.0001'))
       const txid = await dashClientTestnet.transfer({
         asset: AssetDASH,
@@ -83,8 +83,8 @@ describe('Dash Integration Tests', () => {
   })
   it('should prepare transaction', async () => {
     try {
-      const from = dashClientTestnet.getAddress(0)
-      const to = dashClientTestnet.getAddress(1)
+      const from = await dashClientTestnet.getAddressAsync(0)
+      const to = await dashClientTestnet.getAddressAsync(1)
       const amount = assetToBase(assetAmount('0.0001'))
       const rawUnsignedTransaction = await dashClientTestnet.prepareTx({
         asset: AssetDASH,

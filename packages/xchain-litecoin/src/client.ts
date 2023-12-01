@@ -11,12 +11,12 @@ import {
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
-import axios from 'axios'
 import * as Litecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
 import {
   AssetLTC,
+  BitgoProviders,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   LTCChain,
@@ -28,8 +28,6 @@ import {
 import { NodeAuth } from './types'
 import * as Utils from './utils'
 
-const DEFAULT_SUGGESTED_TRANSACTION_FEE = 1
-
 export type NodeUrls = Record<Network, string>
 
 export const defaultLtcParams: UtxoClientParams & {
@@ -39,7 +37,7 @@ export const defaultLtcParams: UtxoClientParams & {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
-  dataProviders: [BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/84'/2'/0'/0/`,
     [Network.Testnet]: `m/84'/1'/0'/0/`,
@@ -82,15 +80,7 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   * @deprecated this function eventually will be removed use getAddressAsync instead
    */
   getAddress(index = 0): Address {
     if (index < 0) {
@@ -110,6 +100,21 @@ class Client extends UTXOClient {
       return address
     }
     throw new Error('Phrase must be provided')
+  }
+
+  /**
+   * Get the current address.
+   *
+   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
+   * The address is then decoded into type P2WPKH and returned.
+   *
+   * @returns {Address} The current address.
+   *
+   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
+   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
+   */
+  async getAddressAsync(walletIndex = 0): Promise<Address> {
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -158,17 +163,6 @@ class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  protected async getSuggestedFeeRate(): Promise<FeeRate> {
-    //use Bitgo API for fee estimation
-    //Refer: https://app.bitgo.com/docs/#operation/v2.tx.getfeeestimate
-    try {
-      const response = await axios.get('https://app.bitgo.com/api/v2/ltc/tx/fee')
-      return response.data.feePerKb / 1000 // feePerKb to feePerByte
-    } catch (error) {
-      return DEFAULT_SUGGESTED_TRANSACTION_FEE
-    }
-  }
-
   /**
    * Transfer LTC.
    *
@@ -184,7 +178,7 @@ class Client extends UTXOClient {
     const { rawUnsignedTx } = await this.prepareTx({
       ...params,
       feeRate,
-      sender: this.getAddress(fromAddressIndex),
+      sender: await this.getAddressAsync(fromAddressIndex),
     })
 
     const psbt = Litecoin.Psbt.fromBase64(rawUnsignedTx)

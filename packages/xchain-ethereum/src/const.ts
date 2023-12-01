@@ -19,13 +19,10 @@ export const AssetETH: Asset = {
 }
 
 // =====Ethers providers=====
-const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
-  'homestead',
-  process.env['ETHERSCAN_API_KEY'],
-)
+const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('homestead', process.env.ETHERSCAN_API_KEY)
 // as per https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider
 const network = ethers.providers.getNetwork('sepolia')
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env['ETHERSCAN_API'] || '')
+const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
 
 const ethersJSProviders = {
   [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,
@@ -38,7 +35,7 @@ const ethersJSProviders = {
 const ETH_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   ETH_TESTNET_ETHERS_PROVIDER,
   'https://api-sepolia.etherscan.io/',
-  process.env['ETHERSCAN_API'] || '',
+  process.env.ETHERSCAN_API_KEY || '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
@@ -47,7 +44,7 @@ const ETH_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
 const ETH_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   ETH_MAINNET_ETHERS_PROVIDER,
   'https://api.etherscan.io/',
-  process.env['ETHERSCAN_API'] || '',
+  process.env.ETHERSCAN_API_KEY || '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
@@ -88,19 +85,19 @@ const defaults = {
     approveGasLimit: BigNumber.from(200000),
     transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30),
+    gasPrice: BigNumber.from(30 * 10 ** 9),
   },
   [Network.Testnet]: {
     approveGasLimit: BigNumber.from(200000),
     transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30),
+    gasPrice: BigNumber.from(30 * 10 ** 9),
   },
   [Network.Stagenet]: {
     approveGasLimit: BigNumber.from(200000),
     transferGasAssetGasLimit: BigNumber.from(23000),
     transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30),
+    gasPrice: BigNumber.from(30 * 10 ** 9),
   },
 }
 

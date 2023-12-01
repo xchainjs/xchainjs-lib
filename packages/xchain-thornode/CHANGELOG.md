@@ -1,3 +1,9 @@
+# v0.3.9 (2023-11-14)
+
+## Update
+
+- Updated thornode api spec to the latest 1.124.0
+
 # v0.3.8 (2023-10-19)
 
 ## Update

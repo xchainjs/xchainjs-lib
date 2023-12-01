@@ -1,6 +1,7 @@
 import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 import {
+  BitgoProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   SochainNetwork,
@@ -13,7 +14,7 @@ import {
  * @see https://github.com/bitcoin/bitcoin/blob/db88db47278d2e7208c50d16ab10cb355067d071/src/validation.h#L56
  */
 export const MIN_TX_FEE = 1000
-export const LOWER_FEE_BOUND = 1
+export const LOWER_FEE_BOUND = 0.5
 export const UPPER_FEE_BOUND = 500
 export const LTC_DECIMAL = 8
 
@@ -52,7 +53,7 @@ export const explorerProviders = {
 
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   LTCChain,
   AssetLTC,
   8,
@@ -60,7 +61,7 @@ const testnetSochainProvider = new SochainProvider(
 )
 const mainnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
-  process.env['SOCHAIN_API_KEY'] || '',
+  process.env.SOCHAIN_API_KEY || '',
   LTCChain,
   AssetLTC,
   8,
@@ -81,10 +82,24 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   AssetLTC,
   8,
   BlockcypherNetwork.LTC,
-  process.env['BlOCKCYPHER_API_KEY'] || '',
+  process.env.BLOCKCYPHER_API_KEY || '',
 )
 export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined,
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+//======================
+// Bitgo
+//======================
+const mainnetBitgoProvider = new BitgoProvider({
+  baseUrl: 'https://app.bitgo.com',
+  chain: LTCChain,
+})
+
+export const BitgoProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined,
+  [Network.Stagenet]: mainnetBitgoProvider,
+  [Network.Mainnet]: mainnetBitgoProvider,
 }

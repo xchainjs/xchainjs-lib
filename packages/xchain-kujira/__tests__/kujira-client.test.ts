@@ -22,7 +22,7 @@ describe('Kujira client Integration Tests', () => {
     expect(isValid).toBe(true)
   })
   it('should generate addreses', async () => {
-    const address = await xchainClient.getAddress(0)
+    const address = await xchainClient.getAddressAsync(0)
     expect(address).toBe('kujira1k688m5uq5gqwt2sltvvu0679vnh3ehlslvf9e2')
   })
   it('get fees', async () => {
