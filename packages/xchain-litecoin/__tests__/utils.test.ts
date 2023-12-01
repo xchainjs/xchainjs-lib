@@ -1,4 +1,5 @@
-import { Network, UTXO } from '@xchainjs/xchain-client'
+import { Network } from '@xchainjs/xchain-client'
+import { UTXO } from '@xchainjs/xchain-utxo'
 
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode-api'
