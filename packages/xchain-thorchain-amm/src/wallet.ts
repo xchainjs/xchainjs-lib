@@ -3,15 +3,7 @@ import { BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { BCHChain, Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
-import {
-  FeeOption,
-  Network,
-  Protocol,
-  UTXOClient,
-  UtxoClientParams,
-  XChainClient,
-  XChainClientParams,
-} from '@xchainjs/xchain-client'
+import { FeeOption, Network, Protocol, XChainClient, XChainClientParams } from '@xchainjs/xchain-client'
 import { Client as CosmosClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, DOGEChain, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -21,6 +13,7 @@ import { Client as MayaClient, MAYAChain, MayachainClientParams } from '@xchainj
 import { Client as ThorClient, THORChain, ThorchainClient, ThorchainClientParams } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Address, Asset, assetFromString } from '@xchainjs/xchain-util'
+import { Client as UTXOClient, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import {
   AddLiquidity,

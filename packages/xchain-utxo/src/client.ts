@@ -8,6 +8,7 @@ import {
   FeeRates,
   Fees,
   FeesWithRates,
+  Protocol,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -19,10 +20,6 @@ import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import { UTXO, UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
 import { UtxoClientParams } from './types'
-
-export enum Protocol {
-  THORCHAIN = 1,
-}
 
 export abstract class Client extends BaseXChainClient {
   protected explorerProviders: ExplorerProviders
