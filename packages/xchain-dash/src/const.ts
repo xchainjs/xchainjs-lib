@@ -1,7 +1,11 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
-import { UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo'
-import { BitgoProvider, BlockcypherNetwork, BlockcypherProvider } from '@xchainjs/xchain-utxo-providers'
+import {
+  BitgoProvider,
+  BlockcypherNetwork,
+  BlockcypherProvider,
+  UtxoOnlineDataProviders,
+} from '@xchainjs/xchain-utxo-providers'
 
 /**
  * Minimum transaction fee

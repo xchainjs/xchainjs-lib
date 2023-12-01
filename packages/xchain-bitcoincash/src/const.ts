@@ -1,6 +1,11 @@
-import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
+import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
-import { BitgoProvider, HaskoinNetwork, HaskoinProvider } from '@xchainjs/xchain-utxo-providers'
+import {
+  BitgoProvider,
+  HaskoinNetwork,
+  HaskoinProvider,
+  UtxoOnlineDataProviders,
+} from '@xchainjs/xchain-utxo-providers'
 
 export const LOWER_FEE_BOUND = 1
 export const UPPER_FEE_BOUND = 500

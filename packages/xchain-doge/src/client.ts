@@ -1,4 +1,13 @@
-import { AssetInfo, FeeRate, Network, PreparedTx, TxHash, TxParams, checkFeeBounds } from '@xchainjs/xchain-client'
+import {
+  AssetInfo,
+  FeeOption,
+  FeeRate,
+  Network,
+  PreparedTx,
+  TxHash,
+  TxParams,
+  checkFeeBounds,
+} from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
