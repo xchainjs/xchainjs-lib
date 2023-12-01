@@ -1,3 +1,9 @@
+# v0.28.14 (2023-12-01)
+
+## Update
+
+- Client and Cosmos client dependency updated
+
 # v0.28.13 (2023-11-16)
 
 ## Update

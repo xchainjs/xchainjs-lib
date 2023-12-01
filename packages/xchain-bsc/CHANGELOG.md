@@ -1,3 +1,9 @@
+# v0.4.3 (2023-12-01)
+
+## Update
+
+- Client and EVM client packages update
+
 # v0.4.2 (2023-11-21)
 
 ## Update

@@ -1,3 +1,9 @@
+# v0.2.6 (2023-12-01)
+
+## Update
+
+- UTXO client package dependency
+
 # v0.2.5 (2023-11-21)
 
 ## Update
