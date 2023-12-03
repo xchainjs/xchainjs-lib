@@ -1318,6 +1318,19 @@
     "@ledgerhq/logs" "^6.12.0"
     node-hid "^2.1.2"
 
+"@ledgerhq/hw-transport-node-hid-singleton@^6.30.0":
+  version "6.30.0"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-hid-singleton/-/hw-transport-node-hid-singleton-6.30.0.tgz#7f0cb0c6db8c4c8164021fd393cfbd7e070f7100"
+  integrity sha512-qTc0eeqrx0NShtpXSG3n8mhb8316eWp/AAusOxvOaUCzqH4rjAGUlkHfRdKo2bm84J6k5RMxFYAndDi3kX5o4g==
+  dependencies:
+    "@ledgerhq/devices" "^8.1.0"
+    "@ledgerhq/errors" "^6.16.0"
+    "@ledgerhq/hw-transport" "^6.30.0"
+    "@ledgerhq/hw-transport-node-hid-noevents" "^6.29.0"
+    "@ledgerhq/logs" "^6.12.0"
+    node-hid "^2.1.2"
+    usb "2.9.0"
+
 "@ledgerhq/hw-transport-node-hid@^5.10.0":
   version "5.51.1"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-5.51.1.tgz#fe8eb81e18929663540698c80905952cdbe542d5"
