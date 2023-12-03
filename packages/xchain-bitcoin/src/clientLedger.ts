@@ -10,7 +10,6 @@ import { Client } from './client'
  * Custom Ledger Bitcoin client
  */
 class ClientLedger extends Client {
-  // NOT FINAL CODE ONLY POC PORPUSE.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: any // TODO: Parametrize
   private app: AppBtc | undefined
