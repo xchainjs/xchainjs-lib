@@ -56,5 +56,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-app-btc": "^10.1.0",
+    "@ledgerhq/hw-transport-node-hid": "^6.28.0"
   }
 }
