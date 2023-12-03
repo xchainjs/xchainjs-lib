@@ -1,8 +1,14 @@
-# v0.6.13 (2023-12-01)
+# v0.6.14 (2023-12-03)
 
 ## Update
 
 - Client and midgard-query dependencies updated
+
+# v0.6.13 (2023-11-28)
+
+## Update
+
+- getSaverEstimateErrors() inboundFee error check
 
 # v0.6.12 (2023-11-21)
 

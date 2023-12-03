@@ -841,7 +841,7 @@ export class ThorchainQuery {
     const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).thornodeDetails
     if (pool.status.toLowerCase() !== 'available')
       errors.push(`Pool is not available for this asset ${assetToString(addAmount.asset)}`)
-    const inboundFee = calcNetworkFee(addAmount.asset, inboundDetails[addAmount.asset.chain])
+    const inboundFee = new CryptoAmount(baseAmount(inboundDetails[addAmount.asset.chain].gasRate), addAmount.asset) // only needs to check against inbound fee, not network fee.
     const inboundFeeInAddAmountAsset = await this.convert(inboundFee, addAmount.asset) // to make sure maths is being done on same assets
     if (addAmount.lte(inboundFeeInAddAmountAsset)) errors.push(`Add amount does not cover fees`)
     return errors

@@ -1,8 +1,14 @@
-# v0.8.5 (2023-12-01)
+# v0.8.6 (2023-12-01)
 
 ## Update
 
 - Client dependencies updated
+
+# v0.8.5 (2023-11-28)
+
+## Update
+
+- bump thorchain-query dep
 
 # v0.8.4 (2023-11-21)
 
