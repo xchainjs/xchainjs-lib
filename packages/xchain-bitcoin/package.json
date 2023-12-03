@@ -33,6 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
+    "@ledgerhq/hw-transport-node-hid": "^6.28.0",
     "@types/wif": "^2.0.2",
     "@xchainjs/xchain-client": "^0.15.4",
     "@xchainjs/xchain-crypto": "^0.3.0",
@@ -58,8 +59,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-btc": "^10.1.0",
-    "@ledgerhq/hw-transport-node-hid": "^6.28.0",
-    "@ledgerhq/hw-transport-node-hid-singleton": "^6.30.0"
+    "@ledgerhq/hw-app-btc": "^10.1.0"
   }
 }
