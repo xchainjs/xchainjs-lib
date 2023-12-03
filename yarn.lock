@@ -2522,18 +2522,6 @@
     "@typescript-eslint/types" "5.59.1"
     eslint-visitor-keys "^3.3.0"
 
-"@xchainjs/xchain-client@^0.14.1":
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.14.2.tgz#9047bcb83a940fdceff52cd53baeb2fdc8362237"
-  integrity sha512-uYnKLU5qcDixNizIGtyt7K4FYHkWCEq2PNKSv/8mApjIVjsYvt2TnzFCazj0kK0tOxhlFZUzELCHbvQpF+ugDg==
-
-"@xchainjs/xchain-utxo-providers@0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-utxo-providers/-/xchain-utxo-providers-0.2.5.tgz#8770a67adddd3141d35d0b323c6c4cb290761e4a"
-  integrity sha512-qqasI126Ckc0FZIWD9fxvIrDHRMKnrx3tKaLm3pAmi3rR1GAwB3Av6UScFr2C4vSViBpqzGs56ypABmAXhODIg==
-  dependencies:
-    "@supercharge/promise-pool" "^2.4.0"
-
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
