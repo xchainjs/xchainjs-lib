@@ -138,7 +138,7 @@ export const getDepositTxDataFromLogs = (logs: TxLog[], address?: Address): TxDa
  * @returns {Fees} The default fee.
  */
 export const getDefaultFees = (): Fees => {
-  const fee = assetToBase(assetAmount(0.02 /* 0.02 CACAO */, CACAO_DECIMAL))
+  const fee = assetToBase(assetAmount(1, CACAO_DECIMAL)) // Referenced from NATIVETRANSACTIONFEE https://mayanode.mayachain.info/mayachain/mimir
   return singleFee(FeeType.FlatFee, fee)
 }
 
