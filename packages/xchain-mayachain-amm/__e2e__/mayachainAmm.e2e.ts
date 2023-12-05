@@ -1,8 +1,17 @@
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
+import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { Asset, CryptoAmount, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import { MayachainAMM, Wallet } from '../src'
@@ -60,10 +69,11 @@ const ethersJSProviders = {
 
 describe('MayachainAmm e2e tests', () => {
   let mayachainAmm: MayachainAMM
+  let wallet: Wallet
 
   beforeAll(() => {
     const mayaChainQuery = new MayachainQuery()
-    const wallet = new Wallet(process.env.MAINNET_PHRASE || '', Network.Mainnet, {
+    wallet = new Wallet(process.env.MAINNET_PHRASE || '', Network.Mainnet, {
       ETH: {
         providers: ethersJSProviders,
       },
@@ -147,5 +157,27 @@ describe('MayachainAmm e2e tests', () => {
     })
 
     printQuoteSwap(quoteSwap)
+  })
+
+  it('Should do non protocol asset swap. Rune -> Cacao', async () => {
+    const txSubmitted = await mayachainAmm.doSwap({
+      fromAsset: AssetRuneNative,
+      destinationAsset: AssetCacao,
+      amount: new CryptoAmount(assetToBase(assetAmount(0.5)), AssetRuneNative),
+      destinationAddress: await wallet.getAddress(AssetCacao.chain),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should do protocol asset swap. Cacao -> Rune', async () => {
+    const txSubmitted = await mayachainAmm.doSwap({
+      fromAsset: AssetCacao,
+      destinationAsset: AssetRuneNative,
+      amount: new CryptoAmount(assetToBase(assetAmount(1.5, 10)), AssetCacao),
+      destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
+    })
+
+    console.log(txSubmitted)
   })
 })
