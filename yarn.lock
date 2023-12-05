@@ -2527,9 +2527,6 @@
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-client/-/xchain-client-0.14.2.tgz#9047bcb83a940fdceff52cd53baeb2fdc8362237"
   integrity sha512-uYnKLU5qcDixNizIGtyt7K4FYHkWCEq2PNKSv/8mApjIVjsYvt2TnzFCazj0kK0tOxhlFZUzELCHbvQpF+ugDg==
 
-"@xchainjs/xchain-mayamidgard@^0.5.2":
-  version "0.1.0"
-
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"

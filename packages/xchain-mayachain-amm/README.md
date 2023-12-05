@@ -27,7 +27,7 @@ Following peer dependencies have to be installed into your project. These are no
     "@xchainjs/xchain-evm": "^0.4.1",
     "@xchainjs/xchain-kujira": "^0.1.2",
     "@xchainjs/xchain-mayachain": "^0.2.10",
-    "@xchainjs/xchain-mayamidgard": "^0.5.2",
+    "@xchainjs/xchain-mayamidgard": "^0.1.0",
     "@xchainjs/xchain-thorchain": "^0.28.13",
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-utxo-providers": "^0.2.8",

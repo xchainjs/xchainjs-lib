@@ -1,3 +1,9 @@
+# v0.6.13 (2023-11-28)
+
+## Update
+
+- getSaverEstimateErrors() inboundFee error check
+
 # v0.6.12 (2023-11-21)
 
 ## Update
