@@ -6,7 +6,6 @@ import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xcha
 import { Client as EvmClient, EVMClientParams, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, KUJIChain, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import {
-  AssetCacao,
   Client as MayaClient,
   DepositParam,
   MAYAChain,
@@ -74,7 +73,7 @@ export class Wallet {
     return allBalances
   }
 
-  async deposit({ asset = AssetCacao, amount, memo }: DepositParam): Promise<string> {
+  async deposit({ asset, amount, memo }: DepositParam & { asset: Asset }): Promise<string> {
     const client = this.getChainClient(asset.chain)
     if (!('deposit' in client)) throw Error(`Can not deposit with ${asset.chain} client`)
 
