@@ -114,7 +114,7 @@ describe('MayachainAmm e2e tests', () => {
     console.log(errors)
   })
 
-  it(`Should estimate swap from Cacao to BTC`, async () => {
+  it(`Should estimate swap from Rune to BTC`, async () => {
     const quoteSwap = await mayachainAmm.estimateSwap({
       fromAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
@@ -134,5 +134,18 @@ describe('MayachainAmm e2e tests', () => {
       destinationAddress: 'bc1q3gf722qm79433nycvuflh3uh37z72elrd73r7x',
     })
     console.log(errors)
+  })
+
+  it(`Should quote swap from Rune to BTC without errors`, async () => {
+    const quoteSwap = await mayachainAmm.estimateSwap({
+      fromAsset: AssetRuneNative,
+      destinationAsset: AssetBTC,
+      amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+      affiliateAddress: 'maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz',
+      affiliateBps: 300,
+      destinationAddress: 'bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj',
+    })
+
+    printQuoteSwap(quoteSwap)
   })
 })

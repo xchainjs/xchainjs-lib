@@ -13,5 +13,10 @@ export default {
       const resp = require(`./responses/inbound-addresses.json`)
       return [200, resp]
     })
+    // Quote swap
+    mock.onGet(/\/mayachain\/quote/).reply(() => {
+      const resp = require(`./responses/quote-swap.json`)
+      return [200, resp]
+    })
   },
 }

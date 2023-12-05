@@ -44,6 +44,8 @@ export class MayachainAMM {
       amount,
       destinationAsset,
       destinationAddress,
+      affiliateAddress,
+      affiliateBps,
     })
 
     if (errors.length > 0) {
@@ -54,7 +56,7 @@ export class MayachainAMM {
         dustThreshold: this.mayachainQuery.getChainDustValue(fromAsset.chain),
         fees: {
           asset: destinationAsset,
-          affiliateFee: new CryptoAmount(baseAmount(0), fromAsset),
+          affiliateFee: new CryptoAmount(baseAmount(0), destinationAsset),
           outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
         },
         outboundDelayBlocks: 0,
@@ -92,7 +94,6 @@ export class MayachainAMM {
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
-    // check address
     if (destinationAddress && !this.wallet.validateAddress(destinationAsset.chain, destinationAddress)) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
