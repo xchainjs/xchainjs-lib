@@ -16,8 +16,6 @@ import { Client as ThorClient, THORChain, ThorchainClientParams } from '@xchainj
 import { Asset, BaseAmount, Chain, assetToString, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
-import { ChainBalances } from './types'
-
 export type NodeUrls = Record<Network, string>
 export type ChainConfigs = Partial<{
   [BTCChain]: Partial<Omit<UtxoClientParams, 'phrase' | 'network'>>
@@ -27,17 +25,16 @@ export type ChainConfigs = Partial<{
   [THORChain]: Omit<XChainClientParams & ThorchainClientParams, 'phrase' | 'network'>
   [MAYAChain]: Omit<XChainClientParams & MayachainClientParams, 'phrase' | 'network'>
 }>
-/**
- * Wallet Class for managing all xchain-* wallets with a mnemonic seed.
- */
+
 export class Wallet {
   clients: Record<string, XChainClient>
+
   /**
    * Constructor to create a Wallet
    *
-   * @param phrase - mnemonic phrase
-   * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
-   * @param chainConfigs - Config by chain
+   * @param {string} phrase - mnemonic phrase
+   * @param {Network} network - mnemonic phrase
+   * @param {ChainConfigs} chainConfigs - Config by chain. If it isn not set, each client uses its default params
    * @returns Wallet
    */
   constructor(phrase: string, network: Network, chainConfigs: ChainConfigs = {}) {
@@ -54,25 +51,48 @@ export class Wallet {
   }
 
   /**
-   * Fetch balances for all wallets
-   *
-   * @returns AllBalances[]
+   * Get chain address
+   * @param {Chain} chain
+   * @returns the chain address
    */
-  async getAllBalances(): Promise<ChainBalances[]> {
-    const allBalances: ChainBalances[] = []
-
-    for (const [chain, client] of Object.entries(this.clients)) {
-      const address = await client.getAddressAsync(0)
-      try {
-        const balances = await client.getBalance(address)
-        allBalances.push({ chain, address, balances })
-      } catch (err) {
-        allBalances.push({ chain, address, balances: [], error: (err as Error).message })
-      }
-    }
-    return allBalances
+  async getAddress(chain: Chain): Promise<string> {
+    const client = this.getChainClient(chain)
+    return client.getAddressAsync()
   }
 
+  /**
+   * Check if address is valid
+   * @param {Chain} chain in which the address has to be valid
+   * @param {string} address to validate
+   * @returns true if it is a valid address, otherwise, false
+   */
+  public validateAddress(chain: Chain, address: string): boolean {
+    const client = this.getChainClient(chain)
+    return client.validateAddress(address)
+  }
+
+  /**
+   * Make a transaction
+   * @param {TxParams} txParams to make the transfer
+   * @returns the transaction hash
+   */
+  async transfer({ asset, amount, recipient, memo, walletIndex }: TxParams & { asset: Asset }): Promise<string> {
+    const client = this.getChainClient(asset.chain)
+    return client.transfer({
+      walletIndex,
+      asset,
+      amount,
+      recipient,
+      memo,
+    })
+  }
+
+  /**
+   * Make a deposit
+   * @param {DepositParam} depositParams
+   * @returns the hash of the deposit
+   * @throws {Error} if can not make deposit with the asset
+   */
   async deposit({ asset, amount, memo }: DepositParam & { asset: Asset }): Promise<string> {
     const client = this.getChainClient(asset.chain)
     if (!('deposit' in client)) throw Error(`Can not deposit with ${asset.chain} client`)
@@ -80,6 +100,15 @@ export class Wallet {
     return (client as unknown as MayachainClient).deposit({ asset, amount, memo })
   }
 
+  /**
+   * Check if an spenderAddress is allowed to spend in name of another address certain asset amount
+   * @param {Asset} asset to check
+   * @param {BaseAmount} amount to check
+   * @param {string} fromAddress owner of the amount asset
+   * @param {string} spenderAddress spender to check if it is allowed to spend
+   * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
+   * @throws {Error} if asset is a non ERC20 asset
+   */
   async isApproved(asset: Asset, amount: BaseAmount, fromAddress: string, spenderAddress: string): Promise<boolean> {
     const client = this.getChainClient(asset.chain)
     if (!this.isERC20Asset(asset)) throw Error(`${assetToString(asset)} is not an ERC20 token`)
@@ -94,57 +123,69 @@ export class Wallet {
     })
   }
 
-  public validateAddress(chain: Chain, address: string): boolean {
-    const client = this.getChainClient(chain)
-    return client.validateAddress(address)
-  }
-
-  async getAddress(chain: Chain): Promise<string> {
-    const client = this.getChainClient(chain)
-    return client.getAddressAsync()
-  }
-
+  /**
+   * Get transaction url
+   * @param {Chain} chain of the transaction
+   * @param {string} hash of the transaction
+   * @returns the transaction url
+   */
   async getExplorerTxUrl(chain: Chain, hash: string): Promise<string> {
     const client = this.getChainClient(chain)
     return client.getExplorerTxUrl(hash)
   }
 
-  async transfer({ asset, amount, recipient, memo, walletIndex }: TxParams & { asset: Asset }): Promise<string> {
-    const client = this.getChainClient(asset.chain)
-    return client.transfer({
-      walletIndex,
-      asset,
-      amount,
-      recipient,
-      memo,
-    })
-  }
-
+  /**
+   * Get feeRates
+   * @param {Chain} chain of which return the feeRates
+   * @returns the gas fee rates
+   * @throws {Error} if gas fee rates can not be returned from the chain
+   */
   async getGasFeeRates(chain: Chain): Promise<GasPrices> {
     const client = this.getChainClient(chain)
-    if (!('getWallet' in client)) throw Error(`Can not deposit with ${chain} client`)
+    if (!('estimateGasPrices' in client)) throw Error(`Can not get gas with ${chain} client`)
     return (client as EvmClient).estimateGasPrices()
   }
 
+  /**
+   * Get chain wallet
+   * @param {Chain} chain of which return the wallet
+   * @returns the chain wallet
+   * @throws {Error} wallet can not be retrieve from chain
+   */
   public getChainWallet(chain: Chain): ethers.Wallet {
     const client = this.getChainClient(chain)
-    if (!('getWallet' in client)) throw Error(`Can not deposit with ${chain} client`)
+    if (!('getWallet' in client)) throw Error(`Can not get wallet of ${chain} client`)
     return (client as EvmClient).getWallet()
   }
 
+  /**
+   * Get chain client
+   * @param {Chain} chain of which return the client
+   * @returns the chain client
+   * @throws {Error} if client does not exist
+   */
   private getChainClient(chain: Chain): XChainClient {
     const client = this.clients[chain]
     if (!client) throw Error(`Client not found for ${chain} chain`)
-
     return client
   }
 
+  /**
+   * Check if asset is ERC20
+   * @param {Asset} asset to check
+   * @returns true if asset is ERC20, otherwise, false
+   */
   public isERC20Asset(asset: Asset): boolean {
     const isGasAsset = [AssetETH.symbol].includes(asset.symbol)
-    return this.isEVMChain(asset) && !isGasAsset
+    return this.isEVMChain(asset.chain) && !isGasAsset
   }
 
-  public isEVMChain(asset: Asset): boolean {
-    return [AssetETH.chain].includes(asset.chain)
+  /**
+   * Check if asset chain is EVM
+   * @param {Chain} chain to check
+   * @returns true if chain is EVM, otherwise, false
+   */
+  public isEVMChain(chain: string): boolean {
+    return [AssetETH.chain].includes(chain)
   }
 }

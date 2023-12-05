@@ -9,9 +9,9 @@ import { TxSubmitted } from './types'
 import { Wallet } from './wallet'
 
 /**
- * THORChain Class for interacting with THORChain.
- * Recommended main class to use for swapping with THORChain
- * Has access to Midgard and THORNode data
+ * MAYAChainAMM class for interacting with THORChain.
+ * Recommended main class to use for swapping with MAYAChain
+ * Has access to Midgard and MayaNode data
  */
 export class MayachainAMM {
   private mayachainQuery: MayachainQuery
@@ -19,7 +19,6 @@ export class MayachainAMM {
 
   /**
    * Constructor to create a MayachainAMM
-   *
    * @param mayachainQuery - an instance of the MayachainQuery
    * @returns MayachainAMM
    */
@@ -28,6 +27,11 @@ export class MayachainAMM {
     this.wallet = wallet
   }
 
+  /**
+   * Estimate swap validating the swap params
+   * @param {QuoteSwapParams} quoteSwapParams Swap params
+   * @returns {QuoteSwap} Quote swap. If swap can not be done, it returns an empty QuoteSwap with the reasons the swap can not be done
+   */
   public async estimateSwap({
     fromAsset,
     fromAddress,
@@ -83,6 +87,11 @@ export class MayachainAMM {
     })
   }
 
+  /**
+   * Validate swap params
+   * @param {QuoteSwapParams} quoteSwapParams Swap params
+   * @returns {string[]} the reasons the swap can not be done. If it is empty there are no reason to avoid the swap
+   */
   public async validateSwap({
     fromAsset,
     fromAddress,
@@ -126,6 +135,11 @@ export class MayachainAMM {
     return errors
   }
 
+  /**
+   * Do swap between assets
+   * @param {QuoteSwapParams} quoteSwapParams Swap params
+   * @returns {TxSubmitted} the swap transaction hash and url
+   */
   public async doSwap({
     fromAsset,
     fromAddress,
@@ -154,10 +168,21 @@ export class MayachainAMM {
       : this.doNonProtocolAssetSwap(amount, quoteSwap.toAddress, quoteSwap.memo)
   }
 
+  /**
+   * Check if a name is a valid MAYAName
+   * @param {string} name MAYAName
+   * @returns {boolean} true if is a registered MAYAName, otherwise, false
+   */
   private async isMAYAName(name: string): Promise<boolean> {
     return !!(await this.mayachainQuery.getMAYANameDetails(name))
   }
 
+  /**
+   * Do swap from native protocol asset to any other asset
+   * @param {CryptoAmount} amount Amount to swap
+   * @param {string} memo Memo to add to the transaction to successfully make the swap
+   * @returns {TxSubmitted} the swap transaction hash and url
+   */
   private async doProtocolAssetSwap(amount: CryptoAmount, memo: string): Promise<TxSubmitted> {
     const hash = await this.wallet.deposit({ asset: amount.asset, amount: amount.baseAmount, memo })
 
@@ -167,6 +192,13 @@ export class MayachainAMM {
     }
   }
 
+  /**
+   * Do swap between assets
+   * @param {CryptoAmount} amount Amount to swap
+   * @param {string} memo Memo to add to the transaction to successfully make the swap
+   * @param {string} recipient inbound address to make swap transaction to
+   * @returns {TxSubmitted} the swap transaction hash and url
+   */
   private async doNonProtocolAssetSwap(amount: CryptoAmount, recipient: string, memo: string): Promise<TxSubmitted> {
     // Non ERC20 swaps
     if (!this.wallet.isERC20Asset(amount.asset)) {
