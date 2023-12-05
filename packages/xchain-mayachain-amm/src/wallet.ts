@@ -21,10 +21,10 @@ import { ChainBalances } from './types'
 
 export type NodeUrls = Record<Network, string>
 export type ChainConfigs = Partial<{
-  [BTCChain]: Omit<UtxoClientParams, 'phrase' | 'network'>
-  [ETHChain]: Omit<EVMClientParams, 'phrase' | 'network'>
-  [DASHChain]: Omit<UtxoClientParams, 'phrase' | 'network'>
-  [KUJIChain]: Omit<CosmosSdkClientParams, 'phrase' | 'network'>
+  [BTCChain]: Partial<Omit<UtxoClientParams, 'phrase' | 'network'>>
+  [ETHChain]: Partial<Omit<EVMClientParams, 'phrase' | 'network'>>
+  [DASHChain]: Partial<Omit<UtxoClientParams, 'phrase' | 'network'>>
+  [KUJIChain]: Partial<Omit<CosmosSdkClientParams, 'phrase' | 'network'>>
   [THORChain]: Omit<XChainClientParams & ThorchainClientParams, 'phrase' | 'network'>
   [MAYAChain]: Omit<XChainClientParams & MayachainClientParams, 'phrase' | 'network'>
 }>
@@ -81,12 +81,7 @@ export class Wallet {
     return (client as unknown as MayachainClient).deposit({ asset, amount, memo })
   }
 
-  async isAllowedToSpend(
-    asset: Asset,
-    amount: BaseAmount,
-    fromAddress: string,
-    spenderAddress: string,
-  ): Promise<boolean> {
+  async isApproved(asset: Asset, amount: BaseAmount, fromAddress: string, spenderAddress: string): Promise<boolean> {
     const client = this.getChainClient(asset.chain)
     if (!this.isERC20Asset(asset)) throw Error(`${assetToString(asset)} is not an ERC20 token`)
     const contractAddress = getContractAddressFromAsset(asset)
@@ -100,7 +95,7 @@ export class Wallet {
     })
   }
 
-  async validateAddress(chain: Chain, address: string): Promise<boolean> {
+  public validateAddress(chain: Chain, address: string): boolean {
     const client = this.getChainClient(chain)
     return client.validateAddress(address)
   }

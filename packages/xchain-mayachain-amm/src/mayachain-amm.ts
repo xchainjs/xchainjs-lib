@@ -105,21 +105,21 @@ export class MayachainAMM {
     }
 
     if (affiliateBps && (affiliateBps < 0 || affiliateBps > 10000)) {
-      errors.push(`affiliateBps ${affiliateAddress} out of range [0 - 10000]`)
+      errors.push(`affiliateBps ${affiliateBps} out of range [0 - 10000]`)
     }
+
     if (this.wallet.isERC20Asset(fromAsset) && fromAddress) {
       const inboundDetails = await this.mayachainQuery.getChainInboundDetails(fromAsset.chain)
       if (!inboundDetails.router) throw Error(`Unknown router address for ${fromAsset.chain}`)
 
-      const contractAddress = getContractAddressFromAsset(fromAsset)
-
-      const isApprovedResult = await this.wallet.isAllowedToSpend(
+      const isApprovedResult = await this.wallet.isApproved(
         fromAsset,
         amount.baseAmount,
         fromAddress,
-        contractAddress,
+        inboundDetails.router,
       )
-      if (!isApprovedResult) errors.push('Maya router router has not been approved to spend this amount')
+
+      if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
     }
 
     return errors

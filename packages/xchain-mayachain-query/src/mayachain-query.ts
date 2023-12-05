@@ -180,7 +180,7 @@ export class MayachainQuery {
    */
   public async getChainInboundDetails(chain: string): Promise<InboundDetail> {
     const inboundDetails = await this.getInboundDetails()
-    if (inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
+    if (!inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
     return inboundDetails[chain]
   }
 }

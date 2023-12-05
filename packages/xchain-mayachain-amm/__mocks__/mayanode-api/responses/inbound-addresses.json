@@ -1,0 +1,68 @@
+[
+  {
+    "address": "bc1qqtemwlu9ju3ts3da5l82qejnzdl3xfs3lcl4wg",
+    "chain": "BTC",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "gas_rate": "274",
+    "gas_rate_units": "satsperbyte",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "274500",
+    "outbound_tx_size": "1000",
+    "pub_key": "mayapub1addwnpepqvz6vkw4nzcp5sl9ktx63kz7v0n754r99uehfnzv42eauc644yzgvmuun3k"
+  },
+  {
+    "address": "XaxT9NnuEUKQTLJ7QsBG4WLXZNJ4A7P6Ec",
+    "chain": "DASH",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "gas_rate": "12",
+    "gas_rate_units": "satsperbyte",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "5412",
+    "outbound_tx_size": "451",
+    "pub_key": "mayapub1addwnpepqvz6vkw4nzcp5sl9ktx63kz7v0n754r99uehfnzv42eauc644yzgvmuun3k"
+  },
+  {
+    "address": "0x87a8d8abd8086173e2f15a90a1938d8077e02ecb",
+    "chain": "ETH",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "gas_rate": "90",
+    "gas_rate_units": "gwei",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "720000",
+    "outbound_tx_size": "80000",
+    "pub_key": "mayapub1addwnpepqvz6vkw4nzcp5sl9ktx63kz7v0n754r99uehfnzv42eauc644yzgvmuun3k",
+    "router": "0xe3985E6b61b814F7Cdb188766562ba71b446B46d"
+  },
+  {
+    "address": "kujira1qtemwlu9ju3ts3da5l82qejnzdl3xfs3c2rx80",
+    "chain": "KUJI",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "gas_rate": "300000",
+    "gas_rate_units": "ukuji",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "300000",
+    "outbound_tx_size": "1",
+    "pub_key": "mayapub1addwnpepqvz6vkw4nzcp5sl9ktx63kz7v0n754r99uehfnzv42eauc644yzgvmuun3k"
+  },
+  {
+    "address": "thor1qtemwlu9ju3ts3da5l82qejnzdl3xfs309c9l6",
+    "chain": "THOR",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "gas_rate": "3000000",
+    "gas_rate_units": "rune",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "6000000",
+    "outbound_tx_size": "1",
+    "pub_key": "mayapub1addwnpepqvz6vkw4nzcp5sl9ktx63kz7v0n754r99uehfnzv42eauc644yzgvmuun3k"
+  }
+]
