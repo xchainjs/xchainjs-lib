@@ -1,3 +1,9 @@
+# v0.8.6 (2023-12-06)
+
+## Update
+
+- Expose Ledger implementation for Bitcoin
+
 # v0.8.5 (2023-11-28)
 
 ## Update
