@@ -36,12 +36,12 @@
   },
   "devDependencies": {
     "@types/secp256k1": "^4.0.3",
-    "@xchainjs/xchain-client": "^0.15.3",
+    "@xchainjs/xchain-client": "^0.15.5",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.15.3",
+    "@xchainjs/xchain-client": "^0.15.5",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1"
   },

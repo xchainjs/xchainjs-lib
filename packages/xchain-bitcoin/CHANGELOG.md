@@ -1,3 +1,9 @@
+# v0.23.7 (2023-12-06)
+
+## Add
+
+- Expose Ledger implementation
+
 # v0.23.6 (2023-11-21)
 
 ## Update
