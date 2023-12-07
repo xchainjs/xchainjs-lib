@@ -1,3 +1,9 @@
+# v0.8.7 (2023-12-07)
+
+## Update
+
+- dependency xchain-thorchain
+
 # v0.8.6 (2023-12-06)
 
 ## Update
