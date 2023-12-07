@@ -1,3 +1,9 @@
+# v0.28.14 (2023-12-07)
+
+## Update
+
+- Change thorchain getFees() to fetch to  /thorchain/network
+
 # v0.28.13 (2023-11-16)
 
 ## Update

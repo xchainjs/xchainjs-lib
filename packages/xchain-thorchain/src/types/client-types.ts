@@ -56,11 +56,9 @@ export type TxOfflineParams = TxParams & {
 /**
  * Response from `thorchain/constants` endpoint
  */
-export type ThorchainConstantsResponse = {
-  int_64_values: {
-    // We are in fee interested only - ignore all other values
-    NativeTransactionFee: number
-  }
+export type ThorchainNetworkResponse = {
+  // We are in fee interested only - ignore all other values
+  native_tx_fee_rune: number
 }
 
 /**
