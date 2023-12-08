@@ -1,7 +1,7 @@
 import { AssetInfo, Network, UtxoClientParams } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { Client } from '../src/client'
+import { ClientKeystore as Client } from '../src/clientKeystore'
 import {
   AssetBTC,
   BTC_DECIMAL,

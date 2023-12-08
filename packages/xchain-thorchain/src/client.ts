@@ -54,7 +54,7 @@ import {
   ExplorerUrls,
   NodeUrl,
   ThorchainClientParams,
-  ThorchainConstantsResponse,
+  ThorchainNetworkResponse,
   TxData,
   TxOfflineParams,
 } from './types'
@@ -884,10 +884,8 @@ class Client extends BaseXChainClient implements ThorchainClient, XChainClient {
   async getFees(): Promise<Fees> {
     try {
       const {
-        data: {
-          int_64_values: { NativeTransactionFee: fee },
-        },
-      } = await axios.get<ThorchainConstantsResponse>(`${this.getClientUrl().node}/thorchain/constants`)
+        data: { native_tx_fee_rune: fee },
+      } = await axios.get<ThorchainNetworkResponse>(`${this.getClientUrl().node}/thorchain/network`)
 
       // validate data
       if (!fee || isNaN(fee) || fee < 0) throw Error(`Invalid fee: ${fee.toString()}`)
