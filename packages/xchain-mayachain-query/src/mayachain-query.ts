@@ -65,7 +65,11 @@ export class MayachainQuery {
   }: QuoteSwapParams): Promise<QuoteSwap> {
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
-    const inputAmount = getBaseAmountWithDiffDecimals(amount, 8)
+    // Endpoint allows 10 decimals for Cacao, 8 for the rest of assets
+    const inputAmount =
+      fromAssetString === assetToString(CacaoAsset)
+        ? amount.baseAmount.amount()
+        : getBaseAmountWithDiffDecimals(amount, 8)
 
     const swapQuote: QuoteSwapResponse = await this.mayachainCache.mayanode.getSwapQuote(
       fromAssetString,
@@ -84,12 +88,21 @@ export class MayachainQuery {
       return {
         toAddress: ``,
         memo: ``,
-        expectedAmount: new CryptoAmount(baseAmount(0), destinationAsset),
+        expectedAmount: new CryptoAmount(
+          baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
+          destinationAsset,
+        ),
         dustThreshold: this.getChainDustValue(fromAsset.chain),
         fees: {
           asset: destinationAsset,
-          affiliateFee: new CryptoAmount(baseAmount(0), fromAsset),
-          outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          affiliateFee: new CryptoAmount(
+            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
+            destinationAsset,
+          ),
+          outboundFee: new CryptoAmount(
+            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
+            destinationAsset,
+          ),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
@@ -108,15 +121,19 @@ export class MayachainQuery {
     const errors: string[] = []
     if (swapQuote.memo === undefined) errors.push(`Error parsing swap quote: Memo is ${swapQuote.memo}`)
 
+    const isFeeAssetCacao = swapQuote.fees.asset === assetToString(CacaoAsset)
     return {
       toAddress: swapQuote.inbound_address || '',
       memo: swapQuote.memo || '',
-      expectedAmount: new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
+      expectedAmount: new CryptoAmount(
+        baseAmount(swapQuote.expected_amount_out, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
+        destinationAsset,
+      ),
       dustThreshold: this.getChainDustValue(fromAsset.chain),
       fees: {
         asset: feeAsset,
-        affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate), feeAsset),
-        outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound), feeAsset),
+        affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8), feeAsset),
+        outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8), feeAsset),
       },
       slipBasisPoints: swapQuote.slippage_bps,
       outboundDelayBlocks: swapQuote.outbound_delay_blocks,
@@ -138,11 +155,11 @@ export class MayachainQuery {
     // TODO: Find out how to fetch native asset decimals
     return {
       [BtcChain]: new CryptoAmount(baseAmount(10000, 8), BtcAsset),
-      [EthChain]: new CryptoAmount(baseAmount(0, 8), EthAsset),
+      [EthChain]: new CryptoAmount(baseAmount(0, 18), EthAsset),
       [DashChain]: new CryptoAmount(baseAmount(10000, 8), DashAsset),
-      [KujiraChain]: new CryptoAmount(baseAmount(0, 8), KujiraAsset),
+      [KujiraChain]: new CryptoAmount(baseAmount(0, 6), KujiraAsset),
       [ThorChain]: new CryptoAmount(baseAmount(0, 8), RuneAsset),
-      [MayaChain]: new CryptoAmount(baseAmount(0, 8), CacaoAsset),
+      [MayaChain]: new CryptoAmount(baseAmount(0, 10), CacaoAsset),
     }
   }
 
@@ -180,7 +197,7 @@ export class MayachainQuery {
    */
   public async getChainInboundDetails(chain: string): Promise<InboundDetail> {
     const inboundDetails = await this.getInboundDetails()
-    if (inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
+    if (!inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
     return inboundDetails[chain]
   }
 }
