@@ -1,5 +1,6 @@
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
@@ -134,6 +135,17 @@ describe('MayachainAmm e2e tests', () => {
     printQuoteSwap(quoteSwap)
   })
 
+  it(`Should estimate swap from USDT to ETH`, async () => {
+    const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+    const quoteSwap = await mayachainAmm.estimateSwap({
+      fromAsset,
+      destinationAsset: assetFromStringEx('ETH.ETH'),
+      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
+    })
+
+    printQuoteSwap(quoteSwap)
+  })
+
   it('Should validate swap from ERC20 to BTC without errors', async () => {
     const errors = await mayachainAmm.validateSwap({
       fromAsset: ETH_USDT,
@@ -176,6 +188,21 @@ describe('MayachainAmm e2e tests', () => {
       destinationAsset: AssetRuneNative,
       amount: new CryptoAmount(assetToBase(assetAmount(1.5, 10)), AssetCacao),
       destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should do ERC20 asset swap. USDT -> ETH', async () => {
+    const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+
+    await wallet.getAddress(AssetRuneNative.chain)
+    const txSubmitted = await mayachainAmm.doSwap({
+      fromAddress: await wallet.getAddress(fromAsset.chain),
+      destinationAddress: await wallet.getAddress(AssetETH.chain),
+      fromAsset,
+      destinationAsset: AssetETH,
+      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
     })
 
     console.log(txSubmitted)
