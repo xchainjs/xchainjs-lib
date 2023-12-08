@@ -220,8 +220,14 @@ export class MayachainAMM {
     const contractAddress = getContractAddressFromAsset(amount.asset)
     const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
 
-    const expiry = new Date(new Date().getTime() + 15 * 60000).getMilliseconds() / 1000
-    const depositParams = [recipient, checkSummedContractAddress, amount.baseAmount.amount().toFixed(), memo, expiry]
+    const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
+    const depositParams = [
+      recipient,
+      checkSummedContractAddress,
+      amount.baseAmount.amount().toFixed(),
+      memo,
+      expiration,
+    ]
 
     const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
     const wallet = this.wallet.getChainWallet(amount.asset.chain)
