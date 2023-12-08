@@ -196,7 +196,6 @@ describe('MayachainAmm e2e tests', () => {
   it('Should do ERC20 asset swap. USDT -> ETH', async () => {
     const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
 
-    await wallet.getAddress(AssetRuneNative.chain)
     const txSubmitted = await mayachainAmm.doSwap({
       fromAddress: await wallet.getAddress(fromAsset.chain),
       destinationAddress: await wallet.getAddress(AssetETH.chain),
