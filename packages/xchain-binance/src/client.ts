@@ -95,9 +95,9 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
     network = Network.Mainnet,
     phrase,
     rootDerivationPaths = {
-      [Network.Mainnet]: "44'/931'/0'/0/",
-      [Network.Stagenet]: "44'/931'/0'/0/",
-      [Network.Testnet]: "44'/931'/0'/0/",
+      [Network.Mainnet]: "44'/714'/0'/0/",
+      [Network.Stagenet]: "44'/714'/0'/0/",
+      [Network.Testnet]: "44'/714'/0'/0/",
     },
   }: XChainClientParams) {
     super(BNBChain, { network, rootDerivationPaths, phrase })

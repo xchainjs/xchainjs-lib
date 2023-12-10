@@ -1,3 +1,9 @@
+# v0.8.8 (2023-12-08)
+
+## Update
+
+- Binance client version updated
+
 # v0.8.7 (2023-12-07)
 
 ## Update
