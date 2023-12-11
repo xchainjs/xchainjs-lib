@@ -1,8 +1,26 @@
-# v0.8.6 (2023-12-01)
+# v0.8.9 (2023-12-11)
 
 ## Update
 
 - Client dependencies updated
+
+# v0.8.8 (2023-12-08)
+
+## Update
+
+- Binance client version updated
+
+# v0.8.7 (2023-12-07)
+
+## Update
+
+- dependency xchain-thorchain
+
+# v0.8.6 (2023-12-06)
+
+## Update
+
+- Expose Ledger implementation for Bitcoin
 
 # v0.8.5 (2023-11-28)
 

@@ -6,7 +6,7 @@ import mockBitgoApi from '../__mocks__/bitgo'
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
-import { Client } from '../src/client'
+import { ClientKeystore as Client } from '../src/clientKeystore'
 import {
   AssetBTC,
   BitgoProviders,

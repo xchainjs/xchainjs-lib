@@ -1,8 +1,14 @@
-# v0.28.14 (2023-12-01)
+# v0.28.15 (2023-12-11)
 
 ## Update
 
-- Client and Cosmos client dependency updated
+- Client and Cosmos client dependency update
+
+# v0.28.14 (2023-12-07)
+
+## Update
+
+- Change thorchain getFees() to fetch to  /thorchain/network
 
 # v0.28.13 (2023-11-16)
 

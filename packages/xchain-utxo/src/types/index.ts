@@ -1,3 +1,3 @@
-import { UTXO, UtxoClientParams, Witness } from './types'
+import { PreparedTx, UTXO, UtxoClientParams, Witness } from './types'
 
-export { UTXO, UtxoClientParams, Witness }
+export { UTXO, UtxoClientParams, Witness, PreparedTx }

@@ -1,8 +1,14 @@
-# v0.2.6 (2023-12-01)
+# v0.2.7 (2023-12-11)
 
 ## Update
 
 - UTXO client package dependency
+
+# v0.2.6 (2023-12-06)
+
+## Update
+
+- Expose chain
 
 # v0.2.5 (2023-11-21)
 

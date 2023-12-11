@@ -1,0 +1,13 @@
+{
+  "expected_amount_out": "98647691",
+  "fees": {
+    "affiliate": "3061722",
+    "asset": "BTC.BTC",
+    "outbound": "348000"
+  },
+  "inbound_address": "thor1qtemwlu9ju3ts3da5l82qejnzdl3xfs309c9l6",
+  "memo": "=:BTC.BTC:bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj::maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz:300",
+  "outbound_delay_blocks": 179,
+  "outbound_delay_seconds": 107400,
+  "slippage_bps": 83
+}

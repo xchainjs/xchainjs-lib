@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-dash",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Custom Dash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@types/bitcoinjs-lib": "^5.0.0",
     "@types/wif": "^2.0.2",
-    "@xchainjs/xchain-client": "^0.15.5",
+    "@xchainjs/xchain-client": "^0.15.6",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-utxo": "^0.1.0",
@@ -48,7 +48,7 @@
     "wif": "^2.0.6"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.15.5",
+    "@xchainjs/xchain-client": "^0.15.6",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-utxo": "^0.1.0",

@@ -1,8 +1,14 @@
-# v0.1.3 (2023-12-01)
+# v0.1.4 (2023-12-11)
 
 ## Update
 
 - Client and Cosmos client dependency updated
+
+# v0.1.3 (2023-12-06)
+
+## Update
+
+- Expose chain
 
 # v0.1.2 (2023-11-16)
 

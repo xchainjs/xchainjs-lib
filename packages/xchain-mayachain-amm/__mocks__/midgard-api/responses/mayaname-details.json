@@ -1,0 +1,30 @@
+{
+  "entries": [
+    {
+      "address": "bc1qdjqcm3fsadjn9zth9wk30gy5su6hkwkhfr0re9",
+      "chain": "BTC"
+    },
+    {
+      "address": "XiKv7A7vVQmYwNUp4TjCq8ZamkjB8zZtsL",
+      "chain": "DASH"
+    },
+    {
+      "address": "0x1509b1fe69be4d508a62ce8109635e1d1cf29a4f",
+      "chain": "ETH"
+    },
+    {
+      "address": "kujira1mg9jt63eeww5ptnkw963z2sw6jzezxw0trns50",
+      "chain": "KUJI"
+    },
+    {
+      "address": "maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09",
+      "chain": "MAYA"
+    },
+    {
+      "address": "thor1gnehec7mf4uytuw3wj4uwpptvkyvzclgqap7e4",
+      "chain": "THOR"
+    }
+  ],
+  "expire": "66751601",
+  "owner": "maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09"
+}

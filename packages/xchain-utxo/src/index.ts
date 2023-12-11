@@ -1,4 +1,4 @@
 import { Client } from './client'
-import { UTXO, UtxoClientParams, Witness } from './types'
+import { PreparedTx, UTXO, UtxoClientParams, Witness } from './types'
 
-export { Client, UTXO, UtxoClientParams, Witness }
+export { Client, UTXO, UtxoClientParams, Witness, PreparedTx }

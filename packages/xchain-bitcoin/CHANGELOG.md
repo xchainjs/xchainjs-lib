@@ -1,8 +1,14 @@
-# v0.23.7 (2023-12-01)
+# v0.23.8 (2023-12-11)
 
 ## Update
 
 - UTXO client package dependency
+
+# v0.23.7 (2023-12-06)
+
+## Add
+
+- Expose Ledger implementation
 
 # v0.23.6 (2023-11-21)
 

@@ -1,16 +1,6 @@
-import {
-  AssetInfo,
-  FeeOption,
-  FeeRate,
-  Network,
-  PreparedTx,
-  TxHash,
-  TxParams,
-  checkFeeBounds,
-} from '@xchainjs/xchain-client'
-import { getSeed } from '@xchainjs/xchain-crypto'
+import { AssetInfo, FeeRate, Network, TxParams } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { Client as UTXOClient, PreparedTx, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 
@@ -45,7 +35,7 @@ export const defaultBTCParams: UtxoClientParams = {
 /**
  * Custom Bitcoin client
  */
-class Client extends UTXOClient {
+abstract class Client extends UTXOClient {
   /**
    * Constructor
    * Client is initialised with network type
@@ -64,44 +54,6 @@ class Client extends UTXOClient {
   }
 
   /**
-   * @deprecated this function eventually will be removed use getAddressAsync instead
-   */
-  getAddress(index = 0): Address {
-    if (index < 0) {
-      throw new Error('index must be greater than zero')
-    }
-    if (this.phrase) {
-      const btcNetwork = Utils.btcNetwork(this.network)
-      const btcKeys = this.getBtcKeys(this.phrase, index)
-
-      const { address } = Bitcoin.payments.p2wpkh({
-        pubkey: btcKeys.publicKey,
-        network: btcNetwork,
-      })
-      if (!address) {
-        throw new Error('Address not defined')
-      }
-      return address
-    }
-    throw new Error('Phrase must be provided')
-  }
-
-  /**
-   * Get the current address.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
-   */
-  async getAddressAsync(index = 0): Promise<string> {
-    return this.getAddress(index)
-  }
-
-  /**
    *
    * @returns BTC asset info
    */
@@ -111,30 +63,6 @@ class Client extends UTXOClient {
       decimal: BTC_DECIMAL,
     }
     return assetInfo
-  }
-
-  /**
-   * @private
-   * Get private key.
-   *
-   * Private function to get keyPair from the this.phrase
-   *
-   * @param {string} phrase The phrase to be used for generating privkey
-   * @returns {ECPairInterface} The privkey generated from the given phrase
-   *
-   * @throws {"Could not get private key from phrase"} Throws an error if failed creating BTC keys from the given phrase
-   * */
-  private getBtcKeys(phrase: string, index = 0): Bitcoin.ECPair.ECPairInterface {
-    const btcNetwork = Utils.btcNetwork(this.network)
-
-    const seed = getSeed(phrase)
-    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
-
-    if (!master.privateKey) {
-      throw new Error('Could not get private key from phrase')
-    }
-
-    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
   }
 
   /**
@@ -184,46 +112,6 @@ class Client extends UTXOClient {
     }
     const fee = sum * feeRate
     return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
-  }
-
-  /**
-   * Transfer BTC.
-   *
-   * @param {TxParams&FeeRate} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   *
-   * @throws {"memo too long"} Thrown if memo longer than  80 chars.
-   */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    // set the default fee rate to `fast`
-    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
-    checkFeeBounds(this.feeBounds, feeRate)
-
-    const fromAddressIndex = params?.walletIndex || 0
-    const { rawUnsignedTx } = await this.prepareTx({
-      ...params,
-      sender: await this.getAddressAsync(fromAddressIndex),
-      feeRate,
-    })
-
-    const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
-    const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
-
-    psbt.signAllInputs(btcKeys) // Sign all inputs
-    psbt.finalizeAllInputs() // Finalise inputs
-
-    const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
-
-    const txHash = psbt.extractTransaction().getId()
-    try {
-      const txId = await this.roundRobinBroadcastTx(txHex)
-      return txId
-    } catch (err) {
-      const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
-        this.network
-      ].getExplorerTxUrl(txHash)}`
-      return error
-    }
   }
 
   /**
@@ -320,7 +208,7 @@ class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
   }): Promise<PreparedTx> {
-    const { psbt } = await this.buildTx({
+    const { psbt, utxos } = await this.buildTx({
       sender,
       recipient,
       amount,
@@ -329,7 +217,7 @@ class Client extends UTXOClient {
       spendPendingUTXO,
     })
 
-    return { rawUnsignedTx: psbt.toBase64() }
+    return { rawUnsignedTx: psbt.toBase64(), utxos }
   }
 }
 

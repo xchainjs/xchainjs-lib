@@ -267,6 +267,11 @@ describe('thorchain Integration Tests', () => {
     expect(tx.type).toBe('transfer')
     expect(tx.from[1].amount.amount().toNumber()).toBe(13744300000000)
   })
+
+  it('should fetch thorchain native Tx fee', async () => {
+    const fees = await thorClient.getFees()
+    expect(fees.average.amount().toNumber()).toEqual(2000000)
+  })
   it('should prepare transaction', async () => {
     try {
       const sender = await thorClient.getAddressAsync(3)

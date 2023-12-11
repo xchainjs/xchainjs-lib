@@ -1,8 +1,14 @@
-# v5.7.6 (2023-12-01)
+# v5.7.7 (2023-12-11)
 
 ## Update
 
 - Client dependency updated
+
+# v5.7.6 (2023-12-01)
+
+## Update
+
+- Derivation path changed
 
 # v5.7.5 (2023-11-16)
 

@@ -36,7 +36,7 @@
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",
     "@types/big.js": "^6.1.6",
-    "@xchainjs/xchain-client": "^0.15.5",
+    "@xchainjs/xchain-client": "^0.15.6",
     "@xchainjs/xchain-cosmos": "^0.21.8",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
@@ -49,7 +49,7 @@
   },
   "peerDependencies": {
     "@cosmos-client/core": "0.46.1",
-    "@xchainjs/xchain-client": "^0.15.5",
+    "@xchainjs/xchain-client": "^0.15.6",
     "@xchainjs/xchain-cosmos": "^0.21.8",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
