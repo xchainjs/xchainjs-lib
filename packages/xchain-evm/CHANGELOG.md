@@ -1,8 +1,9 @@
-# v0.4.2 (2023-12-01)
+# v0.4.2 (2023-12-11)
 
 ## Update
 
 - Client package version update
+- Evm-providers package version updated
 
 # v0.4.1 (2023-11-16)
 
