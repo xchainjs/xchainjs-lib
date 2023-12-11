@@ -33,7 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.15.5",
+    "@xchainjs/xchain-client": "^0.15.6",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-utxo": "^0.1.0",
@@ -47,7 +47,7 @@
     "wif": "^2.0.6"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.15.5",
+    "@xchainjs/xchain-client": "^0.15.6",
     "@xchainjs/xchain-crypto": "^0.3.0",
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-utxo": "^0.1.0",
