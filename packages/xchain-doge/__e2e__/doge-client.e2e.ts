@@ -127,13 +127,35 @@ describe('Dogecoin Integration Tests', () => {
       fail()
     }
   })
-
   it('Should fetch fee rates from Thorchain', async () => {
     try {
       const feeRates = await dogeClient.getFeeRates(Protocol.THORCHAIN)
       console.log(feeRates)
     } catch (error) {
       console.error(`Error running "Should fetch fee rates from Thorchain". ${error}`)
+      fail()
+    }
+  })
+  it('Should get fees', async () => {
+    try {
+      const fees = await dogeClient.getFees()
+      console.log({
+        type: fees.type,
+        average: {
+          amount: fees.average.amount().toString(),
+          decimals: fees.average.decimal,
+        },
+        fast: {
+          amount: fees.fast.amount().toString(),
+          decimals: fees.fast.decimal,
+        },
+        fastest: {
+          amount: fees.fastest.amount().toString(),
+          decimals: fees.fastest.decimal,
+        },
+      })
+    } catch (error) {
+      console.error(`Should get fees". ${error}`)
       fail()
     }
   })
