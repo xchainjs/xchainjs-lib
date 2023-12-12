@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-client",
-  "version": "0.15.5",
+  "version": "0.15.6",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",

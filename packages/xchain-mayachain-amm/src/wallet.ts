@@ -1,5 +1,5 @@
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
-import { Network, TxParams, UtxoClientParams, XChainClient, XChainClientParams } from '@xchainjs/xchain-client'
+import { Network, TxParams, XChainClient, XChainClientParams } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
 import { Client as DashClient, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -14,6 +14,7 @@ import {
 } from '@xchainjs/xchain-mayachain'
 import { Client as ThorClient, THORChain, ThorchainClientParams } from '@xchainjs/xchain-thorchain'
 import { Asset, BaseAmount, Chain, assetToString, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 import { ethers } from 'ethers'
 
 export type NodeUrls = Record<Network, string>

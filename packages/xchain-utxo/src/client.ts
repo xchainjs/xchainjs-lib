@@ -1,54 +1,35 @@
-import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
-
-import { BaseXChainClient as Client } from './BaseXChainClient'
-import { standardFeeRates } from './feeRates'
-import { calcFeesAsync } from './fees'
-import { ExplorerProviders, UTXO, UtxoOnlineDataProviders } from './provider-types'
 import {
   Balance,
+  BaseXChainClient,
+  ExplorerProviders,
   Fee,
   FeeEstimateOptions,
   FeeRate,
   FeeRates,
   Fees,
   FeesWithRates,
+  Protocol,
   Tx,
   TxHash,
   TxHistoryParams,
   TxsPage,
-  XChainClientParams,
-} from './types'
+  calcFeesAsync,
+  standardFeeRates,
+} from '@xchainjs/xchain-client'
+import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { UTXO, UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
-export type UtxoClientParams = XChainClientParams & {
-  explorerProviders: ExplorerProviders
-  dataProviders: UtxoOnlineDataProviders[]
-}
+import { UtxoClientParams } from './types'
 
-export enum Protocol {
-  THORCHAIN = 1,
-}
-
-export abstract class UTXOClient extends Client {
+export abstract class Client extends BaseXChainClient {
   protected explorerProviders: ExplorerProviders
   protected dataProviders: UtxoOnlineDataProviders[]
 
-  protected abstract compileMemo(memo: string): Buffer
-  protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
-
-  protected async calcFee(feeRate: FeeRate, options?: FeeEstimateOptions): Promise<Fee> {
-    let utxos: UTXO[] = []
-    if (options?.sender) {
-      utxos = await this.scanUTXOs(options.sender, false)
-    }
-    const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
-    const fee = this.getFeeFromUtxos(utxos, feeRate, compiledMemo)
-    return baseAmount(fee)
-  }
-
   /**
    * Constructor
-   * Client is initialised with network type
+   * Client is initialized with network type
    *
+   * @param {Chain} chain Chain to instantiate the client with
    * @param {UtxoClientParams} params
    */
   constructor(chain: Chain, params: UtxoClientParams) {
@@ -60,6 +41,16 @@ export abstract class UTXOClient extends Client {
     })
     this.explorerProviders = params.explorerProviders
     this.dataProviders = params.dataProviders
+  }
+
+  protected async calcFee(feeRate: FeeRate, options?: FeeEstimateOptions): Promise<Fee> {
+    let utxos: UTXO[] = []
+    if (options?.sender) {
+      utxos = await this.scanUTXOs(options.sender, false)
+    }
+    const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
+    const fee = this.getFeeFromUtxos(utxos, feeRate, compiledMemo)
+    return baseAmount(fee)
   }
 
   /**
@@ -90,6 +81,7 @@ export abstract class UTXOClient extends Client {
   getExplorerTxUrl(txID: string): string {
     return this.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
+
   /**
    * Get transaction history of a given address with pagination options.
    * By default it will return the transaction history of the current wallet.
@@ -120,9 +112,9 @@ export abstract class UTXOClient extends Client {
   }
 
   /**
-   * Gets BTC balances of a given address.
+   * Gets balance of a given address.
    *
-   * @param {Address} BTC address to get balances from
+   * @param {Address} address to get balances from
    * @param {undefined} Needed for legacy only to be in common with `XChainClient` interface - will be removed by a next version
    * @param {confirmedOnly} Flag to get balances of confirmed txs only
    *
@@ -142,6 +134,7 @@ export abstract class UTXOClient extends Client {
   ): Promise<UTXO[]> {
     return this.roundRobinGetUnspentTxs(address, confirmedOnly)
   }
+
   async getFeesWithRates(options?: FeeEstimateOptions): Promise<FeesWithRates> {
     const rates = await this.getFeeRates()
     return {
@@ -200,6 +193,7 @@ export abstract class UTXOClient extends Client {
     }
     throw Error('no provider able to get balance')
   }
+
   protected async roundRobinGetUnspentTxs(address: Address, confirmed: boolean) {
     for (const provider of this.dataProviders) {
       try {
@@ -213,6 +207,7 @@ export abstract class UTXOClient extends Client {
     }
     throw Error('no provider able to GetUnspentTxs')
   }
+
   protected async roundRobinGetTransactionData(txid: string) {
     for (const provider of this.dataProviders) {
       try {
@@ -224,6 +219,7 @@ export abstract class UTXOClient extends Client {
     }
     throw Error('no provider able to GetTransactionData')
   }
+
   protected async roundRobinGetTransactions(params: TxHistoryParams) {
     for (const provider of this.dataProviders) {
       try {
@@ -235,6 +231,7 @@ export abstract class UTXOClient extends Client {
     }
     throw Error('no provider able to GetTransactions')
   }
+
   protected async roundRobinBroadcastTx(txHex: string) {
     for (const provider of this.dataProviders) {
       try {
@@ -247,6 +244,8 @@ export abstract class UTXOClient extends Client {
     throw Error('no provider able to BroadcastTx')
   }
 
+  protected abstract compileMemo(memo: string): Buffer
+  protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
   protected async roundRobinGetFeeRates(): Promise<FeeRates> {
     for (const provider of this.dataProviders) {
       try {

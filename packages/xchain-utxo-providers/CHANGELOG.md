@@ -1,3 +1,9 @@
+# v0.2.9 (2023-12-01)
+
+## Update
+
+- Client package version update
+
 # v0.2.8 (2023-11-21)
 
 ## Update

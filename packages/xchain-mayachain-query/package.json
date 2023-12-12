@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-query",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "license": "MIT",
   "description": "Mayachain query module that is responsible for estimating swap calculations and add/remove liquidity for thorchain",
   "keywords": [
@@ -33,8 +33,8 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.15.5",
-    "@xchainjs/xchain-mayamidgard-query": "^0.1.1",
+    "@xchainjs/xchain-client": "^0.15.6",
+    "@xchainjs/xchain-mayamidgard-query": "^0.1.2",
     "@xchainjs/xchain-mayanode": "^0.1.2",
     "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.3.6",
@@ -42,8 +42,8 @@
     "bignumber.js": "^9.0.0"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.15.5",
-    "@xchainjs/xchain-mayamidgard-query": "^0.1.1",
+    "@xchainjs/xchain-client": "^0.15.6",
+    "@xchainjs/xchain-mayamidgard-query": "^0.1.2",
     "@xchainjs/xchain-mayanode": "^0.1.2",
     "@xchainjs/xchain-util": "^0.13.0",
     "axios": "^1.3.6",

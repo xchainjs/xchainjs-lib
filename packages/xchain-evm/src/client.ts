@@ -11,6 +11,7 @@ import {
   Fees,
   Network,
   PreparedTx,
+  Protocol,
   Tx,
   TxHash,
   TxHistoryParams,
@@ -46,9 +47,6 @@ import {
   validateAddress,
 } from './utils'
 
-export enum Protocol {
-  THORCHAIN = 1,
-}
 /**
  * Interface for custom EVM client
  */

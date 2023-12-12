@@ -1,3 +1,9 @@
+# v0.15.6 (2023-12-11)
+
+## Update
+
+- UTXO client removed
+
 # v0.15.5 (2023-12-06)
 
 ## Add

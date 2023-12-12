@@ -1,3 +1,9 @@
+# v0.8.9 (2023-12-11)
+
+## Update
+
+- Client dependencies updated
+
 # v0.8.8 (2023-12-08)
 
 ## Update

@@ -1,5 +1,5 @@
-import { TxHash, XChainClient } from '@xchainjs/xchain-client'
-import { ApproveParams, Client as EvmClient, MAX_APPROVAL, Protocol, abi } from '@xchainjs/xchain-evm'
+import { Protocol, TxHash, XChainClient } from '@xchainjs/xchain-client'
+import { ApproveParams, Client as EvmClient, MAX_APPROVAL, abi } from '@xchainjs/xchain-evm'
 import { ThorchainCache } from '@xchainjs/xchain-thorchain-query'
 import { Asset, BaseAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'

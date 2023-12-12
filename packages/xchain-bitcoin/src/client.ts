@@ -1,14 +1,6 @@
-import {
-  AssetInfo,
-  FeeRate,
-  Network,
-  PreparedTx,
-  TxParams,
-  UTXO,
-  UTXOClient,
-  UtxoClientParams,
-} from '@xchainjs/xchain-client'
+import { AssetInfo, FeeRate, Network, TxParams } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
+import { Client as UTXOClient, PreparedTx, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
 

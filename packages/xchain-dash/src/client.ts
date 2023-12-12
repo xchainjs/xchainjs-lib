@@ -12,14 +12,12 @@ import {
   TxParams,
   TxType,
   TxsPage,
-  UTXO,
-  UTXOClient,
-  UtxoClientParams,
   checkFeeBounds,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import * as nodeApi from '@xchainjs/xchain-dash/src/node-api'
 import { Address, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Dash from 'bitcoinjs-lib'
 
 import {

@@ -1,4 +1,4 @@
-import { ExplorerProvider, Network, UtxoOnlineDataProviders } from '@xchainjs/xchain-client'
+import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
@@ -6,6 +6,7 @@ import {
   BlockcypherProvider,
   SochainNetwork,
   SochainProvider,
+  UtxoOnlineDataProviders,
 } from '@xchainjs/xchain-utxo-providers'
 
 /**

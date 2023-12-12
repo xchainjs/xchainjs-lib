@@ -1,5 +1,6 @@
-import { Network, UTXO } from '@xchainjs/xchain-client'
+import { Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
+import { UTXO } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 export const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 //10

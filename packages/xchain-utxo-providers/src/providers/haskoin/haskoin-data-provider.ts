@@ -1,15 +1,7 @@
-import {
-  Balance,
-  FeeRates,
-  Tx,
-  TxHash,
-  TxHistoryParams,
-  TxType,
-  TxsPage,
-  UTXO,
-  UtxoOnlineDataProvider,
-} from '@xchainjs/xchain-client'
+import { Balance, FeeRates, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+
+import { UTXO, UtxoOnlineDataProvider } from '../types'
 
 import * as haskoin from './haskoin-api'
 import { HaskoinNetwork, Transaction, TxUnspent } from './haskoin-api-types'

@@ -1,3 +1,9 @@
+# v0.6.14 (2023-12-03)
+
+## Update
+
+- Client and midgard-query dependencies updated
+
 # v0.6.13 (2023-11-28)
 
 ## Update
