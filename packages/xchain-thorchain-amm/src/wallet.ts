@@ -11,8 +11,8 @@ import { EVMClientParams } from '@xchainjs/xchain-evm'
 import { Client as LtcClient, LTCChain, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as MayaClient, MAYAChain, MayachainClientParams } from '@xchainjs/xchain-mayachain'
 import { Client as ThorClient, THORChain, ThorchainClient, ThorchainClientParams } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Address, Asset, assetFromString } from '@xchainjs/xchain-util'
+import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { Address, Asset, CryptoAmount, assetFromString } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import {
