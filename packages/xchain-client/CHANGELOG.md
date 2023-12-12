@@ -1,3 +1,9 @@
+# v0.16.0 (2023-12-12)
+
+## Update
+
+- CalcFee and CalcFeeAsync removed
+
 # v0.15.6 (2023-12-11)
 
 ## Update

@@ -1,3 +1,9 @@
+# v5.7.8 (2023-12-12)
+
+## Update
+
+- Client dependency increased to 0.16.0
+
 # v5.7.7 (2023-12-11)
 
 ## Update
