@@ -114,7 +114,7 @@ export const defaultBscParams: EVMClientParams = {
   providers: ethersJSProviders,
   explorerProviders: bscExplorerProviders,
   dataProviders: [bscProviders],
-  network: Network.Testnet,
+  network: Network.Mainnet,
   feeBounds: {
     lower: LOWER_FEE_BOUND,
     upper: UPPER_FEE_BOUND,
