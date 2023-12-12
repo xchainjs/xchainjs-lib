@@ -1,12 +1,17 @@
+import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
+import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
+import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { abi } from '@xchainjs/xchain-evm'
-import { MAYAChain } from '@xchainjs/xchain-mayachain'
+import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
-import { CryptoAmount, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
+import { Asset, CryptoAmount, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
 import { TxSubmitted } from './types'
-import { Wallet } from './wallet'
 
 /**
  * MAYAChainAMM class for interacting with THORChain.
@@ -22,7 +27,17 @@ export class MayachainAMM {
    * @param mayachainQuery - an instance of the MayachainQuery
    * @returns MayachainAMM
    */
-  constructor(mayachainQuery = new MayachainQuery(), wallet = new Wallet('', Network.Mainnet)) {
+  constructor(
+    mayachainQuery = new MayachainQuery(),
+    wallet = new Wallet({
+      BTC: new BtcClient({ ...defaultBtcParams, network: Network.Mainnet }),
+      ETH: new EthClient({ ...defaultEthParams, network: Network.Mainnet }),
+      DASH: new DashClient({ ...defaultDashParams, network: Network.Mainnet }),
+      KUJI: new KujiraClient({ ...defaultKujiParams, network: Network.Mainnet }),
+      THOR: new ThorClient({ network: Network.Mainnet }),
+      MAYA: new MayaClient({ network: Network.Mainnet }),
+    }),
+  ) {
     this.mayachainQuery = mayachainQuery
     this.wallet = wallet
   }
@@ -118,7 +133,7 @@ export class MayachainAMM {
       errors.push(`affiliateBps ${affiliateBps} out of range [0 - 10000]`)
     }
 
-    if (this.wallet.isERC20Asset(fromAsset) && fromAddress) {
+    if (this.isERC20Asset(fromAsset) && fromAddress) {
       const inboundDetails = await this.mayachainQuery.getChainInboundDetails(fromAsset.chain)
       if (!inboundDetails.router) throw Error(`Unknown router address for ${fromAsset.chain}`)
 
@@ -201,7 +216,7 @@ export class MayachainAMM {
    */
   private async doNonProtocolAssetSwap(amount: CryptoAmount, recipient: string, memo: string): Promise<TxSubmitted> {
     // Non ERC20 swaps
-    if (!this.wallet.isERC20Asset(amount.asset)) {
+    if (!this.isERC20Asset(amount.asset)) {
       const hash = await this.wallet.transfer({
         asset: amount.asset,
         amount: amount.baseAmount,
@@ -246,5 +261,23 @@ export class MayachainAMM {
       hash,
       url: await this.wallet.getExplorerTxUrl(amount.asset.chain, hash),
     }
+  }
+
+  /**
+   * Check if asset is ERC20
+   * @param {Asset} asset to check
+   * @returns true if asset is ERC20, otherwise, false
+   */
+  private isERC20Asset(asset: Asset): boolean {
+    return this.isEVMChain(asset.chain) ? [AssetETH.symbol].includes(asset.symbol) : false
+  }
+
+  /**
+   * Check if asset chain is EVM
+   * @param {Chain} chain to check
+   * @returns true if chain is EVM, otherwise, false
+   */
+  private isEVMChain(chain: string): boolean {
+    return [AssetETH.chain].includes(chain)
   }
 }
