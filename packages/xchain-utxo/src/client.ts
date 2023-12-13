@@ -2,10 +2,10 @@ import {
   Balance,
   BaseXChainClient,
   ExplorerProviders,
-  Fee,
   FeeEstimateOptions,
   FeeRate,
   FeeRates,
+  FeeType,
   Fees,
   FeesWithRates,
   Protocol,
@@ -13,7 +13,6 @@ import {
   TxHash,
   TxHistoryParams,
   TxsPage,
-  calcFeesAsync,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
@@ -41,16 +40,6 @@ export abstract class Client extends BaseXChainClient {
     })
     this.explorerProviders = params.explorerProviders
     this.dataProviders = params.dataProviders
-  }
-
-  protected async calcFee(feeRate: FeeRate, options?: FeeEstimateOptions): Promise<Fee> {
-    let utxos: UTXO[] = []
-    if (options?.sender) {
-      utxos = await this.scanUTXOs(options.sender, false)
-    }
-    const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
-    const fee = this.getFeeFromUtxos(utxos, feeRate, compiledMemo)
-    return baseAmount(fee)
   }
 
   /**
@@ -136,11 +125,18 @@ export abstract class Client extends BaseXChainClient {
   }
 
   async getFeesWithRates(options?: FeeEstimateOptions): Promise<FeesWithRates> {
+    const utxos = options?.sender ? await this.scanUTXOs(options.sender, false) : []
+    const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
+
     const rates = await this.getFeeRates()
+
     return {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      fees: await calcFeesAsync(rates, this.calcFee.bind(this), options),
+      fees: {
+        average: baseAmount(this.getFeeFromUtxos(utxos, rates.average, compiledMemo)),
+        fast: baseAmount(this.getFeeFromUtxos(utxos, rates.fast, compiledMemo)),
+        fastest: baseAmount(this.getFeeFromUtxos(utxos, rates.fastest, compiledMemo)),
+        type: FeeType.PerByte,
+      },
       rates,
     }
   }

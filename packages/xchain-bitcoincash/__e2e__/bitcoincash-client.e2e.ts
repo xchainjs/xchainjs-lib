@@ -24,6 +24,32 @@ describe('BCH e2e tests', () => {
     }
   })
 
+  it('Should get fees', async () => {
+    try {
+      const fees = await client.getFees({
+        sender: 'qzzp3027eteuj29lkgx4dphg86grd04frgtn2ngukd',
+      })
+      console.log({
+        type: fees.type,
+        average: {
+          amount: fees.average.amount().toString(),
+          decimals: fees.average.decimal,
+        },
+        fast: {
+          amount: fees.fast.amount().toString(),
+          decimals: fees.fast.decimal,
+        },
+        fastest: {
+          amount: fees.fastest.amount().toString(),
+          decimals: fees.fastest.decimal,
+        },
+      })
+    } catch (error) {
+      console.error(`Should get fees". ${error}`)
+      fail()
+    }
+  })
+
   it('Should fetch fee rates from provider', async () => {
     try {
       const feeRates = await client.getFeeRates()

@@ -1,3 +1,10 @@
+# v0.6.15 (2023-12-12)
+
+## Update
+
+- Client dependency increased to 0.16.0
+- Midgard query dependency increased to 0.1.9
+
 # v0.6.14 (2023-12-03)
 
 ## Update

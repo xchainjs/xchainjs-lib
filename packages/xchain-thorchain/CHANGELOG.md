@@ -1,3 +1,10 @@
+# v0.28.16 (2023-12-12)
+
+## Update
+
+- Client dependency increased to 0.16.0
+- Cosmos dependency increased to 0.21.9
+
 # v0.28.15 (2023-12-11)
 
 ## Update

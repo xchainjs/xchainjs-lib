@@ -1,3 +1,24 @@
+# v0.8.10 (2023-12-12)
+
+## Update
+
+- Avax client dependency increased to 0.4.3
+- Binance client dependency increased to 5.7.8
+- Bitcoin client dependency increased to 0.23.9
+- Bitcoin cash client dependency increased to 0.17.7
+- Client client dependency increased to 0.16.0
+- Cosmos client dependency increased to 0.21.9
+- Bsc client dependency increased to 0.4.4
+- Doge client dependency increased to 0.7.9
+- Ethereum client dependency increased to 0.31.3
+- Thorchain query client dependency increased to 0.6.15
+- Evm client dependency increased to 0.4.3
+- Litecoin client dependency increased to 0.13.8
+- Mayachain client dependency increased to 0.2.13
+- Thorchain client dependency increased to 0.28.16
+- Utxo providers dependency increased to 0.2.10
+
+
 # v0.8.9 (2023-12-11)
 
 ## Update
