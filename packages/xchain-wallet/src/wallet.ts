@@ -1,4 +1,4 @@
-import { Balance, Network, PreparedTx, TxHash, TxParams, XChainClient } from '@xchainjs/xchain-client'
+import { Balance, Network, TxHash, TxParams, XChainClient } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
 import { Asset, BaseAmount, Chain, getContractAddressFromAsset } from '@xchainjs/xchain-util'
@@ -49,7 +49,7 @@ export class Wallet {
   /**
    * Get chain address
    * @param {Chain} chain
-   * @returns the chain address
+   * @returns {string} the chain address
    */
   public async getAddress(chain: Chain): Promise<string> {
     const client = this.getClient(chain)
@@ -60,7 +60,7 @@ export class Wallet {
    * Check if address is valid
    * @param {Chain} chain in which the address has to be valid
    * @param {string} address to validate
-   * @returns true if it is a valid address, otherwise, false
+   * @returns {boolean} true if it is a valid address, otherwise, false
    */
   public validateAddress(chain: Chain, address: string): boolean {
     const client = this.getClient(chain)
@@ -70,7 +70,7 @@ export class Wallet {
   /**
    * Get chain balances
    * @param {Chain} chain to retrieve the balance of
-   * @returns the chain balances
+   * @returns {Balance[]} the chain balances
    */
   public async getBalance(chain: Chain, assets?: Asset[]): Promise<Balance[]> {
     const client = this.getClient(chain)
@@ -103,21 +103,28 @@ export class Wallet {
   /**
    * Make a deposit
    * @param {DepositParam} depositParams
-   * @returns the hash of the deposit
+   * @returns {string} the hash of the deposit
    * @throws {Error} if can not make deposit with the asset
    */
-  public async deposit({ asset, amount, memo }: DepositParam & { asset: Asset }): Promise<string> {
+  public async deposit({
+    asset,
+    amount,
+    memo,
+    walletIndex,
+    sequence,
+    gasLimit,
+  }: DepositParam & { asset: Asset }): Promise<string> {
     const client = this.getClient(asset.chain)
     if (!('deposit' in client)) throw Error(`Can not deposit with ${asset.chain} client`)
 
-    return (client as unknown as MayachainClient).deposit({ asset, amount, memo })
+    return (client as unknown as MayachainClient).deposit({ asset, amount, memo, walletIndex, sequence, gasLimit })
   }
 
   /**
    * Broadcast transaction
-   * @param chain in which broadcast the signed raw transaction
-   * @param txHex signed raw transaction
-   * @returns the broadcasted transaction hash
+   * @param {Chain} chain in which broadcast the signed raw transaction
+   * @param {string} txHex signed raw transaction
+   * @returns {TxHash} the broadcasted transaction hash
    */
   public async broadcast(chain: Chain, txHex: string): Promise<TxHash> {
     const client = this.getClient(chain)
@@ -130,7 +137,7 @@ export class Wallet {
    * @param {BaseAmount} amount to check
    * @param {string} fromAddress owner of the amount asset
    * @param {string} spenderAddress spender to check if it is allowed to spend
-   * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
+   * @returns {boolean} true if the spenderAddress is allowed to spend the amount, otherwise, false
    * @throws {Error} if asset is a non ERC20 asset
    */
   public async isApproved(
@@ -157,7 +164,7 @@ export class Wallet {
   /**
    * Get feeRates. Only available for EVM clients
    * @param {Chain} chain of which return the feeRates
-   * @returns the gas fee rates
+   * @returns {GasPrices} the gas fee rates
    * @throws {Error} if gas fee rates can not be returned from the chain
    */
   public async getGasFeeRates(chain: Chain): Promise<GasPrices> {
@@ -169,7 +176,7 @@ export class Wallet {
   /**
    * Get explorer url
    * @param {Chain} chain to retrieve the explorer of
-   * @returns the transaction url
+   * @returns {string} the transaction url
    */
   public async getExplorerUrl(chain: Chain): Promise<string> {
     const client = this.getClient(chain)
@@ -180,7 +187,7 @@ export class Wallet {
    * Get transaction url
    * @param {Chain} chain of the transaction
    * @param {string} hash to retrieve the url of
-   * @returns the transaction url
+   * @returns {string} the transaction url
    */
   public async getExplorerTxUrl(chain: Chain, hash: string): Promise<string> {
     const client = this.getClient(chain)
@@ -191,7 +198,7 @@ export class Wallet {
    * Get address url
    * @param {Chain} chain of the address
    * @param {string} address to retrieve the url of
-   * @returns the transaction url
+   * @returns {string} the transaction url
    */
   public async getExplorerAddressUrl(chain: Chain, address: string): Promise<string> {
     const client = this.getClient(chain)
@@ -201,7 +208,7 @@ export class Wallet {
   /**
    * Get chain wallet. Only available for EVM clients
    * @param {Chain} chain of which return the wallet
-   * @returns the chain wallet
+   * @returns {ethers.Wallet} the chain wallet
    * @throws {Error} wallet can not be retrieve from chain
    */
   public getChainWallet(chain: Chain): ethers.Wallet {
@@ -213,7 +220,7 @@ export class Wallet {
   /**
    * Add a new client to the wallet
    * @param chain to remove the client of
-   * @returns true if client is successfully added, otherwise, false
+   * @returns {boolean} true if client is successfully added, otherwise, false
    * @throws {Error} If client to add is working on different network compared to others
    */
   public addClient(chain: Chain, client: XChainClient): boolean {
@@ -234,7 +241,7 @@ export class Wallet {
   /**
    * Purge and remove client from wallet
    * @param chain to remove the client of
-   * @returns true if the client is successfully purge and removed, otherwise, false
+   * @returns {true} true if the client is successfully purge and removed, otherwise, false
    */
   public purgeClient(chain: Chain): boolean {
     try {
@@ -249,7 +256,7 @@ export class Wallet {
 
   /**
    * Purge and remove all clients from wallet
-   * @returns true if the wallet is successfully purge and removed, otherwise, false
+   * @returns {boolean} true if the wallet is successfully purge and removed, otherwise, false
    */
   public purgeWallet(): boolean {
     try {
@@ -266,7 +273,7 @@ export class Wallet {
   /**
    * Get chain client
    * @param {Chain} chain of which return the client
-   * @returns the chain client
+   * @returns {XChainClient} the chain client
    * @throws {Error} if client does not exist
    */
   private getClient(chain: Chain): XChainClient {
