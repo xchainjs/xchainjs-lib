@@ -1,6 +1,8 @@
-# v0.8.10 (2023-12-12)
+# Changelog
 
-## Update
+## v0.8.10 (2023-12-12)
+
+### Update
 
 - Avax client dependency increased to 0.4.3
 - Binance client dependency increased to 5.7.8
@@ -19,349 +21,349 @@
 - Utxo providers dependency increased to 0.2.10
 
 
-# v0.8.9 (2023-12-11)
+## v0.8.9 (2023-12-11)
 
-## Update
+### Update
 
 - Client dependencies updated
 
-# v0.8.8 (2023-12-08)
+## v0.8.8 (2023-12-08)
 
-## Update
+### Update
 
 - Binance client version updated
 
-# v0.8.7 (2023-12-07)
+## v0.8.7 (2023-12-07)
 
-## Update
+### Update
 
 - dependency xchain-thorchain
 
-# v0.8.6 (2023-12-06)
+## v0.8.6 (2023-12-06)
 
-## Update
+### Update
 
 - Expose Ledger implementation for Bitcoin
 
-# v0.8.5 (2023-11-28)
+## v0.8.5 (2023-11-28)
 
-## Update
+### Update
 
 - bump thorchain-query dep
 
-# v0.8.4 (2023-11-21)
+## v0.8.4 (2023-11-21)
 
-## Update
+### Update
 
 - xchain-client dependency increased
 
-# v0.8.3 (2023-11-21)
+## v0.8.3 (2023-11-21)
 
-## Update
+### Update
 
 - Client dependencies updated to work with renamed environment variables
 
-# v0.8.2 (2023-11-16)
+## v0.8.2 (2023-11-16)
 
-## Update
+### Update
 
 - Runescan explorer
 
-# v0.8.1 (2023-11-16)
+## v0.8.1 (2023-11-16)
 
-## Update
+### Update
 
 - Created method getAddressAsync
 
-# v0.8.0 (2023-11-15)
+## v0.8.0 (2023-11-15)
 
-## Update
+### Update
 
 - Default gasPrice in baseAmount unit. Changed from GWei to Wei
 
-# v0.7.18 (2023-11-12)
+## v0.7.18 (2023-11-12)
 
-## Update
+### Update
 
 - Update EVM clients to use Routescan and Etherscan provider compatible with Routescan
 - update Midgard & Query & thornode deps
 - Remove fromAddress from quoteSwap() params - no longer needed
 
-# v0.7.17 (2023-11-12)
+## v0.7.17 (2023-11-12)
 
-## Update
+### Update
 
 - Transfer bug fix with txSigner, sender address can be retrieved from signer
 
-# v0.7.16 (2023-11-11)
+## v0.7.16 (2023-11-11)
 
-## Update
+### Update
 
 - Thorchain package version from 0.28.10 to 0.28.11
 
-# v0.7.15 (2023-11-10)
+## v0.7.15 (2023-11-10)
 
-## Update
+### Update
 
 - Utxo clients version updated
 
-# v0.7.14 (2023-11-07)
+## v0.7.14 (2023-11-07)
 
-## Update
+### Update
 
 - Update thorname estimation and prepareTx cosmos chains
 
-# v0.7.13 (2023-11-05)
+## v0.7.13 (2023-11-05)
 
-## Update
+### Update
 
 - Wallet can be initialised with a custom config by chain
 
-# v0.7.12 (2023-11-05)
+## v0.7.12 (2023-11-05)
 
-## Update
+### Update
 
 - Update deps for xchain-thorchain-query
 
-# v0.7.11 (2023-11-04)
+## v0.7.11 (2023-11-04)
 
-## Update
+### Update
 
 - thorchain-query package from 0.6.7 to 0.6.8
 
-# v0.7.10 (2023-11-02)
+## v0.7.10 (2023-11-02)
 
-## Update
+### Update
 
 - Force Thorchain estimations
 
-# v0.7.9 (2023-11-03)
+## v0.7.9 (2023-11-03)
 
-## Update
+### Update
 
 - Native asset for dustAmount and dustThreshold
 
-# v0.7.8 (2023-10-31)
+## v0.7.8 (2023-10-31)
 
-## Update
+### Update
 
 - Bumped deps for Doge and Query
 
-# v0.7.7 (2023-10-26)
+## v0.7.7 (2023-10-26)
 
-## Update
+### Update
 
 - Refactor transfer method to use prepareTx
 
-# v0.7.6 (2023-10-19)
+## v0.7.6 (2023-10-19)
 
-## Update
+### Update
 
 - Update deps for thorchain-query & thornode
 
-# v0.7.5 (2023-10-09)
+## v0.7.5 (2023-10-09)
 
-## Update
+### Update
 
 - Increase client versions for supporting 'sender' option on `getFees()``
 
-# v0.7.4 (2023-10-09)
+## v0.7.4 (2023-10-09)
 
-## Update
+### Update
 
 - Fix pending UTXOs bug
 - Increate default fee estimation
 
-# v0.7.3 (2023-10-06)
+## v0.7.3 (2023-10-06)
 
-## Update
+### Update
 
 - Update deps for thorchain-query && thornode && midgard
 
-# v0.7.2 (2023-09-24)
+## v0.7.2 (2023-09-24)
 
-## Update
+### Update
 
 - Support transefer and renewal THORNames
 
-# v0.7.1 (2023-09-18)
+## v0.7.1 (2023-09-18)
 
-## Update
+### Update
 
 - Add functions getThornamesByAddress, registerThorname and updateThorname
 
-# v0.7.0 (2023-09-10)
+## v0.7.0 (2023-09-10)
 
-## Update
+### Update
 
 - Replace calls to Midgard, now made using the midgard-query package
 
-# v0.6.0 (2023-09-04)
+## v0.6.0 (2023-09-04)
 
-## Update
+### Update
 
 - Update peer deps, thorchain-query
 
-# v0.5.9 (2023-08-14)
+## v0.5.9 (2023-08-14)
 
-## Update
+### Update
 
 - update deps, query, thorchain, evm, ethereum, avax, bsc
 
-# v0.5.8 (2023-07-26)
+## v0.5.8 (2023-07-26)
 
-## Update
+### Update
 
 - Updated dependencies for cosmos, thorchain & query
 
-# v0.5.7 (2023-07-10)
+## v0.5.7 (2023-07-10)
 
-## Update
+### Update
 
 - Update deps for avax, bsc, bitcoin, doge & litecoin
 
-# v0.5.6 (2023-06-28)
+## v0.5.6 (2023-06-28)
 
-## Update
+### Update
 
 - Update deps for thorchain-query & mayachain
 - Udpate deps for thorchain
 
-# v0.5.5 (2023-06-21)
+## v0.5.5 (2023-06-21)
 
-## Update
+### Update
 
 - Updated dependencies for thornode, thorchain && thorhcain-query
 
-# v0.5.4 (2023-06-01)
+## v0.5.4 (2023-06-01)
 
-## Update
+### Update
 
 - Updated mayachain, ethereum, bitcoincash dependencies
 
-# v0.5.3 (2023-05-22)
+## v0.5.3 (2023-05-22)
 
-## Update
+### Update
 
 - Add getLoanQuoteClose & getLoanQuoteOpen to thorchainamm
 - Bumps Query dep
 
-# v0.5.2 (2023-05-18)
+## v0.5.2 (2023-05-18)
 
-## Update
+### Update
 
 - Add Mayachain to wallet class
 - Bumps deps
 
-# v0.5.1 (2023-05-10)
+## v0.5.1 (2023-05-10)
 
-## Update
+### Update
 
 - Bump thornode & thorchain-query deps
 
-# v0.5.0 (2023-05-03)
+## v0.5.0 (2023-05-03)
 
-## Update
+### Update
 
 - Updated thorchain-amm to wrap the latest swap quote from thorchain-query
 - removed waitTimesSeconds from ExecuteSwap,TxSubmitted
 
-# v0.4.0 (2023-05-02)
+## v0.4.0 (2023-05-02)
 
-## Update
+### Update
 
 - update rollup config and axios to the latest
 - update `bitoinCashjs-lib`
 
-# v0.3.25 (2023-04-24)
+## v0.3.25 (2023-04-24)
 
-## Add
+### Add
 
 - Bump packages
 
-# v0.3.24 (2023-04-14)
+## v0.3.24 (2023-04-14)
 
-## Fix
+### Fix
 
 - `addSaver` bug with AddAmount
 - Error handling for `withdrawSaver()`
 
-# v0.3.23 (2023-04-12)
+## v0.3.23 (2023-04-12)
 
-## Add
+### Add
 
 - case for `synths` in `validateSwap()`
 
-# v0.3.22 (2023-04-05)
+## v0.3.22 (2023-04-05)
 
-## Add
+### Add
 
 - Bump packages
 - change erc-20 depositWithExpiry gaslimit to 160000
 
-# v0.3.21 (2023-04-04)
+## v0.3.21 (2023-04-04)
 
-## Add
+### Add
 
 - Bump packages
 - Add `erc-20` approval check in `thorchain-amm.estimateSwap()`
 
-## Fix
+### Fix
 
 - Pass `FeeOption` enum through `executeSwap()`
 
-# v0.3.20 (2023-03-27)
+## v0.3.20 (2023-03-27)
 
-## Update
+### Update
 
 - Bump packages
 
-# v0.3.19 (2023-03-21)
+## v0.3.19 (2023-03-21)
 
-## FIX
+### FIX
 
 - Update package deps
 - Update wallet client() settings
 
-# v0.3.18 (2023-3-2)
+## v0.3.18 (2023-3-2)
 
-## FIX
+### FIX
 
 - ERC-20 approve bug
 - update dependencies
 
-# v0.3.17 (2023-2-15)
+## v0.3.17 (2023-2-15)
 
-## Add
+### Add
 
 - `xchain-bsc`: "0.1.0"
 
-# v0.3.16 (2023-2-8)
+## v0.3.16 (2023-2-8)
 
-## Update
+### Update
 
 - Bump:
 - `xchain-bitcoin`
 - `xchain-litecoin`
 - `xchain-doge`
 
-# v0.3.15 (2023-2-6)
+## v0.3.15 (2023-2-6)
 
-## Update
-
-- Bump:
-- `xchain-thorchain-query`
-
-# v0.3.14 (2023-1-26)
-
-## Update
+### Update
 
 - Bump:
 - `xchain-thorchain-query`
 
-# v0.3.13 (2023-1-24)
+## v0.3.14 (2023-1-26)
 
-## Update
+### Update
+
+- Bump:
+- `xchain-thorchain-query`
+
+## v0.3.13 (2023-1-24)
+
+### Update
 
 - Bump:
 - `xchain-avax`: "^0.1.4",
@@ -375,15 +377,15 @@
 - `xchain-midgard`: "0.4.1",
 - `xchain-thorchain-query`: "^0.1.14",
 
-# v0.3.12 (2022-12-29)
+## v0.3.12 (2022-12-29)
 
-## Update
+### Update
 
 - Bump:`xchain-thornode@0.2.0`
 
-# v0.3.11 (2022-12-27)
+## v0.3.11 (2022-12-27)
 
-## Update
+### Update
 
 - Bump:
 - `xchain-avax@0.1.3`
@@ -400,54 +402,54 @@
 - Change `Asset*` and `*Chain` imports from `xchain-util` to its respective `xchain-*`
 - Update README.md dependency specification
 
-# v0.3.10 (2022-12-08)
+## v0.3.10 (2022-12-08)
 
-## udpate
+### udpate
 
 - changed eth & evm deposit() to use depositWithExpiry() with a 15 min expiry time
 
-# v0.3.9 (2022-11-24)
+## v0.3.9 (2022-11-24)
 
-## udpate
+### udpate
 
 - Bump `xchain-client`
 
-# v0.3.8 (2022-11-08)
+## v0.3.8 (2022-11-08)
 
-## Update
+### Update
 
 - added `addSaver()` & `withdrawSaver()` to thorchain-amm
 
-# v0.3.7 (2022-11-10)
+## v0.3.7 (2022-11-10)
 
-## Update
+### Update
 
 - added missing 'await' statements in thorchain-amm
 
-# v0.3.6 (2022-11-08)
+## v0.3.6 (2022-11-08)
 
-## Update
+### Update
 
 - changed chain-id in wallet to `thorchain-stagenet-v2`
 - removed clienturl params in wallet
 
-# v0.3.5 (2022-10-27)
+## v0.3.5 (2022-10-27)
 
-## Update
+### Update
 
 - Bump Dep for `thorchain-query`
 - Bump Dep for `xchain-litecoin`
 
-# v0.3.4 (2022-10-27)
+## v0.3.4 (2022-10-27)
 
-## Update
+### Update
 
 - Bump Dep for `thorchain-query`
 - update to `getInboundDetails()`
 
-# v0.3.3 (2022-10-17)
+## v0.3.3 (2022-10-17)
 
-## Update
+### Update
 
 - Bump Dep version number for `xchain-midgard`, `thorchain-query`
 - Change ExecuteSwap() parameters to use constructed memo from `estimateSwap()`
@@ -455,78 +457,78 @@
 - validate affiliate address is either a valid thorchain adress OR a valid thorname
 - Clean types file
 
-# v0.3.3 (2022-10-17)
+## v0.3.3 (2022-10-17)
 
-## Update
+### Update
 
 - default to mainnet and stadard APIs with no arg constructor
 
-# v0.3.1 (2022-10-11)
+## v0.3.1 (2022-10-11)
 
-## Add
+### Add
 
 - Add lp add & withdraw
 - Bumped `xchain-litecoin`
 
-# v0.3.0 (2022-10-10)
+## v0.3.0 (2022-10-10)
 
-## Update
+### Update
 
 - Bumped `xchain-thorchain`
 
-# v0.2.1 (2022-10-04)
+## v0.2.1 (2022-10-04)
 
-## Update
+### Update
 
 - Bumped `xchain-utils` & `xchain-client`
 
-# v0.2.0 (2022-10-04)
+## v0.2.0 (2022-10-04)
 
-## Update
+### Update
 
 - Updated wallet.ts and evm files to use updated `thorchain-query` `getInboundDetails()`
 
-# v0.0.1.0-beta5 (2022-09-29)
+## v0.0.1.0-beta5 (2022-09-29)
 
-## Update
+### Update
 
 - bumped deps on xchain-utils & xchain-client
 
-# v0.0.1.0-beta4 (2022-09-15)
+## v0.0.1.0-beta4 (2022-09-15)
 
 - moved examples into different directory
 - import new version of xchain-thorchain-query
 
-# v0.0.1.0-beta3 (2022-09-06)
+## v0.0.1.0-beta3 (2022-09-06)
 
 - import new version of xchain-thorchain-query
 
-# v0.0.1.0-beta2 (2022-09-05)
+## v0.0.1.0-beta2 (2022-09-05)
 
 - moved estimate logic into xchain-thorchain-query
 
-# v0.0.1.0-beta (2022-08-15)
+## v0.0.1.0-beta (2022-08-15)
 
 - resolved several issues
 - added avax client
 - added ThorchainCache to manage caching thorchain state
 
-# v0.0.1.0-alpha3 (2022-08-08)
+## v0.0.1.0-alpha3 (2022-08-08)
 
-## Remove
+### Remove
 
 - Remove `Polkadot` from chain defaults and chain references/switch cases.
 
-# v0.0.1.0-alpha2 (2022-07-25)
+## v0.0.1.0-alpha2 (2022-07-25)
 
-## ADD
+### ADD
 
 - Add `Doswap()` function to thorchain-amm
 
-## Update
+### Update
 
 - Changed values in `calcSwapNetworkFee` to suite the latest network fees
 
-# v0.0.1.0-alpha (2022-07-20)
+## v0.0.1.0-alpha (2022-07-20)
 
-## Module Created
+### Module Created
