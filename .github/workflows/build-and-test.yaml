@@ -21,10 +21,10 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Install Deps
+      - name: Install dependencies
         run: yarn && yarn yarn-audit-ci --high
 
-      - name: Build Packages
+      - name: Build packages
         run: yarn build
 
       - name: Build examples
