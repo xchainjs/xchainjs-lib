@@ -28,7 +28,7 @@ jobs:
       - name: Build packages
         run: yarn build
 
-      - name: Publish to npm
+      - name: Create release pull request or publish to npm
         uses: changesets/action@v1
         with:
           version: yarn increase-packages
