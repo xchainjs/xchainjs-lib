@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.11
+
+### Patch Changes
+
+- 390eefb: CryptoAmount type removed
+- e863d41: Thorchain-query as dependency
+- Updated dependencies [390eefb]
+  - @xchainjs/xchain-thorchain-query@0.7.0
+
 ## v0.8.10 (2023-12-12)
 
 ### Update
@@ -19,7 +28,6 @@
 - Mayachain client dependency increased to 0.2.13
 - Thorchain client dependency increased to 0.28.16
 - Utxo providers dependency increased to 0.2.10
-
 
 ## v0.8.9 (2023-12-11)
 
