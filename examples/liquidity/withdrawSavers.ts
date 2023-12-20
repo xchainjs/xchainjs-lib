@@ -1,4 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
+import { decryptFromKeystore } from "@xchainjs/xchain-crypto"
+import { readFileSync } from 'fs';
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import { SaversWithdraw, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
@@ -31,7 +33,9 @@ const withdrawSavers = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 
 // Call the function from main()
 const main = async () => {
-  const seed = process.argv[2]
+  const pass = process.argv[2]
+  const keyStore = JSON.parse(readFileSync(process.argv[7], 'utf8'))
+  const seed = await decryptFromKeystore(keyStore, pass)
   const network = process.argv[3] as Network
   const midgardCache = new MidgardCache(new Midgard(network))
   const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))

@@ -1,5 +1,7 @@
 import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
+import { decryptFromKeystore } from "@xchainjs/xchain-crypto"
+import { readFileSync } from 'fs';
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { THORChain } from '@xchainjs/xchain-thorchain'
 import { Wallet } from '@xchainjs/xchain-thorchain-amm'
@@ -19,7 +21,6 @@ const doSend = async (wallet: Wallet) => {
     const amount = assetAmount(process.argv[4], decimals)
     const asset = assetFromString(`${process.argv[6]}`)
     const destinationAddress = process.argv[7]
-    const memo = process.argv[8]
 
     const toChain = asset.synth ? THORChain : asset.chain
     const client = wallet.clients[toChain]
@@ -32,13 +33,14 @@ const doSend = async (wallet: Wallet) => {
 }
 
 const main = async () => {
-  const seed = process.argv[2]
+  const pass = process.argv[2]
+  const keyStore = JSON.parse(readFileSync(process.argv[8], 'utf8'))
+  const seed = await decryptFromKeystore(keyStore, pass)
   const network = process.argv[3] as Network
   const midgardCache = new MidgardCache(new Midgard(network))
   const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
   const thorchainQuery = new ThorchainQuery(thorchainCache)
   const wallet = new Wallet(seed, thorchainQuery)
-  console.log(`\ Send on ${network} :)\n`)
   await doSend(wallet)
 }
 

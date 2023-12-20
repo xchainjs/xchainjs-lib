@@ -332,11 +332,11 @@ export const formatAssetAmountCurrency = ({
     // BTC
     let regex = new RegExp(AssetBTC.ticker, 'i')
     if (ticker.match(new RegExp(AssetBTC.ticker, 'i'))) {
-      const base = assetToBase(amount)
+      //const base = assetToBase(amount)
       // format all < ₿ 0.01 in statoshi
-      if (base.amount().isLessThanOrEqualTo('1000000')) {
-        return `${AssetCurrencySymbol.SATOSHI} ${formatBaseAmount(base)}`
-      }
+      //if (base.amount().isLessThanOrEqualTo('1000000')) {
+      //  return `${AssetCurrencySymbol.SATOSHI} ${formatBaseAmount(base)}`
+      //}
       return `${AssetCurrencySymbol.BTC} ${amountFormatted}`
     }
     // ETH

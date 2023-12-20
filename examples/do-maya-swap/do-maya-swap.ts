@@ -1,4 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
+import { decryptFromKeystore } from "@xchainjs/xchain-crypto"
+import { readFileSync } from 'fs';
 import { MayachainAMM, Wallet } from '@xchainjs/xchain-mayachain-amm'
 import { MayaChain, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { CryptoAmount, assetAmount, assetFromString, assetToBase, assetToString } from '@xchainjs/xchain-util'
@@ -19,11 +21,6 @@ const printQuoteSwap = (quoteSwap: QuoteSwap) => {
     },
     totalFees: {
       asset: assetToString(quoteSwap.fees.asset),
-      affiliateFee: {
-        asset: assetToString(quoteSwap.fees.affiliateFee.asset),
-        amount: quoteSwap.fees.affiliateFee.baseAmount.amount().toString(),
-        decimals: quoteSwap.fees.affiliateFee.baseAmount.decimal,
-      },
       outboundFee: {
         asset: assetToString(quoteSwap.fees.outboundFee.asset),
         amount: quoteSwap.fees.outboundFee.baseAmount.amount().toString(),
@@ -45,15 +42,8 @@ const printQuoteSwap = (quoteSwap: QuoteSwap) => {
 const doSwap = async (mayachainAmm: MayachainAMM, quoteSwapParams: QuoteSwapParams) => {
   try {
     const quoteSwap = await mayachainAmm.estimateSwap(quoteSwapParams)
-    console.log('______________________    ESTIMATION   ____________________')
     printQuoteSwap(quoteSwap)
     if (quoteSwap.canSwap) {
-      console.log('______________________      RESULT     ____________________')
-      console.log(
-        `Executing swap from ${assetToString(quoteSwapParams.fromAsset)} to ${assetToString(
-          quoteSwapParams.destinationAsset,
-        )}`,
-      )
       const txSubmitted = await mayachainAmm.doSwap(quoteSwapParams)
       console.log(`Tx hash: ${txSubmitted.hash},\n Tx url: ${txSubmitted.url}\n`)
     }
@@ -63,18 +53,14 @@ const doSwap = async (mayachainAmm: MayachainAMM, quoteSwapParams: QuoteSwapPara
 }
 
 const main = async () => {
-  const seed = process.argv[2]
+  const pass = process.argv[2]
+  const keyStore = JSON.parse(readFileSync(process.argv[8], 'utf8'))
+  const seed = await decryptFromKeystore(keyStore, pass)
   const network = process.argv[3] as Network
   const amount = process.argv[4]
   const decimals = Number(process.argv[5])
   const fromAsset = assetFromString(`${process.argv[6]}`)
   const toAsset = assetFromString(`${process.argv[7]}`)
-  const affiliateAddress = process.argv[8]
-  let affiliateBps = 0
-
-  if (affiliateAddress) {
-    affiliateBps = Number(process.argv[9])
-  }
 
   const wallet = new Wallet(seed, network)
   const toChain = toAsset.synth ? MayaChain : toAsset.chain
@@ -82,15 +68,9 @@ const main = async () => {
     fromAsset,
     destinationAsset: toAsset,
     amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
-    affiliateAddress,
-    affiliateBps,
     destinationAddress: await wallet.getAddress(toChain),
   }
 
-  console.log('====================== DO SWAP EXAMPLE ====================')
-  console.log('\n\n\n')
-  console.log('______________________    SWAP TO DO   ____________________')
-  console.log({ ...quoteSwapParams, amount: quoteSwapParams.amount.assetAmount.amount().toString() })
 
   const mayachainAmm = new MayachainAMM(new MayachainQuery(), wallet)
   await doSwap(mayachainAmm, quoteSwapParams)

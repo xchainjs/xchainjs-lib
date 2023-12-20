@@ -16,13 +16,9 @@ function printSaver(saver: EstimateAddSaver) {
   const expanded = {
     assetAmount: saver.assetAmount.formatedAssetString(),
     estimatedDepositValue: saver.estimatedDepositValue.formatedAssetString(),
-    fee: {
-      affiliateFee: saver.fee.affiliate.formatedAssetString(),
-      asset: saver.fee.asset,
-      outbound: saver.fee.outbound.formatedAssetString(),
-    },
+    outboundFee: saver.fee.outbound.formatedAssetString(),
     expiry: saver.expiry,
-    toAddress: saver.toAddress,
+    toAddressVault: saver.toAddress,
     memo: saver.memo,
     estimateWaitTime: saver.estimatedWaitTime,
     saverCapFilledPercent: saver.saverCapFilledPercent,
