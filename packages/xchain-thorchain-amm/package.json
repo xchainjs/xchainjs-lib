@@ -36,7 +36,7 @@
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
   "dependencies": {
-    "@xchainjs/xchain-thorchain-query": "^0.6.15"
+    "@xchainjs/xchain-thorchain-query": "0.6.15"
   },
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
