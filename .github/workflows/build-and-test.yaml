@@ -1,36 +1,37 @@
-name: Test Commit
+name: Build and test workflow
 
 on:
   pull_request:
     types: [opened, synchronize]
-  push:
-    branches:
-      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '20.x'
+          node-version: "20.x"
+
       - name: Cache Yarn packages
         uses: actions/cache@v2
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
-      - name: Install Deps
+
+      - name: Install dependencies
         run: yarn && yarn yarn-audit-ci --high
-      - name: Build Packages
+
+      - name: Build packages
         run: yarn build
+
       - name: Build examples
         run: yarn build:examples
+
       - name: Lint
         run: yarn lint
+
       - name: Test
         run: yarn test
-        env:
-          CI: true
-          BLOCKCHAIR_API_KEY: ${{ secrets.BLOCKCHAIR_API_KEY }}
