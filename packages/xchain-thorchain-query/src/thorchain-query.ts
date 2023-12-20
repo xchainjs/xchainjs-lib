@@ -3,6 +3,7 @@ import {
   Address,
   Asset,
   Chain,
+  CryptoAmount,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -12,7 +13,6 @@ import {
 import { BigNumber } from 'bignumber.js'
 
 import { DefaultChainAttributes } from './chain-defaults'
-import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import {
   AddliquidityPosition,

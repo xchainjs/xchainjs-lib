@@ -1,8 +1,8 @@
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { Asset, CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
