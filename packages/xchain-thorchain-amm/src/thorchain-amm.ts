@@ -1,6 +1,5 @@
 import {
   AddliquidityPosition,
-  CryptoAmount,
   EstimateAddLP,
   EstimateAddSaver,
   EstimateWithdrawLP,
@@ -17,6 +16,7 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount } from '@xchainjs/xchain-util'
 
 import { TxSubmitted } from './types'
 import { Wallet } from './wallet'

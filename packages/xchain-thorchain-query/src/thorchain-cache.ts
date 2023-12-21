@@ -1,8 +1,16 @@
 import { MidgardQuery } from '@xchainjs/xchain-midgard-query'
-import { Address, Asset, CachedValue, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  CachedValue,
+  Chain,
+  CryptoAmount,
+  assetToString,
+  baseAmount,
+  eqAsset,
+} from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { CryptoAmount } from './crypto-amount'
 import { LiquidityPool } from './liquidity-pool'
 import { InboundDetail } from './types'
 import { THORChain, isAssetRuneNative } from './utils'
