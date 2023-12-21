@@ -1,5 +1,5 @@
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
-import { Network, TxParams, XChainClient, XChainClientParams } from '@xchainjs/xchain-client'
+import { Balance, Network, Tx, TxParams, TxsPage, XChainClient, XChainClientParams } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
 import { Client as DashClient, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -13,7 +13,7 @@ import {
   MayachainClientParams,
 } from '@xchainjs/xchain-mayachain'
 import { Client as ThorClient, THORChain, ThorchainClientParams } from '@xchainjs/xchain-thorchain'
-import { Asset, BaseAmount, Chain, assetToString, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, assetToString, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 import { ethers } from 'ethers'
 
@@ -62,7 +62,29 @@ export class Wallet {
   }
 
   /**
-   * Check if address is valid
+   * Get wallet chain addresses.
+   * @param {Chain[]} chains Optional - Chains of which return the address of. If not provided, it will return
+   * the wallet chain addresses
+   * @returns the chains addresses
+   */
+  async getAddresses(chains?: Chain[]): Promise<Record<Chain, Address>> {
+    const _chains: Chain[] = chains || Object.keys(this.clients)
+    const tasks = _chains.map((chain) => {
+      return this.getAddress(chain)
+    })
+
+    const walletAddresses: Record<Chain, Address> = {}
+    const addresses = await Promise.all(tasks)
+
+    addresses.map((walletAddress, index) => {
+      walletAddresses[_chains[index]] = walletAddress
+    })
+
+    return walletAddresses
+  }
+
+  /**
+   * Check if an address is valid
    * @param {Chain} chain in which the address has to be valid
    * @param {string} address to validate
    * @returns true if it is a valid address, otherwise, false
@@ -70,6 +92,87 @@ export class Wallet {
   public validateAddress(chain: Chain, address: string): boolean {
     const client = this.getChainClient(chain)
     return client.validateAddress(address)
+  }
+
+  /**
+   * Get chain balances.
+   * @param {Chain} chain - Chains of the assets
+   * @param {Assets[]} assets - Optional. Assets of which return the balance
+   * @returns {Balance[]} Balances by chain
+   */
+  public async getBalance(chain: Chain, assets?: Asset[]): Promise<Balance[]> {
+    const client = this.getChainClient(chain)
+    return client.getBalance(await this.getAddress(chain), assets)
+  }
+
+  /**
+   * Get wallet balances. By default, it returns all the wallet balances unless assets are provided, in that case,
+   * only asset balances will be returned by chain
+   * @param {Assets[]} assets - Optional. Assets of which return the balance
+   * @returns {Record<Chain, Balance[]>} Balances by chain
+   */
+  public async getBalances(assets?: Asset[]): Promise<Record<Chain, Balance[]>> {
+    const chains: Chain[] = assets ? Array.from(new Set(assets.map((asset) => asset.chain))) : Object.keys(this.clients)
+
+    const tasks = chains.map(async (chain) => {
+      return await this.getBalance(
+        chain,
+        assets?.filter((asset) => asset.chain === chain),
+      )
+    })
+
+    const walletBalances: Record<Chain, Balance[]> = {}
+    const balances = await Promise.all(tasks)
+
+    balances.map((chainBalance, index) => {
+      walletBalances[chains[index]] = chainBalance
+    })
+
+    return walletBalances
+  }
+
+  /**
+   * Get transaction data from hash
+   * @param {Chain} chain - Chain in which the transaction was done
+   * @param {string} hash - Hash of the transaction
+   * @returns
+   */
+  public async getTransactionData(chain: Chain, hash: string): Promise<Tx> {
+    const client = this.getChainClient(chain)
+    return await client.getTransactionData(hash)
+  }
+
+  /**
+   * Returns the transaction history of a chain
+   * @param {Chain} chain Chain of which return the transaction history
+   * @returns {TxsPage} the chain transaction history
+   */
+  public async getTransactionsHistory(chain: Chain): Promise<TxsPage> {
+    const client = this.getChainClient(chain)
+    return client.getTransactions()
+  }
+
+  /**
+   * Get wallet histories. By default, it returns all the wallet histories unless chains are provided, in that case,
+   * only chain histories will be returned by chain
+   * @param {Chain[]} chains - Optional. Chain of which return the transaction history
+   * @returns {TxsPage} the chain transaction history
+   */
+  public async getTransactionsHistories(chains?: Chain[]): Promise<Record<Chain, TxsPage>> {
+    const _chains: Chain[] = chains || Object.keys(this.clients)
+
+    const tasks = _chains.map(async (chain) => {
+      return this.getTransactionsHistory(chain)
+    })
+
+    const walletHistories: Record<Chain, TxsPage> = {}
+    const histories = await Promise.all(tasks)
+
+    histories.map((history, index) => {
+      walletHistories[_chains[index]] = history
+    })
+
+    return walletHistories
   }
 
   /**
