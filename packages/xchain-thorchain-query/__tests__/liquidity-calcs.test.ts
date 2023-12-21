@@ -1,10 +1,9 @@
 import { Pool } from '@xchainjs/xchain-thornode'
-import { assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
-import { CryptoAmount } from '../src/crypto-amount'
 import { LiquidityPool } from '../src/liquidity-pool'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { Block, LiquidityToAdd, PoolShareDetail, PostionDepositValue, UnitData } from '../src/types'

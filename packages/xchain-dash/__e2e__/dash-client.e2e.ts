@@ -100,4 +100,36 @@ describe('Dash Integration Tests', () => {
       fail()
     }
   })
+  it('should get fees', async () => {
+    try {
+      const fees = await dashClient.getFees()
+      console.log({
+        type: fees.type,
+        average: {
+          amount: fees.average.amount().toString(),
+          decimals: fees.average.decimal,
+        },
+        fast: {
+          amount: fees.fast.amount().toString(),
+          decimals: fees.fast.decimal,
+        },
+        fastest: {
+          amount: fees.fastest.amount().toString(),
+          decimals: fees.fastest.decimal,
+        },
+      })
+    } catch (error) {
+      console.error(`Should get fees". ${error}`)
+      fail()
+    }
+  })
+  it('should get fee rates', async () => {
+    try {
+      const feeRates = await dashClient.getFeeRates()
+      console.log(feeRates)
+    } catch (error) {
+      console.error(`Should get fees". ${error}`)
+      fail()
+    }
+  })
 })

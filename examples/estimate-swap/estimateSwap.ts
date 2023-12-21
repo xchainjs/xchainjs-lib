@@ -1,7 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import {
-  CryptoAmount,
   QuoteSwapParams,
   SwapEstimate,
   ThorchainCache,
@@ -9,7 +8,7 @@ import {
   Thornode,
   TxDetails,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromString, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetFromString, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
