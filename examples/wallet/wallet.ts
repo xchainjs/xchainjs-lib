@@ -3,8 +3,11 @@ import { Network } from '@xchainjs/xchain-client'
 import { Wallet } from '@xchainjs/xchain-mayachain-amm'
 import {
   Asset,
+  AssetAmount,
   Chain,
+  assetAmount,
   assetFromStringEx,
+  assetToBase,
   assetToString,
   baseToAsset,
   delay,
@@ -137,6 +140,19 @@ const _getTransactionData = async (wallet: Wallet, chain: Chain, hash: string) =
   })
 }
 
+const _transfer = async (wallet: Wallet, asset: Asset, recipient: string, amount: AssetAmount, memo?: string) => {
+  const hash = await wallet.transfer({
+    asset,
+    amount: assetToBase(amount),
+    recipient,
+    memo,
+  })
+  return {
+    hash,
+    url: await wallet.getExplorerTxUrl(asset.chain, hash),
+  }
+}
+
 const main = async () => {
   const seed = process.argv[2]
   const wallet: Wallet = new Wallet(seed, Network.Mainnet)
@@ -179,6 +195,12 @@ const main = async () => {
 
   console.log('============= Get transaction data ==============')
   await _getTransactionData(wallet, 'BTC', 'f91312f16f1d1dd8a68f00d7aa48575079837bfe119eed705d2b284d7624bfba')
+  await delay(5000)
+
+  console.log('============= Transfer ==============')
+  // Transaction done to the same address
+  // Commented to avoid unwanted transfers
+  // await _transfer(wallet, assetFromStringEx('MAYA.CACAO'), await wallet.getAddress('MAYA'), assetAmount(1))
 }
 
 main()
