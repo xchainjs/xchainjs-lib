@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0
+
+### Minor Changes
+
+- 390eefb: CryptoAmount type removed
+
 ## v0.6.15 (2023-12-12)
 
 ### Update
@@ -31,7 +37,7 @@
 
 - Created method getAddressAsync
 - update Midgard dep & thornode dep
-- Remove param fromAddress from quoteSwapParams to align with latest thornode specs 
+- Remove param fromAddress from quoteSwapParams to align with latest thornode specs
 
 ## v0.6.10 (2023-11-07)
 
