@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.12
+
+### Patch Changes
+
+- Updated dependencies [29008d7]
+  - @xchainjs/xchain-ethereum@0.31.4
+  - @xchainjs/xchain-avax@0.4.4
+  - @xchainjs/xchain-bsc@0.4.5
+
 ## 0.8.11
 
 ### Patch Changes
