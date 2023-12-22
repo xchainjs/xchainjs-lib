@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.31.4
+
+### Patch Changes
+
+- 29008d7: Mainnet network set as default network
+
 ## v0.31.3 (2023-12-12)
 
 ### Update
@@ -60,7 +66,7 @@
 
 ### Update
 
--  Updated creation of the testnet provider to match -[ethers docs]- ( https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider)
+- Updated creation of the testnet provider to match -[ethers docs]- ( https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider)
 
 ## v0.30.2 (2023-09-14)
 

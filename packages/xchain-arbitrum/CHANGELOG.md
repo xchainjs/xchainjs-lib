@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+### Patch Changes
+
+- 29008d7: Mainnet network set as default network
+
 ## v0.1.3 (2023-12-12)
 
 ### Update
@@ -25,4 +31,3 @@
 ### Update
 
 - Arbitrum package first release
-

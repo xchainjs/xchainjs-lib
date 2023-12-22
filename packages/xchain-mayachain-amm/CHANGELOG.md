@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- 9fe66f6: New methods, get balance and balances method, get addresses method, get transaction data and get transactions history and get transactions histories method
+
+### Patch Changes
+
+- Updated dependencies [29008d7]
+  - @xchainjs/xchain-ethereum@0.31.4
+  - @xchainjs/xchain-kujira@0.1.6
+
 ## v0.1.3 (2023-12-12)
 
 ### Update

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- 29008d7: Mainnet network set as default network
+
 ## v0.1.5 (2023-12-12)
 
 ### Update
