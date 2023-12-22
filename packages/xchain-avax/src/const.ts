@@ -135,7 +135,7 @@ export const defaultAvaxParams: EVMClientParams = {
   providers: ethersJSProviders,
   explorerProviders: avaxExplorerProviders,
   dataProviders: [avaxProviders, routescanProviders],
-  network: Network.Testnet,
+  network: Network.Mainnet,
   feeBounds: {
     lower: LOWER_FEE_BOUND,
     upper: UPPER_FEE_BOUND,
