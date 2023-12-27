@@ -28,15 +28,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-evm": "0.4.2",
-    "@xchainjs/xchain-util": "0.13.2"
-  },
-  "devDependencies": {
-    "@xchainjs/xchain-client": "0.15.6",
-    "ethers": "5.6.6"
-  },
-  "peerDependencies": {
-    "@xchainjs/xchain-client": "0.15.6",
+    "@xchainjs/xchain-evm": "0.4.3",
+    "@xchainjs/xchain-util": "0.13.2",
+    "@xchainjs/xchain-client": "0.16.0",
     "ethers": "5.6.6"
   }
 }
