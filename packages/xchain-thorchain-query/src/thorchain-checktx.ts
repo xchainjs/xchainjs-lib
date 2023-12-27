@@ -1,8 +1,7 @@
 import { Saver, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
-import { Asset, Chain, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, Chain, CryptoAmount, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
-import { CryptoAmount } from './crypto-amount'
 import { ThorchainCache } from './thorchain-cache'
 import { ChainAttributes } from './types'
 import { AssetRuneNative, THORChain, isAssetRuneNative } from './utils'

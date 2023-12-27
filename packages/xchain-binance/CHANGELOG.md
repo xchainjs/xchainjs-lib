@@ -1,276 +1,284 @@
-# v5.7.7 (2023-12-11)
+# Changelog
 
-## Update
+## v5.7.8 (2023-12-12)
+
+### Update
+
+- Client dependency increased to 0.16.0
+
+## v5.7.7 (2023-12-11)
+
+### Update
 
 - Client dependency updated
 
-# v5.7.6 (2023-12-01)
+## v5.7.6 (2023-12-01)
 
-## Update
+### Update
 
 - Derivation path changed
 
-# v5.7.5 (2023-11-16)
+## v5.7.5 (2023-11-16)
 
-## Update
+### Update
 
 - Created method getAddressAsync
 
-# v5.7.4 (2023-10-26)
+## v5.7.4 (2023-10-26)
 
-## Update
+### Update
 
 - Throw error not supported for prepareTx
 
-# v5.7.2 (2023-09-11)
+## v5.7.2 (2023-09-11)
 
-## Update
+### Update
 
 - Bumped dependencies for util
 
-# v5.7.1 (2023-05-18)
+## v5.7.1 (2023-05-18)
 
-## Add
+### Add
 
 - New client function getAssetInfo() returns chain, decimals and asset
 
-# v5.7.0 (2023-05-02)
+## v5.7.0 (2023-05-02)
 
-## Update
+### Update
 
 - update rollup config and axios to the latest
 
-# v.5.6.8 (2023-04-05)
+## v.5.6.8 (2023-04-05)
 
-## Add
+### Add
 
 - Add async `broadcastTx()` to client
 
-## Update
+### Update
 
 - Bump `xchain-client
 
-# v.5.6.7 (2023-01-19)
+## v.5.6.7 (2023-01-19)
 
-## Update
+### Update
 
 - Type safety `BNBChain`
 
-## Update
+### Update
 
 - Bump `xchain-client@13.5.0`
 
-# v.5.6.5 (2022-10-13)
+## v.5.6.5 (2022-10-13)
 
-## Update
+### Update
 
 - Bump `xchain-client`
 
-# v.5.6.4 (2022-10-13)
+## v.5.6.4 (2022-10-13)
 
-## Update
+### Update
 
 - Set Default network to `Network.Mainnet`
 
-# v.5.6.3 (2022-xx-xx)
+## v.5.6.3 (2022-xx-xx)
 
-## Update
+### Update
 
 - Bumped `xchain-utils` & `xchain-client`
 
-# v.5.6.2 (2022-09-29)
+## v.5.6.2 (2022-09-29)
 
-## Update
-
-- bumped deps on xchain-utils & xchain-client
-
-# v.5.6.0 (2022-09-05)
-
-## Update
+### Update
 
 - bumped deps on xchain-utils & xchain-client
 
-# v.5.5.0 (2022-07-21)
+## v.5.6.0 (2022-09-05)
 
-### Breaking change
+### Update
+
+- bumped deps on xchain-utils & xchain-client
+
+## v.5.5.0 (2022-07-21)
+
+#### Breaking change
 
 - client.deposit() removed, all thorchain deposits were moved to xchain-thorchain-amm
 
-# v.5.4.3 (2022-05-05)
+## v.5.4.3 (2022-05-05)
 
-## Update
+### Update
 
 - Add `deposit` to Binance `Client`
 - Update latest dependencies
 - Add tests for `deposit`
 
-# v.5.4.2 (2022-02-04)
+## v.5.4.2 (2022-02-04)
 
-## Update
+### Update
 
 - xchain-util@0.5.1
 - xchain-client@0.11.1
 
-# v.5.4.1 (2022-02-02)
+## v.5.4.1 (2022-02-02)
 
-## Update
+### Update
 
 - xchain-util@0.5.0
 
-# v.5.4.0 (2021-12-29)
+## v.5.4.0 (2021-12-29)
 
-## Breaking change
+### Breaking change
 
 - Add stagenet environment handling for `Network` and `BaseXChainClient` changes client to default to mainnet values until stagenet is configured.
 
-# v.5.3.1 (2021-09-03)
+## v.5.3.1 (2021-09-03)
 
 - updated to the latest dependencies
 
-# v.5.3.0 (2021-08-27)
+## v.5.3.0 (2021-08-27)
 
 - Add `getAccount`
 
-# v.5.2.6 (2021-07-26)
+## v.5.2.6 (2021-07-26)
 
 - fixed missing walletIndex in client.transfer()
 
-# v.5.2.5 (2021-07-18)
+## v.5.2.5 (2021-07-18)
 
 - Updatedrollupjs to include axios to enlable usage on node
 
-# v.5.2.4 (2021-07-07)
+## v.5.2.4 (2021-07-07)
 
 - Use latest `xchain-client@0.10.1` + `xchain-util@0.3.0`
 
-# v.5.2.3 (2021-07-05)
+## v.5.2.3 (2021-07-05)
 
 - refactored client methods to use regular method syntax (not fat arrow) in order for bcall to super.xxx() to work properly
 
-# v.5.2.2 (2021-06-29)
+## v.5.2.2 (2021-06-29)
 
 - added support for pulling fees from thornode.
 
-# v.5.2.1 (2021-06-01)
+## v.5.2.1 (2021-06-01)
 
 - update peerDependencies
 
-# v.5.1.0 (2021-05-17)
+## v.5.1.0 (2021-05-17)
 
-### Breaking change
+#### Breaking change
 
 - added support for HD wallets
 
-# v.5.0.0 (2021-05-05)
+## v.5.0.0 (2021-05-05)
 
-### Breaking change
+#### Breaking change
 
 - Latest @xchainjs/xchain-client@0.8.0
 - Latest @xchainjs/xchain-util@0.2.7
 
-# v.4.7.0 (2021-03-02)
+## v.4.7.0 (2021-03-02)
 
-### Breaking change
+#### Breaking change
 
 - replace `find`, `findIndex`
 - Update @xchainjs/xchain-client package to 0.7.0
 
-# v.4.6.0 (2021-02-24)
+## v.4.6.0 (2021-02-24)
 
-### Breaking change
+#### Breaking change
 
 - Update @xchainjs/xchain-client package to 0.6.0
 - Update `getBalance`
 
-# v.4.5.0 (2021-02-19)
+## v.4.5.0 (2021-02-19)
 
-### Breaking change
+#### Breaking change
 
 - Update @xchainjs/xchain-client package to 0.4.0
 - Update @xchainjs/xchain-crypto package to 0.2.3
 
-### Update
+#### Update
 
 - Update @xchainjs/xchain-client package to 0.5.0
 - Add `Service Providers` section in README.md
 - Update `peerDependencies`
 
-# v.4.4.2 (2021-01-30)
+## v.4.4.2 (2021-01-30)
 
 - Clear lib folder on build
 
-# v.4.4.1 (2021-01-15)
+## v.4.4.1 (2021-01-15)
 
-### Change
+#### Change
 
 - Export `getPrefix`
 
-# v.4.4.0 (2021-01-15)
+## v.4.4.0 (2021-01-15)
 
-### Update
+#### Update
 
 - Update comments for documentation
 - Add `getPrefix`
 
-# v.4.3.0 (2020-12-28)
+## v.4.3.0 (2020-12-28)
 
-### Breaking change
+#### Breaking change
 
 - Extract `getDefaultFees` from `Client` to `utils` #157
 - Remove `validateAddress` from `BinanceClient`
 
-# v.4.2.0 (2020-12-11)
+## v.4.2.0 (2020-12-11)
 
-### Update
+#### Update
 
 - Update dependencies
 - Add `getDefaultFees`
 - Add `getSingleAndMultiFees`
 - Add `getDerivePath` helper
 
-# v.4.1.0 (2020-11-20)
+## v.4.1.0 (2020-11-20)
 
-### Breaking change
+#### Breaking change
 
 - Update @xchainjs/xchain-crypto package to 0.2.0, deprecating old keystores
 
-# v.4.0.0 (2020-11-11)
+## v.4.0.0 (2020-11-11)
 
-### Breaking change
+#### Breaking change
 
 - Remove `freeze` and `unfreeze` related functions: `getFreezeFees()`, `freeze()`, `unfreeze()`, `getFreezeFees()`
 - Ignore `freeze` and `unfreeze` txs in `parseTx()`
 - Ignore `freeze` and `unfreeze` txs in `getTxType()`
 
-# v.3.1.1 (2020-11-09)
+## v.3.1.1 (2020-11-09)
 
-### Change
+#### Change
 
 - updated `xchain-client` package version
 
-# v.3.1.0 (2020-11-06)
+## v.3.1.0 (2020-11-06)
 
-### Add
+#### Add
 
 - `getTransactionData(txId: string): Promise<Tx>`
 
 - `asset` parameter to the `getTransactions` method
 
-### Change
+#### Change
 
 - `getExplorerUrl` is public now
 
-### Fix
+#### Fix
 
 - Fixed asset parsing for `getBalance` method
 
-# v.3.0.1 (2020-08-26)
+## v.3.0.1 (2020-08-26)
 
 - Change type of `amount` to `BigSource` in `normalTx`, `vaultTx`, `freeze`, `unfreeze`
 
-# v.3.0.0 (2020-08-26)
+## v.3.0.0 (2020-08-26)
 
-### Breaking changes:
+#### Breaking changes:
 
 - `Constructor` argument is an object now `{ network: Network; phrase?: string }`
 - `getAddress` returns undefined if `phrase` has not been set before
@@ -278,39 +286,39 @@
 - `setPrivateKey` rejects if a `phase` has not been set before
 - `vaultTx`, `normalTx`, `multiSend`, `getMarkets` accept an object as its parameters
 
-### Add:
+#### Add:
 
 - `freeze(params: FreezeParams): Promise<TransferResult>`
 - `unfreeze(params: FreezeParams): Promise<TransferResult>`
 - `getBncClient(): BncClient`
 
-### Fix:
+#### Fix:
 
 - Fix `Rollup` warnings of `Unresolved dependencies` and `Circular dependencies`
 
-### Update:
+#### Update:
 
 - Use latest npm dependencies
 
-# v.2.1.1 (2020-08-14)
+## v.2.1.1 (2020-08-14)
 
 - Fix result type of `getFees()`
 
-# v.2.1.0 (2020-08-14)
+## v.2.1.0 (2020-08-14)
 
-### Add:
+#### Add:
 
 - `getFees()`
 - `TxFee`
 
-# v.2.0.0 (2020-07-20)
+## v.2.0.0 (2020-07-20)
 
 - BREAKING CHANGE: `getTransactions` expects `GetTxsParams` as its parameter
 - Refactored implementation of `getTransactions`
 - Use latest `@binance-chain/javascript-sdk@4.0.5"
 - Fix `Tx` type
 
-# v.1.0.0 (2020-05-14)
+## v.1.0.0 (2020-05-14)
 
 Refactors the client to be constructed with a `net` and optional `phrase`
 
@@ -322,20 +330,20 @@ const phrase = process.env.VAULT_PHRASE
 const bnbClient = new BinanceClient(net, phrase)
 ```
 
-### Removal:
+#### Removal:
 
 - init()
 - initClient()
 - setPrivateKey()
 - removePrivateKey()
 
-### Change:
+#### Change:
 
 - getClientUrl(): string -> Class-based
 - getExplorerUrl(): string -> Class-based
 - getPrefix(): string -> Class-based
 
-### Add:
+#### Add:
 
 - setNetwork(net: Network): void
 - getNetwork(): Network
@@ -349,6 +357,6 @@ const bnbClient = new BinanceClient(net, phrase)
 - vaultTx(addressTo: Address, amount: number, asset: string, memo: string): Promise<TransferResult>
 - normalTx(addressTo: Address, amount: number, asset: string): Promise<TransferResult>
 
-# v.0.1.0 (2020-04-13)
+## v.0.1.0 (2020-04-13)
 
 First release

@@ -3,13 +3,12 @@ import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-qu
 import { isAssetRuneNative } from '@xchainjs/xchain-thorchain'
 import {
   AddliquidityPosition,
-  CryptoAmount,
   EstimateAddLP,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)

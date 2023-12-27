@@ -25,6 +25,7 @@ export const getDefaultExplorers = (): RootDerivationPaths => ({
 
 export const defaultClientConfig: CosmosSdkClientParams = {
   chain: AssetKUJI.chain,
+  network: Network.Mainnet,
   clientUrls: getDefaultClientUrls(),
   rootDerivationPaths: getDefaultRootDerivationPaths(),
   prefix: 'kujira',

@@ -1,76 +1,84 @@
-# v0.2.9 (2023-12-01)
+# Changelog
 
-## Update
+## v0.2.10 (2023-12-12)
+
+### Update
+
+- Client dependency increased to 0.16.0
+
+## v0.2.9 (2023-12-01)
+
+### Update
 
 - Client package version update
 
-# v0.2.8 (2023-11-21)
+## v0.2.8 (2023-11-21)
 
-## Update
+### Update
 
 - Bitgo provider
 - Get fee rates endpoint for providers
 
-# v0.2.7 (2023-11-16)
+## v0.2.7 (2023-11-16)
 
-## Update
+### Update
 
 - Created method getAddressAsync
 
-# v0.2.6 (2023-11-10)
+## v0.2.6 (2023-11-10)
 
-## Update
+### Update
 
 - Limit parameter for TX Blockcypher endpoint
 
-# v0.2.5 (2023-10-15)
+## v0.2.5 (2023-10-15)
 
-## Update
+### Update
 
 - Update client version
 
-# v0.2.4 (2023-10-05)
+## v0.2.4 (2023-10-05)
 
-## Update
+### Update
 
 - Fix bugs related with pending utxos on Hashkoin and Blockcypher
 
-# v0.2.3 (2023-09-11)
+## v0.2.3 (2023-09-11)
 
-## Update
+### Update
 
 - Bumped dependencies for client & util
 
-# v0.2.2 (2023-06-07)
+## v0.2.2 (2023-06-07)
 
-## Update
+### Update
 
 - Added Dash routing to Blockcyphernetwork
 
-# v0.2.1 (2023-05-18)
+## v0.2.1 (2023-05-18)
 
-## Update
+### Update
 
 - Update client dependency
 
-# v0.2.0 (2023-05-02)
+## v0.2.0 (2023-05-02)
 
-## Update
+### Update
 
 - update rollup config and axios to the latest
 
-# v.0.1.2 (2023-4-11)
+## v.0.1.2 (2023-4-11)
 
-## Fix
+### Fix
 
 - changed build to output esm libs
 
-# v.0.1.1 (2023-2-25)
+## v.0.1.1 (2023-2-25)
 
-## Fix
+### Fix
 
 - Blockcypher getBalance() error
 
-# v.0.1.0 (2023-2-20)
+## v.0.1.0 (2023-2-20)
 
-## Create
+### Create

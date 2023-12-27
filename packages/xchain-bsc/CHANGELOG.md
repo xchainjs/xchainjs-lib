@@ -1,3 +1,19 @@
+# Changelog
+
+## 0.4.5
+
+### Patch Changes
+
+- 29008d7: Mainnet network set as default network
+
+# v0.4.4 (2023-12-12)
+
+## Update
+
+- Client dependency increased to 0.16.0
+- Evm client dependency increased to 0.4.3
+- Evm providers dependency increased to 0.1.5
+
 # v0.4.3 (2023-12-11)
 
 ## Update
