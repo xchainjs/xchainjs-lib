@@ -2,12 +2,12 @@ import {
   // Address,
   Asset,
   Chain,
+  CryptoAmount,
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { CryptoAmount } from '../crypto-amount'
 import { InboundDetail } from '../types'
 // eslint-disable-next-line ordered-imports/ordered-imports
 import {

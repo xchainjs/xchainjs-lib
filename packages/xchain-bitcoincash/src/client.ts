@@ -1,18 +1,8 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
-import {
-  AssetInfo,
-  FeeOption,
-  FeeRate,
-  Network,
-  TxHash,
-  TxParams,
-  UTXO,
-  UTXOClient,
-  UtxoClientParams,
-  checkFeeBounds,
-} from '@xchainjs/xchain-client'
+import { AssetInfo, FeeOption, FeeRate, Network, TxHash, TxParams, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
+import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import accumulative from 'coinselect/accumulative'
 
 import {

@@ -1,5 +1,7 @@
-import { Balance, FeeOption, FeeRates, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, FeeRates, Tx, TxsPage } from '@xchainjs/xchain-client'
 import { Chain } from '@xchainjs/xchain-util'
+
+import { UTXO, UtxoOnlineDataProvider } from '../types'
 
 import { getFeeEstimate } from './bitgo-api'
 

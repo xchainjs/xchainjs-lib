@@ -10,8 +10,8 @@ export type KujiraClientParams = Partial<CosmosSdkClientParams>
 export class Client extends CosmosSdkClient {
   constructor(config: KujiraClientParams = defaultClientConfig) {
     super({
-      ...config,
       ...defaultClientConfig,
+      ...config,
     })
   }
 

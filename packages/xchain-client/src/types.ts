@@ -1,7 +1,5 @@
 import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
 
-import { UTXO } from './provider-types'
-
 export enum Network {
   Mainnet = 'mainnet',
   Stagenet = 'stagenet',
@@ -104,7 +102,6 @@ export type XChainClientParams = {
 
 export type PreparedTx = {
   rawUnsignedTx: string
-  utxos?: UTXO[]
 }
 
 export interface XChainClient {

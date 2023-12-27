@@ -1,250 +1,264 @@
-# v0.15.5 (2023-12-06)
+# Changelog
 
-## Add
+## v0.16.0 (2023-12-12)
+
+### Update
+
+- CalcFee and CalcFeeAsync removed
+
+## v0.15.6 (2023-12-11)
+
+### Update
+
+- UTXO client removed
+
+## v0.15.5 (2023-12-06)
+
+### Add
 
 - Expose Ledger implementation for Bitcoin
 
-# v0.15.4 (2023-11-21)
+## v0.15.4 (2023-11-21)
 
-## Update
+### Update
 
 - Get fee rates for UTXO data providers and round robin strategy
 - Get suggested fee rate removed for UTXO clients
 
-# v0.15.3 (2023-11-16)
+## v0.15.3 (2023-11-16)
 
-## Update
+### Update
 
 - Created method getAddressAsync
 
-# v0.15.2 (2023-11-02)
+## v0.15.2 (2023-11-02)
 
-## Update
+### Update
 
 - EVMOnlineDataProvider interface
 
-# v0.15.1 (2023-10-26)
+## v0.15.1 (2023-10-26)
 
-## Update
+### Update
 
 - prepareTx transaction
 
-# v.0.15.0 (2023-10-25)
+## v.0.15.0 (2023-10-25)
 
 - Remove function `getFeesWithMemo` from UTXOClient
 - Update signature (support option `sender`) in functions `getFeesWithRates` and `getFees` from UTXOClient
 
-# v0.14.2 (2023-09-11)
+## v0.14.2 (2023-09-11)
 
-## Update
+### Update
 
 - Bumped dependencies for util
 
-# v0.14.1 (2023-05-18)
+## v0.14.1 (2023-05-18)
 
-## Add
+### Add
 
 - Abstract function getAssetInfo()
 
-# v0.14.0 (2023-05-02)
+## v0.14.0 (2023-05-02)
 
-## Update
+### Update
 
 - update rollup config and axios to the latest
 
-# v.0.13.7 (2023-04-05)
+## v.0.13.7 (2023-04-05)
 
-## Add
+### Add
 
 - add `broadcastTx()` to `BaseXChainClient` & `UTXOClient`
 
-# v.0.13.6 (2023-03-23)
+## v.0.13.6 (2023-03-23)
 
-## Add
+### Add
 
 - add OnlineDataProvider, UtxoOnlineDataProvider, ExplorerProvider
 
-# v.0.13.5 (2022-12-27)
+## v.0.13.5 (2022-12-27)
 
-## Update
+### Update
 
 - Bump `xchain-util@0.12.0`
 
-# v.0.13.4 (2022-12-13)
+## v.0.13.4 (2022-12-13)
 
-## Update
+### Update
 
 - removed `customRequestHeaders` from BaseXChainClient
 
-# v.0.13.3 (2022-11-24)
+## v.0.13.3 (2022-11-24)
 
-## Update
+### Update
 
 - added `customRequestHeaders` to BaseXChainClient
 
-# v.0.13.2 (2022-xx-xx)
+## v.0.13.2 (2022-xx-xx)
 
-## Update
+### Update
 
 - Bumped `xchain-utils`
 
-# v.0.13.1 (2022-09-29)
+## v.0.13.1 (2022-09-29)
 
-## Update
+### Update
 
 - bumped deps on xchain-utils & xchain-client
 
-# v.0.13.0 (2022-09-05)
+## v.0.13.0 (2022-09-05)
 
-### Breaking change
+#### Breaking change
 
 - moved isAssetRuneNative(), strip0x(), strip0x() from other libs into client
 
-# v.0.12.0 (2022-07-20)
+## v.0.12.0 (2022-07-20)
 
-### Breaking change
+#### Breaking change
 
 - DepositParams type removed, all thorchain deposits were moved to xchain-thorchain-amm
 
-# v.0.11.3 (2022-05-24)
+## v.0.11.3 (2022-05-24)
 
-## Update
+### Update
 
 - Add tx fee bounds b76d430
 
-# v.0.11.2 (2022-05-05)
+## v.0.11.2 (2022-05-05)
 
-## Update
+### Update
 
 - Add `DepositParams` type to `types.ts`
 
-# v.0.11.1 (2022-02-04)
+## v.0.11.1 (2022-02-04)
 
-### Update
+#### Update
 
 - Use latest `@xchainjs/xchain-util@0.5.1`
 - made walletIndex optional in BaseXChainClient.getAddress(walletIndex?: number)
 - Use latest axios@0.25.0
 - change TxFrom/TxTo to have optional Asset, to support Terra's multiple native asset types (UST, KRT, LUNA, etc)
 
-# v.0.11.0 (2021-12-29)
+## v.0.11.0 (2021-12-29)
 
-### Breaking change
+#### Breaking change
 
 - Expand `Network` enum type to include stagenet and introduce stagenet environment variables to `BaseXChainClient` for thorchain.
 
-# v.0.10.3 (2021-09-02)
+## v.0.10.3 (2021-09-02)
 
 - updated to the latest dependencies
 
-# v.0.10.2 (2021-07-18)
+## v.0.10.2 (2021-07-18)
 
 - optimized BaseXchainClient to skip creating an addres that just gets thown away in the constructor
 
-# v.0.10.1 (2021-07-07)
+## v.0.10.1 (2021-07-07)
 
-### Update
+#### Update
 
 - Use latest `@xchainjs/xchain-util@0.3.0`
 
-# v.0.10.0 (2021-07-07)
+## v.0.10.0 (2021-07-07)
 
-### Breaking change
+#### Breaking change
 
 - Introduce `Network`, `TxType`, `FeeOption` enums
 
-### Add
+#### Add
 
 - Introduce `UTXOClient`
 - Add fee rate helpers `singleFeeRate`, `standardFeeRates`
 - Add fee helpers `singleFee`, `standardFees`, `calcFee`, `calcFeesAsync`
 
-# v.0.9.4 (2021-06-25)
+## v.0.9.4 (2021-06-25)
 
 - added BaseXChainClient
 - added support for fetch gas fees from thorchain
 
-# v.0.9.3 (2021-06-01)
+## v.0.9.3 (2021-06-01)
 
 - updated peer deps
 
-# v.0.9.2 (2021-06-02)
+## v.0.9.2 (2021-06-02)
 
-### Update
+#### Update
 
 - Make `walletIndex` optional in `getAddress`
 
-# v.0.9.1 (2021-05-21)
+## v.0.9.1 (2021-05-21)
 
 - No changes, just a bump to next minor version by an accident
 
-# v.0.9.0 (2021-05-17)
+## v.0.9.0 (2021-05-17)
 
-### Breaking change
+#### Breaking change
 
 - added support for HD wallets
 
-# v.0.8.0 (2021-05-05)
+## v.0.8.0 (2021-05-05)
 
-### Breaking change
+#### Breaking change
 
 - Update @xchainjs/xchain-util package to 0.2.7
 
-# v.0.7.0 (2021-03-02)
+## v.0.7.0 (2021-03-02)
 
-### Breaking change
+#### Breaking change
 
 - Add optional parameter for `getTransactionData`
 
-# v.0.6.0 (2021-02-24)
+## v.0.6.0 (2021-02-24)
 
-### Breaking change
+#### Breaking change
 
 - Update `getBalance`
 
-# v.0.5.0 (2021-02-19)
+## v.0.5.0 (2021-02-19)
 
-### Breaking change
+#### Breaking change
 
 - Add @xchainjs/xchain-util to `peerDependencies`
 
-# v.0.4.0 (2020-01-30)
+## v.0.4.0 (2020-01-30)
 
-### Breaking change
+#### Breaking change
 
 - Update @xchainjs/xchain-util package to 0.2.2
 
-### Breaking change
+#### Breaking change
 
 - Add optional parameter for `getFees`
 
-# v.0.3.0 (2020-28-12)
+## v.0.3.0 (2020-28-12)
 
-### Breaking change
+#### Breaking change
 
 - Remove `getDefaultFees` #157
 
-# v.0.2.1 (2020-23-12)
+## v.0.2.1 (2020-23-12)
 
-### Update
+#### Update
 
 - Add `validateAddress` #149
 
-# v.0.2.0 (2020-12-11)
+## v.0.2.0 (2020-12-11)
 
-### Update
+#### Update
 
 - Update dependencies
 - Add `getDefaultFees`
 
-# v.0.1.0 (2020-11-12)
+## v.0.1.0 (2020-11-12)
 
-### Breaking Change
+#### Breaking Change
 
 - Remove 'transfer' | 'freeze' from `type TxType`
 
-# v.0.0.7 (2020-11-09)
+## v.0.0.7 (2020-11-09)
 
-### Changes
+#### Changes
 
 - reverted 0.0.6 version

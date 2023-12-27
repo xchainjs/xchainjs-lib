@@ -1,6 +1,6 @@
 import { Balance, FeeOption } from '@xchainjs/xchain-client'
-import { CryptoAmount, LiquidityPool } from '@xchainjs/xchain-thorchain-query'
-import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
+import { LiquidityPool } from '@xchainjs/xchain-thorchain-query'
+import { Address, Asset, BaseAmount, Chain, CryptoAmount } from '@xchainjs/xchain-util'
 
 export type AllBalances = {
   chain: Chain

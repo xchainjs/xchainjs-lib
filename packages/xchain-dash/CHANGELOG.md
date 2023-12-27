@@ -1,58 +1,74 @@
-# v0.2.6 (2023-12-06)
+# Changelog
 
-## Update
+## v0.2.8 (2023-12-12)
+
+### Update
+
+- Client dependency increased to 0.16.0
+- Utxo client dependency increased to 0.1.1
+- Utxo providers dependency increased to 0.2.10
+
+## v0.2.7 (2023-12-11)
+
+### Update
+
+- UTXO client package dependency
+
+## v0.2.6 (2023-12-06)
+
+### Update
 
 - Expose chain
 
-# v0.2.5 (2023-11-21)
+## v0.2.5 (2023-11-21)
 
-## Update
+### Update
 
 - Round robin fee strategy
 - GetSuggestedFee removed
 
-# v0.2.4 (2023-11-16)
+## v0.2.4 (2023-11-16)
 
-## Update
+### Update
 
 - Created method getAddressAsync
 
-# v0.2.3 (2023-11-10)
+## v0.2.3 (2023-11-10)
 
-## Update
+### Update
 
 - Utxo-providers package from 0.2.5 to 0.2.6
 
-# v0.2.2 (2023-10-26)
+## v0.2.2 (2023-10-26)
 
-## Update
+### Update
 
 - Refactor transfer method to use prepareTx
 
-# v.0.2.0 (2023-10-25)
+## v.0.2.0 (2023-10-25)
 
 - Remove functions `getFee`, `calcFee`, `getDefaultFeesWithRates`, and `getDefaultFees` from utils
 - Remove function `getFeesWithMemo` from client
 - Support option `sender` in functions `getFeesWithRates` and `getFees`
 
-# v0.1.3 (2023-06-10)
+## v0.1.3 (2023-06-10)
 
-## Update
+### Update
 
 - Increase fee estimation
 
-# v0.1.2 (2023-09-11)
+## v0.1.2 (2023-09-11)
 
-## Update
+### Update
 
 - Bumped dependencies for util
 
-# v0.1.1 (2023-08-08)
+## v0.1.1 (2023-08-08)
 
-## Update
+### Update
 
 - removed reference to external import at runtime for xchain-client
 
-# v.0.0.1 (2022-08-31)
+## v.0.0.1 (2022-08-31)
 
 First release
