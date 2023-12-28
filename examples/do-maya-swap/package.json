@@ -25,6 +25,7 @@
     "@xchainjs/xchain-mayamidgard-query": "file:../../packages/xchain-mayamidgard-query",
     "@xchainjs/xchain-mayachain-query": "file:../../packages/xchain-mayachain-query",
     "@xchainjs/xchain-mayachain-amm": "file:../../packages/xchain-mayachain-amm",
+    "@xchainjs/xchain-wallet": "file:../../packages/xchain-wallet",
     "axios-retry": "^3.3.1",
     "bech32-buffer": "^0.2.0",
     "bitcoinjs-lib": "5.2.0",
