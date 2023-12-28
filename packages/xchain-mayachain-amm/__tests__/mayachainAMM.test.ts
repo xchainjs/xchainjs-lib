@@ -1,19 +1,31 @@
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { AssetBTC, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
+import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
+import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { AssetRuneNative, Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 import mayanodeApi from '../__mocks__/mayanode-api/mayanode-api'
 import midgarApi from '../__mocks__/midgard-api/midgard-api'
-import { MayachainAMM, Wallet } from '../src'
+import { MayachainAMM } from '../src'
 
 describe('Mayachain Client Test', () => {
   let mayachainAmm: MayachainAMM
 
   beforeAll(() => {
     const mayaChainQuery = new MayachainQuery()
-    const wallet = new Wallet(process.env.MAINNET_PHRASE || '', Network.Mainnet)
+    const wallet = new Wallet({
+      BTC: new BtcClient({ ...defaultBtcParams, network: Network.Mainnet }),
+      ETH: new EthClient({ ...defaultEthParams, network: Network.Mainnet }),
+      DASH: new DashClient({ ...defaultDashParams, network: Network.Mainnet }),
+      KUJI: new KujiraClient({ ...defaultKujiParams, network: Network.Mainnet }),
+      THOR: new ThorClient({ network: Network.Mainnet }),
+      MAYA: new MayaClient({ network: Network.Mainnet }),
+    })
     mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
   })
 
