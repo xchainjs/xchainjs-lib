@@ -36,6 +36,7 @@
   "devDependencies": {
     "@xchainjs/xchain-bitcoin": "0.23.9",
     "@xchainjs/xchain-ethereum": "0.31.4",
-    "@xchainjs/xchain-thorchain": "0.28.16"
+    "@xchainjs/xchain-thorchain": "0.28.16",
+    "@xchainjs/xchain-mayachain": "0.2.13"
   }
 }
