@@ -1,9 +1,5 @@
 # Changelog
 
-## v0.3.1 (2024-01-04)
-
-- bump crypto-js dependencies ( https://github.com/xchainjs/xchainjs-lib/pull/875 ) @hippocampus-web3
-
 ## v0.3.0 (2023-05-02)
 
 ### Update
