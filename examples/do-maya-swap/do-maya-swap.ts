@@ -1,7 +1,14 @@
+import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { MayachainAMM, Wallet } from '@xchainjs/xchain-mayachain-amm'
+import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
+import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
+import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayaChain, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
+import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, assetAmount, assetFromString, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 const printQuoteSwap = (quoteSwap: QuoteSwap) => {
   console.log({
@@ -76,7 +83,14 @@ const main = async () => {
     affiliateBps = Number(process.argv[9])
   }
 
-  const wallet = new Wallet(seed, network)
+  const wallet = new Wallet({
+    BTC: new BtcClient({ ...defaultBtcParams, network, phrase: seed }),
+    ETH: new EthClient({ ...defaultEthParams, network, phrase: seed }),
+    DASH: new DashClient({ ...defaultDashParams, network, phrase: seed }),
+    KUJI: new KujiraClient({ ...defaultKujiParams, network, phrase: seed }),
+    THOR: new ThorClient({ network, phrase: seed }),
+    MAYA: new MayaClient({ network, phrase: seed }),
+  })
   const toChain = toAsset.synth ? MayaChain : toAsset.chain
   const quoteSwapParams: QuoteSwapParams = {
     fromAsset,

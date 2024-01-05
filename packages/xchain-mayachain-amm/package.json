@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "@xchainjs/xchain-ethereum": "0.31.4",
-    "@xchainjs/xchain-kujira": "0.1.6"
+    "@xchainjs/xchain-kujira": "0.1.6",
+    "@xchainjs/xchain-wallet": "0.0.0"
   },
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",

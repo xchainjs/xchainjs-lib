@@ -1,6 +1,11 @@
 import cosmosclient from '@cosmos-client/core'
+import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { Wallet } from '@xchainjs/xchain-mayachain-amm'
+import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
+import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
+import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import {
   Asset,
   AssetAmount,
@@ -13,6 +18,7 @@ import {
   delay,
   register9Rheader,
 } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 import axios from 'axios'
 
 register9Rheader(cosmosclient.config.globalAxios)
@@ -57,7 +63,7 @@ const _getAddress = async (wallet: Wallet, chain: Chain) => {
 
 const _getHistories = async (wallet: Wallet, chains?: Chain[]) => {
   const histories = await wallet.getTransactionsHistories(chains)
-  Object.keys((chain) => {
+  Object.keys(histories).forEach((chain) => {
     const history = histories[chain]
     console.log({
       numTxs: history.total,
@@ -155,7 +161,14 @@ const _transfer = async (wallet: Wallet, asset: Asset, recipient: string, amount
 
 const main = async () => {
   const seed = process.argv[2]
-  const wallet: Wallet = new Wallet(seed, Network.Mainnet)
+  const wallet = new Wallet({
+    BTC: new BtcClient({ ...defaultBtcParams, network: Network.Mainnet, phrase: seed }),
+    ETH: new EthClient({ ...defaultEthParams, network: Network.Mainnet, phrase: seed }),
+    DASH: new DashClient({ ...defaultDashParams, network: Network.Mainnet, phrase: seed }),
+    KUJI: new KujiraClient({ ...defaultKujiParams, network: Network.Mainnet, phrase: seed }),
+    THOR: new ThorClient({ network: Network.Mainnet, phrase: seed }),
+    MAYA: new MayaClient({ network: Network.Mainnet, phrase: seed }),
+  })
 
   console.log('============= Get all wallet balances ==============')
   await _getBalances(wallet)
