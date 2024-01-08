@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [7f7f543]
+  - @xchainjs/xchain-crypto@0.3.1
+  - @xchainjs/xchain-client@0.16.1
+  - @xchainjs/xchain-evm@0.4.4
+  - @xchainjs/xchain-evm-providers@0.1.6
+
 ## 0.4.4
 
 ### Patch Changes

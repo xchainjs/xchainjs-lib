@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- 7f7f543: bump crypto-js version (security)
+
 ## v0.3.0 (2023-05-02)
 
 ### Update

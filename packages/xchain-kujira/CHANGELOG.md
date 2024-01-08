@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7
+
+### Patch Changes
+
+- @xchainjs/xchain-client@0.16.1
+- @xchainjs/xchain-cosmos-sdk@0.1.6
+
 ## 0.1.6
 
 ### Patch Changes

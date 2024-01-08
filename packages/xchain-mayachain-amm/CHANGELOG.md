@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- 7e2261b: Wallet from XChainJS wallet package
+
+### Patch Changes
+
+- Updated dependencies [7f7f543]
+- Updated dependencies [7e2261b]
+  - @xchainjs/xchain-crypto@0.3.1
+  - @xchainjs/xchain-wallet@0.1.0
+  - @xchainjs/xchain-bitcoin@0.23.10
+  - @xchainjs/xchain-client@0.16.1
+  - @xchainjs/xchain-cosmos-sdk@0.1.6
+  - @xchainjs/xchain-dash@0.2.9
+  - @xchainjs/xchain-ethereum@0.31.5
+  - @xchainjs/xchain-evm@0.4.4
+  - @xchainjs/xchain-mayachain@0.2.14
+  - @xchainjs/xchain-thorchain@0.28.17
+  - @xchainjs/xchain-utxo@0.1.2
+  - @xchainjs/xchain-utxo-providers@0.2.11
+  - @xchainjs/xchain-kujira@0.1.7
+  - @xchainjs/xchain-mayachain-query@0.1.5
+
 ## 0.2.0
 
 ### Minor Changes

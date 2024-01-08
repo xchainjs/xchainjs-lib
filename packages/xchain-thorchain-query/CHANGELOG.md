@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1
+
+### Patch Changes
+
+- @xchainjs/xchain-client@0.16.1
+- @xchainjs/xchain-midgard-query@0.1.10
+
 ## 0.7.0
 
 ### Minor Changes

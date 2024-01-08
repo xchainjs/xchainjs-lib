@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.7.9
+
+### Patch Changes
+
+- Updated dependencies [7f7f543]
+  - @xchainjs/xchain-crypto@0.3.1
+  - @xchainjs/xchain-client@0.16.1
+
 ## v5.7.8 (2023-12-12)
 
 ### Update

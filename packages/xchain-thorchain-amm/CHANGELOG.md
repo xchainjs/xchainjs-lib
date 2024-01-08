@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.8.13
+
+### Patch Changes
+
+- Updated dependencies [7f7f543]
+  - @xchainjs/xchain-crypto@0.3.1
+  - @xchainjs/xchain-avax@0.4.5
+  - @xchainjs/xchain-binance@5.7.9
+  - @xchainjs/xchain-bitcoin@0.23.10
+  - @xchainjs/xchain-bitcoincash@0.17.8
+  - @xchainjs/xchain-bsc@0.4.6
+  - @xchainjs/xchain-client@0.16.1
+  - @xchainjs/xchain-cosmos@0.21.10
+  - @xchainjs/xchain-doge@0.7.10
+  - @xchainjs/xchain-ethereum@0.31.5
+  - @xchainjs/xchain-evm@0.4.4
+  - @xchainjs/xchain-litecoin@0.13.9
+  - @xchainjs/xchain-mayachain@0.2.14
+  - @xchainjs/xchain-thorchain@0.28.17
+  - @xchainjs/xchain-utxo-providers@0.2.11
+  - @xchainjs/xchain-thorchain-query@0.7.1
+
 ## 0.8.12
 
 ### Patch Changes

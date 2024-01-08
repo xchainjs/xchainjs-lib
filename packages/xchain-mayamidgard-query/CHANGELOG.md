@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+### Patch Changes
+
+- @xchainjs/xchain-client@0.16.1
+
 ## v0.1.3 (2023-12-12)
 
 ### Update
@@ -23,4 +29,3 @@
 ### Update
 
 - First release
-

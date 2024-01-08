@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.14
+
+### Patch Changes
+
+- Updated dependencies [7f7f543]
+  - @xchainjs/xchain-crypto@0.3.1
+  - @xchainjs/xchain-client@0.16.1
+  - @xchainjs/xchain-cosmos@0.21.10
+
 ## v0.2.13 (2023-12-12)
 
 ### Update

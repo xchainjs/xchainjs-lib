@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.10
+
+### Patch Changes
+
+- @xchainjs/xchain-client@0.16.1
+
 ## v0.1.9 (2023-12-12)
 
 ### Update
