@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.16.1
+
+### Patch Changes
+
+- Updated dependencies [7f7f543]
+  - @xchainjs/xchain-crypto@0.3.1
+
 ## v0.16.0 (2023-12-12)
 
 ### Update

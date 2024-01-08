@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-wallet",
   "description": "XChainjs clients wrapper to work with several chains at the same time",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -28,15 +28,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-evm": "0.4.3",
+    "@xchainjs/xchain-evm": "0.4.4",
     "@xchainjs/xchain-util": "0.13.2",
-    "@xchainjs/xchain-client": "0.16.0",
+    "@xchainjs/xchain-client": "0.16.1",
     "ethers": "5.6.6"
   },
   "devDependencies": {
-    "@xchainjs/xchain-bitcoin": "0.23.9",
-    "@xchainjs/xchain-ethereum": "0.31.4",
-    "@xchainjs/xchain-thorchain": "0.28.16",
-    "@xchainjs/xchain-mayachain": "0.2.13"
+    "@xchainjs/xchain-bitcoin": "0.23.10",
+    "@xchainjs/xchain-ethereum": "0.31.5",
+    "@xchainjs/xchain-thorchain": "0.28.17",
+    "@xchainjs/xchain-mayachain": "0.2.14"
   }
 }

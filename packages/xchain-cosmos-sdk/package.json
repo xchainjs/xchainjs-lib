@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cosmos-sdk",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Genereic Cosmos SDK client for XChainJS",
   "keywords": [
     "XChain",
@@ -36,13 +36,13 @@
   },
   "devDependencies": {
     "@types/secp256k1": "^4.0.3",
-    "@xchainjs/xchain-client": "^0.16.0",
-    "@xchainjs/xchain-crypto": "^0.3.0",
+    "@xchainjs/xchain-client": "^0.16.1",
+    "@xchainjs/xchain-crypto": "^0.3.1",
     "@xchainjs/xchain-util": "^0.13.1"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.16.0",
-    "@xchainjs/xchain-crypto": "^0.3.0",
+    "@xchainjs/xchain-client": "^0.16.1",
+    "@xchainjs/xchain-crypto": "^0.3.1",
     "@xchainjs/xchain-util": "^0.13.1"
   },
   "dependencies": {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.23.10
+
+### Patch Changes
+
+- Updated dependencies [7f7f543]
+  - @xchainjs/xchain-crypto@0.3.1
+  - @xchainjs/xchain-client@0.16.1
+  - @xchainjs/xchain-utxo@0.1.2
+  - @xchainjs/xchain-utxo-providers@0.2.11
+
 ## v0.23.9 (2023-12-12)
 
 ### Update
