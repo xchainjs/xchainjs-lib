@@ -55,7 +55,7 @@ yarn doSend "MnemonicPhrase" mainnet 1 8 THOR.RUNE thorxxxx +:thor.rune:mayaxxxx
 ### Do streaming swap
 
 executes a transfer of an asset from your wallet to another address minimizing slippage
-`yarn doStreamingSwap "MnemonicPhrase" stagenet|mainnet assetsAmount decimals fromString toString streamingInterval streamingQuantity`
+`yarn doStreamingSwap "MnemonicPhrase" stagenet|mainnet assetsAmount decimals fromString toString streamingInterval streamingQuantity  [affiliateAddress] [affiliate percent]`
 
 streamingInterval: The maximum interval for swaps that involve L1 assets (such as BTC, ETH) is restricted by the limitation of the maximum duration for a swap; currently, this limitation is 24 hours.
 
