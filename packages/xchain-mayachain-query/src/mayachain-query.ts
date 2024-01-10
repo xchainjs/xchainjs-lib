@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { MAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
-import { CryptoAmount, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, CryptoAmount, assetFromStringEx, assetToString, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
 
 import { MayachainCache } from './mayachain-cache'
 import { InboundDetail, QuoteSwap, QuoteSwapParams } from './types'
@@ -9,6 +9,7 @@ import {
   BtcAsset,
   BtcChain,
   CacaoAsset,
+  DEFAULT_MAYACHAIN_DECIMALS,
   DashAsset,
   DashChain,
   EthAsset,
@@ -199,5 +200,21 @@ export class MayachainQuery {
     const inboundDetails = await this.getInboundDetails()
     if (!inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
     return inboundDetails[chain]
+  }
+
+  /**
+   * Get asset decimals
+   * @param {Asset} asset
+   * @returns the asset decimals
+   * @throws {Error} if the asset is not supported in Mayachain
+   */
+  public async getAssetDecimals(asset: Asset): Promise<number> {
+    if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
+
+    const assetNotation = assetToString(asset)
+    const assetsDecimals = await this.mayachainCache.getAssetDecimals()
+    if (!assetsDecimals[assetNotation]) throw Error(`Can not get decimals for ${assetNotation}`)
+
+    return assetsDecimals[assetNotation]
   }
 }

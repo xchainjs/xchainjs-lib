@@ -16,6 +16,7 @@ export class MayachainCache {
   readonly mayanode: Mayanode
   private conf: MayachainCacheConf
   private readonly inboundDetailCache: CachedValue<Record<string, InboundDetail>>
+  private readonly assetDecimalsCache: CachedValue<Record<string, number>>
   /**
    * Constructor to create a MayachainCache
    *
@@ -36,6 +37,7 @@ export class MayachainCache {
       () => this.refreshInboundDetailCache(),
       this.conf.expirationTimeInboundAddress,
     )
+    this.assetDecimalsCache = new CachedValue<Record<string, number>>(() => this.refreshAssetDecimalsCache())
   }
 
   /**
@@ -45,6 +47,15 @@ export class MayachainCache {
   public async getInboundDetails(): Promise<Record<string, InboundDetail>> {
     if (!this.inboundDetailCache) throw Error(`Could not refresh inbound details`)
     return await this.inboundDetailCache.getValue()
+  }
+
+  /**
+   * Get the number of the decimals of the supported Mayachain tokens
+   * @returns {Record<string, number>} A record with the string asset notation as key and the number of decimals as value
+   */
+  public async getAssetDecimals(): Promise<Record<string, number>> {
+    if (!this.assetDecimalsCache) throw Error(`Could not refresh assets decimals`)
+    return await this.assetDecimalsCache.getValue()
   }
 
   /**
@@ -97,5 +108,24 @@ export class MayachainCache {
     }
 
     return inboundDetails
+  }
+
+  /**
+   * Refreshes the number of decimals of the supported Mayachain tokens
+   */
+  private async refreshAssetDecimalsCache(): Promise<Record<string, number>> {
+    // TODO: As soon as Mayachain returns native decimals from any endpoint of its API, refactor the function
+    return {
+      'BTC.BTC': 8,
+      'ETH.ETH': 18,
+      'DASH.DASH': 8,
+      'KUJI.KUJI': 6,
+      'THOR.RUNE': 8,
+      'MAYA.CACAO': 8,
+      'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
+      'ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 6,
+      'ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0': 18,
+      'KUJI.USK': 6,
+    }
   }
 }
