@@ -43,6 +43,12 @@ export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDeci
   return baseAmount(baseAmountOut, outDecimals).amount()
 }
 
+export const getCryptoAmountWithNotation = (amount: CryptoAmount, notation: number): CryptoAmount => {
+  const inputAmountBaseNotation = amount.baseAmount.amount()
+  const decimalsDiff = notation - amount.baseAmount.decimal
+  return new CryptoAmount(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
+}
+
 /**
  * Returns the native asset for a given chain
  * @param chain
