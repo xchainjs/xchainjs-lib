@@ -2,7 +2,7 @@ import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xcha
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { abi } from '@xchainjs/xchain-evm'
+import { MAX_APPROVAL, abi } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
@@ -11,7 +11,7 @@ import { Asset, CryptoAmount, baseAmount, getContractAddressFromAsset } from '@x
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
-import { TxSubmitted } from './types'
+import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
 
 /**
  * MAYAChainAMM class for interacting with THORChain.
@@ -134,17 +134,12 @@ export class MayachainAMM {
     }
 
     if (this.isERC20Asset(fromAsset) && fromAddress) {
-      const inboundDetails = await this.mayachainQuery.getChainInboundDetails(fromAsset.chain)
-      if (!inboundDetails.router) throw Error(`Unknown router address for ${fromAsset.chain}`)
-
-      const isApprovedResult = await this.wallet.isApproved(
-        fromAsset,
-        amount.baseAmount,
-        fromAddress,
-        inboundDetails.router,
-      )
-
-      if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
+      const approveErrors = await this.isRouterApprovedToSpend({
+        asset: fromAsset,
+        address: fromAddress,
+        amount: amount.baseAmount,
+      })
+      errors.push(...approveErrors)
     }
 
     return errors
@@ -181,6 +176,45 @@ export class MayachainAMM {
     return fromAsset.chain === MAYAChain || fromAsset.synth
       ? this.doProtocolAssetSwap(amount, quoteSwap.memo)
       : this.doNonProtocolAssetSwap(amount, quoteSwap.toAddress, quoteSwap.memo)
+  }
+
+  /**
+   * Approve Mayachain router in the chain of the asset to spend the amount in name of the address
+   * @param {ApproveParams} approveParams contains the asset and amount the router will be allowed. If amount is not defined,
+   * an infinity approve will be done
+   */
+  public async approveRouterToSpend({ asset, amount }: ApproveParams): Promise<TxSubmitted> {
+    const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
+    if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
+    const tx = await this.wallet.approve(
+      asset,
+      amount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
+      inboundDetails.router,
+    )
+
+    return {
+      hash: tx.hash,
+      url: await this.wallet.getExplorerTxUrl(asset.chain, tx.hash),
+    }
+  }
+
+  /**
+   * Validate if the asset router is allowed to spend the asset amount in name of the address
+   * @param {IsApprovedParams} isApprovedParams contains the asset and the amount the router is supposed to spend
+   * int name of address
+   * @returns {string[]} the reasons the router of the asset is not allowed to spend the amount. If it is empty, the asset router is allowed to spend the amount
+   */
+  public async isRouterApprovedToSpend({ asset, amount, address }: IsApprovedParams): Promise<string[]> {
+    const errors: string[] = []
+
+    const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
+    if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
+
+    const isApprovedResult = await this.wallet.isApproved(asset, amount, address, inboundDetails.router)
+
+    if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
+
+    return errors
   }
 
   /**
