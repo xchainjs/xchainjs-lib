@@ -1,4 +1,4 @@
-import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
 
 export type TxSubmitted = {
   hash: string
@@ -7,11 +7,11 @@ export type TxSubmitted = {
 
 export type ApproveParams = {
   asset: Asset
-  amount: BaseAmount | undefined
+  amount: CryptoAmount | undefined
 }
 
 export type IsApprovedParams = {
   asset: Asset
-  amount: BaseAmount
+  amount: CryptoAmount
   address: Address
 }

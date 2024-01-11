@@ -137,7 +137,7 @@ export class MayachainAMM {
       const approveErrors = await this.isRouterApprovedToSpend({
         asset: fromAsset,
         address: fromAddress,
-        amount: amount.baseAmount,
+        amount,
       })
       errors.push(...approveErrors)
     }
@@ -188,7 +188,7 @@ export class MayachainAMM {
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
     const tx = await this.wallet.approve(
       asset,
-      amount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
+      amount?.baseAmount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
       inboundDetails.router,
     )
 
@@ -210,7 +210,7 @@ export class MayachainAMM {
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
 
-    const isApprovedResult = await this.wallet.isApproved(asset, amount, address, inboundDetails.router)
+    const isApprovedResult = await this.wallet.isApproved(asset, amount.baseAmount, address, inboundDetails.router)
 
     if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
 
