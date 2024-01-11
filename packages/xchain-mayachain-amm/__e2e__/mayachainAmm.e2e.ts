@@ -1,9 +1,11 @@
-import { AssetBTC } from '@xchainjs/xchain-bitcoin'
+import { AssetBTC, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { AssetCacao } from '@xchainjs/xchain-mayachain'
+import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
+import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { AssetCacao, Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { AssetRuneNative, Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import {
   Asset,
   CryptoAmount,
@@ -13,9 +15,10 @@ import {
   assetToString,
   baseAmount,
 } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
-import { MayachainAMM, Wallet } from '../src'
+import { MayachainAMM } from '../src'
 
 function printQuoteSwap(quoteSwap: QuoteSwap) {
   console.log({
@@ -74,10 +77,19 @@ describe('MayachainAmm e2e tests', () => {
 
   beforeAll(() => {
     const mayaChainQuery = new MayachainQuery()
-    wallet = new Wallet(process.env.MAINNET_PHRASE || '', Network.Mainnet, {
-      ETH: {
+    const phrase = process.env.MAINNET_PHRASE
+    wallet = new Wallet({
+      BTC: new BtcClient({ ...defaultBtcParams, phrase, network: Network.Mainnet }),
+      ETH: new EthClient({
+        ...defaultEthParams,
         providers: ethersJSProviders,
-      },
+        phrase,
+        network: Network.Mainnet,
+      }),
+      DASH: new DashClient({ ...defaultDashParams, phrase, network: Network.Mainnet }),
+      KUJI: new KujiraClient({ ...defaultKujiParams, phrase, network: Network.Mainnet }),
+      THOR: new ThorClient({ phrase, network: Network.Mainnet }),
+      MAYA: new MayaClient({ phrase, network: Network.Mainnet }),
     })
     mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
   })
@@ -191,6 +203,29 @@ describe('MayachainAmm e2e tests', () => {
     })
 
     console.log(txSubmitted)
+  })
+
+  it('Should approve Mayachain router to spend', async () => {
+    const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+
+    const txSubmitted = await mayachainAmm.approveRouterToSpend({
+      asset,
+      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), asset),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should check if Mayachain router is allowed to spend', async () => {
+    const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+
+    const isApprovedToSpend = await mayachainAmm.isRouterApprovedToSpend({
+      asset,
+      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), asset),
+      address: '0x6e08C7bBC09D68c6b9be0613ae32D4B5EAA63247',
+    })
+
+    console.log(!!isApprovedToSpend.length)
   })
 
   it('Should do ERC20 asset swap. USDT -> ETH', async () => {
