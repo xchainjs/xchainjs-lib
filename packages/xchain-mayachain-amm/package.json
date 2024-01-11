@@ -38,7 +38,8 @@
   "dependencies": {
     "@xchainjs/xchain-ethereum": "0.31.5",
     "@xchainjs/xchain-kujira": "0.1.7",
-    "@xchainjs/xchain-wallet": "0.1.0"
+    "@xchainjs/xchain-wallet": "0.1.0",
+    "@xchainjs/xchain-mayachain-query": "0.1.5"
   },
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",
@@ -49,7 +50,6 @@
     "@xchainjs/xchain-crypto": "^0.3.1",
     "@xchainjs/xchain-dash": "^0.2.9",
     "@xchainjs/xchain-mayanode": "^0.1.2",
-    "@xchainjs/xchain-mayachain-query": "^0.1.5",
     "@xchainjs/xchain-evm": "^0.4.4",
     "@xchainjs/xchain-mayachain": "^0.2.14",
     "@xchainjs/xchain-mayamidgard": "^0.1.0",
@@ -76,7 +76,6 @@
     "@xchainjs/xchain-crypto": "^0.3.1",
     "@xchainjs/xchain-dash": "^0.2.9",
     "@xchainjs/xchain-mayanode": "^0.1.2",
-    "@xchainjs/xchain-mayachain-query": "^0.1.5",
     "@xchainjs/xchain-evm": "^0.4.4",
     "@xchainjs/xchain-mayachain": "^0.2.14",
     "@xchainjs/xchain-mayamidgard": "^0.1.0",
