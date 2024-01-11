@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.2
+
+### Patch Changes
+
+- 04c87ae: Native decimal bug fix
+
 ## 0.7.1
 
 ### Patch Changes
