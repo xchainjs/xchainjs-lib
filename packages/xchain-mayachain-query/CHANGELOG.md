@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- 9229e99: Update apis to the latest specs
+- Updated dependencies [9229e99]
+  - @xchainjs/xchain-mayanode@0.1.3
+  - @xchainjs/xchain-mayamidgard-query@0.1.5
+
 ## 0.1.5
 
 ### Patch Changes

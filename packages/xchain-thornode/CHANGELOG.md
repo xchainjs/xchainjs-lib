@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.10
+
+### Patch Changes
+
+- 9229e99: Update apis to the latest specs
+
 ## v0.3.9 (2023-11-14)
 
 ### Update
