@@ -41,6 +41,7 @@ const BusdThornodePoolDetails1: Pool = {
   derived_depth_bps: '',
   loan_collateral: '',
   loan_cr: '',
+  loan_collateral_remaining: '',
 }
 
 describe(`Liquidity calc tests`, () => {

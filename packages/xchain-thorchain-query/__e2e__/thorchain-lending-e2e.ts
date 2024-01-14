@@ -1,18 +1,17 @@
 import { Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import { LoanCloseParams, LoanCloseQuote, LoanOpenParams, LoanOpenQuote } from '../src/types'
-import { AssetBTC, AssetETH } from '../src/utils'
+import { AssetBTC, AssetETH, AssetRuneNative } from '../src/utils'
 import { Thornode } from '../src/utils/thornode'
 
 const thorchainCache = new ThorchainCache(new Thornode(Network.Stagenet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // addresses
-const btcAddress = 'bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v'
+const btcAddress = 'bc1qy7yxaun8hzmue5ggktqqy3dw2tt8yppf3qaxt0'
 const ethAddress = '0xf155e9cdD77A5d77073aB43d17F661507C08E23d'
 
 function printOpen(quote: LoanOpenQuote) {
@@ -112,9 +111,9 @@ describe('Thorchain-query Loan Integration Tests', () => {
 
   it(`Should fetch a loan withdrawal quote for BTC`, async () => {
     const loanCloseParams: LoanCloseParams = {
-      asset: AssetETH,
+      asset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC),
-      loanAsset: AssetBTC,
+      loanAsset: AssetRuneNative,
       loanOwner: btcAddress,
     }
     const loanQuoteWithdraw = await thorchainQuery.getLoanQuoteClose(loanCloseParams)
