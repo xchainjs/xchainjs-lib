@@ -1,4 +1,11 @@
-import { CryptoAmount, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 
 import mockMayanodeApi from '../__mocks__/mayanode-api'
 import { BtcAsset, EthAsset, RuneAsset } from '../src/'
@@ -84,5 +91,28 @@ describe('Mayachain-query tests', () => {
     expect(quoteSwap.canSwap).toBe(true)
     expect(quoteSwap.errors.length).toBe(0)
     expect(quoteSwap.warning).toBe('')
+  })
+
+  it('Should return the number of decimals of Mayachain assets', async () => {
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC.BTC'))).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC/BTC'))).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.ETH'))).toBe(18)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('DASH.DASH'))).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.KUJI'))).toBe(6)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('THOR.RUNE'))).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('MAYA.CACAO'))).toBe(8)
+    expect(
+      await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')),
+    ).toBe(6)
+    expect(
+      await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')),
+    ).toBe(6)
+    expect(
+      await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0')),
+    ).toBe(18)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK'))).toBe(6)
+    expect(
+      mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52')),
+    ).rejects.toThrowError('Can not get decimals for ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52')
   })
 })
