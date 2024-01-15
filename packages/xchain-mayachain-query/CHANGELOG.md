@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7
+
+### Patch Changes
+
+- 0f92b8c: Get asset decimals method
+
 ## 0.1.6
 
 ### Patch Changes

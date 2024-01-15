@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- 0f92b8c: approveRouterToSpend and isRouterApprovedToSpend methods
+- Updated dependencies [0f92b8c]
+- Updated dependencies [0f92b8c]
+  - @xchainjs/xchain-wallet@0.1.1
+  - @xchainjs/xchain-mayachain-query@0.1.7
+
 ## 1.0.1
 
 ### Patch Changes
