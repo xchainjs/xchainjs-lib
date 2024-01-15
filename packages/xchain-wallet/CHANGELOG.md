@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+### Patch Changes
+
+- 0f92b8c: Approve method
+
 ## 0.1.0
 
 ### Minor Changes
