@@ -32,6 +32,7 @@ jobs:
         run: yarn test
 
       - name: Create release pull request or publish to npm
+        id: changesets
         uses: changesets/action@v1
         with:
           version: yarn increase-packages
@@ -39,3 +40,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Prepare notification for Discord
+        id: prepare-notification
+        if: steps.changesets.outputs.published == 'true'
+        run: yarn notification:prepare ${{ toJSON(steps.changesets.outputs.publishedPackages) }}
+
+      - name: Send discord notification
+        if: steps.prepare-notification.outputs.success == 'true'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EMBEDS: ${{ steps.prepare-notification.outputs.embeds }}
+        uses: Ilshidur/action-discord@0.3.2

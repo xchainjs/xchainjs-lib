@@ -14,7 +14,8 @@
     "e2e": "lerna run e2e",
     "lint": "lerna run lint",
     "update-packages": "yarn changeset",
-    "increase-packages": "yarn changeset version"
+    "increase-packages": "yarn changeset version",
+    "notification:prepare": "ts-node scripts/notification"
   },
   "husky": {
     "hooks": {
@@ -26,6 +27,7 @@
     "crypto-js": "4.2.0"
   },
   "devDependencies": {
+    "@actions/core": "1.10.0",
     "@changesets/cli": "2.27.1",
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-json": "^6.0.0",
