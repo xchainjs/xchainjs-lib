@@ -1,7 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
-import { CryptoAmount } from '../src/crypto-amount'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
 import {

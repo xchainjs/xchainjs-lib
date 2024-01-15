@@ -85,9 +85,9 @@ const doStreamingSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Net
       wallet,
       walletIndex: 0,
     }
-    const affiliateAddress = process.argv[8]
+    const affiliateAddress = process.argv[10]
     if (affiliateAddress) {
-      const affiliateFeeBasisPoints = Number(process.argv[9])
+      const affiliateFeeBasisPoints = Number(process.argv[11])
       swapParams.affiliateAddress = affiliateAddress
       swapParams.affiliateBps = affiliateFeeBasisPoints
     }
