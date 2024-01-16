@@ -51,7 +51,7 @@
     "rollup-plugin-peer-deps-external": "2.2.4",
     "rollup-plugin-typescript2": "^0.34.1",
     "ts-jest": "^29.0.3",
-    "ts-node": "^10.9.2",
+    "ts-node": "10.9.2",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4",
     "yarn-audit-ci": "^1.2.0"
