@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.16
+
+### Patch Changes
+
+- 770abac: approveTCRouterToSpend decimal bug fix
+
 ## 0.8.15
 
 ### Patch Changes
