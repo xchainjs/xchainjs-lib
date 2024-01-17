@@ -100,11 +100,11 @@ export class EvmHelper {
   ): Promise<ethers.providers.TransactionResponse> {
     const contractAddress = getContractAddressFromAsset(asset)
     const router = await this.thorchainCache.getRouterAddressForChain(asset.chain)
-
+    const decimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
     const approveParams: ApproveParams = {
       contractAddress,
       spenderAddress: router,
-      amount: baseAmount(amount.toString(), this.evmClient.config.gasAssetDecimals),
+      amount: baseAmount(amount.toString(), decimals),
       walletIndex,
     }
     return await this.evmClient.approve(approveParams)
