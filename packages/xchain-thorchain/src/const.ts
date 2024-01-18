@@ -13,12 +13,14 @@ export const RUNE_DENOM = 'rune'
 const RUNE_TICKER = 'RUNE'
 
 export const DEFAULT_FEE: BaseAmount = assetToBase(assetAmount(0.02, RUNE_DECIMAL))
+export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 
 export const THORChain = 'THOR' as const
 
 export const AssetRUNE: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
 
 export const MSG_SEND_TYPE_URL = '/types.MsgSend' as const
+export const MSG_DEPOSIT_TYPE_URL = '/types.MsgDeposit' as const
 
 export const defaultClientConfig: CosmosSdkClientParams = {
   chain: AssetRUNE.chain,
@@ -29,6 +31,10 @@ export const defaultClientConfig: CosmosSdkClientParams = {
   defaultDecimals: RUNE_DECIMAL,
   defaultFee: DEFAULT_FEE,
   baseDenom: RUNE_DENOM,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  registryTypes: [[MSG_SEND_TYPE_URL, { ...(types.types.MsgSend as any) }]],
+  registryTypes: [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [MSG_SEND_TYPE_URL, { ...(types.types.MsgSend as any) }],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [MSG_DEPOSIT_TYPE_URL, { ...(types.types.MsgDeposit as any) }],
+  ],
 }

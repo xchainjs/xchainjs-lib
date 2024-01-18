@@ -55,10 +55,10 @@ export enum MsgTypes {
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
   private readonly startgateClient: CachedValue<StargateClient>
-  private readonly clientUrls: Record<Network, string>
-  private readonly prefix: string
   private readonly defaultDecimals: number
   private readonly defaultFee: BaseAmount
+  protected readonly clientUrls: Record<Network, string>
+  protected readonly prefix: string
   protected readonly baseDenom: string
   protected readonly registry: Registry
   /**
