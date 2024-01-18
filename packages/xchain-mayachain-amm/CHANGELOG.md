@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [273da94]
+  - @xchainjs/xchain-mayachain@0.2.15
+
 ## 1.0.2
 
 ### Patch Changes

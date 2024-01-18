@@ -37,6 +37,6 @@
     "@xchainjs/xchain-bitcoin": "0.23.10",
     "@xchainjs/xchain-ethereum": "0.31.5",
     "@xchainjs/xchain-thorchain": "0.28.17",
-    "@xchainjs/xchain-mayachain": "0.2.14"
+    "@xchainjs/xchain-mayachain": "0.2.15"
   }
 }

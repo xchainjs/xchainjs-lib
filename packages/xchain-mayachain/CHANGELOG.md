@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.15
+
+### Patch Changes
+
+- 273da94: Maya synths return with 1e8 instead of 1e10
+
 ## 0.2.14
 
 ### Patch Changes
