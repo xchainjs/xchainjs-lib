@@ -8,6 +8,7 @@ const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
 const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
 
 export const CACAO_DECIMAL = 10
+export const MAYA_SYNTH_DECIMAL = 8
 export const MAYA_DECIMAL = 4
 export const DEFAULT_GAS_ADJUSTMENT = 2
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
