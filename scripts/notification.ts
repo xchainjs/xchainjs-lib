@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
+import { info, setFailed, setOutput } from '@actions/core'
 
 type Package = {
   name: string
@@ -35,8 +35,8 @@ const embedTemplate: Embed = {
 const main = () => {
   try {
     if (!process.argv[2]) {
-      core.info('There is no release to notify')
-      core.setOutput('success', false)
+      info('There is no release to notify')
+      setOutput('success', false)
       return
     }
     const publishedPackages = JSON.parse(process.argv[2]) as Package[]
@@ -49,10 +49,10 @@ const main = () => {
         .join('\n'),
     }
 
-    core.setOutput('embeds', [embed])
-    core.setOutput('success', true)
+    setOutput('embeds', [embed])
+    setOutput('success', true)
   } catch (e) {
-    core.setFailed(`Error preparing message: ${e}`)
+    setFailed(`Error preparing message: ${e}`)
   }
 }
 
