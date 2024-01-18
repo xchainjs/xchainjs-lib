@@ -32,4 +32,5 @@ export const defaultClientConfig: CosmosSdkClientParams = {
   defaultDecimals: 6,
   defaultFee: DEFAULT_FEE,
   baseDenom: 'ukuji',
+  registryTypes: [],
 }

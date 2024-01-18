@@ -9,3 +9,5 @@ export const DEFAULT_FEE = baseAmount(5000, KUJI_DECIMAL)
 export const KUJIChain = 'KUJI' as const
 
 export const AssetKUJI: Asset = { chain: KUJIChain, symbol: 'KUJI', ticker: 'KUJI', synth: false }
+
+export const MSG_SEND_TYPE_URL = '/cosmos.bank.v1beta1.MsgSend' as const
