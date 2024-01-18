@@ -34,12 +34,18 @@
     "generate:ThorchainMsgs": "./genMsgs.sh"
   },
   "dependencies": {
-    "@xchainjs/xchain-cosmos-sdk": "0.1.6",
+    "@cosmjs/encoding": "0.31.1",
     "@xchainjs/xchain-client": "0.16.1",
+    "@xchainjs/xchain-cosmos-sdk": "0.1.6",
     "@xchainjs/xchain-util": "0.13.2",
-    "bignumber.js": "9.0.0"
+    "bignumber.js": "9.0.0",
+    "protobufjs": "6.11.4"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@cosmjs/amino": "0.31.1",
+    "@cosmjs/proto-signing": "0.31.1",
+    "cosmjs-types": "0.8.0"
+  },
   "publishConfig": {
     "access": "public"
   }

@@ -2,6 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
 import { Asset, BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
+import types from './types/proto/MsgCompiled'
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
 
 export const DEFAULT_EXPLORER_URL = 'https://runescan.io'
@@ -17,6 +18,8 @@ export const THORChain = 'THOR' as const
 
 export const AssetRUNE: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
 
+export const MSG_SEND_TYPE_URL = '/types.MsgSend' as const
+
 export const defaultClientConfig: CosmosSdkClientParams = {
   chain: AssetRUNE.chain,
   network: Network.Mainnet,
@@ -26,4 +29,6 @@ export const defaultClientConfig: CosmosSdkClientParams = {
   defaultDecimals: RUNE_DECIMAL,
   defaultFee: DEFAULT_FEE,
   baseDenom: RUNE_DENOM,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  registryTypes: [[MSG_SEND_TYPE_URL, { ...(types.types.MsgSend as any) }]],
 }

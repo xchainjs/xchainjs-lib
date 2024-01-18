@@ -37,7 +37,6 @@ export const getExplorerTxUrl = (tx: TxHash): Record<Network, string> => ({
 
 /**
  * Checks whether an asset is `AssetRUNE`
- *
  * @param {Asset} asset
  * @returns {boolean} `true` or `false`
  */
