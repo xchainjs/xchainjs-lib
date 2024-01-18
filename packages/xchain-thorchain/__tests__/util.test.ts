@@ -1,4 +1,4 @@
-import { isAssetRune } from '..'
+import { isAssetRuneNative as isAssetRune } from '..'
 describe('Utils', () => {
   it('Should validate Rune asset', () => {
     expect(isAssetRune({ chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', synth: false })).toBeTruthy()

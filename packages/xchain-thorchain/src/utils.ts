@@ -40,4 +40,4 @@ export const getExplorerTxUrl = (tx: TxHash): Record<Network, string> => ({
  * @param {Asset} asset
  * @returns {boolean} `true` or `false`
  */
-export const isAssetRune = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRUNE)
+export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRUNE)

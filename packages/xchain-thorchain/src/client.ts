@@ -24,7 +24,7 @@ import {
   defaultClientConfig,
 } from './const'
 import { DepositParam } from './types'
-import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRune } from './utils'
+import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRuneNative as isAssetRune } from './utils'
 
 /**
  * Interface for custom Thorchain client
