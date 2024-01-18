@@ -16,7 +16,7 @@ import axios from 'axios'
 import * as bech32Buffer from 'bech32-buffer'
 import Long from 'long'
 
-import { AssetCacao, AssetMaya, CACAO_DECIMAL, DEFAULT_GAS_ADJUSTMENT, MAYA_DECIMAL } from './const'
+import { AssetCacao, AssetMaya, CACAO_DECIMAL, DEFAULT_GAS_ADJUSTMENT, MAYA_DECIMAL, MAYA_SYNTH_DECIMAL } from './const'
 import { ChainId, ExplorerUrls, NodeInfoResponse, TxData } from './types'
 import { MsgNativeTx } from './types/messages'
 import types from './types/proto/MsgCompiled'
@@ -371,7 +371,7 @@ export const getBalance = async ({
       if (hasAssetFromString) {
         return {
           asset: hasAssetFromString,
-          amount: baseAmount(balance.amount, CACAO_DECIMAL),
+          amount: baseAmount(balance.amount, MAYA_SYNTH_DECIMAL),
         }
       }
 
