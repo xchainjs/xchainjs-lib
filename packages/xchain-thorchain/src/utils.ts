@@ -1,7 +1,7 @@
 import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
 import { Address, Asset, assetToString } from '@xchainjs/xchain-util'
 
-import { AssetRUNE, DEFAULT_EXPLORER_URL } from './const'
+import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL } from './const'
 
 export const getDefaultClientUrls = (): Record<Network, string> => {
   return {

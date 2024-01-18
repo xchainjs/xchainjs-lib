@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 
-import { AssetRUNE, Client } from '../'
+import { AssetRuneNative as AssetRUNE, Client } from '../'
 
 describe('Thorchain client', () => {
   describe('Instantiation', () => {

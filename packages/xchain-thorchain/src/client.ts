@@ -15,7 +15,7 @@ import { BigNumber } from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import {
-  AssetRUNE,
+  AssetRuneNative as AssetRUNE,
   DEPOSIT_GAS_LIMIT_VALUE,
   MSG_DEPOSIT_TYPE_URL,
   MSG_SEND_TYPE_URL,

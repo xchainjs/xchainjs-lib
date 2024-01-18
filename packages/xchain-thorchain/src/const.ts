@@ -17,13 +17,13 @@ export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 
 export const THORChain = 'THOR' as const
 
-export const AssetRUNE: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
+export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
 
 export const MSG_SEND_TYPE_URL = '/types.MsgSend' as const
 export const MSG_DEPOSIT_TYPE_URL = '/types.MsgDeposit' as const
 
 export const defaultClientConfig: CosmosSdkClientParams = {
-  chain: AssetRUNE.chain,
+  chain: AssetRuneNative.chain,
   network: Network.Mainnet,
   clientUrls: getDefaultClientUrls(),
   rootDerivationPaths: getDefaultRootDerivationPaths(),
