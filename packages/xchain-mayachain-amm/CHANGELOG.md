@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [62ef17b]
+  - @xchainjs/xchain-dash@0.2.10
+
 ## 1.0.3
 
 ### Patch Changes
