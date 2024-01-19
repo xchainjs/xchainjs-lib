@@ -1,3 +1,4 @@
+import { Tx } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -9,3 +10,5 @@ export type DepositParam = {
   gasLimit?: BigNumber
   sequence?: number
 }
+
+export type DepositTx = Omit<Tx, 'date'>

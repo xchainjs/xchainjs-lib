@@ -23,7 +23,7 @@ import {
   RUNE_DENOM,
   defaultClientConfig,
 } from './const'
-import { DepositParam } from './types'
+import { DepositParam, DepositTx } from './types'
 import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRuneNative as isAssetRune } from './utils'
 
 /**
@@ -31,6 +31,7 @@ import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRu
  */
 export interface ThorchainClient {
   deposit(params: DepositParam): Promise<TxHash>
+  getDepositTransaction(txId: string): Promise<DepositTx>
 }
 
 export type ThorchainClientParams = Partial<CosmosSdkClientParams>
@@ -194,6 +195,14 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     )
 
     return tx.transactionHash
+  }
+
+  /**
+   * @deprecated Use getTransactionData instead
+   * @param txId
+   */
+  public async getDepositTransaction(txId: string): Promise<DepositTx> {
+    return this.getTransactionData(txId)
   }
 
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
