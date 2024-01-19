@@ -54,9 +54,9 @@ export enum MsgTypes {
  * Generic implementation of the XChainClient interface chains built with cosmos-sdk (https://docs.cosmos.network/) using the dependencies of the official @cosmjs monorepo.
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
-  private readonly startgateClient: CachedValue<StargateClient>
   private readonly defaultDecimals: number
   private readonly defaultFee: BaseAmount
+  protected readonly startgateClient: CachedValue<StargateClient>
   protected readonly clientUrls: Record<Network, string>
   protected readonly prefix: string
   protected readonly baseDenom: string

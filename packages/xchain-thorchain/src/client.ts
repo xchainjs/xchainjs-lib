@@ -1,6 +1,13 @@
 import { StdFee } from '@cosmjs/amino'
-import { toBase64 } from '@cosmjs/encoding'
-import { DirectSecp256k1HdWallet, TxBodyEncodeObject } from '@cosmjs/proto-signing'
+import { Bip39, EnglishMnemonic, Secp256k1, Slip10, Slip10Curve } from '@cosmjs/crypto'
+import { fromBase64, toBase64 } from '@cosmjs/encoding'
+import {
+  DecodedTxRaw,
+  DirectSecp256k1HdWallet,
+  EncodeObject,
+  TxBodyEncodeObject,
+  decodeTxRaw,
+} from '@cosmjs/proto-signing'
 import { SigningStargateClient } from '@cosmjs/stargate'
 import { AssetInfo, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
 import {
@@ -16,6 +23,7 @@ import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import {
   AssetRuneNative as AssetRUNE,
+  DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
   MSG_DEPOSIT_TYPE_URL,
   MSG_SEND_TYPE_URL,
@@ -23,7 +31,7 @@ import {
   RUNE_DENOM,
   defaultClientConfig,
 } from './const'
-import { DepositParam, DepositTx } from './types'
+import { DepositParam, DepositTx, TxOfflineParams } from './types'
 import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRuneNative as isAssetRune } from './utils'
 
 /**
@@ -32,6 +40,7 @@ import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRu
 export interface ThorchainClient {
   deposit(params: DepositParam): Promise<TxHash>
   getDepositTransaction(txId: string): Promise<DepositTx>
+  transferOffline(params: TxOfflineParams): Promise<string>
 }
 
 export type ThorchainClientParams = Partial<CosmosSdkClientParams>
@@ -195,6 +204,71 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     )
 
     return tx.transactionHash
+  }
+
+  /**
+   * @deprecated Use prepare Tx instead
+   */
+  public async transferOffline({
+    walletIndex = 0,
+    recipient,
+    asset,
+    amount,
+    memo,
+    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
+  }: TxOfflineParams & { gasLimit: BigNumber }): Promise<string> {
+    const sender = await this.getAddressAsync()
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender,
+      recipient: recipient,
+      asset: asset,
+      amount: amount,
+      memo: memo,
+    })
+
+    const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
+
+    const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
+      prefix: this.prefix,
+      hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex))],
+    })
+
+    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
+      registry: this.registry,
+    })
+
+    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+      return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+    })
+
+    const rawTx = await signingClient.sign(
+      sender,
+      messages,
+      {
+        amount: [],
+        gas: gasLimit.toString(),
+      },
+      unsignedTx.body.memo,
+    )
+
+    return toBase64(TxRaw.encode(rawTx).finish())
+  }
+
+  public async getPrivateKey(index = 0): Promise<Uint8Array> {
+    const mnemonicChecked = new EnglishMnemonic(this.phrase)
+    const seed = await Bip39.mnemonicToSeed(mnemonicChecked)
+    const { privkey } = Slip10.derivePath(
+      Slip10Curve.Secp256k1,
+      seed,
+      makeClientPath(this.getFullDerivationPath(index)),
+    )
+    return privkey
+  }
+
+  public async getPubKey(index = 0): Promise<Uint8Array> {
+    const privateKey = await this.getPrivateKey(index)
+    const { pubkey } = await Secp256k1.makeKeypair(privateKey)
+    return Secp256k1.compressPubkey(pubkey)
   }
 
   /**

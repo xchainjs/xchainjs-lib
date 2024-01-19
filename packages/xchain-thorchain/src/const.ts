@@ -13,6 +13,7 @@ export const RUNE_DENOM = 'rune'
 const RUNE_TICKER = 'RUNE'
 
 export const DEFAULT_FEE: BaseAmount = assetToBase(assetAmount(0.02, RUNE_DECIMAL))
+export const DEFAULT_GAS_LIMIT_VALUE = '6000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 
 export const THORChain = 'THOR' as const
