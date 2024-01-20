@@ -43,9 +43,20 @@ export interface ThorchainClient {
   transferOffline(params: TxOfflineParams): Promise<string>
 }
 
+/**
+ * Thorchain client params to instantiate the Thorchain client
+ */
 export type ThorchainClientParams = Partial<CosmosSdkClientParams>
 
+/**
+ * Thorchain client
+ */
 export class Client extends CosmosSDKClient implements ThorchainClient {
+  /**
+   * Thorchain client constructor
+   *
+   * @param {ThorchainClientParams} config Optional - Client configuration. If it is not set, default values will be used
+   */
   constructor(config: ThorchainClientParams = defaultClientConfig) {
     super({
       ...defaultClientConfig,
@@ -55,6 +66,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
 
   /**
    * Get client native asset
+   *
    * @returns {AssetInfo} Thorchain native asset
    */
   public getAssetInfo(): AssetInfo {
@@ -161,6 +173,19 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     return { rawUnsignedTx: toBase64(TxRaw.encode(rawTx).finish()) }
   }
 
+  /**
+   * Make a deposit
+   *
+   * @param {number} param.walletIndex Optional - The index to use to generate the address from the transaction will be done.
+   * If it is not set, address associated with index 0 will be used
+   * @param {Asset} param.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
+   * used
+   * @param {BaseAmount} param.amount The amount that will be deposit
+   * @param {string} param.memo Optional - The memo associated with the deposit
+   * @param {BigNumber} param.gasLimit Optional - The limit amount of gas allowed to spend in the deposit. If not set, default
+   * value of 600000000 will be used
+   * @returns {string} The deposit hash
+   */
   public async deposit({
     walletIndex = 0,
     asset = AssetRUNE,
@@ -207,6 +232,8 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   }
 
   /**
+   * Create and sign transaction without broadcasting it
+   *
    * @deprecated Use prepare Tx instead
    */
   public async transferOffline({
@@ -254,6 +281,13 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     return toBase64(TxRaw.encode(rawTx).finish())
   }
 
+  /**
+   * Returns the private key associated with an index
+   *
+   * @param {number} index Optional - The index to use to generate the private key. If it is not set, address associated with
+   * index 0 will be used
+   * @returns {Uint8Array} The private key
+   */
   public async getPrivateKey(index = 0): Promise<Uint8Array> {
     const mnemonicChecked = new EnglishMnemonic(this.phrase)
     const seed = await Bip39.mnemonicToSeed(mnemonicChecked)
@@ -265,6 +299,13 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     return privkey
   }
 
+  /**
+   * Returns the compressed public key associated with an index
+   *
+   * @param {number} index Optional - The index to use to generate the private key. If it is not set, address associated with
+   * index 0 will be used
+   * @returns {Uint8Array} The public key
+   */
   public async getPubKey(index = 0): Promise<Uint8Array> {
     const privateKey = await this.getPrivateKey(index)
     const { pubkey } = await Secp256k1.makeKeypair(privateKey)
@@ -272,6 +313,8 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   }
 
   /**
+   * Get deposit transaction
+   *
    * @deprecated Use getTransactionData instead
    * @param txId
    */
@@ -279,12 +322,24 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     return this.getTransactionData(txId)
   }
 
+  /**
+   * Get the message type url by type used by the cosmos-sdk client to make certain actions
+   *
+   * @param {MsgTypes} msgType Message type of which return the type url
+   * @returns {string} the type url of the message
+   */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
-    return {
+    const messageTypeUrls: Record<MsgTypes, string> = {
       [MsgTypes.TRANSFER]: MSG_SEND_TYPE_URL,
-    }[msgType]
+    }
+    return messageTypeUrls[msgType]
   }
 
+  /**
+   * Returns the standard fee used by the client
+   *
+   * @returns {StdFee} the standard fee
+   */
   protected getStandardFee(): StdFee {
     return { amount: [], gas: '6000000' }
   }

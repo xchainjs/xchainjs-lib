@@ -25,6 +25,7 @@ const getPrintableTx = (tx: Tx) => {
     }),
   }
 }
+
 const getPrintableDepositTx = (depositTx: DepositTx) => {
   return {
     hash: depositTx.hash,

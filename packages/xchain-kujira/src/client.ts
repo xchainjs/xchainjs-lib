@@ -7,7 +7,7 @@ import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes } from '@xch
 import { Address, Asset, eqAsset } from '@xchainjs/xchain-util'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
-import { AssetKUJI, KUJI_DECIMAL } from './const'
+import { AssetKUJI, KUJI_DECIMAL, MSG_SEND_TYPE_URL } from './const'
 import { defaultClientConfig, getDefaultExplorers } from './utils'
 
 export type KujiraClientParams = Partial<CosmosSdkClientParams>
@@ -100,12 +100,23 @@ export class Client extends CosmosSdkClient {
     return { rawUnsignedTx: toBase64(TxRaw.encode(rawTx).finish()) }
   }
 
+  /**
+   * Get the message type url by type used by the cosmos-sdk client to make certain actions
+   * @param msgType
+   * @returns {string} the type url of the message
+   */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
-    return {
-      [MsgTypes.TRANSFER]: '/cosmos.bank.v1beta1.MsgSend',
-    }[msgType]
+    const messageTypeUrls: Record<MsgTypes, string> = {
+      [MsgTypes.TRANSFER]: MSG_SEND_TYPE_URL,
+    }
+    return messageTypeUrls[msgType]
   }
 
+  /**
+   * Returns the standard fee used by the client for an asset
+   * @param {Asset} asset the asset to retrieve the fee of
+   * @returns {StdFee} the standard fee
+   */
   protected getStandardFee(asset: Asset): StdFee {
     const denom = this.getDenom(asset)
     const defaultGasPrice = GasPrice.fromString(`0.025${denom}`)
