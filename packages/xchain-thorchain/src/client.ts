@@ -216,8 +216,8 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     amount,
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
-  }: TxOfflineParams & { gasLimit: BigNumber }): Promise<string> {
-    const sender = await this.getAddressAsync()
+  }: TxOfflineParams & { gasLimit?: BigNumber }): Promise<string> {
+    const sender = await this.getAddressAsync(walletIndex)
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient: recipient,
