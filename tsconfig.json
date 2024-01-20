@@ -13,7 +13,7 @@
       "node"
     ],
     "outDir": "lib",
-    "module": "esnext",
+    "module": "CommonJS",
     "target": "es6",
     "lib": [
       "es6",
