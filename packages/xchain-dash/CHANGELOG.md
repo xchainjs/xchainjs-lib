@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.10
+
+### Patch Changes
+
+- 62ef17b: export \* from ./const for asset declaration & decimal use
+
 ## 0.2.9
 
 ### Patch Changes
