@@ -380,7 +380,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
 
   public async broadcastTx(txHex: string): Promise<string> {
     const client = await this.startgateClient.getValue()
-    const txResponse = await client.broadcastTx(new Uint8Array(Buffer.from(txHex, 'hex')))
+    const txResponse = await client.broadcastTx(fromBase64(txHex))
     return txResponse.transactionHash
   }
 
