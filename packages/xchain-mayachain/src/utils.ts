@@ -418,15 +418,7 @@ export const getExplorerAddressUrl = ({
   network: Network
   address: Address
 }): string => {
-  const url = `${urls.address[network]}/${address}`
-  switch (network) {
-    case Network.Mainnet:
-      return url
-    case Network.Stagenet:
-      return `${url}?network=stagenet`
-    case Network.Testnet:
-      return `${url}?network=testnet`
-  }
+  return `${urls.address[network]}/${address}`
 }
 
 /**
@@ -446,15 +438,7 @@ export const getExplorerTxUrl = ({
   network: Network
   txID: TxHash
 }): string => {
-  const url = `${urls.tx[network]}/${txID}`
-  switch (network) {
-    case Network.Mainnet:
-      return url
-    case Network.Stagenet:
-      return `${url}?network=stagenet`
-    case Network.Testnet:
-      return `${url}?network=testnet`
-  }
+  return `${urls.tx[network]}/${txID}`
 }
 
 export const getAccount = (

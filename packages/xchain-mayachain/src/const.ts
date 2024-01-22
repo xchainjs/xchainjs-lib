@@ -3,9 +3,8 @@ import { Asset } from '@xchainjs/xchain-util/lib'
 
 import { ExplorerUrls } from './types'
 
-const DEFAULT_EXPLORER_URL = 'https://explorer.mayachain.info'
-const txUrl = `${DEFAULT_EXPLORER_URL}/tx`
-const addressUrl = `${DEFAULT_EXPLORER_URL}/address`
+const MAINNET_EXPLORER_URL = 'https://mayascan.org'
+const STAGENET_EXPLORER_URL = 'https://stagenet.mayascan.org'
 
 export const CACAO_DECIMAL = 10
 export const MAYA_SYNTH_DECIMAL = 8
@@ -16,19 +15,19 @@ export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 export const MAX_TX_COUNT = 100
 export const defaultExplorerUrls: ExplorerUrls = {
   root: {
-    [Network.Testnet]: `${DEFAULT_EXPLORER_URL}?network=testnet`,
-    [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}?network=stagenet`,
-    [Network.Mainnet]: DEFAULT_EXPLORER_URL,
+    [Network.Testnet]: `deprecated`,
+    [Network.Stagenet]: STAGENET_EXPLORER_URL,
+    [Network.Mainnet]: MAINNET_EXPLORER_URL,
   },
   tx: {
-    [Network.Testnet]: txUrl,
-    [Network.Stagenet]: txUrl,
-    [Network.Mainnet]: txUrl,
+    [Network.Testnet]: 'deprecated',
+    [Network.Stagenet]: `${STAGENET_EXPLORER_URL}/tx`,
+    [Network.Mainnet]: `${MAINNET_EXPLORER_URL}/tx`,
   },
   address: {
-    [Network.Testnet]: addressUrl,
-    [Network.Stagenet]: addressUrl,
-    [Network.Mainnet]: addressUrl,
+    [Network.Testnet]: 'deprecated',
+    [Network.Stagenet]: `${STAGENET_EXPLORER_URL}/address`,
+    [Network.Mainnet]: `${MAINNET_EXPLORER_URL}/address`,
   },
 }
 

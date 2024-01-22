@@ -127,30 +127,28 @@ describe('mayachain/util', () => {
 
   describe('explorer url', () => {
     it('should return valid explorer url', () => {
-      expect(getExplorerUrl(defaultExplorerUrls, 'testnet' as Network)).toEqual(
-        'https://explorer.mayachain.info?network=testnet',
-      )
+      expect(getExplorerUrl(defaultExplorerUrls, 'testnet' as Network)).toEqual('deprecated')
 
-      expect(getExplorerUrl(defaultExplorerUrls, 'mainnet' as Network)).toEqual('https://explorer.mayachain.info')
+      expect(getExplorerUrl(defaultExplorerUrls, 'mainnet' as Network)).toEqual('https://mayascan.org')
     })
 
     it('should return valid explorer address url', () => {
       expect(
         getExplorerAddressUrl({ urls: defaultExplorerUrls, network: 'testnet' as Network, address: 'tthorabc' }),
-      ).toEqual('https://explorer.mayachain.info/address/tthorabc?network=testnet')
+      ).toEqual('deprecated/tthorabc')
 
       expect(
         getExplorerAddressUrl({ urls: defaultExplorerUrls, network: 'mainnet' as Network, address: 'thorabc' }),
-      ).toEqual('https://explorer.mayachain.info/address/thorabc')
+      ).toEqual('https://mayascan.org/address/thorabc')
     })
 
     it('should return valid explorer tx url', () => {
       expect(getExplorerTxUrl({ urls: defaultExplorerUrls, network: 'testnet' as Network, txID: 'txhash' })).toEqual(
-        'https://explorer.mayachain.info/tx/txhash?network=testnet',
+        'deprecated/txhash',
       )
 
       expect(getExplorerTxUrl({ urls: defaultExplorerUrls, network: 'mainnet' as Network, txID: 'txhash' })).toEqual(
-        'https://explorer.mayachain.info/tx/txhash',
+        'https://mayascan.org/tx/txhash',
       )
     })
   })
