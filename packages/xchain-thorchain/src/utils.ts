@@ -12,9 +12,9 @@ export const getDefaultClientUrls = (): Record<Network, string> => {
 }
 
 export const getDefaultRootDerivationPaths = (): RootDerivationPaths => ({
-  [Network.Mainnet]: `44'/931'/0'/0/`,
-  [Network.Stagenet]: `44'/931'/0'/0/`,
-  [Network.Testnet]: `44'/931'/0'/0/`,
+  [Network.Mainnet]: `m/44'/931'/0'/0/`,
+  [Network.Stagenet]: `m/44'/931'/0'/0/`,
+  [Network.Testnet]: `m/44'/931'/0'/0/`,
 })
 
 export const getDefaultExplorers = (): Record<Network, string> => ({

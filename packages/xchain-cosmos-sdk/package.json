@@ -35,7 +35,6 @@
     "access": "public"
   },
   "devDependencies": {
-    "@cosmjs/math": "0.31.1",
     "@types/secp256k1": "^4.0.3",
     "@xchainjs/xchain-client": "^0.16.1",
     "@xchainjs/xchain-crypto": "^0.3.1",

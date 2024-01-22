@@ -694,7 +694,7 @@
     "@cosmjs/stream" "^0.31.1"
     xstream "^11.14.0"
 
-"@cosmjs/math@0.31.1", "@cosmjs/math@^0.31.1":
+"@cosmjs/math@^0.31.1":
   version "0.31.1"
   resolved "https://registry.yarnpkg.com/@cosmjs/math/-/math-0.31.1.tgz#74c02cf237c2996b77661b636b014168b18d95e6"
   integrity sha512-kiuHV6m6DSB8/4UV1qpFhlc4ul8SgLXTGRlYkYiIIP4l0YNeJ+OpPYaOlEgx4Unk2mW3/O2FWYj7Jc93+BWXng==
