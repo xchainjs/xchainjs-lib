@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.16
+
+### Patch Changes
+
+- bb51e47: Mayascan as explorer
+
 ## 0.2.15
 
 ### Patch Changes
