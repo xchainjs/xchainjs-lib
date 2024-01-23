@@ -15,7 +15,7 @@
     "lint": "lerna run lint",
     "update-packages": "yarn changeset",
     "increase-packages": "yarn changeset version",
-    "notification:prepare": "ts-node scripts/notification.cts"
+    "notification:prepare": "ts-node scripts/notification.ts"
   },
   "husky": {
     "hooks": {
