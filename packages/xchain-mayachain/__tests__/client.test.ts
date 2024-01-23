@@ -544,26 +544,24 @@ describe('Client Test', () => {
   })
 
   it('should return valid explorer url', () => {
-    expect(mayaClient.getExplorerUrl()).toEqual('https://explorer.mayachain.info?network=stagenet')
+    expect(mayaClient.getExplorerUrl()).toEqual('https://stagenet.mayascan.org')
 
     mayaClient.setNetwork(Network.Mainnet)
-    expect(mayaClient.getExplorerUrl()).toEqual('https://explorer.mayachain.info')
+    expect(mayaClient.getExplorerUrl()).toEqual('https://mayascan.org')
   })
 
   it('should return valid explorer address url', () => {
-    expect(mayaClient.getExplorerAddressUrl('tthorabc')).toEqual(
-      'https://explorer.mayachain.info/address/tthorabc?network=stagenet',
-    )
+    expect(mayaClient.getExplorerAddressUrl('tthorabc')).toEqual('https://stagenet.mayascan.org/address/tthorabc')
 
     mayaClient.setNetwork(Network.Mainnet)
-    expect(mayaClient.getExplorerAddressUrl('thorabc')).toEqual('https://explorer.mayachain.info/address/thorabc')
+    expect(mayaClient.getExplorerAddressUrl('thorabc')).toEqual('https://mayascan.org/address/thorabc')
   })
 
   it('should return valid explorer tx url', () => {
-    expect(mayaClient.getExplorerTxUrl('txhash')).toEqual('https://explorer.mayachain.info/tx/txhash?network=stagenet')
+    expect(mayaClient.getExplorerTxUrl('txhash')).toEqual('https://stagenet.mayascan.org/tx/txhash')
 
     mayaClient.setNetwork(Network.Mainnet)
-    expect(mayaClient.getExplorerTxUrl('txhash')).toEqual('https://explorer.mayachain.info/tx/txhash')
+    expect(mayaClient.getExplorerTxUrl('txhash')).toEqual('https://mayascan.org/tx/txhash')
   })
 
   it('fetches fees from client', async () => {
