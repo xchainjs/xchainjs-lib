@@ -33,14 +33,14 @@
   },
   "dependencies": {
     "@cosmjs/encoding": "0.31.1",
-    "@cosmjs/stargate": "0.31.1"
+    "@cosmjs/stargate": "0.31.1",
+    "@xchainjs/xchain-cosmos-sdk": "0.1.6"
   },
   "devDependencies": {
     "@cosmjs/amino": "0.31.1",
     "@cosmjs/proto-signing": "0.31.1",
     "@xchainjs/xchain-client": "^0.16.1",
     "@xchainjs/xchain-util": "^0.13.2",
-    "@xchainjs/xchain-cosmos-sdk": "^0.1.6",
     "cosmjs-types": "0.8.0"
   },
   "publishConfig": {
@@ -48,7 +48,6 @@
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.16.1",
-    "@xchainjs/xchain-util": "^0.13.2",
-    "@xchainjs/xchain-cosmos-sdk": "^0.1.6"
+    "@xchainjs/xchain-util": "^0.13.2"
   }
 }
