@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.8
+
+### Patch Changes
+
+- 6e86d90: USK asset support
+- 754fe1a: New version compatible with cosmos-sdk version
+- Updated dependencies [754fe1a]
+- Updated dependencies [754fe1a]
+- Updated dependencies [754fe1a]
+- Updated dependencies [6e86d90]
+  - @xchainjs/xchain-cosmos-sdk@0.2.0
+
 ## 0.1.7
 
 ### Patch Changes

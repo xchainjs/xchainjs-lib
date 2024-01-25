@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- 754fe1a: New util functions: makeClientPath, bech32toBase64 format and base64ToBech32
+- 754fe1a: New constructor parameter 'registry' to allow the client to work with custom message types.
+
+### Patch Changes
+
+- 754fe1a: Broadcast bug fix
+- 6e86d90: Native asset for fee in transfer method
+
 ## 0.1.6
 
 ### Patch Changes

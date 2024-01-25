@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain",
-  "version": "0.28.17",
+  "version": "1.0.0",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -37,7 +37,7 @@
     "@cosmjs/encoding": "0.31.1",
     "@cosmjs/crypto": "0.31.1",
     "@xchainjs/xchain-client": "0.16.1",
-    "@xchainjs/xchain-cosmos-sdk": "0.1.6",
+    "@xchainjs/xchain-cosmos-sdk": "0.2.0",
     "@xchainjs/xchain-util": "0.13.2",
     "bignumber.js": "9.0.0",
     "protobufjs": "6.11.4"

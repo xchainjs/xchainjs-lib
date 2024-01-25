@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- 754fe1a: Breaking changes
+  - `getPrivateKey` is now async and response is Uint8Array type
+  - `getPubKey` is now async and response is Uint8Array type
+  - `getDepositTransaction` is deprecated in favour of `getTransactionData`
+  - `fetchTransaction` removed
+  - `setClientUrl` removed
+  - `getClientUrl` removed
+  - `setExplorerUrls` removed
+  - `getCosmosClient` removed
+  - `setNetwork` removed
+  - `setChainId` removed
+  - `getChainId` removed
+- 754fe1a: Client compatible with @xchainjs/xchain-cosmos-sdk package
+
+### Patch Changes
+
+- Updated dependencies [754fe1a]
+- Updated dependencies [754fe1a]
+- Updated dependencies [754fe1a]
+- Updated dependencies [6e86d90]
+  - @xchainjs/xchain-cosmos-sdk@0.2.0
+
 ## 0.28.17
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-kujira",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Custom Kujira client",
   "keywords": [
     "XChain",
@@ -34,7 +34,7 @@
   "dependencies": {
     "@cosmjs/encoding": "0.31.1",
     "@cosmjs/stargate": "0.31.1",
-    "@xchainjs/xchain-cosmos-sdk": "0.1.6"
+    "@xchainjs/xchain-cosmos-sdk": "0.2.0"
   },
   "devDependencies": {
     "@cosmjs/amino": "0.31.1",
