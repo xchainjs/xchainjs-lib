@@ -9,3 +9,13 @@ export const DEFAULT_FEE = baseAmount(5000, KUJI_DECIMAL)
 export const KUJIChain = 'KUJI' as const
 
 export const AssetKUJI: Asset = { chain: KUJIChain, symbol: 'KUJI', ticker: 'KUJI', synth: false }
+
+/**
+ * USK denom
+ */
+export const USK_ASSET_DENOM = 'factory/kujira1qk00h5atutpsv900x202pxx42npjr9thg58dnqpa72f2p7m2luase444a7/uusk' as const
+
+/**
+ * USK Asset
+ */
+export const AssetUSK: Asset = { chain: KUJIChain, symbol: 'USK', ticker: 'USK', synth: false }

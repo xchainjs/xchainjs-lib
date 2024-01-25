@@ -356,7 +356,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     })
 
     // TODO: Support fee configuration (subsided fee)
-    const denom = this.getDenom(params.asset || this.getAssetInfo().asset)
+    const denom = this.getDenom(this.getAssetInfo().asset)
     const defaultGasPrice = GasPrice.fromString(`0.025${denom}`)
     const defaultSendFee: StdFee = calculateFee(90_000, defaultGasPrice)
 
