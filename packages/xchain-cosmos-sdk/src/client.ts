@@ -1,14 +1,13 @@
-import { fromBase64, fromBech32, toBase64 } from '@cosmjs/encoding'
-import { DecodedTxRaw, DirectSecp256k1HdWallet, Registry, TxBodyEncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
+import { fromBase64, fromBech32 } from '@cosmjs/encoding'
 import {
-  GasPrice,
-  IndexedTx,
-  MsgSendEncodeObject,
-  SigningStargateClient,
-  StargateClient,
-  StdFee,
-  calculateFee,
-} from '@cosmjs/stargate'
+  DecodedTxRaw,
+  DirectSecp256k1HdWallet,
+  EncodeObject,
+  GeneratedType,
+  Registry,
+  decodeTxRaw,
+} from '@cosmjs/proto-signing'
+import { IndexedTx, SigningStargateClient, StargateClient, StdFee, defaultRegistryTypes } from '@cosmjs/stargate'
 import {
   AssetInfo,
   Balance,
@@ -32,9 +31,10 @@ import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Address, Asset, BaseAmount, CachedValue, Chain, baseAmount } from '@xchainjs/xchain-util'
 import * as bech32 from 'bech32'
 import * as BIP32 from 'bip32'
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import * as crypto from 'crypto'
 import * as secp256k1 from 'secp256k1'
+
+import { makeClientPath } from './utils'
 
 export type CosmosSdkClientParams = XChainClientParams & {
   chain: Chain
@@ -43,19 +43,24 @@ export type CosmosSdkClientParams = XChainClientParams & {
   defaultDecimals: number
   defaultFee: BaseAmount
   baseDenom: string
+  registryTypes: Iterable<[string, GeneratedType]>
+}
+
+export enum MsgTypes {
+  TRANSFER = 'transfer',
 }
 
 /**
  * Generic implementation of the XChainClient interface chains built with cosmos-sdk (https://docs.cosmos.network/) using the dependencies of the official @cosmjs monorepo.
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
-  private readonly startgateClient: CachedValue<StargateClient>
-  private readonly clientUrls: Record<Network, string>
-  private readonly signer: CachedValue<DirectSecp256k1HdWallet> | undefined
-  private readonly prefix: string
   private readonly defaultDecimals: number
   private readonly defaultFee: BaseAmount
+  protected readonly startgateClient: CachedValue<StargateClient>
+  protected readonly clientUrls: Record<Network, string>
+  protected readonly prefix: string
   protected readonly baseDenom: string
+  protected readonly registry: Registry
   /**
    * Constructor
    * @constructor
@@ -68,12 +73,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     this.defaultDecimals = params.defaultDecimals
     this.defaultFee = params.defaultFee
     this.baseDenom = params.baseDenom
-    if (params.phrase) {
-      this.signer = new CachedValue<DirectSecp256k1HdWallet>(
-        async () =>
-          await DirectSecp256k1HdWallet.fromMnemonic(params.phrase as string, { prefix: params.prefix || 'cosmos' }),
-      )
-    }
+    this.registry = new Registry([...defaultRegistryTypes, ...params.registryTypes])
     this.startgateClient = new CachedValue<StargateClient>(() =>
       this.connectClient(this.clientUrls[params.network || Network.Mainnet]),
     )
@@ -343,8 +343,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   public async transfer(params: TxParams): Promise<string> {
-    if (!this.signer) throw Error('Invalid signer')
-
     const sender = await this.getAddressAsync(params.walletIndex || 0)
 
     const { rawUnsignedTx } = await this.prepareTx({
@@ -355,81 +353,52 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       memo: params.memo,
     })
 
-    // TODO: Support fee configuration (subsided fee)
-    const denom = this.getDenom(params.asset || this.getAssetInfo().asset)
-    const defaultGasPrice = GasPrice.fromString(`0.025${denom}`)
-    const defaultSendFee: StdFee = calculateFee(90_000, defaultGasPrice)
-
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
 
-    const signer = await this.signer.getValue()
-    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer)
-
-    const messages: MsgSendEncodeObject[] = unsignedTx.body.messages.map((message) => {
-      return { typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: signingClient.registry.decode(message) }
+    const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
+      prefix: this.prefix,
+      hdPaths: [makeClientPath(this.getFullDerivationPath(params.walletIndex || 0))],
     })
-    const tx = await signingClient.signAndBroadcast(sender, messages, defaultSendFee, unsignedTx.body.memo)
+
+    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
+      registry: this.registry,
+    })
+
+    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+      return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+    })
+
+    const tx = await signingClient.signAndBroadcast(
+      sender,
+      messages,
+      this.getStandardFee(params.asset || this.getAssetInfo().asset),
+      unsignedTx.body.memo,
+    )
 
     return tx.transactionHash
   }
 
   public async broadcastTx(txHex: string): Promise<string> {
     const client = await this.startgateClient.getValue()
-    const txResponse = await client.broadcastTx(new Uint8Array(Buffer.from(txHex, 'hex')))
+    const txResponse = await client.broadcastTx(fromBase64(txHex))
     return txResponse.transactionHash
   }
 
-  /**
-   * Prepare transfer.
-   *
-   * @param {TxParams&Address} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
-   */
-  public async prepareTx({
+  public abstract prepareTx({
     sender,
     recipient,
     asset,
     amount,
     memo,
-  }: TxParams & { sender: Address }): Promise<PreparedTx> {
-    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
-    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
-
-    const denom = this.getDenom(asset || this.getAssetInfo().asset)
-    if (!denom)
-      throw Error(`Invalid asset ${asset?.symbol} - Only ${this.baseDenom} asset is currently supported to transfer`)
-
-    const demonAmount = { amount: amount.amount().toString(), denom }
-
-    const txBody: TxBodyEncodeObject = {
-      typeUrl: '/cosmos.tx.v1beta1.TxBody',
-      value: {
-        messages: [
-          {
-            typeUrl: '/cosmos.bank.v1beta1.MsgSend',
-            value: {
-              fromAddress: sender,
-              toAddress: recipient,
-              amount: [demonAmount],
-            },
-          },
-        ],
-        memo: memo,
-      },
-    }
-
-    const rawTx = TxRaw.fromPartial({
-      bodyBytes: new Registry().encode(txBody),
-    })
-    return { rawUnsignedTx: toBase64(TxRaw.encode(rawTx).finish()) }
-  }
-
+  }: TxParams & { sender: Address }): Promise<PreparedTx>
   abstract getAssetInfo(): AssetInfo
   abstract getExplorerUrl(): string
   abstract getExplorerAddressUrl(_address: string): string
   abstract getExplorerTxUrl(txID: string): string
   abstract assetFromDenom(denom: string): Asset | null
   abstract getDenom(asset: Asset): string | null
+  protected abstract getMsgTypeUrlByType(msgType: MsgTypes): string
+  protected abstract getStandardFee(asset: Asset): StdFee
 }
 
 export { Client }
