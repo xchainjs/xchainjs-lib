@@ -19,3 +19,5 @@ export const USK_ASSET_DENOM = 'factory/kujira1qk00h5atutpsv900x202pxx42npjr9thg
  * USK Asset
  */
 export const AssetUSK: Asset = { chain: KUJIChain, symbol: 'USK', ticker: 'USK', synth: false }
+
+export const MSG_SEND_TYPE_URL = '/cosmos.bank.v1beta1.MsgSend' as const
