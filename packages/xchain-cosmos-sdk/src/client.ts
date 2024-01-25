@@ -371,7 +371,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const tx = await signingClient.signAndBroadcast(
       sender,
       messages,
-      this.getStandardFee(params.asset || this.getAssetInfo().asset),
+      this.getStandardFee(this.getAssetInfo().asset),
       unsignedTx.body.memo,
     )
 

@@ -1,3 +1,3 @@
 export * from './client'
-export { KUJIChain } from './const'
+export { KUJIChain, AssetKUJI, AssetUSK } from './const'
 export { defaultClientConfig as defaultKujiParams } from './utils'

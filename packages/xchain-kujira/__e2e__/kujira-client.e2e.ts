@@ -2,7 +2,7 @@ import { Network, TxParams } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { Client as KujiraClient } from '../src/client'
-import { AssetKUJI, KUJIChain } from '../src/const'
+import { AssetKUJI, AssetUSK, KUJIChain } from '../src/const'
 
 let xchainClient: KujiraClient
 
@@ -61,6 +61,16 @@ describe('Kujira client Integration Tests', () => {
       memo: 'Rosa melano',
     }
     const txHash = await xchainClient.transfer(txDate)
+    console.log('txHash', txHash)
+  })
+  it('Try USK asset transfer', async () => {
+    const txData: TxParams = {
+      asset: AssetUSK,
+      amount: assetToBase(assetAmount(1, 6)),
+      recipient: await xchainClient.getAddressAsync(0),
+      memo: 'usk test',
+    }
+    const txHash = await xchainClient.transfer(txData)
     console.log('txHash', txHash)
   })
   it('Prepare transaction', async () => {

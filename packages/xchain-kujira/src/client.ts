@@ -7,7 +7,7 @@ import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes } from '@xch
 import { Address, Asset, eqAsset } from '@xchainjs/xchain-util'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
-import { AssetKUJI, KUJI_DECIMAL, MSG_SEND_TYPE_URL } from './const'
+import { AssetKUJI, AssetUSK, KUJI_DECIMAL, MSG_SEND_TYPE_URL, USK_ASSET_DENOM } from './const'
 import { defaultClientConfig, getDefaultExplorers } from './utils'
 
 export type KujiraClientParams = Partial<CosmosSdkClientParams>
@@ -30,11 +30,13 @@ export class Client extends CosmosSdkClient {
 
   getDenom(asset: Asset): string | null {
     if (eqAsset(asset, AssetKUJI)) return this.baseDenom
+    if (eqAsset(asset, AssetUSK)) return USK_ASSET_DENOM
     return null
   }
 
   assetFromDenom(denom: string): Asset | null {
     if (denom === this.baseDenom) return AssetKUJI
+    if (denom === USK_ASSET_DENOM) return AssetUSK
     return {
       chain: AssetKUJI.chain,
       symbol: denom,
