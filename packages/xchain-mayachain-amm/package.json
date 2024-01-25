@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-amm",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "module that exposes estimating & swapping cryptocurrency assets on mayachain",
   "keywords": [
     "MAYAChain",
@@ -37,10 +37,10 @@
   },
   "dependencies": {
     "@xchainjs/xchain-ethereum": "0.31.5",
-    "@xchainjs/xchain-kujira": "0.1.7",
+    "@xchainjs/xchain-kujira": "0.1.8",
     "@xchainjs/xchain-mayachain-query": "0.1.7",
-    "@xchainjs/xchain-thorchain": "0.28.17",
-    "@xchainjs/xchain-wallet": "0.1.1"
+    "@xchainjs/xchain-thorchain": "1.0.0",
+    "@xchainjs/xchain-wallet": "0.1.2"
   },
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",
