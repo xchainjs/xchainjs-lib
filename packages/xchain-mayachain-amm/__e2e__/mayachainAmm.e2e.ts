@@ -2,7 +2,7 @@ import { AssetBTC, Client as BtcClient, defaultBTCParams as defaultBtcParams } f
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { AssetUSK, Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { AssetCacao, Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
 import { AssetRuneNative, Client as ThorClient } from '@xchainjs/xchain-thorchain'
@@ -158,6 +158,18 @@ describe('MayachainAmm e2e tests', () => {
     printQuoteSwap(quoteSwap)
   })
 
+  it(`Should estimate swap from USK to Rune`, async () => {
+    const quoteSwap = await mayachainAmm.estimateSwap({
+      fromAsset: AssetUSK,
+      fromAddress: await wallet.getAddress('KUJI'),
+      destinationAsset: AssetRuneNative,
+      destinationAddress: await wallet.getAddress('THOR'),
+      amount: new CryptoAmount(assetToBase(assetAmount(1, 6)), AssetUSK),
+    })
+
+    printQuoteSwap(quoteSwap)
+  })
+
   it('Should validate swap from ERC20 to BTC without errors', async () => {
     const errors = await mayachainAmm.validateSwap({
       fromAsset: ETH_USDT,
@@ -189,6 +201,18 @@ describe('MayachainAmm e2e tests', () => {
       destinationAsset: AssetCacao,
       amount: new CryptoAmount(assetToBase(assetAmount(0.5)), AssetRuneNative),
       destinationAddress: await wallet.getAddress(AssetCacao.chain),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should do non protocol asset swap. USK -> Rune', async () => {
+    const txSubmitted = await mayachainAmm.doSwap({
+      fromAsset: AssetUSK,
+      fromAddress: await wallet.getAddress('KUJI'),
+      destinationAsset: AssetRuneNative,
+      destinationAddress: await wallet.getAddress('THOR'),
+      amount: new CryptoAmount(assetToBase(assetAmount(1, 6)), AssetUSK),
     })
 
     console.log(txSubmitted)
