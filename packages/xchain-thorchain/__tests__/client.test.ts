@@ -105,6 +105,9 @@ describe('Thorchain client', () => {
       expect(client.assetFromDenom('rune')).toEqual(AssetRUNE)
       expect(client.assetFromDenom('bnb/bnb')).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true })
     })
+    it('should get asset decimals', async () => {
+      expect(client.getAssetDecimals(AssetRUNE)).toBe(8)
+    })
   })
 
   describe('Address', () => {

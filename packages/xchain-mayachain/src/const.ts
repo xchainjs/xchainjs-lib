@@ -15,8 +15,17 @@ export const CACAO_DECIMAL = 10
  */
 export const CACAO_DENOM = 'cacao'
 
+/**
+ * MAYA denom
+ */
+export const MAYA_DENOM = 'maya'
+
+/**
+ * MAYA asset number of decimals
+ */
+export const MAYA_DECIMAL = 4
+
 export const MAYA_SYNTH_DECIMAL = 8 // To review
-export const MAYA_DECIMAL = 4 // To review
 export const DEFAULT_GAS_ADJUSTMENT = 2 // To review
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'

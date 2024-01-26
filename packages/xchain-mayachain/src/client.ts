@@ -17,15 +17,19 @@ import {
   bech32ToBase64,
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
-import { Address, Asset, assetFromString, assetToString, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, assetToString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import {
   AssetCacao,
+  AssetMaya,
   CACAO_DECIMAL,
+  CACAO_DENOM,
   DEFAULT_GAS_LIMIT_VALUE,
   DEPOSIT_GAS_LIMIT_VALUE,
+  MAYA_DECIMAL,
+  MAYA_DENOM,
   MSG_DEPOSIT_TYPE_URL,
   MSG_SEND_TYPE_URL,
   defaultClientConfig,
@@ -76,6 +80,18 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
+   * Returns the number of the decimals of known assets
+   *
+   * @param {Asset} asset - Asset of which return the number of decimals
+   * @returns {number} the number of decimals of the assets
+   */
+  public getAssetDecimals(asset: Asset): number {
+    if (eqAsset(asset, AssetCacao)) return CACAO_DECIMAL
+    if (eqAsset(asset, AssetMaya)) return MAYA_DECIMAL
+    return this.defaultDecimals
+  }
+
+  /**
    * Get the explorer url.
    *
    * @returns {string} The explorer url for thorchain based on the current network.
@@ -111,7 +127,9 @@ export class Client extends CosmosSDKClient implements MayachainClient {
    * @returns {Asset|null} The asset of the given denomination.
    */
   public assetFromDenom(denom: string): Asset | null {
-    return assetFromString(denom.toUpperCase())
+    if (denom === CACAO_DENOM) return AssetCacao
+    if (denom === MAYA_DENOM) return AssetMaya
+    return null
   }
 
   /**
@@ -121,6 +139,8 @@ export class Client extends CosmosSDKClient implements MayachainClient {
    * @returns {string} The denomination of the given asset.
    */
   public getDenom(asset: Asset): string | null {
+    if (eqAsset(asset, AssetCacao)) return CACAO_DENOM
+    if (eqAsset(asset, AssetMaya)) return MAYA_DENOM
     if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
     return asset.symbol.toLowerCase()
   }

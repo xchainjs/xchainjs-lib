@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 
-import { AssetCacao, Client } from '../'
+import { AssetCacao, AssetMaya, Client } from '../'
 
 describe('Mayachain client', () => {
   describe('Instantiation', () => {
@@ -104,6 +104,10 @@ describe('Mayachain client', () => {
     it('Should get asset for denom', () => {
       expect(client.assetFromDenom('cacao')).toEqual(AssetCacao)
       expect(client.assetFromDenom('bnb/bnb')).toEqual(null)
+    })
+    it('should get asset decimals', async () => {
+      expect(client.getAssetDecimals(AssetCacao)).toBe(10)
+      expect(client.getAssetDecimals(AssetMaya)).toBe(4)
     })
   })
 
