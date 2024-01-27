@@ -38,6 +38,7 @@
     "bchaddrjs": "^0.5.2",
     "bech32": "^2.0.0",
     "bech32-buffer": "^0.2.0",
+    "bignumber.js": "9.0.1",
     "bitcoinjs-lib": "^5.2.0",
     "coininfo": "^5.1.0",
     "coinselect": "^3.1.12",
