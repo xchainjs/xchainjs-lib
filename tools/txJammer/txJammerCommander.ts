@@ -2,7 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { assetFromStringEx } from '@xchainjs/xchain-util'
 import * as commander from 'commander'
 
-import { TxJammer } from './TxJammer'
+import { TxJammer } from './txJammer'
 import { ActionConfig, AddLpConfig, JammerAction, SwapConfig, TransferConfig, WithdrawLpConfig } from './types'
 
 function parseCustomSwap(value: string): SwapConfig[] {
