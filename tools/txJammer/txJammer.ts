@@ -13,7 +13,15 @@ import {
   Thornode,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { Asset, CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 import * as weighted from 'weighted'
 
@@ -428,7 +436,7 @@ export class TxJammer {
       rune: rune,
     }
     const addlpAsym: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0, decimals)), sourceAssetAmount.asset), // leave as empty. for asym,
+      asset: new CryptoAmount(baseAmount(0, decimals), sourceAssetAmount.asset), // leave as empty. for asym,
       rune: rune,
     }
 
