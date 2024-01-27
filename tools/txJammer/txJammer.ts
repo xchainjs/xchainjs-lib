@@ -428,7 +428,7 @@ export class TxJammer {
       rune: rune,
     }
     const addlpAsym: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0, +decimals)), sourceAssetAmount.asset), // leave as empty. for asym,
+      asset: new CryptoAmount(assetToBase(assetAmount(0, decimals)), sourceAssetAmount.asset), // leave as empty. for asym,
       rune: rune,
     }
 
