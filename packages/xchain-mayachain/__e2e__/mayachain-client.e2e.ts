@@ -1,7 +1,7 @@
 import { Tx } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { AssetCacao, Client, DepositTx } from '..'
+import { AssetCacao, CACAO_DECIMAL, Client, DepositTx } from '..'
 
 const getPrintableTx = (tx: Tx) => {
   return {
@@ -67,7 +67,7 @@ describe('Thorchain client e2e', () => {
     console.log(publicKey)
   })
 
-  it('Should get address', async () => {
+  it('Should get wallet address', async () => {
     const address = await client.getAddressAsync()
     console.log(address)
   })
@@ -93,12 +93,12 @@ describe('Thorchain client e2e', () => {
   })
 
   it('Should get transaction', async () => {
-    const tx = await client.getTransactionData('796D37DBB13F1A7EB86720832A4F395729F9AAFC953DC576795BEEE3FC4EBEC6')
+    const tx = await client.getTransactionData('5C21AC622D2F24D9C83C89C62223D304F01BAE8CBC2D32F79BEE19AD2E4AE421')
     console.log(getPrintableTx(tx))
   })
 
   it('Should get deposit transaction', async () => {
-    const tx = await client.getDepositTransaction('796D37DBB13F1A7EB86720832A4F395729F9AAFC953DC576795BEEE3FC4EBEC6')
+    const tx = await client.getDepositTransaction('7BC1B91999827119D3941BE64A9C99F566C0602B6212E1664EE82797E25E449C')
     console.log(getPrintableDepositTx(tx))
   })
 
@@ -106,7 +106,7 @@ describe('Thorchain client e2e', () => {
     const unsignedTx = await client.prepareTx({
       sender: await client.getAddressAsync(0),
       recipient: await client.getAddressAsync(1),
-      amount: assetToBase(assetAmount(1, 8)),
+      amount: assetToBase(assetAmount(1, CACAO_DECIMAL)),
       memo: 'test',
     })
     console.log(unsignedTx)
@@ -115,7 +115,7 @@ describe('Thorchain client e2e', () => {
   it('Should make transfer to address 0', async () => {
     const hash = await client.transfer({
       recipient: await client.getAddressAsync(0),
-      amount: assetToBase(assetAmount(1, 8)),
+      amount: assetToBase(assetAmount(1, CACAO_DECIMAL)),
       memo: 'test',
     })
     console.log(hash)
@@ -132,7 +132,7 @@ describe('Thorchain client e2e', () => {
 
       const hash = await client.deposit({
         walletIndex: 0,
-        amount: assetToBase(assetAmount(1, 8)),
+        amount: assetToBase(assetAmount(2, CACAO_DECIMAL)),
         asset: AssetCacao,
         memo,
       })
@@ -147,7 +147,7 @@ describe('Thorchain client e2e', () => {
     const txRaw = await client.transferOffline({
       walletIndex: 0,
       recipient: await client.getAddressAsync(0),
-      amount: assetToBase(assetAmount(1, 8)),
+      amount: assetToBase(assetAmount(1, CACAO_DECIMAL)),
     })
     console.log(txRaw)
   })
