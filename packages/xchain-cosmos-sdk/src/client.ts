@@ -150,42 +150,38 @@ export default abstract class Client extends BaseXChainClient implements XChainC
             // Fill to
             const asset = this.assetFromDenom(denom)
             if (asset) {
-              const recipientKey = `${keyRecipient.value}${assetToString(asset)}`
-              if (mapTo.has(recipientKey)) {
+              const recipientAssetKey = `${keyRecipient.value}${assetToString(asset)}`
+              if (mapTo.has(recipientAssetKey)) {
                 const currentTo = mapTo.get(keyRecipient.value) as {
                   amount: BaseAmount
-                  asset: Asset | undefined
+                  asset: Asset
                   address: Address
                 }
-                currentTo.amount = currentTo?.amount.plus(amount)
-                mapTo.set(recipientKey, currentTo)
+                currentTo.amount = currentTo.amount.plus(amount)
+                mapTo.set(recipientAssetKey, currentTo)
               } else {
-                if (asset) {
-                  mapTo.set(recipientKey, {
-                    amount,
-                    asset,
-                    address: keyRecipient.value,
-                  })
-                }
+                mapTo.set(recipientAssetKey, {
+                  amount,
+                  asset,
+                  address: keyRecipient.value,
+                })
               }
               // Fill from
-              const senderKey = `${keySender.value}${assetToString(asset)}`
-              if (mapFrom.has(senderKey)) {
-                const currentTo = mapFrom.get(senderKey) as {
+              const senderAssetKey = `${keySender.value}${assetToString(asset)}`
+              if (mapFrom.has(senderAssetKey)) {
+                const currentTo = mapFrom.get(senderAssetKey) as {
                   amount: BaseAmount
-                  asset: Asset | undefined
+                  asset: Asset
                   address: Address
                 }
-                currentTo.amount = currentTo?.amount.plus(amount)
-                mapFrom.set(senderKey, currentTo)
+                currentTo.amount = currentTo.amount.plus(amount)
+                mapFrom.set(senderAssetKey, currentTo)
               } else {
-                if (asset) {
-                  mapFrom.set(senderKey, {
-                    amount,
-                    asset,
-                    address: keySender.value,
-                  })
-                }
+                mapFrom.set(senderAssetKey, {
+                  amount,
+                  asset,
+                  address: keySender.value,
+                })
               }
             }
           })
