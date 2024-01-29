@@ -28,7 +28,7 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import * as xchainCrypto from '@xchainjs/xchain-crypto'
-import { Address, Asset, BaseAmount, CachedValue, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, CachedValue, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import * as bech32 from 'bech32'
 import * as BIP32 from 'bip32'
 import * as crypto from 'crypto'
@@ -92,7 +92,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   private splitAmountAndDenom(amountsAndDenoms: string[]) {
     const amounAndDenomParsed: { amount: string; denom: string }[] = []
     amountsAndDenoms.forEach((amountAndDenom) => {
-      const regex = /^(\d+)(\D+)$/
+      const regex = /^(\d+)(.*)$/
       const match = amountAndDenom.match(regex)
 
       if (match) {
@@ -111,10 +111,15 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * @returns {Tx} transaction with xchainjs format
    */
   private async mapIndexedTxToTx(indexedTx: IndexedTx): Promise<Tx> {
-    const mapTo: Map<Address, { amount: BaseAmount; asset: Asset | undefined }> = new Map()
-    const mapFrom: Map<Address, { amount: BaseAmount; asset: Asset | undefined }> = new Map()
+    const mapTo: Map<string, { amount: BaseAmount; asset: Asset | undefined; address: Address }> = new Map()
+    const mapFrom: Map<string, { amount: BaseAmount; asset: Asset | undefined; address: Address }> = new Map()
 
-    indexedTx.events.forEach((event) => {
+    /**
+     * Approach to be compatible with other clients. Due to Cosmos transaction sorted events, the first 7 events
+     * belongs to the transaction fee, so they can be skipped
+     */
+
+    indexedTx.events.slice(7).forEach((event) => {
       if (event.type === 'transfer') {
         const keyAmount = event.attributes.find((atribute) => atribute.key === 'amount') as {
           key: string
@@ -131,40 +136,59 @@ export default abstract class Client extends BaseXChainClient implements XChainC
         try {
           const allTokensInEvent = keyAmount.value.split(',') // More than one asset per event (kuji faucet example)
           const amounts = this.splitAmountAndDenom(allTokensInEvent)
-          const nativeAssetAmounts = amounts.filter((amount) => amount.denom === this.baseDenom) // TODO: Temporally discard non native assets
-          const totalNativeAmount = nativeAssetAmounts.reduce(
-            // TODO: Diferenciate fee from amount
-            (acum, amount) => acum.plus(amount.amount),
-            baseAmount(0, this.defaultDecimals),
-          )
-          // Fill to
-          if (mapTo.has(keyRecipient.value)) {
-            const currentTo = mapTo.get(keyRecipient.value) as { amount: BaseAmount; asset: Asset | undefined }
-            currentTo.amount = currentTo?.amount.plus(totalNativeAmount)
-            mapTo.set(keyRecipient.value, currentTo)
-          } else {
-            const asset = this.assetFromDenom(this.baseDenom)
-            if (asset) {
-              mapTo.set(keyRecipient.value, {
-                amount: totalNativeAmount,
-                asset,
-              })
+          const denomAmountMap: Record<string, BaseAmount> = {}
+          amounts.forEach((amount) => {
+            if (amount.denom in denomAmountMap) {
+              denomAmountMap[amount.denom] = denomAmountMap[amount.denom].plus(
+                baseAmount(amount.amount, this.defaultDecimals),
+              )
+            } else {
+              denomAmountMap[amount.denom] = baseAmount(amount.amount, this.defaultDecimals)
             }
-          }
-          // Fill from
-          if (mapFrom.has(keySender.value)) {
-            const currentTo = mapFrom.get(keySender.value) as { amount: BaseAmount; asset: Asset | undefined }
-            currentTo.amount = currentTo?.amount.plus(totalNativeAmount)
-            mapFrom.set(keySender.value, currentTo)
-          } else {
-            const asset = this.assetFromDenom(this.baseDenom)
+          })
+          Object.entries(denomAmountMap).forEach(([denom, amount]) => {
+            // Fill to
+            const asset = this.assetFromDenom(denom)
             if (asset) {
-              mapFrom.set(keySender.value, {
-                amount: totalNativeAmount,
-                asset,
-              })
+              const recipientKey = `${keyRecipient.value}${assetToString(asset)}`
+              if (mapTo.has(recipientKey)) {
+                const currentTo = mapTo.get(keyRecipient.value) as {
+                  amount: BaseAmount
+                  asset: Asset | undefined
+                  address: Address
+                }
+                currentTo.amount = currentTo?.amount.plus(amount)
+                mapTo.set(recipientKey, currentTo)
+              } else {
+                if (asset) {
+                  mapTo.set(recipientKey, {
+                    amount,
+                    asset,
+                    address: keyRecipient.value,
+                  })
+                }
+              }
+              // Fill from
+              const senderKey = `${keySender.value}${assetToString(asset)}`
+              if (mapFrom.has(senderKey)) {
+                const currentTo = mapFrom.get(senderKey) as {
+                  amount: BaseAmount
+                  asset: Asset | undefined
+                  address: Address
+                }
+                currentTo.amount = currentTo?.amount.plus(amount)
+                mapFrom.set(senderKey, currentTo)
+              } else {
+                if (asset) {
+                  mapFrom.set(senderKey, {
+                    amount,
+                    asset,
+                    address: keySender.value,
+                  })
+                }
+              }
             }
-          }
+          })
         } catch (e) {
           console.error('Error:', e)
         }
@@ -172,9 +196,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     })
 
     const txTo: TxTo[] = []
-    for (const [key, value] of mapTo.entries()) {
+    for (const value of mapTo.values()) {
       const txToObj: TxTo = {
-        to: key,
+        to: value.address,
         amount: value.amount,
         asset: value.asset,
       }
@@ -182,9 +206,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
 
     const txFrom: TxFrom[] = []
-    for (const [key, value] of mapFrom.entries()) {
+    for (const value of mapFrom.values()) {
       const txFromObj: TxFrom = {
-        from: key,
+        from: value.address,
         amount: value.amount,
         asset: value.asset,
       }
