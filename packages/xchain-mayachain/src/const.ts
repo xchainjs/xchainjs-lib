@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
-import { Asset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, baseAmount } from '@xchainjs/xchain-util'
 
 import types from './types/proto/MsgCompiled'
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
@@ -25,11 +25,8 @@ export const MAYA_DENOM = 'maya'
  */
 export const MAYA_DECIMAL = 4
 
-export const MAYA_SYNTH_DECIMAL = 8 // To review
-export const DEFAULT_GAS_ADJUSTMENT = 2 // To review
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
-export const MAX_TX_COUNT = 100 // To review
 
 /**
  * Chain identifier for MayaChain
@@ -37,7 +34,11 @@ export const MAX_TX_COUNT = 100 // To review
  */
 export const MAYAChain = 'MAYA' as const
 
-export const DEFAULT_FEE = assetToBase(assetAmount(1, CACAO_DECIMAL))
+/**
+ * Mayachain default fee
+ */
+export const DEFAULT_FEE = baseAmount(5000000000, CACAO_DECIMAL)
+
 /**
  * Base "chain" asset on mayachain main net.
  *
@@ -45,6 +46,10 @@ export const DEFAULT_FEE = assetToBase(assetAmount(1, CACAO_DECIMAL))
  * @see https://gitlab.com/mayachain/mayanode
  */
 export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', synth: false }
+
+/**
+ * Maya asset
+ */
 export const AssetMaya: Asset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', synth: false }
 
 /**
