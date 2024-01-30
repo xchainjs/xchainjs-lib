@@ -118,12 +118,22 @@ describe('Mayachain client', () => {
         expect(client.validateAddress('maya1ty0e5kry55rm7qd8g2uwp9y4rjfmmj6hfal0ul')).toBeTruthy()
         expect(client.validateAddress('0x42D5B09a92A31AfB875e1E40ae4b06f2A60890FC')).toBeFalsy()
       })
+      it('Should change network and validate address', () => {
+        const client = new Client({ network: Network.Stagenet })
+        client.setNetwork(Network.Mainnet)
+        expect(client.validateAddress('maya1ty0e5kry55rm7qd8g2uwp9y4rjfmmj6hfal0ul')).toBeTruthy()
+      })
     })
     describe('Stagenet', () => {
       it('Should validate address', () => {
         const client = new Client({ network: Network.Stagenet, prefix: 'maya' })
         expect(client.validateAddress('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6')).toBeTruthy()
         expect(client.validateAddress('0x42D5B09a92A31AfB875e1E40ae4b06f2A60890FC')).toBeFalsy()
+      })
+      it('Should change network and validate address', () => {
+        const client = new Client()
+        client.setNetwork(Network.Stagenet)
+        expect(client.validateAddress('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6')).toBeTruthy()
       })
     })
   })
