@@ -11,6 +11,5 @@ Breaking changes
   - `getClientUrl` removed
   - `setExplorerUrls` removed
   - `getCosmosClient` removed
-  - `setNetwork` removed
   - `setChainId` removed
   - `getChainId` removed
