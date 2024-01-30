@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [bfa655b]
+  - @xchainjs/xchain-thorchain@1.0.1
+
 ## 0.1.2
 
 ### Patch Changes
