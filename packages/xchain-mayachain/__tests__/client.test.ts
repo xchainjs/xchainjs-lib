@@ -133,7 +133,7 @@ describe('Mayachain client', () => {
       it('Should change network and validate address', () => {
         const client = new Client()
         client.setNetwork(Network.Stagenet)
-        expect(client.validateAddress('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kh6')).toBeTruthy()
+        expect(client.validateAddress('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6')).toBeTruthy()
       })
     })
   })
