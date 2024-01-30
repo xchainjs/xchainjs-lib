@@ -122,7 +122,11 @@ program.requiredOption('-p1, --password1 <password>', 'you must send in a passwo
 program.requiredOption('-w2, --wallet2 <file> ', 'you must send in a json wallet ')
 program.requiredOption('-p2, --password2 <password>', 'you must send in a password for wallet 2')
 program.requiredOption('-d, --durationSeconds <number>', 'the seconds you want to run the txJammer for', parseInteger)
-program.requiredOption('-p, --pauseTimeSeconds <number>', 'the seconds you want to pause between actions', parseInteger)
+program.requiredOption(
+  '-p, --pauseTimeMSeconds <number>',
+  'the seconds you want to pause between actions',
+  parseInteger,
+)
 program.requiredOption('-u, --txAmountInUsd <min-max>', 'the value of each tx in USD terms', parseMinMaxAmounts)
 program.option('-s, --configActions <config>', 'custom action configuration ', parseCustomActions)
 program.option('-s, --configSwap <config>', 'custom swap configuration ', parseCustomSwap)
@@ -140,7 +144,7 @@ const txJammer = new TxJammer(
   Number(options.txAmountInUsd[0]),
   Number(options.txAmountInUsd[1]),
   Number(options.durationSeconds),
-  options.pauseTimeSeconds,
+  options.pauseTimeMSeconds,
   options.wallet1,
   options.password1,
   options.wallet2,

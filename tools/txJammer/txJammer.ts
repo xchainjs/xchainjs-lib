@@ -55,7 +55,7 @@ export class TxJammer {
   private minAmount: number
   private maxAmount: number
   private durationSeconds: number
-  private pauseTimeSeconds: number
+  private pauseTimeMSeconds: number
 
   private keystore1FilePath: string
   private keystore1Password: string
@@ -75,7 +75,7 @@ export class TxJammer {
     minAmount: number,
     maxAmount: number,
     durationSeconds: number,
-    pauseTimeSeconds: number,
+    pauseTimeMSeconds: number,
     keystore1FilePath: string,
     keystore1Password: string,
     keystore2FilePath: string,
@@ -90,7 +90,7 @@ export class TxJammer {
     this.minAmount = minAmount
     this.maxAmount = maxAmount
     this.durationSeconds = durationSeconds
-    this.pauseTimeSeconds = pauseTimeSeconds
+    this.pauseTimeMSeconds = pauseTimeMSeconds
 
     this.keystore1FilePath = keystore1FilePath
     this.keystore1Password = keystore1Password
@@ -156,6 +156,7 @@ export class TxJammer {
       assetsIncludingSynths.push(asset)
       assetsIncludingSynths.push(assetToString(synth))
     }
+    assetsIncludingSynths.push('THOR.RUNE') // add rune to the list of assets
     this.setupWeightedSwaps(assetsIncludingSynths)
     this.setupWeightedTransfers(assetsIncludingSynths)
     this.setupWeightedAddLps(assets)
@@ -264,7 +265,7 @@ export class TxJammer {
       const action = weighted.select(this.weightedActions) as string
       console.log(`executing ${action}..`)
       await this.executeAction(action)
-      await delay(this.pauseTimeSeconds * 1000)
+      await delay(this.pauseTimeMSeconds)
       currentTime = new Date()
     }
     await this.writeToFile()
