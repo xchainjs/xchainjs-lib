@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+### Patch Changes
+
+- bfa655b: getPrefix abstract function
+- bfa655b: setNetwork function bug fix
+
 ## 0.2.0
 
 ### Minor Changes

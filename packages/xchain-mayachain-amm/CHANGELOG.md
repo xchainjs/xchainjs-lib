@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [bfa655b]
+  - @xchainjs/xchain-thorchain@1.0.1
+  - @xchainjs/xchain-kujira@0.1.9
+  - @xchainjs/xchain-wallet@0.1.3
+
 ## 1.0.6
 
 ### Patch Changes
