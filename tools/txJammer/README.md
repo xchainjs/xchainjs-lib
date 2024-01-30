@@ -27,7 +27,7 @@ Options:
   -w2, --wallet2 <file>            you must send in a json wallet
   -p2, --password2 <password>      you must send in a password for wallet 2
   -d, --durationSeconds <number>   the seconds you want to run the txJammer for
-  -p, --pauseTimeSeconds <number>  the seconds you want to pause between actions
+  -p, --pauseTimeMSeconds <number>  the seconds you want to pause between actions
   -u, --txAmountInUsd <min-max>    the value of each tx in USD terms
   -s, --configActions <config>     custom action configuration
   -s, --configSwap <config>        custom swap configuration
@@ -46,7 +46,7 @@ Runs random txs with a monetary value between 1-3 USD for 60 secs with a pause b
 yarn ts-node txJammerCommander.ts \
  --wallet1 ./keystore1.txt --password1 123 \
  --wallet2 ./keystore2.txt --password2 123 \
- --durationSeconds 60 --pauseTimeSeconds 2 \
+ --durationSeconds 60 --pauseTimeMSeconds 2 \
  --txAmountInUsd 1-3 \
  --estimateOnly
 ```
@@ -72,7 +72,7 @@ Additionally, a specfic **Swap Config** specified with --configSwap, specifies t
 yarn ts-node txJammerCommander.ts \
  --wallet1 ./keystore1.txt --password1 123 \
  --wallet2 ./keystore2.txt --password2 123 \
- --durationSeconds 60 --pauseTimeSeconds 2 \
+ --durationSeconds 60 --pauseTimeMSeconds 2 \
  --txAmountInUsd 1-3 \
  --estimateOnly \
  --configActions "transfer 500, addLp 0, withdrawLp 0, swap 300" \
@@ -105,7 +105,7 @@ Additionally, a specfic **WithdrawLP Config** specified with --configWithdrawLp,
 yarn ts-node txJammerCommander.ts \
  --wallet1 ./keystore1.txt --password1 123 \
  --wallet2 ./keystore2.txt --password2 123 \
- --durationSeconds 60 --pauseTimeSeconds 2 \
+ --durationSeconds 60 --pauseTimeMSeconds 2 \
  --txAmountInUsd 1-3 \
  --estimateOnly \
  --configTransfer "BNB.BNB 300, BCH.BCH 200, * 50" \

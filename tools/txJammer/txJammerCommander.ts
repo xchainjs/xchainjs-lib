@@ -124,7 +124,7 @@ program.requiredOption('-p2, --password2 <password>', 'you must send in a passwo
 program.requiredOption('-d, --durationSeconds <number>', 'the seconds you want to run the txJammer for', parseInteger)
 program.requiredOption(
   '-p, --pauseTimeMSeconds <number>',
-  'the seconds you want to pause between actions',
+  'the miliseconds you want to pause between actions',
   parseInteger,
 )
 program.requiredOption('-u, --txAmountInUsd <min-max>', 'the value of each tx in USD terms', parseMinMaxAmounts)
