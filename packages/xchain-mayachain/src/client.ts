@@ -9,7 +9,7 @@ import {
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
 import { SigningStargateClient } from '@cosmjs/stargate'
-import { AssetInfo, Network, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
+import { AssetInfo, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
 import {
   Client as CosmosSDKClient,
   CosmosSdkClientParams,
@@ -47,7 +47,7 @@ export interface MayachainClient {
 }
 
 /**
- * Thorchain client params to instantiate the Thorchain client
+ * Mayachain client params to instantiate the Mayachain client
  */
 export type MayachainClientParams = Partial<CosmosSdkClientParams>
 
@@ -56,9 +56,9 @@ export type MayachainClientParams = Partial<CosmosSdkClientParams>
  */
 export class Client extends CosmosSDKClient implements MayachainClient {
   /**
-   * Thorchain client constructor
+   * Mayachain client constructor
    *
-   * @param {ThorchainClientParams} config Optional - Client configuration. If it is not set, default values will be used
+   * @param {MayachainClientParams} config Optional - Client configuration. If it is not set, default values will be used
    */
   constructor(config: MayachainClientParams = defaultClientConfig) {
     super({
@@ -72,15 +72,8 @@ export class Client extends CosmosSDKClient implements MayachainClient {
    * @param {Network} network The network of which return the prefix
    * @returns the address prefix
    */
-  protected getPrefix(network: Network): string {
-    switch (network) {
-      case Network.Mainnet:
-        return 'maya'
-      case Network.Stagenet:
-        return 'smaya'
-      case Network.Testnet:
-        return 'tmaya'
-    }
+  protected getPrefix(): string {
+    return 'maya'
   }
 
   /**

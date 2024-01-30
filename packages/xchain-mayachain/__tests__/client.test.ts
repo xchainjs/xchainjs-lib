@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 
-import { AssetCacao, AssetMaya, Client } from '../'
+import { AssetCacao, AssetMaya, Client } from '../src'
 
 describe('Mayachain client', () => {
   describe('Instantiation', () => {
@@ -126,14 +126,14 @@ describe('Mayachain client', () => {
     })
     describe('Stagenet', () => {
       it('Should validate address', () => {
-        const client = new Client({ network: Network.Stagenet, prefix: 'maya' })
+        const client = new Client({ network: Network.Stagenet })
         expect(client.validateAddress('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6')).toBeTruthy()
         expect(client.validateAddress('0x42D5B09a92A31AfB875e1E40ae4b06f2A60890FC')).toBeFalsy()
       })
       it('Should change network and validate address', () => {
         const client = new Client()
         client.setNetwork(Network.Stagenet)
-        expect(client.validateAddress('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6')).toBeTruthy()
+        expect(client.validateAddress('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kh6')).toBeTruthy()
       })
     })
   })
