@@ -120,7 +120,6 @@ export class TxJammer {
 
     this.wallet1 = new Wallet(phrase1, this.thorchainQuery)
     this.wallet2 = new Wallet(phrase2, this.thorchainQuery)
-
     this.pools = await this.thorchainCache.getPools()
     this.setupWeightedActions()
     await this.setupWeightedChoices()
