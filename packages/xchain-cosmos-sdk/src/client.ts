@@ -55,10 +55,10 @@ export enum MsgTypes {
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
   private readonly defaultFee: BaseAmount
+  protected startgateClient: CachedValue<StargateClient>
+  protected prefix: string
   protected readonly defaultDecimals: number
-  protected readonly startgateClient: CachedValue<StargateClient>
   protected readonly clientUrls: Record<Network, string>
-  protected readonly prefix: string
   protected readonly baseDenom: string
   protected readonly registry: Registry
   /**
@@ -69,7 +69,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   constructor(params: CosmosSdkClientParams) {
     super(params.chain, params)
     this.clientUrls = params.clientUrls
-    this.prefix = params.prefix
+    this.prefix = this.getPrefix(this.getNetwork())
     this.defaultDecimals = params.defaultDecimals
     this.defaultFee = params.defaultFee
     this.baseDenom = params.baseDenom
@@ -81,6 +81,18 @@ export default abstract class Client extends BaseXChainClient implements XChainC
 
   private async connectClient(clientUrl: string) {
     return StargateClient.connect(clientUrl)
+  }
+
+  /**
+   * Set client network to work with.
+   *
+   * @param {Network} network
+   * @returns {void}
+   */
+  public setNetwork(network: Network): void {
+    super.setNetwork(network)
+    this.startgateClient = new CachedValue<StargateClient>(() => this.connectClient(this.clientUrls[network]))
+    this.prefix = this.getPrefix(network)
   }
 
   /**
@@ -400,6 +412,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   public abstract getAssetDecimals(asset: Asset): number
   protected abstract getMsgTypeUrlByType(msgType: MsgTypes): string
   protected abstract getStandardFee(asset: Asset): StdFee
+  protected abstract getPrefix(network: Network): string
 }
 
 export { Client }

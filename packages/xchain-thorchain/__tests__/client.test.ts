@@ -117,12 +117,22 @@ describe('Thorchain client', () => {
         expect(client.validateAddress('thor1k2e50ws3d9lce9ycr7ppaazx3ygaa7lxj8kkny')).toBeTruthy()
         expect(client.validateAddress('0x42D5B09a92A31AfB875e1E40ae4b06f2A60890FC')).toBeFalsy()
       })
+      it('Should change network and validate address', () => {
+        const client = new Client({ network: Network.Stagenet })
+        client.setNetwork(Network.Mainnet)
+        expect(client.validateAddress('thor1k2e50ws3d9lce9ycr7ppaazx3ygaa7lxj8kkny')).toBeTruthy()
+      })
     })
     describe('Stagenet', () => {
       it('Should validate address', () => {
-        const client = new Client({ network: Network.Stagenet, prefix: 'sthor' })
+        const client = new Client({ network: Network.Stagenet })
         expect(client.validateAddress('sthor17gw75axcnr8747pkanye45pnrwk7p9c3ve0wxj')).toBeTruthy()
-        expect(client.validateAddress('0x42D5B09a92A31AfB875e1E40ae4b06f2A60890FC')).toBeFalsy()
+      })
+
+      it('Should change network and validate address', () => {
+        const client = new Client()
+        client.setNetwork(Network.Stagenet)
+        expect(client.validateAddress('sthor17gw75axcnr8747pkanye45pnrwk7p9c3ve0wxj')).toBeTruthy()
       })
     })
   })

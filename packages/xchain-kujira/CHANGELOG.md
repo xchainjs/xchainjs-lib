@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.9
+
+### Patch Changes
+
+- bfa655b: getPrefix protected function
+- Updated dependencies [bfa655b]
+- Updated dependencies [bfa655b]
+  - @xchainjs/xchain-cosmos-sdk@0.2.1
+
 ## 0.1.8
 
 ### Patch Changes

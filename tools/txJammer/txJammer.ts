@@ -2,19 +2,27 @@ import fs = require('fs')
 
 import { Network, TxParams } from '@xchainjs/xchain-client'
 import { decryptFromKeystore } from '@xchainjs/xchain-crypto'
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
 import {
   AddliquidityPosition,
-  CryptoAmount,
   LiquidityPool,
-  Midgard,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { Asset, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
+import { BigNumber } from 'bignumber.js'
 import * as weighted from 'weighted'
 
 import {
@@ -47,7 +55,7 @@ export class TxJammer {
   private minAmount: number
   private maxAmount: number
   private durationSeconds: number
-  private pauseTimeSeconds: number
+  private pauseTimeMSeconds: number
 
   private keystore1FilePath: string
   private keystore1Password: string
@@ -67,7 +75,7 @@ export class TxJammer {
     minAmount: number,
     maxAmount: number,
     durationSeconds: number,
-    pauseTimeSeconds: number,
+    pauseTimeMSeconds: number,
     keystore1FilePath: string,
     keystore1Password: string,
     keystore2FilePath: string,
@@ -82,7 +90,7 @@ export class TxJammer {
     this.minAmount = minAmount
     this.maxAmount = maxAmount
     this.durationSeconds = durationSeconds
-    this.pauseTimeSeconds = pauseTimeSeconds
+    this.pauseTimeMSeconds = pauseTimeMSeconds
 
     this.keystore1FilePath = keystore1FilePath
     this.keystore1Password = keystore1Password
@@ -94,7 +102,10 @@ export class TxJammer {
     this.transferConfig = transferConfig
     this.withdrawLpConfig = withdrawLpConfig
 
-    this.thorchainCache = new ThorchainCache(new Midgard(network), new Thornode(network))
+    this.thorchainCache = new ThorchainCache(
+      new Thornode(network),
+      new MidgardQuery(new MidgardCache(new Midgard(network))),
+    )
     this.thorchainQuery = new ThorchainQuery(this.thorchainCache)
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery)
   }
@@ -109,7 +120,6 @@ export class TxJammer {
 
     this.wallet1 = new Wallet(phrase1, this.thorchainQuery)
     this.wallet2 = new Wallet(phrase2, this.thorchainQuery)
-
     this.pools = await this.thorchainCache.getPools()
     this.setupWeightedActions()
     await this.setupWeightedChoices()
@@ -145,6 +155,7 @@ export class TxJammer {
       assetsIncludingSynths.push(asset)
       assetsIncludingSynths.push(assetToString(synth))
     }
+    assetsIncludingSynths.push('THOR.RUNE') // add rune to the list of assets
     this.setupWeightedSwaps(assetsIncludingSynths)
     this.setupWeightedTransfers(assetsIncludingSynths)
     this.setupWeightedAddLps(assets)
@@ -253,7 +264,7 @@ export class TxJammer {
       const action = weighted.select(this.weightedActions) as string
       console.log(`executing ${action}..`)
       await this.executeAction(action)
-      await delay(this.pauseTimeSeconds * 1000)
+      await delay(this.pauseTimeMSeconds)
       currentTime = new Date()
     }
     await this.writeToFile()
@@ -284,7 +295,8 @@ export class TxJammer {
       ? receiverWallet.clients[THORChain].getAddress()
       : receiverWallet.clients[destinationAsset.chain].getAddress()
     const swapParams: AmmEstimateSwapParams = {
-      input: await this.createCryptoAmount(sourceAsset),
+      amount: await this.createCryptoAmount(sourceAsset),
+      fromAsset: sourceAsset,
       destinationAsset,
       destinationAddress: destinationAddress,
       wallet: senderWallet,
@@ -295,7 +307,7 @@ export class TxJammer {
     try {
       const estimate = await this.thorchainAmm.estimateSwap(swapParams)
       result.date = new Date()
-      result.details = `swapping ${swapParams.input.formatedAssetString()} to ${assetToString(destinationAsset)} `
+      result.details = `swapping ${swapParams.amount.formatedAssetString()} to ${assetToString(destinationAsset)} `
       if (estimate.txEstimate.canSwap && !this.estimateOnly) {
         const txhash = await this.thorchainAmm.doSwap(senderWallet, swapParams)
         result.result = txhash
@@ -337,10 +349,38 @@ export class TxJammer {
   }
   private async createCryptoAmount(asset: Asset): Promise<CryptoAmount> {
     const amount = this.getRandomFloat(this.minAmount, this.maxAmount)
-    const usdPool = await this.thorchainCache.getDeepestUSDPool()
+    const usdPool = await this.getDeepestUSDPool()
     const usdAmount = new CryptoAmount(assetToBase(assetAmount(amount)), usdPool.asset)
     return await this.thorchainQuery.convert(usdAmount, asset)
   }
+
+  private async getDeepestUSDPool(): Promise<LiquidityPool> {
+    const USD_ASSETS: Record<Network, Asset[]> = {
+      mainnet: [
+        assetFromStringEx('BNB.BUSD-BD1'),
+        assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
+        assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
+      ],
+      stagenet: [assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
+      testnet: [
+        assetFromStringEx('BNB.BUSD-74E'),
+        assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306'),
+      ],
+    }
+    const usdAssets = USD_ASSETS[this.thorchainCache.midgardQuery.midgardCache.midgard.network]
+    let deepestRuneDepth = new BigNumber(0)
+    let deepestPool: LiquidityPool | null = null
+    for (const usdAsset of usdAssets) {
+      const usdPool = await this.thorchainCache.getPoolForAsset(usdAsset)
+      if (usdPool.runeBalance.amount().gt(deepestRuneDepth)) {
+        deepestRuneDepth = usdPool.runeBalance.amount()
+        deepestPool = usdPool
+      }
+    }
+    if (!deepestPool) throw Error('now USD Pool found')
+    return deepestPool
+  }
+
   private getRandomWallets(): [Wallet, Wallet] {
     const rand = this.getRandomInt(0, 1)
     return rand == 0 ? [this.wallet1, this.wallet2] : [this.wallet2, this.wallet1]
@@ -387,7 +427,7 @@ export class TxJammer {
     const rune = await this.thorchainQuery.convert(sourceAssetAmount, AssetRuneNative)
 
     const inboundDetails = await this.thorchainQuery.thorchainCache.getPoolForAsset(sourceAsset)
-    const decimals = inboundDetails.pool.nativeDecimal
+    const decimals = inboundDetails.thornodeDetails.decimals
     const randomNumber = this.getRandomInt(1, 10)
     // if it is even its a symmetrical add if its odd the its an asymetrical add
     const isEven = randomNumber % 2 === 0
@@ -396,7 +436,7 @@ export class TxJammer {
       rune: rune,
     }
     const addlpAsym: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(0, +decimals)), sourceAssetAmount.asset), // leave as empty. for asym,
+      asset: new CryptoAmount(baseAmount(0, decimals), sourceAssetAmount.asset), // leave as empty. for asym,
       rune: rune,
     }
 
