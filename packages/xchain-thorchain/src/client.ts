@@ -9,7 +9,7 @@ import {
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
 import { SigningStargateClient } from '@cosmjs/stargate'
-import { AssetInfo, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
+import { AssetInfo, Network, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
 import {
   Client as CosmosSDKClient,
   CosmosSdkClientParams,
@@ -62,6 +62,22 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
       ...defaultClientConfig,
       ...config,
     })
+  }
+
+  /**
+   * Get address prefix by network
+   * @param {Network} network The network of which return the prefix
+   * @returns the address prefix
+   */
+  protected getNetworkPrefix(network: Network): string {
+    switch (network) {
+      case Network.Mainnet:
+        return 'thor'
+      case Network.Stagenet:
+        return 'sthor'
+      case Network.Testnet:
+        return 'tthor'
+    }
   }
 
   /**

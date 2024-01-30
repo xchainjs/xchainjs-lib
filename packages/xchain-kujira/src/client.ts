@@ -20,6 +20,15 @@ export class Client extends CosmosSdkClient {
     })
   }
 
+  /**
+   * Get address prefix by network
+   * @param {Network} network The network of which return the prefix
+   * @returns the address prefix
+   */
+  protected getNetworkPrefix(): string {
+    return 'kujira'
+  }
+
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
       asset: AssetKUJI,
