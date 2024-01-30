@@ -69,7 +69,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   constructor(params: CosmosSdkClientParams) {
     super(params.chain, params)
     this.clientUrls = params.clientUrls
-    this.prefix = this.getNetworkPrefix(this.getNetwork())
+    this.prefix = this.getPrefix(this.getNetwork())
     this.defaultDecimals = params.defaultDecimals
     this.defaultFee = params.defaultFee
     this.baseDenom = params.baseDenom
@@ -92,7 +92,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   public setNetwork(network: Network): void {
     super.setNetwork(network)
     this.startgateClient = new CachedValue<StargateClient>(() => this.connectClient(this.clientUrls[network]))
-    this.prefix = this.getNetworkPrefix(network)
+    this.prefix = this.getPrefix(network)
   }
 
   /**
@@ -411,7 +411,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   abstract getDenom(asset: Asset): string | null
   protected abstract getMsgTypeUrlByType(msgType: MsgTypes): string
   protected abstract getStandardFee(asset: Asset): StdFee
-  protected abstract getNetworkPrefix(network: Network): string
+  protected abstract getPrefix(network: Network): string
 }
 
 export { Client }

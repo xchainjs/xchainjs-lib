@@ -69,7 +69,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
    * @param {Network} network The network of which return the prefix
    * @returns the address prefix
    */
-  protected getNetworkPrefix(network: Network): string {
+  protected getPrefix(network: Network): string {
     switch (network) {
       case Network.Mainnet:
         return 'thor'

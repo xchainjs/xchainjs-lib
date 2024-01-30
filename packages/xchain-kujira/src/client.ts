@@ -25,7 +25,7 @@ export class Client extends CosmosSdkClient {
    * @param {Network} network The network of which return the prefix
    * @returns the address prefix
    */
-  protected getNetworkPrefix(): string {
+  protected getPrefix(): string {
     return 'kujira'
   }
 

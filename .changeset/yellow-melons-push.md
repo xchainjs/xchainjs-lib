@@ -3,4 +3,4 @@
 '@xchainjs/xchain-kujira': patch
 ---
 
-getNetworkPrefix protected function
+getPrefix protected function
