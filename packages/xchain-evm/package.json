@@ -39,7 +39,8 @@
     "@xchainjs/xchain-util": "^0.13.1",
     "@xchainjs/xchain-evm-providers": "^0.1.6",
     "axios": "^1.3.6",
-    "ethers": "^5.7.2"
+    "ethers": "^5.7.2",
+    "nock": "13.0.5"
   },
   "peerDependencies": {
     "@xchainjs/xchain-client": "^0.16.1",

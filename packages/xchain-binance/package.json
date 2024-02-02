@@ -37,7 +37,8 @@
     "@types/big.js": "^6.1.6",
     "@xchainjs/xchain-client": "^0.16.1",
     "@xchainjs/xchain-crypto": "^0.3.1",
-    "@xchainjs/xchain-util": "^0.13.1"
+    "@xchainjs/xchain-util": "^0.13.1",
+    "nock": "13.0.5"
   },
   "publishConfig": {
     "access": "public"
