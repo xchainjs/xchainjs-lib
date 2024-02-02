@@ -17,7 +17,7 @@ import {
   bech32ToBase64,
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
-import { Address, Asset, assetToString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
@@ -35,7 +35,7 @@ import {
   defaultClientConfig,
 } from './const'
 import { DepositParam, DepositTx, TxOfflineParams } from './types'
-import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl } from './utils'
+import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
 
 /**
  * Interface for custom Thorchain client
@@ -69,11 +69,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
 
   /**
    * Get address prefix by network
-   * @param {Network} network The network of which return the prefix
    * @returns the address prefix
    */
   protected getPrefix(): string {
-    return 'maya'
+    return getPrefix()
   }
 
   /**
@@ -148,10 +147,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
    * @returns {string} The denomination of the given asset.
    */
   public getDenom(asset: Asset): string | null {
-    if (eqAsset(asset, AssetCacao)) return CACAO_DENOM
-    if (eqAsset(asset, AssetMaya)) return MAYA_DENOM
-    if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
-    return asset.symbol.toLowerCase()
+    return getDenom(asset)
   }
 
   /**
