@@ -5,7 +5,7 @@ import { Asset, baseAmount } from '@xchainjs/xchain-util'
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
 
 /**
- * The decimal for cosmos chain.
+ * Cosmos native asset number of decimals
  */
 export const COSMOS_DECIMAL = 6
 
@@ -39,12 +39,7 @@ export const AssetATOM: Asset = { chain: GAIAChain, symbol: 'ATOM', ticker: 'ATO
 /**
  * Native Cosmos asset denom
  */
-export const DENOM_ATOM = 'uatom' as const
-
-/**
- * ATOM asset number of decimals
- */
-export const ATOM_DECIMAL = 6
+export const ATOM_DENOM = 'uatom' as const
 
 /**
  * Message type url used to make transactions

@@ -1,7 +1,7 @@
 import { Network, Tx } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { ATOM_DECIMAL, Client } from '../src'
+import { COSMOS_DECIMAL, Client } from '../src'
 
 const getPrintableTx = (tx: Tx) => {
   return {
@@ -70,7 +70,7 @@ describe('Cosmos client e2e', () => {
     const unsignedTx = await client.prepareTx({
       sender: await client.getAddressAsync(0),
       recipient: await client.getAddressAsync(1),
-      amount: assetToBase(assetAmount(0.1, ATOM_DECIMAL)),
+      amount: assetToBase(assetAmount(0.1, COSMOS_DECIMAL)),
       memo: 'test',
     })
     console.log(unsignedTx)
@@ -79,7 +79,7 @@ describe('Cosmos client e2e', () => {
   it('Should make transfer to address 0', async () => {
     const hash = await client.transfer({
       recipient: await client.getAddressAsync(0),
-      amount: assetToBase(assetAmount(0.1, ATOM_DECIMAL)),
+      amount: assetToBase(assetAmount(0.1, COSMOS_DECIMAL)),
       memo: 'test',
     })
     console.log(hash)
@@ -89,7 +89,7 @@ describe('Cosmos client e2e', () => {
     const txRaw = await client.transferOffline({
       walletIndex: 0,
       recipient: await client.getAddressAsync(0),
-      amount: assetToBase(assetAmount(0.1, ATOM_DECIMAL)),
+      amount: assetToBase(assetAmount(0.1, COSMOS_DECIMAL)),
     })
     console.log(txRaw)
   })
