@@ -17,7 +17,7 @@ import {
   bech32ToBase64,
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
-import { Address, Asset, assetFromString, assetToString, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, assetFromString } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
@@ -32,7 +32,7 @@ import {
   defaultClientConfig,
 } from './const'
 import { DepositParam, DepositTx, TxOfflineParams } from './types'
-import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRuneNative as isAssetRune } from './utils'
+import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
 
 /**
  * Interface for custom Thorchain client
@@ -70,14 +70,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
    * @returns the address prefix
    */
   protected getPrefix(network: Network): string {
-    switch (network) {
-      case Network.Mainnet:
-        return 'thor'
-      case Network.Stagenet:
-        return 'sthor'
-      case Network.Testnet:
-        return 'tthor'
-    }
+    return getPrefix(network)
   }
 
   /**
@@ -139,9 +132,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
    * @returns {string} The denomination of the given asset.
    */
   public getDenom(asset: Asset): string | null {
-    if (isAssetRune(asset)) return RUNE_DENOM
-    if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
-    return asset.symbol.toLowerCase()
+    return getDenom(asset)
   }
 
   /**
