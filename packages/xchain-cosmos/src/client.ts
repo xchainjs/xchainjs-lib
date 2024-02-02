@@ -15,7 +15,6 @@ import BigNumber from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import {
-  ATOM_DENOM,
   AssetATOM,
   COSMOS_DECIMAL,
   DEFAULT_FEE,
@@ -25,7 +24,7 @@ import {
   defaultClientConfig,
 } from './const'
 import { TxOfflineParams } from './types'
-import { getDefaultExplorers } from './utils'
+import { getDefaultExplorers, getDenom, getPrefix } from './utils'
 
 /**
  * Custom Cosmos client
@@ -116,8 +115,7 @@ export class Client extends CosmosSDKClient {
    * @returns {string} The denomination of the given asset.
    */
   public getDenom(asset: Asset): string | null {
-    if (eqAsset(asset, AssetATOM)) return ATOM_DENOM
-    return null
+    return getDenom(asset)
   }
 
   /**
@@ -243,7 +241,7 @@ export class Client extends CosmosSDKClient {
    * @returns the address prefix
    */
   protected getPrefix(): string {
-    return 'cosmos'
+    return getPrefix()
   }
 
   /**
