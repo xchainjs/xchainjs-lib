@@ -1,1 +1,3 @@
-export * from './client-types'
+import { TxOfflineParams } from './types'
+
+export { TxOfflineParams }

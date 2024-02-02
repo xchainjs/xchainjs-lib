@@ -1,99 +1,60 @@
-import cosmosclient from '@cosmos-client/core'
-import { proto } from '@cosmos-client/core/cjs/module'
+import { StdFee } from '@cosmjs/amino'
+import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import {
-  AssetInfo,
-  Balance,
-  BaseXChainClient,
-  FeeType,
-  Fees,
-  Network,
-  PreparedTx,
-  Tx,
-  TxHash,
-  TxHistoryParams,
-  TxParams,
-  TxsPage,
-  XChainClient,
-  XChainClientParams,
-  singleFee,
-} from '@xchainjs/xchain-client'
-import { Address, Asset, BaseAmount, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+  DecodedTxRaw,
+  DirectSecp256k1HdWallet,
+  EncodeObject,
+  TxBodyEncodeObject,
+  decodeTxRaw,
+} from '@cosmjs/proto-signing'
+import { GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
+import { AssetInfo, FeeType, Fees, PreparedTx, TxParams, singleFee } from '@xchainjs/xchain-client'
+import { Client as CosmosSDKClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
+import { Address, Asset, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
-import { AssetATOM, COSMOS_DECIMAL, DEFAULT_FEE, DEFAULT_GAS_LIMIT, GAIAChain } from './const'
-import { CosmosSDKClient } from './cosmos/sdk-client'
-import { TxOfflineParams } from './cosmos/types'
-import { ChainIds, ClientUrls, CosmosClientParams } from './types'
 import {
-  getAsset,
-  getDefaultChainIds,
-  getDefaultClientUrls,
-  getDefaultRootDerivationPaths,
-  getDenom,
-  getTxsFromHistory,
-  protoFee,
-  protoTxBody,
-} from './utils'
-
-/**
- * Interface for custom Cosmos client
- */
-export interface CosmosClient {
-  getSDKClient(): CosmosSDKClient
-}
+  AssetATOM,
+  COSMOS_DECIMAL,
+  DEFAULT_FEE,
+  DEFAULT_GAS_LIMIT,
+  DENOM_ATOM,
+  GAIAChain,
+  MSG_SEND_TYPE_URL,
+  defaultClientConfig,
+} from './const'
+import { TxOfflineParams } from './types'
+import { getDefaultExplorers } from './utils'
 
 /**
  * Custom Cosmos client
  */
-class Client extends BaseXChainClient implements CosmosClient, XChainClient {
-  private sdkClient: CosmosSDKClient
-  private clientUrls: ClientUrls
-  private chainIds: ChainIds
+export type CosmosClientParams = Partial<CosmosSdkClientParams>
 
-  /**
-   * Constructor
-   *
-   * Client has to be initialised with network type and phrase.
-   * It will throw an error if an invalid phrase has been passed.
-   *
-   * @param {XChainClientParams} params
-   *
-   * @throws {"Invalid phrase"} Thrown if the given phase is invalid.
-   */
-  constructor({
-    network = Network.Mainnet,
-    phrase,
-    clientUrls = getDefaultClientUrls(),
-    chainIds = getDefaultChainIds(),
-    rootDerivationPaths = getDefaultRootDerivationPaths(),
-  }: XChainClientParams & CosmosClientParams) {
-    super(GAIAChain, { network, rootDerivationPaths, phrase })
-
-    this.clientUrls = clientUrls
-    this.chainIds = chainIds
-
-    this.sdkClient = new CosmosSDKClient({
-      server: this.clientUrls[network],
-      chainId: this.chainIds[network],
+export class Client extends CosmosSDKClient {
+  constructor(config: CosmosClientParams = defaultClientConfig) {
+    super({
+      ...defaultClientConfig,
+      ...config,
     })
   }
 
   /**
-   * Updates current network.
+   * Get client native asset
    *
-   * @param {Network} network
-   * @returns {void}
+   * @returns {AssetInfo} Thorchain native asset
    */
-  setNetwork(network: Network): void {
-    // dirty check to avoid using and re-creation of same data
-    if (network === this.network) return
+  public getAssetInfo(): AssetInfo {
+    return {
+      asset: AssetATOM,
+      decimal: COSMOS_DECIMAL,
+    }
+  }
 
-    super.setNetwork(network)
-
-    this.sdkClient = new CosmosSDKClient({
-      server: this.clientUrls[network],
-      chainId: this.chainIds[network],
-    })
+  public getAssetDecimals(asset: Asset): number {
+    if (eqAsset(asset, AssetATOM)) return COSMOS_DECIMAL
+    return this.defaultDecimals
   }
 
   /**
@@ -101,14 +62,8 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    *
    * @returns {string} The explorer url.
    */
-  getExplorerUrl(): string {
-    switch (this.network) {
-      case Network.Mainnet:
-      case Network.Stagenet:
-        return 'https://cosmos.bigdipper.live'
-      case Network.Testnet:
-        return 'https://explorer.theta-testnet.polypore.xyz'
-    }
+  public getExplorerUrl(): string {
+    return getDefaultExplorers()[this.network]
   }
 
   /**
@@ -117,8 +72,8 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    * @param {Address} address
    * @returns {string} The explorer url for the given address.
    */
-  getExplorerAddressUrl(address: Address): string {
-    return `${this.getExplorerUrl()}/account/${address}`
+  public getExplorerAddressUrl(address: Address): string {
+    return `${this.getExplorerUrl()}/accounts/${address}`
   }
 
   /**
@@ -127,238 +82,42 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    * @param {string} txID
    * @returns {string} The explorer url for the given transaction id.
    */
-  getExplorerTxUrl(txID: string): string {
+  public getExplorerTxUrl(txID: string): string {
     return `${this.getExplorerUrl()}/transactions/${txID}`
   }
 
   /**
-   * @private
-   * Get private key.
+   * Get Asset from denomination
    *
-   * @returns {PrivKey} The private key generated from the given phrase
-   *
-   * @throws {"Phrase not set"}
-   * Throws an error if phrase has not been set before
-   * */
-  private getPrivateKey(index = 0): proto.cosmos.crypto.secp256k1.PrivKey {
-    if (!this.phrase) throw new Error('Phrase not set')
-
-    return this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(index))
-  }
-
-  getSDKClient(): CosmosSDKClient {
-    return this.sdkClient
+   * @param {string} denom
+   * @returns {Asset|null} The asset of the given denomination.
+   */
+  public assetFromDenom(denom: string): Asset | null {
+    if (denom === this.getDenom(AssetATOM)) return AssetATOM
+    // IBC assets
+    if (denom.startsWith('ibc/'))
+      // Note: Don't use `assetFromString` here, it will interpret `/` as synth
+      return {
+        chain: GAIAChain,
+        symbol: denom,
+        // TODO (xchain-contributors)
+        // Get readable ticker for IBC assets from denom #600 https://github.com/xchainjs/xchainjs-lib/issues/600
+        // At the meantime ticker will be empty
+        ticker: '',
+        synth: false,
+      }
+    return null
   }
 
   /**
-   * @deprecated this function eventually will be removed use getAddressAsync instead
-   */
-  getAddress(index = 0): string {
-    if (!this.phrase) throw new Error('Phrase not set')
-
-    return this.getSDKClient().getAddressFromMnemonic(this.phrase, this.getFullDerivationPath(index))
-  }
-
-  /**
-   * Get the current address.
+   * Get denomination from Asset
    *
-   * @returns {Address} The current address.
-   *
-   * @throws {Error} Thrown if phrase has not been set before. A phrase is needed to create a wallet and to derive an address from it.
+   * @param {Asset} asset
+   * @returns {string} The denomination of the given asset.
    */
-  async getAddressAsync(index = 0): Promise<string> {
-    return this.getAddress(index)
-  }
-
-  /**
-   * Validate the given address.
-   *
-   * @param {Address} address
-   * @returns {boolean} `true` or `false`
-   */
-  validateAddress(address: Address): boolean {
-    return this.getSDKClient().checkAddress(address)
-  }
-
-  /**
-   * Get the balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
-   * @returns {Balance[]} The balance of the address.
-   */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
-    const coins = await this.getSDKClient().getBalance(address)
-
-    const balances = coins
-      .reduce((acc: Balance[], { denom, amount }) => {
-        const asset = getAsset(denom)
-        return asset ? [...acc, { asset, amount: baseAmount(amount || '0', COSMOS_DECIMAL) }] : acc
-      }, [])
-      .filter(({ asset: balanceAsset }) => !assets || assets.filter((asset) => eqAsset(balanceAsset, asset)).length)
-
-    return balances
-  }
-
-  /**
-   *
-   * @returns asset info
-   */
-  getAssetInfo(): AssetInfo {
-    const assetInfo: AssetInfo = {
-      asset: AssetATOM,
-      decimal: COSMOS_DECIMAL,
-    }
-    return assetInfo
-  }
-
-  /**
-   * Get transaction history of a given address and asset with pagination options.
-   * If `asset` is not set, history will include `ATOM` txs only
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
-  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const messageAction = undefined
-    const page = (params && params.offset) || undefined
-    const limit = (params && params.limit) || undefined
-    const txMinHeight = undefined
-    const txMaxHeight = undefined
-    const asset = getAsset(params?.asset ?? '') || AssetATOM
-    const messageSender = params?.address ?? (await this.getAddressAsync())
-
-    const txHistory = await this.getSDKClient().searchTx({
-      messageAction,
-      messageSender,
-      page,
-      limit,
-      txMinHeight,
-      txMaxHeight,
-    })
-
-    return {
-      total: parseInt(txHistory.pagination?.total || '0'),
-      txs: getTxsFromHistory(txHistory.tx_responses || [], asset),
-    }
-  }
-
-  /**
-   * Get the transaction details of a given transaction id. Supports `ATOM` txs only.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
-  async getTransactionData(txId: string): Promise<Tx> {
-    const txResult = await this.getSDKClient().txsHashGet(txId)
-    if (!txResult || txResult.txhash === '') {
-      throw new Error('transaction not found')
-    }
-
-    const txs = getTxsFromHistory([txResult], AssetATOM)
-    if (txs.length === 0) throw new Error('transaction not found')
-
-    return txs[0]
-  }
-
-  /**
-   * Transfer balances.
-   *
-   * @param {TxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   */
-  async transfer({
-    walletIndex = 0,
-    asset = AssetATOM,
-    amount,
-    recipient,
-    memo,
-    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
-    feeAmount = DEFAULT_FEE,
-  }: TxParams & { gasLimit?: BigNumber; feeAmount?: BaseAmount }): Promise<TxHash> {
-    const sender = this.getAddress(walletIndex || 0)
-
-    const unsignedTxData = await this.prepareTx({
-      sender,
-      asset,
-      amount,
-      recipient,
-      memo,
-      gasLimit,
-      feeAmount,
-    })
-
-    const decodedTx = cosmosclient.proto.cosmos.tx.v1beta1.TxRaw.decode(
-      Buffer.from(unsignedTxData.rawUnsignedTx, 'base64'),
-    )
-
-    const privKey = this.getSDKClient().getPrivKeyFromMnemonic(this.phrase, this.getFullDerivationPath(walletIndex))
-    const authInfo = cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo.decode(decodedTx.auth_info_bytes)
-
-    if (!authInfo.signer_infos[0].public_key) {
-      authInfo.signer_infos[0].public_key = cosmosclient.codec.instanceToProtoAny(privKey.pubKey())
-    }
-
-    const txBuilder = new cosmosclient.TxBuilder(
-      this.getSDKClient().sdk,
-      cosmosclient.proto.cosmos.tx.v1beta1.TxBody.decode(decodedTx.body_bytes),
-      authInfo,
-    )
-
-    const address = cosmosclient.AccAddress.fromString(sender)
-    const { account_number: accountNumber } = await this.sdkClient.getAccount(address)
-
-    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
-
-    const signDocBytes = txBuilder.signDocBytes(accountNumber)
-    txBuilder.addSignature(privKey.sign(signDocBytes))
-
-    const signedTx = txBuilder.txBytes()
-
-    return this.broadcastTx(signedTx)
-  }
-
-  /**
-   * Transfer offline balances.
-   *
-   * @param {TxOfflineParams} params The transfer offline options.
-   * @returns {string} The signed transaction bytes.
-   */
-  async transferOffline({
-    walletIndex,
-    asset = AssetATOM,
-    amount,
-    recipient,
-    memo,
-    from_account_number,
-    from_sequence,
-    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
-    feeAmount = DEFAULT_FEE,
-  }: TxOfflineParams): Promise<string> {
-    const fromAddressIndex = walletIndex || 0
-
-    const denom = getDenom(asset)
-
-    if (!denom)
-      throw Error(`Invalid asset ${assetToString(asset)} - Only ATOM asset is currently supported to transfer`)
-
-    const fee = protoFee({ denom, amount: feeAmount, gasLimit })
-
-    return await this.getSDKClient().transferSignedOffline({
-      privkey: this.getPrivateKey(fromAddressIndex),
-      from: await this.getAddressAsync(fromAddressIndex),
-      from_account_number,
-      from_sequence,
-      to: recipient,
-      amount,
-      denom,
-      memo,
-      fee,
-    })
-  }
-  async broadcastTx(txHex: string): Promise<TxHash> {
-    return await this.getSDKClient().broadcast(txHex)
+  public getDenom(asset: Asset): string | null {
+    if (eqAsset(asset, AssetATOM)) return DENOM_ATOM
+    return null
   }
 
   /**
@@ -368,7 +127,7 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
    *
    * @returns {Fees} Current fees
    */
-  async getFees(): Promise<Fees> {
+  public async getFees(): Promise<Fees> {
     try {
       const feeRate = await this.getFeeRateFromThorchain()
       // convert decimal: 1e8 (THORChain) to 1e6 (COSMOS)
@@ -386,54 +145,127 @@ class Client extends BaseXChainClient implements CosmosClient, XChainClient {
   /**
    * Prepare transfer.
    *
-   * @param {TxParams&Address&BaseAmount&BigNumber} params The transfer options.
+   * @param {TxParams&Address} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
    */
-  async prepareTx({
+  public async prepareTx({
     sender,
     recipient,
+    asset,
     amount,
     memo,
-    asset = AssetATOM,
-    feeAmount = DEFAULT_FEE,
-    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
-  }: TxParams & { sender: Address; feeAmount?: BaseAmount; gasLimit?: BigNumber }): Promise<PreparedTx> {
-    const denom = getDenom(asset)
-
-    if (!denom)
-      throw Error(`Invalid asset ${assetToString(asset)} - Only ATOM asset is currently supported to transfer`)
-
+  }: TxParams & { sender: Address }): Promise<PreparedTx> {
     if (!this.validateAddress(sender)) throw Error('Invalid sender address')
     if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
 
-    this.sdkClient.setPrefix()
+    const denom = this.getDenom(asset || this.getAssetInfo().asset)
+    if (!denom)
+      throw Error(`Invalid asset ${asset?.symbol} - Only ${this.baseDenom} asset is currently supported to transfer`)
 
-    const address = cosmosclient.AccAddress.fromString(sender)
-    const account = await this.sdkClient.getAccount(address)
+    const demonAmount = { amount: amount.amount().toString(), denom }
 
-    const { sequence, account_number: accountNumber, pub_key: pubkey } = account
-    if (!sequence) throw Error(`Transfer failed - missing sequence`)
-    if (!accountNumber) throw Error(`Transfer failed - missing account number`)
-    const txBody = protoTxBody({ from: sender, to: recipient, amount, denom, memo })
-    const fee = protoFee({ denom, amount: feeAmount, gasLimit })
-
-    const authInfo = new cosmosclient.proto.cosmos.tx.v1beta1.AuthInfo({
-      fee,
-      signer_infos: [
-        {
-          public_key: pubkey,
-          mode_info: {
-            single: {
-              mode: cosmosclient.proto.cosmos.tx.signing.v1beta1.SignMode.SIGN_MODE_DIRECT,
+    const txBody: TxBodyEncodeObject = {
+      typeUrl: '/cosmos.tx.v1beta1.TxBody',
+      value: {
+        messages: [
+          {
+            typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER),
+            value: {
+              fromAddress: sender,
+              toAddress: recipient,
+              amount: [demonAmount],
             },
           },
-          sequence,
-        },
-      ],
+        ],
+        memo: memo,
+      },
+    }
+
+    const rawTx = TxRaw.fromPartial({
+      bodyBytes: this.registry.encode(txBody),
+    })
+    return { rawUnsignedTx: toBase64(TxRaw.encode(rawTx).finish()) }
+  }
+
+  /**
+   * Create and sign transaction without broadcasting it
+   *
+   * @deprecated Use prepare Tx instead
+   */
+  public async transferOffline({
+    walletIndex = 0,
+    recipient,
+    asset,
+    amount,
+    memo,
+    gasLimit = new BigNumber(DEFAULT_GAS_LIMIT),
+  }: TxOfflineParams & { gasLimit?: BigNumber }): Promise<string> {
+    const sender = await this.getAddressAsync(walletIndex)
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender,
+      recipient: recipient,
+      asset: asset,
+      amount: amount,
+      memo: memo,
     })
 
-    return { rawUnsignedTx: new cosmosclient.TxBuilder(this.sdkClient.sdk, txBody, authInfo).txBytes() }
+    const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
+
+    const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
+      prefix: this.prefix,
+      hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex))],
+    })
+
+    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
+      registry: this.registry,
+    })
+
+    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+      return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+    })
+
+    const rawTx = await signingClient.sign(
+      sender,
+      messages,
+      {
+        amount: [],
+        gas: gasLimit.toString(),
+      },
+      unsignedTx.body.memo,
+    )
+
+    return toBase64(TxRaw.encode(rawTx).finish())
+  }
+
+  /**
+   * Get address prefix by network
+   * @param {Network} network The network of which return the prefix
+   * @returns the address prefix
+   */
+  protected getPrefix(): string {
+    return 'cosmos'
+  }
+
+  /**
+   * Get the message type url by type used by the cosmos-sdk client to make certain actions
+   * @param msgType
+   * @returns {string} the type url of the message
+   */
+  protected getMsgTypeUrlByType(msgType: MsgTypes): string {
+    const messageTypeUrls: Record<MsgTypes, string> = {
+      [MsgTypes.TRANSFER]: MSG_SEND_TYPE_URL,
+    }
+    return messageTypeUrls[msgType]
+  }
+
+  /**
+   * Returns the standard fee used by the client for an asset
+   * @param {Asset} asset the asset to retrieve the fee of
+   * @returns {StdFee} the standard fee
+   */
+  protected getStandardFee(asset: Asset): StdFee {
+    const denom = this.getDenom(asset)
+    const defaultGasPrice = GasPrice.fromString(`0.006${denom}`)
+    return calculateFee(90_000, defaultGasPrice)
   }
 }
-
-export { Client }
