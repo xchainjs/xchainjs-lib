@@ -29,6 +29,7 @@ export type SwapEstimate = {
 }
 
 export type QuoteSwapParams = {
+  fromAddress?: Address
   fromAsset: Asset
   destinationAsset: Asset
   amount: CryptoAmount

@@ -82,3 +82,9 @@ export type UpdateThornameParams = {
   preferredAsset?: Asset
   expirity?: Date
 }
+
+export type IsApprovedParams = {
+  asset: Asset
+  amount: CryptoAmount
+  address: Address
+}
