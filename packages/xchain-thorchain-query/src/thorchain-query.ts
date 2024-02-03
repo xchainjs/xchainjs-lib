@@ -23,6 +23,7 @@ import {
   EstimateAddSaver,
   EstimateWithdrawLP,
   EstimateWithdrawSaver,
+  InboundDetail,
   LiquidityPosition,
   LoanCloseParams,
   LoanCloseQuote,
@@ -1188,5 +1189,23 @@ export class ThorchainQuery {
       memo: thornameMemo,
       value: totalCost,
     }
+  }
+
+  /**
+   * Get inbound addresses details
+   * @returns Inbound details
+   */
+  public async getInboundDetails(): Promise<Record<string, InboundDetail>> {
+    return this.thorchainCache.getInboundDetails()
+  }
+
+  /**
+   * Get chain inbound address details
+   * @returns Inbound details
+   */
+  public async getChainInboundDetails(chain: string): Promise<InboundDetail> {
+    const inboundDetails = await this.getInboundDetails()
+    if (!inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
+    return inboundDetails[chain]
   }
 }
