@@ -1,5 +1,8 @@
-import { AssetInfo, Network, TxParams } from '@xchainjs/xchain-client'
+import { StdFee } from '@cosmjs/stargate'
+import { AssetInfo, Network, PreparedTx, TxParams } from '@xchainjs/xchain-client'
 import { Asset, assetFromString, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+
+import Client from '../src/client'
 
 const AssetKUJI = assetFromString('KUJI.KUJI') as Asset
 const AssetTokenKuji = {
@@ -9,11 +12,18 @@ const AssetTokenKuji = {
   synth: false,
 }
 
-import Client from '../src/client'
-
 let xchainClient: Client
 
 class CustomSdkClient extends Client {
+  public prepareTx(): Promise<PreparedTx> {
+    throw new Error('Method not implemented.')
+  }
+  protected getMsgTypeUrlByType(): string {
+    throw new Error('Method not implemented.')
+  }
+  protected getStandardFee(): StdFee {
+    throw new Error('Method not implemented.')
+  }
   getAssetInfo(): AssetInfo {
     throw new Error('Method not implemented.')
   }
@@ -61,6 +71,7 @@ describe('Cosmos SDK client Integration Tests', () => {
         [Network.Stagenet]: 'wip',
         [Network.Mainnet]: 'wip',
       },
+      registryTypes: [],
     }
     xchainClient = new CustomSdkClient(settings)
   })
