@@ -68,4 +68,13 @@ export const getChainId = async (nodeUrl: string): Promise<string> => {
  * Get address prefix by network
  * @returns the address prefix
  */
-export const getPrefix = () => 'maya'
+export const getPrefix = (network: Network) => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'maya'
+    case Network.Stagenet:
+      return 'smaya'
+    case Network.Testnet:
+      return 'tmaya'
+  }
+}

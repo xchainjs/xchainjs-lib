@@ -9,7 +9,7 @@ import {
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
 import { SigningStargateClient } from '@cosmjs/stargate'
-import { AssetInfo, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
+import { AssetInfo, Network, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
 import {
   Client as CosmosSDKClient,
   CosmosSdkClientParams,
@@ -71,8 +71,8 @@ export class Client extends CosmosSDKClient implements MayachainClient {
    * Get address prefix by network
    * @returns the address prefix
    */
-  protected getPrefix(): string {
-    return getPrefix()
+  protected getPrefix(network: Network): string {
+    return getPrefix(network)
   }
 
   /**
