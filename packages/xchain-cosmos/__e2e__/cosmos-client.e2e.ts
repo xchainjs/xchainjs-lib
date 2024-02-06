@@ -1,7 +1,19 @@
+import { StdFee } from '@cosmjs/amino'
+import { fromBase64, toBase64 } from '@cosmjs/encoding'
+import {
+  DecodedTxRaw,
+  DirectSecp256k1HdWallet,
+  EncodeObject,
+  coins,
+  decodeTxRaw,
+  makeCosmoshubPath,
+} from '@cosmjs/proto-signing'
+import { SigningStargateClient } from '@cosmjs/stargate'
 import { Network, Tx } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
-import { COSMOS_DECIMAL, Client } from '../src'
+import { COSMOS_DECIMAL, Client, getDefaultClientUrls } from '../src'
 
 const getPrintableTx = (tx: Tx) => {
   return {
@@ -92,5 +104,45 @@ describe('Cosmos client e2e', () => {
       amount: assetToBase(assetAmount(0.1, COSMOS_DECIMAL)),
     })
     console.log(txRaw)
+  })
+
+  it('Should prepare transaction, sign externally and broadcast', async () => {
+    const senderIndex = 0
+    const sender = await client.getAddressAsync(senderIndex)
+    const recipient = await client.getAddressAsync(1)
+    const memo = 'test'
+
+    const { rawUnsignedTx } = await client.prepareTx({
+      sender,
+      recipient,
+      amount: assetToBase(assetAmount(0.1, 6)),
+      memo,
+    })
+
+    const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
+
+    const signer = await DirectSecp256k1HdWallet.fromMnemonic(process.env.PHRASE_MAINNET as string, {
+      hdPaths: [makeCosmoshubPath(senderIndex)],
+    })
+    const signingClient = await SigningStargateClient.connectWithSigner(getDefaultClientUrls()[Network.Mainnet], signer)
+
+    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+      return { typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: signingClient.registry.decode(message) }
+    })
+
+    const feeAmount = coins(2000, 'uatom')
+    const gasLimit = 200000
+
+    const stdFee: StdFee = {
+      amount: feeAmount,
+      gas: gasLimit.toString(),
+    }
+
+    const txRaw = await signingClient.sign(sender, messages, stdFee, memo)
+    const txRawBytes = TxRaw.encode(txRaw).finish()
+    const signedRawTransaction = toBase64(txRawBytes)
+
+    const hash = await client.broadcastTx(signedRawTransaction)
+    console.log(hash)
   })
 })
