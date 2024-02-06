@@ -17,7 +17,7 @@ import {
   bech32ToBase64,
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
-import { Address, Asset, assetFromString } from '@xchainjs/xchain-util'
+import { Address, Asset, assetFromString, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
@@ -83,6 +83,17 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
       asset: AssetRUNE,
       decimal: RUNE_DECIMAL,
     }
+  }
+
+  /**
+   * Returns the number of the decimals of known assets
+   *
+   * @param {Asset} asset - Asset of which return the number of decimals
+   * @returns {number} the number of decimals of the assets
+   */
+  public getAssetDecimals(asset: Asset): number {
+    if (eqAsset(asset, AssetRUNE)) return RUNE_DECIMAL
+    return this.defaultDecimals
   }
 
   /**

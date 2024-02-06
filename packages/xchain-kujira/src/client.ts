@@ -7,7 +7,7 @@ import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes } from '@xch
 import { Address, Asset, eqAsset } from '@xchainjs/xchain-util'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
-import { AssetKUJI, AssetUSK, KUJI_DECIMAL, MSG_SEND_TYPE_URL, USK_ASSET_DENOM } from './const'
+import { AssetKUJI, AssetUSK, KUJI_DECIMAL, MSG_SEND_TYPE_URL, USK_ASSET_DENOM, USK_DECIMAL } from './const'
 import { defaultClientConfig, getDefaultExplorers } from './utils'
 
 export type KujiraClientParams = Partial<CosmosSdkClientParams>
@@ -35,6 +35,18 @@ export class Client extends CosmosSdkClient {
       decimal: KUJI_DECIMAL,
     }
     return assetInfo
+  }
+
+  /**
+   * Returns the number of the decimals of known assets
+   *
+   * @param {Asset} asset - Asset of which return the number of decimals
+   * @returns {number} the number of decimals of the assets
+   */
+  public getAssetDecimals(asset: Asset): number {
+    if (eqAsset(asset, AssetKUJI)) return KUJI_DECIMAL
+    if (eqAsset(asset, AssetUSK)) return USK_DECIMAL
+    return this.defaultDecimals
   }
 
   getDenom(asset: Asset): string | null {

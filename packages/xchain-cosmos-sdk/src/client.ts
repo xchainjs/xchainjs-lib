@@ -54,10 +54,10 @@ export enum MsgTypes {
  * Generic implementation of the XChainClient interface chains built with cosmos-sdk (https://docs.cosmos.network/) using the dependencies of the official @cosmjs monorepo.
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
-  private readonly defaultDecimals: number
   private readonly defaultFee: BaseAmount
   protected startgateClient: CachedValue<StargateClient>
   protected prefix: string
+  protected readonly defaultDecimals: number
   protected readonly clientUrls: Record<Network, string>
   protected readonly baseDenom: string
   protected readonly registry: Registry
@@ -315,7 +315,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       if (asset) {
         balances.push({
           asset,
-          amount: baseAmount(balance.amount, this.defaultDecimals),
+          amount: baseAmount(balance.amount, this.getAssetDecimals(asset)),
         })
       }
     })
@@ -429,6 +429,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   abstract getExplorerTxUrl(txID: string): string
   abstract assetFromDenom(denom: string): Asset | null
   abstract getDenom(asset: Asset): string | null
+  public abstract getAssetDecimals(asset: Asset): number
   protected abstract getMsgTypeUrlByType(msgType: MsgTypes): string
   protected abstract getStandardFee(asset: Asset): StdFee
   protected abstract getPrefix(network: Network): string

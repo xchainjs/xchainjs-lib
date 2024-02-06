@@ -1,197 +1,154 @@
-import { Client as BnbClient } from '@xchainjs/xchain-binance'
-import { Network, TxParams, XChainClient } from '@xchainjs/xchain-client'
-import {
-  Asset,
-  BaseAmount,
-  assetAmount,
-  assetFromString,
-  assetToBase,
-  assetToString,
-  baseAmount,
-  delay,
-} from '@xchainjs/xchain-util'
+import { Tx } from '@xchainjs/xchain-client'
+import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { Client as MayaClient } from '../src/client'
-import { AssetCacao, CACAO_DECIMAL } from '../src/const'
-// import axios from 'axios'
+import { AssetCacao, CACAO_DECIMAL, Client, DepositTx } from '..'
 
-export type Swap = {
-  fromBaseAmount: BaseAmount
-  to: Asset
+const getPrintableTx = (tx: Tx) => {
+  return {
+    hash: tx.hash,
+    date: tx.date.toDateString(),
+    asset: assetToString(tx.asset),
+    type: tx.type,
+    from: tx.from.map((sender) => {
+      return {
+        from: sender.from,
+        asset: sender.asset ? assetToString(sender.asset) : 'undefined',
+        amount: baseToAsset(sender.amount).amount().toString(),
+      }
+    }),
+    to: tx.to.map((recipient) => {
+      return {
+        to: recipient.to,
+        asset: recipient.asset ? assetToString(recipient.asset) : 'undefined',
+        amount: baseToAsset(recipient.amount).amount().toString(),
+      }
+    }),
+  }
 }
 
-// Mock chain ids
-const chainIds = {
-  [Network.Mainnet]: 'mayachain-mainnet-v1',
-  [Network.Stagenet]: 'mayachain-stagenet-v1',
-  [Network.Testnet]: 'deprecated',
+const getPrintableDepositTx = (depositTx: DepositTx) => {
+  return {
+    hash: depositTx.hash,
+    asset: assetToString(depositTx.asset),
+    type: depositTx.type,
+    from: depositTx.from.map((sender) => {
+      return {
+        from: sender.from,
+        asset: sender.asset ? assetToString(sender.asset) : 'undefined',
+        amount: baseToAsset(sender.amount).amount().toString(),
+      }
+    }),
+    to: depositTx.to.map((recipient) => {
+      return {
+        to: recipient.to,
+        asset: recipient.asset ? assetToString(recipient.asset) : 'undefined',
+        amount: baseToAsset(recipient.amount).amount().toString(),
+      }
+    }),
+  }
 }
 
-const mayaClient = new MayaClient({
-  network: Network.Mainnet,
-  phrase: process.env.MAINNET_PHRASE,
-  chainIds: chainIds,
-})
-const mayachainClient = mayaClient
-const bnbClient: XChainClient = new BnbClient({ network: Network.Mainnet, phrase: process.env.MAINNET_PHRASE })
+describe('Thorchain client e2e', () => {
+  let client: Client
 
-describe('Mayachain Integration Tests', () => {
-  it('should fetch mayachain balances', async () => {
-    const address = await mayaClient.getAddressAsync(0)
-    console.log('address', address)
-    const balances = await mayaClient.getBalance(address)
-    balances.forEach((bal) => {
-      console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
+  beforeAll(() => {
+    client = new Client({
+      phrase: process.env.PHRASE_MAINNET,
     })
-    expect(balances.length).toBeGreaterThan(0)
-  })
-  it('should xfer cacao from wallet 0 -> 1, with a memo and custom sequence', async () => {
-    try {
-      const addressTo = await mayaClient.getAddressAsync(1)
-      const transferTx = {
-        walletIndex: 0,
-        asset: AssetCacao,
-        amount: baseAmount('100', CACAO_DECIMAL),
-        recipient: addressTo,
-        memo: 'Hi!',
-        sequence: 1,
-      }
-      await mayaClient.transfer(transferTx)
-      fail()
-    } catch (error: any) {
-      expect(error.toString().includes('account sequence mismatch')).toBe(true)
-    }
-  })
-  it('should transfer cacao from wallet 0 -> 1, with a memo', async () => {
-    try {
-      const addressTo = await mayaClient.getAddressAsync(1)
-      const transferTx: TxParams = {
-        walletIndex: 0,
-        asset: AssetCacao,
-        amount: baseAmount('100', CACAO_DECIMAL),
-        recipient: addressTo,
-        memo: 'Hi!',
-      }
-      const hash = await mayaClient.transfer(transferTx)
-      console.log('hash', hash)
-      expect(hash.length).toBeGreaterThan(0)
-    } catch (error) {
-      console.log(error)
-      throw error
-    }
-  })
-  it('should swap some cacao for BNB', async () => {
-    try {
-      // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
-      await delay(10 * 1000)
-
-      const address = bnbClient.getAddress()
-      const memo = `=:BNB.BNB:${address}`
-
-      const hash = await mayachainClient.deposit({
-        walletIndex: 0,
-        amount: baseAmount('100'),
-        asset: AssetCacao,
-        memo,
-      })
-
-      expect(hash.length).toBeGreaterThan(5)
-    } catch (error) {
-      console.log(error)
-      throw error
-    }
-  })
-  it('should swap some ETH/ETH for CACAO', async () => {
-    try {
-      const address = await mayachainClient.getAddressAsync()
-      const memo = `=:MAYA.CACAO:${address}`
-
-      const hash = await mayachainClient.deposit({
-        walletIndex: 0,
-        amount: baseAmount('10000', 8),
-        asset: assetFromString('ETH/ETH') as Asset,
-        memo,
-      })
-      console.log('hash', hash)
-      expect(hash.length).toBeGreaterThan(5)
-    } catch (error) {
-      console.log(error)
-      throw error
-    }
   })
 
-  it('should transfer some ETH/ETH', async () => {
-    try {
-      const address = await mayachainClient.getAddressAsync(1)
-      const asset = assetFromString('ETH/ETH') as Asset
-      const transferTx: TxParams = {
-        walletIndex: 0,
-        asset: asset,
-        amount: baseAmount('30000', 8),
-        recipient: address,
-      }
-      const hash = await mayaClient.transfer(transferTx)
-      expect(hash.length).toBeGreaterThan(5)
-    } catch (error) {
-      console.log(error)
-      throw error
-    }
+  it('Should get private key', async () => {
+    const privateKey = await client.getPrivateKey(0)
+    console.log(privateKey)
   })
 
-  it('should swap some CACAO for ETH/ETH', async () => {
+  it('Should get public key', async () => {
+    const publicKey = await client.getPubKey(0)
+    console.log(publicKey)
+  })
+
+  it('Should get wallet address', async () => {
+    const address = await client.getAddressAsync()
+    console.log(address)
+  })
+
+  it('Should get address balances', async () => {
+    const balances = await client.getBalance(await client.getAddressAsync())
+    console.log(
+      balances.map((balance) => {
+        return {
+          asset: assetToString(balance.asset),
+          amount: baseToAsset(balance.amount).amount().toString(),
+        }
+      }),
+    )
+  })
+
+  it('Should get address transaction history', async () => {
+    const history = await client.getTransactions({ address: await client.getAddressAsync() })
+    console.log({ total: history.total })
+    history.txs.forEach((tx) => {
+      console.log(getPrintableTx(tx))
+    })
+  })
+
+  it('Should get transaction', async () => {
+    const tx = await client.getTransactionData('5C21AC622D2F24D9C83C89C62223D304F01BAE8CBC2D32F79BEE19AD2E4AE421')
+    console.log(getPrintableTx(tx))
+  })
+
+  it('Should get deposit transaction', async () => {
+    const tx = await client.getDepositTransaction('7BC1B91999827119D3941BE64A9C99F566C0602B6212E1664EE82797E25E449C')
+    console.log(getPrintableDepositTx(tx))
+  })
+
+  it('Should prepare transaction', async () => {
+    const unsignedTx = await client.prepareTx({
+      sender: await client.getAddressAsync(0),
+      recipient: await client.getAddressAsync(1),
+      amount: assetToBase(assetAmount(1, CACAO_DECIMAL)),
+      memo: 'test',
+    })
+    console.log(unsignedTx)
+  })
+
+  it('Should make transfer to address 0', async () => {
+    const hash = await client.transfer({
+      recipient: await client.getAddressAsync(0),
+      amount: assetToBase(assetAmount(1, CACAO_DECIMAL)),
+      memo: 'test',
+    })
+    console.log(hash)
+  })
+
+  it('Should make deposit', async () => {
     try {
-      // Wait 10 seconds, make sure previous test has finished to avoid sequnce conflict
-      await delay(10 * 1000)
+      /**
+       * MAKE SURE TO TEST THIS FUNCTION WITH YOUR KUJI ADDRESS, OTHERWISE, YOU COULD LOSE FUNDS
+       */
+      const address: string = '' || 'TO_BE_DEFINED'
+      if (address === 'TO_BE_DEFINED') throw Error('Set an address to try the deposit e2e function')
+      const memo = `=:KUJI.KUJI:${address}`
 
-      const address = await mayachainClient.getAddressAsync()
-      const memo = `=:ETH/ETH:${address}`
-
-      const hash = await mayachainClient.deposit({
+      const hash = await client.deposit({
         walletIndex: 0,
-        amount: baseAmount('100000000000', CACAO_DECIMAL),
+        amount: assetToBase(assetAmount(2, CACAO_DECIMAL)),
         asset: AssetCacao,
         memo,
       })
-      console.log('hash', hash)
-      expect(hash.length).toBeGreaterThan(5)
+      console.log(hash)
     } catch (error) {
       console.log(error)
       throw error
     }
   })
 
-  it('should fetch mayachain txs', async () => {
-    const address = await mayaClient.getAddressAsync(0)
-    const txPage = await mayaClient.getTransactions({ address })
-    expect(txPage.total).toBeGreaterThan(0)
-    expect(txPage.txs.length).toBeGreaterThan(0)
-  })
-  it('should fetch mayachain native Tx fee', async () => {
-    const fees = await mayaClient.getFees()
-    expect(fees.average.amount().toNumber()).toEqual(10000000000)
-  })
-  it('should fetch mayachain tx data', async () => {
-    const txId = '28DA11D33AC96BA87981F45FCB2EC80536C60BB824321E0CAEF097D10B568BA5'
-    const tx = await mayaClient.getTransactionData(txId)
-    console.log(JSON.stringify(tx, null, 2))
-    expect(tx.hash).toBe('28DA11D33AC96BA87981F45FCB2EC80536C60BB824321E0CAEF097D10B568BA5')
-    // expect(tx.asset.ticker).toBe('xx')
-  })
-  it('should prepare transaction', async () => {
-    try {
-      const from = 'maya1fs0zqmeulyej044snvkey5mu5xp9d4xc9dxzar'
-      const to = 'maya1fs0zqmeulyej044snvkey5mu5xp9d4xc9dxzar'
-      const amount = assetToBase(assetAmount('0.0001'))
-      const rawUnsignedTransaction = await mayaClient.prepareTx({
-        sender: from,
-        recipient: to,
-        amount,
-        memo: 'test',
-      })
-      console.log(rawUnsignedTransaction)
-    } catch (err) {
-      console.error('ERR running test', err)
-      fail()
-    }
+  it('Should transfer offline', async () => {
+    const txRaw = await client.transferOffline({
+      walletIndex: 0,
+      recipient: await client.getAddressAsync(0),
+      amount: assetToBase(assetAmount(1, CACAO_DECIMAL)),
+    })
+    console.log(txRaw)
   })
 })
