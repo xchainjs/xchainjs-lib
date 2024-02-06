@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+### Patch Changes
+
+- ae35c36: GetTransactionData for non native asset transactions
+
 ## 0.2.1
 
 ### Patch Changes
