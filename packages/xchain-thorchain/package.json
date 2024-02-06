@@ -36,6 +36,8 @@
   "dependencies": {
     "@cosmjs/encoding": "0.31.1",
     "@cosmjs/crypto": "0.31.1",
+    "@cosmjs/proto-signing": "0.31.1",
+    "cosmjs-types": "0.8.0",
     "@xchainjs/xchain-client": "0.16.1",
     "@xchainjs/xchain-cosmos-sdk": "0.2.2",
     "@xchainjs/xchain-util": "0.13.2",
@@ -44,9 +46,7 @@
     "protobufjs": "6.11.4"
   },
   "devDependencies": {
-    "@cosmjs/amino": "0.31.1",
-    "@cosmjs/proto-signing": "0.31.1",
-    "cosmjs-types": "0.8.0"
+    "@cosmjs/amino": "0.31.1"
   },
   "publishConfig": {
     "access": "public"
