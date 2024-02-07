@@ -34,7 +34,7 @@
       <v-row class="d-flex align-center justify-center">
         <v-col cols="auto">
           <v-btn
-            href="https://github.com/mihoz-fe/xchainjs-vue3-vite"
+            href="https://github.com/xchainjs/xchainjs-lib/tree/master/examples/frameworks/vite-example"
             min-width="164"
             rel="noopener noreferrer"
             target="_blank"
