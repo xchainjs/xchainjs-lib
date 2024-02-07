@@ -1,7 +1,11 @@
+import { Network } from '@xchainjs/xchain-client/lib'
+import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 
+import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
+
 /**
- * The decimal for cosmos chain.
+ * Cosmos native asset number of decimals
  */
 export const COSMOS_DECIMAL = 6
 
@@ -31,3 +35,28 @@ export const GAIAChain = 'GAIA' as const
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
 export const AssetATOM: Asset = { chain: GAIAChain, symbol: 'ATOM', ticker: 'ATOM', synth: false }
+
+/**
+ * Native Cosmos asset denom
+ */
+export const ATOM_DENOM = 'uatom' as const
+
+/**
+ * Message type url used to make transactions
+ */
+export const MSG_SEND_TYPE_URL = '/cosmos.bank.v1beta1.MsgSend' as const
+
+/**
+ * Default Cosmos client params
+ */
+export const defaultClientConfig: CosmosSdkClientParams = {
+  chain: GAIAChain,
+  network: Network.Mainnet,
+  clientUrls: getDefaultClientUrls(),
+  rootDerivationPaths: getDefaultRootDerivationPaths(),
+  prefix: 'cosmos',
+  defaultDecimals: 6,
+  defaultFee: DEFAULT_FEE,
+  baseDenom: 'uatom',
+  registryTypes: [],
+}
