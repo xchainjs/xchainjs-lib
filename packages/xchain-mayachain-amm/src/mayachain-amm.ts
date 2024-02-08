@@ -196,7 +196,7 @@ export class MayachainAMM {
       amount?.baseAmount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
       inboundDetails.router,
     )
-      // Return transaction hash and URL
+    // Return transaction hash and URL
     return {
       hash: tx.hash,
       url: await this.wallet.getExplorerTxUrl(asset.chain, tx.hash),

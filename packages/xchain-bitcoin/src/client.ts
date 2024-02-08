@@ -16,14 +16,14 @@ import {
   blockstreamExplorerProviders,
 } from './const'
 import * as Utils from './utils'
-
+// Default parameters for the Bitcoin UTXO client
 export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
   dataProviders: [BitgoProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+    [Network.Mainnet]: `84'/0'/0'/0/`, // Not BIP44 compliant but compatible with pre-HD wallets
     [Network.Testnet]: `84'/1'/0'/0/`,
     [Network.Stagenet]: `84'/0'/0'/0/`,
   },
@@ -38,8 +38,7 @@ export const defaultBTCParams: UtxoClientParams = {
 abstract class Client extends UTXOClient {
   /**
    * Constructor
-   * Client is initialised with network type
-   *
+   * Initializes the client with network type and other parameters.
    * @param {UtxoClientParams} params
    */
   constructor(params = defaultBTCParams) {
@@ -54,8 +53,8 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   *
-   * @returns BTC asset info
+   * Get BTC asset info.
+   * @returns {AssetInfo} BTC asset information.
    */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
@@ -66,20 +65,18 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Validate the given address.
-   *
-   * @param {Address} address
-   * @returns {boolean} `true` or `false`
+   * Validate the given Bitcoin address.
+   * @param {string} address Bitcoin address to validate.
+   * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
 
   /**
-   * Compile memo.
-   *
-   * @param {string} memo The memo to be compiled.
-   * @returns {Buffer} The compiled memo.
+   * Compile memo into a buffer.
+   * @param {string} memo Memo to compile.
+   * @returns {Buffer} Compiled memo.
    */
   protected compileMemo(memo: string): Buffer {
     const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
@@ -87,18 +84,19 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Get the transaction fee.
-   *
-   * @param {UTXO[]} inputs The UTXOs.
-   * @param {FeeRate} feeRate The fee rate.
-   * @param {Buffer} data The compiled memo (Optional).
-   * @returns {number} The fee amount.
+   * Get transaction fee from UTXOs.
+   * @param {UTXO[]} inputs UTXOs to calculate fee from.
+   * @param {FeeRate} feeRate Fee rate.
+   * @param {Buffer | null} data Compiled memo (Optional).
+   * @returns {number} Transaction fee.
    */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+    // Calculate input size based on inputs
     const inputSizeBasedOnInputs =
       inputs.length > 0
         ? inputs.reduce((a, x) => a + Utils.inputBytes(x), 0) + inputs.length // +1 byte for each input signature
         : 0
+    // Calculate sum
     let sum =
       Utils.TX_EMPTY_SIZE +
       inputSizeBasedOnInputs +
@@ -110,12 +108,13 @@ abstract class Client extends UTXOClient {
     if (data) {
       sum += Utils.TX_OUTPUT_BASE + data.length
     }
+    // Calculate fee
     const fee = sum * feeRate
     return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
   }
 
   /**
-   *
+   * Build a Bitcoin transaction.*
    * @param param0
    * @deprecated
    */
@@ -131,37 +130,43 @@ abstract class Client extends UTXOClient {
     sender: Address
     spendPendingUTXO?: boolean
     withTxHex?: boolean
-  }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+    }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+    // Check memo length
     if (memo && memo.length > 80) {
       throw new Error('memo too long, must not be longer than 80 chars.')
     }
+    // This section of the code is responsible for preparing a transaction by building a Bitcoin PSBT (Partially Signed Bitcoin Transaction).
     if (!this.validateAddress(recipient)) throw new Error('Invalid address')
-    // search only confirmed UTXOs if pending UTXO is not allowed
+    // Determine whether to only use confirmed UTXOs or include pending UTXOs based on the spendPendingUTXO flag.
     const confirmedOnly = !spendPendingUTXO
+    // Scan UTXOs associated with the sender's address.
     const utxos = await this.scanUTXOs(sender, confirmedOnly)
+    // Throw an error if there are no available UTXOs to cover the transaction.
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
+    // Round up the fee rate to the nearest integer.
     const feeRateWhole = Math.ceil(feeRate)
+    // Compile the memo into a Buffer if provided.
     const compiledMemo = memo ? this.compileMemo(memo) : null
-
+    // Initialize an array to store the target outputs of the transaction.
     const targetOutputs = []
 
-    //1. add output amount and recipient to targets
+    // 1. Add the recipient address and amount to the target outputs.
     targetOutputs.push({
       address: recipient,
       value: amount.amount().toNumber(),
     })
-    //2. add output memo to targets (optional)
+    // 2. Add the compiled memo to the target outputs if it exists.
     if (compiledMemo) {
       targetOutputs.push({ script: compiledMemo, value: 0 })
     }
+    // Use the coinselect library to determine the inputs and outputs for the transaction.
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-
-    // .inputs and .outputs will be undefined if no solution was found
+    // If no suitable inputs or outputs are found, throw an error indicating insufficient balance.
     if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
-
+    // Initialize a new Bitcoin PSBT object.
     const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) }) // Network-specific
 
-    // psbt add input from accumulative inputs
+    // Add inputs to the PSBT from the accumulated inputs.
     inputs.forEach((utxo: UTXO) =>
       psbt.addInput({
         hash: utxo.hash,
@@ -170,23 +175,24 @@ abstract class Client extends UTXOClient {
       }),
     )
 
-    // psbt add outputs from accumulative outputs
+    // Add outputs to the PSBT from the accumulated outputs.
     outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
+       // If the output address is not specified, it's considered a change address and set to the sender's address.
       if (!output.address) {
         //an empty address means this is the  change ddress
         output.address = sender
       }
+      // Add the output to the PSBT.
       if (!output.script) {
         psbt.addOutput(output)
       } else {
-        //we need to add the compiled memo this way to
-        //avoid dust error tx when accumulating memo output with 0 value
+        // If the output is a memo, add it to the PSBT to avoid dust error.
         if (compiledMemo) {
           psbt.addOutput({ script: compiledMemo, value: 0 })
         }
       }
     })
-
+    // Return the prepared transaction data including the PSBT, UTXOs, and inputs.
     return { psbt, utxos, inputs }
   }
 
@@ -207,7 +213,8 @@ abstract class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-  }): Promise<PreparedTx> {
+    }): Promise<PreparedTx> {
+    // Build the transaction using the provided parameters.
     const { psbt, utxos } = await this.buildTx({
       sender,
       recipient,
@@ -216,7 +223,7 @@ abstract class Client extends UTXOClient {
       memo,
       spendPendingUTXO,
     })
-
+    // Return the raw unsigned transaction (PSBT) and associated UTXOs.
     return { rawUnsignedTx: psbt.toBase64(), utxos }
   }
 }

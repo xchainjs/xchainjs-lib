@@ -1,40 +1,30 @@
+// Import necessary modules and classes from external packages and files
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
+// Define constants related to Arbitrum
 export const ARB_DECIMAL = 18
-
 export const LOWER_FEE_BOUND = 100_000_000
 export const UPPER_FEE_BOUND = 1_000_000_000
-
 export const ARB_GAS_ASSET_DECIMAL = 18
-
-/**
- * Chain identifier for ARB.
- *
- */
 export const ARBChain = 'ARB' as const
-
-/**
- * Base "chain" asset of Arbitrum chain.
- *
- */
 export const AssetARB: Asset = { chain: ARBChain, symbol: 'ARB', ticker: 'ETH', synth: false }
 
-// =====Ethers providers=====
+// Define JSON-RPC providers for mainnet and testnet
 const ARBITRUM_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc')
 const ARBITRUM_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://goerli-rollup.arbitrum.io/rpc')
 
+// Define ethers providers for different networks
 const ethersJSProviders = {
   [Network.Mainnet]: ARBITRUM_MAINNET_ETHERS_PROVIDER,
   [Network.Testnet]: ARBITRUM_TESTNET_ETHERS_PROVIDER,
   [Network.Stagenet]: ARBITRUM_MAINNET_ETHERS_PROVIDER,
 }
 
-// =====ONLINE providers=====
-
+// Define online providers (Etherscan) for mainnet and testnet
 const ARB_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   ARBITRUM_MAINNET_ETHERS_PROVIDER,
   'https://api.arbiscan.io',
@@ -53,36 +43,41 @@ const ARB_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   18,
 )
 
+// Define providers for different networks
 const arbProviders = {
   [Network.Mainnet]: ARB_ONLINE_PROVIDER_MAINNET,
   [Network.Testnet]: ARB_ONLINE_PROVIDER_TESTNET,
   [Network.Stagenet]: ARB_ONLINE_PROVIDER_MAINNET,
 }
 
-// =====Explorers=====
+// Define explorer providers for mainnet and testnet
 const ARB_MAINNET_EXPLORER = new ExplorerProvider(
   'https://arbiscan.io/',
   'https://arbiscan.io/address/%%ADDRESS%%',
   'https://arbiscan.io/tx/%%TX_ID%%',
 )
+
 const ARB_TESTNET_EXPLORER = new ExplorerProvider(
   'https://goerli.arbiscan.io',
   'https://goerli.arbiscan.io/address/%%ADDRESS%%',
   'https://goerli.arbiscan.io/tx/%%TX_ID%%',
 )
+
+// Define explorer providers for different networks
 const arbExplorerProviders = {
   [Network.Mainnet]: ARB_MAINNET_EXPLORER,
   [Network.Testnet]: ARB_TESTNET_EXPLORER,
   [Network.Stagenet]: ARB_MAINNET_EXPLORER,
 }
-// =====Explorers=====
 
+// Define root derivation paths for different networks
 const ethRootDerivationPaths = {
   [Network.Mainnet]: `m/44'/60'/0'/0/`,
   [Network.Testnet]: `m/44'/60'/0'/0/`,
   [Network.Stagenet]: `m/44'/60'/0'/0/`,
 }
 
+// Define default parameters for the Arbitrum client
 const defaults = {
   [Network.Mainnet]: {
     approveGasLimit: BigNumber.from(200000),
@@ -104,6 +99,7 @@ const defaults = {
   },
 }
 
+// Define the default parameters for the Arbitrum client
 export const defaultArbParams: EVMClientParams = {
   chain: ARBChain,
   gasAsset: AssetARB,
