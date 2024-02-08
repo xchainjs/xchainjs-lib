@@ -28,11 +28,11 @@ const STAGENET_THORNODE_API_BASE = 'https://stagenet-thornode.ninerealms.com/tho
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 
 export abstract class BaseXChainClient implements XChainClient {
-  protected chain: Chain; // The blockchain chain identifier
-  protected network: Network; // The network (e.g., Mainnet, Testnet, Stagenet)
-  protected feeBounds: FeeBounds; // The fee bounds for transactions
-  protected phrase = ''; // The mnemonic phrase used for wallet generation
-  protected rootDerivationPaths: RootDerivationPaths | undefined; // The root derivation paths for HD wallets
+  protected chain: Chain // The blockchain chain identifier
+  protected network: Network // The network (e.g., Mainnet, Testnet, Stagenet)
+  protected feeBounds: FeeBounds // The fee bounds for transactions
+  protected phrase = '' // The mnemonic phrase used for wallet generation
+  protected rootDerivationPaths: RootDerivationPaths | undefined // The root derivation paths for HD wallets
 
   /**
    * Constructor for the BaseXChainClient class.
@@ -43,21 +43,21 @@ export abstract class BaseXChainClient implements XChainClient {
    */
   constructor(chain: Chain, params: XChainClientParams) {
     // Initialize class properties
-    this.chain = chain;
-    this.network = params.network || Network.Testnet;
-    this.feeBounds = params.feeBounds || { lower: 1, upper: Infinity };
+    this.chain = chain
+    this.network = params.network || Network.Testnet
+    this.feeBounds = params.feeBounds || { lower: 1, upper: Infinity }
 
     // Warn if using Stagenet for real assets
-    if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!');
+    if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
 
-    if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths;
+    if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
 
     // Set the mnemonic phrase if provided
     if (params.phrase) {
       if (!validatePhrase(params.phrase)) {
-        throw new Error('Invalid phrase');
+        throw new Error('Invalid phrase')
       }
-      this.phrase = params.phrase;
+      this.phrase = params.phrase
     }
   }
 
@@ -69,12 +69,12 @@ export abstract class BaseXChainClient implements XChainClient {
    */
   public setNetwork(network: Network): void {
     if (!network) {
-      throw new Error('Network must be provided');
+      throw new Error('Network must be provided')
     }
-    this.network = network;
+    this.network = network
 
     // Warn if using Stagenet for real assets
-    if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!');
+    if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
   }
 
   /**
@@ -82,7 +82,7 @@ export abstract class BaseXChainClient implements XChainClient {
    * @returns {Network} The current network
    */
   public getNetwork(): Network {
-    return this.network;
+    return this.network
   }
 
   /**
@@ -115,6 +115,7 @@ export abstract class BaseXChainClient implements XChainClient {
           return TESTNET_THORNODE_API_BASE
       }
     })()
+    return (await axios.get(url + endpoint)).data
   }
 
   /**
@@ -149,22 +150,22 @@ export abstract class BaseXChainClient implements XChainClient {
    * @returns {void}
    */
   public purgeClient(): void {
-    this.phrase = '';
+    this.phrase = ''
   }
 
   // Abstract methods that must be implemented by concrete XChain clients
-  abstract getFees(): Promise<Fees>;
-  abstract getAddress(walletIndex?: number): string;
-  abstract getAddressAsync(walletIndex?: number): Promise<string>;
-  abstract getExplorerUrl(): string;
-  abstract getExplorerAddressUrl(address: string): string;
-  abstract getExplorerTxUrl(txID: string): string;
-  abstract validateAddress(address: string): boolean;
-  abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>;
-  abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>;
-  abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>;
-  abstract transfer(params: TxParams): Promise<string>;
-  abstract broadcastTx(txHex: string): Promise<TxHash>;
-  abstract getAssetInfo(): AssetInfo;
-  abstract prepareTx(params: TxParams): Promise<PreparedTx>;
+  abstract getFees(): Promise<Fees>
+  abstract getAddress(walletIndex?: number): string
+  abstract getAddressAsync(walletIndex?: number): Promise<string>
+  abstract getExplorerUrl(): string
+  abstract getExplorerAddressUrl(address: string): string
+  abstract getExplorerTxUrl(txID: string): string
+  abstract validateAddress(address: string): boolean
+  abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>
+  abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
+  abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
+  abstract transfer(params: TxParams): Promise<string>
+  abstract broadcastTx(txHex: string): Promise<TxHash>
+  abstract getAssetInfo(): AssetInfo
+  abstract prepareTx(params: TxParams): Promise<PreparedTx>
 }
