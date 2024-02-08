@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+### Patch Changes
+
+- ef2d8e2: getAssetDecimals abstract function
+
 ## 0.2.2
 
 ### Patch Changes

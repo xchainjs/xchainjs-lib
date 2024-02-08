@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.11
+
+### Patch Changes
+
+- ef2d8e2: getAssetDecimals function
+- Updated dependencies [ef2d8e2]
+  - @xchainjs/xchain-cosmos-sdk@0.2.3
+
 ## 0.1.10
 
 ### Patch Changes
