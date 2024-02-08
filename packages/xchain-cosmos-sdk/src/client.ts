@@ -39,13 +39,13 @@ import { makeClientPath } from './utils'
  * Represents the parameters required to configure a Cosmos SDK client.
  */
 export type CosmosSdkClientParams = XChainClientParams & {
-  chain: Chain; // The chain identifier
-  clientUrls: Record<Network, string>; // URLs for connecting to the chain's client
-  prefix: string; // The prefix used for generating addresses
-  defaultDecimals: number; // Default number of decimals for assets
-  defaultFee: BaseAmount; // Default fee structure
-  baseDenom: string; // Base denomination
-  registryTypes: Iterable<[string, GeneratedType]>; // Custom registry types
+  chain: Chain // The chain identifier
+  clientUrls: Record<Network, string> // URLs for connecting to the chain's client
+  prefix: string // The prefix used for generating addresses
+  defaultDecimals: number // Default number of decimals for assets
+  defaultFee: BaseAmount // Default fee structure
+  baseDenom: string // Base denomination
+  registryTypes: Iterable<[string, GeneratedType]> // Custom registry types
 }
 /**
  * Enum representing different message types for transactions.
@@ -59,29 +59,29 @@ export enum MsgTypes {
  * Uses dependencies from the official @cosmjs monorepo.
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
-  private readonly defaultFee: BaseAmount; // Default fee structure
-  protected startgateClient: CachedValue<StargateClient>; // Cached instance of StargateClient
-  protected prefix: string; // Address prefix
-  protected readonly defaultDecimals: number; // Default number of decimals for assets
-  protected readonly clientUrls: Record<Network, string>; // URLs for connecting to the chain's client
-  protected readonly baseDenom: string; // Base denomination
-  protected readonly registry: Registry; // Registry instance for encoding and decoding data
+  private readonly defaultFee: BaseAmount // Default fee structure
+  protected startgateClient: CachedValue<StargateClient> // Cached instance of StargateClient
+  protected prefix: string // Address prefix
+  protected readonly defaultDecimals: number // Default number of decimals for assets
+  protected readonly clientUrls: Record<Network, string> // URLs for connecting to the chain's client
+  protected readonly baseDenom: string // Base denomination
+  protected readonly registry: Registry // Registry instance for encoding and decoding data
 
   /**
    * Constructor for initializing the Cosmos SDK client.
    * @param {CosmosSdkClientParams} params Configuration parameters for the client
    */
   constructor(params: CosmosSdkClientParams) {
-    super(params.chain, params); // Call the constructor of the superclass (BaseXChainClient)
-    this.clientUrls = params.clientUrls; // Assign client URLs
-    this.prefix = this.getPrefix(this.getNetwork()); // Assign address prefix based on network
-    this.defaultDecimals = params.defaultDecimals; // Assign default number of decimals
-    this.defaultFee = params.defaultFee; // Assign default fee structure
-    this.baseDenom = params.baseDenom; // Assign base denomination
-    this.registry = new Registry([...defaultRegistryTypes, ...params.registryTypes]); // Create a new registry
-    this.startgateClient = new CachedValue<StargateClient>(() =>
-      this.connectClient(this.clientUrls[params.network || Network.Mainnet]), // Initialize StargateClient
-    );
+    super(params.chain, params) // Call the constructor of the superclass (BaseXChainClient)
+    this.clientUrls = params.clientUrls // Assign client URLs
+    this.prefix = this.getPrefix(this.getNetwork()) // Assign address prefix based on network
+    this.defaultDecimals = params.defaultDecimals // Assign default number of decimals
+    this.defaultFee = params.defaultFee // Assign default fee structure
+    this.baseDenom = params.baseDenom // Assign base denomination
+    this.registry = new Registry([...defaultRegistryTypes, ...params.registryTypes]) // Create a new registry
+    this.startgateClient = new CachedValue<StargateClient>(
+      () => this.connectClient(this.clientUrls[params.network || Network.Mainnet]), // Initialize StargateClient
+    )
   }
   /**
    * Connects the client to a given client URL.
@@ -99,9 +99,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * @returns {void}
    */
   public setNetwork(network: Network): void {
-    super.setNetwork(network); // Call the superclass method to set the network
-    this.startgateClient = new CachedValue<StargateClient>(() => this.connectClient(this.clientUrls[network])); // Reconnect with the new network
-    this.prefix = this.getPrefix(network); // Update the address prefix
+    super.setNetwork(network) // Call the superclass method to set the network
+    this.startgateClient = new CachedValue<StargateClient>(() => this.connectClient(this.clientUrls[network])) // Reconnect with the new network
+    this.prefix = this.getPrefix(network) // Update the address prefix
   }
 
   /**
@@ -117,9 +117,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       const match = amountAndDenom.match(regex)
 
       if (match) {
-        const amount = match[1]; // Extract the amount
-        const denom = match[2]; // Extract the denomination
-        amounAndDenomParsed.push({ amount, denom });
+        const amount = match[1] // Extract the amount
+        const denom = match[2] // Extract the denomination
+        amounAndDenomParsed.push({ amount, denom })
       }
     })
     return amounAndDenomParsed
@@ -271,10 +271,10 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   /**
- * Get the address derived from the provided phrase.
- * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
- * @returns {string} The user address at the specified walletIndex.
- */
+   * Get the address derived from the provided phrase.
+   * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
+   * @returns {string} The user address at the specified walletIndex.
+   */
   public getAddress(walletIndex?: number | undefined): string {
     const seed = xchainCrypto.getSeed(this.phrase)
     const node = BIP32.fromSeed(seed)
@@ -300,10 +300,10 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   /**
- * Validates the format of the provided address.
- * @param {string} address The address to be validated.
- * @returns {boolean} Returns true if the address is valid, otherwise false.
- */
+   * Validates the format of the provided address.
+   * @param {string} address The address to be validated.
+   * @returns {boolean} Returns true if the address is valid, otherwise false.
+   */
   public validateAddress(address: string): boolean {
     try {
       const { prefix: decodedPrefix } = fromBech32(address)
@@ -378,11 +378,11 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   /**
- * Retrieves transaction data using the transaction ID.
- * @param {string} txId The identifier of the transaction.
- * @param {string | undefined} _assetAddress Ignored parameter.
- * @returns {Tx} A promise that resolves to transaction data.
- */
+   * Retrieves transaction data using the transaction ID.
+   * @param {string} txId The identifier of the transaction.
+   * @param {string | undefined} _assetAddress Ignored parameter.
+   * @returns {Tx} A promise that resolves to transaction data.
+   */
   public async getTransactionData(txId: string, _assetAddress?: string | undefined): Promise<Tx> {
     const client = await this.startgateClient.getValue()
     const tx = await client.getTx(txId)

@@ -186,7 +186,8 @@ export type EstimateAddLP = {
   slipPercent: BigNumber // The slip percentage
   poolShare: PoolShareDetail // The pool share detail
   lpUnits: BaseAmount // The liquidity pool units
-  inbound: { // Details of inbound liquidity
+  inbound: {
+    // Details of inbound liquidity
     fees: LPAmounts // The fees associated with inbound liquidity
   }
   runeToAssetRatio: BigNumber // The ratio of RUNE to asset

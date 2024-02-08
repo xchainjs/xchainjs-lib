@@ -12,6 +12,7 @@ import { Client } from './client'
  */
 class ClientLedger extends Client {
   // Reference to the Ledger transport object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: any // TODO: Parametrize
   private app: AppBtc | undefined
 

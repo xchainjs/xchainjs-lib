@@ -9,4 +9,3 @@ export { getDerivePath, getDefaultFees, getPrefix } from './utils'
 
 // Export specific constants from the 'const' module
 export { AssetBNB, BNBChain } from './const'
-

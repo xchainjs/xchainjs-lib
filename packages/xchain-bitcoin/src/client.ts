@@ -130,7 +130,7 @@ abstract class Client extends UTXOClient {
     sender: Address
     spendPendingUTXO?: boolean
     withTxHex?: boolean
-    }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+  }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
     // Check memo length
     if (memo && memo.length > 80) {
       throw new Error('memo too long, must not be longer than 80 chars.')
@@ -177,7 +177,7 @@ abstract class Client extends UTXOClient {
 
     // Add outputs to the PSBT from the accumulated outputs.
     outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
-       // If the output address is not specified, it's considered a change address and set to the sender's address.
+      // If the output address is not specified, it's considered a change address and set to the sender's address.
       if (!output.address) {
         //an empty address means this is the  change ddress
         output.address = sender
@@ -213,7 +213,7 @@ abstract class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-    }): Promise<PreparedTx> {
+  }): Promise<PreparedTx> {
     // Build the transaction using the provided parameters.
     const { psbt, utxos } = await this.buildTx({
       sender,

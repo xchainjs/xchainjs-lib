@@ -59,4 +59,3 @@ export const defaultClientConfig: CosmosSdkClientParams = {
   baseDenom: 'uatom',
   registryTypes: [],
 }
-

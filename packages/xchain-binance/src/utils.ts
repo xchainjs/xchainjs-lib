@@ -3,7 +3,6 @@ import { FeeType, Fees, Network, Tx, TxType, singleFee } from '@xchainjs/xchain-
 import { assetAmount, assetFromString, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 // Import constants from the 'const' file
 import { BNBChain } from './const'
-// Import types from the 'types' file
 import { Account, DexFees, Fee, TransferFee, Tx as BinanceTx, TxType as BinanceTxType } from './types/binance'
 import { Transfer, TransferEvent } from './types/binance-ws'
 import { DerivePath } from './types/common'

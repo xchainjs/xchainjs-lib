@@ -1,23 +1,23 @@
 /**
  * Module importing and providing utilities for Bitcoin Cash (BCH) transactions and addresses.
  */
-import { Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client'; // Importing types related to network and transactions
-import { Address, baseAmount } from '@xchainjs/xchain-util'; // Importing utilities related to addresses and amounts
-import * as bchaddr from 'bchaddrjs'; // Importing Bitcoin Cash address utilities
-import coininfo from 'coininfo'; // Importing coin information utility
+import { Network, Tx, TxFrom, TxTo, TxType } from '@xchainjs/xchain-client' // Importing types related to network and transactions
+import { Address, baseAmount } from '@xchainjs/xchain-util' // Importing utilities related to addresses and amounts
+import * as bchaddr from 'bchaddrjs' // Importing Bitcoin Cash address utilities
+import coininfo from 'coininfo' // Importing coin information utility
 
-import { AssetBCH, BCH_DECIMAL } from './const'; // Importing BCH asset and decimal constants
-import { Transaction, TransactionInput, TransactionOutput } from './types'; // Importing custom transaction types
-import { Network as BCHNetwork } from './types/bitcoincashjs-types'; // Importing custom network type
+import { AssetBCH, BCH_DECIMAL } from './const' // Importing BCH asset and decimal constants
+import { Transaction, TransactionInput, TransactionOutput } from './types' // Importing custom transaction types
+import { Network as BCHNetwork } from './types/bitcoincashjs-types' // Importing custom network type
 
 /**
  * Size constants for BCH transactions.
  */
-export const TX_EMPTY_SIZE = 4 + 1 + 1 + 4;
-export const TX_INPUT_BASE = 32 + 4 + 1 + 4;
-export const TX_INPUT_PUBKEYHASH = 107;
-export const TX_OUTPUT_BASE = 8 + 1;
-export const TX_OUTPUT_PUBKEYHASH = 25;
+export const TX_EMPTY_SIZE = 4 + 1 + 1 + 4
+export const TX_INPUT_BASE = 32 + 4 + 1 + 4
+export const TX_INPUT_PUBKEYHASH = 107
+export const TX_OUTPUT_BASE = 8 + 1
+export const TX_OUTPUT_PUBKEYHASH = 25
 
 /**
  * Retrieves the BCH network to be used with bitcore-lib.
@@ -28,9 +28,9 @@ export const bchNetwork = (network: Network): BCHNetwork => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return coininfo.bitcoincash.main.toBitcoinJS();
+      return coininfo.bitcoincash.main.toBitcoinJS()
     case Network.Testnet:
-      return coininfo.bitcoincash.test.toBitcoinJS();
+      return coininfo.bitcoincash.test.toBitcoinJS()
   }
 }
 
@@ -39,14 +39,14 @@ export const bchNetwork = (network: Network): BCHNetwork => {
  *
  * @returns {string} The BCH address prefix.
  */
-export const getPrefix = (): string => '';
+export const getPrefix = (): string => ''
 
 /**
  * Strips the BCH address prefix.
  * @param {Address} address The BCH address.
  * @returns {Address} The address with the prefix removed.
  */
-export const stripPrefix = (address: Address): Address => address.replace(/(bchtest:|bitcoincash:)/, '');
+export const stripPrefix = (address: Address): Address => address.replace(/(bchtest:|bitcoincash:)/, '')
 
 /**
  * Converts the BCH address to a legacy address format.
@@ -54,7 +54,7 @@ export const stripPrefix = (address: Address): Address => address.replace(/(bcht
  * @returns {Address} The legacy address.
  */
 export const toLegacyAddress = (address: Address): Address => {
-  return bchaddr.toLegacyAddress(address);
+  return bchaddr.toLegacyAddress(address)
 }
 
 /**
@@ -63,7 +63,7 @@ export const toLegacyAddress = (address: Address): Address => {
  * @returns {Address} The cash address.
  */
 export const toCashAddress = (address: Address): Address => {
-  return bchaddr.toCashAddress(address);
+  return bchaddr.toCashAddress(address)
 }
 
 /**
@@ -72,7 +72,7 @@ export const toCashAddress = (address: Address): Address => {
  * @returns {boolean} Whether the address is a cash address.
  */
 export const isCashAddress = (address: Address): boolean => {
-  return bchaddr.isCashAddress(address);
+  return bchaddr.isCashAddress(address)
 }
 
 /**
@@ -116,9 +116,9 @@ export const toBCHAddressNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return bchaddr.Network.Mainnet;
+      return bchaddr.Network.Mainnet
     case Network.Testnet:
-      return bchaddr.Network.Testnet;
+      return bchaddr.Network.Testnet
   }
 }
 
@@ -129,6 +129,6 @@ export const toBCHAddressNetwork = (network: Network): string => {
  * @returns {boolean} Whether the address is valid.
  */
 export const validateAddress = (address: string, network: Network): boolean => {
-  const toAddress = toCashAddress(address);
-  return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === toBCHAddressNetwork(network);
+  const toAddress = toCashAddress(address)
+  return bchaddr.isValidAddress(toAddress) && bchaddr.detectAddressNetwork(toAddress) === toBCHAddressNetwork(network)
 }

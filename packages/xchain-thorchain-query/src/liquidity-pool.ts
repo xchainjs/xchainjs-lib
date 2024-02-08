@@ -29,7 +29,7 @@ export class LiquidityPool {
     this.runeToAssetRatio = this.runeBalance.amount().div(this.assetBalance.amount())
     this.assetToRuneRatio = this.assetBalance.amount().div(this.runeBalance.amount())
   }
-  
+
   /**
    * Checks if the liquidity pool is available
    * @returns {boolean} True if the liquidity pool is available, otherwise false

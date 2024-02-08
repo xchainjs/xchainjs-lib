@@ -56,10 +56,10 @@ export class Client extends CosmosSDKClient {
     }
   }
   /**
- * Get the number of decimals for a given asset.
- * @param {Asset} asset The asset to get the decimals for.
- * @returns {number} The number of decimals.
- */
+   * Get the number of decimals for a given asset.
+   * @param {Asset} asset The asset to get the decimals for.
+   * @returns {number} The number of decimals.
+   */
   public getAssetDecimals(asset: Asset): number {
     if (eqAsset(asset, AssetATOM)) return COSMOS_DECIMAL
     return this.defaultDecimals
@@ -146,13 +146,13 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
- * Prepare a transaction for signing.
- * @param {TxParams & { sender: Address }} params Transaction parameters including sender address.
- * @returns {PreparedTx} The prepared transaction.
- * @throws {"Invalid sender address"} Thrown if the sender address is invalid.
- * @throws {"Invalid recipient address"} Thrown if the recipient address is invalid.
- * @throws {"Invalid asset"} Thrown if the asset is invalid or not supported.
- */
+   * Prepare a transaction for signing.
+   * @param {TxParams & { sender: Address }} params Transaction parameters including sender address.
+   * @returns {PreparedTx} The prepared transaction.
+   * @throws {"Invalid sender address"} Thrown if the sender address is invalid.
+   * @throws {"Invalid recipient address"} Thrown if the recipient address is invalid.
+   * @throws {"Invalid asset"} Thrown if the asset is invalid or not supported.
+   */
   public async prepareTx({
     sender,
     recipient,
@@ -193,9 +193,9 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
- * Creates and signs a transaction without broadcasting it.
- * @deprecated Use prepareTx instead.
- */
+   * Creates and signs a transaction without broadcasting it.
+   * @deprecated Use prepareTx instead.
+   */
   public async transferOffline({
     walletIndex = 0,
     recipient,
@@ -251,10 +251,10 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
- * Get the message type URL by message type.
- * @param {MsgTypes} msgType The message type.
- * @returns {string} The message type URL.
- */
+   * Get the message type URL by message type.
+   * @param {MsgTypes} msgType The message type.
+   * @returns {string} The message type URL.
+   */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
     const messageTypeUrls: Record<MsgTypes, string> = {
       [MsgTypes.TRANSFER]: MSG_SEND_TYPE_URL,
@@ -263,10 +263,10 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
- * Returns the standard fee used by the client for an asset.
- * @param {Asset} asset The asset to retrieve the fee for.
- * @returns {StdFee} The standard fee.
- */
+   * Returns the standard fee used by the client for an asset.
+   * @param {Asset} asset The asset to retrieve the fee for.
+   * @returns {StdFee} The standard fee.
+   */
   protected getStandardFee(asset: Asset): StdFee {
     const denom = this.getDenom(asset)
     const defaultGasPrice = GasPrice.fromString(`0.006${denom}`)

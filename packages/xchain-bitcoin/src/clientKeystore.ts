@@ -22,29 +22,29 @@ class ClientKeystore extends Client {
   getAddress(index = 0): Address {
     // Check if the index is valid
     if (index < 0) {
-      throw new Error('index must be greater than zero');
+      throw new Error('index must be greater than zero')
     }
 
     // Check if the phrase has been set
     if (this.phrase) {
-      const btcNetwork = Utils.btcNetwork(this.network);
-      const btcKeys = this.getBtcKeys(this.phrase, index);
+      const btcNetwork = Utils.btcNetwork(this.network)
+      const btcKeys = this.getBtcKeys(this.phrase, index)
 
       // Generate the address using the Bitcoinjs library
       const { address } = Bitcoin.payments.p2wpkh({
         pubkey: btcKeys.publicKey,
         network: btcNetwork,
-      });
+      })
 
       // Throw an error if the address is not defined
       if (!address) {
-        throw new Error('Address not defined');
+        throw new Error('Address not defined')
       }
 
-      return address;
+      return address
     }
 
-    throw new Error('Phrase must be provided');
+    throw new Error('Phrase must be provided')
   }
 
   /**
@@ -54,7 +54,7 @@ class ClientKeystore extends Client {
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
   async getAddressAsync(index = 0): Promise<string> {
-    return this.getAddress(index);
+    return this.getAddress(index)
   }
 
   /**
@@ -67,15 +67,15 @@ class ClientKeystore extends Client {
    * @throws {"Could not get private key from phrase"} Thrown if failed to create BTC keys from the given phrase.
    */
   private getBtcKeys(phrase: string, index = 0): Bitcoin.ECPair.ECPairInterface {
-    const btcNetwork = Utils.btcNetwork(this.network);
-    const seed = getSeed(phrase);
-    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index));
+    const btcNetwork = Utils.btcNetwork(this.network)
+    const seed = getSeed(phrase)
+    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
-      throw new Error('Could not get private key from phrase');
+      throw new Error('Could not get private key from phrase')
     }
 
-    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork });
+    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
   }
 
   /**
@@ -87,45 +87,47 @@ class ClientKeystore extends Client {
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     // Set the default fee rate to `fast`
-    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast];
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
 
     // Check if the fee rate is within the fee bounds
-    checkFeeBounds(this.feeBounds, feeRate);
+    checkFeeBounds(this.feeBounds, feeRate)
 
     // Get the address index from the parameters or use the default value
-    const fromAddressIndex = params?.walletIndex || 0;
+    const fromAddressIndex = params?.walletIndex || 0
 
     // Prepare the transaction
-    const { rawUnsignedTx } = await this.prepareTx({ ...params, sender: this.getAddress(fromAddressIndex), feeRate });
+    const { rawUnsignedTx } = await this.prepareTx({ ...params, sender: this.getAddress(fromAddressIndex), feeRate })
 
     // Get the Bitcoin keys
-    const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex);
+    const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
 
     // Build the PSBT
-    const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx);
+    const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
 
     // Sign all inputs
-    psbt.signAllInputs(btcKeys);
+    psbt.signAllInputs(btcKeys)
 
     // Finalize inputs
-    psbt.finalizeAllInputs();
+    psbt.finalizeAllInputs()
 
     // Extract the transaction hex
-    const txHex = psbt.extractTransaction().toHex();
+    const txHex = psbt.extractTransaction().toHex()
 
     // Extract the transaction hash
-    const txHash = psbt.extractTransaction().getId();
+    const txHash = psbt.extractTransaction().getId()
 
     try {
       // Broadcast the transaction and return the transaction hash
-      const txId = await this.roundRobinBroadcastTx(txHex);
-      return txId;
+      const txId = await this.roundRobinBroadcastTx(txHex)
+      return txId
     } catch (err) {
       // If broadcasting fails, return an error message with a link to the explorer
-      const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[this.network].getExplorerTxUrl(txHash)}`;
-      return error;
+      const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
+        this.network
+      ].getExplorerTxUrl(txHash)}`
+      return error
     }
   }
 }
 
-export { ClientKeystore };
+export { ClientKeystore }

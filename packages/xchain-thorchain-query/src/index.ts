@@ -23,4 +23,3 @@ export * from './utils'
 
 // Export everything from 'chain-defaults.ts' again (assuming it's a duplicate, can be removed if not needed)
 export * from './chain-defaults'
-
