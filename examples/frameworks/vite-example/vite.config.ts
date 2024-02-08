@@ -41,7 +41,7 @@ export default defineConfig(({ mode }) => {
       minify: 'terser',
       rollupOptions: {
         cache: false,
-        plugins: [inject({ Buffer: ['buffer', 'Buffer'] })],
+        plugins: [],
         maxParallelFileOps: 2,
         output: {
           sourcemap: false,
@@ -60,7 +60,6 @@ export default defineConfig(({ mode }) => {
       alias: {
         stream: 'stream-browserify',
         process: 'process/browser',
-        Buffer: 'buffer',
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
       extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
