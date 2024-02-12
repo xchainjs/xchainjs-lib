@@ -38,27 +38,45 @@ import { DepositParam, DepositTx, TxOfflineParams } from './types'
 import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
 
 /**
- * Interface for custom Thorchain client
+ * Interface representing a MayaChain client.
  */
 export interface MayachainClient {
+  /**
+   * Deposit funds into the MayaChain.
+   *
+   * @param {DepositParam} params Parameters for the deposit.
+   * @returns {Promise<TxHash>} The transaction hash of the deposit.
+   */
   deposit(params: DepositParam): Promise<TxHash>
+  /**
+   * Get the deposit transaction details.
+   *
+   * @param {string} txId The transaction ID.
+   * @returns {Promise<DepositTx>} The deposit transaction details.
+   */
   getDepositTransaction(txId: string): Promise<DepositTx>
+  /**
+   * Transfer funds offline within the MayaChain.
+   *
+   * @param {TxOfflineParams} params Parameters for the offline transfer.
+   * @returns {Promise<string>} The result of the offline transfer.
+   */
   transferOffline(params: TxOfflineParams): Promise<string>
 }
 
 /**
- * Mayachain client params to instantiate the Mayachain client
+ * Parameters to instantiate the MayaChain client.
  */
 export type MayachainClientParams = Partial<CosmosSdkClientParams>
 
 /**
- * Custom mayachain Client
+ * Custom MayaChain client.
  */
 export class Client extends CosmosSDKClient implements MayachainClient {
   /**
-   * Mayachain client constructor
+   * Constructor for the MayaChain client.
    *
-   * @param {MayachainClientParams} config Optional - Client configuration. If it is not set, default values will be used
+   * @param {MayachainClientParams} config Optional configuration for the client. Default values will be used if not provided.
    */
   constructor(config: MayachainClientParams = defaultClientConfig) {
     super({
@@ -68,17 +86,19 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
-   * Get address prefix by network
-   * @returns the address prefix
+   * Get the address prefix for the given network.
+   *
+   * @param {Network} network The network identifier.
+   * @returns {string} The address prefix.
    */
   protected getPrefix(network: Network): string {
     return getPrefix(network)
   }
 
   /**
-   * Get client native asset
+   * Get information about the native asset of the MayaChain.
    *
-   * @returns {AssetInfo} Thorchain native asset
+   * @returns {AssetInfo} Information about the native asset.
    */
   public getAssetInfo(): AssetInfo {
     return {
@@ -88,10 +108,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
-   * Returns the number of the decimals of known assets
+   * Get the number of decimals for a given asset.
    *
-   * @param {Asset} asset - Asset of which return the number of decimals
-   * @returns {number} the number of decimals of the assets
+   * @param {Asset} asset The asset for which to retrieve the decimals.
+   * @returns {number} The number of decimals.
    */
   public getAssetDecimals(asset: Asset): number {
     if (eqAsset(asset, AssetCacao)) return CACAO_DECIMAL
@@ -100,39 +120,39 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
-   * Get the explorer url.
+   * Get the explorer URL for the current network.
    *
-   * @returns {string} The explorer url for thorchain based on the current network.
+   * @returns {string} The explorer URL for the current network.
    */
   public getExplorerUrl(): string {
     return getDefaultExplorers()[this.network]
   }
 
   /**
-   * Get the explorer url for the given address.
+   * Get the explorer URL for the given address.
    *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address.
+   * @param {Address} address The address for which to retrieve the explorer URL.
+   * @returns {string} The explorer URL for the given address.
    */
   public getExplorerAddressUrl(address: string): string {
     return getExplorerAddressUrl(address)[this.network]
   }
 
   /**
-   * Get the explorer url for the given transaction id.
+   * Get the explorer URL for the given transaction ID.
    *
-   * @param {string} txID
-   * @returns {string} The explorer url for the given transaction id.
+   * @param {string} txID The transaction ID for which to retrieve the explorer URL.
+   * @returns {string} The explorer URL for the given transaction ID.
    */
   public getExplorerTxUrl(txID: string): string {
     return getExplorerTxUrl(txID)[this.network]
   }
 
   /**
-   * Get Asset from denomination
+   * Get the asset corresponding to the provided denomination.
    *
-   * @param {string} denom
-   * @returns {Asset|null} The asset of the given denomination.
+   * @param {string} denom The denomination for which to retrieve the asset.
+   * @returns {Asset|null} The asset corresponding to the denomination, or null if not found.
    */
   public assetFromDenom(denom: string): Asset | null {
     if (denom === CACAO_DENOM) return AssetCacao
@@ -141,20 +161,21 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
-   * Get denomination from Asset
+   * Get the denomination of the provided asset.
    *
-   * @param {Asset} asset
-   * @returns {string} The denomination of the given asset.
+   * @param {Asset} asset The asset for which to retrieve the denomination.
+   * @returns {string|null} The denomination of the asset, or null if not found.
    */
   public getDenom(asset: Asset): string | null {
     return getDenom(asset)
   }
 
   /**
-   * Prepare transfer.
+   * Prepare a transaction for transfer.
    *
    * @param {TxParams&Address} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
+   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
+   * @throws {Error} If sender or recipient addresses are invalid, or if the asset symbol is invalid.
    */
   public async prepareTx({
     sender,
@@ -196,7 +217,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
-   * Make a deposit
+   * Deposit assets into the Mayachain network.
    *
    * @param {number} param.walletIndex Optional - The index to use to generate the address from the transaction will be done.
    * If it is not set, address associated with index 0 will be used
@@ -215,17 +236,18 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     memo,
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
   }: DepositParam): Promise<string> {
+    // Get the sender's address
     const sender = await this.getAddressAsync(walletIndex)
-
+    // Create a signer from the mnemonic
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
       prefix: this.prefix,
       hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex || 0))],
     })
-
+    // Connect to the signing client
     const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
       registry: this.registry,
     })
-
+    // Sign and broadcast the deposit transaction
     const tx = await signingClient.signAndBroadcast(
       sender,
       [
@@ -249,14 +271,16 @@ export class Client extends CosmosSDKClient implements MayachainClient {
       },
       memo,
     )
-
+    // Return the transaction hash
     return tx.transactionHash
   }
 
   /**
-   * Create and sign transaction without broadcasting it
+   * Create and sign a transaction without broadcasting it.
    *
-   * @deprecated Use prepare Tx instead
+   * @deprecated Use prepareTx instead.
+   * @param {TxOfflineParams} params The offline transaction parameters.
+   * @returns {Promise<string>} The raw unsigned transaction.
    */
   public async transferOffline({
     walletIndex = 0,
@@ -266,7 +290,9 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
   }: TxOfflineParams & { gasLimit?: BigNumber }): Promise<string> {
+    // Get the sender's address
     const sender = await this.getAddressAsync(walletIndex)
+    // Prepare the transaction
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient: recipient,
@@ -274,18 +300,18 @@ export class Client extends CosmosSDKClient implements MayachainClient {
       amount: amount,
       memo: memo,
     })
-
+    // Decode the unsigned transaction
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
-
+    // Create a signer from the mnemonic
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
       prefix: this.prefix,
       hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex))],
     })
-
+    // Connect to the signing client
     const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
       registry: this.registry,
     })
-
+    // Map messages and sign the transaction
     const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
       return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
     })
@@ -299,20 +325,23 @@ export class Client extends CosmosSDKClient implements MayachainClient {
       },
       unsignedTx.body.memo,
     )
-
+    // Return the raw unsigned transaction
     return toBase64(TxRaw.encode(rawTx).finish())
   }
 
   /**
-   * Returns the private key associated with an index
+   * Retrieve the private key associated with the specified index.
    *
    * @param {number} index Optional - The index to use to generate the private key. If it is not set, address associated with
    * index 0 will be used
    * @returns {Uint8Array} The private key
    */
   public async getPrivateKey(index = 0): Promise<Uint8Array> {
+    // Generate a mnemonic object from the provided mnemonic phrase
     const mnemonicChecked = new EnglishMnemonic(this.phrase)
+    // Derive the seed from the mnemonic
     const seed = await Bip39.mnemonicToSeed(mnemonicChecked)
+    // Derive the private key from the seed and derivation path
     const { privkey } = Slip10.derivePath(
       Slip10Curve.Secp256k1,
       seed,
@@ -322,45 +351,49 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
-   * Returns the compressed public key associated with an index
+   * Retrieve the compressed public key associated with the specified index.
    *
-   * @param {number} index Optional - The index to use to generate the private key. If it is not set, address associated with
-   * index 0 will be used
-   * @returns {Uint8Array} The public key
+   * @param {number} index Optional - The index to use to generate the public key. If not set, the address associated with index 0 will be used.
+   * @returns {Uint8Array} The compressed public key
    */
   public async getPubKey(index = 0): Promise<Uint8Array> {
+    // Retrieve the private key associated with the specified index
     const privateKey = await this.getPrivateKey(index)
+    // Derive the public key from the private key
     const { pubkey } = await Secp256k1.makeKeypair(privateKey)
+    // Compress the public key
     return Secp256k1.compressPubkey(pubkey)
   }
 
   /**
-   * Get deposit transaction
+   * Retrieve the deposit transaction information.
    *
    * @deprecated Use getTransactionData instead
-   * @param txId
+   * @param txId The transaction ID.
    */
   public async getDepositTransaction(txId: string): Promise<DepositTx> {
     return this.getTransactionData(txId)
   }
 
   /**
-   * Get the message type url by type used by the cosmos-sdk client to make certain actions
+   * Retrieve the message type URL by type used by the Cosmos SDK client to make certain actions.
    *
-   * @param {MsgTypes} msgType Message type of which return the type url
-   * @returns {string} the type url of the message
+   * @param {MsgTypes} msgType The message type of which to return the type URL.
+   * @returns {string} The type URL of the message.
    */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
+    // Define message type URLs for known message types
     const messageTypeUrls: Record<MsgTypes, string> = {
       [MsgTypes.TRANSFER]: MSG_SEND_TYPE_URL,
     }
+    // Return the type URL for the specified message type
     return messageTypeUrls[msgType]
   }
 
   /**
-   * Returns the standard fee used by the client
+   * Retrieve the standard fee used by the client.
    *
-   * @returns {StdFee} the standard fee
+   * @returns {StdFee} The standard fee.
    */
   protected getStandardFee(): StdFee {
     return { amount: [], gas: '4000000' }

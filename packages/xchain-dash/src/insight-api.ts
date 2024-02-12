@@ -1,12 +1,18 @@
 import { Network } from '@xchainjs/xchain-client'
 import axios from 'axios'
 
+/**
+ * Parameters for fetching address details from the Insight API.
+ */
 export type InsightAddressParams = {
   network: Network
   address: string
   pageNum?: number
 }
 
+/**
+ * Response structure for address details fetched from the Insight API.
+ */
 export type InsightAddressResponse = {
   addrStr: string
   balance: number
@@ -23,12 +29,19 @@ export type InsightAddressResponse = {
   unconfirmedTxApperances: number
 }
 
+/**
+ * Parameters for fetching transaction details from the Insight API.
+ */
 export type InsightTransactionParams = {
   network: Network
   txid: string
 }
 
+/**
+ * Response structure for transaction details fetched from the Insight API.
+ */
 export type InsightTxResponse = {
+  // Fields representing transaction details
   blockhash: string
   blockheight: number
   blocktime: number
@@ -82,9 +95,16 @@ export type InsightTxResponse = {
   ]
 }
 
+/**
+ * Raw transaction data fetched from the Insight API.
+ */
 export type InsightRawTx = string
 
+/**
+ * Response structure for UTXO details fetched from the Insight API.
+ */
 export type InsightUtxoResponse = {
+  // Fields representing UTXO details
   address: string
   txid: string
   vout: number
@@ -95,7 +115,13 @@ export type InsightUtxoResponse = {
   confirmations: number
 }
 
-const urlForNetwork = (network: Network) => {
+/**
+ * Function to generate the URL for the given network.
+ *
+ * @param {Network} network The network type (Mainnet, Testnet, or Stagenet).
+ * @returns {string} The URL for the Insight API based on the network.
+ */
+const urlForNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
@@ -105,11 +131,23 @@ const urlForNetwork = (network: Network) => {
   }
 }
 
+/**
+ * Fetch address details from the Insight API.
+ *
+ * @param {InsightAddressParams} p Parameters for fetching address details.
+ * @returns {Promise<InsightAddressResponse>} Address details fetched from the Insight API.
+ */
 export const getAddress = async (p: InsightAddressParams): Promise<InsightAddressResponse> => {
   const data = (await axios.get(`${urlForNetwork(p.network)}/addr/${p.address}`)).data
   return data
 }
 
+/**
+ * Fetch transactions associated with an address from the Insight API.
+ *
+ * @param {InsightAddressParams} p Parameters for fetching address transactions.
+ * @returns {Promise<{ txs: InsightTxResponse[]; pagesTotal: number }>} Transactions associated with the address.
+ */
 export const getAddressTxs = async (
   p: InsightAddressParams,
 ): Promise<{ txs: InsightTxResponse[]; pagesTotal: number }> => {
@@ -117,14 +155,32 @@ export const getAddressTxs = async (
   return (await axios.get(`${urlForNetwork(p.network)}/txs?address=${p.address}&pageNum=${pageNum}`)).data
 }
 
+/**
+ * Fetch UTXOs associated with an address from the Insight API.
+ *
+ * @param {InsightAddressParams} p Parameters for fetching address UTXOs.
+ * @returns {Promise<InsightUtxoResponse[]>} UTXOs associated with the address.
+ */
 export const getAddressUtxos = async (p: InsightAddressParams): Promise<InsightUtxoResponse[]> => {
   return (await axios.get(`${urlForNetwork(p.network)}/addr/${p.address}/utxo`)).data
 }
 
+/**
+ * Fetch transaction details from the Insight API.
+ *
+ * @param {InsightTransactionParams} p Parameters for fetching transaction details.
+ * @returns {Promise<InsightTxResponse>} Transaction details fetched from the Insight API.
+ */
 export const getTx = async (p: InsightTransactionParams): Promise<InsightTxResponse> => {
   return (await axios.get(`${urlForNetwork(p.network)}/tx/${p.txid}`)).data
 }
 
+/**
+ * Fetch raw transaction data from the Insight API.
+ *
+ * @param {InsightTransactionParams} p Parameters for fetching raw transaction data.
+ * @returns {Promise<InsightRawTx>} Raw transaction data fetched from the Insight API.
+ */
 export const getRawTx = async (p: InsightTransactionParams): Promise<InsightRawTx> => {
   return (await axios.get(`${urlForNetwork(p.network)}/rawtx/${p.txid}`)).data.rawtx
 }

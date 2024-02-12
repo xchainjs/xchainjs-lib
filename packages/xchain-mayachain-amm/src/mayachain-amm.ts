@@ -17,6 +17,7 @@ import { ethers } from 'ethers'
 import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
 
 /**
+ * Mayachain Automated Market Maker (AMM) class.
  * MAYAChainAMM class for interacting with THORChain.
  * Recommended main class to use for swapping with MAYAChain
  * Has access to Midgard and MayaNode data
@@ -26,9 +27,11 @@ export class MayachainAMM {
   private wallet: Wallet
 
   /**
-   * Constructor to create a MayachainAMM
-   * @param mayachainQuery - An instance of the MayachainQuery
-   * @returns MayachainAMM Returns the MayachainAMM
+   * Constructor to create a MayachainAMM instance.
+   *
+   * @param {MayachainQuery} mayachainQuery An instance of the MayachainQuery class.
+   * @param {Wallet} wallet A wallet instance containing clients for various blockchains.
+   * @returns {MayachainAMM} Returns the MayachainAMM instance.
    */
   constructor(
     mayachainQuery = new MayachainQuery(),
@@ -46,9 +49,10 @@ export class MayachainAMM {
   }
 
   /**
-   * Estimate swap validating the swap params
-   * @param {QuoteSwapParams} quoteSwapParams Swap params
-   * @returns {QuoteSwap} Quote swap. If swap can not be done, it returns an empty QuoteSwap with the reasons the swap can not be done
+   * Estimate swap by validating the swap parameters.
+   *
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
+   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
    */
   public async estimateSwap({
     fromAsset,
@@ -106,9 +110,10 @@ export class MayachainAMM {
   }
 
   /**
-   * Validate swap params before performing a swap operation
-   * @param {QuoteSwapParams} quoteSwapParams - Swap parameters
-   * @returns {string[]} - Reasons the swap cannot be executed. Empty array if the swap is valid.
+   * Validate swap parameters before performing a swap operation.
+   *
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
+   * @returns {string[]} Reasons the swap cannot be executed. Empty array if the swap is valid.
    */
   public async validateSwap({
     fromAsset,
@@ -150,7 +155,7 @@ export class MayachainAMM {
   }
 
   /**
-   * Perform a swap operation between assets
+   * Perform a swap operation between assets.
    * @param {QuoteSwapParams} quoteSwapParams Swap parameters
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
@@ -183,8 +188,9 @@ export class MayachainAMM {
   }
 
   /**
-   * Approve Mayachain router to spend a certain amount in the chain of the asset
+   * Approve the Mayachain router to spend a certain amount in the asset chain.
    * @param {ApproveParams} approveParams Parameters for approving the router to spend
+   * @returns {Promise<TxSubmitted>} Transaction hash and URL
    */
   public async approveRouterToSpend({ asset, amount }: ApproveParams): Promise<TxSubmitted> {
     // Get inbound details for the asset chain
@@ -204,8 +210,8 @@ export class MayachainAMM {
   }
 
   /**
-   * Validate if the asset router is allowed to spend the asset amount on behalf of the address
-   * @param {IsApprovedParams} isApprovedParams Parameters for checking approval
+   * Validate if the asset router is allowed to spend the asset amount on behalf of the address.
+   * @param {IsApprovedParams} isApprovedParams Parameters for checking approval.
    * @returns {string[]} Reasons the asset router is not allowed to spend the amount. Empty array if the router is approved.
    */
   public async isRouterApprovedToSpend({ asset, amount, address }: IsApprovedParams): Promise<string[]> {

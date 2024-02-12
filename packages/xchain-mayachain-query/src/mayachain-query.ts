@@ -37,11 +37,12 @@ export class MayachainQuery {
    * @returns MayachainAMM
    */
   constructor(mayachainCache = new MayachainCache()) {
+    // Initialize MayachainCache instance
     this.mayachainCache = mayachainCache
   }
 
   /**
-   * Get the mayachain query is working with
+   * Get the Mayachain network.
    * @returns
    */
   public getNetwork(): Network {
@@ -49,9 +50,9 @@ export class MayachainQuery {
   }
 
   /**
-   * Quote a swap
-   * @param {QuoteSwapParams} quoteSwapParams - quote swap input params
-   * @returns {QuoteSwap}
+   *  Quote a swap operation.
+   * @param {QuoteSwapParams} quoteSwapParams - Parameters for the quote swap operation.
+   * @returns {QuoteSwap} A quote for the swap operation.
    */
   public async quoteSwap({
     fromAsset,

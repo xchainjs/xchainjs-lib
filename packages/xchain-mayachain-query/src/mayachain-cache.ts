@@ -6,33 +6,38 @@ import { InboundDetail } from './types'
 import { MayaChain, Mayanode } from './utils'
 
 export type MayachainCacheConf = {
-  expirationTimeInboundAddress: number
+  expirationTimeInboundAddress: number // Expiration time for the inbound address cache in milliseconds
 }
+
 /**
- * This class manages retrieving information from up to date Mayachain
+ * This class manages retrieving information from up-to-date Mayachain.
  */
 export class MayachainCache {
-  readonly midgardQuery: MidgardQuery
-  readonly mayanode: Mayanode
-  private conf: MayachainCacheConf
-  private readonly inboundDetailCache: CachedValue<Record<string, InboundDetail>>
-  private readonly assetDecimalsCache: CachedValue<Record<string, number>>
+  readonly midgardQuery: MidgardQuery // Instance of the Maya MidgardQuery API
+  readonly mayanode: Mayanode // Instance of the Maya Mayanode API
+  private conf: MayachainCacheConf // Configuration for the cache
+  private readonly inboundDetailCache: CachedValue<Record<string, InboundDetail>> // Cached value for inbound details
+  private readonly assetDecimalsCache: CachedValue<Record<string, number>> // Cached value for asset decimals
+
   /**
-   * Constructor to create a MayachainCache
+   * Constructor to create a MayachainCache.
    *
-   * @param midgardQuery - an instance of the Maya MidgardQuery API
-   * @param mayanode
-   * @returns MayachainCache
+   * @param midgardQuery - An instance of the Maya MidgardQuery API.
+   * @param mayanode - An instance of the Maya Mayanode API.
+   * @param configuration - Optional configuration for the cache.
+   * @returns MayachainCache.
    */
   constructor(
     midgardQuery = new MidgardQuery(),
     mayanode = new Mayanode(),
     configuration?: Partial<MayachainCacheConf>,
   ) {
+    // Initialize instances and configuration
     this.midgardQuery = midgardQuery
     this.mayanode = mayanode
     this.conf = { expirationTimeInboundAddress: 6000, ...configuration }
 
+    // Initialize cached values
     this.inboundDetailCache = new CachedValue<Record<string, InboundDetail>>(
       () => this.refreshInboundDetailCache(),
       this.conf.expirationTimeInboundAddress,
@@ -41,8 +46,9 @@ export class MayachainCache {
   }
 
   /**
-   * Get inbound addresses details
-   * @returns Inbound details
+   * Get inbound addresses details.
+   *
+   * @returns Inbound details.
    */
   public async getInboundDetails(): Promise<Record<string, InboundDetail>> {
     if (!this.inboundDetailCache) throw Error(`Could not refresh inbound details`)
@@ -50,8 +56,9 @@ export class MayachainCache {
   }
 
   /**
-   * Get the number of the decimals of the supported Mayachain tokens
-   * @returns {Record<string, number>} A record with the string asset notation as key and the number of decimals as value
+   * Get the number of decimals of the supported Mayachain tokens.
+   *
+   * @returns {Record<string, number>} A record with the string asset notation as key and the number of decimals as value.
    */
   public async getAssetDecimals(): Promise<Record<string, number>> {
     if (!this.assetDecimalsCache) throw Error(`Could not refresh assets decimals`)
@@ -59,9 +66,10 @@ export class MayachainCache {
   }
 
   /**
-   * Refreshes the InboundDetailCache Cache
+   * Refreshes the InboundDetailCache cache.
    */
   private async refreshInboundDetailCache(): Promise<Record<string, InboundDetail>> {
+    // Implementation details for refreshing the inbound detail cache
     const [mimirDetails, allInboundAddresses] = await Promise.all([
       this.mayanode.getMimir(),
       this.mayanode.getInboundAddresses(),
@@ -111,9 +119,10 @@ export class MayachainCache {
   }
 
   /**
-   * Refreshes the number of decimals of the supported Mayachain tokens
+   * Refreshes the number of decimals of the supported Mayachain tokens.
    */
   private async refreshAssetDecimalsCache(): Promise<Record<string, number>> {
+    // Implementation details for refreshing the asset decimals cache
     // TODO: As soon as Mayachain returns native decimals from any endpoint of its API, refactor the function
     return {
       'BTC.BTC': 8,

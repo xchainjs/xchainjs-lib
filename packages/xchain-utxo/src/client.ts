@@ -19,17 +19,18 @@ import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import { UTXO, UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
 import { UtxoClientParams } from './types'
-
+/**
+ * Abstract base class for creating blockchain clients in the UTXO model.
+ */
 export abstract class Client extends BaseXChainClient {
   protected explorerProviders: ExplorerProviders
   protected dataProviders: UtxoOnlineDataProviders[]
 
   /**
-   * Constructor
-   * Client is initialized with network type
+   * Constructor for creating a UTXO client instance.
    *
-   * @param {Chain} chain Chain to instantiate the client with
-   * @param {UtxoClientParams} params
+   * @param {Chain} chain The blockchain chain type.
+   * @param {UtxoClientParams} params The parameters required for client initialization.
    */
   constructor(chain: Chain, params: UtxoClientParams) {
     super(chain, {
@@ -43,42 +44,42 @@ export abstract class Client extends BaseXChainClient {
   }
 
   /**
-   * Get the explorer url.
+   * Get the explorer URL based on the network.
    *
-   * @returns {string} The explorer url based on the network.
+   * @returns {string} The explorer URL.
    */
   getExplorerUrl(): string {
     return this.explorerProviders[this.network].getExplorerUrl()
   }
 
   /**
-   * Get the explorer url for the given address.
+   * Get the explorer URL for a given address based on the network.
    *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address based on the network.
+   * @param {string} address The address to query.
+   * @returns {string} The explorer URL for the address.
    */
   getExplorerAddressUrl(address: string): string {
     return this.explorerProviders[this.network].getExplorerAddressUrl(address)
   }
 
   /**
-   * Get the explorer url for the given transaction id.
+   * Get the explorer URL for a given transaction ID based on the network.
    *
-   * @param {string} txID The transaction id
-   * @returns {string} The explorer url for the given transaction id based on the network.
+   * @param {string} txID The transaction ID.
+   * @returns {string} The explorer URL for the transaction.
    */
   getExplorerTxUrl(txID: string): string {
     return this.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
 
   /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
+   * Get the transaction history of a given address with pagination options.
    *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
+   * @param {TxHistoryParams} params The options to get transaction history.
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    // Filter the parameters for transaction history
     const filteredParams: TxHistoryParams = {
       address: params?.address || (await this.getAddress()),
       offset: params?.offset,
@@ -91,10 +92,10 @@ export abstract class Client extends BaseXChainClient {
   }
 
   /**
-   * Get the transaction details of a given transaction id.
+   * Get the transaction details of a given transaction ID.
    *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
+   * @param {string} txId The transaction ID.
+   * @returns {Tx} The transaction details.
    */
   async getTransactionData(txId: string): Promise<Tx> {
     return await this.roundRobinGetTransactionData(txId)
@@ -103,7 +104,7 @@ export abstract class Client extends BaseXChainClient {
   /**
    * Gets balance of a given address.
    *
-   * @param {Address} address to get balances from
+   * @param {Address} address The address to get balances from
    * @param {undefined} Needed for legacy only to be in common with `XChainClient` interface - will be removed by a next version
    * @param {confirmedOnly} Flag to get balances of confirmed txs only
    *
@@ -112,22 +113,35 @@ export abstract class Client extends BaseXChainClient {
   // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
   // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
   async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
-    // TODO figure this out ---> !!confirmedOnly)
+    // The actual logic for getting balances
     confirmedOnly
     return await this.roundRobinGetBalance(address)
   }
-
+  /**
+   * Scan UTXOs for a given address.
+   *
+   * @param {string} address The address to scan.
+   * @param {boolean} confirmedOnly Flag to scan only confirmed UTXOs.
+   * @returns {UTXO[]} The UTXOs found.
+   */
   protected async scanUTXOs(
     address: string,
     confirmedOnly = true, // default: scan only confirmed UTXOs
   ): Promise<UTXO[]> {
     return this.roundRobinGetUnspentTxs(address, confirmedOnly)
   }
-
+  /**
+   * Get estimated fees with fee rates.
+   *
+   * @param {FeeEstimateOptions} options Options for fee estimation.
+   * @returns {Promise<FeesWithRates>} Estimated fees along with fee rates.
+   */
   async getFeesWithRates(options?: FeeEstimateOptions): Promise<FeesWithRates> {
+    // Scan UTXOs if sender address is provided
     const utxos = options?.sender ? await this.scanUTXOs(options.sender, false) : []
+    // Compile memo if memo is provided
     const compiledMemo = options?.memo ? this.compileMemo(options.memo) : null
-
+    // Get fee rates
     const rates = await this.getFeeRates()
 
     return {
@@ -140,7 +154,12 @@ export abstract class Client extends BaseXChainClient {
       rates,
     }
   }
-
+  /**
+   * Get estimated fees.
+   *
+   * @param {FeeEstimateOptions} options Options for fee estimation.
+   * @returns {Promise<Fees>} Estimated fees.
+   */
   async getFees(options?: FeeEstimateOptions): Promise<Fees> {
     const { fees } = await this.getFeesWithRates(options)
     return fees
@@ -173,10 +192,23 @@ export abstract class Client extends BaseXChainClient {
     // TODO: Return default value
     throw Error('Can not retrieve fee rates')
   }
-
+  /**
+   * Broadcast a transaction.
+   *
+   * @param {string} txHex The transaction hex string.
+   * @returns {Promise<TxHash>} The transaction hash.
+   */
   async broadcastTx(txHex: string): Promise<TxHash> {
     return await this.roundRobinBroadcastTx(txHex)
   }
+  /**
+   * Round-robin method to get balance from data providers.
+   * Throws error if no provider can get balance.
+   *
+   * @param {Address} address The address to get balance for.
+   * @returns {Promise<Balance[]>} The balances.
+   * @throws Error If no provider is able to get balance.
+   */
 
   protected async roundRobinGetBalance(address: Address) {
     for (const provider of this.dataProviders) {
@@ -189,7 +221,15 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to get balance')
   }
-
+  /**
+   * Round-robin method to get unspent transactions from data providers.
+   * Throws error if no provider can get unspent transactions.
+   *
+   * @param {Address} address The address to get unspent transactions for.
+   * @param {boolean} confirmed Flag to indicate whether to get confirmed transactions only.
+   * @returns {Promise<UTXO[]>} The unspent transactions.
+   * @throws Error If no provider is able to get unspent transactions.
+   */
   protected async roundRobinGetUnspentTxs(address: Address, confirmed: boolean) {
     for (const provider of this.dataProviders) {
       try {
@@ -203,7 +243,14 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to GetUnspentTxs')
   }
-
+  /**
+   * Round-robin method to get transaction data from data providers.
+   * Throws error if no provider can get transaction data.
+   *
+   * @param {string} txid The transaction ID to get data for.
+   * @returns {Promise<Tx>} The transaction data.
+   * @throws Error If no provider is able to get transaction data.
+   */
   protected async roundRobinGetTransactionData(txid: string) {
     for (const provider of this.dataProviders) {
       try {
@@ -215,7 +262,14 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to GetTransactionData')
   }
-
+  /**
+   * Round-robin method to get transactions from data providers.
+   * Throws error if no provider can get transactions.
+   *
+   * @param {TxHistoryParams} params The parameters for fetching transactions.
+   * @returns {Promise<TxsPage>} The transaction history.
+   * @throws Error If no provider is able to get transactions.
+   */
   protected async roundRobinGetTransactions(params: TxHistoryParams) {
     for (const provider of this.dataProviders) {
       try {
@@ -227,7 +281,12 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to GetTransactions')
   }
-
+  /**
+   * Broadcasts a transaction hex using a round-robin approach across multiple data providers.
+   * @param {string} txHex The transaction hex to broadcast.
+   * @returns {Promise<TxHash>} The hash of the broadcasted transaction.
+   * @throws {Error} Throws an error if no provider is able to broadcast the transaction.
+   */
   protected async roundRobinBroadcastTx(txHex: string) {
     for (const provider of this.dataProviders) {
       try {
@@ -239,9 +298,25 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to BroadcastTx')
   }
-
+  /**
+   * Abstract method to compile a memo.
+   * @param {string} memo The memo string to compile.
+   * @returns {Buffer} The compiled memo.
+   */
   protected abstract compileMemo(memo: string): Buffer
+  /**
+   * Abstract method to calculate the fee from a list of UTXOs.
+   * @param {UTXO[]} inputs The list of UTXOs.
+   * @param {FeeRate} feeRate The fee rate.
+   * @param {Buffer | null} data Optional data buffer.
+   * @returns {number} The calculated fee.
+   */
   protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
+  /**
+   * Retrieves fee rates using a round-robin approach across multiple data providers.
+   * @returns {Promise<FeeRates>} The fee rates (average, fast, fastest) in `Satoshis/byte`.
+   * @throws {Error} Throws an error if no provider is able to retrieve fee rates.
+   */
   protected async roundRobinGetFeeRates(): Promise<FeeRates> {
     for (const provider of this.dataProviders) {
       try {
