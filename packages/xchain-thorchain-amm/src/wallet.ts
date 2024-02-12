@@ -170,10 +170,10 @@ export class Wallet {
     return errors
   }
   /**
-  * Checks if a given string is a valid THORName.
-  * @param name - Name to check
-  * @returns Boolean indicating whether the name is a valid THORName
-  */
+   * Checks if a given string is a valid THORName.
+   * @param name - Name to check
+   * @returns Boolean indicating whether the name is a valid THORName
+   */
   private async isThorname(name: string): Promise<boolean> {
     const thornameDetails =
       await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(name) // Update when thorchainCache expose getTHORNameDetails method
@@ -339,7 +339,8 @@ export class Wallet {
         const hash = JSON.stringify(err)
         return { hash, url: assetClient.getExplorerAddressUrl(assetClient.getAddress()) }
       }
-    } else { // Handle other chains
+    } else {
+      // Handle other chains
       const addParams = {
         wallIndex: 0,
         asset: assetAmount.asset,
@@ -394,7 +395,8 @@ export class Wallet {
         const hash = JSON.stringify(err)
         return { hash, url: await assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
-    } else { // Handle other chains
+    } else {
+      // Handle other chains
       const addParams = {
         wallIndex: 0,
         asset: assetAmount.asset,
@@ -413,10 +415,10 @@ export class Wallet {
   }
 
   /**
-  * Opens a new loan.
-  * @param params - Parameters required to open a loan.
-  * @returns An object containing transaction details and explorer URL.
-  */
+   * Opens a new loan.
+   * @param params - Parameters required to open a loan.
+   * @returns An object containing transaction details and explorer URL.
+   */
   async loanOpen(params: LoanOpenParams): Promise<TxSubmitted> {
     const assetClient = this.clients[params.amount.asset.chain]
     // Handle EVM chains
@@ -448,7 +450,8 @@ export class Wallet {
         const hash = JSON.stringify(err)
         return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
-    } else { // Handle other chains
+    } else {
+      // Handle other chains
       const addParams = {
         wallIndex: 0,
         asset: params.amount.asset,
@@ -472,7 +475,7 @@ export class Wallet {
    */
   async loanClose(params: LoanCloseParams): Promise<TxSubmitted> {
     const assetClient = this.clients[params.amount.asset.chain]
-     // Handle EVM chains
+    // Handle EVM chains
     if (this.isEVMChain(params.amount.asset)) {
       const addParams = {
         wallIndex: 0,
@@ -501,7 +504,8 @@ export class Wallet {
         const hash = JSON.stringify(err)
         return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
-    } else { // Handle other chains
+    } else {
+      // Handle other chains
       const addParams = {
         wallIndex: 0,
         asset: params.amount.asset,
@@ -617,7 +621,7 @@ export class Wallet {
     assetClient: XChainClient,
     inboundAsgard: string,
   ): Promise<TxSubmitted> {
-     // Handle EVM chains
+    // Handle EVM chains
     if (this.isEVMChain(params.asset.asset)) {
       // Prepare parameters for sending a deposit on EVM chains
       const addParams = {
@@ -630,8 +634,9 @@ export class Wallet {
       const evmHelper = new EvmHelper(assetClient, this.thorchainQuery.thorchainCache)
       const hash = await evmHelper.sendDeposit(addParams)
       return { hash, url: assetClient.getExplorerTxUrl(hash) }
-    } else if (this.isUTXOChain(params.asset.asset)) { // Handle UTXO chains
-       // Get fee rates for UTXO chains
+    } else if (this.isUTXOChain(params.asset.asset)) {
+      // Handle UTXO chains
+      // Get fee rates for UTXO chains
       const feeRates = await (assetClient as UTXOClient).getFeeRates(Protocol.THORCHAIN)
       // Prepare parameters for transferring assets on UTXO chains
       const addParams = {
@@ -651,7 +656,8 @@ export class Wallet {
         const hash = JSON.stringify(err)
         return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
-    } else { // Handle other chains
+    } else {
+      // Handle other chains
       // Prepare parameters for transferring assets on other chains
       const addParams = {
         wallIndex: 0,
@@ -715,7 +721,7 @@ export class Wallet {
         const hash = await assetClient.transfer(withdrawParams)
         return { hash, url: assetClient.getExplorerTxUrl(hash) }
       } catch (err) {
-         // If an error occurs during the transfer, handle it and return the error message along with the explorer URL of the asset client's address
+        // If an error occurs during the transfer, handle it and return the error message along with the explorer URL of the asset client's address
         const hash = JSON.stringify(err)
         return { hash, url: assetClient.getExplorerAddressUrl(await assetClient.getAddressAsync()) }
       }
@@ -775,28 +781,28 @@ export class Wallet {
     return { hash, url: thorchainClient.getExplorerTxUrl(hash) }
   }
   /**
- * Checks if an asset is an ERC20 asset.
- * @param asset - Asset to check.
- * @returns - Boolean indicating whether the asset is an ERC20 asset.
- */
+   * Checks if an asset is an ERC20 asset.
+   * @param asset - Asset to check.
+   * @returns - Boolean indicating whether the asset is an ERC20 asset.
+   */
   private isERC20Asset(asset: Asset): boolean {
     const isGasAsset = ['ETH', 'BSC', 'AVAX'].includes(asset.symbol)
     return this.isEVMChain(asset) && !isGasAsset
   }
   /**
- * Checks if an asset belongs to an EVM chain.
- * @param asset - Asset to check.
- * @returns - Boolean indicating whether the asset belongs to an EVM chain.
- */
+   * Checks if an asset belongs to an EVM chain.
+   * @param asset - Asset to check.
+   * @returns - Boolean indicating whether the asset belongs to an EVM chain.
+   */
   private isEVMChain(asset: Asset): boolean {
     const isEvmChain = ['ETH', 'BSC', 'AVAX'].includes(asset.chain)
     return isEvmChain
   }
   /**
- * Checks if an asset belongs to a UTXO chain.
- * @param asset - Asset to check.
- * @returns - Boolean indicating whether the asset belongs to a UTXO chain.
- */
+   * Checks if an asset belongs to a UTXO chain.
+   * @param asset - Asset to check.
+   * @returns - Boolean indicating whether the asset belongs to a UTXO chain.
+   */
   private isUTXOChain(asset: Asset): boolean {
     return ['BTC', 'BCH', 'DOGE'].includes(asset.chain)
   }

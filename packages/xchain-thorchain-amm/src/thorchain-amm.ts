@@ -68,7 +68,7 @@ export class ThorchainAMM {
     walletIndex,
   }: AmmEstimateSwapParams): Promise<TxDetails> {
     let errors: string[] = []
-     // If a wallet is provided, validate the swap parameters
+    // If a wallet is provided, validate the swap parameters
     if (wallet) {
       const params = {
         input: amount,
@@ -122,10 +122,10 @@ export class ThorchainAMM {
   }
 
   /**
-  * Wraps the estimate from ThorchainQuery for adding liquidity.
-  * @param params - The parameters for estimating adding liquidity.
-  * @returns - The estimated liquidity addition object.
-  */
+   * Wraps the estimate from ThorchainQuery for adding liquidity.
+   * @param params - The parameters for estimating adding liquidity.
+   * @returns - The estimated liquidity addition object.
+   */
   public async estimateAddLiquidity(params: AddliquidityPosition): Promise<EstimateAddLP> {
     return await this.thorchainQuery.estimateAddLP(params)
   }
@@ -264,7 +264,7 @@ export class ThorchainAMM {
    * @returns The submitted transaction.
    */
   public async withdrawLoan(wallet: Wallet, loanCloseParams: LoanCloseParams): Promise<TxSubmitted> {
-     // Retrieves the quote for closing the loan
+    // Retrieves the quote for closing the loan
     const withdrawLoan = await this.thorchainQuery.getLoanQuoteClose(loanCloseParams)
     // Checks if there are any errors in the quote
     if (withdrawLoan.errors.length > 0) throw Error(`${withdrawLoan.errors}`)

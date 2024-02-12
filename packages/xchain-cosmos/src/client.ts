@@ -27,11 +27,17 @@ import { TxOfflineParams } from './types'
 import { getDefaultExplorers, getDenom, getPrefix } from './utils'
 
 /**
- * Custom Cosmos client
+ * Partial parameters for the Cosmos client.
  */
 export type CosmosClientParams = Partial<CosmosSdkClientParams>
-
+/**
+ * Cosmos client class extending the Cosmos SDK client.
+ */
 export class Client extends CosmosSDKClient {
+  /**
+   * Constructor for the Cosmos client.
+   * @param {CosmosClientParams} config Configuration parameters for the client.
+   */
   constructor(config: CosmosClientParams = defaultClientConfig) {
     super({
       ...defaultClientConfig,
@@ -40,9 +46,8 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Get client native asset
-   *
-   * @returns {AssetInfo} Thorchain native asset
+   * Get information about the client's native asset.
+   * @returns {AssetInfo} Information about the native asset.
    */
   public getAssetInfo(): AssetInfo {
     return {
@@ -50,16 +55,19 @@ export class Client extends CosmosSDKClient {
       decimal: COSMOS_DECIMAL,
     }
   }
-
+  /**
+   * Get the number of decimals for a given asset.
+   * @param {Asset} asset The asset to get the decimals for.
+   * @returns {number} The number of decimals.
+   */
   public getAssetDecimals(asset: Asset): number {
     if (eqAsset(asset, AssetATOM)) return COSMOS_DECIMAL
     return this.defaultDecimals
   }
 
   /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url.
+   * Get the explorer URL.
+   * @returns {string} The explorer URL.
    */
   public getExplorerUrl(): string {
     return getDefaultExplorers()[this.network]
@@ -86,10 +94,9 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Get Asset from denomination
-   *
-   * @param {string} denom
-   * @returns {Asset|null} The asset of the given denomination.
+   * Get the asset from a given denomination.
+   * @param {string} denom The denomination to convert.
+   * @returns {Asset | null} The asset corresponding to the given denomination.
    */
   public assetFromDenom(denom: string): Asset | null {
     if (denom === this.getDenom(AssetATOM)) return AssetATOM
@@ -109,21 +116,19 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Get denomination from Asset
-   *
-   * @param {Asset} asset
-   * @returns {string} The denomination of the given asset.
+   * Get the denomination from a given asset.
+   * @param {Asset} asset The asset to get the denomination for.
+   * @returns {string | null} The denomination of the given asset.
    */
   public getDenom(asset: Asset): string | null {
     return getDenom(asset)
   }
 
   /**
-   * Returns fees.
-   * It tries to get chain fees from THORChain `inbound_addresses` first
-   * If it fails, it returns DEFAULT fees.
-   *
-   * @returns {Fees} Current fees
+   * Get the current fees.
+   * If possible, fetches the fees from THORChain's `inbound_addresses`.
+   * Otherwise, returns default fees.
+   * @returns {Fees} The current fees.
    */
   public async getFees(): Promise<Fees> {
     try {
@@ -141,10 +146,12 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Prepare transfer.
-   *
-   * @param {TxParams&Address} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
+   * Prepare a transaction for signing.
+   * @param {TxParams & { sender: Address }} params Transaction parameters including sender address.
+   * @returns {PreparedTx} The prepared transaction.
+   * @throws {"Invalid sender address"} Thrown if the sender address is invalid.
+   * @throws {"Invalid recipient address"} Thrown if the recipient address is invalid.
+   * @throws {"Invalid asset"} Thrown if the asset is invalid or not supported.
    */
   public async prepareTx({
     sender,
@@ -186,9 +193,8 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Create and sign transaction without broadcasting it
-   *
-   * @deprecated Use prepare Tx instead
+   * Creates and signs a transaction without broadcasting it.
+   * @deprecated Use prepareTx instead.
    */
   public async transferOffline({
     walletIndex = 0,
@@ -236,7 +242,7 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Get address prefix by network
+   * Get the address prefix based on the network.
    * @param {Network} network The network of which return the prefix
    * @returns the address prefix
    */
@@ -245,9 +251,9 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Get the message type url by type used by the cosmos-sdk client to make certain actions
-   * @param msgType
-   * @returns {string} the type url of the message
+   * Get the message type URL by message type.
+   * @param {MsgTypes} msgType The message type.
+   * @returns {string} The message type URL.
    */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
     const messageTypeUrls: Record<MsgTypes, string> = {
@@ -257,9 +263,9 @@ export class Client extends CosmosSDKClient {
   }
 
   /**
-   * Returns the standard fee used by the client for an asset
-   * @param {Asset} asset the asset to retrieve the fee of
-   * @returns {StdFee} the standard fee
+   * Returns the standard fee used by the client for an asset.
+   * @param {Asset} asset The asset to retrieve the fee for.
+   * @returns {StdFee} The standard fee.
    */
   protected getStandardFee(asset: Asset): StdFee {
     const denom = this.getDenom(asset)
