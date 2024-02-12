@@ -33,7 +33,7 @@ if destinationAsset != RUNE && destinationAsset not in active pool list (https:/
   return "destination asset not on pool list"
 
 If valueofRUNE(inbound fee + outbound fee) > valueOfRUNE(inboundAsset)
- return "insufficent inbound asset amount "
+ return "insufficient inbound asset amount "
 
 If sourceAsset == destinationAsset
      return "source and destination cannot be the same"
@@ -49,7 +49,7 @@ if affiliateFee < 0 || affiliateFee > 1000
 If (destinationAsset.chainType != RUNE)
     destinationInboundDetails = getInboundDetails(Mainnet, sourceAsset.chainType).isHalted
         if (destinationInboundDetails.isHalted)
-            return "Desitnation chain halted"
+            return "Destination chain halted"
 
 Return "Success"
 ```
@@ -58,7 +58,7 @@ Return "Success"
 
 Works out the expected wait time for any transaction, in or out based on the conf counting. Call twice to find the in + out bound time due to conf counting.
 
-Note: conf counting is done in the ChainClient interface within THORChain, so it might be best to have this function in each chain cliednt. e.g. = chain.RequiredConfTime(inputAmount)
+Note: conf counting is done in the ChainClient interface within THORChain, so it might be best to have this function in each chain client. e.g. = chain.RequiredConfTime(inputAmount)
 Should return the just the time in seconds.
 
 ### Inputs
@@ -118,7 +118,7 @@ Look at the value of the outboundTx and decide if it is going in the next block 
 runeValue = runeValueOf(outputAmount)
 
 if runeValue < minTxOutVolumeThreshold
-    Return 6 // likley next block.
+    Return 6 // likely next block.
 
 sumValue = runeValue + scheduled_outbound_value (https://midgard.ninerealms.com/v2/thorchain/queue)
 
@@ -151,7 +151,7 @@ return minBlocks * 6 // THORChain block time, can also do Constants.BlocksPerYea
 
 ### Overview
 
-Gathers all the information for a Swap. Can be called mutiple times within an interface.
+Gathers all the information for a Swap. Can be called multiple times within an interface.
 Informs user of the fees and expected outbound value, wait time and if over the set slip limit
 This is for information only, hence the memo or addresses are not required.
 Will need to convert asset amounts to RUNE to do comparisons.
@@ -216,7 +216,7 @@ Return values
 ## doSwap()
 
 Conducts a swap and sends the transaction. Does not look at LIM or a slip limit
-Does the checking, constructs the memo and then makes a transation for sending to TC.
+Does the checking, constructs the memo and then makes a transaction for sending to TC.
 Will need to convert asset amounts to RUNE to do comparisons
 
 ### Inputs:
@@ -240,7 +240,7 @@ Will need to convert asset amounts to RUNE to do comparisons
 1.  Pool Depth for sourceAsset (if Double Swap, depths for sourceAsset and destinationAsset)
 1.  Halt status for each chain used
 1.  Inbound and outbound gas_rate
-1.  Asgard Vault Address to send the Tx do (I think depost does that already)
+1.  Asgard Vault Address to send the Tx do (I think deposit does that already)
 
 #### Logic
 
@@ -291,7 +291,7 @@ else
 construct TX with Memo and inbound gas_rate
 Send Tx to correct asgardVault or router
 
-Polls TC to ensure the trasnaction was successful. (this might be a differet function that monitors a given Tx)
+Polls TC to ensure the transaction was successful. (this might be a different function that monitors a given Tx)
 
 Return Tx, expectedWait
 ```
@@ -359,9 +359,9 @@ Removes liquidity for a user
 1. `LP Details https://midgard.ninerealms.com/v2/member/{address}`
 1. `Pool List https://midgard.ninerealms.com/v2/pools `
 
-See if the the pool is valid
+See if the pool is valid
 See if their wallet is a member of the pool.
-See if the addtion was single sided or dual sided.
+See if the addition was single sided or dual sided.
 
 Work out basis points
 
@@ -381,7 +381,7 @@ If asym, need to know in which asset they want to get. ASSET or RUNE.
 If Asym
     Memo = "-:{PoolName}:BasisPoints" // will return RUNE and Asset to the deposit address
 Else
-    Memo = "-:{PoolName}:BasisPoints:{Asset} // returns RUNE or ASSET (asset param sets it) to the depost addresses which TC already knows about.
+    Memo = "-:{PoolName}:BasisPoints:{Asset} // returns RUNE or ASSET (asset param sets it) to the deposit addresses which TC already knows about.
 ```
 
 create transaction with memo
