@@ -24,7 +24,8 @@
   },
   "resolutions": {
     "@babel/traverse": "7.23.2",
-    "crypto-js": "4.2.0"
+    "crypto-js": "4.2.0",
+    "socks": "2.7.3"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
