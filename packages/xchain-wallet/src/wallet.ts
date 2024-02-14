@@ -1,11 +1,11 @@
-/**
- * Import necessary modules and libraries
- */
-import { Balance, Network, Tx, TxHash, TxParams, TxsPage, XChainClient } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, Network, Protocol, Tx, TxHash, TxsPage, XChainClient } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
-import { Address, Asset, BaseAmount, Chain, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
 import { ethers } from 'ethers'
+
+import { EvmTxParams, UtxoTxParams } from './types'
 
 // Record type to hold network URLs
 export type NodeUrls = Record<Network, string>
@@ -264,7 +264,8 @@ export class Wallet {
   }
 
   /**
-   * Get feeRates. Only available for EVM clients
+   * @deprecated
+   * Get feeRates. Only available for EVM clients. Use getFeeRates instead
    * @param {Chain} chain Chain of which return the feeRates
    * @returns {GasPrices} Chain of which return the feeRates
    * @throws {Error} If gas fee rates cannot be returned from the chain
@@ -276,18 +277,64 @@ export class Wallet {
   }
 
   /**
+   * Get chain feeRates.
+   * @param {Chain} chain of which return the feeRates
+   * @param {Protocol} protocol to interact with. If it is not set, fee rates are calculated as chain rules
+   * @returns {Record<FeeOption, BaseAmount>} the fee rates
+   * @throws {Error} if the fee rates can not be returned from the chain
+   */
+  public async getFeeRates(chain: Chain, protocol?: Protocol): Promise<Record<FeeOption, BaseAmount>> {
+    const client = this.getClient(chain)
+    if (client instanceof EvmClient) {
+      return client.estimateGasPrices(protocol)
+    }
+    if (client instanceof UtxoClient) {
+      const feeRates = await client.getFeeRates(protocol)
+      const nativeDecimals = client.getAssetInfo().decimal
+      return {
+        [FeeOption.Average]: baseAmount(feeRates[FeeOption.Average], nativeDecimals),
+        [FeeOption.Fast]: baseAmount(feeRates[FeeOption.Fast], nativeDecimals),
+        [FeeOption.Fastest]: baseAmount(feeRates[FeeOption.Fastest], nativeDecimals),
+      }
+    }
+    throw Error(`getFeeRates method not supported in ${chain} chain`)
+  }
+
+  /**
    * Make a transaction
    * @param {TxParams} txParams txParams - The parameters to make the transfer
    * @returns The transaction hash
    */
-  public async transfer({ asset, amount, recipient, memo, walletIndex }: TxParams & { asset: Asset }): Promise<string> {
-    const client = this.getClient(asset.chain)
+  public async transfer(params: UtxoTxParams | EvmTxParams): Promise<string> {
+    const client = this.getClient(params.asset.chain)
+    if (client instanceof EvmClient) {
+      if (!this.isEvmTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
+      return client.transfer({
+        walletIndex: params.walletIndex,
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        memo: params.memo,
+        gasPrice: params.gasPrice,
+      })
+    }
+    if (client instanceof UtxoClient) {
+      if (!this.isUtxoTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
+      return client.transfer({
+        walletIndex: params.walletIndex,
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        memo: params.memo,
+        feeRate: params.feeRate ? params.feeRate.amount().toNumber() : undefined,
+      })
+    }
     return client.transfer({
-      walletIndex,
-      asset,
-      amount,
-      recipient,
-      memo,
+      walletIndex: params.walletIndex,
+      asset: params.asset,
+      amount: params.amount,
+      recipient: params.recipient,
+      memo: params.memo,
     })
   }
 
@@ -391,5 +438,23 @@ export class Wallet {
     const client = this.clients[chain]
     if (!client) throw Error(`Client not found for ${chain} chain`)
     return client
+  }
+
+  /**
+   * Check if params type is compatible with EvmTxParams
+   * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
+   * @returns {boolean} True if params is EvmTxParams
+   */
+  private isEvmTxParams(params: EvmTxParams | UtxoTxParams): params is EvmTxParams {
+    return !('feeRate' in params)
+  }
+
+  /**
+   * Check if params type is compatible with UtxoTxParams
+   * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
+   * @returns {boolean} True if params is UtxoTxParams
+   */
+  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams): params is UtxoTxParams {
+    return !('gasPrice' in params)
   }
 }
