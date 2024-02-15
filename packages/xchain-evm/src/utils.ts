@@ -2,14 +2,16 @@ import { Address, Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { Signer, ethers, providers } from 'ethers'
 
 import erc20ABI from './data/erc20.json'
-
+/**
+ * Maximum approval amount possible, set to 2^256 - 1.
+ */
 export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).sub(1)
 
 /**
  * Validate the given address.
  *
- * @param {Address} address
- * @returns {boolean} `true` or `false`
+ * @param {Address} address The address to validate.
+ * @returns {boolean} `true` if the address is valid, otherwise `false`.
  */
 export const validateAddress = (address: Address): boolean => {
   try {
@@ -23,8 +25,8 @@ export const validateAddress = (address: Address): boolean => {
 /**
  * Get token address from asset.
  *
- * @param {Asset} asset
- * @returns {Address|null} The token address.
+ * @param {Asset} asset The asset to extract the token address from.
+ * @returns {Address|null} The token address if found, otherwise `null`.
  */
 export const getTokenAddress = (asset: Asset): Address | null => {
   try {
@@ -38,15 +40,15 @@ export const getTokenAddress = (asset: Asset): Address | null => {
 /**
  * Check if the symbol is valid.
  *
- * @param {string|null|undefined} symbol
- * @returns {boolean} `true` or `false`.
+ * @param {string|null|undefined} symbol The symbol to validate.
+ * @returns {boolean} `true` if the symbol is valid and has a length of at least 3, otherwise `false`.
  */
 export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
 /**
- * Calculate fees by multiplying .
+ * Calculate fees by multiplying gas price and gas limit.
  *
- * @returns {Fees} The default gas price.
+ * @returns {Fees} The calculated fee.
  */
 export const getFee = ({
   gasPrice,
@@ -61,17 +63,16 @@ export const getFee = ({
 /**
  * Get address prefix based on the network.
  *
- * @returns {string} The address prefix based on the network.
- *
- **/
+ * @returns {string} The address prefix based on the network ('0x').
+ */
 export const getPrefix = () => '0x'
 
 /**
- * Filter self txs
+ * Filter self transactions from an array of transactions.
  *
- * @returns {T[]}
- *
- **/
+ * @param {T[]} txs The transactions array.
+ * @returns {T[]} The filtered transactions array with self transactions removed.
+ */
 export const filterSelfTxs = <T extends { from: string; to: string; hash: string }>(txs: T[]): T[] => {
   const filterTxs = txs.filter((tx) => tx.from !== tx.to)
   let selfTxs = txs.filter((tx) => tx.from === tx.to)
@@ -85,22 +86,24 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
 }
 
 /**
- * Returns approval amount
+ * Returns approval amount. If amount is not set or zero, returns `MAX_APPROVAL`.
  *
- * If given amount is not set or zero, `MAX_APPROVAL` amount is used
+ * @param {BaseAmount} amount The amount to check.
+ * @returns {ethers.BigNumber} The approval amount.
  */
 export const getApprovalAmount = (amount?: BaseAmount): ethers.BigNumber =>
   amount && amount.gt(baseAmount(0, amount.decimal)) ? ethers.BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
 
 /**
- * Call a contract function.
+ * Estimate gas required for calling a contract function.
  *
+ * @param {object} params Parameters for estimating gas.
  * @param {Provider} provider Provider to interact with the contract.
  * @param {Address} contractAddress The contract address.
  * @param {ContractInterface} abi The contract ABI json.
  * @param {string} funcName The function to be called.
  * @param {unknown[]} funcParams The parameters of the function.
- * @returns {BigNumber} The result of the contract function call.
+ * @returns {BigNumber} The estimated gas required for the function call.
  */
 export const estimateCall = async ({
   provider,
@@ -118,19 +121,16 @@ export const estimateCall = async ({
   const contract: ethers.Contract = new ethers.Contract(contractAddress, abi, provider)
   return await contract.estimateGas[funcName](...funcParams)
 }
-
 /**
  * Calls a contract function.
  *
- * @param {Provider} provider Provider to interact with the contract.
- * @param {signer} Signer of the transaction (optional - needed for sending transactions only)
+ * @param {Provider} provider The provider to interact with the contract.
+ * @param {Signer} signer The signer of the transaction (optional - needed for sending transactions only).
  * @param {Address} contractAddress The contract address.
  * @param {ContractInterface} abi The contract ABI json.
  * @param {string} funcName The function to be called.
- * @param {unknow[]} funcParams (optional) The parameters of the function.
- *
- * @returns {T} The result of the contract function call.
-
+ * @param {unknown[]} funcParams (optional) The parameters of the function.
+ * @returns {Promise<T>} The result of the contract function call.
  */
 export const call = async <T>({
   provider,
@@ -149,7 +149,7 @@ export const call = async <T>({
 }): Promise<T> => {
   let contract = new ethers.Contract(contractAddress, abi, provider)
   if (signer) {
-    // For sending transactions a signer is needed
+    // For sending transactions, a signer is needed
     contract = contract.connect(signer)
   }
   return contract[funcName](...funcParams)
@@ -158,10 +158,10 @@ export const call = async <T>({
 /**
  * Load a contract.
  *
- * @param {Provider} provider Provider to interact with the contract.
+ * @param {Provider} provider The provider to interact with the contract.
  * @param {Address} contractAddress The contract address.
  * @param {ContractInterface} abi The contract ABI json.
- *
+ * @returns {Promise<ethers.Contract>} The loaded contract instance.
  */
 export const getContract = async ({
   provider,
@@ -178,13 +178,13 @@ export const getContract = async ({
 /**
  * Estimate gas for calling `approve`.
  *
- * @param {Provider} provider Provider to interact with the contract.
+ * @param {Provider} provider The provider to interact with the contract.
  * @param {Address} contractAddress The contract address.
  * @param {Address} spenderAddress The spender address.
  * @param {Address} fromAddress The address a transaction is sent from.
+ * @param {ContractInterface} abi The contract ABI json.
  * @param {BaseAmount} amount (optional) The amount of token. By default, it will be unlimited token allowance.
- *
- * @returns {BigNumber} Estimated gas
+ * @returns {Promise<ethers.BigNumber>} The estimated gas.
  */
 export const estimateApprove = async ({
   provider,
@@ -214,13 +214,13 @@ export const estimateApprove = async ({
 /**
  * Check allowance.
  *
- * @param {Provider} provider Provider to interact with the contract.
+ * @param {Provider} provider The provider to interact with the contract.
  * @param {Address} contractAddress The contract (ERC20 token) address.
  * @param {Address} spenderAddress The spender address (router).
  * @param {Address} fromAddress The address a transaction is sent from.
  * @param {BaseAmount} amount The amount to check if it's allowed to spend or not (optional).
  * @param {number} walletIndex (optional) HD wallet index
- * @returns {boolean} `true` or `false`.
+ * @returns {Promise<boolean>} `true` if the spender is allowed to spend the specified amount, `false` otherwise.
  */
 export const isApproved = async ({
   provider,
@@ -243,6 +243,9 @@ export const isApproved = async ({
 }
 
 /**
- * Removes `0x` or `0X` from address
+ * Removes `0x` or `0X` from the beginning of the address string.
+ *
+ * @param {Address} addr The address to remove the `0x` or `0X` prefix from.
+ * @returns {string} The address without the `0x` or `0X` prefix.
  */
 export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')

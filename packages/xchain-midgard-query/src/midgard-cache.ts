@@ -11,14 +11,18 @@ const defaultMidgard = new Midgard()
 /**
  * This class retrieves raw information from Midgard API and cached it
  */
+/**
+ * Class for caching and retrieving data from Midgard API related to pools and savers.
+ */
 export class MidgardCache {
   readonly midgard: Midgard
   private readonly cachedPools: CachedValue<PoolDetail[]>
   private readonly cachedSavers: CachedValue<SaverDetails>
+
   /**
-   * Constructor to create a ThorchainCache
+   * Constructor to create a MidgardCache.
    *
-   * @param {Midgard} midgard - an instance of the midgard API (could be pointing to stagenet,testnet,mainnet)
+   * @param {Midgard} midgard - An instance of the Midgard API (could be pointing to stagenet, testnet, mainnet).
    * @returns MidgardCache
    */
   constructor(midgard = defaultMidgard) {
@@ -28,7 +32,7 @@ export class MidgardCache {
   }
 
   /**
-   * Get info about existing pools in the protocol from Midgard API
+   * Get information about existing pools in the protocol from Midgard API.
    *
    * @returns {PoolDetail[]} Array of pools
    */
@@ -39,7 +43,7 @@ export class MidgardCache {
   /**
    * Returns the information of all the positions of a set of addresses in the THORChain savers product.
    *
-   * @param {String} address Comma separated list of addresses
+   * @param {String} address - Comma-separated list of addresses.
    * @returns {SaverDetails} Array of savers positions
    */
   public async getSavers(address: string): Promise<SaverDetails> {

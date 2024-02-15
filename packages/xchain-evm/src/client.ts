@@ -48,7 +48,8 @@ import {
 } from './utils'
 
 /**
- * Interface for custom EVM client
+ * Interface for custom EVM client.
+ * Defines methods for interacting with the EVM (Ethereum Virtual Machine).
  */
 // export interface EVMClient {
 //   call<T>(params: CallParams): Promise<T>
@@ -70,7 +71,9 @@ type EvmDefaults = {
   approveGasLimit: BigNumber
   gasPrice: BigNumber // BaseAmount Unit
 }
-
+/**
+ * Parameters for configuring the EVM client.
+ */
 export type EVMClientParams = XChainClientParams & {
   chain: Chain
   gasAsset: Asset
@@ -82,7 +85,8 @@ export type EVMClientParams = XChainClientParams & {
 }
 
 /**
- * Custom EVM client
+ * Custom EVM client class.
+ * Extends `BaseXChainClient` and implements `XChainClient`.
  */
 export default class Client extends BaseXChainClient implements XChainClient {
   readonly config: EVMClientParams
@@ -94,8 +98,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
   private dataProviders: EvmOnlineDataProviders[]
   private providers: Record<Network, Provider>
   /**
-   * Constructor
-   * @param {EVMClientParams} params
+   * Constructor for the EVM client.
+   * @param {EVMClientParams} params - Parameters for configuring the EVM client.
    */
   constructor({
     chain,
@@ -133,7 +137,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Purge client.
+   * Purges the client, resetting it to initial state.
    *
    * @returns {void}
    */
@@ -143,7 +147,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * @deprecated this function eventually will be removed use getAddressAsync instead
+   * @deprecated Use getAddressAsync instead. This function will eventually be removed.
    */
   getAddress(walletIndex = 0): Address {
     if (walletIndex < 0) {
@@ -157,27 +161,30 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
   /**
    * Get the current address.
-   *
-   * @param {number} walletIndex (optional) HD wallet index
+   * Asynchronously gets the current address.
+   * @param {number} walletIndex The current address.
    * @returns {Address} The current address.
    *
    * @throws Error
-   * Thrown if HDNode is not defined. Note: A phrase is needed to create a wallet and to derive an address from it.
-   * @throws Error
-   * Thrown if wallet index < 0.
+   * @throws {Error} Thrown if HDNode is not defined, indicating that a phrase is needed to derive an address.
+   * @throws {Error} Thrown if wallet index < 0.
+   */
+  /**
+   *
+   * @param {number} walletIndex (optional) Index of the HD wallet.
+   * @returns {Promise<Address>} The current address.
+   * @throws {Error} Thrown if wallet index < 0.
    */
   async getAddressAsync(walletIndex = 0): Promise<Address> {
     return this.getAddress(walletIndex)
   }
 
   /**
-   * Get etherjs wallet interface.
-   *
-   * @param {number} walletIndex (optional) HD wallet index
-   * @returns {Wallet} The current etherjs wallet interface.
-   *
-   * @throws Error
-   * Thrown if HDNode is not defined. Note: A phrase is needed to create a wallet and to derive an address from it.
+   * Retrieves the Ethereum wallet interface.
+   * @param {number} walletIndex - The index of the HD wallet (optional).
+   * @returns {Wallet} The current Ethereum wallet interface.
+   * @throws Error - Thrown if the HDNode is not defined, indicating that a phrase is needed to create a wallet and derive an address.
+   * Note: A phrase is needed to create a wallet and to derive an address from it.
    */
   getWallet(walletIndex = 0): ethers.Wallet {
     if (!this.hdNode) {
@@ -186,25 +193,23 @@ export default class Client extends BaseXChainClient implements XChainClient {
     return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(walletIndex))).connect(this.getProvider())
   }
   /**
-   * Get etherjs Provider interface.
-   *
-   * @returns {Provider} The current etherjs Provider interface.
+   * Retrieves the Ethereum Provider interface.
+   * @returns {Provider} The current Ethereum Provider interface.
    */
   getProvider(): Provider {
     return this.providers[this.network]
   }
   /**
-   * Get the explorer url.
-   *
-   * @returns {string} The explorer url for ethereum based on the current network.
+   * Retrieves the explorer URL based on the current network.
+   * @returns {string} The explorer URL for Ethereum based on the current network.
    */
   getExplorerUrl(): string {
     return this.explorerProviders[this.network].getExplorerUrl()
   }
 
   /**
-   *
-   * @returns asset info
+   * Retrieves asset information.
+   * @returns {AssetInfo} Asset information containing the asset and its decimal places.
    */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
@@ -215,47 +220,37 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address.
+   * Retrieves the explorer URL for a given address.
+   * @param {Address} address - The address to retrieve the explorer URL for.
+   * @returns {string} The explorer URL for the given address.
    */
   getExplorerAddressUrl(address: Address): string {
     return this.explorerProviders[this.network].getExplorerAddressUrl(address)
   }
 
   /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID
-   * @returns {string} The explorer url for the given transaction id.
+   * Retrieves the explorer URL for a given transaction ID.
+   * @param {string} txID - The transaction ID to retrieve the explorer URL for.
+   * @returns {string} The explorer URL for the given transaction ID.
    */
   getExplorerTxUrl(txID: string): string {
     return this.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
 
   /**
-   * Set/update the current network.
-   *
-   * @param {Network} network
+   * Sets or updates the current network.
+   * @param {Network} network - The network to set or update.
    * @returns {void}
-   *
-   * @throws {"Network must be provided"}
-   * Thrown if network has not been set before.
+   * @throws {"Network must be provided"} Thrown if the network has not been set before.
    */
   setNetwork(network: Network): void {
     super.setNetwork(network)
   }
 
   /**
-   * Set/update a new phrase (Eg. If user wants to change wallet)
-   *
-   * @param {string} phrase A new phrase.
-   * @param {number} walletIndex (optional) HD wallet index
-   * @returns {Address} The address from the given phrase
-   *
-   * @throws {"Invalid phrase"}
-   * Thrown if the given phase is invalid.
+   * Validates the given Ethereum address.
+   * @param {Address} address - The address to validate.
+   * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
   setPhrase(phrase: string, walletIndex = 0): Address {
     this.hdNode = HDNode.fromMnemonic(phrase)
@@ -272,23 +267,20 @@ export default class Client extends BaseXChainClient implements XChainClient {
     return validateAddress(address)
   }
   /**
-   * Get the balance of a given address.
-   *
-   * @param {Address} address By default, it will return the balance of the current wallet. (optional)
-   * @returns {Balance[]} The all balance of the address.
-   *
-   * @throws {"Invalid asset"} throws when the give asset is an invalid one
+   * Retrieves the balance of a given address.
+   * @param {Address} address - The address to retrieve the balance for.
+   * @param {Asset[]} assets - Assets to retrieve the balance for (optional).
+   * @returns {Promise<Balance[]>} An array containing the balance of the address.
+   * @throws {"Invalid asset"} Thrown when the provided asset is invalid.
    */
   async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     return await this.roundRobinGetBalance(address, assets)
   }
 
   /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
+   * Retrieves the transaction history of a given address with pagination options.
+   * @param {TxHistoryParams} params - Options to get transaction history (optional).
+   * @returns {Promise<TxsPage>} The transaction history.
    */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const filteredParams: TxHistoryParams = {
@@ -303,14 +295,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @param {string} assetAddress The asset address. (optional)
-   * @returns {Tx} The transaction details of the given transaction id.
-   *
-   * @throws {"Need to provide valid txId"}
-   * Thrown if the given txId is invalid.
+   * Retrieves the transaction details of a given transaction ID.
+   * @param {string} txId - The transaction ID.
+   * @param {string} assetAddress - The asset address (optional).
+   * @returns {Promise<Tx>} The transaction details of the given transaction ID.
+   * @throws {"Need to provide valid txId"} Thrown if the provided transaction ID is invalid.
    */
   async getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> {
     return await this.roundRobinGetTransactionData(txId, assetAddress)
@@ -325,8 +314,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
    * @param {unknown[]} funcParams (optional) The parameters of the function.
-   *
-   * @returns {T} The result of the contract function call.
+   * @param {CallParams} params - Parameters for calling the contract function.
+   * @returns {T} The result of the contract function call..
    */
   async call<T>({
     signer: txSigner,
@@ -342,15 +331,14 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Call a contract function.
+   * Estimates the gas required for calling a contract function.
    * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
    * @param {string} funcName The function to be called.
    * @param {any[]} funcParams The parameters of the function.
    * @param {number} walletIndex (optional) HD wallet index
-   *
-   * @returns {BigNumber} The result of the contract function call.
-
+   * @param {EstimateCallParams} params - Parameters for estimating gas.
+   * @returns {BigNumber}  The estimated gas required for the contract function call.
    */
   async estimateCall({ contractAddress, abi, funcName, funcParams = [] }: EstimateCallParams): Promise<BigNumber> {
     return estimateCall({
@@ -369,7 +357,8 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * @param {Address} spenderAddress The spender address.
    * @param {BaseAmount} amount The amount to check if it's allowed to spend or not (optional).
    * @param {number} walletIndex (optional) HD wallet index
-   * @returns {boolean} `true` or `false`.
+   * @param {IsApprovedParams} params - Parameters for checking allowance.
+   * @returns {boolean} `true` if the allowance is approved, `false` otherwise.
    */
   async isApproved({ contractAddress, spenderAddress, amount, walletIndex }: IsApprovedParams): Promise<boolean> {
     const allowance = await isApproved({
@@ -383,18 +372,17 @@ export default class Client extends BaseXChainClient implements XChainClient {
     return allowance
   }
   /**
-   * Check allowance.
+   * Approves an allowance for spending tokens.
    *
+   * @param {ApproveParams} params - Parameters for approving an allowance.
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
    * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
    * @param {feeOption} FeeOption Fee option (optional)
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    * @param {number} walletIndex (optional) HD wallet index
-   *
-   * @throws Error If gas could not been estimated
-   *
-   * @returns {TransactionResponse} The transaction result.
+   * @returns {TransactionResponse} The result of the approval transaction.
+   * @throws Error If gas estimation fails.
    */
   async approve({
     contractAddress,
@@ -448,14 +436,15 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Estimate gas for calling `approve`.
+   * Estimates the gas required for approving an allowance.
    *
+   * @param {EstimateApproveParams} params - Parameters for estimating gas.
    * @param {Address} contractAddress The contract address.
    * @param {Address} spenderAddress The spender address.
    * @param {Address} fromAddress The address the approve transaction is sent from.
    * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
    *
-   * @returns {BigNumber} Estimated gas
+   * @returns {BigNumber} The estimated gas required for the approval.
    */
   async estimateApprove({
     fromAddress,
@@ -479,13 +468,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
    * Note: A given `feeOption` wins over `gasPrice` and `gasLimit`
    *
    * @param {TxParams} params The transfer options.
-   * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
+   * @param {signer} Signer The address a transaction is sent from. If not set, signer will be defined based on `walletIndex`.
    * @param {feeOption} FeeOption Fee option (optional)
    * @param {gasPrice} BaseAmount Gas price (optional)
    * @param {gasLimit} BigNumber Gas limit (optional)
-   *
    * @throws Error Thrown if address of given `Asset` could not be parsed
-   *
    * @returns {TxHash} The transaction hash.
    */
   async transfer({
@@ -508,20 +495,24 @@ export default class Client extends BaseXChainClient implements XChainClient {
     maxPriorityFeePerGas?: BaseAmount
     gasLimit?: BigNumber
   }): Promise<TxHash> {
+    // Check for compatibility between gasPrice and EIP 1559 parameters
     if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
       throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
     }
-
+    // Initialize fee data object
     const feeData: ethers.providers.FeeData = {
       lastBaseFeePerGas: null,
       maxFeePerGas: null,
       maxPriorityFeePerGas: null,
       gasPrice: null,
     }
-
+    // If EIP 1559 parameters are provided, use them; otherwise, estimate gas price
     if (maxFeePerGas || maxPriorityFeePerGas) {
+      // Get fee info from the provider
       const feeInfo = await this.getProvider().getFeeData()
+      // Set max fee per gas
       if (maxFeePerGas) {
+        // Set max priority fee per gas
         feeData.maxFeePerGas = BigNumber.from(maxFeePerGas.amount().toFixed())
       } else if (maxPriorityFeePerGas && feeInfo.lastBaseFeePerGas) {
         feeData.maxFeePerGas = feeInfo.lastBaseFeePerGas.mul(2).add(maxPriorityFeePerGas.amount().toFixed())
@@ -531,16 +522,19 @@ export default class Client extends BaseXChainClient implements XChainClient {
         : feeInfo.maxPriorityFeePerGas
     } else {
       const txGasPrice: BigNumber = gasPrice
-        ? BigNumber.from(gasPrice.amount().toFixed())
+        ? // Estimate gas price based on fee option
+          BigNumber.from(gasPrice.amount().toFixed())
         : await this.estimateGasPrices()
             .then((prices) => prices[feeOption])
             .then((gp) => BigNumber.from(gp.amount().toFixed()))
+      // Check fee bounds
       checkFeeBounds(this.feeBounds, txGasPrice.toNumber())
+      // Set gas price
       feeData.gasPrice = txGasPrice
     }
-
+    // Get the sender address
     const sender = txSigner ? await txSigner.getAddress() : this.getAddress(walletIndex)
-
+    // Determine gas limit: estimate or use default
     let txGasLimit: BigNumber
     if (!gasLimit) {
       try {
@@ -553,7 +547,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
     } else {
       txGasLimit = gasLimit
     }
-
+    // Prepare the transaction
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient,
@@ -561,11 +555,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
       asset,
       memo,
     })
-
+    // Parse the transaction request
     const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
-
+    // Get the signer
     const signer = txSigner || this.getWallet(walletIndex)
-
+    // Populate the transaction with necessary details
     const tx = await signer.populateTransaction({
       from: transactionRequest.from,
       to: transactionRequest.to,
@@ -576,25 +570,30 @@ export default class Client extends BaseXChainClient implements XChainClient {
       maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
       maxFeePerGas: feeData.maxFeePerGas || undefined,
     })
+    // Send the transaction and return the hash
     const { hash } = await signer.sendTransaction(tx)
 
     return hash
   }
-
+  /**
+   * Broadcasts a transaction.
+   * @param {string} txHex - The transaction in hexadecimal format.
+   * @returns {Promise<TxHash>} The transaction hash.
+   */
   async broadcastTx(txHex: string): Promise<TxHash> {
     const resp = await this.providers[this.network].sendTransaction(txHex)
     return resp.hash
   }
 
   /**
-   * Estimate gas price.
-   * @param {Protocol} protocol Protocol to interact with. If there's no protocol provided, fee rates are retrieved from chain data providers
-   *
+   * Estimates gas prices (average, fast, fastest) for a transaction.
+   * @param {Protocol} protocol The protocol to use for estimating gas prices.
    * @returns {GasPrices} The gas prices (average, fast, fastest) in `Wei` (`BaseAmount`)
    */
   async estimateGasPrices(protocol?: Protocol): Promise<GasPrices> {
     if (!protocol) {
       try {
+        // Attempt to fetch gas prices via round-robin from multiple providers
         const feeRates = await this.roundRobinGetFeeRates()
         return {
           [FeeOption.Average]: baseAmount(feeRates.average, this.gasAssetDecimals),
@@ -606,8 +605,9 @@ export default class Client extends BaseXChainClient implements XChainClient {
       }
 
       try {
+        // If round-robin fails, fetch gas price from the primary provider
         const gasPrice = await this.getProvider().getGasPrice()
-        // x2 and x10 is too abusive
+        // Adjust gas prices for different fee options
         return {
           [FeeOption.Average]: baseAmount(gasPrice.toNumber(), this.gasAssetDecimals),
           [FeeOption.Fast]: baseAmount(gasPrice.toNumber() * 1.5, this.gasAssetDecimals),
@@ -618,9 +618,10 @@ export default class Client extends BaseXChainClient implements XChainClient {
       }
     }
 
-    // If chain data providers fail, THORCHAIN as fallback
+    // If primary provider fails or fallback to THORChain protocol, fetch gas prices from THORChain
     if (!protocol || protocol === Protocol.THORCHAIN) {
       try {
+        // Fetch fee rates from THORChain and convert to BaseAmount
         // Note: `rates` are in `gwei`
         // @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/querier.go#L416-420
         // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
@@ -645,13 +646,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Estimate gas.
+   * Estimates gas limit for a transaction.
    *
    * @param {TxParams} params The transaction and fees options.
-   *
-   * @throws Error Thrown if address could not parsed from given ERC20 asset
-   *
-   * @returns {BaseAmount} The estimated gas fee.
+   * @returns {BaseAmount} The estimated gas limit.
+   * @throws Error Thrown if address could not be parsed from the given ERC20 asset.
    */
   async estimateGasLimit({ asset, recipient, amount, memo, from }: TxParams & { from?: Address }): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
@@ -679,30 +678,36 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     return gasEstimate
   }
+  /**
+   * Checks if the given asset matches the gas asset.
+   *
+   * @param {Asset} asset - The asset to check.
+   * @returns {boolean} True if the asset matches the gas asset, false otherwise.
+   */
   private isGasAsset(asset: Asset): boolean {
     return eqAsset(this.gasAsset, asset)
   }
 
   /**
-   * Estimate gas prices/limits (average, fast fastest).
+   * Estimates gas prices/limits (average, fast, fastest) and fees for a transaction.
    *
-   * @param {TxParams} params
-   * @returns {FeesWithGasPricesAndLimits} The estimated gas prices/limits.
+   * @param {TxParams} params The transaction parameters.
+   * @returns {FeesWithGasPricesAndLimits} The estimated gas prices/limits and fees.
    */
   async estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits> {
-    // gas prices
+    // Gas prices estimation
     const gasPrices = await this.estimateGasPrices()
     const decimals = this.gasAssetDecimals
     const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
-    // gas limits
+    // Gas limits estimation
     const gasLimit = await this.estimateGasLimit({
       asset: params.asset,
       amount: params.amount,
       recipient: params.recipient,
       memo: params.memo,
     })
-
+    // Calculate fees
     return {
       gasPrices,
       fees: {
@@ -716,12 +721,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Get fees.
+   * Get transaction fees.
    *
-   * @param {TxParams} params
-   * @returns {Fees} The average/fast/fastest fees.
-   *
-   * @throws {"Params need to be passed"} Thrown if params are not set
+   * @param {TxParams} params - The transaction parameters.
+   * @returns {Fees} The average, fast, and fastest fees.
+   * @throws {"Params need to be passed"} Thrown if parameters are not provided.
    */
   getFees(): never
   getFees(params: TxParams): Promise<Fees>
@@ -731,7 +735,14 @@ export default class Client extends BaseXChainClient implements XChainClient {
     const { fees } = await this.estimateFeesWithGasPricesAndLimits(params)
     return fees
   }
-
+  /**
+   * Retrieves the balance of an address by round-robin querying multiple data providers.
+   *
+   * @param {Address} address - The address to query the balance for.
+   * @param {Asset[]} [assets] - Optional list of assets to query the balance for.
+   * @returns {Promise<Balance[]>} The balance information for the address.
+   * @throws Error Thrown if no provider is able to retrieve the balance.
+   */
   protected async roundRobinGetBalance(address: Address, assets?: Asset[]) {
     for (const provider of this.dataProviders) {
       try {
@@ -743,6 +754,14 @@ export default class Client extends BaseXChainClient implements XChainClient {
     }
     throw Error('no provider able to get balance')
   }
+  /**
+   * Retrieves transaction data by round-robin querying multiple data providers.
+   *
+   * @param {string} txId - The transaction ID.
+   * @param {string} [assetAddress] - Optional asset address.
+   * @returns {Promise<Tx>} The transaction data.
+   * @throws Error Thrown if no provider is able to retrieve the transaction data.
+   */
   protected async roundRobinGetTransactionData(txId: string, assetAddress?: string) {
     for (const provider of this.dataProviders) {
       try {
@@ -754,6 +773,13 @@ export default class Client extends BaseXChainClient implements XChainClient {
     }
     throw Error('no provider able to GetTransactionData')
   }
+  /**
+   * Retrieves transaction history by round-robin querying multiple data providers.
+   *
+   * @param {TxHistoryParams} params - The transaction history parameters.
+   * @returns {Promise<TxsPage>} The transaction history.
+   * @throws Error Thrown if no provider is able to retrieve the transaction history.
+   */
   protected async roundRobinGetTransactions(params: TxHistoryParams) {
     for (const provider of this.dataProviders) {
       try {
@@ -765,7 +791,12 @@ export default class Client extends BaseXChainClient implements XChainClient {
     }
     throw Error('no provider able to GetTransactions')
   }
-
+  /**
+   * Retrieves fee rates by round-robin querying multiple data providers.
+   *
+   * @returns {Promise<FeeRates>} The fee rates.
+   * @throws Error Thrown if no provider is able to retrieve the fee rates.
+   */
   protected async roundRobinGetFeeRates(): Promise<FeeRates> {
     for (const provider of this.dataProviders) {
       try {
@@ -779,10 +810,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Prepare transfer.
+   * Prepares a transaction for transfer.
    *
-   * @param {TxParams&Address&FeeOption&BaseAmount&BigNumber} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
+   * @param {TxParams&Address&FeeOption&BaseAmount&BigNumber} params - The transfer options.
+   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
+   * @throws Error Thrown if the provided asset chain does not match the client's chain, or if any of the addresses are invalid.
    */
   async prepareTx({
     sender,
@@ -826,10 +858,11 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Prepare transfer.
+   * Prepares an approval transaction.
    *
-   * @param {ApproveParams&Address&FeeOption&BaseAmount&BigNumber} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
+   * @param {ApproveParams&Address&FeeOption&BaseAmount&BigNumber} params - The approval options.
+   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
+   * @throws Error Thrown if any of the addresses are invalid.
    */
   public async prepareApprove({
     contractAddress,

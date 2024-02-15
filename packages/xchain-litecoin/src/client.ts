@@ -27,9 +27,13 @@ import {
 } from './const'
 import { NodeAuth } from './types'
 import * as Utils from './utils'
-
+/**
+ * Defines a mapping of node URLs for different networks.
+ */
 export type NodeUrls = Record<Network, string>
-
+/**
+ * Default parameters for the Litecoin client.
+ */
 export const defaultLtcParams: UtxoClientParams & {
   nodeUrls: NodeUrls
   nodeAuth?: NodeAuth
@@ -55,16 +59,15 @@ export const defaultLtcParams: UtxoClientParams & {
 }
 
 /**
- * Custom Litecoin client
+ * Custom Litecoin client.
  */
 class Client extends UTXOClient {
   private nodeUrls: NodeUrls
   private nodeAuth?: NodeAuth
   /**
-   * Constructor
-   * Client is initialised with network type
+   * Constructs a new `Client` with the provided parameters.
    *
-   * @param {UtxoClientParams} params
+   * @param {UtxoClientParams} params The parameters for initializing the client.
    */
   constructor(params = defaultLtcParams) {
     super(LTCChain, {
@@ -80,7 +83,14 @@ class Client extends UTXOClient {
   }
 
   /**
-   * @deprecated this function eventually will be removed use getAddressAsync instead
+   * [DEPRECATED] Retrieves the address at the specified index.
+   *
+   * @deprecated Use `getAddressAsync` instead.
+   * @param {number} index The index of the address.
+   * @returns {Address} The address at the specified index.
+   * @throws {Error} Thrown when the index is less than zero.
+   * @throws {Error} Thrown when the phrase has not been set.
+   * @throws {Error} Thrown when the address cannot be defined.
    */
   getAddress(index = 0): Address {
     if (index < 0) {
@@ -103,12 +113,12 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the current address.
+   * Retrieves the current address asynchronously.
    *
    * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
    * The address is then decoded into type P2WPKH and returned.
    *
-   * @returns {Address} The current address.
+   * @returns {Address} A promise that resolves to the current address
    *
    * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
    * @throws {"Address not defined"} Thrown if failed creating account from phrase.
@@ -118,8 +128,9 @@ class Client extends UTXOClient {
   }
 
   /**
+   * Returns information about the asset used by the client.
    *
-   * @returns asset info
+   * @returns {AssetInfo} Information about the asset.
    */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
@@ -131,11 +142,11 @@ class Client extends UTXOClient {
 
   /**
    * @private
-   * Get private key.
+   * [PRIVATE] Retrieves the private key.
    *
    * Private function to get keyPair from the this.phrase
    *
-   * @param {string} phrase The phrase to be used for generating privkey
+   * @param {string} phrase The phrase used to generate the private key.
    * @returns {ECPairInterface} The privkey generated from the given phrase
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
@@ -154,20 +165,20 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Validate the given address.
+   * Validates the given Litecoin address.
    *
-   * @param {Address} address
-   * @returns {boolean} `true` or `false`
+   * @param {string} address The Litecoin address to validate.
+   * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
 
   /**
-   * Transfer LTC.
+   * Transfers Litecoin (LTC) from one address to another.
    *
-   * @param {TxParams&FeeRate} params The transfer options.
-   * @returns {TxHash} The transaction hash.
+   * @param {TxParams & { feeRate?: FeeRate }} params The transfer options.
+   * @returns {Promise<TxHash>} A promise that resolves to the transaction hash.
    */
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     // set the default fee rate to `fast`
@@ -197,10 +208,11 @@ class Client extends UTXOClient {
   }
 
   /**
+   * Builds a Litecoin (LTC) transaction.
    *
    * @param {BuildParams} params The transaction build options.
-   * @returns {Transaction}
-   * @deprecated
+   * @returns {Transaction} A promise that resolves to the PSBT (Partially Signed Bitcoin Transaction) and UTXOs (Unspent Transaction Outputs).
+   * @deprecated This function will eventually be removed. Use `prepareTx` instead.
    */
   async buildTx({
     amount,
@@ -267,10 +279,10 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Prepare transfer.
+   * Prepares a Litecoin (LTC) transaction.
    *
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
+   * @returns {PreparedTx} A promise that resolves to the raw unsigned transaction.
    */
   async prepareTx({
     sender,
@@ -305,14 +317,15 @@ class Client extends UTXOClient {
   }
 
   /**
-   * Get the transaction fee.
+   * Calculates the transaction fee based on the provided UTXOs, fee rate, and optional compiled memo.
    *
-   * @param {UTXO[]} inputs The UTXOs.
+   * @param {UTXO[]} inputs The The UTXOs used as inputs in the transaction.
    * @param {FeeRate} feeRate The fee rate.
    * @param {Buffer} data The compiled memo (Optional).
-   * @returns {number} The fee amount.
+   * @returns {number} The calculated  fee amount.
    */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+    // Calculate transaction size based on inputs and outputs
     const inputSizeBasedOnInputs =
       inputs.length > 0
         ? inputs.reduce((a, x) => a + Utils.inputBytes(x), 0) + inputs.length // +1 byte for each input signature
@@ -325,10 +338,11 @@ class Client extends UTXOClient {
       Utils.TX_OUTPUT_PUBKEYHASH +
       Utils.TX_OUTPUT_BASE +
       Utils.TX_OUTPUT_PUBKEYHASH
-
+    // Add additional output size if memo is provided
     if (data) {
       sum += Utils.TX_OUTPUT_BASE + data.length
     }
+    // Calculate fee
     const fee = sum * feeRate
     return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
   }
