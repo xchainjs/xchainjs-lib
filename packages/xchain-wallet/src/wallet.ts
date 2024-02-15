@@ -1,3 +1,6 @@
+/**
+ * Import necessary modules and libraries
+ */
 import { Balance, FeeOption, Network, Protocol, Tx, TxHash, TxsPage, XChainClient } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
