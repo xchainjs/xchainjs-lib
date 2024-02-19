@@ -33,6 +33,7 @@
     "@xchainjs/xchain-client": "0.16.1",
     "@xchainjs/xchain-thorchain": "1.0.3",
     "@xchainjs/xchain-mayachain": "1.0.0",
+    "@xchainjs/xchain-utxo": "0.1.2",
     "ethers": "5.6.6"
   },
   "devDependencies": {
