@@ -226,17 +226,11 @@ const NON_SYNTH_DELIMITER = '.'
  */
 export const assetFromString = (s: string): Asset | null => {
   const isSynth = s.includes(SYNTH_DELIMITER)
-  let isTrade = s.includes(TRADE_DELIMITER)
+  const isTrade = !isSynth && s.includes(TRADE_DELIMITER) // Ensure isTrade is only considered if not a synth
 
-  isSynth ? true : (isTrade = false) // Can't be a Synth and Trade at the same time.
-  let delimiter
-  if (isSynth) {
-    delimiter = SYNTH_DELIMITER
-  } else if (isTrade) {
-    delimiter = TRADE_DELIMITER
-  } else {
-    delimiter = NON_SYNTH_DELIMITER
-  }
+  // Determine the delimiter based on whether the asset is a synth, trade, or neither
+  const delimiter = isSynth ? SYNTH_DELIMITER : isTrade ? TRADE_DELIMITER : NON_SYNTH_DELIMITER
+
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
     return null
