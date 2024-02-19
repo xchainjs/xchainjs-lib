@@ -1,3 +1,4 @@
+import { Protocol } from '@xchainjs/xchain-client'
 import { abi } from '@xchainjs/xchain-evm'
 import { THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
@@ -6,7 +7,7 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
 import { TxSubmitted } from './types'
-import { isProtocolERC20Asset } from './utils'
+import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
 
 export type NonProtocolActionParams = {
   wallet: Wallet
@@ -47,12 +48,36 @@ export class ThorchainAction {
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     // Non ERC20 swaps
     if (!isProtocolERC20Asset(assetAmount.asset)) {
-      const hash = await wallet.transfer({
-        asset: assetAmount.asset,
-        amount: assetAmount.baseAmount,
-        recipient,
-        memo,
-      })
+      if (isProtocolBFTChain(assetAmount.asset.chain)) {
+        const hash = await wallet.transfer({
+          asset: assetAmount.asset,
+          amount: assetAmount.baseAmount,
+          recipient,
+          memo,
+        })
+        return {
+          hash,
+          url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
+        }
+      }
+      const feeRates = await wallet.getFeeRates(assetAmount.asset.chain, Protocol.THORCHAIN)
+      const hash = await wallet.transfer(
+        isProtocolEVMChain(assetAmount.asset.chain)
+          ? {
+              asset: assetAmount.asset,
+              amount: assetAmount.baseAmount,
+              recipient,
+              memo,
+              gasPrice: feeRates.fast,
+            }
+          : {
+              asset: assetAmount.asset,
+              amount: assetAmount.baseAmount,
+              recipient,
+              memo,
+              feeRate: feeRates.fast,
+            },
+      )
       return {
         hash,
         url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
@@ -79,7 +104,7 @@ export class ThorchainAction {
     const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
     const chainWallet = wallet.getChainWallet(assetAmount.asset.chain)
 
-    const gasPrices = await wallet.getGasFeeRates(assetAmount.asset.chain)
+    const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
 
     const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams, {
       from: wallet.getAddress(assetAmount.asset.chain),
