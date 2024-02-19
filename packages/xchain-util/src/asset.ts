@@ -228,11 +228,15 @@ export const assetFromString = (s: string): Asset | null => {
   const isSynth = s.includes(SYNTH_DELIMITER)
   let isTrade = s.includes(TRADE_DELIMITER)
 
-  isSynth ? true : isTrade = false; // Can't be a Synth and Trade at the same time.
-
-  // const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
-   const delimiter = isSynth ? SYNTH_DELIMITER : (!isSynth && !isTrade ? NON_SYNTH_DELIMITER : TRADE_DELIMITER);
-
+  isSynth ? true : (isTrade = false) // Can't be a Synth and Trade at the same time.
+  let delimiter
+  if (isSynth) {
+    delimiter = SYNTH_DELIMITER
+  } else if (isTrade) {
+    delimiter = TRADE_DELIMITER
+  } else {
+    delimiter = NON_SYNTH_DELIMITER
+  }
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
     return null
@@ -246,7 +250,6 @@ export const assetFromString = (s: string): Asset | null => {
   const ticker = symbol.split('-')[0]
 
   if (!symbol) return null
-
 
   return { chain, symbol, ticker, synth: isSynth, trade: isTrade }
 }
@@ -276,7 +279,7 @@ export const assetFromStringEx = (s: string): Asset => {
  * @returns {string} The string from the given asset.
  */
 export const assetToString = ({ chain, symbol, synth, trade }: Asset) => {
-  const delimiter = synth ? SYNTH_DELIMITER : (trade ? TRADE_DELIMITER : NON_SYNTH_DELIMITER);
+  const delimiter = synth ? SYNTH_DELIMITER : trade ? TRADE_DELIMITER : NON_SYNTH_DELIMITER
   return `${chain}${delimiter}${symbol}`
 }
 

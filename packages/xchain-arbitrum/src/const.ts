@@ -11,7 +11,7 @@ export const LOWER_FEE_BOUND = 100_000_000
 export const UPPER_FEE_BOUND = 1_000_000_000
 export const ARB_GAS_ASSET_DECIMAL = 18
 export const ARBChain = 'ARB' as const
-export const AssetARB: Asset = { chain: ARBChain, symbol: 'ARB', ticker: 'ETH', synth: false }
+export const AssetARB: Asset = { chain: ARBChain, symbol: 'ARB', ticker: 'ETH', synth: false, trade: false }
 
 // Define JSON-RPC providers for mainnet and testnet
 const ARBITRUM_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc')
