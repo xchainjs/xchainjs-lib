@@ -12,7 +12,7 @@ describe('AVAX', () => {
   const rpcEndpint = 'https://api.avax.network/ext/bc/C/rpc'
   // Define here to avoid cyclic dependency
   const AVAXChain = 'AVAX'
-  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false, trade: false }
 
   const provider = new ethers.providers.JsonRpcProvider(rpcEndpint)
   const dataProvider = new RoutescanProvider(provider, 'https://api.routescan.io', 43114, AssetAVAX, 18)
@@ -58,6 +58,7 @@ describe('ETH', () => {
     symbol: 'ETH',
     ticker: 'ETH',
     synth: false,
+    trade: false,
   }
 
   const provider = new ethers.providers.JsonRpcProvider(rpcEndpint, 'homestead')

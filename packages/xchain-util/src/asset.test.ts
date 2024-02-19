@@ -15,6 +15,7 @@ import {
   isBaseAmount,
   isBigNumberValue,
   isSynthAsset,
+  isTradeAsset,
   isValidAsset,
 } from './asset'
 import { bn } from './index'
@@ -23,14 +24,14 @@ import { Asset, Denomination } from './types'
 const BNBChain = 'BNB'
 const ETHChain = 'ETH'
 
-const AssetBNB: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false }
-const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false }
+const AssetBNB: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false, trade: false }
+const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false, trade: false }
 
 const RUNE_TICKER = 'RUNE'
-const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
-const AssetRune67C: Asset = { chain: 'BNB', symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false }
-const AssetRuneB1A: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false }
-const AssetRuneNative: Asset = { chain: 'THOR', symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
+const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false, trade: false }
+const AssetRune67C: Asset = { chain: 'BNB', symbol: 'RUNE-67C', ticker: RUNE_TICKER, synth: false, trade: false }
+const AssetRuneB1A: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: RUNE_TICKER, synth: false, trade: false }
+const AssetRuneNative: Asset = { chain: 'THOR', symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false, trade: false }
 
 describe('asset', () => {
   describe('isBigNumberValue', () => {
@@ -286,39 +287,40 @@ describe('asset', () => {
         symbol: 'RUNE-B1A',
         ticker: 'RUNE',
         synth: false,
+        trade: false,
       })
     })
     it('RUNE', () => {
       const result = assetFromString('BNB.RUNE')
-      expect(result).toEqual({ chain: 'BNB', symbol: 'RUNE', ticker: 'RUNE', synth: false })
+      expect(result).toEqual({ chain: 'BNB', symbol: 'RUNE', ticker: 'RUNE', synth: false, trade: false})
     })
     it('BTCB', () => {
       const result = assetFromString('BNB.BTCB-123')
-      expect(result).toEqual({ chain: 'BNB', symbol: 'BTCB-123', ticker: 'BTCB', synth: false })
+      expect(result).toEqual({ chain: 'BNB', symbol: 'BTCB-123', ticker: 'BTCB', synth: false, trade: false})
     })
     it('WBTC', () => {
       const result = assetFromString('ETH.WBTC')
-      expect(result).toEqual({ chain: 'ETH', symbol: 'WBTC', ticker: 'WBTC', synth: false })
+      expect(result).toEqual({ chain: 'ETH', symbol: 'WBTC', ticker: 'WBTC', synth: false, trade: false})
     })
     it('ETH', () => {
       const result = assetFromString('ETH.ETH')
-      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false })
+      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false, trade: false})
     })
     it('BCH', () => {
       const result = assetFromString('BCH.BCH')
-      expect(result).toEqual({ chain: 'BCH', symbol: 'BCH', ticker: 'BCH', synth: false })
+      expect(result).toEqual({ chain: 'BCH', symbol: 'BCH', ticker: 'BCH', synth: false, trade: false})
     })
     it('synth BCH/BCH', () => {
       const result = assetFromString('BCH/BCH')
-      expect(result).toEqual({ chain: 'BCH', symbol: 'BCH', ticker: 'BCH', synth: true })
+      expect(result).toEqual({ chain: 'BCH', symbol: 'BCH', ticker: 'BCH', synth: true, trade: false })
     })
     it('synth ETH/ETH', () => {
       const result = assetFromString('ETH/ETH')
-      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: true })
+      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: true, trade: false })
     })
     it('synth BNB/BNB', () => {
       const result = assetFromString('BNB/BNB')
-      expect(result).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true })
+      expect(result).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false })
     })
     it('null for chain only', () => {
       const result = assetFromString('BNB')
@@ -342,55 +344,64 @@ describe('asset', () => {
     })
     it('null for invalid chain', () => {
       const result = assetFromString('invalid.BNB.BNB')
-      expect(result).toEqual({ chain: 'invalid', symbol: 'BNB', synth: false, ticker: 'BNB' })
+      expect(result).toEqual({ chain: 'invalid', symbol: 'BNB', synth: false, ticker: 'BNB', trade: false})
     })
   })
 
   describe('assetToString', () => {
     it('RUNE', () => {
-      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE', synth: false }
+      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE', synth: false, trade: false }
       expect(assetToString(asset)).toEqual('BNB.RUNE-B1A')
     })
     it('ETH', () => {
-      const asset: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
+      const asset: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false, trade: false }
       expect(assetToString(asset)).toEqual('ETH.ETH')
     })
     it('ETH/ETH', () => {
-      const asset: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: true }
+      const asset: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: true, trade: false }
       expect(assetToString(asset)).toEqual('ETH/ETH')
     })
     it('BNB/BNB', () => {
-      const asset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true }
+      const asset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false }
       expect(assetToString(asset)).toEqual('BNB/BNB')
+    })
+    it('BTC-BTC', () => {
+      const asset: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false, trade: true }
+      expect(assetToString(asset)).toEqual('BTC-BTC')
+      expect(isTradeAsset(asset)).toBeTruthy()
     })
   })
 
   describe('isSynthAsset', () => {
     it('false for "standard" asset', () => {
-      expect(isSynthAsset({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false })).toBeFalsy()
+      expect(isSynthAsset({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false, trade: false })).toBeFalsy()
     })
     it('true for synths', () => {
-      expect(isValidAsset({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true })).toBeTruthy()
+      expect(isValidAsset({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false })).toBeTruthy()
+    })
+    it('true for trade assets', () => {
+      expect(isTradeAsset({ chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false, trade: true })).toBeTruthy()
     })
     it('composable usage', () => {
       const assets: Asset[] = [
-        { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false },
-        { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true },
-        { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false },
+        { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false, trade: false },
+        { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false },
+        { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: false, trade: true },
+        { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false, trade: false },
       ]
       const list = assets.filter(isSynthAsset)
       expect(list.length).toEqual(1)
-      expect(list[0]).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true })
+      expect(list[0]).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false })
     })
   })
 
   describe('isValidAsset', () => {
     it('returns false invalid asset data', () => {
-      expect(isValidAsset({ chain: 'BNB', symbol: '', ticker: 'RUNE', synth: false })).toBeFalsy()
-      expect(isValidAsset({ chain: 'BNB', symbol: 'RUNE-B1A', ticker: '', synth: false })).toBeFalsy()
+      expect(isValidAsset({ chain: 'BNB', symbol: '', ticker: 'RUNE', synth: false, trade: false })).toBeFalsy()
+      expect(isValidAsset({ chain: 'BNB', symbol: 'RUNE-B1A', ticker: '', synth: false, trade: false })).toBeFalsy()
     })
     it('returns true for valid `Asset` data', () => {
-      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE', synth: false }
+      const asset: Asset = { chain: 'BNB', symbol: 'RUNE-B1A', ticker: 'RUNE', synth: false, trade: false }
       expect(isValidAsset(asset)).toBeTruthy()
     })
   })
@@ -412,7 +423,7 @@ describe('asset', () => {
       expect(currencySymbolByAsset(AssetETH)).toEqual('Ξ')
     })
     it('returns $ for USD', () => {
-      expect(currencySymbolByAsset({ chain: BNBChain, symbol: 'BUSD-BAF', ticker: 'BUSD', synth: false })).toEqual('$')
+      expect(currencySymbolByAsset({ chain: BNBChain, symbol: 'BUSD-BAF', ticker: 'BUSD', synth: false, trade: false })).toEqual('$')
     })
     it('returns ticker as currency symbol for other assets', () => {
       expect(currencySymbolByAsset(AssetBNB)).toEqual('BNB')
@@ -452,6 +463,7 @@ describe('asset', () => {
             symbol: 'XRUNE-0X69FA0FEE221AD11012BAB0FDB45D444D3D2CE71C',
             ticker: 'XRUNE',
             synth: false,
+            trade: false,
           },
           decimal: 2,
         }),

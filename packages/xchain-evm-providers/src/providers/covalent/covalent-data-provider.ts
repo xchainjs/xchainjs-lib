@@ -21,7 +21,7 @@ import {
 } from './types'
 
 const AVAXChain: Chain = 'AVAX'
-const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false, trade: false }
 
 export class CovalentProvider implements EvmOnlineDataProvider {
   private baseUrl = 'https://api.covalenthq.com'
@@ -63,6 +63,7 @@ export class CovalentProvider implements EvmOnlineDataProvider {
           symbol,
           ticker: balance.contract_ticker_symbol,
           synth: false,
+          trade: false,
         },
         amount: baseAmount(balance.balance, balance.contract_decimals),
       })
@@ -123,6 +124,7 @@ export class CovalentProvider implements EvmOnlineDataProvider {
         symbol,
         ticker: transferEvent.sender_contract_ticker_symbol as string,
         synth: false,
+        trade: false,
       },
       from,
       to,

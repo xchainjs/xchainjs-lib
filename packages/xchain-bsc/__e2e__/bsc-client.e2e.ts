@@ -12,6 +12,7 @@ const assetETH: Asset = {
   symbol: `ETH-0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378`,
   ticker: `ETH`,
   synth: false,
+  trade: false,
 }
 
 const AssetBNB: Asset = {
@@ -19,6 +20,7 @@ const AssetBNB: Asset = {
   symbol: `BNB`,
   ticker: `BNB`,
   synth: false,
+  trade: false,
 }
 
 defaultBscParams.network = Network.Testnet

@@ -169,7 +169,7 @@ export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount()
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false }
+const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false, trade: false }
 
 /**
  * Base "chain" asset on ethereum main net.
@@ -177,7 +177,7 @@ const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: fal
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
+const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false, trade: false }
 
 /**
  * Helper to check whether asset is valid
@@ -195,7 +195,16 @@ export const isValidAsset = (asset: Asset): boolean => !!asset.chain && !!asset.
  */
 export const isSynthAsset = ({ synth }: Asset): boolean => synth
 
+/**
+ * Helper to check whether an asset is trade asset
+ *
+ * @param {Asset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isTradeAsset = ({ trade }: Asset): boolean => trade
+
 const SYNTH_DELIMITER = '/'
+const TRADE_DELIMITER = '-'
 const NON_SYNTH_DELIMITER = '.'
 
 /**
@@ -217,7 +226,13 @@ const NON_SYNTH_DELIMITER = '.'
  */
 export const assetFromString = (s: string): Asset | null => {
   const isSynth = s.includes(SYNTH_DELIMITER)
-  const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
+  let isTrade = s.includes(TRADE_DELIMITER)
+
+  isSynth ? true : isTrade = false; // Can't be a Synth and Trade at the same time. 
+
+  // const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
+   const delimiter = isSynth ? SYNTH_DELIMITER : (!isSynth && !isTrade ? NON_SYNTH_DELIMITER : TRADE_DELIMITER); // Need to look for non-synth or trade, then synth or trade to correctly evaluate 'BNB.RUNE-B1A'  
+
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
     return null
@@ -232,7 +247,8 @@ export const assetFromString = (s: string): Asset | null => {
 
   if (!symbol) return null
 
-  return { chain, symbol, ticker, synth: isSynth }
+
+  return { chain, symbol, ticker, synth: isSynth, trade: isTrade }
 }
 
 /**
@@ -259,8 +275,8 @@ export const assetFromStringEx = (s: string): Asset => {
  * @param {Asset} asset The given asset.
  * @returns {string} The string from the given asset.
  */
-export const assetToString = ({ chain, symbol, synth }: Asset) => {
-  const delimiter = synth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
+export const assetToString = ({ chain, symbol, synth, trade }: Asset) => {
+  const delimiter = synth ? SYNTH_DELIMITER : (trade ? TRADE_DELIMITER : NON_SYNTH_DELIMITER);
   return `${chain}${delimiter}${symbol}`
 }
 
@@ -378,7 +394,7 @@ export const formatBaseAsAssetAmount = ({
  * @return {boolean} Result of equality check
  */
 export const eqAsset = (a: Asset, b: Asset) =>
-  a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth
+  a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth && a.trade === b.trade
 
 /**
  * Removes `0x` or `0X` from address

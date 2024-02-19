@@ -50,12 +50,12 @@ export const DEFAULT_FEE = baseAmount(5000000000, CACAO_DECIMAL)
  * Based on definition in mayachain `common`
  * @see https://gitlab.com/mayachain/mayanode
  */
-export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', synth: false }
+export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', synth: false, trade: false }
 
 /**
  * Maya asset.
  */
-export const AssetMaya: Asset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', synth: false }
+export const AssetMaya: Asset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', synth: false, trade: false }
 
 /**
  * Message type URL used to send transactions.

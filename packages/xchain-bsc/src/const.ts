@@ -34,6 +34,7 @@ export const AssetBSC: Asset = {
   symbol: 'BNB',
   ticker: 'BNB',
   synth: false,
+  trade: false,
 }
 
 // Ethers providers

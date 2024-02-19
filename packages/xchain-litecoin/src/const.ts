@@ -39,7 +39,7 @@ export const LTCChain = 'LTC' as const
  * Based on definition in Thorchain `common`.
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetLTC: Asset = { chain: LTCChain, symbol: 'LTC', ticker: 'LTC', synth: false }
+export const AssetLTC: Asset = { chain: LTCChain, symbol: 'LTC', ticker: 'LTC', synth: false, trade: false }
 
 const LTC_MAINNET_EXPLORER = new ExplorerProvider(
   'https://blockchair.com/litecoin/',

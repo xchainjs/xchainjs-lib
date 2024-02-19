@@ -92,12 +92,12 @@ describe('Mayachain client', () => {
 
     it('Should get native asset', () => {
       const nativeAsset = client.getAssetInfo()
-      expect(nativeAsset.asset).toEqual({ chain: 'MAYA', symbol: 'CACAO', ticker: 'CACAO', synth: false })
+      expect(nativeAsset.asset).toEqual({ chain: 'MAYA', symbol: 'CACAO', ticker: 'CACAO', synth: false, trade: false })
       expect(nativeAsset.decimal).toBe(10)
     })
 
     it('Should get denom for asset', () => {
-      const synthBNBAsset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true }
+      const synthBNBAsset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false }
       expect(client.getDenom(synthBNBAsset)).toEqual('bnb/bnb')
       expect(client.getDenom(AssetCacao)).toEqual('cacao')
     })

@@ -51,7 +51,7 @@ export const THORChain = 'THOR' as const
 /**
  * Native asset representation for RUNE in Thorchain
  */
-export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
+export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false, trade: false }
 
 /**
  * Message type URL used to make send transactions

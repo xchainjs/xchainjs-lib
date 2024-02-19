@@ -8,7 +8,7 @@ jest.setTimeout(60000)
 describe('covalent Integration Tests (AVAX)', () => {
   // Define here to avoid cyclic dependency
   const AVAXChain = 'AVAX'
-  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false, trade: false }
   const avaxProvider = new CovalentProvider(process.env.COVALENT_API_KEY as string, AVAXChain, 43113, AssetAVAX, 18)
   it('should fetch one balance', async () => {
     const balances = await avaxProvider.getBalance('0xf32DA51880374201852057009c4c4d1e75949e09')
@@ -31,12 +31,14 @@ describe('covalent Integration Tests (AVAX)', () => {
         symbol: 'PGL-0x1acf1583bebdca21c8025e172d8e8f2817343d65',
         ticker: 'PGL',
         synth: false,
+        trade: false,
       },
       {
         chain: 'avalanche-testnet',
         symbol: 'PTP-0x22d4002028f537599be9f666d1c4fa138522f9c8',
         ticker: 'PTP',
         synth: false,
+        trade: false,
       },
     ])
     balances.forEach((bal) => {

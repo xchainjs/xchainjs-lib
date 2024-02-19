@@ -80,6 +80,7 @@ export class Client extends CosmosSdkClient {
       symbol: denom,
       ticker: '',
       synth: false,
+      trade: false,
     }
   }
   /**

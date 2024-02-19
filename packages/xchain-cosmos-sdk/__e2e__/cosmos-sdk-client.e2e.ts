@@ -10,6 +10,7 @@ const AssetTokenKuji = {
   symbol: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo',
   ticker: '',
   synth: false,
+  trade: false,
 }
 
 let xchainClient: Client
@@ -38,6 +39,7 @@ class CustomSdkClient extends Client {
       symbol: denom,
       ticker: '',
       synth: false,
+      trade: false,
     }
   }
   getExplorerUrl(): string {

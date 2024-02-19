@@ -33,7 +33,7 @@ export const GAIAChain = 'GAIA' as const
  * Based on the definition in Thorchain `common`.
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetATOM: Asset = { chain: GAIAChain, symbol: 'ATOM', ticker: 'ATOM', synth: false }
+export const AssetATOM: Asset = { chain: GAIAChain, symbol: 'ATOM', ticker: 'ATOM', synth: false, trade: false }
 
 /**
  * Denomination for the native Cosmos asset.

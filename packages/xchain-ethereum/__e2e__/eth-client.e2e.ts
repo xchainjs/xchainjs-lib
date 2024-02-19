@@ -12,6 +12,7 @@ const assetETH: Asset = {
   symbol: `ETH-0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378`,
   ticker: `ETH`,
   synth: false,
+  trade: false,
 }
 
 const AssetBNB: Asset = {
@@ -19,6 +20,7 @@ const AssetBNB: Asset = {
   symbol: `ETH`,
   ticker: `ETH`,
   synth: false,
+  trade: false,
 }
 
 defaultEthParams.network = Network.Testnet
@@ -181,6 +183,7 @@ describe('xchain-evm (Eth) Integration Tests', () => {
           symbol: `ETH-${erc20Address}`,
           ticker: 'ETH',
           synth: false,
+          trade: false,
         },
         amount: assetToBase(assetAmount(0.1, 6)),
       })

@@ -92,18 +92,18 @@ describe('Thorchain client', () => {
 
     it('Should get native asset', () => {
       const nativeAsset = client.getAssetInfo()
-      expect(nativeAsset.asset).toEqual({ chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', synth: false })
+      expect(nativeAsset.asset).toEqual({ chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', synth: false, trade: false })
       expect(nativeAsset.decimal).toBe(8)
     })
 
     it('Should get denom for asset', () => {
-      const synthBNBAsset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true }
+      const synthBNBAsset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false }
       expect(client.getDenom(synthBNBAsset)).toEqual('bnb/bnb')
       expect(client.getDenom(AssetRUNE)).toEqual('rune')
     })
     it('Should get asset for denom', () => {
       expect(client.assetFromDenom('rune')).toEqual(AssetRUNE)
-      expect(client.assetFromDenom('bnb/bnb')).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true })
+      expect(client.assetFromDenom('bnb/bnb')).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false  })
     })
     it('should get asset decimals', async () => {
       expect(client.getAssetDecimals(AssetRUNE)).toBe(8)
