@@ -204,7 +204,7 @@ export const isSynthAsset = ({ synth }: Asset): boolean => synth
 export const isTradeAsset = ({ trade }: Asset): boolean => trade
 
 const SYNTH_DELIMITER = '/'
-const TRADE_DELIMITER = '-'
+const TRADE_DELIMITER = '~'
 const NON_SYNTH_DELIMITER = '.'
 
 /**
@@ -228,10 +228,10 @@ export const assetFromString = (s: string): Asset | null => {
   const isSynth = s.includes(SYNTH_DELIMITER)
   let isTrade = s.includes(TRADE_DELIMITER)
 
-  isSynth ? true : isTrade = false; // Can't be a Synth and Trade at the same time. 
+  isSynth ? true : isTrade = false; // Can't be a Synth and Trade at the same time.
 
   // const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
-   const delimiter = isSynth ? SYNTH_DELIMITER : (!isSynth && !isTrade ? NON_SYNTH_DELIMITER : TRADE_DELIMITER); // Need to look for non-synth or trade, then synth or trade to correctly evaluate 'BNB.RUNE-B1A'  
+   const delimiter = isSynth ? SYNTH_DELIMITER : (!isSynth && !isTrade ? NON_SYNTH_DELIMITER : TRADE_DELIMITER);
 
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {

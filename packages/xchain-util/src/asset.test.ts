@@ -365,9 +365,9 @@ describe('asset', () => {
       const asset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true, trade: false }
       expect(assetToString(asset)).toEqual('BNB/BNB')
     })
-    it('BTC-BTC', () => {
+    it('BTC~BTC', () => {
       const asset: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false, trade: true }
-      expect(assetToString(asset)).toEqual('BTC-BTC')
+      expect(assetToString(asset)).toEqual('BTC~BTC')
       expect(isTradeAsset(asset)).toBeTruthy()
     })
   })
