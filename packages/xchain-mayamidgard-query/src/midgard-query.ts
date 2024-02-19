@@ -6,14 +6,14 @@ import { MidgardCache } from './midgard-cache'
 import { MAYANameDetails, ReverseMAYANames } from './types'
 
 /**
- * Class for getting data and process from Midgard API using MidgardCache for optimize request number (MAYAChain L2 Api).
+ * Class for retrieving data and processing it from the Midgard API using MidgardCache to optimize the number of requests (MAYAChain L2 API).
  */
 export class MidgardQuery {
   private midgardCache: MidgardCache
 
   /**
-   * Constructor to create a MidgardQuery
-   * @param midgardCache - an instance of the midgardCache (could be pointing to stagenet,testnet,mainnet)
+   * Constructor to create a MidgardQuery instance.
+   * @param midgardCache - An instance of the MidgardCache (could be pointing to stagenet, testnet, mainnet).
    * @returns MidgardQuery
    */
   constructor(midgardCache = new MidgardCache()) {
@@ -21,8 +21,8 @@ export class MidgardQuery {
   }
 
   /**
-   * Gets the latest block using the Health endpoint within Midgard
-   * @returns
+   * Retrieves the latest block height using the Health endpoint within Midgard.
+   * @returns The latest block height.
    */
   public async getLatestBlockHeight(): Promise<number> {
     const health = await this.midgardCache.midgardApi.getHealth()
@@ -30,19 +30,18 @@ export class MidgardQuery {
   }
 
   /**
-   * Get pool list
-   * @returns an array containing details for a set of pools
+   * Retrieves the list of pools.
+   * @returns An array containing details for a set of pools.
    */
   public async getPools(): Promise<PoolDetail[]> {
     return this.midgardCache.getPools()
   }
 
   /**
-   * Get pool by string asset
-   *
-   * @param {Asset} asset In example: BTC.BTC
-   * @returns {PoolDetail} Details of selected pool
-   * @throws {Error} Can't find pool for asset
+   * Retrieves the pool details for a specific asset.
+   * @param asset - The asset for which pool details are requested.
+   * @returns Details of the selected pool.
+   * @throws {Error} If the pool for the asset cannot be found.
    */
   public async getPool(asset: Asset): Promise<PoolDetail> {
     const pools = await this.midgardCache.getPools()
@@ -55,44 +54,44 @@ export class MidgardQuery {
   }
 
   /**
-   * Function to return pool statistics for a particular asset
-   * @param asset - asset string to query its pool stats
-   * @returns - type object poolStatsDetail
+   * Retrieves pool statistics for a particular asset.
+   * @param asset - The asset string to query its pool stats.
+   * @returns Pool statistics details.
    */
   public async getPoolStats(asset: Asset): Promise<PoolStatsDetail> {
     return this.midgardCache.midgardApi.getPoolStats(assetToString(asset))
   }
 
   /**
-   * Get MAYAName details
-   * @param {string} mayaName MayaName
-   * @returns an array of chains and their addresses associated with the given THORName
+   * Retrieves MAYAName details.
+   * @param mayaName - The MAYAName.
+   * @returns An array of chains and their addresses associated with the given MAYAName.
    */
   public async getMAYANameDetails(mayaName: string): Promise<MAYANameDetails | undefined> {
     return this.midgardCache.midgardApi.getMayaNameDetails(mayaName)
   }
 
   /**
-   * Gives a list of MayaNames by reverse lookup
-   * @param {string} address to know if it has a MayaName associated with
-   * @returns an array of THORNames associated with the given address
+   * Performs a reverse lookup to get MAYAName(s) associated with the given address.
+   * @param address - The address to check for associated MAYAName(s).
+   * @returns An array of MAYAName(s) associated with the given address.
    */
   public async getMAYANameReverseLookup(address: string): Promise<ReverseMAYANames | undefined> {
     return this.midgardCache.midgardApi.getMAYANameReverseLookup(address)
   }
 
   /**
-   * Return member details
-   * @param {string} address
-   * @returns an array of statistics for all the liquidity providers associated with a given member address
+   * Retrieves member details.
+   * @param address - The member address.
+   * @returns An array of statistics for all the liquidity providers associated with a given member address.
    */
   public getMemberDetails(address: string): Promise<MemberDetails> {
     return this.midgardCache.midgardApi.getMemberDetails(address)
   }
 
   /**
-   * Get the network midgard query is working with
-   * @returns
+   * Gets the network MidgardQuery is working with.
+   * @returns The network.
    */
   public getNetwork(): Network {
     return this.midgardCache.midgardApi.network

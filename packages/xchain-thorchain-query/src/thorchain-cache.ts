@@ -15,31 +15,30 @@ import { LiquidityPool } from './liquidity-pool'
 import { InboundDetail } from './types'
 import { THORChain, isAssetRuneNative } from './utils'
 import { Thornode } from './utils/thornode'
-
+// Constants
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
 const TEN_MINUTES = 10 * 60 * 1000
-
+// Default instances
 const defaultThornode = new Thornode()
 const defaultMidgardQuery = new MidgardQuery()
 
 /**
- * This class manages retrieving information from up to date Thorchain
+ * This class manages retrieving information from up-to-date Thorchain.
  */
 export class ThorchainCache {
-  readonly thornode: Thornode
-  readonly midgardQuery: MidgardQuery
-  private readonly poolCache: CachedValue<Record<string, LiquidityPool> | undefined>
-  private readonly inboundDetailCache: CachedValue<Record<string, InboundDetail>>
-  private readonly networkValuesCache: CachedValue<Record<string, number>>
+  readonly thornode: Thornode // Instance of Thornode
+  readonly midgardQuery: MidgardQuery // Instance of MidgardQuery
+  private readonly poolCache: CachedValue<Record<string, LiquidityPool> | undefined> // Cached liquidity pool data
+  private readonly inboundDetailCache: CachedValue<Record<string, InboundDetail>> // Cached inbound details
+  private readonly networkValuesCache: CachedValue<Record<string, number>> // Cached network values
 
   /**
    * Constructor to create a ThorchainCache
-   *
-   * @param thornode - an instance of the thornode API (could be pointing to stagenet,testnet,mainnet)
-   * @param midgardQuery - an instance of the midgard query class (could be pointing to stagenet,testnet,mainnet)
-   * @param expirePoolCacheMillis - how long should the pools be cached before expiry
-   * @param expireInboundDetailsCacheMillis - how long should the InboundDetails be cached before expiry
-   * @param expireNetworkValuesCacheMillis - how long should the Mimir/Constants be cached before expiry
+   * @param thornode - An instance of the Thornode API (could be pointing to stagenet, testnet, or mainnet).
+   * @param midgardQuery - An instance of the MidgardQuery class (could be pointing to stagenet, testnet, or mainnet).
+   * @param expirePoolCacheMillis - How long the pools should be cached before expiry.
+   * @param expireInboundDetailsCacheMillis - How long the InboundDetails should be cached before expiry.
+   * @param expireNetworkValuesCacheMillis - How long the Mimir/Constants should be cached before expiry.
    * @returns ThorchainCache
    */
   constructor(
@@ -51,7 +50,7 @@ export class ThorchainCache {
   ) {
     this.thornode = thornode
     this.midgardQuery = midgardQuery
-
+    // Initialize cached values
     this.poolCache = new CachedValue<Record<string, LiquidityPool> | undefined>(
       () => this.refreshPoolCache(),
       expirePoolCacheMillis,
@@ -67,10 +66,9 @@ export class ThorchainCache {
   }
 
   /**
-   * Gets the exchange rate of the from asset in terms on the to asset
-   *
-   * @param asset - cannot be RUNE.
-   * @returns Promise<BigNumber>
+   * Gets the exchange rate of the `from` asset in terms of the `to` asset.
+   * @param asset - The asset to swap from.
+   * @returns Promise<BigNumber> - The exchange rate.
    */
   async getExchangeRate(from: Asset, to: Asset): Promise<BigNumber> {
     let exchangeRate: BigNumber
@@ -96,10 +94,9 @@ export class ThorchainCache {
   }
 
   /**
-   * Gets the Liquidity Pool for a given Asset
-   *
-   * @param asset - cannot be RUNE, since Rune is the other side of each pool.
-   * @returns Promise<LiquidityPool>
+   * Gets the Liquidity Pool for a given Asset.
+   * @param asset - The asset to retrieve the pool for.
+   * @returns Promise<LiquidityPool> - The liquidity pool.
    */
   async getPoolForAsset(asset: Asset): Promise<LiquidityPool> {
     if (isAssetRuneNative(asset)) throw Error(`AssetRuneNative doesn't have a pool`)
@@ -115,9 +112,8 @@ export class ThorchainCache {
 
   /**
    * Get all the Liquidity Pools currently cached.
-   * if the cache is expired, the pools wioll be re-fetched from thornode
-   *
-   * @returns Promise<Record<string, LiquidityPool>>
+   * If the cache is expired, the pools will be re-fetched from Thornode.
+   * @returns Promise<Record<string, LiquidityPool>> - The liquidity pools.
    */
   async getPools(): Promise<Record<string, LiquidityPool>> {
     const pools = await this.poolCache.getValue()
@@ -128,7 +124,8 @@ export class ThorchainCache {
     }
   }
   /**
-   * Refreshes the Pool Cache
+   * Refreshes the Pool Cache.
+   * @returns Promise<Record<string, LiquidityPool> |
    */
   private async refreshPoolCache(): Promise<Record<string, LiquidityPool> | undefined> {
     try {
@@ -156,13 +153,16 @@ export class ThorchainCache {
   }
 
   /**
-   * Refreshes the InboundDetailCache Cache
+   * Refreshes the InboundDetailCache Cache.
+   * @returns Promise<Record<string, InboundDetail>> - The refreshed inbound detail cache.
    */
   private async refreshInboundDetailCache(): Promise<Record<string, InboundDetail>> {
+    // Fetching mimir details and all inbound addresses concurrently
     const [mimirDetails, allInboundAddresses] = await Promise.all([
       this.thornode.getMimir(),
       this.thornode.getInboundAddresses(),
     ])
+    // Mapping inbound details
     const inboundDetails: Record<string, InboundDetail> = {}
     for (const inbound of allInboundAddresses) {
       const chain = inbound.chain
@@ -176,7 +176,7 @@ export class ThorchainCache {
         !inbound.gas_rate_units
       )
         throw new Error(`Missing required inbound info`)
-
+      // Adding mock THORCHAIN inbound details
       const details: InboundDetail = {
         chain: chain,
         address: inbound.address,
@@ -210,13 +210,10 @@ export class ThorchainCache {
   }
 
   /**
-   * Returns the exchange of a CryptoAmount to a different Asset
-   *
-   * Ex. convert(input:100 BUSD, outAsset: BTC) -> 0.0001234 BTC
-   *
-   * @param input - amount/asset to convert to outAsset
-   * @param outAsset - the Asset you want to convert to
-   * @returns CryptoAmount of input
+   * Returns the exchange of a CryptoAmount to a different Asset.
+   * @param input - The amount/asset to convert.
+   * @param outAsset - The asset you want to convert to.
+   * @returns Promise<CryptoAmount> - The converted amount.
    */
   async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
@@ -232,7 +229,11 @@ export class ThorchainCache {
 
     return result
   }
-
+  /**
+   * Gets the router address for a given chain.
+   * @param chain - The chain to get the router address for.
+   * @returns Promise<Address> - The router address.
+   */
   async getRouterAddressForChain(chain: Chain): Promise<Address> {
     const inboundAsgard = (await this.getInboundDetails())[chain]
 
@@ -243,8 +244,8 @@ export class ThorchainCache {
   }
 
   /**
-   *
-   * @returns - inbound details
+   * Gets the inbound details.
+   * @returns Promise<Record<string, InboundDetail>> - The inbound details.
    */
   async getInboundDetails(): Promise<Record<string, InboundDetail>> {
     if (this.inboundDetailCache) {
@@ -254,8 +255,8 @@ export class ThorchainCache {
     }
   }
   /**
-   *
-   * @returns - network values
+   * Gets the network values.
+   * @returns Promise<Record<string, number>> - The network values.
    */
   async getNetworkValues(): Promise<Record<string, number>> {
     if (this.networkValuesCache) {

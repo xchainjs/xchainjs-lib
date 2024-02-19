@@ -1,7 +1,11 @@
+/**
+ * Import necessary modules and types for the Thorchain client.
+ */
 import { StdFee } from '@cosmjs/amino'
 import { Bip39, EnglishMnemonic, Secp256k1, Slip10, Slip10Curve } from '@cosmjs/crypto'
 import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import {
+  // Import transaction-related types and functions from @cosmjs/proto-signing for transaction encoding/decoding.
   DecodedTxRaw,
   DirectSecp256k1HdWallet,
   EncodeObject,
@@ -11,16 +15,20 @@ import {
 import { SigningStargateClient } from '@cosmjs/stargate'
 import { AssetInfo, Network, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
 import {
+  // Import client-related types and functions from @xchainjs/xchain-cosmos-sdk for Cosmos SDK client configuration.
   Client as CosmosSDKClient,
   CosmosSdkClientParams,
   MsgTypes,
   bech32ToBase64,
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
-import { Address, Asset, assetFromString, assetToString, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, assetFromString, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
+/**
+ * Import constants and types
+ */
 import {
   AssetRuneNative as AssetRUNE,
   DEFAULT_GAS_LIMIT_VALUE,
@@ -32,7 +40,7 @@ import {
   defaultClientConfig,
 } from './const'
 import { DepositParam, DepositTx, TxOfflineParams } from './types'
-import { getDefaultExplorers, getExplorerAddressUrl, getExplorerTxUrl, isAssetRuneNative as isAssetRune } from './utils'
+import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
 
 /**
  * Interface for custom Thorchain client
@@ -70,14 +78,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
    * @returns the address prefix
    */
   protected getPrefix(network: Network): string {
-    switch (network) {
-      case Network.Mainnet:
-        return 'thor'
-      case Network.Stagenet:
-        return 'sthor'
-      case Network.Testnet:
-        return 'tthor'
-    }
+    return getPrefix(network)
   }
 
   /**
@@ -93,6 +94,16 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   }
 
   /**
+   * Returns the number of the decimals of known assets
+   *
+   * @param {Asset} asset - Asset of which return the number of decimals
+   * @returns {number} the number of decimals of the assets
+   */
+  public getAssetDecimals(asset: Asset): number {
+    if (eqAsset(asset, AssetRUNE)) return RUNE_DECIMAL
+    return this.defaultDecimals
+  }
+  /**
    * Get the explorer url.
    *
    * @returns {string} The explorer url for thorchain based on the current network.
@@ -104,7 +115,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   /**
    * Get the explorer url for the given address.
    *
-   * @param {Address} address
+   * @param {Address} address The address for which to get the explorer URL.
    * @returns {string} The explorer url for the given address.
    */
   public getExplorerAddressUrl(address: string): string {
@@ -114,7 +125,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   /**
    * Get the explorer url for the given transaction id.
    *
-   * @param {string} txID
+   * @param {string} txID The transaction ID for which to get the explorer URL.
    * @returns {string} The explorer url for the given transaction id.
    */
   public getExplorerTxUrl(txID: string): string {
@@ -124,7 +135,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   /**
    * Get Asset from denomination
    *
-   * @param {string} denom
+   * @param {string} denom The denomination for which to get the asset.
    * @returns {Asset|null} The asset of the given denomination.
    */
   public assetFromDenom(denom: string): Asset | null {
@@ -135,17 +146,15 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   /**
    * Get denomination from Asset
    *
-   * @param {Asset} asset
+   * @param {Asset} asset The asset for which to get the denomination.
    * @returns {string} The denomination of the given asset.
    */
   public getDenom(asset: Asset): string | null {
-    if (isAssetRune(asset)) return RUNE_DENOM
-    if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
-    return asset.symbol.toLowerCase()
+    return getDenom(asset)
   }
 
   /**
-   * Prepare transfer.
+   * Prepare transfer transaction.
    *
    * @param {TxParams&Address} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
@@ -157,15 +166,16 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     amount,
     memo,
   }: TxParams & { sender: Address }): Promise<PreparedTx> {
+    // Validate sender and recipient addresses
     if (!this.validateAddress(sender)) throw Error('Invalid sender address')
     if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
-
+    // Get denomination of the asset
     const denom = this.getDenom(asset || this.getAssetInfo().asset)
     if (!denom)
       throw Error(`Invalid asset ${asset?.symbol} - Only ${this.baseDenom} asset is currently supported to transfer`)
 
+    // Prepare transaction body
     const demonAmount = { amount: amount.amount().toString(), denom }
-
     const txBody: TxBodyEncodeObject = {
       typeUrl: '/cosmos.tx.v1beta1.TxBody',
       value: {
@@ -183,9 +193,11 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
       },
     }
 
+    // Encode transaction body
     const rawTx = TxRaw.fromPartial({
       bodyBytes: this.registry.encode(txBody),
     })
+    // Return raw unsigned transaction
     return { rawUnsignedTx: toBase64(TxRaw.encode(rawTx).finish()) }
   }
 
@@ -209,17 +221,21 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     memo,
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
   }: DepositParam): Promise<string> {
+    // Get sender address
     const sender = await this.getAddressAsync(walletIndex)
 
+    // Create signer
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
       prefix: this.prefix,
       hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex || 0))],
     })
 
+    // Connect to signing client
     const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
       registry: this.registry,
     })
 
+    // Sign and broadcast transaction
     const tx = await signingClient.signAndBroadcast(
       sender,
       [
@@ -260,7 +276,9 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
   }: TxOfflineParams & { gasLimit?: BigNumber }): Promise<string> {
+    // Get sender address
     const sender = await this.getAddressAsync(walletIndex)
+    // Prepare unsigned transaction
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient: recipient,
@@ -269,21 +287,26 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
       memo: memo,
     })
 
+    // Decode unsigned transaction
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
 
+    // Create signer
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
       prefix: this.prefix,
       hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex))],
     })
 
+    // Connect to signing client
     const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
       registry: this.registry,
     })
 
+    // Prepare messages
     const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
       return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
     })
 
+    // Sign transaction
     const rawTx = await signingClient.sign(
       sender,
       messages,
@@ -294,6 +317,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
       unsignedTx.body.memo,
     )
 
+    // Return encoded signed transaction
     return toBase64(TxRaw.encode(rawTx).finish())
   }
 
@@ -305,8 +329,10 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
    * @returns {Uint8Array} The private key
    */
   public async getPrivateKey(index = 0): Promise<Uint8Array> {
+    // Generate seed from mnemonic
     const mnemonicChecked = new EnglishMnemonic(this.phrase)
     const seed = await Bip39.mnemonicToSeed(mnemonicChecked)
+    // Derive private key
     const { privkey } = Slip10.derivePath(
       Slip10Curve.Secp256k1,
       seed,
@@ -323,7 +349,9 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
    * @returns {Uint8Array} The public key
    */
   public async getPubKey(index = 0): Promise<Uint8Array> {
+    // Get private key
     const privateKey = await this.getPrivateKey(index)
+    // Derive public key
     const { pubkey } = await Secp256k1.makeKeypair(privateKey)
     return Secp256k1.compressPubkey(pubkey)
   }
@@ -332,7 +360,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
    * Get deposit transaction
    *
    * @deprecated Use getTransactionData instead
-   * @param txId
+   * @param {string} txId The transaction ID for which to get the deposit transaction
    */
   public async getDepositTransaction(txId: string): Promise<DepositTx> {
     return this.getTransactionData(txId)
@@ -341,7 +369,7 @@ export class Client extends CosmosSDKClient implements ThorchainClient {
   /**
    * Get the message type url by type used by the cosmos-sdk client to make certain actions
    *
-   * @param {MsgTypes} msgType Message type of which return the type url
+   * @param {MsgTypes} msgType The message type of which return the type url
    * @returns {string} the type url of the message
    */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {

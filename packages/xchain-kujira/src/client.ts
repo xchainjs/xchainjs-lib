@@ -7,12 +7,19 @@ import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes } from '@xch
 import { Address, Asset, eqAsset } from '@xchainjs/xchain-util'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
-import { AssetKUJI, AssetUSK, KUJI_DECIMAL, MSG_SEND_TYPE_URL, USK_ASSET_DENOM } from './const'
+import { AssetKUJI, AssetUSK, KUJI_DECIMAL, MSG_SEND_TYPE_URL, USK_ASSET_DENOM, USK_DECIMAL } from './const'
 import { defaultClientConfig, getDefaultExplorers } from './utils'
 
 export type KujiraClientParams = Partial<CosmosSdkClientParams>
-
+/**
+ * Represents a client for interacting with the Kujira blockchain network.
+ * Inherits from the CosmosSdkClient class.
+ */
 export class Client extends CosmosSdkClient {
+  /**
+   * Constructs a new instance of the Kujira client.
+   * @param {KujiraClientParams} config The client configuration parameters.
+   */
   constructor(config: KujiraClientParams = defaultClientConfig) {
     super({
       ...defaultClientConfig,
@@ -21,14 +28,17 @@ export class Client extends CosmosSdkClient {
   }
 
   /**
-   * Get address prefix by network
+   * Retrieves the address prefix used by the Kujira network.
    * @param {Network} network The network of which return the prefix
    * @returns the address prefix
    */
   protected getPrefix(): string {
     return 'kujira'
   }
-
+  /**
+   * Retrieves information about the assets used in the Kujira network.
+   * @returns {AssetInfo} Information about the asset.
+   */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
       asset: AssetKUJI,
@@ -37,12 +47,31 @@ export class Client extends CosmosSdkClient {
     return assetInfo
   }
 
+  /**
+   * Retrieves the number of decimals for a given asset.
+   * @param {Asset} asset The asset for which to retrieve the number of decimals.
+   * @returns {number} The number of decimals.
+   */
+  public getAssetDecimals(asset: Asset): number {
+    if (eqAsset(asset, AssetKUJI)) return KUJI_DECIMAL
+    if (eqAsset(asset, AssetUSK)) return USK_DECIMAL
+    return this.defaultDecimals
+  }
+  /**
+   * Retrieves the denomination of the given asset.
+   * @param {Asset} asset The asset for which to retrieve the denomination.
+   * @returns {string | null} The denomination, or null if not found.
+   */
   getDenom(asset: Asset): string | null {
     if (eqAsset(asset, AssetKUJI)) return this.baseDenom
     if (eqAsset(asset, AssetUSK)) return USK_ASSET_DENOM
     return null
   }
-
+  /**
+   * Retrieves the asset from the given denomination.
+   * @param {string} denom The denomination to retrieve the asset for.
+   * @returns {Asset | null} The corresponding asset, or null if not found.
+   */
   assetFromDenom(denom: string): Asset | null {
     if (denom === this.baseDenom) return AssetKUJI
     if (denom === USK_ASSET_DENOM) return AssetUSK
@@ -53,24 +82,35 @@ export class Client extends CosmosSdkClient {
       synth: false,
     }
   }
-
+  /**
+   * Retrieves the URL of the blockchain explorer for the current network.
+   * @returns {string} The explorer URL.
+   */
   getExplorerUrl(): string {
     return getDefaultExplorers()[this.network]
   }
-
+  /**
+   * Constructs the URL for viewing the address on the blockchain explorer.
+   * @param {Address} address The address to view.
+   * @returns {string} The explorer address URL.
+   */
   getExplorerAddressUrl(address: Address): string {
     return `${this.getExplorerUrl()}/address/${address}`
   }
-
+  /**
+   * Constructs the URL for viewing the transaction on the blockchain explorer.
+   * @param {string} txID The transaction ID to view.
+   * @returns {string} The explorer transaction URL.
+   */
   getExplorerTxUrl(txID: string): string {
     return `${this.getExplorerUrl()}/tx/${txID}`
   }
 
   /**
-   * Prepare transfer.
-   *
-   * @param {TxParams&Address} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
+   * Prepares a transaction for transfer.
+   * @param {TxParams & { sender: Address }} params The transfer options.
+   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
+   * @throws {Error} Thrown if sender or recipient address is invalid or if the asset is invalid.
    */
   public async prepareTx({
     sender,
@@ -112,9 +152,9 @@ export class Client extends CosmosSdkClient {
   }
 
   /**
-   * Get the message type url by type used by the cosmos-sdk client to make certain actions
-   * @param msgType
-   * @returns {string} the type url of the message
+   * Retrieves the message type URL by message type for cosmos-sdk client actions.
+   * @param {MsgTypes} msgType The message type.
+   * @returns {string} The type URL of the message.
    */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
     const messageTypeUrls: Record<MsgTypes, string> = {
@@ -124,9 +164,9 @@ export class Client extends CosmosSdkClient {
   }
 
   /**
-   * Returns the standard fee used by the client for an asset
-   * @param {Asset} asset the asset to retrieve the fee of
-   * @returns {StdFee} the standard fee
+   * Retrieves the standard fee used by the client for a given asset.
+   * @param {Asset} asset The asset to retrieve the fee for.
+   * @returns {StdFee} The standard fee.
    */
   protected getStandardFee(asset: Asset): StdFee {
     const denom = this.getDenom(asset)

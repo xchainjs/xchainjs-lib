@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.3
+
+### Patch Changes
+
+- ef2d8e2: getAssetDecimals abstract function
+
+## 0.2.2
+
+### Patch Changes
+
+- ae35c36: GetTransactionData for non native asset transactions
+
 ## 0.2.1
 
 ### Patch Changes

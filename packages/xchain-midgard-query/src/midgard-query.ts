@@ -5,20 +5,26 @@ import { MidgardCache } from './midgard-cache'
 import { SaversPosition, getSaver } from './types'
 import { isAssetRuneNative } from './utils/const'
 
+/**
+ * Default number of decimals used for THORChain assets.
+ */
 const DEFAULT_THORCHAIN_DECIMALS = 8
 
+/**
+ * Default cache instance for Midgard queries.
+ */
 const defaultCache = new MidgardCache()
 
 /**
- * Class for getting data and process from Midgard API using MidgardCache for optimize request number (THORChain L2 Api).
+ * Class for retrieving and processing data from the Midgard API using MidgardCache to optimize request numbers (THORChain L2 API).
  */
 export class MidgardQuery {
   readonly midgardCache: MidgardCache
 
   /**
-   * Contructor to create a MidgardQuery
+   * Constructor to create a MidgardQuery.
    *
-   * @param midgardCache - an instance of the midgardCache (could be pointing to stagenet,testnet,mainnet)
+   * @param midgardCache - An instance of the MidgardCache (could be pointing to stagenet, testnet, mainnet).
    * @returns MidgardQuery
    */
   constructor(midgardCache = defaultCache) {
@@ -26,11 +32,11 @@ export class MidgardQuery {
   }
 
   /**
-   * Get pool by asset
+   * Get pool by asset.
    *
-   * @param {string} asset In example: BTC.BTC
-   * @returns {PoolDetail} Details of selected pool
-   * @throws {Error} Can't find pool for asset
+   * @param {string} asset - For example: BTC.BTC.
+   * @returns {PoolDetail} - Details of the selected pool.
+   * @throws {Error} - Can't find pool for asset.
    */
   private async getPool(asset: string): Promise<PoolDetail> {
     const pools = await this.midgardCache.getPools()
@@ -42,10 +48,10 @@ export class MidgardQuery {
   }
 
   /**
-   * Get saver positions by array of saver descriptions
+   * Get saver positions by an array of saver descriptions.
    *
-   * @param {getSaver[]} params array of search conditions
-   * @returns {SaversPosition[]} Information on the positions found
+   * @param {getSaver[]} params - Array of search conditions.
+   * @returns {SaversPosition[]} - Information on the positions found.
    */
   public async getSaverPositions(params: getSaver[]): Promise<SaversPosition[]> {
     const addresses: Set<string> = new Set<string>()
@@ -86,10 +92,10 @@ export class MidgardQuery {
   }
 
   /**
-   * Returns number of decimals by asset
+   * Returns the number of decimals for a given asset.
    *
-   * @param {Asset} asset asset for getting decimals
-   * @returns {number} Number of decimals from Midgard https://gitlab.com/thorchain/midgard#refresh-native-decimals
+   * @param {Asset} asset - The asset for getting decimals.
+   * @returns {number} - Number of decimals from Midgard. Reference: https://gitlab.com/thorchain/midgard#refresh-native-decimals
    */
   public async getDecimalForAsset(asset: Asset): Promise<number> {
     if (isAssetRuneNative(asset) || asset.synth) return DEFAULT_THORCHAIN_DECIMALS

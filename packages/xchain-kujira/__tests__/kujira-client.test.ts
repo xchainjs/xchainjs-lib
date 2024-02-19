@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 
 import { Client as KujiraClient } from '../src/client'
-import { DEFAULT_FEE } from '../src/const'
+import { AssetKUJI, AssetUSK, DEFAULT_FEE } from '../src/const'
 
 let xchainClient: KujiraClient
 const phraseOne = 'atom green various power must another rent imitate gadget creek fat then'
@@ -16,6 +16,10 @@ describe('Kujira client Integration Tests', () => {
   it('should validate invalid addreses', async () => {
     const isValid = xchainClient.validateAddress('asdadasd')
     expect(isValid).toBe(false)
+  })
+  it('should get asset decimals', async () => {
+    expect(xchainClient.getAssetDecimals(AssetKUJI)).toBe(6)
+    expect(xchainClient.getAssetDecimals(AssetUSK)).toBe(6)
   })
   it('should validate valid addreses', async () => {
     const isValid = xchainClient.validateAddress('kujira1es76p8qspctcxhex79c32nng9fvhuxjn4z6u7k')

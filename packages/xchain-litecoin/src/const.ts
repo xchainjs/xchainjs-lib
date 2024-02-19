@@ -10,25 +10,33 @@ import {
 } from '@xchainjs/xchain-utxo-providers'
 
 /**
- * Minimum transaction fee
+ * Minimum transaction fee in satoshis.
  * 1000 satoshi/kB (similar to current `minrelaytxfee`)
  * @see https://github.com/bitcoin/bitcoin/blob/db88db47278d2e7208c50d16ab10cb355067d071/src/validation.h#L56
  */
 export const MIN_TX_FEE = 1000
+/**
+ * Lower bound for transaction fee rate in satoshis per byte.
+ */
 export const LOWER_FEE_BOUND = 0.5
+/**
+ * Upper bound for transaction fee rate in satoshis per byte.
+ */
 export const UPPER_FEE_BOUND = 500
+/**
+ * Number of decimal places for Litecoin.
+ */
 export const LTC_DECIMAL = 8
 
 /**
- * Chain identifier for litecoin
- *
+ * Chain identifier for Litecoin.
  */
 export const LTCChain = 'LTC' as const
 
 /**
- * Base "chain" asset on litecoin main net.
+ * Base "chain" asset on Litecoin mainnet.
  *
- * Based on definition in Thorchain `common`
+ * Based on definition in Thorchain `common`.
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
 export const AssetLTC: Asset = { chain: LTCChain, symbol: 'LTC', ticker: 'LTC', synth: false }
@@ -43,6 +51,9 @@ const LTC_TESTNET_EXPLORER = new ExplorerProvider(
   'https://blockexplorer.one/litecoin/testnet/address/%%ADDRESS%%',
   'https://blockexplorer.one/litecoin/testnet/blockHash/%%TX_ID%%',
 )
+/**
+ * Explorer providers for Litecoin.
+ */
 export const explorerProviders = {
   [Network.Testnet]: LTC_TESTNET_EXPLORER,
   [Network.Stagenet]: LTC_MAINNET_EXPLORER,
@@ -68,6 +79,9 @@ const mainnetSochainProvider = new SochainProvider(
   8,
   SochainNetwork.LTC,
 )
+/**
+ * Sochain data providers for Litecoin.
+ */
 export const sochainDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetSochainProvider,
   [Network.Stagenet]: mainnetSochainProvider,
@@ -85,15 +99,18 @@ const mainnetBlockcypherProvider = new BlockcypherProvider(
   BlockcypherNetwork.LTC,
   process.env.BLOCKCYPHER_API_KEY || '',
 )
+/**
+ * Blockcypher data providers for Litecoin.
+ */
 export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined,
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
 }
 
-//======================
-// Bitgo
-//======================
+/**
+ * Bitgo data providers for Litecoin.
+ */
 const mainnetBitgoProvider = new BitgoProvider({
   baseUrl: 'https://app.bitgo.com',
   chain: LTCChain,

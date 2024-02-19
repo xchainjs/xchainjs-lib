@@ -9,31 +9,46 @@ import {
   UtxoOnlineDataProviders,
 } from '@xchainjs/xchain-utxo-providers'
 /**
- * Minimum transaction fee
- * 100000 satoshi/kB (similar to current `minrelaytxfee`)
+ * Minimum transaction fee for Dogecoin transactions.
+ * Defined as 100000 satoshi/kB.
  * @see https://github.com/dogecoin/dogecoin/blob/master/src/validation.h#L58
  */
 export const MIN_TX_FEE = 100000
+
+/**
+ * Decimal places for Dogecoin.
+ */
 export const DOGE_DECIMAL = 8
-export const LOWER_FEE_BOUND = 100 // https://github.com/dogecoin/dogecoin/blob/master/doc/fee-recommendation.md
+
+/**
+ * Lower fee bound for Dogecoin transactions.
+ * Referenced from Dogecoin fee recommendation documentation.
+ * @see https://github.com/dogecoin/dogecoin/blob/master/doc/fee-recommendation.md
+ */
+export const LOWER_FEE_BOUND = 100
+
+/**
+ * Upper fee bound for Dogecoin transactions.
+ * Referenced from Dogecoin fee recommendation documentation.
+ * @see https://github.com/dogecoin/dogecoin/blob/master/doc/fee-recommendation.md
+ */
 export const UPPER_FEE_BOUND = 20_000_000
 
 /**
- * Chain identifier for Dogecoin
- *
+ * Chain identifier for Dogecoin.
  */
 export const DOGEChain = 'DOGE' as const
 
 /**
- * Base "chain" asset on dogecoin
- *
- * Based on definition in Thorchain `common`
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
+ * Base asset object for Dogecoin.
+ * Represents the Dogecoin asset in various contexts.
  */
 export const AssetDOGE: Asset = { chain: DOGEChain, symbol: 'DOGE', ticker: 'DOGE', synth: false }
 
-// https://blockchair.com/
-
+/**
+ * Explorer provider for Dogecoin mainnet and testnet.
+ * Provides URLs for exploring Dogecoin transactions and addresses.
+ */
 const DOGE_MAINNET_EXPLORER = new ExplorerProvider(
   'https://blockchair.com/dogecoin',
   'https://blockchair.com/dogecoin/address/%%ADDRESS%%',
@@ -50,10 +65,10 @@ export const blockstreamExplorerProviders = {
   [Network.Mainnet]: DOGE_MAINNET_EXPLORER,
 }
 
-//======================
-// sochain
-//======================
-
+/**
+ * Sochain data providers for Dogecoin mainnet and testnet.
+ * Provides API access to Sochain for Dogecoin.
+ */
 const testnetSochainProvider = new SochainProvider(
   'https://sochain.com/api/v3',
   process.env.SOCHAIN_API_KEY || '',
@@ -76,10 +91,10 @@ export const sochainDataProviders = {
   [Network.Mainnet]: mainnetSochainProvider,
 }
 
-//======================
-// Blockcypher
-//======================
-
+/**
+ * Blockcypher data providers for Dogecoin mainnet and stagenet.
+ * Provides API access to Blockcypher for Dogecoin.
+ */
 const mainnetBlockcypherProvider = new BlockcypherProvider(
   'https://api.blockcypher.com/v1',
   DOGEChain,
@@ -94,9 +109,10 @@ export const blockcypherDataProviders = {
   [Network.Mainnet]: mainnetBlockcypherProvider,
 }
 
-//======================
-// Bitgo
-//======================
+/**
+ * Bitgo data providers for Dogecoin mainnet and stagenet.
+ * Provides API access to Bitgo for Dogecoin.
+ */
 const mainnetBitgoProvider = new BitgoProvider({
   baseUrl: 'https://app.bitgo.com',
   chain: DOGEChain,

@@ -5,10 +5,10 @@ import ripemd160 from 'crypto-js/ripemd160'
 import sha256 from 'crypto-js/sha256'
 
 /**
- * Convert string to bytes.
+ * Convert a string to an array of bytes.
  *
- * @param {string} string
- * @returns {number[]} The bytes from the given string.
+ * @param {string} string The input string to be converted.
+ * @returns {number[]} The bytes representing the input string.
  */
 export const getBytes = (string: string): number[] => {
   const arrayBytes: number[] = []
@@ -20,12 +20,12 @@ export const getBytes = (string: string): number[] => {
 }
 
 /**
- * Convert Buffer to hex string.
+ * Convert a Buffer to a hexadecimal string.
  *
- * @param {Buffer} arr
- * @returns {string} The hex string from the given buffer.
+ * @param {Buffer} arr The input Buffer to be converted.
+ * @returns {string} The hexadecimal string representing the input Buffer.
  */
-export const ab2hexstring = (arr: Buffer) => {
+export const ab2hexstring = (arr: Buffer): string => {
   let result = ''
   for (let i = 0; i < arr.length; i++) {
     let str = arr[i].toString(16)
@@ -36,13 +36,13 @@ export const ab2hexstring = (arr: Buffer) => {
 }
 
 /**
- * Calculate `ripemd160(sha256(hex))` from the hex string
+ * Calculate `ripemd160(sha256(hex))` from a hexadecimal string.
  *
- * @param {string} hex The hex encoded string.
- * @returns {string} The hex string from the given buffer.
+ * @param {string} hex The input hexadecimal string.
+ * @returns {string} The result of the hash operation.
  *
- * @throws {"sha256ripemd160 expects a string"} Thrown if non-string is provided.
- * @throws {"invalid hex string length"} Thrown if the given hex string is an invalid one.
+ * @throws {"sha256ripemd160 expects a string"} Thrown if a non-string input is provided.
+ * @throws {"invalid hex string length"} Thrown if the input hexadecimal string has an invalid length.
  */
 export const sha256ripemd160 = (hex: string): string => {
   if (typeof hex !== 'string') throw new Error('sha256ripemd160 expects a string')
@@ -53,12 +53,12 @@ export const sha256ripemd160 = (hex: string): string => {
 }
 
 /**
- * Encode address from the string or Buffer.
+ * Encode an address from a string or Buffer.
  *
- * @param {string|Buffer} value The string or Buffer to be encoded.
+ * @param {string | Buffer} value The input string or Buffer to be encoded.
  * @param {string} prefix The prefix of the address. (optional)
- * @param {BufferEncoding} type The buffer encoding type. It will be used when string is provided. (optional)
- * @returns {string} The address generated from the given string or buffer.
+ * @param {BufferEncoding} type The buffer encoding type. It is used when a string is provided. (optional)
+ * @returns {string} The address generated from the input string or Buffer.
  */
 export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: BufferEncoding = 'hex'): string => {
   let words
@@ -71,10 +71,10 @@ export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: Buf
 }
 
 /**
- * Create address from the public key.
+ * Create an address from a public key.
  *
  * @param {Buffer} publicKey The public key in Buffer format.
- * @returns {string} The address generated from the given public key(buffer format).
+ * @returns {string} The address generated from the input public key (Buffer format).
  */
 export const createAddress = (publicKey: Buffer): string => {
   const hexed = ab2hexstring(publicKey)
@@ -86,12 +86,12 @@ export const createAddress = (publicKey: Buffer): string => {
 /**
  * Calculate pbkdf2 (Password-Based Key Derivation Function 2).
  *
- * @param {string|Buffer|Array|DataView} passphrase.
- * @param {string|Buffer|Array|DataView} salt
- * @param {number} iterations
- * @param {number} keylen
- * @param {string} digest
- * @returns {Buffer} The pbkdf2 value from the given options.
+ * @param {string | Buffer | NodeJS.TypedArray | DataView} passphrase The passphrase.
+ * @param {string | Buffer | NodeJS.TypedArray | DataView} salt The salt.
+ * @param {number} iterations The number of iterations.
+ * @param {number} keylen The length of the derived key.
+ * @param {string} digest The digest algorithm.
+ * @returns {Buffer} The derived key.
  */
 export const pbkdf2Async = async (
   passphrase: string | Buffer | NodeJS.TypedArray | DataView,

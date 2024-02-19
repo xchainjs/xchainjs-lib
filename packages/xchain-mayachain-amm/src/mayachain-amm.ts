@@ -1,3 +1,6 @@
+/**
+ * Import necessary modules and libraries
+ */
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
@@ -14,6 +17,7 @@ import { ethers } from 'ethers'
 import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
 
 /**
+ * Mayachain Automated Market Maker (AMM) class.
  * MAYAChainAMM class for interacting with THORChain.
  * Recommended main class to use for swapping with MAYAChain
  * Has access to Midgard and MayaNode data
@@ -23,9 +27,11 @@ export class MayachainAMM {
   private wallet: Wallet
 
   /**
-   * Constructor to create a MayachainAMM
-   * @param mayachainQuery - an instance of the MayachainQuery
-   * @returns MayachainAMM
+   * Constructor to create a MayachainAMM instance.
+   *
+   * @param {MayachainQuery} mayachainQuery An instance of the MayachainQuery class.
+   * @param {Wallet} wallet A wallet instance containing clients for various blockchains.
+   * @returns {MayachainAMM} Returns the MayachainAMM instance.
    */
   constructor(
     mayachainQuery = new MayachainQuery(),
@@ -43,9 +49,10 @@ export class MayachainAMM {
   }
 
   /**
-   * Estimate swap validating the swap params
-   * @param {QuoteSwapParams} quoteSwapParams Swap params
-   * @returns {QuoteSwap} Quote swap. If swap can not be done, it returns an empty QuoteSwap with the reasons the swap can not be done
+   * Estimate swap by validating the swap parameters.
+   *
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
+   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
    */
   public async estimateSwap({
     fromAsset,
@@ -103,9 +110,10 @@ export class MayachainAMM {
   }
 
   /**
-   * Validate swap params
-   * @param {QuoteSwapParams} quoteSwapParams Swap params
-   * @returns {string[]} the reasons the swap can not be done. If it is empty there are no reason to avoid the swap
+   * Validate swap parameters before performing a swap operation.
+   *
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
+   * @returns {string[]} Reasons the swap cannot be executed. Empty array if the swap is valid.
    */
   public async validateSwap({
     fromAsset,
@@ -118,21 +126,22 @@ export class MayachainAMM {
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
+    // Validate destination address if provided
     if (destinationAddress && !this.wallet.validateAddress(destinationAsset.chain, destinationAddress)) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
-
+    // Validate affiliate address if provided
     if (affiliateAddress) {
       const isMayaAddress = this.wallet.validateAddress(MAYAChain, affiliateAddress)
       const isMayaName = await this.isMAYAName(affiliateAddress)
       if (!(isMayaAddress || isMayaName))
         errors.push(`affiliateAddress ${affiliateAddress} is not a valid MAYA address`)
     }
-
+    // Validate affiliate basis points if provided
     if (affiliateBps && (affiliateBps < 0 || affiliateBps > 10000)) {
       errors.push(`affiliateBps ${affiliateBps} out of range [0 - 10000]`)
     }
-
+    // Validate approval if asset is an ERC20 token and fromAddress is provided
     if (this.isERC20Asset(fromAsset) && fromAddress) {
       const approveErrors = await this.isRouterApprovedToSpend({
         asset: fromAsset,
@@ -146,9 +155,9 @@ export class MayachainAMM {
   }
 
   /**
-   * Do swap between assets
-   * @param {QuoteSwapParams} quoteSwapParams Swap params
-   * @returns {TxSubmitted} the swap transaction hash and url
+   * Perform a swap operation between assets.
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   public async doSwap({
     fromAsset,
@@ -170,28 +179,30 @@ export class MayachainAMM {
       affiliateBps,
       toleranceBps,
     })
-
+    // Check if the swap can be performed
     if (!quoteSwap.canSwap) throw Error(`Can not swap. ${quoteSwap.errors.join(' ')}`)
-
+    // Perform the swap based on the asset chain
     return fromAsset.chain === MAYAChain || fromAsset.synth
       ? this.doProtocolAssetSwap(amount, quoteSwap.memo)
       : this.doNonProtocolAssetSwap(amount, quoteSwap.toAddress, quoteSwap.memo)
   }
 
   /**
-   * Approve Mayachain router in the chain of the asset to spend the amount in name of the address
-   * @param {ApproveParams} approveParams contains the asset and amount the router will be allowed. If amount is not defined,
-   * an infinity approve will be done
+   * Approve the Mayachain router to spend a certain amount in the asset chain.
+   * @param {ApproveParams} approveParams Parameters for approving the router to spend
+   * @returns {Promise<TxSubmitted>} Transaction hash and URL
    */
   public async approveRouterToSpend({ asset, amount }: ApproveParams): Promise<TxSubmitted> {
+    // Get inbound details for the asset chain
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
+    // Perform approval
     const tx = await this.wallet.approve(
       asset,
       amount?.baseAmount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
       inboundDetails.router,
     )
-
+    // Return transaction hash and URL
     return {
       hash: tx.hash,
       url: await this.wallet.getExplorerTxUrl(asset.chain, tx.hash),
@@ -199,17 +210,16 @@ export class MayachainAMM {
   }
 
   /**
-   * Validate if the asset router is allowed to spend the asset amount in name of the address
-   * @param {IsApprovedParams} isApprovedParams contains the asset and the amount the router is supposed to spend
-   * int name of address
-   * @returns {string[]} the reasons the router of the asset is not allowed to spend the amount. If it is empty, the asset router is allowed to spend the amount
+   * Validate if the asset router is allowed to spend the asset amount on behalf of the address.
+   * @param {IsApprovedParams} isApprovedParams Parameters for checking approval.
+   * @returns {string[]} Reasons the asset router is not allowed to spend the amount. Empty array if the router is approved.
    */
   public async isRouterApprovedToSpend({ asset, amount, address }: IsApprovedParams): Promise<string[]> {
     const errors: string[] = []
-
+    // Get inbound details for the asset chain
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
-
+    // Check if the router is approved to spend the amount
     const isApprovedResult = await this.wallet.isApproved(asset, amount.baseAmount, address, inboundDetails.router)
 
     if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
@@ -219,20 +229,21 @@ export class MayachainAMM {
 
   /**
    * Check if a name is a valid MAYAName
-   * @param {string} name MAYAName
-   * @returns {boolean} true if is a registered MAYAName, otherwise, false
+   * @param {string} name MAYAName to check
+   * @returns {boolean} True if the name is registered as a MAYAName, otherwise false
    */
   private async isMAYAName(name: string): Promise<boolean> {
     return !!(await this.mayachainQuery.getMAYANameDetails(name))
   }
 
   /**
-   * Do swap from native protocol asset to any other asset
+   * Perform a swap from a native protocol asset to any other asset
    * @param {CryptoAmount} amount Amount to swap
-   * @param {string} memo Memo to add to the transaction to successfully make the swap
-   * @returns {TxSubmitted} the swap transaction hash and url
+   * @param {string} memo Memo to add to the transaction
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   private async doProtocolAssetSwap(amount: CryptoAmount, memo: string): Promise<TxSubmitted> {
+    // Deposit the amount and return transaction hash and URL
     const hash = await this.wallet.deposit({ asset: amount.asset, amount: amount.baseAmount, memo })
 
     return {
@@ -242,14 +253,14 @@ export class MayachainAMM {
   }
 
   /**
-   * Do swap between assets
+   * Perform a swap between assets
    * @param {CryptoAmount} amount Amount to swap
    * @param {string} memo Memo to add to the transaction to successfully make the swap
    * @param {string} recipient inbound address to make swap transaction to
-   * @returns {TxSubmitted} the swap transaction hash and url
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   private async doNonProtocolAssetSwap(amount: CryptoAmount, recipient: string, memo: string): Promise<TxSubmitted> {
-    // Non ERC20 swaps
+    // For non-ERC20 assets, perform a transfer and return transaction hash and URL
     if (!this.isERC20Asset(amount.asset)) {
       const hash = await this.wallet.transfer({
         asset: amount.asset,
@@ -263,7 +274,7 @@ export class MayachainAMM {
       }
     }
 
-    // ERC20 swaps
+    // For ERC20 assets, perform a deposit with expiry and return transaction hash and URL
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(amount.asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router for ${amount.asset.chain} chain`)
     const contractAddress = getContractAddressFromAsset(amount.asset)
@@ -298,20 +309,22 @@ export class MayachainAMM {
   }
 
   /**
-   * Check if asset is ERC20
-   * @param {Asset} asset to check
-   * @returns true if asset is ERC20, otherwise, false
+   * Check if the asset is an ERC20 token
+   * @param {Asset} asset Asset to check
+   * @returns True if the asset is an ERC20 token, otherwise false
    */
   private isERC20Asset(asset: Asset): boolean {
+    // Check if the asset's chain is an EVM chain and if the symbol matches AssetETH.symbol
     return this.isEVMChain(asset.chain) ? [AssetETH.symbol].includes(asset.symbol) : false
   }
 
   /**
-   * Check if asset chain is EVM
-   * @param {Chain} chain to check
-   * @returns true if chain is EVM, otherwise, false
+   * Check if the chain is an EVM (Ethereum Virtual Machine) chain
+   * @param {Chain} chain Chain to check
+   * @returns True if the chain is an EVM chain, otherwise false
    */
   private isEVMChain(chain: string): boolean {
+    // Check if the chain matches AssetETH.chain
     return [AssetETH.chain].includes(chain)
   }
 }

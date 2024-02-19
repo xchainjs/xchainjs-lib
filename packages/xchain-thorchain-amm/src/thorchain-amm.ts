@@ -44,7 +44,7 @@ export class ThorchainAMM {
   private wallet: Wallet
 
   /**
-   * Constructor to create a ThorchainAMM
+   * Constructor to create a ThorchainAMM instance
    *
    * @param thorchainQuery - an instance of the ThorchainQuery
    * @returns ThorchainAMM
@@ -69,12 +69,13 @@ export class ThorchainAMM {
   }
 
   /**
-   * Provides a swap estimate for the given swap detail. Will check the params for errors before trying to get the estimate.
-   * Uses current pool data, works out inbound and outboud fee, affiliate fees and works out the expected wait time for the swap (in and out)
-   *
-   * @param params - amount to swap
+   * * Provides an estimate for a swap based on the given swap details.
+   * Checks the parameters for errors before attempting to retrieve the estimate.
+   * Utilizes current pool data to calculate inbound and outbound fees, affiliate fees,
+   * and the expected wait time for the swap (inbound and outbound).
+   * @param params Parameters for the swap, including the amount to swap.
 
-   * @returns The SwapEstimate
+   * @returns The estimated swap details.
    */
   public async estimateSwap({
     fromAddress,
@@ -102,6 +103,7 @@ export class ThorchainAMM {
       affiliateBps,
       toleranceBps,
     })
+    // Add any validation errors to the estimate
     estimate.txEstimate.errors.push(...errors)
     estimate.txEstimate.canSwap = errors.length == 0
     return estimate
@@ -151,11 +153,11 @@ export class ThorchainAMM {
   }
 
   /**
-   * Conducts a swap with the given inputs. Should be called after estimateSwap() to ensure the swap is valid
+   * Conducts a swap with the given inputs. This method should be called after estimateSwap() to ensure the swap is valid.
    *
-   * @param wallet - wallet to use
-   * @param params - swap params
-   * @returns {SwapSubmitted} - Tx Hash, URL of BlockExplorer and expected wait time.
+   * @param wallet - The wallet to use for the swap.
+   * @param params - The swap parameters.
+   * @returns {SwapSubmitted} - The transaction hash, URL of BlockExplorer, and expected wait time.
    */
   public async doSwap({
     fromAsset,
@@ -167,7 +169,7 @@ export class ThorchainAMM {
     affiliateBps,
     toleranceBps,
   }: QuoteSwapParams): Promise<TxSubmitted> {
-    // Thorchain-query call satisfies the data needed for executeSwap to be called.
+    // Retrieve swap details from ThorchainQuery to ensure validity
     const txDetails = await this.thorchainQuery.quoteSwap({
       fromAsset,
       fromAddress,
@@ -181,7 +183,7 @@ export class ThorchainAMM {
     if (!txDetails.txEstimate.canSwap) {
       throw Error(txDetails.txEstimate.errors.join('\n'))
     }
-
+    // Execute the swap using Thorchain action
     return ThorchainAction.makeAction({
       wallet: this.wallet,
       assetAmount: amount,
@@ -210,26 +212,27 @@ export class ThorchainAMM {
   }
 
   /**
-   * Wraps estimate from thorchain query
-   * @param params - estimate add liquidity
-   * @returns - Estimate add lp object
+   * Wraps the estimate from ThorchainQuery for adding liquidity.
+   * @param params - The parameters for estimating adding liquidity.
+   * @returns - The estimated liquidity addition object.
    */
   public async estimateAddLiquidity(params: AddliquidityPosition): Promise<EstimateAddLP> {
     return await this.thorchainQuery.estimateAddLP(params)
   }
 
   /**
-   * Wraps estimate withdraw from thorchain query
-   * @param params - estimate withdraw liquidity
-   * @returns - Estimate withdraw lp object
+   * Wraps the estimate from ThorchainQuery for withdrawing liquidity.
+   * @param params - The parameters for estimating withdrawing liquidity.
+   * @returns - The estimated liquidity withdrawal object.
    */
   public async estimateWithdrawLiquidity(params: WithdrawLiquidityPosition): Promise<EstimateWithdrawLP> {
     return await this.thorchainQuery.estimateWithdrawLP(params)
   }
 
   /**
-   *
-   * @param params - liquidity parameters
+   * If there is no existing liquidity position, it is created automatically.
+   * @param wallet - Wallet class
+   * @param params - Liquidity parameter
    * @returns
    */
   public async addLiquidityPosition(params: AddliquidityPosition): Promise<TxSubmitted[]> {
@@ -294,12 +297,12 @@ export class ThorchainAMM {
   }
 
   /**
-   *
-   * @param wallet - wallet needed to perform tx
-   * @return
+   * Withdraws liquidity from a position.
+   * @param params - The wallet to perform the transaction.
+   * @return - The array of transaction submissions.
    */
   public async withdrawLiquidityPosition(params: WithdrawLiquidityPosition): Promise<TxSubmitted[]> {
-    // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
+    // Caution Dust Limits: BTC, BCH, LTC chains: 10k sats; DOGE: 1m Sats; ETH: 0 wei; THOR: 0 RUNE.
     const withdrawParams = await this.thorchainQuery.estimateWithdrawLP(params)
 
     const withdrawLiquidity: WithdrawLiquidity = {
@@ -372,36 +375,36 @@ export class ThorchainAMM {
   }
 
   /**
-   *
-   * @param addAssetAmount
-   * @returns
+   * Estimates adding to a saver.
+   * @param addAssetAmount The amount to add to the saver.
+   * @returns The estimated addition to the saver object.
    */
   public async estimateAddSaver(addAssetAmount: CryptoAmount): Promise<EstimateAddSaver> {
     return await this.thorchainQuery.estimateAddSaver(addAssetAmount)
   }
   /**
-   *
-   * @param withdrawParams
-   * @returns
+   * Estimates withdrawing from a saver.
+   * @param withdrawParams The parameters for withdrawing from the saver.
+   * @returns The estimated withdrawal from the saver object.
    */
   public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
     return await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
   }
 
   /**
-   *
-   * @param getsaver
-   * @returns
+   * Retrieves the position of a saver.
+   * @param getsaver The parameters to retrieve the saver position.
+   * @returns The saver position object.
    */
   public async getSaverPosition(getsaver: getSaver): Promise<SaversPosition> {
     return await this.thorchainQuery.getSaverPosition(getsaver)
   }
 
   /**
-   *
+   * Adds assets to a saver.
    * @param wallet - wallet needed to execute tx
-   * @param addAssetAmount - asset amount being added to savers
-   * @returns - submitted tx
+   * @param addAssetAmount - The amount to add to the saver.
+   * @returns - The submitted transaction.
    */
   public async addSaver(addAssetAmount: CryptoAmount): Promise<TxSubmitted> {
     const addEstimate = await this.thorchainQuery.estimateAddSaver(addAssetAmount)
@@ -414,30 +417,10 @@ export class ThorchainAMM {
       memo: addEstimate.memo,
     })
   }
-
   /**
-   *
-   * @param loanOpenParams
-   * @returns
-   */
-  public async getLoanQuoteOpen(loanOpenParams: LoanOpenParams): Promise<LoanOpenQuote> {
-    return await this.thorchainQuery.getLoanQuoteOpen(loanOpenParams)
-  }
-
-  /**
-   *
-   * @param loanCloseParams
-   * @returns
-   */
-  public async getLoanQuoteClose(loanCloseParams: LoanCloseParams): Promise<LoanCloseQuote> {
-    return await this.thorchainQuery.getLoanQuoteClose(loanCloseParams)
-  }
-
-  /**
-   *
-   * @param wallet - wallet to execute the transaction
-   * @param withdrawParams - params needed for withdraw
-   * @returns
+   * Withdraws assets from a saver.
+   * @param withdrawParams - The parameters for withdrawing from the saver.
+   * @returns The submitted transaction.
    */
   public async withdrawSaver(withdrawParams: SaversWithdraw): Promise<TxSubmitted> {
     const withdrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
@@ -452,10 +435,27 @@ export class ThorchainAMM {
   }
 
   /**
-   *
-   * @param wallet - wallet needed to execute transaction
-   * @param loanOpenParams - params needed to open the loan
-   * @returns - submitted tx
+   * Retrieves a quote for opening a loan.
+   * @param loanOpenParams The parameters for opening the loan.
+   * @returns The quote for opening the loan.
+   */
+  public async getLoanQuoteOpen(loanOpenParams: LoanOpenParams): Promise<LoanOpenQuote> {
+    return await this.thorchainQuery.getLoanQuoteOpen(loanOpenParams)
+  }
+
+  /**
+   * Retrieves a quote for closing a loan.
+   * @param loanCloseParams The parameters for closing the loan.
+   * @returns The quote for closing the loan.
+   */
+  public async getLoanQuoteClose(loanCloseParams: LoanCloseParams): Promise<LoanCloseQuote> {
+    return await this.thorchainQuery.getLoanQuoteClose(loanCloseParams)
+  }
+
+  /**
+   * Opens a loan.
+   * @param loanOpenParams - The parameters for opening the loan.
+   * @returns - The submitted transaction.
    */
   public async addLoan(loanOpenParams: LoanOpenParams): Promise<TxSubmitted> {
     const loanOpen: LoanOpenQuote = await this.thorchainQuery.getLoanQuoteOpen(loanOpenParams)
@@ -470,13 +470,13 @@ export class ThorchainAMM {
   }
 
   /**
-   *
-   * @param wallet - wallet to execute the transaction
-   * @param loanCloseParams - params needed for withdrawing the loan
-   * @returns
+   * Withdraws assets from a loan.
+   * @param loanCloseParams - The parameters for withdrawing from the loan.
+   * @returns The submitted transaction.
    */
   public async withdrawLoan(loanCloseParams: LoanCloseParams): Promise<TxSubmitted> {
     const withdrawLoan = await this.thorchainQuery.getLoanQuoteClose(loanCloseParams)
+    // Checks if there are any errors in the quote
     if (withdrawLoan.errors.length > 0) throw Error(`${withdrawLoan.errors}`)
 
     return ThorchainAction.makeAction({
@@ -488,9 +488,9 @@ export class ThorchainAMM {
   }
 
   /**
-   * Get all Thornames and its data associated owned by an address
-   * @param address - address
-   * @returns thornames data
+   * Retrieves all Thornames and their associated data owned by an address.
+   * @param address - The address to retrieve Thornames for.
+   * @returns The Thornames data.
    */
   public async getThornamesByAddress(address: string) {
     return this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameReverseLookup(address)

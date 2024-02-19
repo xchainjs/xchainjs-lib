@@ -1,11 +1,19 @@
-import { Balance, Network, Tx, TxHash, TxParams, TxsPage, XChainClient } from '@xchainjs/xchain-client'
+/**
+ * Import necessary modules and libraries
+ */
+import { Balance, FeeOption, Network, Protocol, Tx, TxHash, TxsPage, XChainClient } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
-import { Address, Asset, BaseAmount, Chain, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, Chain, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
 import { ethers } from 'ethers'
 
+import { EvmTxParams, UtxoTxParams } from './types'
+
+// Record type to hold network URLs
 export type NodeUrls = Record<Network, string>
 
+// Class definition for a Wallet
 export class Wallet {
   private clients: Record<Chain, XChainClient>
   private network: Network
@@ -13,44 +21,48 @@ export class Wallet {
   /**
    * Constructor to create a wallet with the desired clients
    *
-   * @param {Record<string>} clients Clients by chain the wallet work with
-   * @returns Wallet
+   * @param {Record<string>} clients Clients mapped by chain with which the wallet works
+   * @returns Wallet instance
    */
   constructor(clients: Record<Chain, XChainClient>) {
     this.clients = clients
     this.network = Network.Mainnet
 
+    // Check if clients array is not empty
     if (Object.values(clients).length) {
+      // Get the network of the first client
       const network = Object.values(clients)[0].getNetwork()
+      // Ensure all clients are on the same network
       if (!Object.values(clients).every((client) => client.getNetwork() === network)) {
         throw Error('Clients not working on the same network')
       }
-      this.network = network
+      this.network = network // Set the network for the wallet
     }
   }
 
   /**
-   * Get the network clients are working in
-   * @returns {Network} network
+   * Get the network that the clients are working in
+   * @returns {Network} The network
    */
   public getNetwork(): Network {
     return this.network
   }
 
   /**
-   * Set the network clients are working in
-   * @param {Network} network Network
+   * Set the network that the clients are working in
+   * @param {Network} network The Network to set
    */
   public setNetwork(network: Network) {
+    // Set network for each client
     Object.values(this.clients).forEach((client) => client.setNetwork(network))
     this.network = network
   }
 
   /**
    * Add a new client to the wallet
-   * @param chain to remove the client of
-   * @returns {boolean} true if client is successfully added, otherwise, false
-   * @throws {Error} If client to add is working on different network compared to others
+   * @param chain - Chain to add the client for
+   * @returns {boolean} True if client is successfully added, otherwise false
+   * @throws {Error} If trying to add a client on a different network compared to others
    */
   public addClient(chain: Chain, client: XChainClient): boolean {
     if (chain in this.clients) return false
@@ -68,9 +80,9 @@ export class Wallet {
   }
 
   /**
-   * Purge and remove client from wallet
-   * @param chain to remove the client of
-   * @returns {true} true if the client is successfully purge and removed, otherwise, false
+   * Purge and remove client from the wallet
+   * @param chain Chain to remove the client for
+   * @returns {true} True if the client is successfully purged and removed, otherwise false
    */
   public purgeClient(chain: Chain): boolean {
     try {
@@ -85,7 +97,7 @@ export class Wallet {
 
   /**
    * Purge and remove all clients from wallet
-   * @returns {boolean} true if the wallet is successfully purge and removed, otherwise, false
+   * @returns {boolean} True if the wallet is successfully purged and removed, otherwise false
    */
   public purgeWallet(): boolean {
     try {
@@ -101,8 +113,8 @@ export class Wallet {
 
   /**
    * Get chain address
-   * @param {Chain} chain
-   * @returns {string} the chain address
+   * @param {Chain} chain The chain
+   * @returns {string} The chain address
    */
   public async getAddress(chain: Chain): Promise<string> {
     const client = this.getClient(chain)
@@ -110,10 +122,9 @@ export class Wallet {
   }
 
   /**
-   * Get wallet chain addresses.
-   * @param {Chain[]} chains Optional - Chains of which return the address of. If not provided, it will return
-   * the wallet chain addresses
-   * @returns the chains addresses
+   * Get the wallet chain addresses.
+   * @param {Chain[]} chains Optional chains to get addresses for, if not provided, returns all wallet addresses
+   * @returns Addresses mapped by chain
    */
   public async getAddresses(chains?: Chain[]): Promise<Record<Chain, Address>> {
     const _chains: Chain[] = chains || Object.keys(this.clients)
@@ -133,8 +144,8 @@ export class Wallet {
 
   /**
    * Check if address is valid
-   * @param {Chain} chain in which the address has to be valid
-   * @param {string} address to validate
+   * @param {Chain} chain The chain in which the address has to be valid
+   * @param {string} address The address to validate
    * @returns {boolean} true if it is a valid address, otherwise, false
    */
   public validateAddress(chain: Chain, address: string): boolean {
@@ -144,7 +155,7 @@ export class Wallet {
 
   /**
    * Get chain balances
-   * @param {Chain} chain to retrieve the balance of
+   * @param {Chain} chain The chain to retrieve the balance of
    * @returns {Balance[]} the chain balances
    */
   public async getBalance(chain: Chain, assets?: Asset[]): Promise<Balance[]> {
@@ -153,7 +164,7 @@ export class Wallet {
   }
 
   /**
-   * Get wallet balances. By default, it returns all the wallet balances unless assets are provided, in that case,
+   * By default, it returns all the wallet balances unless assets are provided, in that case,
    * only asset balances will be returned by chain
    * @param {Assets[]} assets - Optional. Assets of which return the balance
    * @returns {Record<Chain, Balance[]>} Balances by chain
@@ -200,7 +211,8 @@ export class Wallet {
   }
 
   /**
-   * Get wallet histories. By default, it returns all the wallet histories unless chains are provided, in that case,
+   * Get wallet histories.
+   * By default, it returns all the wallet histories unless chains are provided, in that case,
    * only chain histories will be returned by chain
    * @param {Chain[]} chains - Optional. Chain of which return the transaction history
    * @returns {TxsPage} the chain transaction history
@@ -224,8 +236,8 @@ export class Wallet {
 
   /**
    * Get explorer url
-   * @param {Chain} chain to retrieve the explorer of
-   * @returns {string} the transaction url
+   * @param {Chain} chain The chain to retrieve the explorer of
+   * @returns {string} the transaction URL
    */
   public async getExplorerUrl(chain: Chain): Promise<string> {
     const client = this.getClient(chain)
@@ -233,10 +245,10 @@ export class Wallet {
   }
 
   /**
-   * Get address url
-   * @param {Chain} chain of the address
-   * @param {string} address to retrieve the url of
-   * @returns {string} the transaction url
+   * Get address URL
+   * @param {Chain} chain Chain of the address
+   * @param {string} address The address to retrieve the URL of
+   * @returns {string} The address URL
    */
   public async getExplorerAddressUrl(chain: Chain, address: string): Promise<string> {
     const client = this.getClient(chain)
@@ -244,10 +256,10 @@ export class Wallet {
   }
 
   /**
-   * Get transaction url
-   * @param {Chain} chain of the transaction
-   * @param {string} hash of the transaction
-   * @returns the transaction url
+   * Get transaction URL
+   * @param {Chain} chain Chain of the transaction
+   * @param {string} hash Hash of the transaction
+   * @returns the transaction URL
    */
   public async getExplorerTxUrl(chain: Chain, hash: string): Promise<string> {
     const client = this.getClient(chain)
@@ -255,10 +267,11 @@ export class Wallet {
   }
 
   /**
-   * Get feeRates. Only available for EVM clients
-   * @param {Chain} chain of which return the feeRates
-   * @returns {GasPrices} the gas fee rates
-   * @throws {Error} if gas fee rates can not be returned from the chain
+   * @deprecated
+   * Get feeRates. Only available for EVM clients. Use getFeeRates instead
+   * @param {Chain} chain Chain of which return the feeRates
+   * @returns {GasPrices} Chain of which return the feeRates
+   * @throws {Error} If gas fee rates cannot be returned from the chain
    */
   public async getGasFeeRates(chain: Chain): Promise<GasPrices> {
     const client = this.getClient(chain)
@@ -267,18 +280,64 @@ export class Wallet {
   }
 
   /**
-   * Make a transaction
-   * @param {TxParams} txParams to make the transfer
-   * @returns the transaction hash
+   * Get chain feeRates.
+   * @param {Chain} chain of which return the feeRates
+   * @param {Protocol} protocol to interact with. If it is not set, fee rates are calculated as chain rules
+   * @returns {Record<FeeOption, BaseAmount>} the fee rates
+   * @throws {Error} if the fee rates can not be returned from the chain
    */
-  public async transfer({ asset, amount, recipient, memo, walletIndex }: TxParams & { asset: Asset }): Promise<string> {
-    const client = this.getClient(asset.chain)
+  public async getFeeRates(chain: Chain, protocol?: Protocol): Promise<Record<FeeOption, BaseAmount>> {
+    const client = this.getClient(chain)
+    if (client instanceof EvmClient) {
+      return client.estimateGasPrices(protocol)
+    }
+    if (client instanceof UtxoClient) {
+      const feeRates = await client.getFeeRates(protocol)
+      const nativeDecimals = client.getAssetInfo().decimal
+      return {
+        [FeeOption.Average]: baseAmount(feeRates[FeeOption.Average], nativeDecimals),
+        [FeeOption.Fast]: baseAmount(feeRates[FeeOption.Fast], nativeDecimals),
+        [FeeOption.Fastest]: baseAmount(feeRates[FeeOption.Fastest], nativeDecimals),
+      }
+    }
+    throw Error(`getFeeRates method not supported in ${chain} chain`)
+  }
+
+  /**
+   * Make a transaction
+   * @param {TxParams} txParams txParams - The parameters to make the transfer
+   * @returns The transaction hash
+   */
+  public async transfer(params: UtxoTxParams | EvmTxParams): Promise<string> {
+    const client = this.getClient(params.asset.chain)
+    if (client instanceof EvmClient) {
+      if (!this.isEvmTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
+      return client.transfer({
+        walletIndex: params.walletIndex,
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        memo: params.memo,
+        gasPrice: params.gasPrice,
+      })
+    }
+    if (client instanceof UtxoClient) {
+      if (!this.isUtxoTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
+      return client.transfer({
+        walletIndex: params.walletIndex,
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        memo: params.memo,
+        feeRate: params.feeRate ? params.feeRate.amount().toNumber() : undefined,
+      })
+    }
     return client.transfer({
-      walletIndex,
-      asset,
-      amount,
-      recipient,
-      memo,
+      walletIndex: params.walletIndex,
+      asset: params.asset,
+      amount: params.amount,
+      recipient: params.recipient,
+      memo: params.memo,
     })
   }
 
@@ -286,7 +345,7 @@ export class Wallet {
    * Make a deposit
    * @param {DepositParam} depositParams
    * @returns {string} the hash of the deposit
-   * @throws {Error} if can not make deposit with the asset
+   * @throws {Error} if cannot make deposit with the asset
    */
   public async deposit({
     asset,
@@ -304,12 +363,12 @@ export class Wallet {
 
   /**
    * Check if an spenderAddress is allowed to spend in name of another address certain asset amount
-   * @param {Asset} asset to check
-   * @param {BaseAmount} amount to check
-   * @param {string} fromAddress owner of the amount asset
-   * @param {string} spenderAddress spender to check if it is allowed to spend
+   * @param {Asset} asset The asset to check
+   * @param {BaseAmount} amount The amount to check
+   * @param {string} fromAddress The owner of the amount asset from
+   * @param {string} spenderAddress The spender to check if it is allowed to spend
    * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
-   * @throws {Error} if asset is a non ERC20 asset
+   * @throws {Error} If asset is a non ERC20 asset
    */
   async approve(
     asset: Asset,
@@ -327,12 +386,12 @@ export class Wallet {
 
   /**
    * Check if an spenderAddress is allowed to spend in name of another address certain asset amount
-   * @param {Asset} asset to check
-   * @param {BaseAmount} amount to check
-   * @param {string} fromAddress owner of the amount asset
-   * @param {string} spenderAddress spender to check if it is allowed to spend
+   * @param {Asset} asset The asset to check
+   * @param {BaseAmount} amount The amount to check
+   * @param {string} fromAddress oThe wner of the amount asset from
+   * @param {string} spenderAddress Spender to check if it is allowed to spend
    * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
-   * @throws {Error} if asset is a non ERC20 asset
+   * @throws {Error} If asset is a non ERC20 asset
    */
   async isApproved(asset: Asset, amount: BaseAmount, fromAddress: string, spenderAddress: string): Promise<boolean> {
     const client = this.getClient(asset.chain)
@@ -352,7 +411,7 @@ export class Wallet {
 
   /**
    * Broadcast transaction
-   * @param {Chain} chain in which broadcast the signed raw transaction
+   * @param {Chain} chain The chain in which broadcast the signed raw transaction
    * @param {string} txHex signed raw transaction
    * @returns {TxHash} the broadcasted transaction hash
    */
@@ -374,13 +433,31 @@ export class Wallet {
 
   /**
    * Get chain client
-   * @param {Chain} chain of which return the client
-   * @returns {XChainClient} the chain client
-   * @throws {Error} if client does not exist
+   * @param {Chain} chain The chain of which to return the client
+   * @returns {XChainClient} The chain client
+   * @throws {Error} If the client does not exist
    */
   private getClient(chain: Chain): XChainClient {
     const client = this.clients[chain]
     if (!client) throw Error(`Client not found for ${chain} chain`)
     return client
+  }
+
+  /**
+   * Check if params type is compatible with EvmTxParams
+   * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
+   * @returns {boolean} True if params is EvmTxParams
+   */
+  private isEvmTxParams(params: EvmTxParams | UtxoTxParams): params is EvmTxParams {
+    return !('feeRate' in params)
+  }
+
+  /**
+   * Check if params type is compatible with UtxoTxParams
+   * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
+   * @returns {boolean} True if params is UtxoTxParams
+   */
+  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams): params is UtxoTxParams {
+    return !('gasPrice' in params)
   }
 }

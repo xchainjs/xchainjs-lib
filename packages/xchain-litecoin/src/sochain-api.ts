@@ -15,7 +15,12 @@ import {
   Transaction,
   TxHashParams,
 } from './types/sochain-api-types'
-
+/**
+ * Converts network identifier to Sochain network string.
+ *
+ * @param {Network} network The network identifier.
+ * @returns {string} The corresponding Sochain network string.
+ */
 const toSochainNetwork = (network: Network): string => {
   switch (network) {
     case Network.Mainnet:
@@ -27,7 +32,7 @@ const toSochainNetwork = (network: Network): string => {
 }
 
 /**
- * Get address information.
+ * Retrieves address information from the Sochain API.
  *
  * @see https://sochain.com/api#get-display-data-address
  *
@@ -44,7 +49,7 @@ export const getAddress = async ({ apiKey, sochainUrl, network, address }: Addre
 }
 
 /**
- * Get transaction by hash.
+ * Retrieves transaction details by hash from the Sochain API.
  *
  * @see https://sochain.com/api#get-tx
  *
@@ -54,14 +59,16 @@ export const getAddress = async ({ apiKey, sochainUrl, network, address }: Addre
  * @returns {Transactions}
  */
 export const getTx = async ({ apiKey, sochainUrl, network, hash }: TxHashParams): Promise<Transaction> => {
+  // Constructs the URL for fetching transaction details
   const url = `${sochainUrl}/transaction/${toSochainNetwork(network)}/${hash}`
+  // Sends a GET request to the Sochain API with the specified URL and API key
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const tx: SochainResponse<Transaction> = response.data
   return tx.data
 }
 
 /**
- * Get transactions
+ *  Retrieves transactions associated with an address from the Sochain API.
  *
  * @see https://sochain.com/api#get-tx
  *
@@ -83,14 +90,14 @@ export const getTxs = async ({
   network: Network
   page: number
 }): Promise<LtcGetTxsDTO> => {
+  // Constructs the URL for fetching transactions
   const url = `${sochainUrl}/transactions/${toSochainNetwork(network)}/${address}/${page}` //TODO support paging
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const txs: SochainResponse<LtcGetTxsDTO> = response.data
   return txs.data
 }
 /**
- * Get address balance.
- *
+ * Retrieves the balance of an address from the Sochain API.
  * @see https://sochain.com/api#get-balance
  *
  * @param {string} sochainUrl The sochain node url.
@@ -99,9 +106,12 @@ export const getTxs = async ({
  * @returns {number}
  */
 export const getBalance = async ({ apiKey, sochainUrl, network, address }: BalanceParams): Promise<BaseAmount> => {
+  // Constructs the URL for fetching address balance
   const url = `${sochainUrl}/balance/${toSochainNetwork(network)}/${address}`
+  // Sends a GET request to the Sochain API with the specified URL and API key
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const balanceResponse: SochainResponse<LtcGetBalanceDTO> = response.data
+  // Processes the balance response and converts it to the appropriate format
   const confirmed = assetAmount(balanceResponse.data.confirmed, LTC_DECIMAL)
   const unconfirmed = assetAmount(balanceResponse.data.unconfirmed, LTC_DECIMAL)
   const netAmt = confirmed.amount().plus(unconfirmed.amount())
@@ -110,7 +120,7 @@ export const getBalance = async ({ apiKey, sochainUrl, network, address }: Balan
 }
 
 /**
- * Get unspent txs
+ * Retrieves unspent transactions associated with an address from the Sochain API.
  *
  * @see https://sochain.com/api#get-unspent-tx
  *
@@ -126,7 +136,9 @@ export const getUnspentTxs = async ({
   address,
   page,
 }: AddressParams): Promise<LtcAddressUTXO[]> => {
+  // Constructs the URL for fetching unspent transactions
   const url = [sochainUrl, 'unspent_outputs', toSochainNetwork(network), address, page].filter((v) => !!v).join('/')
+  // Sends a GET request to the Sochain API with the specified URL and API key
   const resp = await axios.get(url, { headers: { 'API-KEY': apiKey } })
   const response: SochainResponse<LtcUnspentTxsDTO> = resp.data
   const txs = response.data.outputs

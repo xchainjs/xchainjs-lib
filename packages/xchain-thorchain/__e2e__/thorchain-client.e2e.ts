@@ -67,7 +67,7 @@ describe('Thorchain client e2e', () => {
     console.log(publicKey)
   })
 
-  it('Should get address', async () => {
+  it('Should get wallet address', async () => {
     const address = await client.getAddressAsync()
     console.log(address)
   })

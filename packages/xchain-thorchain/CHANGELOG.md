@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- ef2d8e2: getAssetDecimals function
+- Updated dependencies [ef2d8e2]
+  - @xchainjs/xchain-cosmos-sdk@0.2.3
+
+## 1.0.2
+
+### Patch Changes
+
+- e1ec010: getDenom, getChainId and getPrefix util functions
+- Updated dependencies [ae35c36]
+  - @xchainjs/xchain-cosmos-sdk@0.2.2
+
 ## 1.0.1
 
 ### Patch Changes

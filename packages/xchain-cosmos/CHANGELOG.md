@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- 82a105c: Breaking changes
+  - `getSDKClient` removed
+
+### Patch Changes
+
+- Updated dependencies [ef2d8e2]
+  - @xchainjs/xchain-cosmos-sdk@0.2.3
+
 ## 0.21.10
 
 ### Patch Changes

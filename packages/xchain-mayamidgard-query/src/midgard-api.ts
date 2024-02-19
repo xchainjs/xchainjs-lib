@@ -11,7 +11,9 @@ import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
 import { MAYANameDetails, MidgardConfig, ReverseMAYANames } from './types'
-
+/**
+ * Default configuration for Midgard API based on different networks.
+ */
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
@@ -27,12 +29,18 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
     midgardBaseUrls: ['https://stagenet.midgard.mayachain.info'],
   },
 }
-
+/**
+ * Class for interacting with the Midgard API.
+ */
 export class MidgardApi {
   private config: MidgardConfig
   readonly network: Network
   private midgardClients: MidgardClient[]
-
+  /**
+   * Constructor to create a MidgardApi instance.
+   * @param network - The network to connect to. Default is Mainnet.
+   * @param config - Configuration options for the Midgard API.
+   */
   constructor(network: Network = Network.Mainnet, config?: MidgardConfig) {
     this.network = network
     this.config = config ?? defaultMidgardConfig[this.network]
@@ -43,8 +51,8 @@ export class MidgardApi {
   }
 
   /**
-   *
-   * @returns an array containing details for a set of pools
+   * Get details for a set of pools.
+   * @returns An array containing details for a set of pools.
    */
   async getPools(): Promise<PoolDetail[]> {
     for (const client of this.midgardClients) {
@@ -56,9 +64,9 @@ export class MidgardApi {
   }
 
   /**
-   * Get MayaName details
-   * @param {string} name MayaName
-   * @returns an array of chains and their addresses associated with the given THORName
+   * Get MAYAName details.
+   * @param {string} name - MAYAName to get details for.
+   * @returns An object containing chains and their addresses associated with the given MAYAName.
    */
   public async getMayaNameDetails(name: string): Promise<MAYANameDetails | undefined> {
     for (const client of this.midgardClients) {
@@ -80,9 +88,9 @@ export class MidgardApi {
   }
 
   /**
-   * Gives a list of MayaNames by reverse lookup
-   * @param {string} address to know if it has a MayaName associated with
-   * @returns an array of THORNames associated with the given address
+   * Perform reverse lookup to get MAYAName(s) associated with a given address.
+   * @param {string} address - Address to perform reverse lookup for.
+   * @returns An array of MAYANames associated with the given address.
    */
   public async getMAYANameReverseLookup(address: string): Promise<ReverseMAYANames | undefined> {
     for (const client of this.midgardClients) {
@@ -104,8 +112,8 @@ export class MidgardApi {
   }
 
   /**
-   * Gets network health info
-   * @returns an object containing the health response of the API
+   * Get network health information.
+   * @returns An object containing the health response of the Midgard API.
    */
   public async getHealth(): Promise<Health> {
     for (const client of this.midgardClients) {
@@ -117,9 +125,9 @@ export class MidgardApi {
   }
 
   /**
-   * Function to return pool statistics for a particular asset
-   * @param {string} asset - asset string to query its pool stats
-   * @returns - type object poolStatsDetail
+   * Get pool statistics for a particular asset.
+   * @param {string} asset - Asset string to query its pool stats.
+   * @returns Pool statistics detail object.
    */
   public async getPoolStats(asset: string): Promise<PoolStatsDetail> {
     for (const client of this.midgardClients) {
@@ -131,9 +139,9 @@ export class MidgardApi {
   }
 
   /**
-   * Function to return member details based on valid liquidity position
-   * @param {string} member - needed to query for Lp details
-   * @returns - object type of Member Detail
+   * Get member details based on a valid liquidity position.
+   * @param {string} member - Member address to query for liquidity pool details.
+   * @returns Object containing member details.
    */
   public async getMemberDetails(member: string): Promise<MemberDetails> {
     for (const client of this.midgardClients) {

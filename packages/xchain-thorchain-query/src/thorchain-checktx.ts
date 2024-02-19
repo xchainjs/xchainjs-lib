@@ -5,7 +5,9 @@ import { DefaultChainAttributes } from './chain-defaults'
 import { ThorchainCache } from './thorchain-cache'
 import { ChainAttributes } from './types'
 import { AssetRuneNative, THORChain, isAssetRuneNative } from './utils'
-
+/**
+ * Enum representing different types of transactions.
+ */
 export enum TxType {
   Swap = 'Swap',
   AddLP = 'AddLP',
@@ -16,39 +18,60 @@ export enum TxType {
   Other = 'Other',
   Unknown = 'Unknown',
 }
+/**
+ * Enum representing inbound transaction status.
+ */
 export enum InboundStatus {
   Observed_Consensus = 'Observed_Consensus',
   Observed_Incomplete = 'Observed_Incomplete',
   Unknown = 'Unknown',
 }
+/**
+ * Enum representing swap transaction status.
+ */
 export enum SwapStatus {
   Complete = 'Complete',
   Complete_Refunded = 'Complete_Refunded',
   Complete_Below_Dust = 'Complete_Below_Dust',
   Incomplete = 'Incomplete',
 }
+/**
+ * Enum representing add liquidity pool transaction status.
+ */
 export enum AddLpStatus {
   Complete = 'Complete',
   Complete_Refunded = 'Complete_Refunded',
   Complete_Below_Dust = 'Complete_Below_Dust',
   Incomplete = 'Incomplete',
 }
+/**
+ * Enum representing withdraw transaction status.
+ */
 export enum WithdrawStatus {
   Complete = 'Complete',
   Incomplete = 'Incomplete',
   Complete_Refunded = 'Complete_Refunded',
 }
+/**
+ * Enum representing refund transaction status.
+ */
 export enum RefundStatus {
   Complete = 'Complete',
   Incomplete = 'Incomplete',
   Complete_Refunded = 'Complete_Refunded',
 }
+/**
+ * Enum representing add saver transaction status.
+ */
 export enum AddSaverStatus {
   Complete = 'Complete',
   Complete_Refunded = 'Complete_Refunded',
   Complete_Below_Dust = 'Complete_Below_Dust',
   Incomplete = 'Incomplete',
 }
+/**
+ * Object representing swap information.
+ */
 export type SwapInfo = {
   status: SwapStatus
   toAddress: string
@@ -60,6 +83,9 @@ export type SwapInfo = {
   expectedAmountOut: CryptoAmount
   actualAmountOut?: CryptoAmount
 }
+/**
+ * Object representing add liquidity pool information.
+ */
 export type AddLpInfo = {
   status: AddLpStatus
   isSymmetric: boolean
@@ -68,6 +94,9 @@ export type AddLpInfo = {
   assetConfirmationDate?: Date
   pool: Asset
 }
+/**
+ * Object representing withdraw saver information.
+ */
 export type WithdrawSaverInfo = {
   status: WithdrawStatus
   withdrawalAmount: CryptoAmount
@@ -77,6 +106,9 @@ export type WithdrawSaverInfo = {
   outboundBlock: number
   estimatedWaitTime: number
 }
+/**
+ * Object representing withdraw information.
+ */
 export type WithdrawInfo = {
   status: WithdrawStatus
   withdrawalAmount: CryptoAmount
@@ -85,6 +117,9 @@ export type WithdrawInfo = {
   outboundHeight: number
   estimatedWaitTime: number
 }
+/**
+ * Object representing refund information.
+ */
 export type RefundInfo = {
   status: RefundStatus
   refundAmount: CryptoAmount
@@ -95,12 +130,17 @@ export type RefundInfo = {
   outboundBlock: number
   estimatedWaitTime: number
 }
-
+/**
+ * Object representing add saver information.
+ */
 export type AddSaverInfo = {
   status: AddSaverStatus
   assetTx?: InboundTx
   saverPos?: Saver
 }
+/**
+ * Object representing inbound transaction.
+ */
 type InboundTx = {
   status: InboundStatus
   date: Date
@@ -111,6 +151,9 @@ type InboundTx = {
   fromAddress: string
   memo: string
 }
+/**
+ * Object representing transaction progress.
+ */
 export type TXProgress = {
   txType: TxType
   inboundObserved?: InboundTx
@@ -121,15 +164,26 @@ export type TXProgress = {
   withdrawSaverInfo?: WithdrawSaverInfo
   refundInfo?: RefundInfo
 }
-
+/**
+ * Class for managing transaction stages.
+ */
 export class TransactionStage {
   readonly thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
-
+  /**
+   * Constructor to create a TransactionStage instance.
+   * @param thorchainCache - ThorchainCache instance.
+   * @param chainAttributes - ChainAttributes object representing default chain attributes.
+   */
   constructor(thorchainCache: ThorchainCache, chainAttributes = DefaultChainAttributes) {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
   }
+  /**
+   * Checks transaction progress.
+   * @param inboundTxHash - Inbound transaction hash.
+   * @returns Promise<TXProgress> - Transaction progress object.
+   */
   public async checkTxProgress(inboundTxHash: string): Promise<TXProgress> {
     let txData
     try {
@@ -171,21 +225,29 @@ export class TransactionStage {
 
     return progress
   }
+  /**
+   * Checks the progress of a swap transaction.
+   * @param txData - Transaction details response.
+   * @param progress - Transaction progress object.
+   */
   private async checkSwapProgress(txData: TxDetailsResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
+      // Extract memo fields
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseSwapMemo(memo)
       const assetOut = assetFromStringEx(memoFields.asset.toUpperCase())
-      //const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
+      // Determine swap status
       const swapStatus = txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded
-      // current height of thorchain, neeed for confirmations
+      // Get current chain height for confirmations
       const chainHeight = await this.blockHeight(AssetRuneNative)
 
-      // expected outbound height
+      // Expected outbound height and date
       const outboundHeight = Number(txData.outbound_height ?? txData.finalised_height)
       const expectedOutBlock = Number(txData.outbound_height ?? txData.finalised_height)
       const expectedOutDate = await this.blockToDate(THORChain, txData, outboundHeight) // height held in the scheduled queue
+      // Calculate confirmations
       const confirmations = chainHeight > outboundHeight ? chainHeight - outboundHeight : 0
+      // Calculate minimum amount out and affiliate fee
       const minimumAmountOut = memoFields.limit
         ? await this.getCryptoAmount(memoFields.limit, assetOut)
         : await this.getCryptoAmount('0', assetOut)
@@ -193,7 +255,7 @@ export class TransactionStage {
       const affliateFee = memoFields.affiliateFee
         ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
         : await this.getCryptoAmount('0', assetOut)
-      // TODO get out tx
+      // Construct swap info object
       const swapInfo: SwapInfo = {
         status: swapStatus,
         expectedOutBlock,
@@ -204,9 +266,15 @@ export class TransactionStage {
         affliateFee,
         toAddress: memoFields.destAddress,
       }
+      // Assign swap info to progress object
       progress.swapInfo = swapInfo
     }
   }
+  /**
+   * Parses swap memo to extract relevant fields.
+   * @param memo - Transaction memo.
+   * @returns Parsed swap memo fields.
+   */
   private parseSwapMemo(memo: string) {
     //SWAP:ASSET:DESTADDR:LIM:AFFILIATE:FEE
     const parts = memo.split(`:`)
@@ -218,11 +286,22 @@ export class TransactionStage {
     const affiliateFee = parts.length > 5 && parts[5].length > 0 ? parts[5] : undefined
     return { action, asset, destAddress, limit, affiliateAddress, affiliateFee }
   }
+  /**
+   * Retrieves a CryptoAmount object.
+   * @param baseAmt - Base amount.
+   * @param asset - Asset object.
+   * @returns Promise<CryptoAmount> - CryptoAmount object.
+   */
   private async getCryptoAmount(baseAmt: string, asset: Asset): Promise<CryptoAmount> {
     const decimals =
       THORChain === asset.chain ? 8 : Number(await this.thorchainCache.midgardQuery.getDecimalForAsset(asset))
     return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
   }
+  /**
+   * Determines the observed status of a transaction.
+   * @param txData - Transaction signers response.
+   * @returns Promise<TXProgress> - Transaction progress object.
+   */
   private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {
     const progress: TXProgress = {
       txType: TxType.Unknown,
@@ -274,13 +353,19 @@ export class TransactionStage {
     }
     return progress
   }
-
+  /**
+   * Checks the progress of an add liquidity pool transaction.
+   * @param txData - Transaction details response.
+   * @param progress - Transaction progress object.
+   */
   private async checkAddLpProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
+      // Extract memo fields
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseAddLpMemo(memo)
       const asset = assetFromStringEx(memoFields.asset)
       const isSymmetric = memoFields.pairedAddress ? true : false
+      // Determine if assetTx or runeTx
       const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
       const runeTx = isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
 
@@ -301,34 +386,41 @@ export class TransactionStage {
       progress.addLpInfo = addLpInfo
     }
   }
-
+  /**
+   * Checks the progress of a withdraw liquidity pool transaction.
+   * @param txData - Transaction details response.
+   * @param progress - Transaction progress object.
+   */
   private async checkWithdrawLpProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
+      // Extract memo fields
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseWithdrawLpMemo(memo)
       const asset = assetFromStringEx(memoFields.asset)
-
+      // Get the last block object
       const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
       const currentHeight = lastBlockObj.find((obj) => obj)
 
-      // find the date in which the asset should be seen in the wallet
+      // Calculate expected confirmation date
       const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
       const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
 
-      // if the TC has process the block that the outbound tx was assigned to then its completed.
+      // Determine transaction status
       const status = txData.tx.status === 'done' ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
-
+      // Extract output amount
       const outAmount =
         status === WithdrawStatus.Complete ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
+      // Extract relevant block heights and calculate estimated wait time
       const outboundBlock = Number(txData.outbound_height ?? txData.finalised_height)
       const currentTCHeight = Number(`${currentHeight?.thorchain}`)
       const estimatedWaitTime =
         outboundBlock > currentTCHeight
           ? (outboundBlock - currentTCHeight) * this.chainAttributes[THORChain].avgBlockTimeInSecs
           : 0
+      // Get withdrawal amount
       const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
-
+      // Construct withdraw liquidity pool info object
       const withdrawLpInfo: WithdrawInfo = {
         status,
         withdrawalAmount,
@@ -337,43 +429,58 @@ export class TransactionStage {
         outboundHeight: outboundBlock,
         estimatedWaitTime,
       }
+      // Assign withdraw liquidity pool info to progress object
       progress.withdrawLpInfo = withdrawLpInfo
     }
   }
-
+  /**
+   * Checks the progress of an add saver transaction.
+   * @param txData - Transaction details response.
+   * @param progress - Transaction progress object.
+   */
   private async checkAddSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
+      // Determine if it's an asset transaction
       const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
-
+      // Check saver vaults
       const checkSaverVaults = await this.thorchainCache.thornode.getSaver(
         txData.tx.tx.coins[0].asset,
         `${assetTx?.fromAddress}`,
       )
+      // Determine transaction status
       const status = checkSaverVaults ? AddSaverStatus.Complete : AddSaverStatus.Incomplete
+      // Construct add saver info object
       const addSaverInfo: AddSaverInfo = {
         status: status,
         assetTx,
         saverPos: checkSaverVaults,
       }
+      // Assign add saver info to progress object
       progress.addSaverInfo = addSaverInfo
     }
   }
-
+  /**
+   * Checks the progress of a withdraw saver transaction.
+   * @param txData - Transaction details response.
+   * @param progress - Transaction progress object.
+   */
   private async checkWithdrawSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
+      // Extract memo fields
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseWithdrawLpMemo(memo)
       const asset = assetFromStringEx(memoFields.asset)
-
+      // Get the last block object
       const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
       const currentHeight = lastBlockObj.find((obj) => obj)
 
-      // find the date in which the asset should be seen in the wallet
+      // Calculate expected confirmation date
       const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
       const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
-
+      // Extract output amount
       const outAmount = txData.out_txs ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
+      // Extract relevant block heights and calculate estimated wait time
       const outboundBlock = Number(txData.outbound_height)
       const finalisedHeight = Number(txData.finalised_height)
       const currentTCHeight = Number(`${currentHeight?.thorchain}`)
@@ -383,10 +490,11 @@ export class TransactionStage {
             this.chainAttributes[asset.chain].avgBlockTimeInSecs
           : 0
 
-      // if the TC has process the block that the outbound tx was assigned to then its completed.
+      // Determine transaction status
       const status = txData.out_txs ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
-
+      // Get withdrawal amount
       const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
+      // Construct withdraw saver info object
       const withdrawSaverInfo: WithdrawSaverInfo = {
         status,
         withdrawalAmount,
@@ -396,23 +504,30 @@ export class TransactionStage {
         outboundBlock,
         estimatedWaitTime,
       }
+      // Assign withdraw saver info to progress object
       progress.withdrawSaverInfo = withdrawSaverInfo
     }
   }
-
+  /**
+   * Checks the progress of a refund transaction.
+   * @param txData - Transaction details response.
+   * @param progress - Transaction progress object.
+   */
   private async checkRefund(txData: TxSignersResponse, progress: TXProgress) {
     if (progress.inboundObserved) {
+      // Get the last block object
       const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
-      // find the date in which the asset should be seen in the wallet
+      // Calculate expected confirmation date
       const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
       const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
-
+      // Extract amount and asset
       const amount = txData.tx.tx.coins[0].amount
       const asset = assetFromStringEx(txData.tx.tx.coins[0].asset)
       const toAddress = `${txData.tx.tx.to_address}`
       const currentHeight = lastBlockObj.find((obj) => obj.chain === asset.chain)
       console.log(currentHeight)
+      // Extract relevant block heights and calculate estimated wait time
       const outboundBlock = Number(`${currentHeight?.last_observed_in}`)
       const finalisedHeight = Number(txData.finalised_height)
       const currentTCHeight = Number(`${currentHeight?.thorchain}`)
@@ -439,35 +554,43 @@ export class TransactionStage {
       progress.refundInfo = refundInfo
     }
   }
-
+  /**
+   * Parses the memo of an add liquidity pool transaction.
+   * @param memo - Memo string of the transaction.
+   * @returns Parsed memo fields.
+   */
   private parseAddLpMemo(memo: string) {
-    //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
+    // Memo format: ADD:POOL:PAIREDADDR:AFFILIATE:FEE
     const parts = memo.split(`:`)
     const action = parts[0]
     const asset = parts[1]
-    //optional fields
-    const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
-    const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
-    const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
-    return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
-  }
-
-  private parseWithdrawLpMemo(memo: string) {
-    //ADD:POOL:PAIREDADDR:AFFILIATE:FEE
-    const parts = memo.split(`:`)
-    const action = parts[0]
-    const asset = parts[1]
-    //optional fields
+    // Optional fields
     const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
     const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
     const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
     return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
   }
   /**
-   * Private function to return the date stamp from block height and chain
-   * @param chain - input chain
-   * @param txData - txResponse
-   * @returns date()
+   * Parses the memo of a withdraw liquidity pool transaction.
+   * @param memo - Memo string of the transaction.
+   * @returns Parsed memo fields.
+   */
+  private parseWithdrawLpMemo(memo: string) {
+    // Memo format: ADD:POOL:PAIREDADDR:AFFILIATE:FEE
+    const parts = memo.split(`:`)
+    const action = parts[0]
+    const asset = parts[1]
+    // Optional fields
+    const pairedAddress = parts.length > 2 && parts[2].length > 0 ? parts[2] : undefined
+    const affiliateAddress = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
+    const affiliateFee = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
+    return { action, asset, pairedAddress, affiliateAddress, affiliateFee }
+  }
+  /**
+   * Converts block height to date.
+   * @param chain - Input chain.
+   * @param txData - Transaction response data.
+   * @returns Date object.
    */
   private async blockToDate(chain: Chain, txData: TxSignersResponse, outboundBlock?: number) {
     const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
@@ -490,7 +613,7 @@ export class TransactionStage {
         return time
       }
     }
-    // find out how long ago it was processed for all chains
+    // Find out how long ago it was processed for all chains
     if (chain == THORChain) {
       const currentHeight = lastBlockObj.find((obj) => obj)
       const thorchainHeight = Number(`${currentHeight?.thorchain}`) // current height of the TC
@@ -506,9 +629,9 @@ export class TransactionStage {
   }
 
   /**
-   * Returns current block height of an asset's native chain
-   * @param chain
-   * @returns
+   * Returns the current block height of an asset's native chain.
+   * @param asset - Asset for which block height is needed.
+   * @returns Block height.
    */
   private async blockHeight(asset: Asset) {
     const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
