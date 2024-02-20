@@ -11,6 +11,7 @@ const AssetTokenKuji = {
   symbol: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo',
   ticker: '',
   synth: false,
+  trade: false,
 }
 
 describe('Kujira client Integration Tests', () => {

@@ -92,6 +92,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
       symbol: `${tokenTicker}-${contractAddress}`,
       ticker: tokenTicker,
       synth: false,
+      trade: false,
     }
 
     const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, this.provider)

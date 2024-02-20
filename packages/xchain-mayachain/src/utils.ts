@@ -1,5 +1,5 @@
 import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, assetToString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { AssetCacao, AssetMaya, CACAO_DENOM, MAYA_DENOM } from './const'
@@ -83,6 +83,7 @@ export const getDenom = (asset: Asset) => {
   if (eqAsset(asset, AssetCacao)) return CACAO_DENOM
   if (eqAsset(asset, AssetMaya)) return MAYA_DENOM
   if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
+  if (isTradeAsset(asset)) return assetToString(asset).toLowerCase()
   return asset.symbol.toLowerCase()
 }
 

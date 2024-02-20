@@ -43,7 +43,7 @@ export const DOGEChain = 'DOGE' as const
  * Base asset object for Dogecoin.
  * Represents the Dogecoin asset in various contexts.
  */
-export const AssetDOGE: Asset = { chain: DOGEChain, symbol: 'DOGE', ticker: 'DOGE', synth: false }
+export const AssetDOGE: Asset = { chain: DOGEChain, symbol: 'DOGE', ticker: 'DOGE', synth: false, trade: false }
 
 /**
  * Explorer provider for Dogecoin mainnet and testnet.

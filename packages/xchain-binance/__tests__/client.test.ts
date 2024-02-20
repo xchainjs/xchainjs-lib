@@ -214,7 +214,7 @@ describe('BinanceClient Test', () => {
       sequence: 5,
     })
 
-    const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE', synth: false }
+    const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE', synth: false, trade: false }
 
     const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', [AssetBNB, AssetRune])
 

@@ -32,7 +32,7 @@ export const BCHChain = 'BCH' as const
  * Defined according to Thorchain's asset structure.
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH', synth: false }
+export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH', synth: false, trade: false }
 
 /**
  * Explorer provider URLs for Bitcoin Cash.

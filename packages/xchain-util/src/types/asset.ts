@@ -4,4 +4,5 @@ export type Asset = {
   symbol: string
   ticker: string
   synth: boolean
+  trade: boolean
 }

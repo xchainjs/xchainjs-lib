@@ -53,12 +53,14 @@ const USDT: Asset = {
   symbol: 'USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306',
   ticker: 'USDT',
   synth: false,
+  trade: false,
 }
 const XRUNE: Asset = {
   chain: ETHChain,
   symbol: 'XRUNE-0X8626DB1A4F9F3E1002EEB9A4F3C6D391436FFC23',
   ticker: 'XRUNE',
   synth: false,
+  trade: false,
 }
 
 function print(estimate: TxDetails) {

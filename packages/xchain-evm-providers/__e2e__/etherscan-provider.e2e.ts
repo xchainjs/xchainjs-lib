@@ -23,7 +23,7 @@ describe('etherscan Integration Tests (AVAX)', () => {
   )
   // Define here to avoid cyclic dependency
   const AVAXChain = 'AVAX'
-  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false, trade: false }
   const avaxProvider = new EtherscanProvider(
     AVALANCHE_TESTNET_ETHERS_PROVIDER,
     'https://api-testnet.snowtrace.io',
@@ -82,6 +82,7 @@ describe('etherscan Integration Tests (BSC)', () => {
     symbol: 'BNB',
     ticker: 'BNB',
     synth: false,
+    trade: false,
   }
   const provider = new EtherscanProvider(
     BSC_TESTNET_ETHERS_PROVIDER,
@@ -126,6 +127,7 @@ describe('etherscan Integration Tests (ETH)', () => {
     symbol: 'ETH',
     ticker: 'ETH',
     synth: false,
+    trade: false,
   }
   const provider = new EtherscanProvider(
     ETH_TESTNET_ETHERS_PROVIDER,

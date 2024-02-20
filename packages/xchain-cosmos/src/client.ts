@@ -111,6 +111,7 @@ export class Client extends CosmosSDKClient {
         // At the meantime ticker will be empty
         ticker: '',
         synth: false,
+        trade: false,
       }
     return null
   }

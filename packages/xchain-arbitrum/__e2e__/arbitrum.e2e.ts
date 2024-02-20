@@ -21,6 +21,7 @@ const MainnetUSDTAsset: Asset = {
   symbol: 'USDT-0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
   ticker: 'USDT',
   synth: false,
+  trade: false,
 }
 
 const TestnetUSDCAsset: Asset = {
@@ -28,6 +29,7 @@ const TestnetUSDCAsset: Asset = {
   symbol: 'USDC-0x179522635726710dd7d2035a81d856de4aa7836c',
   ticker: 'USDC',
   synth: false,
+  trade: false,
 }
 
 describe('Arbitrum', () => {

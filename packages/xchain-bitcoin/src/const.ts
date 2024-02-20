@@ -37,7 +37,7 @@ export const BTCChain = 'BTC' as const
 /**
  * Base "chain" asset on bitcoin main net.
  */
-export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC', synth: false }
+export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC', synth: false, trade: false }
 
 // Explorer providers for Bitcoin
 const BTC_MAINNET_EXPLORER = new ExplorerProvider(

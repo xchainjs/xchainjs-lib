@@ -12,7 +12,7 @@ import {
 import Client, { EVMClientParams } from '../../src/client'
 
 const AVAXChain: Chain = 'AVAX'
-const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false, trade: false }
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'

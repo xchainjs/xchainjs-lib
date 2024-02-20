@@ -28,6 +28,7 @@ export const AssetETH: Asset = {
   symbol: 'ETH',
   ticker: 'ETH',
   synth: false,
+  trade: false,
 }
 
 // ===== Ethers providers =====
