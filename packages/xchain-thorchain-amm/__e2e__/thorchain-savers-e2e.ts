@@ -1,24 +1,20 @@
-import { AVAXChain, AssetAVAX } from '@xchainjs/xchain-avax'
-import { AssetBNB, BNBChain } from '@xchainjs/xchain-binance'
-import { AssetATOM, COSMOS_DECIMAL, GAIAChain } from '@xchainjs/xchain-cosmos'
-import {
-  CryptoAmount,
-  SaversPosition,
-  SaversWithdraw,
-  ThorchainQuery,
-  getSaver,
-} from '@xchainjs/xchain-thorchain-query'
-import { assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
+import { AVAX_DECIMAL, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
+import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
+import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
+import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { Network } from '@xchainjs/xchain-client'
+import { AssetATOM, COSMOS_DECIMAL, Client as GaiaClient } from '@xchainjs/xchain-cosmos'
+import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
+import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
+import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
+import { SaversPosition, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
-import { Wallet } from '../src/wallet'
 
-const thorchainQueryMainnet = new ThorchainQuery()
-const mainnetWallet = new Wallet(process.env.MAINNET_PHRASE || 'you forgot to set the phrase', thorchainQueryMainnet)
-const mainetThorchainAmm = new ThorchainAMM(thorchainQueryMainnet)
-
-// mainnet asset
-//const BUSD = assetFromStringEx('BNB.BUSD-BD1')
 function printSaversPosition(saver: SaversPosition) {
   const expanded = {
     depositValue: saver.depositValue.formatedAssetString(),
@@ -29,91 +25,101 @@ function printSaversPosition(saver: SaversPosition) {
   }
   console.log(expanded)
 }
-// Test User Functions - single and double swap using mock pool data
-describe('Thorchain-amm liquidity action end to end Tests', () => {
-  // Check liquidity position
-  it(`Should add a savers position`, async () => {
-    //const addSaverAmount = new CryptoAmount(assetToBase(assetAmount(0.01, 18)), AssetAVAX)
-    try {
-      const addSaverAmount = new CryptoAmount(assetToBase(assetAmount(0.1, 8)), AssetBNB)
-      const hash = await mainetThorchainAmm.addSaver(mainnetWallet, addSaverAmount)
-      console.log(hash)
-    } catch (error) {
-      console.error(error)
-    }
-  })
 
-  it(`Should check savers position `, async () => {
-    const walletAddress = 'cosmos1guhzq2hmmw78s09tsumpgjmvarwrr4r5j9ws3r'
-    const getSaver: getSaver = {
-      asset: AssetATOM,
-      address: walletAddress,
-    }
-    const saversPosition = await thorchainQueryMainnet.getSaverPosition(getSaver)
-    printSaversPosition(saversPosition)
-  })
+describe('ThorchainAmm e2e tests', () => {
+  describe('Savers', () => {
+    let wallet: Wallet
+    let thorchainAmm: ThorchainAMM
 
-  it(`Should check balance of an address`, async () => {
-    const check = await mainnetWallet.clients[AVAXChain].getBalance('0x5acaed152386de95772468072e1b3fad2f4423f0')
-    console.log(baseToAsset(check[0].amount).amount().toNumber())
-  })
-  it(`Should withdraw savers position`, async () => {
-    const walletAddress = await mainnetWallet.clients[BNBChain].getAddressAsync()
-    const saversWithdraw: SaversWithdraw = {
-      height: 8214446,
-      asset: AssetBNB,
-      address: walletAddress,
-      withdrawBps: 10000,
-    }
-    const hash = await mainetThorchainAmm.withdrawSaver(mainnetWallet, saversWithdraw)
-    console.log(hash)
-  })
+    beforeAll(() => {
+      const phrase = process.env.PHRASE_MAINNET
+      wallet = new Wallet({
+        BTC: new BtcClient({ ...defaultBtcParams, phrase, network: Network.Mainnet }),
+        BCH: new BchClient({ ...defaultBchParams, phrase, network: Network.Mainnet }),
+        LTC: new LtcClient({ ...defaultLtcParams, phrase, network: Network.Mainnet }),
+        DOGE: new DogeClient({ ...defaultDogeParams, phrase, network: Network.Mainnet }),
+        ETH: new EthClient({ ...defaultEthParams, phrase, network: Network.Mainnet }),
+        AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
+        BSC: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
+        GAIA: new GaiaClient({ phrase, network: Network.Mainnet }),
+        BNB: new BnbClient({ phrase, network: Network.Mainnet }),
+        THOR: new ThorClient({ ...defaultThorParams, phrase, network: Network.Mainnet }),
+      })
+      thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)
+    })
 
-  it(`Should add AVAX savers position`, async () => {
-    try {
-      const addSaverAmount = new CryptoAmount(assetToBase(assetAmount(0.01, 18)), AssetAVAX)
-      const hash = await mainetThorchainAmm.addSaver(mainnetWallet, addSaverAmount)
-      console.log(hash)
-    } catch (error) {
-      console.error(error)
-    }
-  })
-  it(`Should withdraw AVAX savers position`, async () => {
-    const walletAddress = await mainnetWallet.clients[AVAXChain].getAddressAsync()
-    const saversWithdraw: SaversWithdraw = {
-      asset: AssetAVAX,
-      address: walletAddress,
-      withdrawBps: 10000,
-    }
-    try {
-      const hash = await mainetThorchainAmm.withdrawSaver(mainnetWallet, saversWithdraw)
-      console.log(hash)
-    } catch (error) {
-      console.error(error)
-    }
-  })
+    it(`Should check ETH savers position `, async () => {
+      const saversPosition = await thorchainAmm.getSaverPosition({
+        asset: AssetETH,
+        address: '0xf34d2f3c28a24dde83005db8cf51f080bb6dc65f',
+      })
+      printSaversPosition(saversPosition)
+    })
 
-  it(`Should add ATOM savers position`, async () => {
-    try {
-      const addSaverAmount = new CryptoAmount(assetToBase(assetAmount(0.1, COSMOS_DECIMAL)), AssetATOM)
-      const hash = await mainetThorchainAmm.addSaver(mainnetWallet, addSaverAmount)
+    it(`Should add BNB savers position`, async () => {
+      try {
+        const hash = await thorchainAmm.addSaver(new CryptoAmount(assetToBase(assetAmount(0.01, 8)), AssetBNB))
+        console.log(hash)
+      } catch (error) {
+        console.error(error)
+      }
+    })
+
+    it(`Should withdraw BNB savers position`, async () => {
+      const hash = await thorchainAmm.withdrawSaver({
+        asset: AssetBNB,
+        address: await wallet.getAddress(AssetBNB.chain),
+        withdrawBps: 10000,
+      })
       console.log(hash)
-    } catch (error) {
-      console.error(error)
-    }
-  })
-  it(`Should withdraw ATOM savers position`, async () => {
-    const walletAddress = await mainnetWallet.clients[GAIAChain].getAddressAsync()
-    const saversWithdraw: SaversWithdraw = {
-      asset: AssetATOM,
-      address: walletAddress,
-      withdrawBps: 10000,
-    }
-    try {
-      const hash = await mainetThorchainAmm.withdrawSaver(mainnetWallet, saversWithdraw)
-      console.log(hash)
-    } catch (error) {
-      console.error(error)
-    }
+    })
+
+    it(`Should add AVAX savers position`, async () => {
+      try {
+        const hash = await thorchainAmm.addSaver(
+          new CryptoAmount(assetToBase(assetAmount(0.01, AVAX_DECIMAL)), AssetAVAX),
+        )
+        console.log(hash)
+      } catch (error) {
+        console.error(error)
+      }
+    })
+
+    it(`Should withdraw AVAX savers position`, async () => {
+      try {
+        const hash = await thorchainAmm.withdrawSaver({
+          asset: AssetAVAX,
+          address: await wallet.getAddress(AssetAVAX.chain),
+          withdrawBps: 10000,
+        })
+        console.log(hash)
+      } catch (error) {
+        console.error(error)
+      }
+    })
+
+    it(`Should add ATOM savers position`, async () => {
+      try {
+        const hash = await thorchainAmm.addSaver(
+          new CryptoAmount(assetToBase(assetAmount(0.1, COSMOS_DECIMAL)), AssetATOM),
+        )
+        console.log(hash)
+      } catch (error) {
+        console.error(error)
+      }
+    })
+
+    it(`Should withdraw ATOM savers position`, async () => {
+      try {
+        const hash = await thorchainAmm.withdrawSaver({
+          asset: AssetATOM,
+          address: await wallet.getAddress(AssetATOM.chain),
+          withdrawBps: 10000,
+        })
+        console.log(hash)
+      } catch (error) {
+        console.error(error)
+      }
+    })
   })
 })
