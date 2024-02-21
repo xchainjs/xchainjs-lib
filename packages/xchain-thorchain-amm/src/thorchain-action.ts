@@ -121,7 +121,11 @@ export class ThorchainAction {
   }
 
   private static isNonProtocolParams(params: ActionParams): params is NonProtocolActionParams {
-    if (params.assetAmount.asset.chain === THORChain || params.assetAmount.asset.synth) {
+    if (
+      (params.assetAmount.asset.chain === THORChain || params.assetAmount.asset.synth) &&
+      'address' in params &&
+      !!params.address
+    ) {
       throw Error('Inconsistent params. Native actions do not support recipient')
     }
     return params.assetAmount.asset.chain !== THORChain && !params.assetAmount.asset.synth

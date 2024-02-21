@@ -21,7 +21,7 @@ export const isProtocolEVMChain = (chain: Chain): boolean => {
  */
 export const isProtocolERC20Asset = (asset: Asset): boolean => {
   return isProtocolEVMChain(asset.chain)
-    ? [AssetETH.symbol, AssetAVAX.symbol, AssetBSC.symbol].includes(asset.symbol)
+    ? ![AssetETH.symbol, AssetAVAX.symbol, AssetBSC.symbol].includes(asset.symbol)
     : false
 }
 

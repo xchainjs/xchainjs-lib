@@ -105,7 +105,7 @@ export class ThorchainAMM {
     })
     // Add any validation errors to the estimate
     estimate.txEstimate.errors.push(...errors)
-    estimate.txEstimate.canSwap = errors.length == 0
+    estimate.txEstimate.canSwap = estimate.txEstimate.errors.length === 0
     return estimate
   }
 
@@ -131,9 +131,12 @@ export class ThorchainAMM {
 
     if (affiliateAddress) {
       const isThorAddress = this.wallet.validateAddress(THORChain, affiliateAddress)
-      const isThorname = !!(await this.thorchainQuery.getThornameDetails(affiliateAddress))
+      const isThorname =
+        !!(await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(
+          affiliateAddress,
+        ))
       if (!(isThorAddress || isThorname))
-        errors.push(`affiliateAddress ${affiliateAddress} is not a valid MAYA address`)
+        errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
     }
 
     if (affiliateBps && (affiliateBps < 0 || affiliateBps > 10000)) {
@@ -353,13 +356,6 @@ export class ThorchainAMM {
         }),
       )
 
-      txSubmitted.push(
-        await ThorchainAction.makeAction({
-          wallet: this.wallet,
-          memo: `-:${withdrawLiquidity.assetPool}:${basisPoints}`,
-          assetAmount: withdrawLiquidity.runeFee,
-        }),
-      )
       return txSubmitted
     } else {
       // asymmetrical rune only
@@ -463,8 +459,8 @@ export class ThorchainAMM {
 
     return ThorchainAction.makeAction({
       wallet: this.wallet,
-      memo: loanOpen.memo as string,
-      recipient: loanOpen.inboundAddress as string,
+      memo: `${loanOpen.memo}`,
+      recipient: `${loanOpen.inboundAddress}`,
       assetAmount: loanOpenParams.amount,
     })
   }
@@ -481,8 +477,8 @@ export class ThorchainAMM {
 
     return ThorchainAction.makeAction({
       wallet: this.wallet,
-      memo: withdrawLoan.memo as string,
-      recipient: withdrawLoan.inboundAddress as string,
+      memo: `${withdrawLoan.memo}`,
+      recipient: `${withdrawLoan.inboundAddress}`,
       assetAmount: loanCloseParams.amount,
     })
   }
