@@ -2,4 +2,4 @@
 '@xchainjs/xchain-thorchain-amm': major
 ---
 
-ThorchainAmm methods `wallet` parameter removed
+ThorchainAMM methods `wallet` parameter removed
