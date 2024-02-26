@@ -1,8 +1,18 @@
+import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { Client as BnbClient } from '@xchainjs/xchain-binance'
+import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
+import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
+import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
-import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
-import { ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import { SaversWithdraw, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
+import { Client as GaiaClient } from '@xchainjs/xchain-cosmos'
+import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
+import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
+import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
+import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+import { SaversWithdraw, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { assetFromString, register9Rheader } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 import axios from 'axios'
 
 register9Rheader(axios)
@@ -11,7 +21,7 @@ register9Rheader(axios)
  * Withdraw lp function
  * Returns tx
  */
-const withdrawSavers = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
+const withdrawSavers = async (tcAmm: ThorchainAMM) => {
   try {
     const asset = assetFromString(process.argv[4])
     const address = process.argv[5] || ''
@@ -22,7 +32,7 @@ const withdrawSavers = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
       address,
       withdrawBps,
     }
-    const withdraw = await tcAmm.withdrawSaver(wallet, saversWithdraw)
+    const withdraw = await tcAmm.withdrawSaver(saversWithdraw)
     console.log(withdraw)
   } catch (e) {
     console.error(e)
@@ -33,12 +43,20 @@ const withdrawSavers = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const midgardCache = new MidgardCache(new Midgard(network))
-  const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
-  const thorchainQuery = new ThorchainQuery(thorchainCache)
-  const thorchainAmm = new ThorchainAMM(thorchainQuery)
-  const wallet = new Wallet(seed, thorchainQuery)
-  await withdrawSavers(thorchainAmm, wallet)
+  const wallet = new Wallet({
+    BTC: new BtcClient({ ...defaultBtcParams, phrase: seed, network }),
+    BCH: new BchClient({ ...defaultBchParams, phrase: seed, network }),
+    LTC: new LtcClient({ ...defaultLtcParams, phrase: seed, network }),
+    DOGE: new DogeClient({ ...defaultDogeParams, phrase: seed, network }),
+    ETH: new EthClient({ ...defaultEthParams, phrase: seed, network }),
+    AVAX: new AvaxClient({ ...defaultAvaxParams, phrase: seed, network }),
+    BSC: new BscClient({ ...defaultBscParams, phrase: seed, network }),
+    GAIA: new GaiaClient({ phrase: seed, network }),
+    BNB: new BnbClient({ phrase: seed, network }),
+    THOR: new ThorClient({ ...defaultThorParams, phrase: seed, network }),
+  })
+  const thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)
+  await withdrawSavers(thorchainAmm)
 }
 
 main()
