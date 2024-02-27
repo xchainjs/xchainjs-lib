@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- 5efae97: Wallet class removed
+- 5efae97: ThorchainAMM methods `wallet` parameter removed
+- 5efae97: ThorchainAMM constructor uses the wallet class from the `@xchainjs/xchain-wallet` package
+
+### Minor Changes
+
+- 5efae97: ThorchainAMM new method `validateSwap` for validating swap params
+- 5efae97: ThorchainQuery new method `isRouterApprovedToSpend` for validating thorchain router are allowed to spend ERC20 assets
+
+### Patch Changes
+
+- 5efae97: ThorchainAMM `estimateSwap` method `walletIndex` parameter removed
+- 5efae97: ThorchainAMM `estimateSwap` method `interfaceID` parameter removed
+- 5efae97: ThorchainAMM `estimateSwap` method new `fromAddress` parameter support
+- Updated dependencies [5efae97]
+- Updated dependencies [5efae97]
+- Updated dependencies [0e42643]
+- Updated dependencies [5efae97]
+- Updated dependencies [0e42643]
+- Updated dependencies [0e42643]
+  - @xchainjs/xchain-wallet@0.1.6
+  - @xchainjs/xchain-thorchain-query@0.7.4
+  - @xchainjs/xchain-bitcoin@0.23.11
+  - @xchainjs/xchain-bitcoincash@0.17.9
+  - @xchainjs/xchain-doge@0.7.11
+  - @xchainjs/xchain-litecoin@0.13.10
+
 ## 0.8.22
 
 ### Patch Changes

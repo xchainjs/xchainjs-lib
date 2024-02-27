@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- 5efae97: Bug fixes
+- 0e42643: New method `getFeeRates` for returning the fee rates in the selected chain. It throws an error if the chain does not support the method
+- 0e42643: `estimateGasPrices` method deprecated in favor of `getFeeRates` method
+- 0e42643: `transfer` method support `feeRate` parameter for UTXO clients and `gasPrice` parameter for EVM clients
+- Updated dependencies [0e42643]
+  - @xchainjs/xchain-utxo@0.1.3
+
 ## 0.1.5
 
 ### Patch Changes

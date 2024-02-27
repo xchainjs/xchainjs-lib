@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- 0e42643: `transfer` method with feeRate parameter defined
+
 ## 0.1.2
 
 ### Patch Changes

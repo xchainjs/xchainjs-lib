@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.17.9
+
+### Patch Changes
+
+- Updated dependencies [0e42643]
+  - @xchainjs/xchain-utxo@0.1.3
+
 ## 0.17.8
 
 ### Patch Changes
