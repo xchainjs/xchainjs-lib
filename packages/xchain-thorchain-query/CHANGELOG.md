@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.4
+
+### Patch Changes
+
+- 5efae97: ThorchainQuery new method `getChainInboundDetails` for returning the inbound address details of a chain
+- 5efae97: ThorchainQuery new method `getInboundDetails` for returning the inbound addresses details
+
 ## 0.7.3
 
 ### Patch Changes

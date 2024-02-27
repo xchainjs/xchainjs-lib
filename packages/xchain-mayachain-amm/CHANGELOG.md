@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [5efae97]
+- Updated dependencies [0e42643]
+- Updated dependencies [0e42643]
+- Updated dependencies [0e42643]
+- Updated dependencies [0e42643]
+  - @xchainjs/xchain-wallet@0.1.6
+  - @xchainjs/xchain-utxo@0.1.3
+  - @xchainjs/xchain-bitcoin@0.23.11
+  - @xchainjs/xchain-dash@0.2.11
+
 ## 1.0.9
 
 ### Patch Changes
