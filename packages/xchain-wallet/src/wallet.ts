@@ -275,8 +275,8 @@ export class Wallet {
    */
   public async getGasFeeRates(chain: Chain): Promise<GasPrices> {
     const client = this.getClient(chain)
-    if (!('estimateGasPrices' in client)) throw Error(`Can not get gas with ${chain} client`)
-    return (client as EvmClient).estimateGasPrices()
+    if (!this.isEvmClient(client)) throw Error(`Can not get gas with ${chain} client`)
+    return client.estimateGasPrices()
   }
 
   /**
@@ -288,10 +288,10 @@ export class Wallet {
    */
   public async getFeeRates(chain: Chain, protocol?: Protocol): Promise<Record<FeeOption, BaseAmount>> {
     const client = this.getClient(chain)
-    if (client instanceof EvmClient) {
+    if (this.isEvmClient(client)) {
       return client.estimateGasPrices(protocol)
     }
-    if (client instanceof UtxoClient) {
+    if (this.isUtxoClient(client)) {
       const feeRates = await client.getFeeRates(protocol)
       const nativeDecimals = client.getAssetInfo().decimal
       return {
@@ -310,7 +310,7 @@ export class Wallet {
    */
   public async transfer(params: UtxoTxParams | EvmTxParams): Promise<string> {
     const client = this.getClient(params.asset.chain)
-    if (client instanceof EvmClient) {
+    if (this.isEvmClient(client)) {
       if (!this.isEvmTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
       return client.transfer({
         walletIndex: params.walletIndex,
@@ -321,7 +321,7 @@ export class Wallet {
         gasPrice: params.gasPrice,
       })
     }
-    if (client instanceof UtxoClient) {
+    if (this.isUtxoClient(client)) {
       if (!this.isUtxoTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
       return client.transfer({
         walletIndex: params.walletIndex,
@@ -376,12 +376,12 @@ export class Wallet {
     spenderAddress: string,
   ): Promise<ethers.providers.TransactionResponse> {
     const client = this.getClient(asset.chain)
-    if (!('approve' in client)) throw Error('Can not make approve over non EVM client')
+    if (!this.isEvmClient(client)) throw Error('Can not make approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not make approve over native asset')
 
     const contractAddress = getContractAddressFromAsset(asset)
 
-    return await (client as EvmClient).approve({ contractAddress, amount, spenderAddress })
+    return await client.approve({ contractAddress, amount, spenderAddress })
   }
 
   /**
@@ -395,13 +395,13 @@ export class Wallet {
    */
   async isApproved(asset: Asset, amount: BaseAmount, fromAddress: string, spenderAddress: string): Promise<boolean> {
     const client = this.getClient(asset.chain)
-    if (!('isApproved' in client)) throw Error('Can not validate approve over non EVM client')
+    if (!this.isEvmClient(client)) throw Error('Can not validate approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not validate approve over native asset')
 
     const contractAddress = getContractAddressFromAsset(asset)
 
     return isApproved({
-      provider: (client as EvmClient).getProvider(),
+      provider: client.getProvider(),
       amount,
       spenderAddress,
       contractAddress,
@@ -427,8 +427,8 @@ export class Wallet {
    */
   public getChainWallet(chain: Chain): ethers.Wallet {
     const client = this.getClient(chain)
-    if (!('getWallet' in client)) throw Error(`Can not get wallet of ${chain} client`)
-    return (client as EvmClient).getWallet()
+    if (!this.isEvmClient(client)) throw Error(`Can not get wallet of ${chain} client`)
+    return client.getWallet()
   }
 
   /**
@@ -459,5 +459,15 @@ export class Wallet {
    */
   private isUtxoTxParams(params: EvmTxParams | UtxoTxParams): params is UtxoTxParams {
     return !('gasPrice' in params)
+  }
+
+  // TEMPORAL APPROACH UNTIL A NEW ONE
+  private isEvmClient(client: XChainClient): client is EvmClient {
+    return 'estimateGasPrices' in client
+  }
+
+  // TEMPORAL APPROACH UNTIL A NEW ONE
+  private isUtxoClient(client: XChainClient): client is UtxoClient {
+    return 'getFeeRates' in client
   }
 }

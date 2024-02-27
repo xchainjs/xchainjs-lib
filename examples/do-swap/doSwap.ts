@@ -1,9 +1,17 @@
 import cosmosclient from '@cosmos-client/core'
+import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { Client as BnbClient } from '@xchainjs/xchain-binance'
+import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
+import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
+import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
-import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
-import { THORChain } from '@xchainjs/xchain-thorchain'
-import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
-import { ThorchainCache, ThorchainQuery, Thornode, TxDetails } from '@xchainjs/xchain-thorchain-query'
+import { Client as GaiaClient } from '@xchainjs/xchain-cosmos'
+import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
+import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
+import { Client as ThorClient, THORChain, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
+import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+import { QuoteSwapParams, ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
 import {
   CryptoAmount,
   assetAmount,
@@ -13,6 +21,7 @@ import {
   delay,
   register9Rheader,
 } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 import axios from 'axios'
 
 import { checkTx } from '../check-tx/check-tx'
@@ -65,7 +74,7 @@ const delayedLog = async (message: string, delayMs: number) => {
 /**
  * From asset to asset with no Affiliate address on testnet
  */
-const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Network) => {
+const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
   try {
     const amount = process.argv[4]
     const decimals = Number(process.argv[5])
@@ -73,17 +82,15 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
     const toAsset = assetFromString(`${process.argv[7]}`)
 
     const toChain = toAsset.synth ? THORChain : toAsset.chain
-    const destinationAddress = wallet.clients[toChain].getAddress()
 
-    const swapParams: AmmEstimateSwapParams = {
+    const swapParams: QuoteSwapParams = {
       fromAsset,
       amount: new CryptoAmount(assetToBase(assetAmount(amount, decimals)), fromAsset),
       destinationAsset: toAsset,
-      destinationAddress,
+      destinationAddress: await wallet.getAddress(toChain),
       toleranceBps: 1000, //optional
-      wallet,
-      walletIndex: 0,
     }
+
     const affiliateAddress = process.argv[8]
     if (affiliateAddress) {
       const affiliateFeeBasisPoints = Number(process.argv[9])
@@ -93,7 +100,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
     const outPutCanSwap = await tcAmm.estimateSwap(swapParams)
     printTx(outPutCanSwap, swapParams.amount)
     if (outPutCanSwap.txEstimate.canSwap) {
-      const output = await tcAmm.doSwap(wallet, swapParams)
+      const output = await tcAmm.doSwap(swapParams)
       console.log(
         `Tx hash: ${output.hash},\n Tx url: ${output.url}\n WaitTime: ${outPutCanSwap.txEstimate.outboundDelaySeconds}`,
       )
@@ -104,7 +111,7 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
           ? 12000
           : outPutCanSwap.txEstimate.outboundDelaySeconds * 1000,
       )
-      await checkTx(network, output.hash)
+      await checkTx(wallet.getNetwork(), output.hash)
     }
   } catch (error) {
     console.error(error)
@@ -114,12 +121,20 @@ const doSingleSwap = async (tcAmm: ThorchainAMM, wallet: Wallet, network: Networ
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const midgardCache = new MidgardCache(new Midgard(network))
-  const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
-  const thorchainQuery = new ThorchainQuery(thorchainCache)
-  const thorchainAmm = new ThorchainAMM(thorchainQuery)
-  const wallet = new Wallet(seed, thorchainQuery)
-  await doSingleSwap(thorchainAmm, wallet, network)
+  const wallet = new Wallet({
+    BTC: new BtcClient({ ...defaultBtcParams, phrase: seed, network }),
+    BCH: new BchClient({ ...defaultBchParams, phrase: seed, network }),
+    LTC: new LtcClient({ ...defaultLtcParams, phrase: seed, network }),
+    DOGE: new DogeClient({ ...defaultDogeParams, phrase: seed, network }),
+    ETH: new EthClient({ ...defaultEthParams, phrase: seed, network }),
+    AVAX: new AvaxClient({ ...defaultAvaxParams, phrase: seed, network }),
+    BSC: new BscClient({ ...defaultBscParams, phrase: seed, network }),
+    GAIA: new GaiaClient({ phrase: seed, network }),
+    BNB: new BnbClient({ phrase: seed, network }),
+    THOR: new ThorClient({ ...defaultThorParams, phrase: seed, network }),
+  })
+  const thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)
+  await doSingleSwap(thorchainAmm, wallet)
 }
 
 main()

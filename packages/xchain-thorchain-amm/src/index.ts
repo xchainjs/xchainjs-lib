@@ -1,11 +1,4 @@
 /**
- * Export all modules related to the wallet functionality.
- * This includes modules for managing wallets, interacting with wallets,
- * and handling wallet-related data.
- */
-export * from './wallet'
-
-/**
  * Export all modules related to THORChain Automated Market Making (AMM).
  * These modules provide functionality for interacting with THORChain's AMM system,
  * facilitating asset swaps and liquidity provision.

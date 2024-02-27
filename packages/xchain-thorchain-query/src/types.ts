@@ -36,6 +36,7 @@ export type SwapEstimate = {
  * Represents parameters for requesting a swap quote.
  */
 export type QuoteSwapParams = {
+  fromAddress?: Address // The address to swap from
   fromAsset: Asset // The asset to swap from
   destinationAsset: Asset // The asset to swap to
   amount: CryptoAmount // The amount to swap
