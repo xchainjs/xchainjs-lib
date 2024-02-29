@@ -9,7 +9,7 @@ import {
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetATOM, Client as GaiaClient } from '@xchainjs/xchain-cosmos'
+import { AssetATOM, Client as GaiaClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
@@ -127,6 +127,42 @@ describe('ThorchainAmm e2e tests', () => {
         destinationAsset: AssetETH,
         amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
         destinationAddress: 'randomDestinationAddress',
+      })
+
+      console.log(errors)
+    })
+
+    it(`Should validate swap from ATOM to synth ATOM without errors`, async () => {
+      const errors = await thorchainAmm.validateSwap({
+        fromAsset: AssetATOM,
+        amount: new CryptoAmount(assetToBase(assetAmount('10')), AssetATOM),
+        destinationAddress: await wallet.getAddress(THORChain),
+        destinationAsset: assetFromStringEx('GAIA/ATOM'),
+      })
+
+      console.log(errors)
+    })
+
+    it(`Should validate swap from ATOM to synth ATOM with destination address error`, async () => {
+      const errors = await thorchainAmm.validateSwap({
+        fromAsset: AssetATOM,
+        amount: new CryptoAmount(assetToBase(assetAmount('10')), AssetATOM),
+        destinationAddress: await wallet.getAddress(GAIAChain),
+        destinationAsset: assetFromStringEx('GAIA/ATOM'),
+      })
+
+      console.log(errors)
+    })
+
+    it(`Should validate swap from AVAX.USDC to synth ATOM`, async () => {
+      const asset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E')
+
+      const errors = await thorchainAmm.validateSwap({
+        fromAsset: asset,
+        fromAddress: await wallet.getAddress(asset.chain),
+        amount: new CryptoAmount(assetToBase(assetAmount('10')), asset),
+        destinationAddress: await wallet.getAddress(AssetATOM.chain),
+        destinationAsset: AssetATOM,
       })
 
       console.log(errors)
