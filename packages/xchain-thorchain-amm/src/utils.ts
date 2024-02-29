@@ -3,7 +3,7 @@ import { AssetBNB } from '@xchainjs/xchain-binance'
 import { AssetBSC } from '@xchainjs/xchain-bsc'
 import { AssetATOM } from '@xchainjs/xchain-cosmos'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset, Chain, eqAsset } from '@xchainjs/xchain-util'
 
 /**
  * Check if a chain is EVM and supported by the protocol
@@ -21,7 +21,7 @@ export const isProtocolEVMChain = (chain: Chain): boolean => {
  */
 export const isProtocolERC20Asset = (asset: Asset): boolean => {
   return isProtocolEVMChain(asset.chain)
-    ? ![AssetETH.symbol, AssetAVAX.symbol, AssetBSC.symbol].includes(asset.symbol)
+    ? [AssetETH, AssetAVAX, AssetBSC].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1
     : false
 }
 

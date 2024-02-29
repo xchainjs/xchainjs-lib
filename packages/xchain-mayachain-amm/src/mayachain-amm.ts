@@ -10,7 +10,7 @@ import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kuji
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { Asset, CryptoAmount, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Asset, CryptoAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
@@ -127,7 +127,10 @@ export class MayachainAMM {
     const errors: string[] = []
 
     // Validate destination address if provided
-    if (destinationAddress && !this.wallet.validateAddress(destinationAsset.chain, destinationAddress)) {
+    if (
+      destinationAddress &&
+      !this.wallet.validateAddress(destinationAsset.synth ? MAYAChain : destinationAsset.chain, destinationAddress)
+    ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
     // Validate affiliate address if provided
@@ -315,7 +318,9 @@ export class MayachainAMM {
    */
   private isERC20Asset(asset: Asset): boolean {
     // Check if the asset's chain is an EVM chain and if the symbol matches AssetETH.symbol
-    return this.isEVMChain(asset.chain) ? [AssetETH.symbol].includes(asset.symbol) : false
+    return this.isEVMChain(asset.chain)
+      ? [AssetETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1
+      : false
   }
 
   /**
