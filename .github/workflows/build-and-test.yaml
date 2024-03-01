@@ -30,6 +30,9 @@ jobs:
       - name: Build examples
         run: yarn build:examples
 
+      - name: Build tools
+        run: yarn build:tools
+
       - name: Lint
         run: yarn lint
 
