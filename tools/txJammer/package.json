@@ -10,7 +10,8 @@
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
-    "postversion": "git push --follow-tags"
+    "postversion": "git push --follow-tags",
+    "txJammer": "npx ts-node txJammerCommander.ts"
   },
   "dependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",
