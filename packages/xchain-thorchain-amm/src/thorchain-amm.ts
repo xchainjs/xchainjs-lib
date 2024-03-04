@@ -125,7 +125,10 @@ export class ThorchainAMM {
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
-    if (destinationAddress && !this.wallet.validateAddress(destinationAsset.chain, destinationAddress)) {
+    if (
+      destinationAddress &&
+      !this.wallet.validateAddress(destinationAsset.synth ? THORChain : destinationAsset.chain, destinationAddress)
+    ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
 
