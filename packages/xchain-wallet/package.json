@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@xchainjs/xchain-bitcoin": "0.23.11",
-    "@xchainjs/xchain-ethereum": "0.31.5"
+    "@xchainjs/xchain-ethereum": "0.31.5",
+    "@xchainjs/xchain-bitcoincash": "0.17.9"
   }
 }

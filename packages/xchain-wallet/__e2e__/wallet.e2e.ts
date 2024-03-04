@@ -1,10 +1,11 @@
+import { AssetBCH, BCH_DECIMAL, Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Network } from '@xchainjs/xchain-client'
-import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { AssetETH, Client as EthClient, ETH_GAS_ASSET_DECIMAL, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
-import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { assetFromStringEx, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { AssetRuneNative, Client as ThorClient, RUNE_DECIMAL } from '@xchainjs/xchain-thorchain'
+import { assetAmount, assetFromStringEx, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { Wallet } from '..'
+import { Wallet } from '../src/wallet'
 
 describe('Wallet', () => {
   let wallet: Wallet
@@ -12,7 +13,6 @@ describe('Wallet', () => {
   beforeAll(() => {
     const seed = ''
     const network = Network.Mainnet
-
     wallet = new Wallet({
       THOR: new ThorClient({ network, phrase: seed }),
       MAYA: new MayaClient({ network, phrase: seed }),
@@ -21,6 +21,7 @@ describe('Wallet', () => {
         network,
         phrase: seed,
       }),
+      BCH: new BchClient({ ...defaultBchParams, network, phrase: seed }),
     })
   })
 
@@ -232,5 +233,50 @@ describe('Wallet', () => {
     expect(async () => {
       await wallet.getBalance('BTC')
     }).rejects.toThrowError('Client not found for BTC chain')
+  })
+
+  it('Should estimate Utxo transfer', async () => {
+    const txEstimated = await wallet.estimateTransferFees({
+      asset: AssetBCH,
+      recipient: await wallet.getAddress(AssetBCH.chain),
+      amount: assetToBase(assetAmount(1, BCH_DECIMAL)),
+      memo: 'test',
+    })
+    console.log({
+      type: txEstimated.type,
+      average: baseToAsset(txEstimated.average).amount().toString(),
+      fast: baseToAsset(txEstimated.fast).amount().toString(),
+      fastest: baseToAsset(txEstimated.fastest).amount().toString(),
+    })
+  })
+
+  it('Should estimate Evm transfer', async () => {
+    const txEstimated = await wallet.estimateTransferFees({
+      asset: AssetETH,
+      recipient: await wallet.getAddress(AssetETH.chain),
+      amount: assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)),
+      memo: 'test',
+    })
+    console.log({
+      type: txEstimated.type,
+      average: baseToAsset(txEstimated.average).amount().toString(),
+      fast: baseToAsset(txEstimated.fast).amount().toString(),
+      fastest: baseToAsset(txEstimated.fastest).amount().toString(),
+    })
+  })
+
+  it('Should estimate Cosmos transfer', async () => {
+    const txEstimated = await wallet.estimateTransferFees({
+      asset: AssetRuneNative,
+      recipient: await wallet.getAddress(AssetRuneNative.chain),
+      amount: assetToBase(assetAmount(1, RUNE_DECIMAL)),
+      memo: 'test',
+    })
+    console.log({
+      type: txEstimated.type,
+      average: baseToAsset(txEstimated.average).amount().toString(),
+      fast: baseToAsset(txEstimated.fast).amount().toString(),
+      fastest: baseToAsset(txEstimated.fastest).amount().toString(),
+    })
   })
 })
