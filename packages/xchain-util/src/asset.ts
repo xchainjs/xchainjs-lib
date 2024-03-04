@@ -353,7 +353,7 @@ export const formatAssetAmountCurrency = ({
     if (ticker.match(regex)) return `${AssetCurrencySymbol.ETH} ${amountFormatted}`
     // LTC
     regex = new RegExp('LTC', 'i')
-    if (ticker.match(regex)) return `${AssetCurrencySymbol.BTC} ${amountFormatted}`
+    if (ticker.match(regex)) return `${AssetCurrencySymbol.LTC} ${amountFormatted}`
     // DASH
     regex = new RegExp('DASH', 'i')
     if (ticker.match(regex)) return `${AssetCurrencySymbol.DASH} ${amountFormatted}`
