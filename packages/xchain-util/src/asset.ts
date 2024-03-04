@@ -273,6 +273,9 @@ export enum AssetCurrencySymbol {
   SATOSHI = '⚡',
   ETH = 'Ξ',
   USD = '$',
+  DASH = 'Đ',
+  LTC = 'Ł',
+  DOGE = 'Ð',
 }
 
 /**
@@ -281,7 +284,7 @@ export enum AssetCurrencySymbol {
  * @param {Asset} asset The given asset.
  * @returns {string} The currency symbol from the given asset.
  */
-export const currencySymbolByAsset = ({ ticker }: Asset) => {
+export const currencySymbolByAsset = ({ ticker }: Asset): string => {
   switch (true) {
     case ticker === 'RUNE':
       return AssetCurrencySymbol.RUNE
@@ -289,7 +292,13 @@ export const currencySymbolByAsset = ({ ticker }: Asset) => {
       return AssetCurrencySymbol.BTC
     case ticker === AssetETH.ticker:
       return AssetCurrencySymbol.ETH
-    case ticker.includes('USD') || ticker.includes('UST'):
+    case ticker === 'DASH':
+      return AssetCurrencySymbol.DASH
+    case ticker === 'LTC':
+      return AssetCurrencySymbol.LTC
+    case ticker === 'DOGE':
+      return AssetCurrencySymbol.DOGE
+    case ticker.includes('USD'):
       return AssetCurrencySymbol.USD
     default:
       return ticker
@@ -331,7 +340,7 @@ export const formatAssetAmountCurrency = ({
     if (ticker === 'RUNE') return `${AssetCurrencySymbol.RUNE} ${amountFormatted}`
     // BTC
     let regex = new RegExp(AssetBTC.ticker, 'i')
-    if (ticker.match(new RegExp(AssetBTC.ticker, 'i'))) {
+    if (ticker.match(regex)) {
       const base = assetToBase(amount)
       // format all < ₿ 0.01 in statoshi
       if (base.amount().isLessThanOrEqualTo('1000000')) {
@@ -342,6 +351,15 @@ export const formatAssetAmountCurrency = ({
     // ETH
     regex = new RegExp(AssetETH.ticker, 'i')
     if (ticker.match(regex)) return `${AssetCurrencySymbol.ETH} ${amountFormatted}`
+    // LTC
+    regex = new RegExp('LTC', 'i')
+    if (ticker.match(regex)) return `${AssetCurrencySymbol.BTC} ${amountFormatted}`
+    // DASH
+    regex = new RegExp('DASH', 'i')
+    if (ticker.match(regex)) return `${AssetCurrencySymbol.DASH} ${amountFormatted}`
+    // DOGE
+    regex = new RegExp('DOGE', 'i')
+    if (ticker.match(regex)) return `${AssetCurrencySymbol.DOGE} ${amountFormatted}`
     // USD
     regex = new RegExp('USD', 'i')
     if (ticker.match('USD')) return `${AssetCurrencySymbol.USD} ${amountFormatted}`
