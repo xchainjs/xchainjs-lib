@@ -12,7 +12,7 @@
     "lib"
   ],
   "scripts": {
-    "clean": "rimraf lib/**",
+    "clean": "rimraf --glob ./lib/**",
     "build": "yarn clean && rollup -c",
     "compile": "tsc -p tsconfig.build.json",
     "prepublishOnly": "yarn run build",

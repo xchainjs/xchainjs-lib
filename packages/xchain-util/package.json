@@ -24,7 +24,7 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "clean": "rimraf lib/**",
+    "clean": "rimraf --glob ./lib/**",
     "build": "yarn clean && rollup -c",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",

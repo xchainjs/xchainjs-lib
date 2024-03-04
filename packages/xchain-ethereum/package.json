@@ -24,7 +24,7 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "clean": "rimraf lib/**",
+    "clean": "rimraf --glob ./lib/**",
     "build": "yarn clean && rollup -c",
     "test": "jest --passWithNoTests",
     "e2e": "jest --config jest.config.e2e.js",
