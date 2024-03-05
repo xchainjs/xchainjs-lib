@@ -120,9 +120,16 @@ export class ThorchainQuery {
       height,
     )
 
-    // Error handling for fetch response
-    const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
-    if (response.error) errors.push(`Thornode request quote: ${response.error}`)
+    let response
+
+    // Check if swapQuote is a string, which we assume indicates an error message
+    if (typeof swapQuote === 'string') {
+      response = { error: swapQuote }
+    } else {
+      response = swapQuote
+    }
+    const responseError: { error?: string } = JSON.parse(JSON.stringify(response))
+    if (responseError.error) errors.push(`Thornode request quote: ${responseError.error}`)
     if (errors.length > 0) {
       // If there are errors, construct and return a transaction details object with error information
       return {
