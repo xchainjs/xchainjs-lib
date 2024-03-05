@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.3
+
+### Patch Changes
+
+- c71952d: Added Dash/ltc/doge symbols to asset utils
+
 ## v0.13.2 (2023-09-23)
 
 ### Update
