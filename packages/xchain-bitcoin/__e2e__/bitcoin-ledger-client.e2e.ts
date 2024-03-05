@@ -1,6 +1,7 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
-import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import { ClientLedger } from '../src/clientLedger'
 import {
@@ -39,8 +40,14 @@ describe('Bitcoin Client Ledger', () => {
       ...defaultBTCParams,
     })
   })
-  it('get address async', async () => {
+  it('get address async without verification', async () => {
     const address = await btcClient.getAddressAsync()
+    console.log('address', address)
+    expect(address).toContain('b')
+  })
+
+  it('get address async with verification', async () => {
+    const address = await btcClient.getAddressAsync(0, true)
     console.log('address', address)
     expect(address).toContain('b')
   })
