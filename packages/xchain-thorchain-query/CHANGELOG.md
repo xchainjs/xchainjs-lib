@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.5
+
+### Patch Changes
+
+- 3aec134: Added error handling for a simple string response from thornode
+- Updated dependencies [c71952d]
+  - @xchainjs/xchain-util@0.13.3
+  - @xchainjs/xchain-client@0.16.2
+  - @xchainjs/xchain-midgard-query@0.1.11
+
 ## 0.7.4
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-midgard-query",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "license": "MIT",
   "description": "Module that is responsible for get data from Midgard API",
   "keywords": [
@@ -32,17 +32,17 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.16.1",
+    "@xchainjs/xchain-client": "^0.16.2",
     "@xchainjs/xchain-midgard": "^0.5.2",
-    "@xchainjs/xchain-util": "^0.13.1",
+    "@xchainjs/xchain-util": "^0.13.3",
     "axios": "^1.3.6",
     "axios-retry": "^3.2.5",
     "bignumber.js": "^9.0.0"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.16.1",
+    "@xchainjs/xchain-client": "^0.16.2",
     "@xchainjs/xchain-midgard": "^0.5.2",
-    "@xchainjs/xchain-util": "^0.13.1",
+    "@xchainjs/xchain-util": "^0.13.3",
     "axios": "^1.3.6",
     "axios-retry": "^3.2.5",
     "bignumber.js": "^9.0.0"

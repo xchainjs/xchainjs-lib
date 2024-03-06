@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [0e07692]
+  - @xchainjs/xchain-bitcoin@0.23.13
+
+## 1.0.1
+
+### Patch Changes
+
+- bac0794: Bug fix on swap validation with synth and erc-20 assets
+- Updated dependencies [3aec134]
+- Updated dependencies [c71952d]
+  - @xchainjs/xchain-thorchain-query@0.7.5
+  - @xchainjs/xchain-util@0.13.3
+  - @xchainjs/xchain-avax@0.4.6
+  - @xchainjs/xchain-binance@5.7.10
+  - @xchainjs/xchain-bitcoin@0.23.12
+  - @xchainjs/xchain-bitcoincash@0.17.10
+  - @xchainjs/xchain-bsc@0.4.7
+  - @xchainjs/xchain-client@0.16.2
+  - @xchainjs/xchain-cosmos@1.0.1
+  - @xchainjs/xchain-doge@0.7.12
+  - @xchainjs/xchain-ethereum@0.31.6
+  - @xchainjs/xchain-evm@0.4.5
+  - @xchainjs/xchain-litecoin@0.13.11
+  - @xchainjs/xchain-mayachain@1.0.1
+  - @xchainjs/xchain-thorchain@1.0.4
+  - @xchainjs/xchain-utxo-providers@0.2.12
+  - @xchainjs/xchain-wallet@0.1.7
+
 ## 1.0.0
 
 ### Major Changes
