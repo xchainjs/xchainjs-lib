@@ -38,11 +38,11 @@ class ClientLedger extends Client {
   }
 
   // Get the current address asynchronously
-  async getAddressAsync(index = 0): Promise<Address> {
+  async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const result = await app.getWalletPublicKey(this.getFullDerivationPath(index), {
       format: 'bech32',
-      verify: false,
+      verify,
     })
     return result.bitcoinAddress
   }
