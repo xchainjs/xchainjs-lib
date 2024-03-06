@@ -37,7 +37,7 @@
     "ethers": "5.6.6"
   },
   "devDependencies": {
-    "@xchainjs/xchain-bitcoin": "0.23.12",
+    "@xchainjs/xchain-bitcoin": "0.23.13",
     "@xchainjs/xchain-ethereum": "0.31.6"
   }
 }

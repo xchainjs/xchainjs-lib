@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [0e07692]
+  - @xchainjs/xchain-bitcoin@0.23.13
+
 ## 1.0.1
 
 ### Patch Changes
