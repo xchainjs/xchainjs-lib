@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
 import { MAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import { Asset, CryptoAmount, assetFromStringEx, assetToString, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
@@ -215,5 +216,13 @@ export class MayachainQuery {
     if (!assetsDecimals[assetNotation]) throw Error(`Can not get decimals for ${assetNotation}`)
 
     return assetsDecimals[assetNotation]
+  }
+
+  /**
+   * Get pools details
+   * @returns {PoolDetail[]} pools details
+   */
+  public async getPools(): Promise<PoolDetail[]> {
+    return this.mayachainCache.getPools()
   }
 }
