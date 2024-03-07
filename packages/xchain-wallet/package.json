@@ -34,7 +34,7 @@
     "@xchainjs/xchain-thorchain": "1.0.4",
     "@xchainjs/xchain-mayachain": "1.0.1",
     "@xchainjs/xchain-utxo": "0.1.4",
-    "ethers": "5.6.6"
+    "ethers": "5.7.2"
   },
   "devDependencies": {
     "@xchainjs/xchain-bitcoin": "0.23.13",

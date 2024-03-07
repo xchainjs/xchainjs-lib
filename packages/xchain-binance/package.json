@@ -32,21 +32,17 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"
   },
+  "dependencies": {
+    "@binance-chain/javascript-sdk": "4.2.0",
+    "@xchainjs/xchain-client": "0.16.2",
+    "@xchainjs/xchain-crypto": "0.3.1",
+    "@xchainjs/xchain-util": "0.13.3"
+  },
   "devDependencies": {
-    "@binance-chain/javascript-sdk": "^4.2.0",
-    "@types/big.js": "^6.1.6",
-    "@xchainjs/xchain-client": "^0.16.2",
-    "@xchainjs/xchain-crypto": "^0.3.1",
-    "@xchainjs/xchain-util": "^0.13.3",
+    "@types/big.js": "6.1.6",
     "nock": "13.0.5"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "peerDependencies": {
-    "@binance-chain/javascript-sdk": "^4.2.0",
-    "@xchainjs/xchain-client": "^0.16.2",
-    "@xchainjs/xchain-crypto": "^0.3.1",
-    "@xchainjs/xchain-util": "^0.13.3"
   }
 }

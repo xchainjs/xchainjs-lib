@@ -30,11 +30,8 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build"
   },
-  "peerDependencies": {
-    "bignumber.js": "9.x"
-  },
-  "devDependencies": {
-    "bignumber.js": "^9.0.0"
+  "dependencies": {
+    "bignumber.js": "9.0.0"
   },
   "publishConfig": {
     "access": "public"
