@@ -1,4 +1,3 @@
-import { Fees } from '@xchainjs/xchain-client'
 import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
 
 type TxSubmitted = {
@@ -6,16 +5,22 @@ type TxSubmitted = {
   url: string
 }
 
+type Fees = {
+  asset: Asset // The asset for which fees are calculated
+  affiliateFee: CryptoAmount // The affiliate fee amount
+  outboundFee: CryptoAmount // The outbound fee amount
+}
+
+/**
+ * Represents a quote for a swap operation.
+ */
 type QuoteSwap = {
+  protocol: string
   toAddress: Address // The destination address for the swap
   memo: string // The memo associated with the swap
   expectedAmount: CryptoAmount // The expected amount to be received after the swap
   dustThreshold: CryptoAmount // The dust threshold for the swap
   fees: Fees // The fees associated with the swap
-  inboundConfirmationSeconds?: number // The inbound confirmation time in seconds
-  inboundConfirmationBlocks?: number // The inbound confirmation time in blocks
-  outboundDelaySeconds: number // The outbound delay time in seconds
-  outboundDelayBlocks: number // The outbound delay time in blocks
   totalSwapSeconds: number // The total time for the swap operation
   slipBasisPoints: number // The slip basis points for the swap
   canSwap: boolean // Indicates whether the swap can be performed
@@ -39,10 +44,9 @@ type QuoteSwapParams = {
 }
 
 interface IProtocol {
+  name: string
   isAssetSupported(asset: Asset): Promise<boolean>
-  estimateSwap(params: QuoteSwap): Promise<QuoteSwap>
-  validateSwap(params: QuoteSwap): Promise<string[]>
-  doSwap(params: QuoteSwap): Promise<TxSubmitted>
+  estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>
 }
 
 export { IProtocol, QuoteSwapParams, QuoteSwap, TxSubmitted }

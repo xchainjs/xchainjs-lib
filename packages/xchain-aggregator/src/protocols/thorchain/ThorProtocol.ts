@@ -1,19 +1,39 @@
-import { TxSubmitted } from '@xchainjs/xchain-thorchain-amm'
+import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Asset } from '@xchainjs/xchain-util'
 
-import { IProtocol, QuoteSwap } from '../../types'
+import { IProtocol, QuoteSwap, QuoteSwapParams } from '../../types'
 
 export class ThorProtocol implements IProtocol {
-  isAssetSupported(asset: Asset): Promise<boolean> {
-    throw new Error('Method not implemented.')
+  public readonly name = 'Thorchain'
+  private thorchainQuery: ThorchainQuery
+  private thorchainAmm: ThorchainAMM
+
+  constructor() {
+    this.thorchainQuery = new ThorchainQuery()
+    this.thorchainAmm = new ThorchainAMM(this.thorchainQuery)
   }
-  estimateSwap(params: QuoteSwap): Promise<QuoteSwap> {
-    throw new Error('Method not implemented.')
+
+  public async isAssetSupported(asset: Asset): Promise<boolean> {
+    const pool = await this.thorchainQuery.thorchainCache.getPoolForAsset(asset)
+    return pool.isAvailable()
   }
-  validateSwap(params: QuoteSwap): Promise<string[]> {
-    throw new Error('Method not implemented.')
-  }
-  doSwap(params: QuoteSwap): Promise<TxSubmitted> {
-    throw new Error('Method not implemented.')
+
+  public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
+    const estimatedSwap = await this.thorchainAmm.estimateSwap(params)
+    return {
+      protocol: this.name,
+      toAddress: estimatedSwap.toAddress,
+      memo: estimatedSwap.memo,
+      expectedAmount: estimatedSwap.txEstimate.netOutput,
+      dustThreshold: estimatedSwap.dustThreshold,
+      fees: estimatedSwap.txEstimate.totalFees,
+      totalSwapSeconds:
+        estimatedSwap.txEstimate.inboundConfirmationSeconds || 0 + estimatedSwap.txEstimate.outboundDelaySeconds,
+      slipBasisPoints: estimatedSwap.txEstimate.slipBasisPoints,
+      canSwap: estimatedSwap.txEstimate.canSwap,
+      errors: estimatedSwap.txEstimate.errors,
+      warning: estimatedSwap.txEstimate.warning,
+    }
   }
 }
