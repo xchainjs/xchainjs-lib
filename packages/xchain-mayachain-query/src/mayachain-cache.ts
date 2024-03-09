@@ -46,7 +46,7 @@ export class MayachainCache {
       this.conf.expirationTimeInboundAddress,
     )
     this.assetDecimalsCache = new CachedValue<Record<string, number>>(() => this.refreshAssetDecimalsCache())
-    this.poolsCache = new CachedValue<PoolDetail[]>(this.refreshPoolsCache, this.conf.expirationTimePools)
+    this.poolsCache = new CachedValue<PoolDetail[]>(() => this.refreshPoolsCache(), this.conf.expirationTimePools)
   }
 
   /**

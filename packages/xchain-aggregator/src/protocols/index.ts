@@ -1,2 +1,2 @@
-export { MayaProtocol } from './mayachain'
-export { ThorProtocol } from './thorchain'
+export { MayachainProtocol } from './mayachain'
+export { ThorchainProtocol } from './thorchain'

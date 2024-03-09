@@ -1,1 +1,1 @@
-export { ThorProtocol } from './ThorProtocol'
+export { ThorchainProtocol } from './ThorchainProtocol'

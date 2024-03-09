@@ -1,22 +1,27 @@
+import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { IProtocol, QuoteSwap, QuoteSwapParams } from '../../types'
 
-export class ThorProtocol implements IProtocol {
+export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
   private thorchainAmm: ThorchainAMM
 
-  constructor() {
+  constructor(wallet?: Wallet) {
     this.thorchainQuery = new ThorchainQuery()
-    this.thorchainAmm = new ThorchainAMM(this.thorchainQuery)
+    this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, wallet)
   }
 
   public async isAssetSupported(asset: Asset): Promise<boolean> {
-    const pool = await this.thorchainQuery.thorchainCache.getPoolForAsset(asset)
-    return pool.isAvailable()
+    if (eqAsset(asset, AssetRuneNative)) return true
+    const pools = await this.thorchainQuery.thorchainCache.getPools()
+    return (
+      Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
+    )
   }
 
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {

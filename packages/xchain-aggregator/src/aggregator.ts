@@ -1,14 +1,15 @@
 import { assetToString } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { MayaProtocol, ThorProtocol } from './protocols'
+import { MayachainProtocol, ThorchainProtocol } from './protocols'
 import { IProtocol, QuoteSwap, QuoteSwapParams } from './types'
 
 // Class definition for an Aggregator
 export class Aggregator {
   private protocols: IProtocol[]
 
-  constructor() {
-    this.protocols = [new ThorProtocol(), new MayaProtocol()]
+  constructor(wallet?: Wallet) {
+    this.protocols = [new ThorchainProtocol(wallet), new MayachainProtocol(wallet)]
   }
 
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
@@ -17,8 +18,9 @@ export class Aggregator {
         protocol.isAssetSupported(params.fromAsset),
         protocol.isAssetSupported(params.destinationAsset),
       ])
-      if (!isFromAssetSupported) throw Error(`${params.fromAsset} not supported in ${protocol.name}`)
-      if (!isDestinationAssetSupported) throw Error(`${params.destinationAsset} not supported in ${protocol.name}`)
+      if (!isFromAssetSupported) throw Error(`${assetToString(params.fromAsset)} not supported in ${protocol.name}`)
+      if (!isDestinationAssetSupported)
+        throw Error(`${assetToString(params.destinationAsset)} not supported in ${protocol.name}`)
 
       return protocol.estimateSwap(params)
     }

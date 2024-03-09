@@ -10,11 +10,12 @@ describe('Aggregator', () => {
     aggregator = new Aggregator()
   })
 
-  it('Should find max amount output estimate swap', () => {
-    aggregator.estimateSwap({
+  it('Should find max amount output estimate swap', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
       destinationAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
+    console.log(estimatedSwap)
   })
 })

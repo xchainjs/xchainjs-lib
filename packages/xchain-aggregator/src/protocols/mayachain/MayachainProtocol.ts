@@ -1,22 +1,26 @@
+import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import { Asset, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { IProtocol, QuoteSwap, QuoteSwapParams } from '../../types'
 
-export class MayaProtocol implements IProtocol {
+export class MayachainProtocol implements IProtocol {
   public readonly name = 'Mayachain'
   private mayachainQuery: MayachainQuery
   private mayachainAmm: MayachainAMM
-  constructor() {
+
+  constructor(wallet?: Wallet) {
     this.mayachainQuery = new MayachainQuery()
-    this.mayachainAmm = new MayachainAMM(this.mayachainQuery)
+    this.mayachainAmm = new MayachainAMM(this.mayachainQuery, wallet)
   }
 
   public async isAssetSupported(asset: Asset): Promise<boolean> {
+    if (eqAsset(asset, AssetCacao)) return true
     const pools = await this.mayachainQuery.getPools()
     return (
-      pools.findIndex((pool) => pool.status === 'Available' && eqAsset(asset, assetFromStringEx(pool.asset))) !== -1
+      pools.findIndex((pool) => pool.status === 'available' && eqAsset(asset, assetFromStringEx(pool.asset))) !== -1
     )
   }
 
