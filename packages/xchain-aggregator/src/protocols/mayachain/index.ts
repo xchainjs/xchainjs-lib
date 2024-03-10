@@ -1,1 +1,1 @@
-export { MayachainProtocol } from './MayachainProtocol'
+export { MayachainProtocol } from './mayachainProtocol'
