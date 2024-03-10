@@ -39,7 +39,9 @@
     "@xchainjs/xchain-wallet": "0.1.7"
   },
   "devDependencies": {
+    "@xchainjs/xchain-avax": "0.4.6",
     "@xchainjs/xchain-bitcoin": "0.23.13",
+    "@xchainjs/xchain-binance": "5.7.10",
     "@xchainjs/xchain-ethereum": "0.31.6",
     "@xchainjs/xchain-kujira": "0.1.12",
     "axios-mock-adapter": "1.20.0"

@@ -4,11 +4,8 @@ export default {
   reset: mock.reset,
   restore: mock.restore,
   init: () => {
-    mock.onGet(/\/pools/).reply(function () {
+    mock.onGet(/v2\/pools/).reply(function () {
       return [200, require('./responses/pools.json')]
-    })
-    mock.onGet(/\/thorchain\/quote\/swap/).reply(function () {
-      return [200, require('./responses/quoteSwap.json')]
     })
   },
 }

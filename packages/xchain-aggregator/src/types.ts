@@ -11,11 +11,13 @@ type Fees = {
   outboundFee: CryptoAmount // The outbound fee amount
 }
 
+type Protocol = 'Thorchain' | 'Mayachain'
+
 /**
  * Represents a quote for a swap operation.
  */
 type QuoteSwap = {
-  protocol: string
+  protocol: Protocol
   toAddress: Address // The destination address for the swap
   memo: string // The memo associated with the swap
   expectedAmount: CryptoAmount // The expected amount to be received after the swap
@@ -47,6 +49,7 @@ interface IProtocol {
   name: string
   isAssetSupported(asset: Asset): Promise<boolean>
   estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>
+  doSwap(params: QuoteSwapParams): Promise<TxSubmitted>
 }
 
-export { IProtocol, QuoteSwapParams, QuoteSwap, TxSubmitted }
+export { IProtocol, QuoteSwapParams, QuoteSwap, TxSubmitted, Protocol }

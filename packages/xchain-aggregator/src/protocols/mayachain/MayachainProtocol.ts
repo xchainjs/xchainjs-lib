@@ -4,10 +4,10 @@ import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import { Asset, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, QuoteSwap, QuoteSwapParams } from '../../types'
+import { IProtocol, QuoteSwap, QuoteSwapParams, TxSubmitted } from '../../types'
 
 export class MayachainProtocol implements IProtocol {
-  public readonly name = 'Mayachain'
+  public readonly name = 'Mayachain' as const
   private mayachainQuery: MayachainQuery
   private mayachainAmm: MayachainAMM
 
@@ -39,5 +39,9 @@ export class MayachainProtocol implements IProtocol {
       errors: estimatedSwap.errors,
       warning: estimatedSwap.warning,
     }
+  }
+
+  public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
+    return this.mayachainAmm.doSwap(params)
   }
 }

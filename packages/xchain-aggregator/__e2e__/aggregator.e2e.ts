@@ -1,21 +1,130 @@
-import { AssetBTC, BTC_DECIMAL } from '@xchainjs/xchain-bitcoin'
+import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
+import {
+  AssetBTC,
+  BTC_DECIMAL,
+  Client as BtcClient,
+  defaultBTCParams as defaultBtcParams,
+} from '@xchainjs/xchain-bitcoin'
+import { Network } from '@xchainjs/xchain-client'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetKUJI } from '@xchainjs/xchain-kujira'
+import { CryptoAmount, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { Aggregator } from '../src'
+import { Aggregator, QuoteSwap } from '../src'
+
+function printQuoteSwap(quoteSwap: QuoteSwap) {
+  console.log({
+    protocol: quoteSwap.protocol,
+    toAddress: quoteSwap.toAddress,
+    memo: quoteSwap.memo,
+    expectedAmount: {
+      asset: assetToString(quoteSwap.expectedAmount.asset),
+      amount: quoteSwap.expectedAmount.baseAmount.amount().toString(),
+      decimals: quoteSwap.expectedAmount.baseAmount.decimal,
+    },
+    dustThreshold: {
+      asset: assetToString(quoteSwap.dustThreshold.asset),
+      amount: quoteSwap.dustThreshold.baseAmount.amount().toString(),
+      decimals: quoteSwap.dustThreshold.baseAmount.decimal,
+    },
+    totalFees: {
+      asset: assetToString(quoteSwap.fees.asset),
+      affiliateFee: {
+        asset: assetToString(quoteSwap.fees.affiliateFee.asset),
+        amount: quoteSwap.fees.affiliateFee.baseAmount.amount().toString(),
+        decimals: quoteSwap.fees.affiliateFee.baseAmount.decimal,
+      },
+      outboundFee: {
+        asset: assetToString(quoteSwap.fees.outboundFee.asset),
+        amount: quoteSwap.fees.outboundFee.baseAmount.amount().toString(),
+        decimals: quoteSwap.fees.outboundFee.baseAmount.decimal,
+      },
+    },
+    totalSwapSeconds: quoteSwap.totalSwapSeconds,
+    slipBasisPoints: quoteSwap.slipBasisPoints,
+    canSwap: quoteSwap.canSwap,
+    errors: quoteSwap.errors,
+    warning: quoteSwap.warning,
+  })
+}
 
 describe('Aggregator', () => {
   let aggregator: Aggregator
+  let wallet: Wallet
+
   beforeAll(() => {
-    aggregator = new Aggregator()
+    const phrase = process.env.PHRASE_MAINNET
+    wallet = new Wallet({
+      BTC: new BtcClient({ ...defaultBtcParams, phrase, network: Network.Mainnet }),
+      AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
+      BNB: new BnbClient({ phrase, network: Network.Mainnet }),
+    })
+    aggregator = new Aggregator(wallet)
   })
 
-  it('Should find max amount output estimate swap', async () => {
+  it('Should find swap with greatest expected amount', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
       destinationAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
-    console.log(estimatedSwap)
+    printQuoteSwap(estimatedSwap)
+  })
+
+  it('Should find estimated swap with one protocol not supporting one asset', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: AssetBTC,
+      destinationAsset: AssetKUJI,
+      amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
+    })
+    printQuoteSwap(estimatedSwap)
+  })
+
+  it('Should not estimate swap', async () => {
+    try {
+      await aggregator.estimateSwap({
+        fromAsset: AssetAVAX,
+        destinationAsset: AssetKUJI,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetAVAX),
+      })
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message)
+      }
+    }
+  })
+
+  it('Should do swap using chosen protocol', async () => {
+    const txEstimatedSwap = await aggregator.estimateSwap({
+      fromAsset: AssetBNB,
+      destinationAsset: AssetAVAX,
+      amount: new CryptoAmount(assetToBase(assetAmount(0.017)), AssetBNB),
+      destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+    })
+
+    printQuoteSwap(txEstimatedSwap)
+
+    const txSubmitted = await aggregator.doSwap({
+      protocol: txEstimatedSwap.protocol,
+      fromAsset: AssetBNB,
+      destinationAsset: AssetAVAX,
+      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
+      destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should do swap without selecting protocol', async () => {
+    const txSubmitted = await aggregator.doSwap({
+      fromAsset: AssetBNB,
+      destinationAsset: AssetAVAX,
+      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
+      destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+    })
+
+    console.log(txSubmitted)
   })
 })

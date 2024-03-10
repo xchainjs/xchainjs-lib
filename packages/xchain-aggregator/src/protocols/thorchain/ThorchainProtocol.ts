@@ -4,10 +4,10 @@ import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Asset, assetToString, eqAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, QuoteSwap, QuoteSwapParams } from '../../types'
+import { IProtocol, QuoteSwap, QuoteSwapParams, TxSubmitted } from '../../types'
 
 export class ThorchainProtocol implements IProtocol {
-  public readonly name = 'Thorchain'
+  public readonly name = 'Thorchain' as const
   private thorchainQuery: ThorchainQuery
   private thorchainAmm: ThorchainAMM
 
@@ -40,5 +40,9 @@ export class ThorchainProtocol implements IProtocol {
       errors: estimatedSwap.txEstimate.errors,
       warning: estimatedSwap.txEstimate.warning,
     }
+  }
+
+  public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
+    return this.thorchainAmm.doSwap(params)
   }
 }

@@ -2,7 +2,7 @@ import { assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { MayachainProtocol, ThorchainProtocol } from './protocols'
-import { IProtocol, QuoteSwap, QuoteSwapParams } from './types'
+import { IProtocol, Protocol, QuoteSwap, QuoteSwapParams, TxSubmitted } from './types'
 
 // Class definition for an Aggregator
 export class Aggregator {
@@ -40,5 +40,13 @@ export class Aggregator {
       throw Error(`Can not estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.fromAsset)}`)
 
     return optimalSwap
+  }
+
+  public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
+    const protocolName = params.protocol ? params.protocol : (await this.estimateSwap(params)).protocol
+    const protocol = this.protocols.find((protocol) => protocol.name === protocolName)
+
+    if (!protocol) throw Error(`${protocolName} protocol is not supported`)
+    return protocol.doSwap(params)
   }
 }
