@@ -417,11 +417,11 @@ export class Thornode {
             toAsset,
             amount,
             destinationAddress,
-            streamingInterval,
+            streamingInterval?.toString(),
             streamingQuantity,
             toleranceBps,
             affiliateBps,
-            affiliate,
+            affiliate ? Number(affiliate) : undefined,
           )
         ).data
         return resp
