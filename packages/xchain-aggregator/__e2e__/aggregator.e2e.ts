@@ -100,7 +100,7 @@ describe('Aggregator', () => {
     const txEstimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBNB,
       destinationAsset: AssetAVAX,
-      amount: new CryptoAmount(assetToBase(assetAmount(0.017)), AssetBNB),
+      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
       destinationAddress: await wallet.getAddress(AssetAVAX.chain),
     })
 

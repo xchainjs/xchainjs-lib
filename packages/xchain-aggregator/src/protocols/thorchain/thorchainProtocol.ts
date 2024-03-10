@@ -16,6 +16,11 @@ export class ThorchainProtocol implements IProtocol {
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, wallet)
   }
 
+  /**
+   * Check if an asset is supported in the protocol
+   * @param {Asset} asset Asset to check if it is supported
+   * @returns {boolean} True if the asset is supported, otherwise false
+   */
   public async isAssetSupported(asset: Asset): Promise<boolean> {
     if (eqAsset(asset, AssetRuneNative)) return true
     const pools = await this.thorchainQuery.thorchainCache.getPools()
@@ -24,6 +29,12 @@ export class ThorchainProtocol implements IProtocol {
     )
   }
 
+  /**
+   * Estimate swap by validating the swap parameters.
+   *
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
+   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
+   */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const estimatedSwap = await this.thorchainAmm.estimateSwap(params)
     return {
@@ -42,6 +53,11 @@ export class ThorchainProtocol implements IProtocol {
     }
   }
 
+  /**
+   * Perform a swap operation between assets.
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
+   */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     return this.thorchainAmm.doSwap(params)
   }

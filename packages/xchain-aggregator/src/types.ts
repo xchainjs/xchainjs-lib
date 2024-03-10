@@ -1,10 +1,16 @@
 import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
 
+/**
+ * TxSubmitted
+ */
 type TxSubmitted = {
   hash: string
   url: string
 }
 
+/**
+ * Fees
+ */
 type Fees = {
   asset: Asset // The asset for which fees are calculated
   affiliateFee: CryptoAmount // The affiliate fee amount

@@ -12,6 +12,11 @@ export class Aggregator {
     this.protocols = [new ThorchainProtocol(wallet), new MayachainProtocol(wallet)]
   }
 
+  /**
+   * Estimate swap
+   * @param {QuoteSwapParams} params Swap parameters
+   * @returns the swap with the greatest expected amount estimated in the supported protocols
+   */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const estimateTask = async (protocol: IProtocol, params: QuoteSwapParams) => {
       const [isFromAssetSupported, isDestinationAssetSupported] = await Promise.all([
@@ -42,6 +47,12 @@ export class Aggregator {
     return optimalSwap
   }
 
+  /**
+   * Do swap
+   * @param {QuoteSwapParams & { protocol?: Protocol }} params Swap parameters. If protocol is not set,
+   * estimateSwap will be call and swap will be done in protocol with the greatest expected amount
+   * @returns the swap with the greatest expected amount estimated in the supported protocols
+   */
   public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
     const protocolName = params.protocol ? params.protocol : (await this.estimateSwap(params)).protocol
     const protocol = this.protocols.find((protocol) => protocol.name === protocolName)
