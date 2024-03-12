@@ -1,5 +1,5 @@
 import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
+import { AssetBNB, BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import {
   AssetBTC,
   BTC_DECIMAL,
@@ -143,6 +143,17 @@ describe('ThorchainAmm e2e tests', () => {
       console.log(errors)
     })
 
+    it(`Should validate swap from synth BNB to BNB without errors`, async () => {
+      const errors = await thorchainAmm.validateSwap({
+        fromAsset: assetFromStringEx('BNB/BNB'),
+        amount: new CryptoAmount(assetToBase(assetAmount('1')), assetFromStringEx('BNB/BNB')),
+        destinationAddress: await wallet.getAddress(BNBChain),
+        destinationAsset: assetFromStringEx('BNB.BNB'),
+      })
+
+      console.log(errors)
+    })
+
     it(`Should validate swap from ATOM to synth ATOM with destination address error`, async () => {
       const errors = await thorchainAmm.validateSwap({
         fromAsset: AssetATOM,
@@ -200,6 +211,17 @@ describe('ThorchainAmm e2e tests', () => {
       printQuoteSwap(quoteSwap)
     })
 
+    it(`Should estimate swap from synth BNB to BNB without errors`, async () => {
+      const estimatedSwap = await thorchainAmm.estimateSwap({
+        fromAsset: assetFromStringEx('BNB/BNB'),
+        amount: new CryptoAmount(assetToBase(assetAmount('1')), assetFromStringEx('BNB/BNB')),
+        destinationAddress: await wallet.getAddress(BNBChain),
+        destinationAsset: assetFromStringEx('BNB.BNB'),
+      })
+
+      printQuoteSwap(estimatedSwap)
+    })
+
     it('Should do non protocol asset swap. ATOM -> BNB', async () => {
       const txSubmitted = await thorchainAmm.doSwap({
         fromAsset: AssetATOM,
@@ -217,6 +239,17 @@ describe('ThorchainAmm e2e tests', () => {
         destinationAsset: assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E'),
         amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetRuneNative),
         destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it(`Should do swap from synth BNB to BNB without errors`, async () => {
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAsset: assetFromStringEx('BNB/BNB'),
+        amount: new CryptoAmount(assetToBase(assetAmount('1')), assetFromStringEx('BNB/BNB')),
+        destinationAddress: await wallet.getAddress(BNBChain),
+        destinationAsset: assetFromStringEx('BNB.BNB'),
       })
 
       console.log(txSubmitted)

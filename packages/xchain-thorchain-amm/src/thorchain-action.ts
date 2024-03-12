@@ -32,7 +32,12 @@ export class ThorchainAction {
   }
 
   private static async makeProtocolAction({ wallet, assetAmount, memo }: ProtocolActionParams): Promise<TxSubmitted> {
-    const hash = await wallet.deposit({ asset: assetAmount.asset, amount: assetAmount.baseAmount, memo })
+    const hash = await wallet.deposit({
+      chain: THORChain,
+      asset: assetAmount.asset,
+      amount: assetAmount.baseAmount,
+      memo,
+    })
 
     return {
       hash,
