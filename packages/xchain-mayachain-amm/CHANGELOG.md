@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.13
+
+### Patch Changes
+
+- Updated dependencies [85fefc5]
+- Updated dependencies [09f8125]
+  - @xchainjs/xchain-wallet@0.1.8
+
 ## 1.0.12
 
 ### Patch Changes

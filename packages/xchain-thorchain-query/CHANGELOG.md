@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.6
+
+### Patch Changes
+
+- aa127f8: New optional parameter `refundAddress` for `getSwapQuote` method
+- Updated dependencies [aa127f8]
+  - @xchainjs/xchain-thornode@0.3.11
+
 ## 0.7.5
 
 ### Patch Changes

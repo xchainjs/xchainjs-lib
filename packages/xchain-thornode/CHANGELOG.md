@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.11
+
+### Patch Changes
+
+- aa127f8: Thornode client updated to v1.128.1
+
 ## 0.3.10
 
 ### Patch Changes

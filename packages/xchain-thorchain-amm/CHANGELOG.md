@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [aa127f8]
+- Updated dependencies [85fefc5]
+- Updated dependencies [aa127f8]
+- Updated dependencies [09f8125]
+  - @xchainjs/xchain-thornode@0.3.11
+  - @xchainjs/xchain-wallet@0.1.8
+  - @xchainjs/xchain-thorchain-query@0.7.6
+
 ## 1.0.2
 
 ### Patch Changes

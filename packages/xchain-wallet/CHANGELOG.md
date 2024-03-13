@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.8
+
+### Patch Changes
+
+- 85fefc5: Xchain wallet `estimateTransferFees` new method
+- 09f8125: New mandatory parameter `chain` for `deposit` method
+
 ## 0.1.7
 
 ### Patch Changes
