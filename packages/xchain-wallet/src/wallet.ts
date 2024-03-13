@@ -1,7 +1,7 @@
 /**
  * Import necessary modules and libraries
  */
-import { Balance, FeeOption, Network, Protocol, Tx, TxHash, TxsPage, XChainClient } from '@xchainjs/xchain-client'
+import { Balance, FeeOption, Fees, Network, Protocol, Tx, TxHash, TxsPage, XChainClient } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
 import { Address, Asset, BaseAmount, Chain, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
@@ -301,6 +301,30 @@ export class Wallet {
       }
     }
     throw Error(`getFeeRates method not supported in ${chain} chain`)
+  }
+
+  /**
+   * Estimate transfer fees
+   * @param {UtxoTxParams | EvmTxParams} params to make the transfer estimation
+   * @returns {Fees} Estimated fees
+   */
+  public async estimateTransferFees(params: UtxoTxParams | EvmTxParams): Promise<Fees> {
+    const client = this.getClient(params.asset.chain)
+    if (this.isEvmClient(client)) {
+      if (!this.isEvmTxParams(params)) throw Error(`Invalid params for estimating ${params.asset.chain} transfer`)
+      return client.getFees(params)
+    }
+    if (this.isUtxoClient(client)) {
+      if (!this.isUtxoTxParams(params)) throw Error(`Invalid params for estimating ${params.asset.chain} transfer`)
+      let sender: Address | undefined
+      try {
+        sender = await this.getAddress(params.asset.chain)
+      } catch {
+        /* Empty */
+      }
+      return client.getFees({ sender, memo: params.memo })
+    }
+    return client.getFees()
   }
 
   /**
