@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.23.13
+
+### Patch Changes
+
+- 0e07692: Ledger client method `getAddressAsync` with verify parameter
+
 ## 0.23.12
 
 ### Patch Changes

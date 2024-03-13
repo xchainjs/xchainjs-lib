@@ -378,9 +378,10 @@ export class Wallet {
     walletIndex,
     sequence,
     gasLimit,
-  }: DepositParam & { asset: Asset }): Promise<string> {
-    const client = this.getClient(asset.chain)
-    if (!('deposit' in client)) throw Error(`Can not deposit with ${asset.chain} client`)
+    chain,
+  }: DepositParam & { asset: Asset; chain: Chain }): Promise<string> {
+    const client = this.getClient(chain)
+    if (!('deposit' in client)) throw Error(`Can not deposit with ${chain} client`)
 
     return (client as unknown as MayachainClient).deposit({ asset, amount, memo, walletIndex, sequence, gasLimit })
   }

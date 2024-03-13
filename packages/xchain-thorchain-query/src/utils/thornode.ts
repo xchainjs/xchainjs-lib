@@ -407,6 +407,7 @@ export class Thornode {
     affiliateBps?: number,
     affiliate?: string,
     height?: number,
+    refundAddress?: string,
   ): Promise<QuoteSwapResponse> {
     for (const api of this.quoteApi) {
       try {
@@ -417,6 +418,7 @@ export class Thornode {
             toAsset,
             amount,
             destinationAddress,
+            refundAddress,
             streamingInterval,
             streamingQuantity,
             toleranceBps,

@@ -247,7 +247,7 @@ export class MayachainAMM {
    */
   private async doProtocolAssetSwap(amount: CryptoAmount, memo: string): Promise<TxSubmitted> {
     // Deposit the amount and return transaction hash and URL
-    const hash = await this.wallet.deposit({ asset: amount.asset, amount: amount.baseAmount, memo })
+    const hash = await this.wallet.deposit({ chain: MAYAChain, asset: amount.asset, amount: amount.baseAmount, memo })
 
     return {
       hash,
