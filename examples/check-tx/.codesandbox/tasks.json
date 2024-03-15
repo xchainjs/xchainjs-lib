@@ -8,11 +8,11 @@
     ],
   
     // These tasks can be run from CodeSandbox. Running one will open a log in the app.
-    "tasks": [
-      {
+    "tasks": {
+      "Check tx": {
         "name": "Check tx",
         "command": "yarn checktx mainnet FF900F04B145799668AB9975E40C51E42024D8761330D2210DCC8447F44218AF"
       }
-    ]
+    }
 }
   
