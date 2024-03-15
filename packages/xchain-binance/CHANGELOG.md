@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.7.11
+
+### Patch Changes
+
+- ab5c51f: Stagenet compatibility
+
 ## 5.7.10
 
 ### Patch Changes

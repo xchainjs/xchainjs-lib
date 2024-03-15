@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [ab5c51f]
+  - @xchainjs/xchain-binance@5.7.11
+
 ## 1.0.3
 
 ### Patch Changes
