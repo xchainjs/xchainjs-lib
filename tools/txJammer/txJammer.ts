@@ -1,13 +1,28 @@
 import fs = require('fs')
 
-import { Network, TxParams } from '@xchainjs/xchain-client'
+import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { Client as BnbClient } from '@xchainjs/xchain-binance'
+import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
+import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
+import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { Network } from '@xchainjs/xchain-client'
+import { Client as GaiaClient, defaultClientConfig as defaultGaiaParams } from '@xchainjs/xchain-cosmos'
 import { decryptFromKeystore } from '@xchainjs/xchain-crypto'
+import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
+import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
-import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
-import { AmmEstimateSwapParams, ThorchainAMM, Wallet } from '@xchainjs/xchain-thorchain-amm'
+import {
+  AssetRuneNative,
+  Client as ThorClient,
+  THORChain,
+  defaultClientConfig as defaultThorParams,
+} from '@xchainjs/xchain-thorchain'
+import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import {
   AddliquidityPosition,
   LiquidityPool,
+  QuoteSwapParams,
   ThorchainCache,
   ThorchainQuery,
   Thornode,
@@ -22,6 +37,7 @@ import {
   assetToString,
   baseAmount,
 } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 import { BigNumber } from 'bignumber.js'
 import * as weighted from 'weighted'
 
@@ -49,7 +65,6 @@ export class TxJammer {
   private txRecords: TxDetail[] = []
   private thorchainCache: ThorchainCache
   private thorchainQuery: ThorchainQuery
-  private thorchainAmm: ThorchainAMM
 
   private estimateOnly: boolean
   private minAmount: number
@@ -107,7 +122,6 @@ export class TxJammer {
       new MidgardQuery(new MidgardCache(new Midgard(network))),
     )
     this.thorchainQuery = new ThorchainQuery(this.thorchainCache)
-    this.thorchainAmm = new ThorchainAMM(this.thorchainQuery)
   }
   private async writeToFile() {
     fs.writeFileSync(`./txJammer${new Date().toISOString()}.json`, JSON.stringify(this.txRecords, null, 4), 'utf8')
@@ -118,8 +132,24 @@ export class TxJammer {
     const phrase1 = await decryptFromKeystore(keystore1, this.keystore1Password)
     const phrase2 = await decryptFromKeystore(keystore2, this.keystore2Password)
 
-    this.wallet1 = new Wallet(phrase1, this.thorchainQuery)
-    this.wallet2 = new Wallet(phrase2, this.thorchainQuery)
+    const getClients = (phrase: string) => {
+      const network = this.thorchainCache.midgardQuery.midgardCache.midgard.network
+      return {
+        BTC: new BtcClient({ ...defaultBtcParams, network, phrase }),
+        BCH: new BchClient({ ...defaultBchParams, network, phrase }),
+        LTC: new LtcClient({ ...defaultLtcParams, network, phrase }),
+        DOGE: new DogeClient({ ...defaultDogeParams, network, phrase }),
+        ETH: new EthClient({ ...defaultEthParams, network, phrase }),
+        AVAX: new AvaxClient({ ...defaultAvaxParams, network, phrase }),
+        BSC: new BscClient({ ...defaultBscParams, network, phrase }),
+        GAIA: new GaiaClient({ ...defaultGaiaParams, network, phrase }),
+        BNB: new BnbClient({ network, phrase }),
+        THOR: new ThorClient({ ...defaultThorParams, network, phrase }),
+      }
+    }
+
+    this.wallet1 = new Wallet(getClients(phrase1))
+    this.wallet2 = new Wallet(getClients(phrase2))
     this.pools = await this.thorchainCache.getPools()
     this.setupWeightedActions()
     await this.setupWeightedChoices()
@@ -292,24 +322,23 @@ export class TxJammer {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
     const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
     const destinationAddress = destinationAsset.synth
-      ? receiverWallet.clients[THORChain].getAddress()
-      : receiverWallet.clients[destinationAsset.chain].getAddress()
-    const swapParams: AmmEstimateSwapParams = {
+      ? await receiverWallet.getAddress(THORChain)
+      : await receiverWallet.getAddress(destinationAsset.chain)
+    const swapParams: QuoteSwapParams = {
       amount: await this.createCryptoAmount(sourceAsset),
       fromAsset: sourceAsset,
       destinationAsset,
       destinationAddress: destinationAddress,
-      wallet: senderWallet,
-      walletIndex: 0,
     }
 
     const result: TxDetail = { action: 'swap' }
     try {
-      const estimate = await this.thorchainAmm.estimateSwap(swapParams)
+      const thorchainAmm = new ThorchainAMM(this.thorchainQuery, senderWallet)
+      const estimate = await thorchainAmm.estimateSwap(swapParams)
       result.date = new Date()
       result.details = `swapping ${swapParams.amount.formatedAssetString()} to ${assetToString(destinationAsset)} `
       if (estimate.txEstimate.canSwap && !this.estimateOnly) {
-        const txhash = await this.thorchainAmm.doSwap(senderWallet, swapParams)
+        const txhash = await thorchainAmm.doSwap(swapParams)
         result.result = txhash
       } else {
         result.result = `not submitted, Can swap: ${estimate.txEstimate.canSwap} or estimate: ${this.estimateOnly}`
@@ -327,17 +356,17 @@ export class TxJammer {
     const result: TxDetail = { action: 'transfer' }
     try {
       const amount = await this.createCryptoAmount(sourceAsset)
-      const transferParams: TxParams = {
+      const transferParams = {
         asset: amount.asset,
         amount: amount.baseAmount,
-        recipient: receiverWallet.clients[sourceAsset.chain].getAddress(),
+        recipient: await receiverWallet.getAddress(sourceAsset.chain),
       }
       result.date = new Date()
       result.details = `transfering ${amount.formatedAssetString()} to ${transferParams.recipient} `
       if (!this.estimateOnly) {
         result.date = new Date()
         result.details = transferParams
-        const txhash = await senderWallet.clients[sourceAsset.chain].transfer(transferParams)
+        const txhash = await senderWallet.transfer(transferParams)
         result.result = txhash
       } else {
         result.result = 'not submitted, estimate only mode'
@@ -445,13 +474,14 @@ export class TxJammer {
     }
     try {
       const estimateSym = await this.thorchainQuery.estimateAddLP(addlpSym)
+      const thorchainAmm = new ThorchainAMM(this.thorchainQuery, senderWallet)
       result.date = new Date()
       if (isEven) {
         result.details = `Adding symetrical liquidity position ${rune.formatedAssetString()} and ${sourceAssetAmount.formatedAssetString()} to pool: ${
           estimateSym.assetPool
         } `
         if (estimateSym.canAdd && !this.estimateOnly) {
-          const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpSym)
+          const txhash = await thorchainAmm.addLiquidityPosition(addlpSym)
           result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
         } else {
           result.result = `not submitted, Can add lp position: ${estimateSym.canAdd},  estimateOnly: ${this.estimateOnly}`
@@ -462,7 +492,7 @@ export class TxJammer {
         } `
         const estimate = await this.thorchainQuery.estimateAddLP(addlpAsym)
         if (estimate.canAdd && !this.estimateOnly) {
-          const txhash = await this.thorchainAmm.addLiquidityPosition(senderWallet, addlpAsym)
+          const txhash = await thorchainAmm.addLiquidityPosition(addlpAsym)
           result.result = `hash: ${txhash[0].hash}`
         } else {
           result.result = `not submitted, Can add: ${estimate.canAdd} ,  estimateOnly: ${this.estimateOnly}`
@@ -479,8 +509,8 @@ export class TxJammer {
   private async executeWithdraw() {
     const [senderWallet] = this.getRandomWallets()
     const asset = this.getRandomWithdrawLpAsset()
-    const runeAddress = senderWallet.clients[THORChain].getAddress()
-    const sourceAddress = senderWallet.clients[asset.chain].getAddress()
+    const runeAddress = await senderWallet.getAddress(THORChain)
+    const sourceAddress = await senderWallet.getAddress(asset.chain)
     const percentageWithdraw = this.getRandomInt(1, 100)
     const result: TxDetail = {
       action: 'withdrawLp',
@@ -504,7 +534,8 @@ export class TxJammer {
       const estimate = await this.thorchainQuery.estimateWithdrawLP(withdrawLParams)
 
       if (estimate && !this.estimateOnly) {
-        const txhash = await this.thorchainAmm.withdrawLiquidityPosition(senderWallet, withdrawLParams)
+        const thorchainAmm = new ThorchainAMM(this.thorchainQuery, senderWallet)
+        const txhash = await thorchainAmm.withdrawLiquidityPosition(withdrawLParams)
         result.details = withdrawLParams
         result.result = `hash: ${txhash[0].hash}    hash: ${txhash[1].hash}`
       } else {
