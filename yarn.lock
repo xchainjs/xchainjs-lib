@@ -3239,6 +3239,13 @@
     "@typescript-eslint/types" "5.59.1"
     eslint-visitor-keys "^3.3.0"
 
+"@xchainjs/xchain-bitcoincash@0.17.9":
+  version "0.17.9"
+  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-bitcoincash/-/xchain-bitcoincash-0.17.9.tgz#b985fca65bf6e555489ef470bef78be3b55ad039"
+  integrity sha512-LLgC+GFGNRq4UIxkU2vzg959oE9pomlu01VJkT0Ayj+0SCZjucLdX0HVlu05Yp4vOfH4mIAkgDxkUr7VfLbewA==
+  dependencies:
+    uniqid "^5.4.0"
+
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
