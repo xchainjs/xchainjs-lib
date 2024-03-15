@@ -22,6 +22,7 @@
     "rimraf": "~3.0.2"
   },
   "devDependencies": {
-    "@types/node": "20.11.28"
+    "@types/node": "20.11.28",
+    "ts-node": "10.9.2"
   }
 }
