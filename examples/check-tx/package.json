@@ -1,9 +1,13 @@
 {
   "name": "check-tx-",
+  "private": true,
   "version": "1.0.0",
   "scripts": {
     "checktx": "npx ts-node check-tx.ts"
   },
+  "workspaces": [
+    "../../packages/*"
+  ],
   "description": "example of doing checking a Tx with thorchain-query package",
   "main": "index.js",
   "author": "GRC",
