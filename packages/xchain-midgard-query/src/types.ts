@@ -1,3 +1,4 @@
+import { GetActions200Response } from '@xchainjs/xchain-midgard'
 import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
 
 /**
@@ -30,3 +31,32 @@ export type MidgardConfig = {
   apiRetries: number // The number of retries for API requests.
   midgardBaseUrls: string[] // The base URLs of the Midgard API endpoints.
 }
+
+/**
+ * Action types
+ */
+export type ActionType = 'swap' | 'addLiquidity' | 'withdraw' | 'donate' | 'refund' | 'switch'
+
+/**
+ * Get action params
+ */
+export type GetActionsParams = Partial<{
+  address: string
+  txid: string
+  asset: string
+  type: ActionType
+  affiliate: string
+  limit: number
+  offset: number
+  nextPageToken: number
+  timestamp: number
+  height: number
+  prevPageToken: number
+  fromTimestamp: number
+  fromHeight: number
+}>
+
+/**
+ * Action history
+ */
+export type ActionHistory = GetActions200Response
