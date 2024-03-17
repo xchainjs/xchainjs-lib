@@ -9,7 +9,6 @@
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@cosmos-client/core": "^0.46.1",
     "@mdi/font": "7.0.96",
     "@rollup/plugin-inject": "^5.0.3",
     "@rollup/plugin-terser": "^0.4.3",
@@ -35,6 +34,7 @@
     "vuetify": "^3.0.0"
   },
   "devDependencies": {
+    "@cosmos-client/core": "^0.46.1",
     "@babel/types": "^7.21.4",
     "@rollup/plugin-replace": "^5.0.1",
     "@types/node": "^18.15.0",
