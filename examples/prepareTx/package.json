@@ -1,6 +1,7 @@
 {
-  "name": "prepare-tx-",
+  "name": "xchainjs-prepare-tx",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "preparetx": "npx ts-node prepare-tx.ts"
   },
@@ -10,9 +11,9 @@
   "license": "MIT",
   "dependencies": {
     "@cosmos-client/core": "^0.46.1",
-    "@xchainjs/xchain-ethereum": "file:../../packages/xchain-ethereum",
-    "@xchainjs/xchain-bitcoin": "file:../../packages/xchain-bitcoin",
-    "@xchainjs/xchain-util": "file:../../packages/xchain-util",
-    "@xchainjs/xchain-client": "file:../../packages/xchain-client"
+    "@xchainjs/xchain-ethereum": "*",
+    "@xchainjs/xchain-bitcoin": "*",
+    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "*"
   }
 }

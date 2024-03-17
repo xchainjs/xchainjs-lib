@@ -1,5 +1,6 @@
 {
-  "name": "xchainjs-test",
+  "name": "xchainjs-estimate-swap",
+  "private": true,
   "version": "1.0.0",
   "scripts": {
     "listPools": "npx ts-node listPools.ts",
@@ -11,13 +12,13 @@
   "author": "THORIANITE",
   "license": "MIT",
   "dependencies": {
-    "@xchainjs/xchain-thorchain-query": "file:../../packages/xchain-thorchain-query",
-    "@xchainjs/xchain-midgard-query": "file:../../packages/xchain-midgard-query",
-    "@xchainjs/xchain-client": "file:../../packages/xchain-client",
-    "@xchainjs/xchain-midgard": "file:../../packages/xchain-midgard",
-    "@xchainjs/xchain-thornode": "file:../../packages/xchain-thornode",
-    "@xchainjs/xchain-util": "file:../../packages/xchain-util",
-    "@xchainjs/xchain-crypto": "file:../../packages/xchain-crypto",
+    "@xchainjs/xchain-thorchain-query": "*",
+    "@xchainjs/xchain-midgard-query": "*",
+    "@xchainjs/xchain-client": "*",
+    "@xchainjs/xchain-midgard": "*",
+    "@xchainjs/xchain-thornode": "*",
+    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-crypto": "*",
     "axios": "^1.3.6",
     "axios-retry": "^3.2.5",
     "bignumber.js": "9.0.1",
