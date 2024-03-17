@@ -1,4 +1,4 @@
-import { FeeOption } from '@xchainjs/xchain-client'
+import { FeeOption, TxHash } from '@xchainjs/xchain-client'
 import { LiquidityProviderSummary } from '@xchainjs/xchain-thornode'
 import { Address, Asset, BaseAmount, Chain, CryptoAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -473,4 +473,32 @@ export type QuoteThornameParams = {
   preferredAsset?: Asset | null // The preferred asset
   expirity?: Date // The expiry date
   isUpdate?: boolean // Indicates if the THORName is being updated
+}
+
+export type SwapHistoryParams = {
+  addresses: Address[]
+}
+
+/**
+ * Transaction action
+ */
+export type TransactionAction = {
+  hash: TxHash
+  address: Address
+  amount: CryptoAmount
+}
+
+/**
+ * Swap resume
+ */
+export type Swap = {
+  date: Date
+  status: 'success' | 'pending'
+  inboundTx: TransactionAction
+  outboundTx: TransactionAction
+}
+
+export type SwapsHistory = {
+  swaps: Swap[]
+  count: number
 }

@@ -13,6 +13,7 @@ import {
 import { BigNumber } from 'bignumber.js'
 
 import { DefaultChainAttributes } from './chain-defaults'
+import { LiquidityPool } from './liquidity-pool'
 import { ThorchainCache } from './thorchain-cache'
 import {
   AddliquidityPosition,
@@ -36,6 +37,8 @@ import {
   SaverFees,
   SaversPosition,
   SaversWithdraw,
+  SwapHistoryParams,
+  SwapsHistory,
   ThornameAlias,
   ThornameDetails,
   TotalFees,
@@ -49,6 +52,7 @@ import {
   AssetRuneNative,
   BNBChain,
   GAIAChain,
+  THORCHAIN_DECIMAL,
   THORChain,
   getCryptoAmountWithNotation,
   isAssetRuneNative,
@@ -1332,5 +1336,49 @@ export class ThorchainQuery {
     const inboundDetails = await this.getInboundDetails()
     if (!inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
     return inboundDetails[chain]
+  }
+
+  /**
+   * Get swap addresses swap history
+   * @param { addresses } SwapHistoryParams Swap history params
+   * @returns {SwapResume} Swap resume
+   */
+  public async getSwapsHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
+    const actionsResume = await this.thorchainCache.midgardQuery.midgardCache.midgard.getActions({
+      address: addresses.join(','),
+      type: 'swap',
+    })
+    const pools = await this.thorchainCache.getPools()
+
+    const getInboundCryptoAmount = (
+      pools: Record<string, LiquidityPool>,
+      asset: string,
+      amount: string,
+    ): CryptoAmount => {
+      const decimals = asset in pools ? pools[asset].thornodeDetails.decimals || THORCHAIN_DECIMAL : THORCHAIN_DECIMAL
+      return decimals === THORCHAIN_DECIMAL
+        ? new CryptoAmount(baseAmount(amount), assetFromStringEx(asset))
+        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFromStringEx(asset)), decimals)
+    }
+
+    return {
+      count: actionsResume.count ? Number(actionsResume.count) : 0,
+      swaps: actionsResume.actions.map((action) => {
+        return {
+          date: new Date(Number(action.date) / 10 ** 6),
+          status: action.status,
+          inboundTx: {
+            hash: action.in[0].txID,
+            address: action.in[0].address,
+            amount: getInboundCryptoAmount(pools, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
+          },
+          outboundTx: {
+            hash: action.out[0].txID,
+            address: action.out[0].address,
+            amount: getInboundCryptoAmount(pools, action.out[0].coins[0].asset, action.out[0].coins[0].amount),
+          },
+        }
+      }),
+    }
   }
 }
