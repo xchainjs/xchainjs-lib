@@ -21,7 +21,8 @@ export const isProtocolEVMChain = (chain: Chain): boolean => {
  */
 export const isProtocolERC20Asset = (asset: Asset): boolean => {
   return isProtocolEVMChain(asset.chain)
-    ? [AssetETH, AssetAVAX, AssetBSC].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1
+    ? [AssetETH, AssetAVAX, AssetBSC].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 &&
+        !asset.synth
     : false
 }
 
