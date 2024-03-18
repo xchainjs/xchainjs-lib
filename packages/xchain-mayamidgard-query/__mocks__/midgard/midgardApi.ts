@@ -8,5 +8,9 @@ export default {
       const resp = require(`./responses/pools.json`)
       return [200, resp]
     })
+    mock.onGet(/\/v2\/actions/).reply(() => {
+      const resp = require(`./responses/actions.json`)
+      return [200, resp]
+    })
   },
 }
