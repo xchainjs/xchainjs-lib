@@ -12,13 +12,16 @@ describe('Thorchain protocol', () => {
 
   beforeAll(() => {
     protocol = new ThorchainProtocol()
-    mockThornodeApi.init()
-    mockMidgardApi.init()
   })
 
-  afterAll(() => {
-    mockThornodeApi.restore()
+  beforeEach(() => {
+    mockMidgardApi.init()
+    mockThornodeApi.init()
+  })
+
+  afterEach(() => {
     mockMidgardApi.restore()
+    mockThornodeApi.restore()
   })
 
   it('Should check asset is supported', async () => {

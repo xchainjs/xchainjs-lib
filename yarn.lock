@@ -3256,67 +3256,12 @@
     "@typescript-eslint/types" "5.59.1"
     eslint-visitor-keys "^3.3.0"
 
-"@xchainjs/xchain-binance@5.7.10":
-  version "5.7.10"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-binance/-/xchain-binance-5.7.10.tgz#08632403e1bb84945cb8db6370278ab9494d2dc0"
-  integrity sha512-o2nHVmLgPxaK1EcG9huO6sVei+LLdljPHvwprPE+eBjpEcDVqNMUPZGI/OzF7rmo2PVfudMd6rNHjOWXrWI8uA==
-
 "@xchainjs/xchain-bitcoincash@0.17.9":
   version "0.17.9"
   resolved "https://registry.yarnpkg.com/@xchainjs/xchain-bitcoincash/-/xchain-bitcoincash-0.17.9.tgz#b985fca65bf6e555489ef470bef78be3b55ad039"
   integrity sha512-LLgC+GFGNRq4UIxkU2vzg959oE9pomlu01VJkT0Ayj+0SCZjucLdX0HVlu05Yp4vOfH4mIAkgDxkUr7VfLbewA==
   dependencies:
     uniqid "^5.4.0"
-
-"@xchainjs/xchain-mayachain-amm@1.0.12":
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-mayachain-amm/-/xchain-mayachain-amm-1.0.12.tgz#951aa07985acfd883bb626cc8e27e971c8c30379"
-  integrity sha512-oxLvvXVp9GRji3qQ/LRUJEfbno4fWX7xi61T+bnlbe6jRzgE2nua8897QDLwRoc22IwnlXtluGpQfp6AksrbcQ==
-  dependencies:
-    "@xchainjs/xchain-ethereum" "0.31.6"
-    "@xchainjs/xchain-kujira" "0.1.12"
-    "@xchainjs/xchain-mayachain" "1.0.1"
-    "@xchainjs/xchain-mayachain-query" "0.1.8"
-    "@xchainjs/xchain-thorchain" "1.0.4"
-    "@xchainjs/xchain-wallet" "0.1.7"
-
-"@xchainjs/xchain-thorchain-amm@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-amm/-/xchain-thorchain-amm-1.0.2.tgz#3121f5de85045e37a21e01345c115b061c36715a"
-  integrity sha512-ayB4do21DUln5SC0E1uDPn42tEzV2MwStUKLBGoZopx3V6vUcU0BtO4cY+cWlqFkoCcEMDqJin81PQd2GDbfyw==
-  dependencies:
-    "@xchainjs/xchain-avax" "0.4.6"
-    "@xchainjs/xchain-binance" "5.7.10"
-    "@xchainjs/xchain-bitcoin" "0.23.13"
-    "@xchainjs/xchain-bitcoincash" "0.17.10"
-    "@xchainjs/xchain-bsc" "0.4.7"
-    "@xchainjs/xchain-cosmos" "1.0.1"
-    "@xchainjs/xchain-doge" "0.7.12"
-    "@xchainjs/xchain-ethereum" "0.31.6"
-    "@xchainjs/xchain-litecoin" "0.13.11"
-    "@xchainjs/xchain-mayachain" "1.0.1"
-    "@xchainjs/xchain-thorchain" "1.0.4"
-    "@xchainjs/xchain-thorchain-query" "0.7.5"
-    "@xchainjs/xchain-util" "^0.13.3"
-    "@xchainjs/xchain-wallet" "0.1.7"
-
-"@xchainjs/xchain-thorchain-query@0.7.5":
-  version "0.7.5"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-thorchain-query/-/xchain-thorchain-query-0.7.5.tgz#fc2eb42da8d4615dace9ee8e0a658d5184855b95"
-  integrity sha512-WDhmarvullfyafHu/q+NBzdIx0XVGkL00Ww4+IA7fF8yJqR3BiwbQTZWYyVOC1VKAgH2L9zScPUagGWxxjhygA==
-
-"@xchainjs/xchain-wallet@0.1.7":
-  version "0.1.7"
-  resolved "https://registry.yarnpkg.com/@xchainjs/xchain-wallet/-/xchain-wallet-0.1.7.tgz#a5ffcc19058904891b87ce74bd029fa7fb1d7f95"
-  integrity sha512-nXmctgdPaSTXPoCyIgKjH2o3cTM9p5XcJu0TVCzpHuJNycZ+ma+Y3SnGPgcLF5/nw/7hp5+kUmtqrtJZgMOWUQ==
-  dependencies:
-    "@xchainjs/xchain-client" "0.16.2"
-    "@xchainjs/xchain-evm" "0.4.5"
-    "@xchainjs/xchain-mayachain" "1.0.1"
-    "@xchainjs/xchain-thorchain" "1.0.4"
-    "@xchainjs/xchain-util" "0.13.3"
-    "@xchainjs/xchain-utxo" "0.1.4"
-    ethers "5.6.6"
 
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"

@@ -4,7 +4,7 @@ export default {
   reset: mock.reset,
   restore: mock.restore,
   init: () => {
-    mock.onGet(/v2\/pools/).replyOnce(function () {
+    mock.onGet(/v2\/pools/).reply(function () {
       return [200, require('./responses/pools.json')]
     })
     mock.onGet(/\/v2\/actions?/).replyOnce(function () {

@@ -10,10 +10,13 @@ describe('Mayachain protocol', () => {
 
   beforeAll(() => {
     protocol = new MayachainProtocol()
+  })
+
+  beforeEach(() => {
     mockMidgardApi.init()
   })
 
-  afterAll(() => {
+  afterEach(() => {
     mockMidgardApi.restore()
   })
 
