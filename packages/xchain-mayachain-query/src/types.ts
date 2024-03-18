@@ -1,3 +1,4 @@
+import { TxHash } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -59,4 +60,35 @@ export type InboundDetail = {
   haltedChain: boolean // Indicates if the chain is halted
   haltedTrading: boolean // Indicates if trading is halted
   haltedLP: boolean // Indicates if LP (liquidity provision) is halted
+}
+
+export type SwapHistoryParams = {
+  addresses: Address[]
+}
+
+/**
+ * Transaction action
+ */
+export type TransactionAction = {
+  hash: TxHash
+  address: Address
+  amount: CryptoAmount
+}
+
+/**
+ * Swap resume
+ */
+export type Swap = {
+  date: Date
+  status: 'success' | 'pending'
+  inboundTx: TransactionAction
+  outboundTx: TransactionAction
+}
+
+/**
+ * Swap history
+ */
+export type SwapsHistory = {
+  swaps: Swap[]
+  count: number
 }
