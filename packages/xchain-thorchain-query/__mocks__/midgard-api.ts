@@ -31,8 +31,7 @@ export default {
     })
     //Mock midgard actions
     mock.onGet(/\/v2\/actions?/).reply(function () {
-      const resp = require(`./responses/midgard/health.json`)
-      console.log(`actions`)
+      const resp = require(`./responses/midgard/actions.json`)
       return [200, resp]
     })
   },
