@@ -498,6 +498,9 @@ export type Swap = {
   outboundTx: TransactionAction
 }
 
+/**
+ * Swap history
+ */
 export type SwapsHistory = {
   swaps: Swap[]
   count: number
