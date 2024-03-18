@@ -1343,7 +1343,7 @@ export class ThorchainQuery {
    * @param { addresses } SwapHistoryParams Swap history params
    * @returns {SwapResume} Swap resume
    */
-  public async getSwapsHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
+  public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
     const actionsResume = await this.thorchainCache.midgardQuery.midgardCache.midgard.getActions({
       address: addresses.join(','),
       type: 'swap',

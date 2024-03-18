@@ -2,7 +2,15 @@ import { Network } from '@xchainjs/xchain-client'
 import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
 import { MAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
-import { Asset, CryptoAmount, assetFromStringEx, assetToString, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  assetFromStringEx,
+  assetToString,
+  baseAmount,
+  eqAsset,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 
 import { MayachainCache } from './mayachain-cache'
 import { InboundDetail, QuoteSwap, QuoteSwapParams, SwapHistoryParams, SwapsHistory } from './types'
@@ -232,17 +240,17 @@ export class MayachainQuery {
    * @param { addresses } SwapHistoryParams Swap history params
    * @returns {SwapResume} Swap resume
    */
-  public async getSwapsHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
+  public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
     const actionsResume = await this.mayachainCache.midgardQuery.getActions({
       address: addresses.join(','),
       type: 'swap',
     })
     const assetDecimals = await this.mayachainCache.getAssetDecimals()
 
-    const getInboundCryptoAmount = (pools: Record<string, number>, asset: string, amount: string): CryptoAmount => {
-      const decimals = asset in pools ? pools[asset] || DEFAULT_MAYACHAIN_DECIMALS : DEFAULT_MAYACHAIN_DECIMALS
-      return decimals === DEFAULT_MAYACHAIN_DECIMALS
-        ? new CryptoAmount(baseAmount(amount), assetFromStringEx(asset))
+    const getCryptoAmount = (assetDecimals: Record<string, number>, asset: string, amount: string): CryptoAmount => {
+      const decimals = asset in assetDecimals ? assetDecimals[asset] : DEFAULT_MAYACHAIN_DECIMALS
+      return decimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFromStringEx(asset))
+        ? new CryptoAmount(baseAmount(amount, decimals), assetFromStringEx(asset))
         : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFromStringEx(asset)), decimals)
     }
 
@@ -255,12 +263,12 @@ export class MayachainQuery {
           inboundTx: {
             hash: action.in[0].txID,
             address: action.in[0].address,
-            amount: getInboundCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
+            amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
           },
           outboundTx: {
             hash: action.out[0].txID,
             address: action.out[0].address,
-            amount: getInboundCryptoAmount(assetDecimals, action.out[0].coins[0].asset, action.out[0].coins[0].amount),
+            amount: getCryptoAmount(assetDecimals, action.out[0].coins[0].asset, action.out[0].coins[0].amount),
           },
         }
       }),

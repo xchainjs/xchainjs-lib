@@ -104,7 +104,7 @@ describe('Thorchain-query tests', () => {
   })
 
   it('Should get swaps history', async () => {
-    const swapResume = await thorchainQuery.getSwapsHistory({ addresses: ['address'] })
+    const swapResume = await thorchainQuery.getSwapHistory({ addresses: ['address'] })
     expect(swapResume.count === swapResume.swaps.length)
     expect({
       date: swapResume.swaps[0].date,

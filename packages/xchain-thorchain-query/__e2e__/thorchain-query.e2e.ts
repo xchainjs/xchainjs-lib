@@ -10,7 +10,7 @@ describe('Thorchain Query', () => {
   })
 
   it('Should get swaps history', async () => {
-    const swapResume: SwapsHistory = await thorchainQuery.getSwapsHistory({
+    const swapResume: SwapsHistory = await thorchainQuery.getSwapHistory({
       addresses: ['address'],
     })
     console.log(

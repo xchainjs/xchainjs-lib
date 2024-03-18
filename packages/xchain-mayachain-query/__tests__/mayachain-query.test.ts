@@ -122,7 +122,7 @@ describe('Mayachain-query tests', () => {
   })
 
   it('Should get swaps history', async () => {
-    const swapResume = await mayachainQuery.getSwapsHistory({ addresses: ['address'] })
+    const swapResume = await mayachainQuery.getSwapHistory({ addresses: ['address'] })
     expect(swapResume.count === swapResume.swaps.length)
     expect({
       date: swapResume.swaps[0].date,
