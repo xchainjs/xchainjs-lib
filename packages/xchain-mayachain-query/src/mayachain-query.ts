@@ -5,7 +5,7 @@ import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import { Asset, CryptoAmount, assetFromStringEx, assetToString, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
 
 import { MayachainCache } from './mayachain-cache'
-import { InboundDetail, QuoteSwap, QuoteSwapParams } from './types'
+import { InboundDetail, QuoteSwap, QuoteSwapParams, SwapHistoryParams, SwapsHistory } from './types'
 import {
   BtcAsset,
   BtcChain,
@@ -21,6 +21,7 @@ import {
   RuneAsset,
   ThorChain,
   getBaseAmountWithDiffDecimals,
+  getCryptoAmountWithNotation,
 } from './utils'
 
 /**
@@ -224,5 +225,45 @@ export class MayachainQuery {
    */
   public async getPools(): Promise<PoolDetail[]> {
     return this.mayachainCache.getPools()
+  }
+
+  /**
+   * Get swap addresses swap history
+   * @param { addresses } SwapHistoryParams Swap history params
+   * @returns {SwapResume} Swap resume
+   */
+  public async getSwapsHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
+    const actionsResume = await this.mayachainCache.midgardQuery.getActions({
+      address: addresses.join(','),
+      type: 'swap',
+    })
+    const assetDecimals = await this.mayachainCache.getAssetDecimals()
+
+    const getInboundCryptoAmount = (pools: Record<string, number>, asset: string, amount: string): CryptoAmount => {
+      const decimals = asset in pools ? pools[asset] || DEFAULT_MAYACHAIN_DECIMALS : DEFAULT_MAYACHAIN_DECIMALS
+      return decimals === DEFAULT_MAYACHAIN_DECIMALS
+        ? new CryptoAmount(baseAmount(amount), assetFromStringEx(asset))
+        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFromStringEx(asset)), decimals)
+    }
+
+    return {
+      count: actionsResume.count ? Number(actionsResume.count) : 0,
+      swaps: actionsResume.actions.map((action) => {
+        return {
+          date: new Date(Number(action.date) / 10 ** 6),
+          status: action.status,
+          inboundTx: {
+            hash: action.in[0].txID,
+            address: action.in[0].address,
+            amount: getInboundCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
+          },
+          outboundTx: {
+            hash: action.out[0].txID,
+            address: action.out[0].address,
+            amount: getInboundCryptoAmount(assetDecimals, action.out[0].coins[0].asset, action.out[0].coins[0].amount),
+          },
+        }
+      }),
+    }
   }
 }
