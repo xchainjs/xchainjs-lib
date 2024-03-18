@@ -1339,8 +1339,9 @@ export class ThorchainQuery {
   }
 
   /**
-   * Get swap addresses swap history
+   * Get addresses swap history
    * @param { addresses } SwapHistoryParams Swap history params
+   * @param {SwapHistoryParams} params Swap history params
    * @returns {SwapResume} Swap resume
    */
   public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
