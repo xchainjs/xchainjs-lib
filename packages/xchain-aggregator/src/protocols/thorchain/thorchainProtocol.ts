@@ -4,7 +4,7 @@ import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Asset, assetToString, eqAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, QuoteSwap, QuoteSwapParams, TxSubmitted } from '../../types'
+import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, SwapHistoryParams, TxSubmitted } from '../../types'
 
 export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain' as const
@@ -60,5 +60,20 @@ export class ThorchainProtocol implements IProtocol {
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     return this.thorchainAmm.doSwap(params)
+  }
+
+  /**
+   * Get historical swaps
+   * @param {Address[]} addresses Addresses of which return their swap history
+   * @returns the swap history
+   */
+  public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapHistory> {
+    const swapHistory = await this.thorchainQuery.getSwapHistory({ addresses })
+    return {
+      count: swapHistory.count,
+      swaps: swapHistory.swaps.map((swap) => {
+        return { protocol: this.name, ...swap }
+      }),
+    }
   }
 }

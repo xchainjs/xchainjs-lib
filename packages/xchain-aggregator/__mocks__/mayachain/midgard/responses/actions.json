@@ -1,0 +1,75 @@
+{
+  "actions": [
+    {
+      "date": "1710210508760883749",
+      "height": "5275978",
+      "in": [
+        {
+          "address": "0xaa278b62225f6dbc4436de8fa3dd195e1542d159",
+          "coins": [
+            {
+              "amount": "1000000",
+              "asset": "ETH.ETH"
+            }
+          ],
+          "txID": "224CAF4D502A0A415F1312AFD16C0E7A2E3E79840AF593C2F875C806AA12E020"
+        }
+      ],
+      "metadata": {
+        "swap": {
+          "affiliateAddress": "wr",
+          "affiliateFee": "100",
+          "isStreamingSwap": false,
+          "liquidityFee": "2559820",
+          "memo": "=:MAYA.CACAO:maya17xu9ej4rkxsmnl3wkp0kph6k4jk70gzay56p0l::wr:100",
+          "networkFees": [
+            {
+              "amount": "2000000000",
+              "asset": "MAYA.CACAO"
+            },
+            {
+              "amount": "2000000000",
+              "asset": "MAYA.CACAO"
+            }
+          ],
+          "swapSlip": "0",
+          "swapTarget": "0"
+        }
+      },
+      "out": [
+        {
+          "address": "maya17xu9ej4rkxsmnl3wkp0kph6k4jk70gzay56p0l",
+          "coins": [
+            {
+              "amount": "33297336036086",
+              "asset": "MAYA.CACAO"
+            }
+          ],
+          "height": "5275978",
+          "txID": ""
+        },
+        {
+          "address": "maya1a427q3v96psuj4fnughdw8glt5r7j38ljfa6hh",
+          "coins": [
+            {
+              "amount": "334352001083",
+              "asset": "MAYA.CACAO"
+            }
+          ],
+          "height": "5275978",
+          "txID": ""
+        }
+      ],
+      "pools": [
+        "ETH.ETH"
+      ],
+      "status": "success",
+      "type": "swap"
+    }
+  ],
+  "count": "1",
+  "meta": {
+    "nextPageToken": "52759789000000001",
+    "prevPageToken": "52759789000000012"
+  }
+}

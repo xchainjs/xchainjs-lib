@@ -1,3 +1,4 @@
+import { TxHash } from '@xchainjs/xchain-client'
 import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
 
 /**
@@ -51,11 +52,35 @@ type QuoteSwapParams = {
   affiliateAddress?: string // The affiliate address for the swap
 }
 
+type SwapHistoryParams = {
+  addresses: Address[]
+}
+
+type TransactionAction = {
+  hash: TxHash
+  address: Address
+  amount: CryptoAmount
+}
+
+type SwapResume = {
+  protocol: Protocol
+  date: Date
+  status: 'success' | 'pending'
+  inboundTx: TransactionAction
+  outboundTx: TransactionAction
+}
+
+type SwapHistory = {
+  count: number
+  swaps: SwapResume[]
+}
+
 interface IProtocol {
   name: string
   isAssetSupported(asset: Asset): Promise<boolean>
   estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>
   doSwap(params: QuoteSwapParams): Promise<TxSubmitted>
+  getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory>
 }
 
-export { IProtocol, QuoteSwapParams, QuoteSwap, TxSubmitted, Protocol }
+export { IProtocol, QuoteSwapParams, QuoteSwap, TxSubmitted, Protocol, SwapHistory, SwapResume, SwapHistoryParams }

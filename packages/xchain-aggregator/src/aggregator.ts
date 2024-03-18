@@ -2,7 +2,16 @@ import { assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { MayachainProtocol, ThorchainProtocol } from './protocols'
-import { IProtocol, Protocol, QuoteSwap, QuoteSwapParams, TxSubmitted } from './types'
+import {
+  IProtocol,
+  Protocol,
+  QuoteSwap,
+  QuoteSwapParams,
+  SwapHistory,
+  SwapHistoryParams,
+  SwapResume,
+  TxSubmitted,
+} from './types'
 
 // Class definition for an Aggregator
 export class Aggregator {
@@ -59,5 +68,27 @@ export class Aggregator {
 
     if (!protocol) throw Error(`${protocolName} protocol is not supported`)
     return protocol.doSwap(params)
+  }
+
+  /**
+   * Get historical swaps
+   * @param {Address[]} addresses Addresses of which return their swap history
+   * @returns the swap history
+   */
+  public async getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory> {
+    const results = await Promise.allSettled(this.protocols.map((protocol) => protocol.getSwapHistory(params)))
+
+    const swaps: SwapResume[] = []
+
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        swaps.push(...result.value.swaps)
+      }
+    })
+
+    return {
+      count: swaps.length,
+      swaps: swaps.sort((swapA, swapB) => swapB.date.getTime() - swapA.date.getTime()),
+    }
   }
 }

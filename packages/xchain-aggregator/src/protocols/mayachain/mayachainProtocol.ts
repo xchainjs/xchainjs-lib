@@ -4,7 +4,7 @@ import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import { Asset, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, QuoteSwap, QuoteSwapParams, TxSubmitted } from '../../types'
+import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, SwapHistoryParams, TxSubmitted } from '../../types'
 
 export class MayachainProtocol implements IProtocol {
   public readonly name = 'Mayachain' as const
@@ -59,5 +59,20 @@ export class MayachainProtocol implements IProtocol {
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     return this.mayachainAmm.doSwap(params)
+  }
+
+  /**
+   * Get historical swaps
+   * @param {Address[]} addresses Addresses of which return their swap history
+   * @returns the swap history
+   */
+  public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapHistory> {
+    const swapHistory = await this.mayachainQuery.getSwapHistory({ addresses })
+    return {
+      count: swapHistory.count,
+      swaps: swapHistory.swaps.map((swap) => {
+        return { protocol: this.name, ...swap }
+      }),
+    }
   }
 }
