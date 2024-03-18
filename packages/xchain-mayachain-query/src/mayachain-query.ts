@@ -237,7 +237,8 @@ export class MayachainQuery {
 
   /**
    * Get swap addresses swap history
-   * @param { addresses } SwapHistoryParams Swap history params
+   * @param {SwapHistoryParams} params Swap history params
+   * @param {Address[]} params.addresses - List of addresses
    * @returns {SwapResume} Swap resume
    */
   public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
