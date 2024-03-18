@@ -1,0 +1,78 @@
+import { AssetCacao } from '@xchainjs/xchain-mayachain'
+import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
+import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
+import { Asset, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
+
+import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, SwapHistoryParams, TxSubmitted } from '../../types'
+
+export class MayachainProtocol implements IProtocol {
+  public readonly name = 'Mayachain' as const
+  private mayachainQuery: MayachainQuery
+  private mayachainAmm: MayachainAMM
+
+  constructor(wallet?: Wallet) {
+    this.mayachainQuery = new MayachainQuery()
+    this.mayachainAmm = new MayachainAMM(this.mayachainQuery, wallet)
+  }
+
+  /**
+   * Check if an asset is supported in the protocol
+   * @param {Asset} asset Asset to check if it is supported
+   * @returns {boolean} True if the asset is supported, otherwise false
+   */
+  public async isAssetSupported(asset: Asset): Promise<boolean> {
+    if (eqAsset(asset, AssetCacao)) return true
+    const pools = await this.mayachainQuery.getPools()
+    return (
+      pools.findIndex((pool) => pool.status === 'available' && eqAsset(asset, assetFromStringEx(pool.asset))) !== -1
+    )
+  }
+
+  /**
+   * Estimate swap by validating the swap parameters.
+   *
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
+   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
+   */
+  public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
+    const estimatedSwap = await this.mayachainAmm.estimateSwap(params)
+    return {
+      protocol: this.name,
+      toAddress: estimatedSwap.toAddress,
+      memo: estimatedSwap.memo,
+      expectedAmount: estimatedSwap.expectedAmount,
+      dustThreshold: estimatedSwap.dustThreshold,
+      fees: estimatedSwap.fees,
+      totalSwapSeconds: estimatedSwap.inboundConfirmationSeconds || 0 + estimatedSwap.outboundDelaySeconds,
+      slipBasisPoints: estimatedSwap.slipBasisPoints,
+      canSwap: estimatedSwap.canSwap,
+      errors: estimatedSwap.errors,
+      warning: estimatedSwap.warning,
+    }
+  }
+
+  /**
+   * Perform a swap operation between assets.
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
+   */
+  public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
+    return this.mayachainAmm.doSwap(params)
+  }
+
+  /**
+   * Get historical swaps
+   * @param {Address[]} addresses Addresses of which return their swap history
+   * @returns the swap history
+   */
+  public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapHistory> {
+    const swapHistory = await this.mayachainQuery.getSwapHistory({ addresses })
+    return {
+      count: swapHistory.count,
+      swaps: swapHistory.swaps.map((swap) => {
+        return { protocol: this.name, ...swap }
+      }),
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "dust_threshold": "10000",
+  "expected_amount_out": "1770607901",
+  "expected_amount_out_streaming": "",
+  "expiry": 1710087554,
+  "fees": {
+    "affiliate": "0",
+    "asset": "ETH.ETH",
+    "liquidity": "3834248",
+    "outbound": "1000000",
+    "slippage_bps": 21,
+    "total": "4834248",
+    "total_bps": 27
+  },
+  "inbound_address": "bc1qpg8zcjzrjjnknzkqh2eenyeaxj7qlax6hpy62p",
+  "inbound_confirmation_blocks": 1,
+  "inbound_confirmation_seconds": 600,
+  "max_streaming_quantity": 0,
+  "notes": "First output should be to inbound_address, second output should be change back to self, third output should be OP_RETURN, limited to 80 bytes. Do not send below the dust threshold. Do not use exotic spend scripts, locks or address formats (P2WSH with Bech32 address format preferred).",
+  "outbound_delay_blocks": 720,
+  "outbound_delay_seconds": 4320,
+  "recommended_min_amount_in": "224808",
+  "slippage_bps": 21,
+  "streaming_slippage_bps": 21,
+  "streaming_swap_blocks": 0,
+  "total_swap_seconds": 4920,
+  "warning": "Do not cache this response. Do not send funds after the expiry."
+}
