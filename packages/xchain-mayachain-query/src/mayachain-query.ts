@@ -239,7 +239,7 @@ export class MayachainQuery {
    * Get swap addresses swap history
    * @param {SwapHistoryParams} params Swap history params
    * @param {Address[]} params.addresses - List of addresses
-   * @returns {SwapResume} Swap resume
+   * @returns {SwapsHistory} Swap history
    */
   public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
     const actionsResume = await this.mayachainCache.midgardQuery.getActions({
