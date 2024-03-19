@@ -1,3 +1,4 @@
+import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
 import { MidgardQuery } from '@xchainjs/xchain-mayamidgard-query'
 import { CachedValue } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -7,6 +8,7 @@ import { MayaChain, Mayanode } from './utils'
 
 export type MayachainCacheConf = {
   expirationTimeInboundAddress: number // Expiration time for the inbound address cache in milliseconds
+  expirationTimePools: number // Expiration time for the inbound address cache in milliseconds
 }
 
 /**
@@ -18,6 +20,7 @@ export class MayachainCache {
   private conf: MayachainCacheConf // Configuration for the cache
   private readonly inboundDetailCache: CachedValue<Record<string, InboundDetail>> // Cached value for inbound details
   private readonly assetDecimalsCache: CachedValue<Record<string, number>> // Cached value for asset decimals
+  private readonly poolsCache: CachedValue<PoolDetail[]> // Cached value pools
 
   /**
    * Constructor to create a MayachainCache.
@@ -35,7 +38,7 @@ export class MayachainCache {
     // Initialize instances and configuration
     this.midgardQuery = midgardQuery
     this.mayanode = mayanode
-    this.conf = { expirationTimeInboundAddress: 6000, ...configuration }
+    this.conf = { expirationTimeInboundAddress: 60000, expirationTimePools: 60000, ...configuration }
 
     // Initialize cached values
     this.inboundDetailCache = new CachedValue<Record<string, InboundDetail>>(
@@ -43,6 +46,7 @@ export class MayachainCache {
       this.conf.expirationTimeInboundAddress,
     )
     this.assetDecimalsCache = new CachedValue<Record<string, number>>(() => this.refreshAssetDecimalsCache())
+    this.poolsCache = new CachedValue<PoolDetail[]>(() => this.refreshPoolsCache(), this.conf.expirationTimePools)
   }
 
   /**
@@ -63,6 +67,11 @@ export class MayachainCache {
   public async getAssetDecimals(): Promise<Record<string, number>> {
     if (!this.assetDecimalsCache) throw Error(`Could not refresh assets decimals`)
     return await this.assetDecimalsCache.getValue()
+  }
+
+  public async getPools(): Promise<PoolDetail[]> {
+    if (!this.poolsCache) throw Error(`Could not refresh pools cache`)
+    return await this.poolsCache.getValue()
   }
 
   /**
@@ -130,11 +139,19 @@ export class MayachainCache {
       'DASH.DASH': 8,
       'KUJI.KUJI': 6,
       'THOR.RUNE': 8,
-      'MAYA.CACAO': 8,
+      'MAYA.CACAO': 10,
       'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
       'ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 6,
       'ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0': 18,
       'KUJI.USK': 6,
     }
+  }
+
+  /**
+   * Refreshes the Pools cache
+   * @returns {PoolDetail[]} the list of pools
+   */
+  private async refreshPoolsCache(): Promise<PoolDetail[]> {
+    return this.midgardQuery.getPools()
   }
 }
