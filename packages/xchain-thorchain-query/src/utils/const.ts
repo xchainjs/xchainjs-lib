@@ -25,4 +25,6 @@ export const MAYAChain = 'MAYA'
 export const BSCChain = 'BSC'
 export const THORChain = 'THOR'
 
+export const THORCHAIN_DECIMAL = 8
+
 export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)

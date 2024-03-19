@@ -1,0 +1,148 @@
+{
+  "actions": [
+    {
+      "date": "1710685749029840134",
+      "height": "15151326",
+      "in": [
+        {
+          "address": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+          "coins": [
+            {
+              "amount": "899293646959",
+              "asset": "DOGE/DOGE"
+            }
+          ],
+          "txID": "EA7F60B6EB355A40FA7DAA030A0F09F27B7C3AE18E8AE8AB55A7C87DA80F0446"
+        }
+      ],
+      "metadata": {
+        "swap": {
+          "affiliateAddress": "",
+          "affiliateFee": "0",
+          "isStreamingSwap": false,
+          "liquidityFee": "5336222",
+          "memo": "=:ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48:thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55:135560143957",
+          "networkFees": [
+            {
+              "amount": "17206900",
+              "asset": "ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48"
+            }
+          ],
+          "streamingSwapMeta": {
+            "count": "1",
+            "depositedCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "inCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "interval": "0",
+            "lastHeight": "0",
+            "outCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "quantity": "1"
+          },
+          "swapSlip": "3",
+          "swapTarget": "135560143957"
+        }
+      },
+      "out": [
+        {
+          "address": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+          "coins": [
+            {
+              "amount": "135586901000",
+              "asset": "ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48"
+            }
+          ],
+          "height": "15151326",
+          "txID": ""
+        }
+      ],
+      "pools": [
+        "DOGE.DOGE",
+        "ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48"
+      ],
+      "status": "success",
+      "type": "swap"
+    },
+    {
+      "date": "1710685742836624291",
+      "height": "15151325",
+      "in": [
+        {
+          "address": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+          "coins": [
+            {
+              "amount": "5117068269",
+              "asset": "AVAX/AVAX"
+            }
+          ],
+          "txID": "5400CA16A8DF5A7EA4EE229584ACCEE6640C17A14F3ACAD94C1D3D1DBD20D801"
+        }
+      ],
+      "metadata": {
+        "swap": {
+          "affiliateAddress": "",
+          "affiliateFee": "0",
+          "isStreamingSwap": false,
+          "liquidityFee": "8136689",
+          "memo": "=:RUNE:thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55:32670419584",
+          "networkFees": [
+            {
+              "amount": "2000000",
+              "asset": "THOR.RUNE"
+            }
+          ],
+          "streamingSwapMeta": {
+            "count": "1",
+            "depositedCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "inCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "interval": "0",
+            "lastHeight": "0",
+            "outCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "quantity": "1"
+          },
+          "swapSlip": "2",
+          "swapTarget": "32670419584"
+        }
+      },
+      "out": [
+        {
+          "address": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+          "coins": [
+            {
+              "amount": "32683461166",
+              "asset": "THOR.RUNE"
+            }
+          ],
+          "height": "15151325",
+          "txID": ""
+        }
+      ],
+      "pools": [
+        "AVAX.AVAX"
+      ],
+      "status": "success",
+      "type": "swap"
+    }
+  ],
+  "count": "2",
+  "meta": {
+    "nextPageToken": "151512749000000078",
+    "prevPageToken": "151513269000000082"
+  }
+}
