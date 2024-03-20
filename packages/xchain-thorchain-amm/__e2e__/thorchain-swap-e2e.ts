@@ -291,5 +291,15 @@ describe('ThorchainAmm e2e tests', () => {
 
       console.log(txSubmitted)
     })
+
+    it(`Should approve Thorchain router to spend`, async () => {
+      const asset = assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e')
+      const txSubmitted = await thorchainAmm.approveRouterToSpend({
+        asset,
+        amount: new CryptoAmount(assetToBase(assetAmount('10', 6)), asset),
+      })
+
+      console.log(txSubmitted)
+    })
   })
 })

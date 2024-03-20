@@ -122,3 +122,9 @@ export type IsApprovedParams = {
   amount: CryptoAmount
   address: Address
 }
+
+// Object representing parameters for approving a transaction
+export type ApproveParams = {
+  asset: Asset // The asset to approve
+  amount: CryptoAmount | undefined // The amount to approve, or undefined for an infinite approval
+}
