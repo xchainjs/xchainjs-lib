@@ -30,13 +30,10 @@
   "dependencies": {
     "@xchainjs/xchain-client": "0.16.2",
     "@xchainjs/xchain-mayachain": "1.0.1",
-    "@xchainjs/xchain-mayachain-amm": "1.0.14",
     "@xchainjs/xchain-mayachain-query": "0.1.9",
     "@xchainjs/xchain-thorchain": "1.0.4",
-    "@xchainjs/xchain-thorchain-amm": "1.0.5",
     "@xchainjs/xchain-thorchain-query": "0.7.7",
-    "@xchainjs/xchain-util": "0.13.3",
-    "@xchainjs/xchain-wallet": "0.1.8"
+    "@xchainjs/xchain-util": "0.13.3"
   },
   "devDependencies": {
     "@xchainjs/xchain-avax": "0.4.6",
@@ -45,5 +42,10 @@
     "@xchainjs/xchain-ethereum": "0.31.6",
     "@xchainjs/xchain-kujira": "0.1.12",
     "axios-mock-adapter": "1.20.0"
+  },
+  "peerDependencies": {
+    "@xchainjs/xchain-mayachain-amm": "1.0.14",
+    "@xchainjs/xchain-thorchain-amm": "1.0.5",
+    "@xchainjs/xchain-wallet": "0.1.8"
   }
 }

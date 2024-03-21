@@ -5,7 +5,7 @@ Protocol aggregator to make actions in different protocols with the aim to opera
 ## Install 
 
 ```sh
-yarn install @xchainjs/xchain-aggregator
+yarn install @xchainjs/xchain-aggregator @xchainjs/xchain-mayachain-amm @xchainjs/xchain-thorchain-amm 
 ```
 
 ## Supported protocols
@@ -20,3 +20,4 @@ The current supported protocols are:
 The current supported actions are:
 
 - Swap
+- Get swap history
