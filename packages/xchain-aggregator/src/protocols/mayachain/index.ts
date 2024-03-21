@@ -1,0 +1,1 @@
+export { MayachainProtocol } from './mayachainProtocol'

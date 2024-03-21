@@ -1,0 +1,14 @@
+{
+  "expected_amount_out": "1703141348",
+  "fees": {
+    "affiliate": "0",
+    "asset": "ETH.ETH",
+    "outbound": "1200000"
+  },
+  "inbound_address": "bc1qywkdg8kw4hkdjvrw4kucsttkjcmkguz2k3z5ua",
+  "inbound_confirmation_blocks": 1,
+  "inbound_confirmation_seconds": 600,
+  "outbound_delay_blocks": 256,
+  "outbound_delay_seconds": 3840,
+  "slippage_bps": 211
+}
