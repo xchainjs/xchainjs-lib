@@ -3,7 +3,8 @@
   "private": true,
   "description": "XChainJS Chain Clients MonoRepo",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "clean": "lerna run clean",

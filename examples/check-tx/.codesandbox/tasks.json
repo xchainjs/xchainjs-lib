@@ -1,0 +1,18 @@
+{
+    // These tasks will run in order when initializing your CodeSandbox project.
+    "setupTasks": [
+      {
+        "name": "Install Dependencies",
+        "command": "yarn install"
+      }
+    ],
+  
+    // These tasks can be run from CodeSandbox. Running one will open a log in the app.
+    "tasks": {
+      "Check tx": {
+        "name": "Check tx",
+        "command": "yarn checktx mainnet FF900F04B145799668AB9975E40C51E42024D8761330D2210DCC8447F44218AF"
+      }
+    }
+}
+  
