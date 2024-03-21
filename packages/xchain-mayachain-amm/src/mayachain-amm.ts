@@ -319,7 +319,7 @@ export class MayachainAMM {
   private isERC20Asset(asset: Asset): boolean {
     // Check if the asset's chain is an EVM chain and if the symbol matches AssetETH.symbol
     return this.isEVMChain(asset.chain)
-      ? [AssetETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1
+      ? [AssetETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 && !asset.synth
       : false
   }
 
