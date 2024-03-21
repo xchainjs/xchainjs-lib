@@ -1,5 +1,8 @@
 import commonjs from '@rollup/plugin-commonjs'
-import typescript from '@rollup/plugin-typescript'
+import json from '@rollup/plugin-json'
+import resolve from '@rollup/plugin-node-resolve'
+import external from 'rollup-plugin-peer-deps-external'
+import typescript from 'rollup-plugin-typescript2'
 
 import pkg from './package.json'
 
@@ -20,10 +23,16 @@ export default {
     },
   ],
   plugins: [
+    external(),
+    json(),
+    resolve({ preferBuiltins: true, browser: true }),
     typescript({
-      tsconfig: './tsconfig.json',
-      declarationDir: '.',
+      tsconfig: 'tsconfig.json',
+      exclude: '__tests__/**',
     }),
-    commonjs(),
+    commonjs({
+      include: /node_modules/,
+      exclude: '**/*.json',
+    }),
   ],
 }
