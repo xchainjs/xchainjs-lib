@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7
+
+### Patch Changes
+
+- c4bd96a: New method `getActions`
+
 ## 0.1.6
 
 ### Patch Changes

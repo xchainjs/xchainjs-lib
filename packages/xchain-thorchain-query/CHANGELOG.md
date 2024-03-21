@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.7
+
+### Patch Changes
+
+- d72fe81: New method `getSwapHistory`
+- Updated dependencies [d72fe81]
+  - @xchainjs/xchain-midgard-query@0.1.12
+
 ## 0.7.6
 
 ### Patch Changes
