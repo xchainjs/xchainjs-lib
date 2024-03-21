@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies [d72fe81]
+  - @xchainjs/xchain-thorchain-query@0.7.7
+
 ## 1.0.4
 
 ### Patch Changes

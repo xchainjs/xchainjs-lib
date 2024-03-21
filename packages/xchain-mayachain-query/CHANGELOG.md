@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.9
+
+### Patch Changes
+
+- c4bd96a: New method `getSwapHistory`
+- c4bd96a: New method `getPools`
+- c4bd96a: Bug fix with Cacao decimals
+- Updated dependencies [c4bd96a]
+  - @xchainjs/xchain-mayamidgard-query@0.1.7
+
 ## 0.1.8
 
 ### Patch Changes

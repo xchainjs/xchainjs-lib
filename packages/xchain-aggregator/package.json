@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-aggregator",
   "description": "Protocol aggregator to make actions in different protocols",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -30,11 +30,11 @@
   "dependencies": {
     "@xchainjs/xchain-client": "0.16.2",
     "@xchainjs/xchain-mayachain": "1.0.1",
-    "@xchainjs/xchain-mayachain-amm": "1.0.13",
-    "@xchainjs/xchain-mayachain-query": "0.1.8",
+    "@xchainjs/xchain-mayachain-amm": "1.0.14",
+    "@xchainjs/xchain-mayachain-query": "0.1.9",
     "@xchainjs/xchain-thorchain": "1.0.4",
-    "@xchainjs/xchain-thorchain-amm": "1.0.4",
-    "@xchainjs/xchain-thorchain-query": "0.7.6",
+    "@xchainjs/xchain-thorchain-amm": "1.0.5",
+    "@xchainjs/xchain-thorchain-query": "0.7.7",
     "@xchainjs/xchain-util": "0.13.3",
     "@xchainjs/xchain-wallet": "0.1.8"
   },
