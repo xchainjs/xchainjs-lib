@@ -121,11 +121,20 @@ Poweful tool to build whatever you want...
 
 ## Examples
 
-- [`doSwap(), doSend()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/do-swap)
-- [`addLiquidity()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/liquidity)
-- [`estimateSwap()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/estimate-swap)
-- [`checkTx()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/check-tx)
-- [`loans()`](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/loans)
+To show different use cases and to facilitate developers experience with XChainJS, we have created a few examples on [CodeSandbox](https://codesandbox.io/) where you will be able to see and fork our examples to create yours.
+
+Follow the [examples instructions](https://xchainjs.gitbook.io/xchainjs/examples-instructions) to be able to start working with the library in just a few minutes.
+
+Examples:
+
+- [Estimate Thorchain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/estimate-swap)
+- [THORChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-swap)
+- [Liquidity and savers](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/liquidity)
+- [Loans](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/loans)
+- [THORChain transaction status](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/check-tx)
+- [MAYAChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-maya-swap)
+
+
 
 ## Tools
 
