@@ -32,7 +32,65 @@
 
 <br />
 
-XChainJS is a library with a common interface for multiple blockchains, designed for easy and fast integration for wallets and THORChain and Mayachain interactions.
+XChainJS is a comprehensive toolkit designed to facilitate blockchain development by providing developers with a wide range of utilities, modules, and functionalities. Its purpose is to streamline the process of building decentralized applications (DApps), interacting with blockchain networks, and integrating blockchain technology into various projects.&#x20;
+
+The library aims to abstract away the complexities of blockchain development, allowing developers to focus on building innovative solutions without getting bogged down in low-level implementation details.
+
+## Purpose
+
+- **Simplify Blockchain Development**:
+  The primary purpose of the XchainJS library is to simplify blockchain development by providing developers with high-level abstractions and ready-to-use tools for common blockchain tasks.
+
+- **Promote Interoperability**:
+  The library aims to promote interoperability by offering support for multiple blockchain protocols and standards, enabling developers to build applications that can interact seamlessly with different blockchain networks.
+
+- **Empower Developers**:
+  By abstracting away the complexities of blockchain technology, the XchainJS library empowers developers of all skill levels to leverage the potential of blockchain in their projects, regardless of their expertise in cryptography or distributed systems.
+
+
+## Scope
+
+**Blockchain Interaction**:
+The XchainJS library covers a wide range of functionalities related to interacting with blockchain networks, including transaction handling, wallet management, protocols interactions, and data querying.
+**Protocol Support**:
+It provides support for various blockchain protocols and standards, such as [THORChain](https://thorchain.org/) and [MAYAProtocol](https://docs.mayaprotocol.com/).
+
+**Utilities and Tools**:
+The library offers a collection of utilities and tools for common blockchain tasks, including cryptographic operations, address formatting, transaction parsing, and fetching data.
+
+## Key Features
+
+**Modularity**:
+The xchain library is modular, allowing developers to pick and choose the modules and functionalities they need for their specific use cases. This modular approach promotes flexibility and scalability in blockchain development.
+
+**Abstraction**:
+It abstracts away the complexities of blockchain technology, providing developers with high-level interfaces and abstractions that shield them from low-level implementation details.
+
+**Protocol Agnosticism**:
+The library is designed to be protocol-agnostic, meaning it can support multiple blockchain protocols and standards. This allows developers to build applications that are not tied to a specific blockchain network.
+
+**Community Support**:
+The xchain library is supported by a vibrant community of developers and contributors who actively maintain and improve the library, ensuring its relevance and usability in the rapidly evolving blockchain landscape.
+
+
+## Examples
+
+To show different use cases and to facilitate developers experience with XChainJS, we have created a few examples on [CodeSandbox](https://codesandbox.io/) where you will be able to see and fork our examples to create yours.
+
+Follow the [examples instructions](https://xchainjs.gitbook.io/xchainjs/examples-instructions) to be able to start working with the library in just a few minutes.
+
+Examples:
+
+- [Estimate Thorchain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/estimate-swap)
+- [THORChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-swap)
+- [Liquidity and savers](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/liquidity)
+- [Loans](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/loans)
+- [THORChain transaction status](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/check-tx)
+- [MAYAChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-maya-swap)
+
+## Documentation
+
+More information about how to use each XChainJS package can be found on [documentation](https://xchainjs.gitbook.io/xchainjs)
 
 
 ## Packages
@@ -119,33 +177,11 @@ Poweful tool to build whatever you want...
 | [@xchainjs/xchain-aggregator](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-aggregator) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-aggregator)](https://www.npmjs.com/package/@xchainjs/xchain-aggregator) |
 
 
-## Examples
-
-To show different use cases and to facilitate developers experience with XChainJS, we have created a few examples on [CodeSandbox](https://codesandbox.io/) where you will be able to see and fork our examples to create yours.
-
-Follow the [examples instructions](https://xchainjs.gitbook.io/xchainjs/examples-instructions) to be able to start working with the library in just a few minutes.
-
-Examples:
-
-- [Estimate Thorchain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/estimate-swap)
-- [THORChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-swap)
-- [Liquidity and savers](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/liquidity)
-- [Loans](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/loans)
-- [THORChain transaction status](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/check-tx)
-- [MAYAChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-maya-swap)
-
-
-
 ## Tools
 
 ### TxJammer
 
 [Tx Jammer](https://github.com/xchainjs/xchainjs-lib/tree/master/tools/txJammer) is a script which pushes a random amount of different types of transactions to stagenet to verify new stagenet releases
-
-
-## Documentation
-
-More information about how to use each XChainJS package can be found on [documentation](https://xchainjs.gitbook.io/xchainjs)
 
 
 ## Contributing
