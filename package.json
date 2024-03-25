@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "clean": "turbo run clean",
-    "build": "turbo run build",
+    "build": "turbo run build --cache-dir=.turbo",
     "build:examples": "tsc examples/**/*.ts --noEmit --skipLibCheck",
     "build:tools": "tsc tools/**/*.ts --noEmit --skipLibCheck",
     "pub": "turbo publish",
