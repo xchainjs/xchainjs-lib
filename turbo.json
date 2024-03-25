@@ -12,7 +12,7 @@
     },
     "test": {
       "dependsOn": [
-        "build"
+        "^build"
       ],
       "inputs": [
         "src/**/*.ts",
