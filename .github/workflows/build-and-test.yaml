@@ -8,15 +8,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v1
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
+          node-version: 20.x
+          cache: yarn
 
       - name: Install dependencies
-        run: yarn && yarn yarn-audit-ci --high
+        run: yarn install --frozen-lockfile && yarn yarn-audit-ci --high
 
       - name: Build packages
         run: yarn build
