@@ -7,17 +7,20 @@
         "^build"
       ],
       "outputs": [
-        ".lib/**"
+        "lib/**"
       ]
     },
     "test": {
       "dependsOn": [
-        "^build"
+        "build"
       ],
       "inputs": [
         "src/**/*.ts",
         "test/**/*.ts"
       ]
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

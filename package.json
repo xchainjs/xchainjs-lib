@@ -7,7 +7,8 @@
     "examples/*"
   ],
   "scripts": {
-    "clean": "turbo run clean",
+    "clean": "turbo run clean && rm -rf ./.turbo",
+    "clean:nodemodules": "rm -rf ./packages/*/node_modules && rm -rf ./node_modules",
     "build": "turbo run build --cache-dir=.turbo",
     "build:examples": "tsc examples/**/*.ts --noEmit --skipLibCheck",
     "build:tools": "tsc tools/**/*.ts --noEmit --skipLibCheck",
