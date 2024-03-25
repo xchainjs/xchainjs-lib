@@ -41,7 +41,7 @@ export class ThorchainAction {
 
     return {
       hash,
-      url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
+      url: await wallet.getExplorerTxUrl(THORChain, hash),
     }
   }
 
