@@ -18,8 +18,10 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "build": "yarn clean && rollup -c",
-    "clean": "rimraf -rf ./lib",
+    "clean": "rm -rf .turbo && rm -rf lib",
+    "build": "yarn build:pro",
+    "build:dev": "tsup --env.ENV dev",
+    "build:pro": "tsup --env.ENV pro",
     "prepublishOnly": "yarn run build",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
@@ -28,24 +30,23 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "0.16.2",
-    "@xchainjs/xchain-mayachain": "1.0.1",
-    "@xchainjs/xchain-mayachain-query": "0.1.9",
-    "@xchainjs/xchain-thorchain": "1.0.4",
-    "@xchainjs/xchain-thorchain-query": "0.7.7",
-    "@xchainjs/xchain-util": "0.13.3"
+    "@xchainjs/xchain-client": "*",
+    "@xchainjs/xchain-mayachain": "*",
+    "@xchainjs/xchain-mayachain-amm": "*",
+    "@xchainjs/xchain-mayachain-query": "*",
+    "@xchainjs/xchain-thorchain": "*",
+    "@xchainjs/xchain-thorchain-amm": "*",
+    "@xchainjs/xchain-thorchain-query": "*",
+    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-wallet": "*"
   },
   "devDependencies": {
-    "@xchainjs/xchain-avax": "0.4.6",
-    "@xchainjs/xchain-bitcoin": "0.23.13",
-    "@xchainjs/xchain-binance": "5.7.11",
-    "@xchainjs/xchain-ethereum": "0.31.6",
-    "@xchainjs/xchain-kujira": "0.1.12",
+    "@xchainjs/xchain-avax": "*",
+    "@xchainjs/xchain-bitcoin": "*",
+    "@xchainjs/xchain-binance": "*",
+    "@xchainjs/xchain-ethereum": "*",
+    "@xchainjs/xchain-kujira": "*",
+    "axios": "1.3.6",
     "axios-mock-adapter": "1.20.0"
-  },
-  "peerDependencies": {
-    "@xchainjs/xchain-mayachain-amm": "1.0.14",
-    "@xchainjs/xchain-thorchain-amm": "1.0.5",
-    "@xchainjs/xchain-wallet": "0.1.8"
   }
 }

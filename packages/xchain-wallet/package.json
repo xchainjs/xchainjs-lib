@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build": "yarn clean && rollup -c",
-    "clean": "rimraf -rf ./lib",
+    "clean": "rm -rf .turbo && rm -rf lib",
     "prepublishOnly": "yarn run build",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
