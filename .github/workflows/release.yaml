@@ -34,18 +34,13 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build packages
-        run: yarn build
-
-      - name: Test
-        run: yarn test
-
       - name: Create release pull request or publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
           version: yarn increase-packages
-          publish: yarn changeset publish
+          publish: yarn publish-packages
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
