@@ -29,8 +29,7 @@
     "build": "yarn clean && rollup -c",
     "test": "jest",
     "compile": "tsc -p tsconfig.build.json",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build"
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "devDependencies": {
     "@binance-chain/javascript-sdk": "^4.2.0",

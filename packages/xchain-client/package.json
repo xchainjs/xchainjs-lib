@@ -15,7 +15,6 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
     "compile": "tsc -p tsconfig.build.json",
-    "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {

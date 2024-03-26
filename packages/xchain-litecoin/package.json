@@ -29,7 +29,6 @@
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "e2e": "jest --config jest.config.e2e.js",
-    "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {

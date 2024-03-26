@@ -22,7 +22,6 @@
     "build": "yarn build:pro",
     "build:dev": "tsup --env.ENV dev",
     "build:pro": "tsup --env.ENV pro",
-    "prepublishOnly": "yarn run build",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
   },

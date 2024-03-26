@@ -27,7 +27,6 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn run build",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:midgard && yarn generate:types:midgard",
     "generate:types:midgard": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://midgard.mayachain.info/v2/swagger.json -g typescript-axios -o ./src/generated/midgardApi --generate-alias-as-model --reserved-words-mappings in=in",
