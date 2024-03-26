@@ -29,7 +29,6 @@
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build",
     "start:example": "ts-node example/index.ts",
     "generate:ThorchainMsgs": "./genMsgs.sh"
   },

@@ -28,8 +28,7 @@
     "build": "yarn clean && rollup -c",
     "test": "jest --passWithNoTests",
     "e2e": "jest --config jest.config.e2e.js",
-    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build"
+    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
   },
   "publishConfig": {
     "access": "public"

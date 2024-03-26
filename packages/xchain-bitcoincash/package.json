@@ -30,7 +30,6 @@
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__,__mocks__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
