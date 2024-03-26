@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- b2e198f: Add validation that allows synthetics to be discarded from EVM approvals
+
+### Patch Changes
+
+- 0944dcc: Get URL in protocol transactions bug fix
+- 502ceca: New method `approveRouterToSpend` to approve Thorchain routers to spend a certain amount in the name of the user
+
 ## 1.0.5
 
 ### Patch Changes
