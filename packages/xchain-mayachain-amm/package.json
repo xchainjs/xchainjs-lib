@@ -37,7 +37,7 @@
   "dependencies": {
     "@xchainjs/xchain-ethereum": "0.31.6",
     "@xchainjs/xchain-kujira": "0.1.12",
-    "@xchainjs/xchain-mayachain-query": "0.1.9",
+    "@xchainjs/xchain-mayachain-query": "^0.1.9",
     "@xchainjs/xchain-mayachain": "1.0.1",
     "@xchainjs/xchain-thorchain": "1.0.4",
     "@xchainjs/xchain-wallet": "0.1.8"

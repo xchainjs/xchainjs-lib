@@ -33,6 +33,9 @@ describe('Midgard Client Test', () => {
     volume24h: '8370845079708',
     totalCollateral: '',
     totalDebtTor: '',
+    earnings: '1006874582462',
+    earningsAnnualAsPercentOfDepth: '0.23113862350837777',
+    lpLuvi: '-0.8152153645976675',
   }
 
   it(`Should return pools array and match interface type PoolDetail`, async () => {
