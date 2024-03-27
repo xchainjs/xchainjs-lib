@@ -7,6 +7,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { Client as GaiaClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, THORChain, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
 import {
@@ -27,11 +28,11 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount } from '@xchainjs/xchain-util'
+import { CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAction } from './thorchain-action'
-import { AddLiquidity, IsApprovedParams, TxSubmitted, WithdrawLiquidity } from './types'
+import { AddLiquidity, ApproveParams, IsApprovedParams, TxSubmitted, WithdrawLiquidity } from './types'
 import { isProtocolERC20Asset } from './utils'
 
 /**
@@ -196,6 +197,32 @@ export class ThorchainAMM {
       memo: txDetails.memo,
       recipient: txDetails.toAddress,
     })
+  }
+
+  /**
+   * Approve the Thorchain router to spend a certain amount in the asset chain.
+   * @param {ApproveParams} approveParams Parameters for approving the router to spend
+   * @returns {Promise<TxSubmitted>} Transaction hash and URL
+   */
+  public async approveRouterToSpend({ asset, amount }: ApproveParams): Promise<TxSubmitted> {
+    // Get inbound details for the asset chain
+    const inboundDetails = await this.thorchainQuery.getChainInboundDetails(asset.chain)
+    if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
+    // Perform approval
+    const tx = await this.wallet.approve(
+      asset,
+      amount?.baseAmount ||
+        baseAmount(
+          MAX_APPROVAL.toString(),
+          await this.thorchainQuery.thorchainCache.midgardQuery.getDecimalForAsset(asset),
+        ),
+      inboundDetails.router,
+    )
+    // Return transaction hash and URL
+    return {
+      hash: tx.hash,
+      url: await this.wallet.getExplorerTxUrl(asset.chain, tx.hash),
+    }
   }
 
   /**

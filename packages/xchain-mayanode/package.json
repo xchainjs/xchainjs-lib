@@ -24,10 +24,9 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "clean": "rimraf --glob ./lib/**",
+    "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:mayanode && yarn generate:types:mayanode",
     "generate:types:mayanode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://mayanode.mayachain.info/mayachain/doc//openapi.yaml -g typescript-axios -o ./src/generated/mayanodeApi --skip-validate-spec --generate-alias-as-model",

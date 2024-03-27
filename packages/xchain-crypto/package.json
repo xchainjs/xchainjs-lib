@@ -14,11 +14,10 @@
     "lib"
   ],
   "scripts": {
-    "clean": "rimraf --glob ./lib/**",
+    "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "test": "jest --coverage",
-    "prepublishOnly": "yarn build"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",

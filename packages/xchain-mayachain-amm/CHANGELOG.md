@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- b2e198f: Add validation that allows synthetics to be discarded from EVM approvals
+
+### Patch Changes
+
+- 0944dcc: Get URL in protocol transactions bug fix
+
 ## 1.0.14
 
 ### Patch Changes

@@ -7,16 +7,18 @@
     "examples/*"
   ],
   "scripts": {
-    "clean": "lerna run clean",
-    "build": "lerna run build",
+    "clean": "turbo run clean && rm -rf ./.turbo",
+    "clean:nodemodules": "rm -rf ./packages/*/node_modules && rm -rf ./node_modules",
+    "build": "turbo run build --cache-dir=.turbo",
     "build:examples": "tsc examples/**/*.ts --noEmit --skipLibCheck",
     "build:tools": "tsc tools/**/*.ts --noEmit --skipLibCheck",
-    "pub": "lerna publish",
-    "test": "lerna run test",
-    "e2e": "lerna run e2e",
-    "lint": "lerna run lint",
+    "test": "turbo run test --cache-dir=.turbo",
+    "pub": "turbo publish",
+    "e2e": "turbo run e2e",
+    "lint": "turbo run lint",
     "update-packages": "yarn changeset",
     "increase-packages": "yarn changeset version",
+    "publish-packages": "turbo run build test --cache-dir=.turbo && yarn increase-packages && yarn changeset publish",
     "notification:prepare": "ts-node scripts/notification.ts"
   },
   "husky": {
@@ -46,7 +48,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.0",
     "jest": "^29.3.1",
-    "lerna": "^6.6.1",
     "lint-staged": "^13.1.0",
     "prettier": "^2.2.0",
     "rimraf": "5.0.0",
@@ -56,8 +57,10 @@
     "ts-jest": "^29.0.3",
     "ts-node": "10.9.2",
     "tslib": "^2.5.0",
+    "tsup": "8.0.2",
+    "turbo": "1.13.0",
     "typescript": "^5.0.4",
-    "yarn-audit-ci": "^1.2.0",
-    "weighted": "^1.0.0"
+    "weighted": "^1.0.0",
+    "yarn-audit-ci": "^1.2.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-amm",
-  "version": "1.0.14",
+  "version": "1.1.0",
   "description": "module that exposes estimating & swapping cryptocurrency assets on mayachain",
   "keywords": [
     "MAYAChain",
@@ -24,12 +24,11 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "clean": "rimraf --glob ./lib/**",
+    "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags"
   },
   "bugs": {

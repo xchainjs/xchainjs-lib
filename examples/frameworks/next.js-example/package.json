@@ -1,0 +1,32 @@
+{
+  "name": "next.js-example",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "next": "14.1.4",
+    "@xchainjs/xchain-dash": "*",
+    "@xchainjs/xchain-crypto": "*",
+    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "*",
+    "ahooks": "3.7.10"
+  },
+  "devDependencies": {
+    "typescript": "5.4.3",
+    "@types/node": "20.11.30",
+    "@types/react": "18.2.69",
+    "@types/react-dom": "18.2.22",
+    "autoprefixer": "10.0.1",
+    "postcss": "8.4.38",
+    "tailwindcss": "3.3.0",
+    "eslint": "8.57.0",
+    "eslint-config-next": "14.1.4"
+  }
+}

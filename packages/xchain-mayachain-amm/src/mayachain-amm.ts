@@ -251,7 +251,7 @@ export class MayachainAMM {
 
     return {
       hash,
-      url: await this.wallet.getExplorerTxUrl(amount.asset.chain, hash),
+      url: await this.wallet.getExplorerTxUrl(MAYAChain, hash),
     }
   }
 
