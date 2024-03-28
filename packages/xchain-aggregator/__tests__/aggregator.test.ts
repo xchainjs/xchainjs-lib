@@ -47,7 +47,12 @@ describe('Aggregator', () => {
   })
 
   it('Should get swap history', async () => {
-    const swapHistory = await aggregator.getSwapHistory({ addresses: ['address'] })
+    const swapHistory = await aggregator.getSwapHistory({
+      chainAddresses: [
+        { chain: 'THOR', address: 'address' },
+        { chain: 'MAYA', address: 'address' },
+      ],
+    })
     expect(swapHistory.count).toEqual(swapHistory.swaps.length)
     const thorchainSwap = swapHistory.swaps.find((swap) => swap.protocol === 'Thorchain')
     expect(thorchainSwap).not.toBeUndefined()

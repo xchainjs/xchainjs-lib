@@ -1,5 +1,5 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, CryptoAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
 
 /**
  * TxSubmitted
@@ -53,7 +53,7 @@ type QuoteSwapParams = {
 }
 
 type SwapHistoryParams = {
-  addresses: Address[]
+  chainAddresses: { address: Address; chain: Chain }[]
 }
 
 type TransactionAction = {
@@ -78,6 +78,7 @@ type SwapHistory = {
 interface IProtocol {
   name: string
   isAssetSupported(asset: Asset): Promise<boolean>
+  getSupportedChains(): Promise<Chain[]>
   estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>
   doSwap(params: QuoteSwapParams): Promise<TxSubmitted>
   getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory>

@@ -76,7 +76,26 @@ export class Aggregator {
    * @returns the swap history
    */
   public async getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory> {
-    const results = await Promise.allSettled(this.protocols.map((protocol) => protocol.getSwapHistory(params)))
+    const getProtocolSwapHistory = async (protocol: IProtocol, params: SwapHistoryParams): Promise<SwapHistory> => {
+      const supportedChains = await protocol.getSupportedChains()
+      const compatibleChainAddresses = params.chainAddresses.filter(
+        (chainAddress) => supportedChains.findIndex((supportedChain) => supportedChain === chainAddress.chain) !== -1,
+      )
+      return compatibleChainAddresses.length === 0
+        ? {
+            swaps: [],
+            count: 0,
+          }
+        : protocol.getSwapHistory({
+            chainAddresses: compatibleChainAddresses,
+          })
+    }
+
+    const results = await Promise.allSettled(
+      this.protocols.map((protocol) => {
+        return getProtocolSwapHistory(protocol, params)
+      }),
+    )
 
     const swaps: SwapResume[] = []
 

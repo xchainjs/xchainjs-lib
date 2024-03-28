@@ -1,0 +1,73 @@
+[
+  {
+    "address": "bc1qywkdg8kw4hkdjvrw4kucsttkjcmkguz2k3z5ua",
+    "chain": "BTC",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "dust_threshold": "10000",
+    "gas_rate": "52",
+    "gas_rate_units": "satsperbyte",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "52500",
+    "outbound_tx_size": "1000",
+    "pub_key": "mayapub1addwnpepq20nay7huc2kxwg606ancpvywvdunan6ye5cace4t2dwwl4dtj9x2k9ftxp"
+  },
+  {
+    "address": "XdwUXJsAaw1jjcrqTuLz6zWYkyZQRUquUB",
+    "chain": "DASH",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "dust_threshold": "10000",
+    "gas_rate": "12",
+    "gas_rate_units": "satsperbyte",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "5412",
+    "outbound_tx_size": "451",
+    "pub_key": "mayapub1addwnpepq20nay7huc2kxwg606ancpvywvdunan6ye5cace4t2dwwl4dtj9x2k9ftxp"
+  },
+  {
+    "address": "0xe2991999342a6ed8521ed49903f7267f31363a46",
+    "chain": "ETH",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "dust_threshold": "0",
+    "gas_rate": "100",
+    "gas_rate_units": "gwei",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "840000",
+    "outbound_tx_size": "80000",
+    "pub_key": "mayapub1addwnpepq20nay7huc2kxwg606ancpvywvdunan6ye5cace4t2dwwl4dtj9x2k9ftxp",
+    "router": "0xe3985E6b61b814F7Cdb188766562ba71b446B46d"
+  },
+  {
+    "address": "kujira1ywkdg8kw4hkdjvrw4kucsttkjcmkguz23r7846",
+    "chain": "KUJI",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "dust_threshold": "0",
+    "gas_rate": "300000",
+    "gas_rate_units": "ukuji",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "300000",
+    "outbound_tx_size": "1",
+    "pub_key": "mayapub1addwnpepq20nay7huc2kxwg606ancpvywvdunan6ye5cace4t2dwwl4dtj9x2k9ftxp"
+  },
+  {
+    "address": "thor1ywkdg8kw4hkdjvrw4kucsttkjcmkguz2xv9yd0",
+    "chain": "THOR",
+    "chain_lp_actions_paused": false,
+    "chain_trading_paused": false,
+    "dust_threshold": "0",
+    "gas_rate": "2000000",
+    "gas_rate_units": "rune",
+    "global_trading_paused": false,
+    "halted": false,
+    "outbound_fee": "3000000",
+    "outbound_tx_size": "1",
+    "pub_key": "mayapub1addwnpepq20nay7huc2kxwg606ancpvywvdunan6ye5cace4t2dwwl4dtj9x2k9ftxp"
+  }
+]

@@ -1,7 +1,7 @@
-import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
+import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Asset, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { Asset, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, SwapHistoryParams, TxSubmitted } from '../../types'
@@ -27,6 +27,15 @@ export class ThorchainProtocol implements IProtocol {
     return (
       Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
     )
+  }
+
+  /**
+   * Retrieve the supported chains by the protocol
+   * @returns {Chain[]} the supported chains by the protocol
+   */
+  public async getSupportedChains(): Promise<Chain[]> {
+    const inboundDetails = await this.thorchainQuery.thorchainCache.getInboundDetails()
+    return [THORChain, ...Object.values(inboundDetails).map((inboundAddress) => inboundAddress.chain)]
   }
 
   /**
@@ -62,13 +71,15 @@ export class ThorchainProtocol implements IProtocol {
     return this.thorchainAmm.doSwap(params)
   }
 
-  /**
+  /**x
    * Get historical swaps
    * @param {Address[]} addresses Addresses of which return their swap history
    * @returns the swap history
    */
-  public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapHistory> {
-    const swapHistory = await this.thorchainQuery.getSwapHistory({ addresses })
+  public async getSwapHistory({ chainAddresses }: SwapHistoryParams): Promise<SwapHistory> {
+    const swapHistory = await this.thorchainQuery.getSwapHistory({
+      addresses: Array.from(new Set(chainAddresses.map((chainAddresses) => chainAddresses.address))),
+    })
     return {
       count: swapHistory.count,
       swaps: swapHistory.swaps.map((swap) => {
