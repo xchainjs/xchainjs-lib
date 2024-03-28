@@ -33,12 +33,12 @@ describe('Mayachain protocol', () => {
   })
 
   it('Should get all swaps with correct protocol name', async () => {
-    const swaps = await protocol.getSwapHistory({ addresses: ['address'] })
+    const swaps = await protocol.getSwapHistory({ chainAddresses: [{ chain: 'chain', address: 'address' }] })
     expect(swaps.swaps.every((swap) => swap.protocol === 'Mayachain')).toEqual(true)
   })
 
   it('Should get swaps history', async () => {
-    const swapResume = await protocol.getSwapHistory({ addresses: ['address'] })
+    const swapResume = await protocol.getSwapHistory({ chainAddresses: [{ chain: 'chain', address: 'address' }] })
     expect(swapResume.count === swapResume.swaps.length)
     expect({
       date: swapResume.swaps[0].date,

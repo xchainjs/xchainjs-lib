@@ -129,7 +129,9 @@ describe('Aggregator', () => {
   })
 
   it('Should get swaps history', async () => {
-    const swapHistory = await aggregator.getSwapHistory({ addresses: ['address'] })
+    const swapHistory = await aggregator.getSwapHistory({
+      chainAddresses: [{ chain: 'BTC', address: 'address' }],
+    })
 
     console.log(
       swapHistory.swaps.map((swap) => {
