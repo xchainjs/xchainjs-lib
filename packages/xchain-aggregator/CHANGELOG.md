@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+### Patch Changes
+
+- 512bdf6: Get swap history bug fix. Get swap history parameters updated from an array of `Address` to an array of `{ chain: Chain, address: Address}`
+
 ## 0.1.3
 
 ### Patch Changes
