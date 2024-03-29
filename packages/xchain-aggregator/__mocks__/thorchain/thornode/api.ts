@@ -10,5 +10,11 @@ export default {
     mock.onGet(/\/thorchain\/quote\/swap/).reply(function () {
       return [200, require('./responses/quoteSwap.json')]
     })
+    mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
+      return [200, require('./responses/inboundAddresses.json')]
+    })
+    mock.onGet(/\/thorchain\/mimir/).reply(function () {
+      return [200, require('./responses/mimir.json')]
+    })
   },
 }
