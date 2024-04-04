@@ -200,15 +200,15 @@ export class MayachainAMM {
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
     // Perform approval
-    const tx = await this.wallet.approve(
+    const hash = await this.wallet.approve(
       asset,
       amount?.baseAmount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
       inboundDetails.router,
     )
     // Return transaction hash and URL
     return {
-      hash: tx.hash,
-      url: await this.wallet.getExplorerTxUrl(asset.chain, tx.hash),
+      hash,
+      url: await this.wallet.getExplorerTxUrl(asset.chain, hash),
     }
   }
 
