@@ -3,27 +3,20 @@
  * Importing the `Client` class from the '@xchainjs/xchain-evm' module
  * Importing the `defaultEthParams` constant from the './const' file
  */
-import { Client as XchainEvmClient } from '@xchainjs/xchain-evm'
-
-import { defaultEthParams } from './const'
+import { EVMClientParams, LedgerClient as EVMLedgerClient } from '@xchainjs/xchain-evm'
 
 /**
- * Class definition for the Dogecoin EVM client.
+ * Class definition for the Ethereum EVM client.
  * Extends the `XchainEvmClient` class.
  */
-export default class Client extends XchainEvmClient {
+export class LedgerClient extends EVMLedgerClient {
   /**
-   * Constructor for the Dogecoin EVM client.
+   * Constructor for the Ethereum EVM client.
    * @param {Object} config - Configuration object for the client (optional).
    *                          Defaults to `defaultEthParams` if not provided.
    */
-  constructor(config = defaultEthParams) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(config: EVMClientParams & { transport: any }) {
     super(config) // Call the constructor of the parent class with the provided config or the default parameters
   }
 }
-
-/**
- * Export statement
- * Exporting the `Client` class from this file.
- */
-export { Client }
