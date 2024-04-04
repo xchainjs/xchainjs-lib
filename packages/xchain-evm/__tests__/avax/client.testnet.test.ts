@@ -9,7 +9,7 @@ import {
   // mock_thornode_inbound_addresses_fail,
   mock_thornode_inbound_addresses_success,
 } from '../../__mocks__/thornode-api'
-import Client, { EVMClientParams } from '../../src/client'
+import Client, { EVMClientParams } from '../../src'
 
 const AVAXChain: Chain = 'AVAX'
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
