@@ -1,6 +1,7 @@
 // Exporting types and the client class
 export * from './types'
-export * from './client'
+export { KeystoreClient, KeystoreClient as Client } from './KeystoreClient'
+export { LedgerClient } from './LedgerClient'
 
 // Exporting utility functions
 export {
