@@ -1,5 +1,10 @@
 // Export all elements from the 'client' module
-export * from './client'
+import { KeystoreClient } from './KeystoreClient'
+
+export { KeystoreClient, KeystoreClient as Client } from './KeystoreClient'
+export { LedgerClient } from './LedgerClient'
 
 // Export all elements from the 'const' module
 export * from './const'
+
+export default KeystoreClient
