@@ -19,7 +19,7 @@ import {
   TxsPage,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, BaseAmount, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, CachedValue, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 import { toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -41,6 +41,7 @@ import {
   estimateCall,
   getApprovalAmount,
   getFee,
+  getNetworkId,
   getTokenAddress,
   isApproved,
   validateAddress,
@@ -61,6 +62,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
   private explorerProviders: ExplorerProviders
   private dataProviders: EvmOnlineDataProviders[]
   private providers: Record<Network, Provider>
+  private cachedNetworkId: CachedValue<number>
   /**
    * Constructor for the EVM client.
    * @param {EVMClientParams} params - Parameters for configuring the EVM client.
@@ -77,7 +79,6 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     rootDerivationPaths,
     explorerProviders,
     dataProviders,
-    chainId,
   }: EVMClientParams) {
     super(chain, { network, rootDerivationPaths, feeBounds })
     this.config = {
@@ -91,7 +92,6 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
       rootDerivationPaths,
       explorerProviders,
       dataProviders,
-      chainId,
     }
     this.defaults = defaults
     this.gasAsset = gasAsset
@@ -99,6 +99,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     this.explorerProviders = explorerProviders
     this.dataProviders = dataProviders
     this.providers = providers
+    this.cachedNetworkId = new CachedValue<number>(() => getNetworkId(this.getProvider()))
     phrase && this.setPhrase(phrase)
   }
 
@@ -155,6 +156,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    */
   setNetwork(network: Network): void {
     super.setNetwork(network)
+    this.cachedNetworkId = new CachedValue<number>(() => getNetworkId(this.getProvider()))
   }
 
   /**
@@ -538,7 +540,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     if (this.isGasAsset(asset)) {
       return {
         rawUnsignedTx: ethers.utils.serializeTransaction({
-          chainId: this.config.chainId,
+          chainId: await this.cachedNetworkId.getValue(),
           to: recipient,
           value: BigNumber.from(amount.amount().toFixed()),
           data: memo ? toUtf8Bytes(memo) : undefined,
@@ -557,7 +559,11 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
       )
 
       return {
-        rawUnsignedTx: ethers.utils.serializeTransaction({ ...unsignedTx, chainId: this.config.chainId, nonce }),
+        rawUnsignedTx: ethers.utils.serializeTransaction({
+          ...unsignedTx,
+          chainId: await this.cachedNetworkId.getValue(),
+          nonce,
+        }),
       }
     }
   }
@@ -585,7 +591,13 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     const unsignedTx = await contract.populateTransaction.approve(spenderAddress, valueToApprove)
     const nonce = await this.getProvider().getTransactionCount(sender)
 
-    return { rawUnsignedTx: ethers.utils.serializeTransaction({ ...unsignedTx, chainId: this.config.chainId, nonce }) }
+    return {
+      rawUnsignedTx: ethers.utils.serializeTransaction({
+        ...unsignedTx,
+        chainId: await this.cachedNetworkId.getValue(),
+        nonce,
+      }),
+    }
   }
 
   /**

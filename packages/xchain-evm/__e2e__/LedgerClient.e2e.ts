@@ -98,7 +98,6 @@ const defaults = {
 
 const defaultAvaxParams: EVMClientParams = {
   chain: AVAXChain,
-  chainId: 43114,
   gasAsset: AssetAVAX,
   gasAssetDecimals: AVAX_GAS_ASSET_DECIMAL,
   defaults,

@@ -72,7 +72,6 @@ export type EvmDefaults = {
  * Parameters for configuring the EVM client.
  */
 export type EVMClientParams = XChainClientParams & {
-  chainId: number
   chain: Chain
   gasAsset: Asset
   gasAssetDecimals: number
