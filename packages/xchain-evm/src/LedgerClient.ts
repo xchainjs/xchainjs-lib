@@ -258,9 +258,9 @@ export class LedgerClient extends Client {
     )
 
     const rawSignedTx = ethers.utils.serializeTransaction(baseTx, {
-      v: ethers.BigNumber.from('0x' + signatureData.v).toNumber(),
-      r: '0x' + signatureData.r,
-      s: '0x' + signatureData.s,
+      v: Number(BigInt(signatureData.v)),
+      r: `0x${signatureData.r}`,
+      s: `0x${signatureData.s}`,
     })
     // Send the transaction and return the hash
     return await this.broadcastTx(rawSignedTx)
