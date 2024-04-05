@@ -87,6 +87,8 @@ export class ThorchainAMM {
     affiliateAddress = '',
     affiliateBps = 0,
     toleranceBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<TxDetails> {
     const errors: string[] = await this.validateSwap({
       fromAddress,
@@ -103,6 +105,8 @@ export class ThorchainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      streamingInterval,
+      streamingQuantity,
     })
     // Add any validation errors to the estimate
     estimate.txEstimate.errors.push(...errors)
@@ -123,6 +127,8 @@ export class ThorchainAMM {
     amount,
     affiliateAddress,
     affiliateBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
@@ -145,6 +151,14 @@ export class ThorchainAMM {
 
     if (affiliateBps && (affiliateBps < 0 || affiliateBps > 10000)) {
       errors.push(`affiliateBps ${affiliateBps} out of range [0 - 10000]`)
+    }
+
+    if (streamingInterval && streamingInterval < 0) {
+      errors.push(`streamingInterval ${streamingInterval} can not be lower than zero`)
+    }
+
+    if (streamingQuantity && streamingQuantity < 0) {
+      errors.push(`streamingQuantity ${streamingQuantity} can not be lower than zero`)
     }
 
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {
@@ -175,6 +189,8 @@ export class ThorchainAMM {
     affiliateAddress,
     affiliateBps,
     toleranceBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<TxSubmitted> {
     // Retrieve swap details from ThorchainQuery to ensure validity
     const txDetails = await this.thorchainQuery.quoteSwap({
@@ -186,6 +202,8 @@ export class ThorchainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      streamingInterval,
+      streamingQuantity,
     })
     if (!txDetails.txEstimate.canSwap) {
       throw Error(txDetails.txEstimate.errors.join('\n'))
