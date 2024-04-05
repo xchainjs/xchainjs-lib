@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.4
+
+### Patch Changes
+
+- b1dcd60: Update thornode and Midgard to the latest api specs
+
 ## v0.5.3 (2023-11-14)
 
 ### Update
