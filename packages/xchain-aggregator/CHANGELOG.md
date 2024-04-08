@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [f130ee3]
+  - @xchainjs/xchain-thorchain-amm@1.1.2
+
+## 0.1.5
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@1.1.1
+- @xchainjs/xchain-thorchain-query@0.7.8
+
 ## 0.1.4
 
 ### Patch Changes

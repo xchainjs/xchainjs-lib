@@ -2,6 +2,7 @@ import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xc
 import { AssetBNB, BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import {
   AssetBTC,
+  BTCChain,
   BTC_DECIMAL,
   Client as BtcClient,
   defaultBTCParams as defaultBtcParams,
@@ -11,7 +12,7 @@ import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM, Client as GaiaClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
-import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import {
   AssetRuneNative,
@@ -184,6 +185,20 @@ describe('ThorchainAmm e2e tests', () => {
         fromAsset: AssetBTC,
         destinationAsset: AssetETH,
         amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
+      })
+
+      printQuoteSwap(quoteSwap)
+    })
+
+    it(`Should estimate streaming swap from BTC to ETH`, async () => {
+      const quoteSwap = await thorchainAmm.estimateSwap({
+        fromAsset: AssetBTC,
+        destinationAsset: AssetETH,
+        amount: new CryptoAmount(assetToBase(assetAmount(10, BTC_DECIMAL)), AssetBTC),
+        streamingInterval: 10,
+        streamingQuantity: 5,
+        fromAddress: await wallet.getAddress(BTCChain),
+        destinationAddress: await wallet.getAddress(ETHChain),
       })
 
       printQuoteSwap(quoteSwap)

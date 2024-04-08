@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.1.2
+
+### Patch Changes
+
+- f130ee3: Streaming swaps parameters `streamingInterval` and `streamingQuantity` bug fix
+
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [b1dcd60]
+  - @xchainjs/xchain-thornode@0.3.12
+  - @xchainjs/xchain-midgard@0.5.4
+  - @xchainjs/xchain-thorchain-query@0.7.8
+
 ## 1.1.0
 
 ### Minor Changes
