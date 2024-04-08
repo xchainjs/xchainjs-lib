@@ -1,7 +1,8 @@
 import { Network, Protocol } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client, defaultDogeParams } from '../src/client'
+import { defaultDogeParams } from '../src/client'
+import { ClientKeystore as Client } from '../src/clientKeystore'
 import { AssetDOGE } from '../src/const'
 
 const dogeClient = new Client({
