@@ -6,7 +6,7 @@ import { HDNode } from 'ethers/lib/utils'
 import { Client } from './client'
 import { ApproveParams } from './types'
 
-export class KeystoreClient extends Client {
+export class ClientKeystore extends Client {
   private hdNode?: HDNode
 
   /**

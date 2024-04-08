@@ -1,14 +1,14 @@
 // Exporting types and the client class
-import { KeystoreClient } from './KeystoreClient'
+import { ClientKeystore } from './ClientKeystore'
 import erc20ABI from './data/erc20.json'
 import routerABI from './data/routerABI.json'
 
-export default KeystoreClient
+export default ClientKeystore
 
 export * from './types'
 
-export { KeystoreClient, KeystoreClient as Client } from './KeystoreClient'
-export { LedgerClient } from './LedgerClient'
+export { ClientKeystore, ClientKeystore as Client } from './ClientKeystore'
+export { ClientLedger } from './ClientLedger'
 
 // Exporting utility functions
 export {

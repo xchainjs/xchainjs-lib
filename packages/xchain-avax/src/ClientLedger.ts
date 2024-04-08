@@ -3,15 +3,15 @@
  * Importing the `Client` class from the '@xchainjs/xchain-evm' module
  * Importing the `defaultEthParams` constant from the './const' file
  */
-import { EVMClientParams, LedgerClient as EVMLedgerClient } from '@xchainjs/xchain-evm'
+import { ClientLedger as EVMClientLedger, EVMClientParams } from '@xchainjs/xchain-evm'
 
 /**
- * Class definition for the Ethereum EVM client.
+ * Class definition for the Avalanche EVM client.
  * Extends the `XchainEvmClient` class.
  */
-export class LedgerClient extends EVMLedgerClient {
+export class ClientLedger extends EVMClientLedger {
   /**
-   * Constructor for the Ethereum EVM client.
+   * Constructor for the Avalanche EVM client.
    * @param {Object} config - Configuration object for the client (optional).
    *                          Defaults to `defaultEthParams` if not provided.
    */

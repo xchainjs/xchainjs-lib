@@ -3,20 +3,21 @@
  * Importing the `Client` class from the '@xchainjs/xchain-evm' module
  * Importing the `defaultEthParams` constant from the './const' file
  */
-import { EVMClientParams, LedgerClient as EVMLedgerClient } from '@xchainjs/xchain-evm'
+import { ClientKeystore as EVMClientKeystore } from '@xchainjs/xchain-evm'
+
+import { defaultEthParams } from './const'
 
 /**
- * Class definition for the Binance Smart Chain EVM client.
+ * Class definition for the Ethereum EVM client.
  * Extends the `XchainEvmClient` class.
  */
-export class LedgerClient extends EVMLedgerClient {
+export class ClientKeystore extends EVMClientKeystore {
   /**
-   * Constructor for the Binance Smart Chain EVM client.
+   * Constructor for the Ethereum EVM client.
    * @param {Object} config - Configuration object for the client (optional).
    *                          Defaults to `defaultEthParams` if not provided.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(config: EVMClientParams & { transport: any }) {
+  constructor(config = defaultEthParams) {
     super(config) // Call the constructor of the parent class with the provided config or the default parameters
   }
 }

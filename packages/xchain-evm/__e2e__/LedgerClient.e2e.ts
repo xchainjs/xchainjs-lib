@@ -6,7 +6,7 @@ import { BigNumber, ethers } from 'ethers'
 
 // Import necessary modules and classes from external packages and files
 import { EVMClientParams } from '../src'
-import { LedgerClient } from '../src/LedgerClient'
+import { ClientLedger } from '../src/ClientLedger'
 
 // Define constants related to Avalanche
 const AVAX_DECIMAL = 18
@@ -131,11 +131,11 @@ const defaultAvaxParams: EVMClientParams = {
 jest.setTimeout(200000)
 
 describe('EVM Client Ledger', () => {
-  let client: LedgerClient
+  let client: ClientLedger
   beforeAll(async () => {
     const transport = await TransportNodeHid.create()
 
-    client = new LedgerClient({
+    client = new ClientLedger({
       transport,
       ...defaultAvaxParams,
     })

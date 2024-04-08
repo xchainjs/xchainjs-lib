@@ -1,14 +1,14 @@
 /**
  * Module importing and providing a customized client for the Binance Smart Chain (BSC).
  */
-import { Client as EVMKeystoreClient } from '@xchainjs/xchain-evm' // Importing the base client from xchain-evm library
+import { ClientKeystore as EVMClientKeystore } from '@xchainjs/xchain-evm' // Importing the base client from xchain-evm library
 
 import { defaultBscParams } from './const' // Importing default parameters for BSC
 
 /**
  * Customized BSC client extending the base XchainEvmClient.
  */
-export class KeystoreClient extends EVMKeystoreClient {
+export class ClientKeystore extends EVMClientKeystore {
   /**
    * Constructor for the BSC client.
    *

@@ -6,7 +6,7 @@ import { BigNumber, ethers } from 'ethers'
 import { Client } from './client'
 import { ApproveParams, EVMClientParams } from './types'
 
-export class LedgerClient extends Client {
+export class ClientLedger extends Client {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: any // TODO: Parametrize
   private app: AppEth | undefined
