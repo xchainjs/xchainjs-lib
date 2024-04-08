@@ -60,7 +60,7 @@ describe('BitcoinCash Client Ledger', () => {
 
   it('transfer Ledger test amount', async () => {
     try {
-      const to = 'D6pKATQDdJmdnK562aXhiohfHbhpLkjT5B'
+      const to = await dogeClient.getAddressAsync(1)
       const amount = assetToBase(assetAmount('1'))
       const txid = await dogeClient.transfer({
         asset: AssetDOGE,

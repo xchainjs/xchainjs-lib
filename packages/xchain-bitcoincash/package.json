@@ -33,9 +33,11 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "uniqid": "^5.4.0"
+    "uniqid": "^5.4.0",
+    "@ledgerhq/hw-app-btc": "^10.1.0"
   },
   "devDependencies": {
+    "@ledgerhq/hw-transport-node-hid": "^6.28.0",
     "@psf/bitcoincashjs-lib": "^4.0.3",
     "@types/bchaddrjs": "0.4.0",
     "@types/uniqid": "^5.3.1",

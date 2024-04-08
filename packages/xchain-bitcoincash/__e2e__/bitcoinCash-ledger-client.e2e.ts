@@ -61,7 +61,7 @@ describe('BitcoinCash Client Ledger', () => {
 
   it('transfer Ledger test amount', async () => {
     try {
-      const to = 'qq3p8qwxpnkwy06fls96qd4rwrufr0e7qghp0xjdjv'
+      const to = await btcCashClient.getAddressAsync(1)
       const amount = assetToBase(assetAmount('0.001'))
       const txid = await btcCashClient.transfer({
         asset: AssetBCH,
