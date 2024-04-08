@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2
+
+### Patch Changes
+
+- f130ee3: Streaming swaps parameters `streamingInterval` and `streamingQuantity` bug fix
+
 ## 1.1.1
 
 ### Patch Changes
