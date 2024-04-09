@@ -1,9 +1,10 @@
+import * as dashcore from '@dashevo/dashcore-lib'
+import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
 import AppBtc from '@ledgerhq/hw-app-btc'
-import { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
+import { Transaction as LedgerTransaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { FeeOption, FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
-import * as Dash from 'bitcoinjs-lib'
 
 import { Client } from './client'
 import { NodeAuth, NodeUrls } from './types'
@@ -42,13 +43,13 @@ class ClientLedger extends Client {
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const result = await app.getWalletPublicKey(this.getFullDerivationPath(index), {
-      format: 'bech32',
+      format: 'legacy',
       verify,
     })
     return result.bitcoinAddress
   }
 
-  // Transfer LTC from Ledger
+  // Transfer DASH from Ledger
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
@@ -58,22 +59,39 @@ class ClientLedger extends Client {
     const sender = await this.getAddressAsync(fromAddressIndex)
     // Prepare transaction
     const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
-    const psbt = Dash.Psbt.fromBase64(rawUnsignedTx)
-    // Prepare Ledger inputs
-    const ledgerInputs: [Transaction, number, string | null, number | null][] = utxos.map(({ txHex, hash, index }) => {
-      if (!txHex) {
-        throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)
+
+    const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.inputs.forEach((input: any, index: number) => {
+      const insightUtxo = utxos.find((utxo) => {
+        return utxo.hash === input.prevTxId.toString('hex') && utxo.index == input.outputIndex
+      })
+      if (!insightUtxo) {
+        throw new Error('Unable to match accumulative inputs with insight utxos')
       }
-      const utxoTx = Dash.Transaction.fromHex(txHex)
-      const splittedTx = app.splitTransaction(txHex, utxoTx.hasWitnesses())
-      return [splittedTx, index, null, null]
+      const scriptBuffer: Buffer = Buffer.from(insightUtxo.scriptPubKey || '', 'hex')
+      const script = new dashcore.Script(scriptBuffer)
+      tx.inputs[index] = new dashcore.Transaction.Input.PublicKeyHash({
+        prevTxId: Buffer.from(insightUtxo.hash, 'hex'),
+        outputIndex: insightUtxo.index,
+        script: '',
+        output: new dashcore.Transaction.Output({
+          satoshis: insightUtxo.value,
+          script,
+        }),
+      })
+    })
+
+    const ledgerInputs: [LedgerTransaction, number, string | null, number | null][] = tx.inputs.map((input) => {
+      const utxoTx = new Transaction(input)
+      const splittedTx = app.splitTransaction(utxoTx.toString())
+      return [splittedTx, input.outputIndex, null, null]
     })
 
     // Prepare associated keysets
-    const associatedKeysets = ledgerInputs.map(() => this.getFullDerivationPath(fromAddressIndex))
+    const associatedKeysets = tx.inputs.map(() => this.getFullDerivationPath(fromAddressIndex))
     // Serialize unsigned transaction
-    const unsignedHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
-    const newTx = app.splitTransaction(unsignedHex, true)
+    const newTx = app.splitTransaction(tx.toString(), true)
     const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
     // Create payment transaction
     const txHex = await app.createPaymentTransaction({
