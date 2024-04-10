@@ -1,5 +1,6 @@
-import { AssetInfo, Network, UtxoClientParams } from '@xchainjs/xchain-client'
+import { AssetInfo, Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import { ClientKeystore as Client } from '../src/clientKeystore'
 import {

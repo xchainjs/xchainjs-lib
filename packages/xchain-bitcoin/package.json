@@ -60,6 +60,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-btc": "^10.1.0"
+    "@keepkey/hdwallet-core": "^1.53.12",
+    "@keepkey/hdwallet-keepkey-nodehid": "^1.53.12",
+    "@ledgerhq/hw-app-btc": "^10.1.0",
+    "@shapeshiftoss/hdwallet-keepkey": "^1.53.5"
   }
 }
