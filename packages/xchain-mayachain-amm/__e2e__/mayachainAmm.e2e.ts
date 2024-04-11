@@ -270,7 +270,7 @@ describe('MayachainAmm e2e tests', () => {
   it('Should do swap from Ledger client to Keystore client', async () => {
     const mayaChainQuery = new MayachainQuery()
     const phrase = process.env.MAINNET_PHRASE
-    wallet = new Wallet({
+    const wallet = new Wallet({
       DASH: new ClientLedger({
         ...defaultDashParams,
         network: Network.Mainnet,
@@ -278,7 +278,7 @@ describe('MayachainAmm e2e tests', () => {
       }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
     })
-    mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
+    const mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
 
     const txSubmitted = await mayachainAmm.doSwap({
       fromAddress: await wallet.getAddress(DASHChain),

@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",
+    "@ledgerhq/hw-transport-node-hid": "^6.28.0",
     "@psf/bitcoincashjs-lib": "^4.0.3",
     "@xchainjs/xchain-bitcoin": "^0.23.13",
     "@xchainjs/xchain-client": "^0.16.2",
