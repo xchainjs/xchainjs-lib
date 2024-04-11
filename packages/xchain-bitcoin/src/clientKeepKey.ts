@@ -7,18 +7,25 @@
 
 */
 import { KeepKeySdk, PairingInfo } from '@keepkey/keepkey-sdk'
-import { FeeOption, FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
-import { Client, defaultBTCParams } from './client'
-import { bip32ToAddressNList, BTCOutputScriptType } from './utils'
+import * as Bitcoin from 'bitcoinjs-lib'
+
+import { Client } from './client'
+import { BTCOutputScriptType, bip32ToAddressNList } from './utils'
 
 type Config = {
   apiKey: string
   pairingInfo: PairingInfo
 }
 
-
+interface psbtTxOutput {
+  address: string
+  script: Buffer
+  value: number
+  change?: boolean // Optional, assuming it indicates if the output is a change
+}
 
 /**
  * Custom Ledger Bitcoin client
@@ -54,14 +61,16 @@ class ClientKeepKey extends Client {
 
   // Get the current address asynchronously
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
-    const path = `${defaultBTCParams.rootDerivationPaths}${index}`
+    const path = `m/${this.getFullDerivationPath(index)}`
+    const coinType = this.network === Network.Mainnet ? 'Bitcoin' : 'Testnet'
     const addressInfo = {
       addressNList: bip32ToAddressNList(path),
       showDisplay: verify,
-      scriptType: BTCOutputScriptType.Bech32, // p2wpkh for bech32 (native) segwit
-      coin: 'Bitcoin',
+      scriptType: BTCOutputScriptType.PayToWitness, // p2wpkh for bech32 (native) segwit
+      coin: coinType,
     }
     const app = await this.getApp()
+
     const address = await app.address.utxoGetAddress({
       address_n: addressInfo.addressNList,
       script_type: addressInfo.scriptType,
@@ -70,20 +79,27 @@ class ClientKeepKey extends Client {
     if (!address) {
       throw new Error('Failed to retrieve address from KeepKey')
     }
-    return address
+    return address.address
   }
 
-  // Transfer BTC from KeepKey
+  // Transfer BTC from KeepKey -- TODO finish this
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    const app = await this.getApp()
+    // const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
+
+    // Set path
+    const path = `m/${this.getFullDerivationPath(fromAddressIndex)}`
     // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
     // Prepare transaction
     const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
-
+    const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
+    // Serialize unsigned transaction
+    const unsignedHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
+    // network
+    const coinType = this.network === Network.Mainnet ? 'Bitcoin' : 'Testnet'
     /*
 
         // will need to format the inputs
@@ -100,47 +116,57 @@ class ClientKeepKey extends Client {
         we will handle building the custom output you, use opReturnData object and attach to vault output.
      */
     const memo = params.memo || ''
-    const txid = "b3002cd9c033f4f3c2ee5a374673d7698b13c7f3525c1ae49a00d2e28e8678ea";
-    const hex =
-      "010000000181f605ead676d8182975c16e7191c21d833972dd0ed50583ce4628254d28b6a3010000008a47304402207f3220930276204c83b1740bae1da18e5a3fa2acad34944ecdc3b361b419e3520220598381bdf8273126e11460a8c720afdbb679233123d2d4e94561f75e9b280ce30141045da61d81456b6d787d576dce817a2d61d7f8cb4623ee669cbe711b0bcff327a3797e3da53a2b4e3e210535076c087c8fb98aef60e42dfeea8388435fc99dca43ffffffff0250ec0e00000000001976a914f7b9e0239571434f0ccfdba6f772a6d23f2cfb1388ac10270000000000001976a9149c9d21f47382762df3ad81391ee0964b28dd951788ac00000000";
+    // const txid = ''
+    // const hex = unsignedHex
+    const inputs = utxos.map(({ hash }) => ({
+      addressNList: bip32ToAddressNList(path), // This is the path of the input address needed for signing
+      scriptType: BTCOutputScriptType.PayToWitness,
+      amount: params.amount.amount().toNumber(),
+      vout: 1,
+      txid: hash,
+      hex: unsignedHex,
+    }))
 
-    const inputs = [
-      {
-        addressNList: [0x80000000 + 44, 0x80000000 + 0, 0x80000000 + 0, 0, 0], //This is the path of the input address needed for signing
-        scriptType: '',
-        amount: String(10000),
-        vout: 1,
-        txid: txid,
-        hex,
-      },
-    ];
+    const outputs = psbt.txOutputs
+      .map((output) => {
+        const { value, address, change } = output as psbtTxOutput
+        const outputAddress = address
 
-    const outputs = [
-      {
-        address: "bc1q6m9u2qsu8mh8y7v8rr2ywavtj8g5arzlyhcej7",
-        addressType: 'spend', // spend/change  change will be verified by the keepkey the device owns the address
-        opReturnData: Buffer.from(memo, "utf-8"),
-        amount: String(0),
-        isChange: false,
-      },
-    ];
+        if (change || address === sender) {
+          return {
+            addressNList: bip32ToAddressNList(path),
+            isChange: true,
+            addressType: 'change',
+            amount: value,
+            scriptType: BTCOutputScriptType.PayToWitness,
+          }
+        }
+        if (outputAddress) {
+          return { address: outputAddress, amount: value, addressType: 'spend' }
+        }
+
+        return null
+      })
+      .filter(Boolean)
 
     // Create the BTCSignTxKK message
-    let signPayload = {
-      coin: 'Bitcoin',
+    const signPayload = {
+      coin: coinType,
       inputs,
       outputs,
       version: 1,
       locktime: 0,
       opReturnData: memo,
-    };
-    //console.log('signPayload: ', JSON.stringify(signPayload));
-    const signedTx = await app.utxo.utxoSignTransaction(signPayload);
+    }
+    console.log('signPayload: ', JSON.stringify(signPayload)) //
+    const signedTx = 'await app.utxo.utxoSignTransaction(signPayload)'
+    console.log(signedTx)
     if (!signedTx) {
       throw new Error('Failed to sign transaction with KeepKey')
     }
+
     // Broadcast
-    const txHash = await this.broadcastTx(signedTx.serializedTx)
+    const txHash = await this.broadcastTx(signedTx)
     if (!txHash) {
       throw new Error('Failed to broadcast transaction')
     }

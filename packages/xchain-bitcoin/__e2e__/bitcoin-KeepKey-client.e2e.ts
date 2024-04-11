@@ -7,13 +7,20 @@
 
 */
 
-import { KeepKeySdk } from '@keepkey/keepkey-sdk'
+// import { KeepKeySdk } from '@keepkey/keepkey-sdk'
 import { Network } from '@xchainjs/xchain-client'
+import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
-import { ClientKeepKey } from '../src/clientKeepKey'
 
-// import { ClientKeepKey } from '../src/clientKeepKey'
-import { BlockcypherDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, blockstreamExplorerProviders } from '../src/const'
+import { ClientKeepKey } from '../src/clientKeepKey'
+import {
+  AssetBTC,
+  BlockcypherDataProviders,
+  HaskoinDataProviders,
+  LOWER_FEE_BOUND,
+  UPPER_FEE_BOUND,
+  blockstreamExplorerProviders,
+} from '../src/const'
 
 jest.setTimeout(200000)
 
@@ -21,7 +28,7 @@ const defaultBTCParams: UtxoClientParams = {
   network: Network.Testnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: [BlockcypherDataProviders],
+  dataProviders: [HaskoinDataProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `84'/0'/0'/0/`,
     [Network.Testnet]: `84'/1'/0'/0/`,
@@ -36,18 +43,17 @@ const defaultBTCParams: UtxoClientParams = {
 //this spec url is static
 const spec = 'http://localhost:1646/spec/swagger.json'
 
-let apiKey = process.env['KK_API_KEY'] || '1234'
-let kkConfig = {
+const apiKey = process.env['KK_API_KEY'] || '1234' // sample
+// config for xchainjs test
+const kkConfig = {
   apiKey,
   pairingInfo: {
-    name: "xchain-js e2e test",
-    imageUrl:
-      "https://xchainjs.org/logos/xchainjs.svg",
+    name: 'xchain-js e2e test',
+    imageUrl: 'https://xchainjs.org/logos/xchainjs.svg',
     basePath: spec,
-    url: "https://xchainjs.org",
+    url: 'https://xchainjs.org',
   },
-};
-
+}
 
 describe('Bitcoin Client KeepKey', () => {
   let btcClient: ClientKeepKey
@@ -68,5 +74,46 @@ describe('Bitcoin Client KeepKey', () => {
     const address = await btcClient.getAddressAsync(0, true)
     console.log('address', address)
     expect(address).toContain('b')
+  })
+
+  it('get balance keepKey', async () => {
+    const address = await btcClient.getAddressAsync()
+    const balance = await btcClient.getBalance(address)
+    console.log('balance', balance[0].amount.amount().toString())
+  })
+
+  it('transfer from KeepKey without memo', async () => {
+    try {
+      const to = await btcClient.getAddressAsync(1)
+      console.log(to)
+      const amount = assetToBase(assetAmount('0.001'))
+      const txid = await btcClient.transfer({
+        asset: AssetBTC,
+        recipient: to,
+        amount,
+        feeRate: 1,
+      })
+      console.log(JSON.stringify(txid, null, 2))
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+  it('transfer from KeepKey with memo', async () => {
+    try {
+      const to = await btcClient.getAddressAsync(1)
+      const amount = assetToBase(assetAmount('0.001'))
+      const txid = await btcClient.transfer({
+        asset: AssetBTC,
+        recipient: to,
+        amount,
+        memo: 'test',
+        feeRate: 1,
+      })
+      console.log(JSON.stringify(txid, null, 2))
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
   })
 })

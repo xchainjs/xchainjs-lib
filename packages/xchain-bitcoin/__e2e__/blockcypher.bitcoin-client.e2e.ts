@@ -45,6 +45,11 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
     }
     expect(info).toEqual(correctAssetInf)
   })
+  it('get address keystore async without verification', async () => {
+    const address = await btcClientTestnet.getAddressAsync()
+    console.log('address', address)
+    expect(address).toContain('b')
+  })
   it('should fetch address balance for blockcypher', async () => {
     const balances = await btcClient.getBalance('bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v')
     balances.forEach((bal) => {

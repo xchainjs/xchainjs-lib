@@ -1,4 +1,5 @@
 // Import statements for necessary modules and types
+import { PairingInfo } from '@keepkey/keepkey-sdk' // Importing pairing info from keepKey
 import { Network } from '@xchainjs/xchain-client' // Importing the Network type from xchain-client module
 import { Address } from '@xchainjs/xchain-util' // Importing the Address type from xchain-util module
 import { UTXO } from '@xchainjs/xchain-utxo' // Importing the UTXO type from xchain-utxo module
@@ -91,51 +92,51 @@ export type Config = {
  */
 
 export enum BTCOutputScriptType {
-  PayToAddress = "p2pkh",
-  PayToMultisig = "p2sh",
-  Bech32 = "bech32",
-  PayToWitness = "p2wpkh",
-  PayToP2SHWitness = "p2sh-p2wpkh",
+  PayToAddress = 'p2pkh',
+  PayToMultisig = 'p2sh',
+  Bech32 = 'bech32',
+  PayToWitness = 'p2wpkh',
+  PayToP2SHWitness = 'p2sh-p2wpkh',
 }
 
 /**
  * bip32 utils
  */
-const HARDENED = 0x80000000;
+const HARDENED = 0x80000000
 
-export function addressNListToBIP32(address: number[]): string {
-  return `m/${address.map((num) => (num >= HARDENED ? `${num - HARDENED}'` : num)).join('/')}`;
+export const addressNListToBIP32 = (address: number[]): string => {
+  return `m/${address.map((num) => (num >= HARDENED ? `${num - HARDENED}'` : num)).join('/')}`
 }
 
-export function bip32Like(path: string): boolean {
-  if (path === 'm/') return true;
-  return /^m(((\/[0-9]+h)+|(\/[0-9]+H)+|(\/[0-9]+')*)((\/[0-9]+)*))$/.test(path);
+export const bip32Like = (path: string): boolean => {
+  if (path === 'm/') return true
+  return /^m(((\/[0-9]+h)+|(\/[0-9]+H)+|(\/[0-9]+')*)((\/[0-9]+)*))$/.test(path)
 }
 
-export function bip32ToAddressNList(path: string): number[] {
+export const bip32ToAddressNList = (path: string): number[] => {
   if (!bip32Like(path)) {
-    throw new Error(`Not a bip32 path: '${path}'`);
+    throw new Error(`Not a bip32 path: '${path}'`)
   }
   if (/^m\//i.test(path)) {
-    path = path.slice(2);
+    path = path.slice(2)
   }
-  const segments = path.split('/');
-  if (segments.length === 1 && segments[0] === '') return [];
-  const ret = new Array(segments.length);
+  const segments = path.split('/')
+  if (segments.length === 1 && segments[0] === '') return []
+  const ret = new Array(segments.length)
   for (let i = 0; i < segments.length; i++) {
-    const tmp = /(\d+)([hH']?)/.exec(segments[i]);
+    const tmp = /(\d+)([hH']?)/.exec(segments[i])
     if (tmp === null) {
-      throw new Error('Invalid input');
+      throw new Error('Invalid input')
     }
-    ret[i] = parseInt(tmp[1], 10);
+    ret[i] = parseInt(tmp[1], 10)
     if (ret[i] >= HARDENED) {
-      throw new Error('Invalid child index');
+      throw new Error('Invalid child index')
     }
     if (tmp[2] === 'h' || tmp[2] === 'H' || tmp[2] === "'") {
-      ret[i] += HARDENED;
+      ret[i] += HARDENED
     } else if (tmp[2].length !== 0) {
-      throw new Error('Invalid modifier');
+      throw new Error('Invalid modifier')
     }
   }
-  return ret;
+  return ret
 }
