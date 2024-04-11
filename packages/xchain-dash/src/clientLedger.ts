@@ -1,12 +1,13 @@
 import * as dashcore from '@dashevo/dashcore-lib'
-import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
 import AppBtc from '@ledgerhq/hw-app-btc'
 import { Transaction as LedgerTransaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { FeeOption, FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
+import * as nodeApi from '@xchainjs/xchain-dash/src/node-api'
 import { Address } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import { Client } from './client'
+import { getRawTx } from './insight-api'
 import { NodeAuth, NodeUrls } from './types'
 
 /**
@@ -60,33 +61,24 @@ class ClientLedger extends Client {
     // Prepare transaction
     const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
 
-    const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)
+    const tx = new dashcore.Transaction(rawUnsignedTx)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tx.inputs.forEach((input: any, index: number) => {
+
+    const ledgerInputs: [LedgerTransaction, number, string | null, number | null][] = []
+
+    for (const input of tx.inputs) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const insightUtxo = utxos.find((utxo) => {
         return utxo.hash === input.prevTxId.toString('hex') && utxo.index == input.outputIndex
       })
       if (!insightUtxo) {
         throw new Error('Unable to match accumulative inputs with insight utxos')
       }
-      const scriptBuffer: Buffer = Buffer.from(insightUtxo.scriptPubKey || '', 'hex')
-      const script = new dashcore.Script(scriptBuffer)
-      tx.inputs[index] = new dashcore.Transaction.Input.PublicKeyHash({
-        prevTxId: Buffer.from(insightUtxo.hash, 'hex'),
-        outputIndex: insightUtxo.index,
-        script: '',
-        output: new dashcore.Transaction.Output({
-          satoshis: insightUtxo.value,
-          script,
-        }),
-      })
-    })
-
-    const ledgerInputs: [LedgerTransaction, number, string | null, number | null][] = tx.inputs.map((input) => {
-      const utxoTx = new Transaction(input)
+      const txHex = await getRawTx({ txid: insightUtxo.hash, network: this.network })
+      const utxoTx = new dashcore.Transaction(txHex)
       const splittedTx = app.splitTransaction(utxoTx.toString())
-      return [splittedTx, input.outputIndex, null, null]
-    })
+      ledgerInputs.push([splittedTx, input.outputIndex, null, null])
+    }
 
     // Prepare associated keysets
     const associatedKeysets = tx.inputs.map(() => this.getFullDerivationPath(fromAddressIndex))
@@ -98,12 +90,17 @@ class ClientLedger extends Client {
       inputs: ledgerInputs,
       associatedKeysets,
       outputScriptHex,
-      segwit: true,
-      useTrustedInputForSegwit: true,
-      additionals: ['bech32'],
+      segwit: false,
+      useTrustedInputForSegwit: false,
+      additionals: [],
     })
+
     // Broadcast transaction
-    const txHash = await this.broadcastTx(txHex)
+    const txHash = await nodeApi.broadcastTx({
+      txHex,
+      nodeUrl: this.nodeUrls[this.network],
+      auth: this.nodeAuth,
+    })
     // Throw error if no transaction hash is received
     if (!txHash) {
       throw Error('No Tx hash')
