@@ -31,7 +31,11 @@
     "e2e": "jest --config jest.config.e2e.js",
     "postversion": "git push --follow-tags"
   },
+  "dependencies": {
+    "@ledgerhq/hw-app-btc": "^10.1.0"
+  },
   "devDependencies": {
+    "@ledgerhq/hw-transport-node-hid": "^6.28.0",
     "@types/wif": "^2.0.2",
     "@xchainjs/xchain-client": "^0.16.2",
     "@xchainjs/xchain-crypto": "^0.3.1",
