@@ -15,6 +15,8 @@ import {
 import { MayachainCache } from './mayachain-cache'
 import { InboundDetail, QuoteSwap, QuoteSwapParams, SwapHistoryParams, SwapsHistory } from './types'
 import {
+  ArbAsset,
+  ArbChain,
   BtcAsset,
   BtcChain,
   CacaoAsset,
@@ -92,6 +94,7 @@ export class MayachainQuery {
       affiliateAddress,
       height,
     )
+    console.log(swapQuote)
 
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) {
@@ -170,6 +173,7 @@ export class MayachainQuery {
       [KujiraChain]: new CryptoAmount(baseAmount(0, 6), KujiraAsset),
       [ThorChain]: new CryptoAmount(baseAmount(0, 8), RuneAsset),
       [MayaChain]: new CryptoAmount(baseAmount(0, 10), CacaoAsset),
+      [ArbChain]: new CryptoAmount(baseAmount(0, 18), ArbAsset),
     }
   }
 
