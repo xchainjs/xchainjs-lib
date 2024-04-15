@@ -94,7 +94,6 @@ export class MayachainQuery {
       affiliateAddress,
       height,
     )
-    console.log(swapQuote)
 
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) {
