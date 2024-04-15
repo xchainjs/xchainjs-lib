@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0
+
+### Minor Changes
+
+- 2f7988a: Ledger client
+
 ## 0.13.11
 
 ### Patch Changes

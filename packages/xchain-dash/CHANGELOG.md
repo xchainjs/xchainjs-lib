@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- 8022a60: Ledger client
+
 ## 0.2.12
 
 ### Patch Changes
