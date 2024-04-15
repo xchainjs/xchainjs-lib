@@ -4,7 +4,17 @@
 export * from './types'
 
 /**
- * Re-exports all entities from the 'client' module.
+ * Export the 'ClientKeystore' class as 'Client'
+ */
+export { ClientKeystore as Client } from './clientKeystore'
+
+/**
+ * Export the 'ClientLedger' class
+ */
+export { ClientLedger } from './clientLedger'
+
+/**
+ * Export the 'defaultBchParams' constant from the 'client' file
  */
 export * from './client'
 

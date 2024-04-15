@@ -1,13 +1,38 @@
 import { Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
+import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import mockBitgoApi from '../__mocks__/bitgo'
 import mockHaskoinApi from '../__mocks__/haskoin'
 import mockThornodeApi from '../__mocks__/thornode'
-import { Client } from '../src/client'
-import { BCH_DECIMAL } from '../src/const'
+import { ClientKeystore as Client } from '../src/clientKeystore'
+import {
+  BCH_DECIMAL,
+  BitgoProviders,
+  HaskoinDataProviders,
+  LOWER_FEE_BOUND,
+  UPPER_FEE_BOUND,
+  explorerProviders,
+} from '../src/const'
 
-const bchClient = new Client()
+// Default parameters for Bitcoin Cash (BCH) client
+export const defaultBchParams: UtxoClientParams = {
+  network: Network.Mainnet, // Default network is Mainnet
+  phrase: '', // Default empty phrase
+  explorerProviders: explorerProviders, // Default explorer providers
+  dataProviders: [BitgoProviders, HaskoinDataProviders], // Default data providers
+  rootDerivationPaths: {
+    [Network.Mainnet]: `m/44'/145'/0'/0/`, // Default root derivation path for Mainnet
+    [Network.Testnet]: `m/44'/1'/0'/0/`, // Default root derivation path for Testnet
+    [Network.Stagenet]: `m/44'/145'/0'/0/`, // Default root derivation path for Stagenet
+  },
+  feeBounds: {
+    lower: LOWER_FEE_BOUND, // Default lower fee bound
+    upper: UPPER_FEE_BOUND, // Default upper fee bound
+  },
+}
+
+const bchClient = new Client({ ...defaultBchParams })
 
 describe('BCHClient Test', () => {
   beforeEach(() => {

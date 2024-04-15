@@ -1,7 +1,8 @@
-import { Network, UtxoClientParams } from '@xchainjs/xchain-client'
+import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 
-import { Client } from '../src/client'
+import { ClientKeystore as Client } from '../src/clientKeystore'
 import { AssetBCH, HaskoinDataProviders, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explorerProviders } from '../src/const'
 
 const defaultBCHParams: UtxoClientParams = {
@@ -102,6 +103,7 @@ describe('Bitcoincash Integration Tests for Haskoin', () => {
         recipient: to,
         amount,
         memo: 'test',
+        feeRate: 1,
       })
       console.log(JSON.stringify(txid, null, 2))
     } catch (err) {
