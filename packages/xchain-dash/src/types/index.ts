@@ -1,3 +1,1 @@
-import { DashPreparedTx } from './client-types'
-
-export { DashPreparedTx }
+export { DashPreparedTx, NodeAuth, NodeUrls } from './client-types'

@@ -2,7 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import dashMocks from '../__mocks__/dash-mocks'
-import { Client } from '../src/client'
+import { Client } from '../src'
 
 const dashClient = new Client()
 

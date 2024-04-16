@@ -1,11 +1,12 @@
+import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { AssetBTC, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
+import { AssetDASH, ClientKeystore, ClientLedger, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetUSK, Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { AssetCacao, Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
-import { AssetRuneNative, Client as ThorClient } from '@xchainjs/xchain-thorchain'
+import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   Asset,
   CryptoAmount,
@@ -86,7 +87,7 @@ describe('MayachainAmm e2e tests', () => {
         phrase,
         network: Network.Mainnet,
       }),
-      DASH: new DashClient({ ...defaultDashParams, phrase, network: Network.Mainnet }),
+      DASH: new ClientKeystore({ ...defaultDashParams, phrase, network: Network.Mainnet }),
       KUJI: new KujiraClient({ ...defaultKujiParams, phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
       MAYA: new MayaClient({ phrase, network: Network.Mainnet }),
@@ -261,6 +262,30 @@ describe('MayachainAmm e2e tests', () => {
       fromAsset,
       destinationAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should do swap from Ledger client to Keystore client', async () => {
+    const mayaChainQuery = new MayachainQuery()
+    const phrase = process.env.MAINNET_PHRASE
+    const wallet = new Wallet({
+      DASH: new ClientLedger({
+        ...defaultDashParams,
+        network: Network.Mainnet,
+        transport: await TransportNodeHid.create(),
+      }),
+      THOR: new ThorClient({ phrase, network: Network.Mainnet }),
+    })
+    const mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
+
+    const txSubmitted = await mayachainAmm.doSwap({
+      fromAddress: await wallet.getAddress(DASHChain),
+      destinationAddress: await wallet.getAddress(THORChain),
+      fromAsset: AssetDASH,
+      destinationAsset: AssetRuneNative,
+      amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetDASH),
     })
 
     console.log(txSubmitted)

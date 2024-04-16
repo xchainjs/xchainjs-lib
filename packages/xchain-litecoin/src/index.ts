@@ -6,7 +6,9 @@ export * from './types'
 /**
  * Export the 'Client' class from the 'client' module.
  */
-export * from './client'
+export { NodeUrls, defaultLtcParams } from './client'
+export { ClientKeystore, ClientKeystore as Client } from './ClientKeystore'
+export { ClientLedger } from './ClientLedger'
 
 /**
  * Export utility functions 'broadcastTx', 'getPrefix', and 'validateAddress' from the 'utils' module.
