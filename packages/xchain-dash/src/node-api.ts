@@ -1,6 +1,7 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { NodeAuth } from '@xchainjs/xchain-dash/src/client'
 import axios from 'axios'
+
+import { NodeAuth } from './types'
 
 /**
  * Parameters for broadcasting a transaction.

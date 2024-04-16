@@ -6,7 +6,10 @@ export * from './const'
 /**
  * Exporting the Dash client class.
  */
-export * from './client'
+export { defaultDashParams } from './client'
+
+export { ClientKeystore, ClientKeystore as Client } from './clientKeystore'
+export { ClientLedger } from './clientLedger'
 
 /**
  * Exporting utility functions for the Dash client module.
