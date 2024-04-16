@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-doge",
-  "version": "0.7.12",
+  "version": "0.7.13",
   "description": "Custom Doge client and utilities used by XChain clients",
   "keywords": [
     "Xchain",
@@ -32,6 +32,7 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
+    "@ledgerhq/hw-transport-node-hid": "^6.28.0",
     "@xchainjs/xchain-client": "^0.16.2",
     "@xchainjs/xchain-crypto": "^0.3.1",
     "@xchainjs/xchain-util": "^0.13.3",
@@ -56,6 +57,9 @@
     "coininfo": "5.1.0",
     "coinselect": "3.1.12",
     "wif": "^2.0.6"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-app-btc": "^10.1.0"
   },
   "publishConfig": {
     "access": "public"

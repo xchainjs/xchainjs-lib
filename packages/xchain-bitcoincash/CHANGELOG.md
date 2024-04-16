@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.17.11
+
+### Patch Changes
+
+- 8e82dc3: Refactored to suit ClientLedger
+
 ## 0.17.10
 
 ### Patch Changes

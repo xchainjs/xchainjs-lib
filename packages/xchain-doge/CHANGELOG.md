@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.13
+
+### Patch Changes
+
+- 8e82dc3: Refactored package to include LedgerClient
+
 ## 0.7.12
 
 ### Patch Changes

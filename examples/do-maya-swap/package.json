@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-maya-do-swap",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "doSwap": "npx ts-node do-maya-swap.ts"
   },

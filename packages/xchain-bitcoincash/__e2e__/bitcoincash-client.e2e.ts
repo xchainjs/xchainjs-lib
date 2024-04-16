@@ -1,7 +1,8 @@
 import { Network, Protocol } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { BCH_DECIMAL, Client, defaultBchParams } from '../src'
+import { BCH_DECIMAL, defaultBchParams } from '../src'
+import { ClientKeystore as Client } from '../src/clientKeystore'
 
 describe('BCH e2e tests', () => {
   let client: Client

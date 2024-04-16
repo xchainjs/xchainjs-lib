@@ -4,7 +4,8 @@ import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode-api'
-import { Client, NodeUrls } from '../src/client'
+import { ClientKeystore as Client } from '../src'
+import { NodeUrls } from '../src/client'
 import {
   AssetLTC,
   LOWER_FEE_BOUND,

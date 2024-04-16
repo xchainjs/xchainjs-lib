@@ -1,7 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client, defaultDashParams } from '../src/client'
+import { defaultDashParams } from '../src/client'
+import { ClientKeystore as Client } from '../src/clientKeystore'
 import { AssetDASH } from '../src/const'
 
 const dashClient = new Client({

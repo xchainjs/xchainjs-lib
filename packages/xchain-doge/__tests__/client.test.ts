@@ -5,7 +5,7 @@ import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 import mocktxId from '../__mocks__/response/broadcast_tx/broadcast_transaction.json'
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode'
-import { Client } from '../src/client'
+import { ClientKeystore as Client } from '../src/clientKeystore'
 import {
   AssetDOGE,
   LOWER_FEE_BOUND,
