@@ -66,7 +66,7 @@ class RadixClient extends BaseXChainClient {
   getExplorerUrl(): string {
     switch (this.getNetwork()) {
       case Network.Mainnet:
-        return 'https://explorer.radixdlt.com'
+        return 'https://dashboard.radixdlt.com'
       case Network.Testnet:
         return 'https://stokenet-dashboard.radixdlt.com/'
       default:
@@ -114,104 +114,33 @@ class RadixClient extends BaseXChainClient {
    * @throws {"Invalid asset"} Thrown when the provided asset is invalid.
    */
   async getBalance(address: string, assets?: Asset[] | undefined): Promise<Balance[]> {
-    console.log(address + assets)
-    try {
-      // Assuming walletIndex is used to construct the URL
-      const url = `https://jsonplaceholder.typicode.com/posts/}`
-      console.log('Making GET request to:', url)
-      const response = await axios.get(url)
-      console.log('Response data:', response.data)
-      // Assuming the response contains an address field
-      const address = response.data.address
-      return address
-    } catch (error) {
-      console.error('Error fetching address:', error)
-      throw error
-    }
+    throw new Error('Not implemented')
   }
+
   async getTransactions(params?: TxHistoryParams | undefined): Promise<TxsPage> {
-    try {
-      console.log(params)
-      // Assuming walletIndex is used to construct the URL
-      const url = `https://jsonplaceholder.typicode.com/posts/`
-      console.log('Making GET request to:', url)
-      const response = await axios.get(url)
-      console.log('Response data:', response.data)
-      // Assuming the response contains an address field
-      const address = response.data.address
-      return address
-    } catch (error) {
-      console.error('Error fetching address:', error)
-      throw error
-    }
+    throw new Error('Not implemented')
   }
+
   async getTransactionData(txId: string, assetAddress?: string | undefined): Promise<Tx> {
-    try {
-      console.log(txId + assetAddress)
-      // Assuming walletIndex is used to construct the URL
-      const url = `https://jsonplaceholder.typicode.com/posts/`
-      console.log('Making GET request to:', url)
-      const response = await axios.get(url)
-      console.log('Response data:', response.data)
-      // Assuming the response contains an address field
-      const address = response.data.address
-      return address
-    } catch (error) {
-      console.error('Error fetching address:', error)
-      throw error
-    }
+    throw new Error('Not implemented')
   }
+
   async transfer(params: TxParams): Promise<string> {
-    try {
-      console.log(params)
-      // Assuming walletIndex is used to construct the URL
-      const url = `https://jsonplaceholder.typicode.com/posts/`
-      console.log('Making GET request to:', url)
-      const response = await axios.get(url)
-      console.log('Response data:', response.data)
-      // Assuming the response contains an address field
-      const address = response.data.address
-      return address
-    } catch (error) {
-      console.error('Error fetching address:', error)
-      throw error
-    }
+    throw new Error('Not implemented')
   }
+
   async broadcastTx(txHex: string): Promise<string> {
-    try {
-      console.log(txHex)
-      // Assuming walletIndex is used to construct the URL
-      const url = `https://jsonplaceholder.typicode.com/posts/`
-      console.log('Making GET request to:', url)
-      const response = await axios.get(url)
-      console.log('Response data:', response.data)
-      // Assuming the response contains an address field
-      const address = response.data.address
-      return address
-    } catch (error) {
-      console.error('Error fetching address:', error)
-      throw error
-    }
+    throw new Error('Not implemented')
   }
+
   getAssetInfo(): AssetInfo {
     throw new Error('Method not implemented.')
   }
+
   async prepareTx(params: TxParams): Promise<PreparedTx> {
-    try {
-      console.log(params)
-      // Assuming walletIndex is used to construct the URL
-      const url = `https://jsonplaceholder.typicode.com/posts/`
-      console.log('Making GET request to:', url)
-      const response = await axios.get(url)
-      console.log('Response data:', response.data)
-      // Assuming the response contains an address field
-      const address = response.data.address
-      return address
-    } catch (error) {
-      console.error('Error fetching address:', error)
-      throw error
-    }
+    throw new Error('Not implemented')
   }
+
   async estimateFees(params?: TxParams): Promise<Fees> {
     try {
       console.log(params)
