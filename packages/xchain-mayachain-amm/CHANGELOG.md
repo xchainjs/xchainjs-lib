@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [ecacc18]
+- Updated dependencies [e0d9669]
+  - @xchainjs/xchain-mayachain-query@0.1.10
+
 ## 1.1.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7
+
+### Patch Changes
+
+- bb1aa7e: Fixed gas asset declaration
+
 ## 0.1.6
 
 ### Patch Changes
