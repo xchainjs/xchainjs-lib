@@ -6,6 +6,7 @@ export const CacaoAsset = assetFromStringEx('MAYA.CACAO')
 export const RuneAsset = assetFromStringEx('THOR.RUNE')
 export const DashAsset = assetFromStringEx('DASH.DASH')
 export const KujiraAsset = assetFromStringEx('KUJI.KUJI')
+export const ArbAsset = assetFromStringEx('ARB.ETH')
 
 export const BtcChain = 'BTC'
 export const EthChain = 'ETH'
@@ -13,5 +14,6 @@ export const MayaChain = 'MAYA'
 export const ThorChain = 'THOR'
 export const DashChain = 'DASH'
 export const KujiraChain = 'KUJI'
+export const ArbChain = 'ARB'
 
 export const DEFAULT_MAYACHAIN_DECIMALS = 8
