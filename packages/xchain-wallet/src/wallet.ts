@@ -124,6 +124,7 @@ export class Wallet {
   /**
    * Return the native token of a chain
    * @param {Chain} chain - The chain to retrieve the asset info of
+   * @returns {AssetInfo} The native asset information of the chain
    */
   public getAssetInfo(chain: Chain): AssetInfo {
     const client = this.getClient(chain)
