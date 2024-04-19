@@ -11,7 +11,16 @@ export const LOWER_FEE_BOUND = 100_000_000
 export const UPPER_FEE_BOUND = 1_000_000_000
 export const ARB_GAS_ASSET_DECIMAL = 18
 export const ARBChain = 'ARB' as const
-export const AssetARB: Asset = { chain: ARBChain, symbol: 'ARB', ticker: 'ETH', synth: false }
+// ARB ETH Gas asset
+export const AssetAETH: Asset = { chain: ARBChain, symbol: 'ETH', ticker: 'ETH', synth: false }
+
+// ARB
+export const AssetARB: Asset = {
+  chain: ARBChain,
+  symbol: 'ARB-0x912ce59144191c1204e64559fe8253a0e49e6548',
+  ticker: 'ARB',
+  synth: false,
+}
 
 // Define JSON-RPC providers for mainnet and testnet
 const ARBITRUM_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc')
@@ -30,7 +39,7 @@ const ARB_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   'https://api.arbiscan.io',
   process.env.ARBISCAN_API_KEY || '',
   ARBChain,
-  AssetARB,
+  AssetAETH,
   18,
 )
 
@@ -39,7 +48,7 @@ const ARB_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   'https://api-goerli.arbiscan.io',
   process.env.ARBISCAN_API_KEY || '',
   ARBChain,
-  AssetARB,
+  AssetAETH,
   18,
 )
 
@@ -102,7 +111,7 @@ const defaults = {
 // Define the default parameters for the Arbitrum client
 export const defaultArbParams: EVMClientParams = {
   chain: ARBChain,
-  gasAsset: AssetARB,
+  gasAsset: AssetAETH,
   gasAssetDecimals: ARB_GAS_ASSET_DECIMAL,
   defaults,
   providers: ethersJSProviders,

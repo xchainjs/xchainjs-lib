@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.10
+
+### Patch Changes
+
+- ecacc18: Add chain ARB to getDustValues
+- e0d9669: Node API backup endpoint
+- Updated dependencies [e0d9669]
+  - @xchainjs/xchain-mayamidgard-query@0.1.8
+
 ## 0.1.9
 
 ### Patch Changes
