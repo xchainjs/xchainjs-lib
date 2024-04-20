@@ -10,9 +10,10 @@ import { createHash } from 'crypto'
 import { publicKeyCreate } from 'secp256k1'
 
 import { Client, CosmosClientParams } from './client'
+import { defaultClientConfig } from './const'
 
 export class ClientKeystore extends Client {
-  constructor(params: CosmosClientParams) {
+  constructor(params: CosmosClientParams = defaultClientConfig) {
     super(params)
   }
   /**
