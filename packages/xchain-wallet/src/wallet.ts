@@ -395,11 +395,7 @@ export class Wallet {
    * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
    * @throws {Error} If asset is a non ERC20 asset
    */
-  async approve(
-    asset: Asset,
-    amount: BaseAmount,
-    spenderAddress: string,
-  ): Promise<ethers.providers.TransactionResponse> {
+  async approve(asset: Asset, amount: BaseAmount, spenderAddress: string): Promise<string> {
     const client = this.getClient(asset.chain)
     if (!this.isEvmClient(client)) throw Error('Can not make approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not make approve over native asset')

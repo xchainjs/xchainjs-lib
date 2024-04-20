@@ -35,13 +35,13 @@
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
   "dependencies": {
-    "@xchainjs/xchain-ethereum": "0.31.6",
+    "@xchainjs/xchain-ethereum": "*",
     "@xchainjs/xchain-dash": "*",
     "@xchainjs/xchain-kujira": "0.1.12",
     "@xchainjs/xchain-mayachain-query": "^0.1.10",
     "@xchainjs/xchain-mayachain": "1.0.1",
     "@xchainjs/xchain-thorchain": "1.0.4",
-    "@xchainjs/xchain-wallet": "0.1.8"
+    "@xchainjs/xchain-wallet": "*"
   },
   "devDependencies": {
     "@cosmos-client/core": "0.46.1",

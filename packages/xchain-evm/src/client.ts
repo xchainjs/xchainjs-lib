@@ -1,4 +1,4 @@
-import { Provider, TransactionResponse } from '@ethersproject/abstract-provider'
+import { Provider } from '@ethersproject/abstract-provider'
 import {
   AssetInfo,
   Balance,
@@ -17,21 +17,20 @@ import {
   TxHistoryParams,
   TxParams,
   TxsPage,
-  XChainClient,
-  XChainClientParams,
-  checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, BaseAmount, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
-import { BigNumber, Signer, Wallet, ethers } from 'ethers'
-import { HDNode, toUtf8Bytes } from 'ethers/lib/utils'
+import { Address, Asset, BaseAmount, CachedValue, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { BigNumber, ethers } from 'ethers'
+import { toUtf8Bytes } from 'ethers/lib/utils'
 
 import erc20ABI from './data/erc20.json'
 import {
   ApproveParams,
   CallParams,
+  EVMClientParams,
   EstimateApproveParams,
   EstimateCallParams,
+  EvmDefaults,
   FeesWithGasPricesAndLimits,
   GasPrices,
   IsApprovedParams,
@@ -42,61 +41,28 @@ import {
   estimateCall,
   getApprovalAmount,
   getFee,
+  getNetworkId,
   getTokenAddress,
   isApproved,
   validateAddress,
 } from './utils'
 
-/**
- * Interface for custom EVM client.
- * Defines methods for interacting with the EVM (Ethereum Virtual Machine).
- */
-// export interface EVMClient {
-//   call<T>(params: CallParams): Promise<T>
-//   estimateCall(asset: EstimateCallParams): Promise<BigNumber>
-//   estimateGasPrices(): Promise<GasPrices>
-//   estimateGasLimit(params: TxParams): Promise<BigNumber>
-//   estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits>
-//   estimateApprove(params: EstimateApproveParams): Promise<BigNumber>
-//   isApproved(params: IsApprovedParams): Promise<boolean>
-//   approve(params: ApproveParams): Promise<TransactionResponse>
-//   // `getFees` of `BaseXChainClient` needs to be overridden
-//   getFees(params: TxParams): Promise<Fees>
-//   getWallet(walletIndex?: number): ethers.Wallet
-//   getProvider(): Provider
-// }
-type EvmDefaults = {
-  transferGasAssetGasLimit: BigNumber
-  transferTokenGasLimit: BigNumber
-  approveGasLimit: BigNumber
-  gasPrice: BigNumber // BaseAmount Unit
-}
-/**
- * Parameters for configuring the EVM client.
- */
-export type EVMClientParams = XChainClientParams & {
-  chain: Chain
-  gasAsset: Asset
-  gasAssetDecimals: number
-  defaults: Record<Network, EvmDefaults>
-  providers: Record<Network, Provider>
-  explorerProviders: ExplorerProviders
-  dataProviders: EvmOnlineDataProviders[]
+export interface EVMClient {
+  approve(params: ApproveParams): Promise<string>
 }
 
 /**
  * Custom EVM client class.
- * Extends `BaseXChainClient` and implements `XChainClient`.
  */
-export default class Client extends BaseXChainClient implements XChainClient {
+export abstract class Client extends BaseXChainClient implements EVMClient {
   readonly config: EVMClientParams
   private gasAsset: Asset
   private gasAssetDecimals: number
-  private hdNode?: HDNode
-  private defaults: Record<Network, EvmDefaults>
+  protected defaults: Record<Network, EvmDefaults>
   private explorerProviders: ExplorerProviders
   private dataProviders: EvmOnlineDataProviders[]
   private providers: Record<Network, Provider>
+  private cachedNetworkId: CachedValue<number>
   /**
    * Constructor for the EVM client.
    * @param {EVMClientParams} params - Parameters for configuring the EVM client.
@@ -133,65 +99,10 @@ export default class Client extends BaseXChainClient implements XChainClient {
     this.explorerProviders = explorerProviders
     this.dataProviders = dataProviders
     this.providers = providers
+    this.cachedNetworkId = new CachedValue<number>(() => getNetworkId(this.getProvider()))
     phrase && this.setPhrase(phrase)
   }
 
-  /**
-   * Purges the client, resetting it to initial state.
-   *
-   * @returns {void}
-   */
-  purgeClient(): void {
-    super.purgeClient()
-    this.hdNode = undefined
-  }
-
-  /**
-   * @deprecated Use getAddressAsync instead. This function will eventually be removed.
-   */
-  getAddress(walletIndex = 0): Address {
-    if (walletIndex < 0) {
-      throw new Error('index must be greater than or equal to zero')
-    }
-    if (!this.hdNode) {
-      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
-    }
-    return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
-  }
-
-  /**
-   * Get the current address.
-   * Asynchronously gets the current address.
-   * @param {number} walletIndex The current address.
-   * @returns {Address} The current address.
-   *
-   * @throws Error
-   * @throws {Error} Thrown if HDNode is not defined, indicating that a phrase is needed to derive an address.
-   * @throws {Error} Thrown if wallet index < 0.
-   */
-  /**
-   *
-   * @param {number} walletIndex (optional) Index of the HD wallet.
-   * @returns {Promise<Address>} The current address.
-   * @throws {Error} Thrown if wallet index < 0.
-   */
-  async getAddressAsync(walletIndex = 0): Promise<Address> {
-    return this.getAddress(walletIndex)
-  }
-
-  /**
-   * Retrieves the Ethereum wallet interface.
-   * @param {number} walletIndex - The index of the HD wallet (optional).
-   * @returns {Wallet} The current Ethereum wallet interface.
-   * @throws Error - Thrown if the HDNode is not defined, indicating that a phrase is needed to create a wallet and derive an address.
-   * Note: A phrase is needed to create a wallet and to derive an address from it.
-   */
-  getWallet(walletIndex = 0): ethers.Wallet {
-    if (!this.hdNode) {
-      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
-    }
-    return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(walletIndex))).connect(this.getProvider())
-  }
   /**
    * Retrieves the Ethereum Provider interface.
    * @returns {Provider} The current Ethereum Provider interface.
@@ -245,16 +156,7 @@ export default class Client extends BaseXChainClient implements XChainClient {
    */
   setNetwork(network: Network): void {
     super.setNetwork(network)
-  }
-
-  /**
-   * Validates the given Ethereum address.
-   * @param {Address} address - The address to validate.
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
-  setPhrase(phrase: string, walletIndex = 0): Address {
-    this.hdNode = HDNode.fromMnemonic(phrase)
-    return super.setPhrase(phrase, walletIndex)
+    this.cachedNetworkId = new CachedValue<number>(() => getNetworkId(this.getProvider()))
   }
 
   /**
@@ -306,31 +208,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
   }
 
   /**
-   * Call a contract function.
-
-   * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
-   * @param {Address} contractAddress The contract address.
-   * @param {number} walletIndex (optional) HD wallet index
-   * @param {ContractInterface} abi The contract ABI json.
-   * @param {string} funcName The function to be called.
-   * @param {unknown[]} funcParams (optional) The parameters of the function.
-   * @param {CallParams} params - Parameters for calling the contract function.
-   * @returns {T} The result of the contract function call..
-   */
-  async call<T>({
-    signer: txSigner,
-    contractAddress,
-    walletIndex = 0,
-    abi,
-    funcName,
-    funcParams = [],
-  }: CallParams): Promise<T> {
-    const provider = this.getProvider()
-    const signer = txSigner || this.getWallet(walletIndex)
-    return call({ provider, signer, contractAddress, abi, funcName, funcParams })
-  }
-
-  /**
    * Estimates the gas required for calling a contract function.
    * @param {Address} contractAddress The contract address.
    * @param {ContractInterface} abi The contract ABI json.
@@ -371,69 +248,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
 
     return allowance
   }
-  /**
-   * Approves an allowance for spending tokens.
-   *
-   * @param {ApproveParams} params - Parameters for approving an allowance.
-   * @param {Address} contractAddress The contract address.
-   * @param {Address} spenderAddress The spender address.
-   * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
-   * @param {feeOption} FeeOption Fee option (optional)
-   * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
-   * @param {number} walletIndex (optional) HD wallet index
-   * @returns {TransactionResponse} The result of the approval transaction.
-   * @throws Error If gas estimation fails.
-   */
-  async approve({
-    contractAddress,
-    spenderAddress,
-    feeOption = FeeOption.Fastest,
-    amount,
-    walletIndex = 0,
-    signer: txSigner,
-  }: ApproveParams): Promise<TransactionResponse> {
-    const sender = await this.getAddressAsync(walletIndex || 0)
-
-    const gasPrice: BigNumber = BigNumber.from(
-      (await this.estimateGasPrices().then((prices) => prices[feeOption]))
-        // .catch(() => getDefaultGasPrices()[feeOption])
-        .amount()
-        .toFixed(),
-    )
-
-    checkFeeBounds(this.feeBounds, gasPrice.toNumber())
-
-    const gasLimit: BigNumber = await this.estimateApprove({
-      spenderAddress,
-      contractAddress,
-      fromAddress: sender,
-      amount,
-    }).catch(() => {
-      return BigNumber.from(this.config.defaults[this.network].approveGasLimit)
-    })
-
-    const { rawUnsignedTx } = await this.prepareApprove({
-      contractAddress,
-      spenderAddress,
-      amount,
-      sender,
-    })
-
-    const transaction = ethers.utils.parseTransaction(rawUnsignedTx)
-
-    const signer = txSigner || this.getWallet(walletIndex)
-
-    const result = await signer.sendTransaction({
-      from: transaction.from,
-      to: transaction.to,
-      value: transaction.value,
-      data: transaction.data,
-      gasPrice,
-      gasLimit,
-    })
-
-    return result
-  }
 
   /**
    * Estimates the gas required for approving an allowance.
@@ -462,119 +276,6 @@ export default class Client extends BaseXChainClient implements XChainClient {
     })
   }
 
-  /**
-   * Transfers ETH or ERC20 token
-   *
-   * Note: A given `feeOption` wins over `gasPrice` and `gasLimit`
-   *
-   * @param {TxParams} params The transfer options.
-   * @param {signer} Signer The address a transaction is sent from. If not set, signer will be defined based on `walletIndex`.
-   * @param {feeOption} FeeOption Fee option (optional)
-   * @param {gasPrice} BaseAmount Gas price (optional)
-   * @param {gasLimit} BigNumber Gas limit (optional)
-   * @throws Error Thrown if address of given `Asset` could not be parsed
-   * @returns {TxHash} The transaction hash.
-   */
-  async transfer({
-    walletIndex = 0,
-    signer: txSigner,
-    asset = this.gasAsset,
-    memo,
-    amount,
-    recipient,
-    feeOption = FeeOption.Fast,
-    gasPrice,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-    gasLimit,
-  }: TxParams & {
-    signer?: Signer
-    feeOption?: FeeOption
-    gasPrice?: BaseAmount
-    maxFeePerGas?: BaseAmount
-    maxPriorityFeePerGas?: BaseAmount
-    gasLimit?: BigNumber
-  }): Promise<TxHash> {
-    // Check for compatibility between gasPrice and EIP 1559 parameters
-    if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
-      throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
-    }
-    // Initialize fee data object
-    const feeData: ethers.providers.FeeData = {
-      lastBaseFeePerGas: null,
-      maxFeePerGas: null,
-      maxPriorityFeePerGas: null,
-      gasPrice: null,
-    }
-    // If EIP 1559 parameters are provided, use them; otherwise, estimate gas price
-    if (maxFeePerGas || maxPriorityFeePerGas) {
-      // Get fee info from the provider
-      const feeInfo = await this.getProvider().getFeeData()
-      // Set max fee per gas
-      if (maxFeePerGas) {
-        // Set max priority fee per gas
-        feeData.maxFeePerGas = BigNumber.from(maxFeePerGas.amount().toFixed())
-      } else if (maxPriorityFeePerGas && feeInfo.lastBaseFeePerGas) {
-        feeData.maxFeePerGas = feeInfo.lastBaseFeePerGas.mul(2).add(maxPriorityFeePerGas.amount().toFixed())
-      }
-      feeData.maxPriorityFeePerGas = maxPriorityFeePerGas
-        ? BigNumber.from(maxPriorityFeePerGas.amount().toFixed())
-        : feeInfo.maxPriorityFeePerGas
-    } else {
-      const txGasPrice: BigNumber = gasPrice
-        ? // Estimate gas price based on fee option
-          BigNumber.from(gasPrice.amount().toFixed())
-        : await this.estimateGasPrices()
-            .then((prices) => prices[feeOption])
-            .then((gp) => BigNumber.from(gp.amount().toFixed()))
-      // Check fee bounds
-      checkFeeBounds(this.feeBounds, txGasPrice.toNumber())
-      // Set gas price
-      feeData.gasPrice = txGasPrice
-    }
-    // Get the sender address
-    const sender = txSigner ? await txSigner.getAddress() : this.getAddress(walletIndex)
-    // Determine gas limit: estimate or use default
-    let txGasLimit: BigNumber
-    if (!gasLimit) {
-      try {
-        txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo, from: sender })
-      } catch (error) {
-        txGasLimit = this.isGasAsset(asset)
-          ? this.defaults[this.network].transferGasAssetGasLimit
-          : this.defaults[this.network].transferTokenGasLimit
-      }
-    } else {
-      txGasLimit = gasLimit
-    }
-    // Prepare the transaction
-    const { rawUnsignedTx } = await this.prepareTx({
-      sender,
-      recipient,
-      amount,
-      asset,
-      memo,
-    })
-    // Parse the transaction request
-    const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
-    // Get the signer
-    const signer = txSigner || this.getWallet(walletIndex)
-    // Populate the transaction with necessary details
-    const tx = await signer.populateTransaction({
-      from: transactionRequest.from,
-      to: transactionRequest.to,
-      data: transactionRequest.data,
-      value: transactionRequest.value,
-      gasLimit: txGasLimit,
-      gasPrice: feeData.gasPrice || undefined,
-      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
-      maxFeePerGas: feeData.maxFeePerGas || undefined,
-    })
-    // Send the transaction and return the hash
-    const { hash } = await signer.sendTransaction(tx)
-
-    return hash
-  }
   /**
    * Broadcasts a transaction.
    * @param {string} txHex - The transaction in hexadecimal format.
@@ -834,12 +535,16 @@ export default class Client extends BaseXChainClient implements XChainClient {
     if (!this.validateAddress(sender)) throw Error('Invalid sender address')
     if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
 
+    const nonce = await this.getProvider().getTransactionCount(sender)
+
     if (this.isGasAsset(asset)) {
       return {
         rawUnsignedTx: ethers.utils.serializeTransaction({
+          chainId: await this.cachedNetworkId.getValue(),
           to: recipient,
           value: BigNumber.from(amount.amount().toFixed()),
           data: memo ? toUtf8Bytes(memo) : undefined,
+          nonce,
         }),
       }
     } else {
@@ -853,7 +558,13 @@ export default class Client extends BaseXChainClient implements XChainClient {
         BigNumber.from(amount.amount().toFixed()),
       )
 
-      return { rawUnsignedTx: ethers.utils.serializeTransaction(unsignedTx) }
+      return {
+        rawUnsignedTx: ethers.utils.serializeTransaction({
+          ...unsignedTx,
+          chainId: await this.cachedNetworkId.getValue(),
+          nonce,
+        }),
+      }
     }
   }
 
@@ -878,9 +589,32 @@ export default class Client extends BaseXChainClient implements XChainClient {
     const valueToApprove = getApprovalAmount(amount)
 
     const unsignedTx = await contract.populateTransaction.approve(spenderAddress, valueToApprove)
+    const nonce = await this.getProvider().getTransactionCount(sender)
 
-    return { rawUnsignedTx: ethers.utils.serializeTransaction(unsignedTx) }
+    return {
+      rawUnsignedTx: ethers.utils.serializeTransaction({
+        ...unsignedTx,
+        chainId: await this.cachedNetworkId.getValue(),
+        nonce,
+      }),
+    }
   }
-}
 
-export { Client }
+  /**
+   * Call a contract function.
+
+   * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
+   * @param {Address} contractAddress The contract address.
+   * @param {number} walletIndex (optional) HD wallet index
+   * @param {ContractInterface} abi The contract ABI json.
+   * @param {string} funcName The function to be called.
+   * @param {unknown[]} funcParams (optional) The parameters of the function.
+   * @param {CallParams} params - Parameters for calling the contract function.
+   * @returns {T} The result of the contract function call..
+   */
+  async call<T>({ contractAddress, abi, funcName, funcParams = [], signer }: CallParams): Promise<T> {
+    return call({ provider: this.getProvider(), signer, contractAddress, abi, funcName, funcParams })
+  }
+
+  public abstract approve(params: ApproveParams): Promise<string>
+}

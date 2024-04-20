@@ -2,7 +2,7 @@ import { AssetInfo, Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import BscClient from '../src/client'
+import BscClient from '../src'
 import { AssetBSC, BSCChain, BSC_GAS_ASSET_DECIMAL, defaultBscParams } from '../src/const'
 
 // =====Erc-20 asset=====

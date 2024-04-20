@@ -249,3 +249,13 @@ export const isApproved = async ({
  * @returns {string} The address without the `0x` or `0X` prefix.
  */
 export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')
+
+/**
+ * Get the chain identifier the provider is connected with
+ * @param {providers.Provider} provider Provider
+ * @returns {number} the chain identifier the provider is connected with
+ */
+export const getNetworkId = async (provider: providers.Provider): Promise<number> => {
+  const network = await provider.getNetwork()
+  return network.chainId
+}
