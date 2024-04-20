@@ -39,11 +39,15 @@
     "@cosmjs/proto-signing": "0.31.1",
     "cosmjs-types": "0.8.0",
     "@xchainjs/xchain-client": "0.16.2",
+    "@xchainjs/xchain-crypto": "*",
     "@xchainjs/xchain-cosmos-sdk": "0.2.4",
     "@xchainjs/xchain-util": "0.13.3",
     "axios": "1.3.6",
+    "bech32": "^1.1.3",
     "bignumber.js": "9.0.0",
-    "protobufjs": "6.11.4"
+    "bip32": "^2.0.6",
+    "protobufjs": "6.11.4",
+    "secp256k1": "^5.0.0"
   },
   "publishConfig": {
     "access": "public"
