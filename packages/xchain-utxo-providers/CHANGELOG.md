@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.13
+
+### Patch Changes
+
+- Updated dependencies [448c29f]
+  - @xchainjs/xchain-client@0.16.3
+
 ## 0.2.12
 
 ### Patch Changes
