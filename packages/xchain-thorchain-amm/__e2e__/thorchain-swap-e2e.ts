@@ -1,5 +1,11 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
-import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import {
+  AVAXChain,
+  AssetAVAX,
+  ClientKeystore as AvaxClientKeystore,
+  ClientLedger as AvaxClientLedger,
+  defaultAvaxParams,
+} from '@xchainjs/xchain-avax'
 import { AssetBNB, BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import {
   AssetBTC,
@@ -88,7 +94,7 @@ describe('ThorchainAmm e2e tests', () => {
         LTC: new LtcKeystoreClient({ ...defaultLtcParams, phrase, network: Network.Mainnet }),
         DOGE: new DogeClient({ ...defaultDogeParams, phrase, network: Network.Mainnet }),
         ETH: new EthClient({ ...defaultEthParams, phrase, network: Network.Mainnet }),
-        AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
+        AVAX: new AvaxClientKeystore({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
         BSC: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
         GAIA: new GaiaClient({ phrase, network: Network.Mainnet }),
         BNB: new BnbClient({ phrase, network: Network.Mainnet }),
@@ -348,7 +354,7 @@ describe('ThorchainAmm e2e tests', () => {
       console.log(txSubmitted)
     })
 
-    it('Should do swap from Ledger client to Keystore client', async () => {
+    it('Should do swap from UTXO Ledger client to Keystore client', async () => {
       const thorchainQuery = new ThorchainQuery()
       const phrase = process.env.MAINNET_PHRASE
       const wallet = new Wallet({
@@ -367,6 +373,29 @@ describe('ThorchainAmm e2e tests', () => {
         fromAsset: AssetLTC,
         destinationAsset: AssetRuneNative,
         amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetLTC),
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it('Should do swap from EVM Ledger client to Keystore client', async () => {
+      const thorchainQuery = new ThorchainQuery()
+      const wallet = new Wallet({
+        AVAX: new AvaxClientLedger({
+          ...defaultAvaxParams,
+          network: Network.Mainnet,
+          transport: await TransportNodeHid.create(),
+        }),
+      })
+      const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
+
+      const USDCAsset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E')
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAddress: await wallet.getAddress(AVAXChain),
+        destinationAddress: await wallet.getAddress(AVAXChain),
+        fromAsset: USDCAsset,
+        destinationAsset: AssetAVAX,
+        amount: new CryptoAmount(assetToBase(assetAmount('10', 6)), USDCAsset),
       })
 
       console.log(txSubmitted)

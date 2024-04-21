@@ -15,11 +15,10 @@ import {
   Tx,
   TxHash,
   TxHistoryParams,
-  TxParams,
   TxsPage,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, BaseAmount, CachedValue, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, CachedValue, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 import { toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -34,6 +33,7 @@ import {
   FeesWithGasPricesAndLimits,
   GasPrices,
   IsApprovedParams,
+  TxParams,
 } from './types'
 import {
   call,
@@ -353,7 +353,14 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @returns {BaseAmount} The estimated gas limit.
    * @throws Error Thrown if address could not be parsed from the given ERC20 asset.
    */
-  async estimateGasLimit({ asset, recipient, amount, memo, from }: TxParams & { from?: Address }): Promise<BigNumber> {
+  async estimateGasLimit({
+    asset,
+    recipient,
+    amount,
+    memo,
+    from,
+    isMemoEncoded,
+  }: TxParams & { from?: Address }): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
     const theAsset = asset ?? this.gasAsset
     let gasEstimate: BigNumber
@@ -372,7 +379,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
         from: from || (await this.getAddressAsync()),
         to: recipient,
         value: txAmount,
-        data: memo ? toUtf8Bytes(memo) : undefined,
+        data: memo ? (isMemoEncoded ? memo : toUtf8Bytes(memo)) : undefined,
       }
       gasEstimate = await this.getProvider().estimateGas(transactionRequest)
     }
@@ -523,11 +530,9 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     memo,
     amount,
     recipient,
+    isMemoEncoded = false,
   }: TxParams & {
     sender: Address
-    feeOption?: FeeOption
-    gasPrice?: BaseAmount
-    gasLimit?: BigNumber
   }): Promise<PreparedTx> {
     if (asset.chain !== this.chain)
       throw Error(`This client can only prepare transactions on chain: ${this.chain}. Bad asset: ${asset.chain}`)
@@ -543,7 +548,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
           chainId: await this.cachedNetworkId.getValue(),
           to: recipient,
           value: BigNumber.from(amount.amount().toFixed()),
-          data: memo ? toUtf8Bytes(memo) : undefined,
+          data: memo ? (isMemoEncoded ? memo : toUtf8Bytes(memo)) : undefined,
           nonce,
         }),
       }
