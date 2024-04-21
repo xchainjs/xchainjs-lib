@@ -19,7 +19,7 @@ export type MayanodeConfig = {
 const defaultMayanodeConfig: Record<Network, MayanodeConfig> = {
   mainnet: {
     apiRetries: 3,
-    mayanodeBaseUrls: ['https://mayanode.mayachain.info'],
+    mayanodeBaseUrls: ['https://mayanode.mayachain.info', 'https://api-maya.liquify.com'],
   },
   stagenet: {
     apiRetries: 3,
