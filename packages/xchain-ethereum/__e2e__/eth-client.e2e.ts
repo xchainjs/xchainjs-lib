@@ -1,8 +1,8 @@
-import { Balance, FeeOption, Network, TxType } from '@xchainjs/xchain-client'
-import { ApproveParams, EstimateApproveParams, IsApprovedParams, Protocol } from '@xchainjs/xchain-evm'
+import { Balance, FeeOption, Network, Protocol, TxType } from '@xchainjs/xchain-client'
+import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
 import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import Client from '../src/client'
+import { Client } from '../src'
 import { AssetETH, ETHChain, defaultEthParams } from '../src/const'
 
 // =====Erc-20 asset=====

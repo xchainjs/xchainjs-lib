@@ -3,7 +3,7 @@ import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainj
 import { CovalentProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
-import AvaxClient from '../src/client'
+import AvaxClient from '../src'
 import { AVAXChain, AssetAVAX, defaultAvaxParams } from '../src/const'
 
 // import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '../src/types'

@@ -227,7 +227,7 @@ export class ThorchainAMM {
     const inboundDetails = await this.thorchainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
     // Perform approval
-    const tx = await this.wallet.approve(
+    const hash = await this.wallet.approve(
       asset,
       amount?.baseAmount ||
         baseAmount(
@@ -238,8 +238,8 @@ export class ThorchainAMM {
     )
     // Return transaction hash and URL
     return {
-      hash: tx.hash,
-      url: await this.wallet.getExplorerTxUrl(asset.chain, tx.hash),
+      hash,
+      url: await this.wallet.getExplorerTxUrl(asset.chain, hash),
     }
   }
 

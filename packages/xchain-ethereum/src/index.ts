@@ -1,9 +1,10 @@
-/**
- * Export all members from the 'client' module.
- */
-export * from './client'
+// Export all elements from the 'client' module
+import { ClientKeystore } from './ClientKeystore'
 
-/**
- * Export all members from the 'const' module.
- */
+export { ClientKeystore, ClientKeystore as Client } from './ClientKeystore'
+export { ClientLedger } from './ClientLedger'
+
+// Export all elements from the 'const' module
 export * from './const'
+
+export default ClientKeystore
