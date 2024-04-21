@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.1.4
+
+### Patch Changes
+
+- 448c29f: EVM protocol actions through the router smart contract
+- Updated dependencies [f432295]
+- Updated dependencies [f432295]
+- Updated dependencies [448c29f]
+- Updated dependencies [448c29f]
+- Updated dependencies [448c29f]
+- Updated dependencies [448c29f]
+- Updated dependencies [448c29f]
+- Updated dependencies [f432295]
+- Updated dependencies [f432295]
+  - @xchainjs/xchain-ethereum@0.32.0
+  - @xchainjs/xchain-avax@0.5.0
+  - @xchainjs/xchain-bsc@0.5.0
+  - @xchainjs/xchain-evm@0.5.0
+  - @xchainjs/xchain-wallet@0.1.9
+  - @xchainjs/xchain-client@0.16.3
+  - @xchainjs/xchain-binance@5.7.12
+  - @xchainjs/xchain-bitcoin@0.23.14
+  - @xchainjs/xchain-bitcoincash@0.17.12
+  - @xchainjs/xchain-cosmos@1.0.2
+  - @xchainjs/xchain-doge@0.7.14
+  - @xchainjs/xchain-litecoin@0.14.1
+  - @xchainjs/xchain-mayachain@1.0.2
+  - @xchainjs/xchain-thorchain@1.0.5
+  - @xchainjs/xchain-thorchain-query@0.7.9
+  - @xchainjs/xchain-utxo-providers@0.2.13
+
 ## 1.1.3
 
 ### Patch Changes

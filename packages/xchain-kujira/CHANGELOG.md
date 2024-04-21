@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.13
+
+### Patch Changes
+
+- Updated dependencies [448c29f]
+  - @xchainjs/xchain-client@0.16.3
+  - @xchainjs/xchain-cosmos-sdk@0.2.5
+
 ## 0.1.12
 
 ### Patch Changes

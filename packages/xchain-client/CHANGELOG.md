@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.3
+
+### Patch Changes
+
+- 448c29f: Method `getAssetInfo` for `XChainClient` interface
+
 ## 0.16.2
 
 ### Patch Changes
