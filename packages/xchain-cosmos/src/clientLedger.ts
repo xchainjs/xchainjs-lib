@@ -13,15 +13,14 @@ import BigNumber from 'bignumber.js'
 import { Client, CosmosClientParams } from './client'
 
 export class ClientLedger extends Client {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: Transport // TODO: Parametrize
   private app: CosmosApp | undefined
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(params: CosmosClientParams & { transport: Transport }) {
     super(params)
     this.transport = params.transport
   }
+
   // Get the current address synchronously
   public getAddress(): string {
     throw Error('Sync method not supported for Ledger')
