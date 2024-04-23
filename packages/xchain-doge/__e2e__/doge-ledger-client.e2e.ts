@@ -75,4 +75,21 @@ describe('BitcoinCash Client Ledger', () => {
       fail()
     }
   })
+  it('transfer Ledger test amount long memo', async () => {
+    try {
+      const to = await dogeClient.getAddressAsync(1)
+      const amount = assetToBase(assetAmount('1'))
+      const txid = await dogeClient.transfer({
+        asset: AssetDOGE,
+        recipient: to,
+        amount,
+        memo: '=:r:thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu:0/1/0:dx:0',
+        feeRate: 1,
+      })
+      console.log(JSON.stringify(txid, null, 2))
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
 })
