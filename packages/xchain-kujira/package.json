@@ -35,18 +35,12 @@
     "@cosmjs/encoding": "0.31.1",
     "@cosmjs/proto-signing": "0.31.1",
     "@cosmjs/stargate": "0.31.1",
-    "@xchainjs/xchain-cosmos-sdk": "0.2.5",
+    "@xchainjs/xchain-client": "*",
+    "@xchainjs/xchain-cosmos-sdk": "*",
+    "@xchainjs/xchain-util": "*",
     "cosmjs-types": "0.8.0"
-  },
-  "devDependencies": {
-    "@xchainjs/xchain-client": "^0.16.3",
-    "@xchainjs/xchain-util": "^0.13.3"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.16.3",
-    "@xchainjs/xchain-util": "^0.13.3"
   }
 }
