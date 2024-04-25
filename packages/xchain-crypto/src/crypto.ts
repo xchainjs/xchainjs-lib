@@ -1,18 +1,39 @@
-import * as bip39 from 'bip39'
+import { generateMnemonic, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english'
+import { blake2bFinal, blake2bInit, blake2bUpdate } from 'blakejs'
 import crypto from 'crypto'
-import { blake256 } from 'foundry-primitives-xchainjs'
-import { v4 as uuidv4 } from 'uuid'
 
-import { pbkdf2Async } from './utils'
+const blake256 = (initData: Buffer | string): string => {
+  let data = initData
 
-// Constants
-const cipher = 'aes-128-ctr' // Encryption cipher
-const kdf = 'pbkdf2' // Key derivation function
-const prf = 'hmac-sha256' // Pseudorandom function
-const dklen = 32 // Derived key length
-const c = 262144 // Iteration count
-const hashFunction = 'sha256' // Hash function
-const meta = 'xchain-keystore' // Metadata
+  if (!(data instanceof Buffer)) {
+    data = Buffer.from(data, 'hex')
+  }
+
+  const context = blake2bInit(32)
+  blake2bUpdate(context, data)
+
+  return Array.from(blake2bFinal(context))
+    .map((byte) => (byte < 0x10 ? `0${byte.toString(16)}` : byte.toString(16)))
+    .join('')
+}
+
+const pbkdf2Async = (
+  passphrase: string | Buffer,
+  salt: string | Buffer,
+  iterations: number,
+  keylen: number,
+  digest: string,
+) =>
+  new Promise<Buffer>((resolve, reject) => {
+    crypto.pbkdf2(passphrase, salt, iterations, keylen, digest, (error, drived) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(drived)
+      }
+    })
+  })
 
 /**
  * The Keystore interface.
@@ -34,17 +55,8 @@ export type Keystore = {
     }
     mac: string
   }
-  id: string
   version: number
   meta: string
-}
-
-/**
- * Determines if the current environment is Node.js.
- * @returns {boolean} True if the current environment is Node.js.
- */
-const _isNode = (): boolean => {
-  return typeof window === 'undefined'
 }
 
 /**
@@ -53,15 +65,9 @@ const _isNode = (): boolean => {
  * @returns {string} The generated mnemonic phrase.
  */
 export const generatePhrase = (size = 12): string => {
-  if (_isNode()) {
-    const bytes = crypto.randomBytes((size == 12 ? 128 : 256) / 8)
-    const phrase = bip39.entropyToMnemonic(bytes)
-    return phrase
-  } else {
-    const entropy = size == 12 ? 128 : 256
-    const phrase = bip39.generateMnemonic(entropy)
-    return phrase
-  }
+  const entropy = size == 12 ? 128 : 256
+  const phrase = generateMnemonic(wordlist, entropy)
+  return phrase
 }
 
 /**
@@ -70,7 +76,7 @@ export const generatePhrase = (size = 12): string => {
  * @returns {boolean} True if the phrase is valid, otherwise false.
  */
 export const validatePhrase = (phrase: string): boolean => {
-  return bip39.validateMnemonic(phrase)
+  return validateMnemonic(phrase, wordlist)
 }
 
 /**
@@ -83,7 +89,7 @@ export const getSeed = (phrase: string): Buffer => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
   }
-  return bip39.mnemonicToSeedSync(phrase)
+  return Buffer.from(mnemonicToSeedSync(phrase))
 }
 
 /**
@@ -94,45 +100,27 @@ export const getSeed = (phrase: string): Buffer => {
  * @throws {Error} Thrown if the phrase is invalid.
  */
 export const encryptToKeyStore = async (phrase: string, password: string): Promise<Keystore> => {
-  if (!validatePhrase(phrase)) {
-    throw new Error('Invalid BIP39 phrase')
-  }
-
-  const ID = _isNode() ? require('uuid').v4() : uuidv4()
   const salt = crypto.randomBytes(32)
   const iv = crypto.randomBytes(16)
-  const kdfParams = {
-    prf: prf,
-    dklen: dklen,
-    salt: salt.toString('hex'),
-    c: c,
-  }
-  const cipherParams = {
-    iv: iv.toString('hex'),
-  }
+  const kdfParams = { c: 262144, prf: 'hmac-sha256', dklen: 32, salt: salt.toString('hex') }
+  const cipher = 'aes-128-ctr'
 
-  const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
-  const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
-  const cipherText = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
-  const mac = blake256(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]))
+  const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, 'sha256')
+  const cipherIV = crypto.createCipheriv(cipher, derivedKey.subarray(0, 16), iv)
+  const ciphertext = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
 
-  const cryptoStruct = {
-    cipher: cipher,
-    ciphertext: cipherText.toString('hex'),
-    cipherparams: cipherParams,
-    kdf: kdf,
-    kdfparams: kdfParams,
-    mac: mac,
-  }
-
-  const keystore = {
-    crypto: cryptoStruct,
-    id: ID,
+  return {
+    meta: 'xchain-keystore',
     version: 1,
-    meta: meta,
+    crypto: {
+      cipher,
+      cipherparams: { iv: iv.toString('hex') },
+      ciphertext: ciphertext.toString('hex'),
+      kdf: 'pbkdf2',
+      kdfparams: kdfParams,
+      mac: blake256(Buffer.concat([derivedKey.subarray(16, 32), Buffer.from(ciphertext)])),
+    },
   }
-
-  return keystore
 }
 
 /**
@@ -143,25 +131,32 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
  * @throws {"Invalid password"} Thrown if the password is incorrect.
  */
 export const decryptFromKeystore = async (keystore: Keystore, password: string): Promise<string> => {
-  const kdfparams = keystore.crypto.kdfparams
-  const derivedKey = await pbkdf2Async(
-    Buffer.from(password),
-    Buffer.from(kdfparams.salt, 'hex'),
-    kdfparams.c,
-    kdfparams.dklen,
-    hashFunction,
-  )
+  switch (keystore.version) {
+    case 1: {
+      const kdfparams = keystore.crypto.kdfparams
+      const derivedKey = await pbkdf2Async(
+        Buffer.from(password),
+        Buffer.from(kdfparams.salt, 'hex'),
+        kdfparams.c,
+        kdfparams.dklen,
+        'sha256',
+      )
 
-  const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
-  const mac = blake256(Buffer.concat([derivedKey.slice(16, 32), ciphertext]))
+      const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
+      const mac = blake256(Buffer.concat([derivedKey.subarray(16, 32), ciphertext]))
 
-  if (mac !== keystore.crypto.mac) throw new Error('Invalid password')
-  const decipher = crypto.createDecipheriv(
-    keystore.crypto.cipher,
-    derivedKey.slice(0, 16),
-    Buffer.from(keystore.crypto.cipherparams.iv, 'hex'),
-  )
+      if (mac !== keystore.crypto.mac) throw new Error('Invalid password')
+      const decipher = crypto.createDecipheriv(
+        keystore.crypto.cipher,
+        derivedKey.subarray(0, 16),
+        Buffer.from(keystore.crypto.cipherparams.iv, 'hex'),
+      )
 
-  const phrase = Buffer.concat([decipher.update(ciphertext), decipher.final()])
-  return phrase.toString('utf8')
+      const phrase = Buffer.concat([decipher.update(ciphertext), decipher.final()])
+      return phrase.toString('utf8')
+    }
+
+    default:
+      throw new Error('Unsupported keystore version')
+  }
 }
