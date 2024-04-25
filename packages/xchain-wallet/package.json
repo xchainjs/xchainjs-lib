@@ -4,8 +4,8 @@
   "version": "0.1.9",
   "license": "MIT",
   "main": "lib/index.js",
-  "module": "lib/index.esm.js",
-  "typings": "lib/index.d.ts",
+  "type": "module",
+  "types": "src/index.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -18,7 +18,7 @@
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
   },
   "scripts": {
-    "build": "yarn clean && rollup -c",
+    "build": "bun run ./build.ts",
     "clean": "rm -rf .turbo && rm -rf lib",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
@@ -27,16 +27,16 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-evm": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-thorchain": "*",
-    "@xchainjs/xchain-mayachain": "*",
-    "@xchainjs/xchain-utxo": "*"
+    "@xchainjs/xchain-evm": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-thorchain": "workspace:*",
+    "@xchainjs/xchain-mayachain": "workspace:*",
+    "@xchainjs/xchain-utxo": "workspace:*"
   },
   "devDependencies": {
-    "@xchainjs/xchain-bitcoin": "*",
-    "@xchainjs/xchain-bitcoincash": "*",
-    "@xchainjs/xchain-ethereum": "*"
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-bitcoincash": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*"
   }
 }

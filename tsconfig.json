@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.build.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
@@ -8,13 +8,9 @@
       ]
     },
     "jsx": "react",
-    "types": [
-      "jest",
-      "node"
-    ],
     "outDir": "lib",
     "module": "esnext",
-    "target": "es6",
+    "target": "ES2022",
     "lib": [
       "es6",
       "dom",
@@ -39,6 +35,10 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
+    "types": [
+      "bun-types",
+      "jest"
+    ]
   },
   "exclude": [
     "examples/frameworks"

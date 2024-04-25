@@ -11,8 +11,8 @@
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
-  "module": "lib/index.esm.js",
-  "typings": "lib/index.d.ts",
+  "type": "module",
+  "types": "src/index.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -26,7 +26,7 @@
   },
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
-    "build": "yarn clean && rollup -c",
+    "build": "bun run ./build.ts",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__,__mocks__}/**/*.ts\" --fix --max-warnings 0",
@@ -35,11 +35,11 @@
   "dependencies": {
     "@ledgerhq/hw-app-btc": "10.1.0",
     "@psf/bitcoincashjs-lib": "4.0.3",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-crypto": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-utxo": "*",
-    "@xchainjs/xchain-utxo-providers": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-utxo": "workspace:*",
+    "@xchainjs/xchain-utxo-providers": "workspace:*",
     "bchaddrjs": "0.5.2",
     "coinselect": "3.1.12"
   },

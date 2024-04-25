@@ -1,5 +1,5 @@
 import { ExplorerProviders, PreparedTx as BasePreparedTx, XChainClientParams } from '@xchainjs/xchain-client'
-import { UTXO, UtxoOnlineDataProviders, Witness } from '@xchainjs/xchain-utxo-providers'
+import { UTXO, UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
 export type UtxoClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
@@ -9,5 +9,3 @@ export type UtxoClientParams = XChainClientParams & {
 export type PreparedTx = BasePreparedTx & {
   utxos: UTXO[]
 }
-
-export { UTXO, Witness }
