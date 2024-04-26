@@ -198,4 +198,5 @@ export interface XChainClient {
   prepareTx(params: TxParams): Promise<PreparedTx> // Prepare transaction
   broadcastTx(txHex: string): Promise<TxHash> // Broadcast transaction
   purgeClient(): void // Purge client
+  getAssetInfo(): AssetInfo // Get native asset info
 }

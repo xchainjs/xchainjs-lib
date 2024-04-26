@@ -3,15 +3,19 @@
  */
 export * from './types'
 
-/**
- * Export the Dogecoin client implementation defined in the 'client.ts' file.
- */
-export * from './client'
+// Export the 'ClientKeystore' class as 'Client'
+export { ClientKeystore as Client } from './clientKeystore'
+
+// Export the 'ClientLedger' class
+export { ClientLedger } from './clientLedger'
 
 /**
  * Export all constants defined in the 'const.ts' file.
  */
 export * from './const'
+
+// Export the 'defaultDogeParams' constant from the 'client' file
+export { defaultDogeParams } from './client'
 
 /**
  * Export utility functions for validating Dogecoin addresses and getting address prefixes

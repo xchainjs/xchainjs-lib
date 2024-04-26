@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.9
+
+### Patch Changes
+
+- 448c29f: Method `getChainWallet` removed
+- 448c29f: New optional parameter `isMemoEncoded` to avoid memo encoding before transfer
+- 448c29f: New method `getAssetInfo` for retrieving the native asset of a chain
+- f432295: `approve` return type updated from `ethers.providers.TransactionResponse` to `string`
+- Updated dependencies [f432295]
+- Updated dependencies [448c29f]
+- Updated dependencies [448c29f]
+- Updated dependencies [f432295]
+  - @xchainjs/xchain-evm@0.5.0
+  - @xchainjs/xchain-client@0.16.3
+  - @xchainjs/xchain-mayachain@1.0.2
+  - @xchainjs/xchain-thorchain@1.0.5
+  - @xchainjs/xchain-utxo@0.1.5
+
 ## 0.1.8
 
 ### Patch Changes

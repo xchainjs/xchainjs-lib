@@ -200,15 +200,15 @@ export class MayachainAMM {
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
     // Perform approval
-    const tx = await this.wallet.approve(
+    const hash = await this.wallet.approve(
       asset,
       amount?.baseAmount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
       inboundDetails.router,
     )
     // Return transaction hash and URL
     return {
-      hash: tx.hash,
-      url: await this.wallet.getExplorerTxUrl(asset.chain, tx.hash),
+      hash,
+      url: await this.wallet.getExplorerTxUrl(asset.chain, hash),
     }
   }
 
@@ -263,8 +263,8 @@ export class MayachainAMM {
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   private async doNonProtocolAssetSwap(amount: CryptoAmount, recipient: string, memo: string): Promise<TxSubmitted> {
-    // For non-ERC20 assets, perform a transfer and return transaction hash and URL
-    if (!this.isERC20Asset(amount.asset)) {
+    // For non-EVM assets, perform a transfer and return transaction hash and URL
+    if (!this.isEVMChain(amount.asset.chain)) {
       const hash = await this.wallet.transfer({
         asset: amount.asset,
         amount: amount.baseAmount,
@@ -277,11 +277,14 @@ export class MayachainAMM {
       }
     }
 
-    // For ERC20 assets, perform a deposit with expiry and return transaction hash and URL
+    // For EVM assets, perform a deposit with expiry and return transaction hash and URL
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(amount.asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router for ${amount.asset.chain} chain`)
-    const contractAddress = getContractAddressFromAsset(amount.asset)
-    const checkSummedContractAddress = ethers.utils.getAddress(contractAddress)
+    const isERC20 = this.isERC20Asset(amount.asset)
+
+    const checkSummedContractAddress = isERC20
+      ? ethers.utils.getAddress(getContractAddressFromAsset(amount.asset))
+      : ethers.constants.AddressZero
 
     const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
     const depositParams = [
@@ -293,18 +296,23 @@ export class MayachainAMM {
     ]
 
     const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
-    const wallet = this.wallet.getChainWallet(amount.asset.chain)
+
+    const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
 
     const gasPrices = await this.wallet.getGasFeeRates(amount.asset.chain)
 
-    const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams, {
-      from: this.wallet.getAddress(amount.asset.chain),
-      value: 0,
-      gasPrice: gasPrices.fast.amount().toFixed(),
-      gasLimit: '160000',
+    const nativeAsset = this.wallet.getAssetInfo(amount.asset.chain)
+
+    const hash = await this.wallet.transfer({
+      asset: nativeAsset.asset,
+      amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : amount.baseAmount,
+      memo: unsignedTx.data,
+      recipient: inboundDetails.router,
+      gasPrice: gasPrices.fast,
+      isMemoEncoded: true,
+      gasLimit: ethers.BigNumber.from(160000),
     })
 
-    const { hash } = await wallet.sendTransaction(unsignedTx)
     return {
       hash,
       url: await this.wallet.getExplorerTxUrl(amount.asset.chain, hash),

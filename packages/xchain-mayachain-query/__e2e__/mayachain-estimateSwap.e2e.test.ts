@@ -1,12 +1,23 @@
-import { CryptoAmount, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 
 import { MayachainQuery } from '../src/mayachain-query'
 import { QuoteSwap, QuoteSwapParams } from '../src/types'
-import { EthAsset } from '../src/utils'
+import { CacaoAsset, EthAsset } from '../src/utils'
 
 const mayachainQuery = new MayachainQuery()
 
 const AssetBTC = assetFromStringEx('BTC.BTC')
+const AssetArb = assetFromStringEx('ARB.ETH')
+
+const ethAddress = '0xf155e9cdD77A5d77073aB43d17F661507C08E23d'
+const mayaAddress = 'maya1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcg0dkv'
 
 function printQuoteSwap(quoteSwap: QuoteSwap) {
   console.log({
@@ -55,6 +66,27 @@ describe('Estimate swap e2e tests', () => {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(baseAmount(100000), AssetBTC),
       destinationAsset: EthAsset,
+    }
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
+    printQuoteSwap(estimate)
+  })
+
+  it('should estimate a swap of 1 ARB.ETH to Cacao', async () => {
+    const swapParams: QuoteSwapParams = {
+      fromAsset: AssetArb,
+      amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetArb),
+      destinationAsset: CacaoAsset,
+      destinationAddress: mayaAddress,
+    }
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
+    printQuoteSwap(estimate)
+  })
+  it('should estimate a swap of 10 Cacao to Arb.eth', async () => {
+    const swapParams: QuoteSwapParams = {
+      fromAsset: CacaoAsset,
+      amount: new CryptoAmount(assetToBase(assetAmount(10, 10)), CacaoAsset),
+      destinationAsset: AssetArb,
+      destinationAddress: ethAddress,
     }
     const estimate = await mayachainQuery.quoteSwap(swapParams)
     printQuoteSwap(estimate)

@@ -1,7 +1,8 @@
 import { Network, Protocol } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client, defaultLtcParams } from '../src/client'
+import { ClientKeystore as Client } from '../src/ClientKeystore'
+import { defaultLtcParams } from '../src/client'
 import { AssetLTC } from '../src/const'
 
 const ltcClient = new Client({

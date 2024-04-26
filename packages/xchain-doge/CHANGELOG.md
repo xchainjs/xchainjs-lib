@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.14
+
+### Patch Changes
+
+- Updated dependencies [448c29f]
+  - @xchainjs/xchain-client@0.16.3
+  - @xchainjs/xchain-utxo@0.1.5
+  - @xchainjs/xchain-utxo-providers@0.2.13
+
+## 0.7.13
+
+### Patch Changes
+
+- 8e82dc3: Refactored package to include LedgerClient
+
 ## 0.7.12
 
 ### Patch Changes

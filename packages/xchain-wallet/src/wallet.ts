@@ -1,12 +1,22 @@
 /**
  * Import necessary modules and libraries
  */
-import { Balance, FeeOption, Fees, Network, Protocol, Tx, TxHash, TxsPage, XChainClient } from '@xchainjs/xchain-client'
+import {
+  AssetInfo,
+  Balance,
+  FeeOption,
+  Fees,
+  Network,
+  Protocol,
+  Tx,
+  TxHash,
+  TxsPage,
+  XChainClient,
+} from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
 import { Address, Asset, BaseAmount, Chain, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
-import { ethers } from 'ethers'
 
 import { EvmTxParams, UtxoTxParams } from './types'
 
@@ -109,6 +119,16 @@ export class Wallet {
     } catch {
       return false
     }
+  }
+
+  /**
+   * Return the native token of a chain
+   * @param {Chain} chain - The chain to retrieve the asset info of
+   * @returns {AssetInfo} The native asset information of the chain
+   */
+  public getAssetInfo(chain: Chain): AssetInfo {
+    const client = this.getClient(chain)
+    return client.getAssetInfo()
   }
 
   /**
@@ -343,6 +363,8 @@ export class Wallet {
         recipient: params.recipient,
         memo: params.memo,
         gasPrice: params.gasPrice,
+        gasLimit: params.gasLimit,
+        isMemoEncoded: params.isMemoEncoded,
       })
     }
     if (this.isUtxoClient(client)) {
@@ -395,11 +417,7 @@ export class Wallet {
    * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
    * @throws {Error} If asset is a non ERC20 asset
    */
-  async approve(
-    asset: Asset,
-    amount: BaseAmount,
-    spenderAddress: string,
-  ): Promise<ethers.providers.TransactionResponse> {
+  async approve(asset: Asset, amount: BaseAmount, spenderAddress: string): Promise<string> {
     const client = this.getClient(asset.chain)
     if (!this.isEvmClient(client)) throw Error('Can not make approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not make approve over native asset')
@@ -443,17 +461,6 @@ export class Wallet {
   public async broadcast(chain: Chain, txHex: string): Promise<TxHash> {
     const client = this.getClient(chain)
     return client.broadcastTx(txHex)
-  }
-  /**
-   * Get chain wallet. Only available for EVM clients
-   * @param {Chain} chain of which return the wallet
-   * @returns {ethers.Wallet} the chain wallet
-   * @throws {Error} wallet can not be retrieve from chain
-   */
-  public getChainWallet(chain: Chain): ethers.Wallet {
-    const client = this.getClient(chain)
-    if (!this.isEvmClient(client)) throw Error(`Can not get wallet of ${chain} client`)
-    return client.getWallet()
   }
 
   /**

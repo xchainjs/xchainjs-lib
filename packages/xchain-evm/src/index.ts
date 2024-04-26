@@ -1,6 +1,14 @@
 // Exporting types and the client class
+import { ClientKeystore } from './ClientKeystore'
+import erc20ABI from './data/erc20.json'
+import routerABI from './data/routerABI.json'
+
+export default ClientKeystore
+
 export * from './types'
-export * from './client'
+
+export { ClientKeystore, ClientKeystore as Client } from './ClientKeystore'
+export { ClientLedger } from './ClientLedger'
 
 // Exporting utility functions
 export {
@@ -16,10 +24,6 @@ export {
   validateAddress, // Function to validate an address
   MAX_APPROVAL, // Constant for maximum approval amount
 } from './utils'
-
-// Importing ERC20 and router ABIs
-import erc20ABI from './data/erc20.json'
-import routerABI from './data/routerABI.json'
 
 // Exporting ABI objects
 export const abi = {

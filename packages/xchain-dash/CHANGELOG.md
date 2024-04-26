@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [448c29f]
+  - @xchainjs/xchain-client@0.16.3
+  - @xchainjs/xchain-utxo@0.1.5
+  - @xchainjs/xchain-utxo-providers@0.2.13
+
+## 0.3.0
+
+### Minor Changes
+
+- 8022a60: Ledger client
+
 ## 0.2.12
 
 ### Patch Changes
