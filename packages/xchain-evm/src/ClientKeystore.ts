@@ -1,10 +1,10 @@
-import { FeeOption, TxHash, TxParams, checkFeeBounds } from '@xchainjs/xchain-client'
-import { Address, BaseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { FeeOption, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
+import { Address, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, Wallet, ethers } from 'ethers'
 import { HDNode } from 'ethers/lib/utils'
 
 import { Client } from './client'
-import { ApproveParams } from './types'
+import { ApproveParams, TxParams } from './types'
 
 export class ClientKeystore extends Client {
   private hdNode?: HDNode
@@ -101,13 +101,8 @@ export class ClientKeystore extends Client {
     maxFeePerGas,
     maxPriorityFeePerGas,
     gasLimit,
-  }: TxParams & {
-    feeOption?: FeeOption
-    gasPrice?: BaseAmount
-    maxFeePerGas?: BaseAmount
-    maxPriorityFeePerGas?: BaseAmount
-    gasLimit?: BigNumber
-  }): Promise<TxHash> {
+    isMemoEncoded,
+  }: TxParams): Promise<TxHash> {
     // Check for compatibility between gasPrice and EIP 1559 parameters
     if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
       throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
@@ -167,6 +162,7 @@ export class ClientKeystore extends Client {
       amount,
       asset,
       memo,
+      isMemoEncoded,
     })
     // Parse the transaction request
     const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)

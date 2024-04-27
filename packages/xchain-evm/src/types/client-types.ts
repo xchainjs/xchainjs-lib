@@ -5,6 +5,7 @@ import {
   FeeOption,
   Fees,
   Network,
+  TxParams as BaseTxParams,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
@@ -79,4 +80,13 @@ export type EVMClientParams = XChainClientParams & {
   providers: Record<Network, Provider>
   explorerProviders: ExplorerProviders
   dataProviders: EvmOnlineDataProviders[]
+}
+
+export type TxParams = BaseTxParams & {
+  feeOption?: FeeOption
+  gasPrice?: BaseAmount
+  maxFeePerGas?: BaseAmount
+  maxPriorityFeePerGas?: BaseAmount
+  gasLimit?: BigNumber
+  isMemoEncoded?: boolean
 }

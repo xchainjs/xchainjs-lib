@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-kujira",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Custom Kujira client",
   "keywords": [
     "XChain",
@@ -46,14 +46,14 @@
     "secp256k1": "^5.0.0"
   },
   "devDependencies": {
-    "@xchainjs/xchain-client": "^0.16.2",
+    "@xchainjs/xchain-client": "^0.16.3",
     "@xchainjs/xchain-util": "^0.13.3"
   },
   "publishConfig": {
     "access": "public"
   },
   "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.16.2",
+    "@xchainjs/xchain-client": "^0.16.3",
     "@xchainjs/xchain-util": "^0.13.3"
   }
 }

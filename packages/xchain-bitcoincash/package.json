@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoincash",
-  "version": "0.17.11",
+  "version": "0.17.12",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -41,11 +41,11 @@
     "@psf/bitcoincashjs-lib": "^4.0.3",
     "@types/bchaddrjs": "0.4.0",
     "@types/uniqid": "^5.3.1",
-    "@xchainjs/xchain-client": "^0.16.2",
+    "@xchainjs/xchain-client": "^0.16.3",
     "@xchainjs/xchain-crypto": "^0.3.1",
     "@xchainjs/xchain-util": "^0.13.3",
-    "@xchainjs/xchain-utxo": "^0.1.4",
-    "@xchainjs/xchain-utxo-providers": "^0.2.12",
+    "@xchainjs/xchain-utxo": "^0.1.5",
+    "@xchainjs/xchain-utxo-providers": "^0.2.13",
     "axios": "^1.3.6",
     "axios-mock-adapter": "^1.20.0",
     "bchaddrjs": "^0.5.2",
@@ -53,11 +53,11 @@
   },
   "peerDependencies": {
     "@psf/bitcoincashjs-lib": "^4.0.3",
-    "@xchainjs/xchain-client": "^0.16.2",
+    "@xchainjs/xchain-client": "^0.16.3",
     "@xchainjs/xchain-crypto": "^0.3.1",
     "@xchainjs/xchain-util": "^0.13.3",
-    "@xchainjs/xchain-utxo": "^0.1.4",
-    "@xchainjs/xchain-utxo-providers": "^0.2.12",
+    "@xchainjs/xchain-utxo": "^0.1.5",
+    "@xchainjs/xchain-utxo-providers": "^0.2.13",
     "axios": "^1.3.6",
     "bchaddrjs": "^0.5.2",
     "coinselect": "3.1.12"

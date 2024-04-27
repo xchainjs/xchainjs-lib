@@ -1,7 +1,0 @@
----
-'@xchainjs/xchain-ethereum': minor
-'@xchainjs/xchain-avax': minor
-'@xchainjs/xchain-bsc': minor
----
-
-`signer` parameter removed from `transfer` function for the keystore client

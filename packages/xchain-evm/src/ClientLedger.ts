@@ -1,10 +1,10 @@
 import AppEth, { ledgerService } from '@ledgerhq/hw-app-eth'
-import { FeeOption, TxParams, checkFeeBounds } from '@xchainjs/xchain-client'
-import { Address, BaseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { FeeOption, checkFeeBounds } from '@xchainjs/xchain-client'
+import { Address, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
 import { Client } from './client'
-import { ApproveParams, EVMClientParams } from './types'
+import { ApproveParams, EVMClientParams, TxParams } from './types'
 
 export class ClientLedger extends Client {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,13 +82,8 @@ export class ClientLedger extends Client {
     maxFeePerGas,
     maxPriorityFeePerGas,
     gasLimit,
-  }: TxParams & {
-    feeOption?: FeeOption
-    gasPrice?: BaseAmount
-    maxFeePerGas?: BaseAmount
-    maxPriorityFeePerGas?: BaseAmount
-    gasLimit?: BigNumber
-  }): Promise<string> {
+    isMemoEncoded,
+  }: TxParams): Promise<string> {
     // Check for compatibility between gasPrice and EIP 1559 parameters
     if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
       throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
@@ -148,6 +143,7 @@ export class ClientLedger extends Client {
       amount,
       asset,
       memo,
+      isMemoEncoded,
     })
 
     const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
