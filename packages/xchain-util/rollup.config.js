@@ -1,6 +1,5 @@
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from '@rollup/plugin-node-resolve'
-import external from 'rollup-plugin-peer-deps-external'
 import typescript from 'rollup-plugin-typescript2'
 
 import pkg from './package.json'
@@ -22,7 +21,6 @@ export default {
     },
   ],
   plugins: [
-    external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
       exclude: '__tests__/**',
