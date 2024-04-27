@@ -29,7 +29,7 @@ export default {
     typescript({
       exclude: '__tests__/**',
     }),
-    commonjs(),
+    commonjs({ esmExternals: true }),
   ],
   external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }
