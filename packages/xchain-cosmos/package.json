@@ -33,7 +33,7 @@
   "dependencies": {
     "@cosmjs/amino": "0.31.1",
     "@cosmjs/encoding": "0.31.1",
-    "@cosmjs/ledger-amino": "0.32.3",
+    "@cosmjs/ledger-amino": "0.31.1",
     "@cosmjs/proto-signing": "0.31.1",
     "@ledgerhq/hw-app-cosmos": "6.29.6",
     "@ledgerhq/hw-transport": "6.30.6",
