@@ -35,7 +35,8 @@ export default {
     }),
     commonjs({
       exclude: '**/*.json',
+      esmExternals: true,
     }),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder'],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }

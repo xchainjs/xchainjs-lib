@@ -29,4 +29,5 @@ export default {
     }),
     commonjs(),
   ],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }

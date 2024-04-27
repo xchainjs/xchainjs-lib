@@ -28,15 +28,15 @@
   },
   "dependencies": {
     "@xchainjs/xchain-evm": "*",
-    "@xchainjs/xchain-util": "0.13.3",
-    "@xchainjs/xchain-client": "0.16.3",
-    "@xchainjs/xchain-thorchain": "1.0.5",
-    "@xchainjs/xchain-mayachain": "1.0.2",
-    "@xchainjs/xchain-utxo": "0.1.5"
+    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "*",
+    "@xchainjs/xchain-thorchain": "*",
+    "@xchainjs/xchain-mayachain": "*",
+    "@xchainjs/xchain-utxo": "*"
   },
   "devDependencies": {
-    "@xchainjs/xchain-bitcoin": "0.23.14",
-    "@xchainjs/xchain-bitcoincash": "0.17.12",
-    "@xchainjs/xchain-ethereum": "0.32.0"
+    "@xchainjs/xchain-bitcoin": "*",
+    "@xchainjs/xchain-bitcoincash": "*",
+    "@xchainjs/xchain-ethereum": "*"
   }
 }

@@ -35,15 +35,5 @@ export default {
       exclude: '**/*.json',
     }),
   ],
-  external: [
-    'readable-stream',
-    'axios',
-    'buffer',
-    'crypto',
-    'stream',
-    'string_decoder',
-    'axios',
-    '@supercharge/promise-pool',
-    '@xchainjs/xchain-client',
-  ],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }

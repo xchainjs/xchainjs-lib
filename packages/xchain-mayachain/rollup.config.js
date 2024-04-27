@@ -29,7 +29,7 @@ export default {
     typescript({
       exclude: '__tests__/**',
     }),
-    commonjs(),
+    commonjs({ esmExternals: true }),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }

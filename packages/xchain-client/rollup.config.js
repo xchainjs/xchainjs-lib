@@ -35,5 +35,5 @@ export default {
       exclude: '**/*.json',
     }),
   ],
-  external: ['buffer', 'crypto'],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }

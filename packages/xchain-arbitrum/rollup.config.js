@@ -31,5 +31,5 @@ export default {
     }),
     commonjs(),
   ],
-  external: ['readable-stream', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }

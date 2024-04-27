@@ -27,9 +27,10 @@ export default {
     external(),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
+      tsconfig: './tsconfig.json',
       exclude: '__tests__/**',
     }),
-    commonjs(),
+    commonjs({ esmExternals: true }),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder'],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }
