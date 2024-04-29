@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.11
+
+### Patch Changes
+
+- 7544bbe: Preferbuiltins and browser for resolve plugin
+
 ## 0.1.10
 
 ### Patch Changes
