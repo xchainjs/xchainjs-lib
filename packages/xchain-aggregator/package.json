@@ -19,9 +19,7 @@
   },
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
-    "build": "yarn build:pro",
-    "build:dev": "tsup --env.ENV dev",
-    "build:pro": "tsup --env.ENV pro",
+    "build": "yarn clean && rollup -c",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
   },
