@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.7.13
+
+### Patch Changes
+
+- b93add9: @binance-chain/javascript-sdk version updated to 4.4.2
+- b93add9: Dependecies as external at building process
+- Updated dependencies [b93add9]
+  - @xchainjs/xchain-client@0.16.4
+  - @xchainjs/xchain-util@0.13.4
+
 ## 5.7.12
 
 ### Patch Changes
