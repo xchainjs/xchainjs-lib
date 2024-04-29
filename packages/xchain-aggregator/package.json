@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-aggregator",
   "description": "Protocol aggregator to make actions in different protocols",
-  "version": "0.1.9",
+  "version": "0.1.11",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -19,9 +19,7 @@
   },
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
-    "build": "yarn build:pro",
-    "build:dev": "tsup --env.ENV dev",
-    "build:pro": "tsup --env.ENV pro",
+    "build": "yarn clean && rollup -c",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
   },

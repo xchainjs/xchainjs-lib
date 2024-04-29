@@ -1,7 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
-import external from 'rollup-plugin-peer-deps-external'
 import typescript from 'rollup-plugin-typescript2'
 
 import pkg from './package.json'
@@ -23,7 +22,6 @@ export default {
     },
   ],
   plugins: [
-    external(),
     json({}),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
@@ -31,5 +29,5 @@ export default {
     }),
     commonjs(),
   ],
-  external: ['readable-stream', 'axios', 'buffer', 'crypto', 'stream', 'string_decoder', 'axios'],
+  external: Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {})),
 }
