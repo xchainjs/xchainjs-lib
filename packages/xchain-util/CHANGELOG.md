@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.4
+
+### Patch Changes
+
+- b93add9: Dependecies as external at building process
+
 ## 0.13.3
 
 ### Patch Changes

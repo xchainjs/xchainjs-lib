@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-midgard-query",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "license": "MIT",
   "description": "Module that is responsible for get data from Midgard API",
   "keywords": [

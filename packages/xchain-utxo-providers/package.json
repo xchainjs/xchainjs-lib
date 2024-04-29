@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-utxo-providers",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",

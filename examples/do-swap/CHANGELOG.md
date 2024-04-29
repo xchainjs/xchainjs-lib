@@ -1,5 +1,37 @@
 # xchainjs-do-swap
 
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [b93add9]
+- Updated dependencies [b93add9]
+  - @xchainjs/xchain-binance@5.7.13
+  - @xchainjs/xchain-thorchain-query@0.7.10
+  - @xchainjs/xchain-utxo-providers@0.2.14
+  - @xchainjs/xchain-evm-providers@0.1.9
+  - @xchainjs/xchain-midgard-query@0.1.15
+  - @xchainjs/xchain-thorchain-amm@1.1.5
+  - @xchainjs/xchain-bitcoincash@0.17.13
+  - @xchainjs/xchain-cosmos-sdk@0.2.6
+  - @xchainjs/xchain-thorchain@1.0.6
+  - @xchainjs/xchain-ethereum@0.32.1
+  - @xchainjs/xchain-litecoin@0.14.2
+  - @xchainjs/xchain-thornode@0.3.13
+  - @xchainjs/xchain-bitcoin@0.23.15
+  - @xchainjs/xchain-midgard@0.5.5
+  - @xchainjs/xchain-client@0.16.4
+  - @xchainjs/xchain-cosmos@1.0.3
+  - @xchainjs/xchain-crypto@0.3.2
+  - @xchainjs/xchain-wallet@0.1.10
+  - @xchainjs/xchain-avax@0.5.1
+  - @xchainjs/xchain-dash@0.3.2
+  - @xchainjs/xchain-doge@0.7.15
+  - @xchainjs/xchain-util@0.13.4
+  - @xchainjs/xchain-utxo@0.1.6
+  - @xchainjs/xchain-bsc@0.5.1
+  - @xchainjs/xchain-evm@0.5.1
+
 ## 1.0.5
 
 ### Patch Changes

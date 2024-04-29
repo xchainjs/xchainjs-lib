@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.12
+
+### Patch Changes
+
+- b93add9: Dependecies as external at building process
+- Updated dependencies [b93add9]
+  - @xchainjs/xchain-mayamidgard-query@0.1.10
+  - @xchainjs/xchain-mayamidgard@0.1.2
+  - @xchainjs/xchain-mayanode@0.1.4
+  - @xchainjs/xchain-client@0.16.4
+  - @xchainjs/xchain-util@0.13.4
+
 ## 0.1.11
 
 ### Patch Changes
