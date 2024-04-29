@@ -23,7 +23,7 @@ export default {
   ],
   plugins: [
     json(),
-    resolve(),
+    resolve({ preferBuiltins: true, browser: true }),
     typescript({
       exclude: '__tests__/**',
       declarationDir: '.',
