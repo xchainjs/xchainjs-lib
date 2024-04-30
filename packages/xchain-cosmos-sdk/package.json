@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cosmos-sdk",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Genereic Cosmos SDK client for XChainJS",
   "keywords": [
     "XChain",
