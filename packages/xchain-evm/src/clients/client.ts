@@ -16,25 +16,27 @@ import {
   TxHash,
   TxHistoryParams,
   TxsPage,
+  XChainClientParams,
+  checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, CachedValue, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, CachedValue, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 import { toUtf8Bytes } from 'ethers/lib/utils'
 
-import erc20ABI from './data/erc20.json'
+import erc20ABI from '../data/erc20.json'
 import {
   ApproveParams,
   CallParams,
-  EVMClientParams,
   EstimateApproveParams,
   EstimateCallParams,
   EvmDefaults,
   FeesWithGasPricesAndLimits,
   GasPrices,
+  ISigner,
   IsApprovedParams,
   TxParams,
-} from './types'
+} from '../types'
 import {
   call,
   estimateApprove,
@@ -45,23 +47,33 @@ import {
   getTokenAddress,
   isApproved,
   validateAddress,
-} from './utils'
+} from '../utils'
 
 export interface EVMClient {
   approve(params: ApproveParams): Promise<string>
 }
 
 /**
+ * Parameters for configuring the EVM client.
+ */
+export type EVMClientParams = XChainClientParams & {
+  chain: Chain
+  gasAsset: Asset
+  gasAssetDecimals: number
+  defaults: Record<Network, EvmDefaults>
+  providers: Record<Network, Provider>
+  explorerProviders: ExplorerProviders
+  dataProviders: EvmOnlineDataProviders[]
+  signer?: ISigner
+}
+
+/**
  * Custom EVM client class.
  */
-export abstract class Client extends BaseXChainClient implements EVMClient {
-  readonly config: EVMClientParams
-  private gasAsset: Asset
-  private gasAssetDecimals: number
+export class Client extends BaseXChainClient implements EVMClient {
+  readonly config: Omit<EVMClientParams, 'signer'>
+  protected signer?: ISigner
   protected defaults: Record<Network, EvmDefaults>
-  private explorerProviders: ExplorerProviders
-  private dataProviders: EvmOnlineDataProviders[]
-  private providers: Record<Network, Provider>
   private cachedNetworkId: CachedValue<number>
   /**
    * Constructor for the EVM client.
@@ -75,10 +87,10 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     network = Network.Mainnet,
     feeBounds,
     providers,
-    phrase = '',
     rootDerivationPaths,
     explorerProviders,
     dataProviders,
+    signer,
   }: EVMClientParams) {
     super(chain, { network, rootDerivationPaths, feeBounds })
     this.config = {
@@ -93,14 +105,9 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
       explorerProviders,
       dataProviders,
     }
+    this.signer = signer
     this.defaults = defaults
-    this.gasAsset = gasAsset
-    this.gasAssetDecimals = gasAssetDecimals
-    this.explorerProviders = explorerProviders
-    this.dataProviders = dataProviders
-    this.providers = providers
     this.cachedNetworkId = new CachedValue<number>(() => getNetworkId(this.getProvider()))
-    phrase && this.setPhrase(phrase)
   }
 
   /**
@@ -108,14 +115,14 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @returns {Provider} The current Ethereum Provider interface.
    */
   getProvider(): Provider {
-    return this.providers[this.network]
+    return this.config.providers[this.network]
   }
   /**
    * Retrieves the explorer URL based on the current network.
    * @returns {string} The explorer URL for Ethereum based on the current network.
    */
   getExplorerUrl(): string {
-    return this.explorerProviders[this.network].getExplorerUrl()
+    return this.config.explorerProviders[this.network].getExplorerUrl()
   }
 
   /**
@@ -124,8 +131,8 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
-      asset: this.gasAsset,
-      decimal: this.gasAssetDecimals,
+      asset: this.config.gasAsset,
+      decimal: this.config.gasAssetDecimals,
     }
     return assetInfo
   }
@@ -136,7 +143,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @returns {string} The explorer URL for the given address.
    */
   getExplorerAddressUrl(address: Address): string {
-    return this.explorerProviders[this.network].getExplorerAddressUrl(address)
+    return this.config.explorerProviders[this.network].getExplorerAddressUrl(address)
   }
 
   /**
@@ -145,7 +152,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @returns {string} The explorer URL for the given transaction ID.
    */
   getExplorerTxUrl(txID: string): string {
-    return this.explorerProviders[this.network].getExplorerTxUrl(txID)
+    return this.config.explorerProviders[this.network].getExplorerTxUrl(txID)
   }
 
   /**
@@ -157,6 +164,17 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
   setNetwork(network: Network): void {
     super.setNetwork(network)
     this.cachedNetworkId = new CachedValue<number>(() => getNetworkId(this.getProvider()))
+  }
+
+  /**
+   * @throws {Error} Method not implement
+   */
+  public getAddress(): string {
+    throw Error('Sync method not supported for Ledger')
+  }
+
+  getAddressAsync(walletIndex?: number): Promise<string> {
+    return this.getSigner().getAddressAsync(walletIndex)
   }
 
   /**
@@ -243,7 +261,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
       amount,
       spenderAddress,
       contractAddress,
-      fromAddress: this.getAddress(walletIndex),
+      fromAddress: await this.getAddressAsync(walletIndex),
     })
 
     return allowance
@@ -282,7 +300,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @returns {Promise<TxHash>} The transaction hash.
    */
   async broadcastTx(txHex: string): Promise<TxHash> {
-    const resp = await this.providers[this.network].sendTransaction(txHex)
+    const resp = await this.config.providers[this.network].sendTransaction(txHex)
     return resp.hash
   }
 
@@ -297,9 +315,9 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
         // Attempt to fetch gas prices via round-robin from multiple providers
         const feeRates = await this.roundRobinGetFeeRates()
         return {
-          [FeeOption.Average]: baseAmount(feeRates.average, this.gasAssetDecimals),
-          [FeeOption.Fast]: baseAmount(feeRates.fast, this.gasAssetDecimals),
-          [FeeOption.Fastest]: baseAmount(feeRates.fastest, this.gasAssetDecimals),
+          [FeeOption.Average]: baseAmount(feeRates.average, this.config.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(feeRates.fast, this.config.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(feeRates.fastest, this.config.gasAssetDecimals),
         }
       } catch (error) {
         console.warn(`Can not round robin over GetFeeRates: ${error}`)
@@ -310,9 +328,9 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
         const gasPrice = await this.getProvider().getGasPrice()
         // Adjust gas prices for different fee options
         return {
-          [FeeOption.Average]: baseAmount(gasPrice.toNumber(), this.gasAssetDecimals),
-          [FeeOption.Fast]: baseAmount(gasPrice.toNumber() * 1.5, this.gasAssetDecimals),
-          [FeeOption.Fastest]: baseAmount(gasPrice.toNumber() * 2, this.gasAssetDecimals),
+          [FeeOption.Average]: baseAmount(gasPrice.toNumber(), this.config.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(gasPrice.toNumber() * 1.5, this.config.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(gasPrice.toNumber() * 2, this.config.gasAssetDecimals),
         }
       } catch (error) {
         console.warn(`Can not get gasPrice from provider: ${error}`)
@@ -328,9 +346,9 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
         // To have all values in `BaseAmount`, they needs to be converted into `wei` (1 gwei = 1,000,000,000 wei = 1e9)
         const ratesInGwei: FeeRates = standardFeeRates(await this.getFeeRateFromThorchain())
         return {
-          [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, this.gasAssetDecimals),
-          [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, this.gasAssetDecimals),
-          [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, this.gasAssetDecimals),
+          [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, this.config.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, this.config.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, this.config.gasAssetDecimals),
         }
       } catch (error) {
         console.warn(error)
@@ -340,9 +358,9 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     // Default fee rates if everything else fails
     const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
     return {
-      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average], this.gasAssetDecimals),
-      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast], this.gasAssetDecimals),
-      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest], this.gasAssetDecimals),
+      [FeeOption.Average]: baseAmount(defaultRatesInGwei[FeeOption.Average], this.config.gasAssetDecimals),
+      [FeeOption.Fast]: baseAmount(defaultRatesInGwei[FeeOption.Fast], this.config.gasAssetDecimals),
+      [FeeOption.Fastest]: baseAmount(defaultRatesInGwei[FeeOption.Fastest], this.config.gasAssetDecimals),
     }
   }
 
@@ -362,7 +380,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     isMemoEncoded,
   }: TxParams & { from?: Address }): Promise<BigNumber> {
     const txAmount = BigNumber.from(amount.amount().toFixed())
-    const theAsset = asset ?? this.gasAsset
+    const theAsset = asset ?? this.config.gasAsset
     let gasEstimate: BigNumber
     if (!this.isGasAsset(theAsset)) {
       // ERC20 gas estimate
@@ -393,7 +411,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @returns {boolean} True if the asset matches the gas asset, false otherwise.
    */
   private isGasAsset(asset: Asset): boolean {
-    return eqAsset(this.gasAsset, asset)
+    return eqAsset(this.config.gasAsset, asset)
   }
 
   /**
@@ -405,7 +423,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
   async estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits> {
     // Gas prices estimation
     const gasPrices = await this.estimateGasPrices()
-    const decimals = this.gasAssetDecimals
+    const decimals = this.config.gasAssetDecimals
     const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
     // Gas limits estimation
@@ -452,7 +470,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the balance.
    */
   protected async roundRobinGetBalance(address: Address, assets?: Asset[]) {
-    for (const provider of this.dataProviders) {
+    for (const provider of this.config.dataProviders) {
       try {
         const prov = provider[this.network]
         if (prov) return await prov.getBalance(address, assets)
@@ -471,7 +489,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the transaction data.
    */
   protected async roundRobinGetTransactionData(txId: string, assetAddress?: string) {
-    for (const provider of this.dataProviders) {
+    for (const provider of this.config.dataProviders) {
       try {
         const prov = provider[this.network]
         if (prov) return await prov.getTransactionData(txId, assetAddress)
@@ -489,7 +507,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the transaction history.
    */
   protected async roundRobinGetTransactions(params: TxHistoryParams) {
-    for (const provider of this.dataProviders) {
+    for (const provider of this.config.dataProviders) {
       try {
         const prov = provider[this.network]
         if (prov) return await prov.getTransactions(params)
@@ -506,7 +524,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the fee rates.
    */
   protected async roundRobinGetFeeRates(): Promise<FeeRates> {
-    for (const provider of this.dataProviders) {
+    for (const provider of this.config.dataProviders) {
       try {
         const prov = provider[this.network]
         if (prov) return await prov.getFeeRates()
@@ -526,7 +544,7 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
    */
   async prepareTx({
     sender,
-    asset = this.gasAsset,
+    asset = this.config.gasAsset,
     memo,
     amount,
     recipient,
@@ -621,5 +639,166 @@ export abstract class Client extends BaseXChainClient implements EVMClient {
     return call({ provider: this.getProvider(), signer, contractAddress, abi, funcName, funcParams })
   }
 
-  public abstract approve(params: ApproveParams): Promise<string>
+  public async transfer({
+    walletIndex,
+    asset = this.getAssetInfo().asset,
+    memo,
+    amount,
+    recipient,
+    feeOption = FeeOption.Fast,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    gasLimit,
+    isMemoEncoded,
+  }: TxParams): Promise<string> {
+    // Check for compatibility between gasPrice and EIP 1559 parameters
+    if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
+      throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
+    }
+    // Initialize fee data object
+    const feeData: ethers.providers.FeeData = {
+      lastBaseFeePerGas: null,
+      maxFeePerGas: null,
+      maxPriorityFeePerGas: null,
+      gasPrice: null,
+    }
+    // If EIP 1559 parameters are provided, use them; otherwise, estimate gas price
+    if (maxFeePerGas || maxPriorityFeePerGas) {
+      // Get fee info from the provider
+      const feeInfo = await this.getProvider().getFeeData()
+      // Set max fee per gas
+      if (maxFeePerGas) {
+        // Set max priority fee per gas
+        feeData.maxFeePerGas = BigNumber.from(maxFeePerGas.amount().toFixed())
+      } else if (maxPriorityFeePerGas && feeInfo.lastBaseFeePerGas) {
+        feeData.maxFeePerGas = feeInfo.lastBaseFeePerGas.mul(2).add(maxPriorityFeePerGas.amount().toFixed())
+      }
+      feeData.maxPriorityFeePerGas = maxPriorityFeePerGas
+        ? BigNumber.from(maxPriorityFeePerGas.amount().toFixed())
+        : feeInfo.maxPriorityFeePerGas
+    } else {
+      const txGasPrice: BigNumber = gasPrice
+        ? // Estimate gas price based on fee option
+          BigNumber.from(gasPrice.amount().toFixed())
+        : await this.estimateGasPrices()
+            .then((prices) => prices[feeOption])
+            .then((gp) => BigNumber.from(gp.amount().toFixed()))
+      // Check fee bounds
+      checkFeeBounds(this.feeBounds, txGasPrice.toNumber())
+      // Set gas price
+      feeData.gasPrice = txGasPrice
+    }
+
+    // Get the sender address
+    const sender = await this.getAddressAsync(walletIndex)
+    // Determine gas limit: estimate or use default
+    let txGasLimit: BigNumber
+    if (!gasLimit) {
+      try {
+        txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo, from: sender })
+      } catch (error) {
+        txGasLimit = eqAsset(asset, this.getAssetInfo().asset)
+          ? this.defaults[this.network].transferGasAssetGasLimit
+          : this.defaults[this.network].transferTokenGasLimit
+      }
+    } else {
+      txGasLimit = gasLimit
+    }
+    // Prepare the transaction
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender,
+      recipient,
+      amount,
+      asset,
+      memo,
+      isMemoEncoded,
+    })
+
+    const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
+
+    const tx = await ethers.utils.resolveProperties(transactionRequest)
+
+    const signedTx = await this.getSigner().signTransfer({
+      sender,
+      tx: {
+        type: feeData.gasPrice ? 1 : 2, // Type 2 for EIP-1559
+        chainId: tx.chainId,
+        data: tx.data,
+        gasLimit: txGasLimit,
+        gasPrice: feeData.gasPrice || undefined,
+        maxFeePerGas: feeData.maxFeePerGas || undefined,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
+        nonce: ethers.BigNumber.from(tx.nonce).toNumber(),
+        to: tx.to || undefined,
+        value: tx.value,
+      },
+    })
+
+    return this.broadcastTx(signedTx)
+  }
+
+  public async approve({
+    contractAddress,
+    spenderAddress,
+    feeOption = FeeOption.Fastest,
+    amount,
+    walletIndex = 0,
+  }: ApproveParams): Promise<string> {
+    const sender = await this.getAddressAsync(walletIndex || 0)
+
+    const gasPrice: BigNumber = BigNumber.from(
+      (await this.estimateGasPrices().then((prices) => prices[feeOption])).amount().toFixed(),
+    )
+
+    checkFeeBounds(this.feeBounds, gasPrice.toNumber())
+
+    const gasLimit: BigNumber = await this.estimateApprove({
+      spenderAddress,
+      contractAddress,
+      fromAddress: sender,
+      amount,
+    }).catch(() => {
+      return BigNumber.from(this.config.defaults[this.network].approveGasLimit)
+    })
+
+    const { rawUnsignedTx } = await this.prepareApprove({
+      contractAddress,
+      spenderAddress,
+      amount,
+      sender,
+    })
+
+    const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
+
+    const tx = await ethers.utils.resolveProperties(transactionRequest)
+    const signedTx = await this.getSigner().signApprove({
+      sender: await this.getAddressAsync(),
+      tx: {
+        type: 1,
+        chainId: tx.chainId,
+        data: tx.data,
+        gasLimit,
+        gasPrice,
+        nonce: ethers.BigNumber.from(tx.nonce).toNumber(),
+        to: tx.to,
+        value: tx.value,
+      },
+    })
+
+    return this.broadcastTx(signedTx)
+  }
+
+  public purgeClient(): void {
+    super.purgeClient()
+    if (this.signer) {
+      this.signer.purge()
+      this.signer = undefined
+    }
+  }
+
+  protected getSigner(): ISigner {
+    if (!this.signer) throw Error('Can not get signer')
+    return this.signer
+  }
 }
