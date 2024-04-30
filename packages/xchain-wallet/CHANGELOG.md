@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.10
+
+### Patch Changes
+
+- b93add9: Dependecies as external at building process
+- Updated dependencies [b93add9]
+  - @xchainjs/xchain-mayachain@1.0.3
+  - @xchainjs/xchain-thorchain@1.0.6
+  - @xchainjs/xchain-client@0.16.4
+  - @xchainjs/xchain-util@0.13.4
+  - @xchainjs/xchain-utxo@0.1.6
+  - @xchainjs/xchain-evm@0.5.1
+
 ## 0.1.9
 
 ### Patch Changes

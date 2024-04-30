@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-util",
-  "version": "0.13.3",
+  "version": "0.13.4",
   "description": "Helper utilities for XChain clients",
   "keywords": [
     "THORChain",
@@ -29,11 +29,8 @@
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
-  "peerDependencies": {
-    "bignumber.js": "9.x"
-  },
-  "devDependencies": {
-    "bignumber.js": "^9.0.0"
+  "dependencies": {
+    "bignumber.js": "9.0.0"
   },
   "publishConfig": {
     "access": "public"
