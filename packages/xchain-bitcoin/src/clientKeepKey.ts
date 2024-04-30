@@ -1,11 +1,3 @@
-/*
-    KK rest api
-    - view swagger docs at
-      http://localhost:1646/docs
-
-    - Docs: https://medium.com/@highlander_35968/building-on-the-keepkey-sdk-2023fda41f38
-
-*/
 import { KeepKeySdk, PairingInfo } from '@keepkey/keepkey-sdk'
 import { FeeOption, FeeRate, Network, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
@@ -14,6 +6,13 @@ import * as Bitcoin from 'bitcoinjs-lib'
 
 import { Client } from './client'
 import { BTCOutputScriptType, bip32ToAddressNList } from './utils'
+/**
+ *    KK rest api
+    - view swagger docs at
+      http://localhost:1646/docs
+
+    - Docs: https://medium.com/@highlander_35968/building-on-the-keepkey-sdk-2023fda41f38
+ */
 
 type Config = {
   apiKey: string
