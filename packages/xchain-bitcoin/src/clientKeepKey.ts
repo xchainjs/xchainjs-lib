@@ -33,7 +33,7 @@ class ClientKeepKey extends Client {
   private config: Config
   private sdk: KeepKeySdk | null = null
 
-  constructor(params: UtxoClientParams & { config: any }) {
+  constructor(params: UtxoClientParams & { config: Config }) {
     super(params)
     //this may need to get into a init? as its async
     this.config = params.config
