@@ -25,7 +25,7 @@ import {
 jest.setTimeout(200000)
 
 const defaultBTCParams: UtxoClientParams = {
-  network: Network.Testnet,
+  network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
   dataProviders: [HaskoinDataProviders, BlockcypherDataProviders],
@@ -65,9 +65,13 @@ describe('Bitcoin Client KeepKey', () => {
   })
 
   it('get keepkey address async without verification', async () => {
-    const address = await btcClient.getAddressAsync()
-    console.log('address', address)
-    expect(address).toContain('b')
+    const address1 = await btcClient.getAddressAsync(0)
+    const address2 = await btcClient.getAddressAsync(1)
+    const address3 = await btcClient.getAddressAsync(2)
+    console.log('address1', address1)
+    console.log('address2', address2)
+    console.log('address3', address3)
+    expect(address1).toContain('b')
   })
 
   it('get address async with verification', async () => {
@@ -84,6 +88,9 @@ describe('Bitcoin Client KeepKey', () => {
 
   it('transfer from KeepKey without memo', async () => {
     try {
+      const address = await btcClient.getAddressAsync()
+      const balance = await btcClient.getBalance(address)
+      console.log('balance', balance[0].amount.amount().toString())
       const to = await btcClient.getAddressAsync(1)
       console.log(to)
       const amount = assetToBase(assetAmount('0.001'))

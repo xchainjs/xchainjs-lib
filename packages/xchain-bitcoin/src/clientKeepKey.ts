@@ -74,6 +74,7 @@ class ClientKeepKey extends Client {
       address_n: addressInfo.addressNList,
       script_type: addressInfo.scriptType,
       coin: addressInfo.coin,
+      show_display: addressInfo.showDisplay,
     })
     if (!address) {
       throw new Error('Failed to retrieve address from KeepKey')
@@ -98,14 +99,8 @@ class ClientKeepKey extends Client {
     // network
     const coinType = this.network === Network.Mainnet ? 'Bitcoin' : 'Testnet'
     /*
-
         // will need to format the inputs
         // ref: https://github.com/thorswap/SwapKit/blob/develop/packages/wallets/keepkey/src/chains/utxo.ts#L80
-
-        here is a working sandbox. https://thorswap.github.io/SwapKit/
-
-        swapkit uses blockchair api to get the utxos
-        then it formats the inputs and outputs to how keepkey needs them
 
         In general we only need the raw hex of the tx and we do most the magic behind the REST api to format to pass over the wire.
 
@@ -117,7 +112,7 @@ class ClientKeepKey extends Client {
     // inputs
     const inputs = utxos.map(({ hash, txHex, index }) => ({
       addressNList: bip32ToAddressNList(path), // This is the path of the input address needed for signing
-      scriptType: BTCOutputScriptType.PayToWitness,
+      scriptType: BTCOutputScriptType.PayToAddress,
       amount: params.amount.amount().toNumber(),
       vout: index,
       txid: hash,
@@ -128,8 +123,6 @@ class ClientKeepKey extends Client {
     const outputs = psbt.txOutputs
       .map((output) => {
         const { value, address, change } = output as psbtTxOutput
-        const outputAddress = address
-
         if (change || address === sender) {
           return {
             addressNList: bip32ToAddressNList(path),
@@ -139,14 +132,15 @@ class ClientKeepKey extends Client {
             scriptType: BTCOutputScriptType.PayToWitness,
           }
         }
-        if (outputAddress) {
-          return { address: outputAddress, amount: value, addressType: 'spend' }
+        if (address) {
+          return { address: address, amount: value, addressType: 'spend' }
         }
 
         return null
       })
       .filter(Boolean)
-    // sign tx // currently fails
+
+    // sign tx
     const signedTx = await app.utxo.utxoSignTransaction({
       coin: coinType,
       inputs,
@@ -159,7 +153,7 @@ class ClientKeepKey extends Client {
     }
 
     // Broadcast
-    const txHash = await this.broadcastTx(signedTx.serializedTx.toString())
+    const txHash = await this.broadcastTx(signedTx.toString())
     if (!txHash) {
       throw new Error('Failed to broadcast transaction')
     }
