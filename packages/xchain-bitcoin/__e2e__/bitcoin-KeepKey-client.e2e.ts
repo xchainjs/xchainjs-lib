@@ -43,7 +43,7 @@ const defaultBTCParams: UtxoClientParams = {
 //this spec url is static
 const spec = 'http://localhost:1646/spec/swagger.json'
 
-const apiKey = process.env['KK_API_KEY'] || '1234' // sample
+const apiKey = process.env['KK_API_KEY'] || '1234' // sample access_token in raw is the api key
 // config for xchainjs test
 const kkConfig = {
   apiKey,

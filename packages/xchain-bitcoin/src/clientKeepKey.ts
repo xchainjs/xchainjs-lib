@@ -28,7 +28,7 @@ interface psbtTxOutput {
 }
 
 /**
- * Custom Ledger Bitcoin client
+ * Custom KeepKey Bitcoin client
  */
 class ClientKeepKey extends Client {
   private config: Config
@@ -84,7 +84,7 @@ class ClientKeepKey extends Client {
 
   // Transfer BTC from KeepKey -- TODO finish this
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    // const app = await this.getApp()
+    const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
 
     // Set path
@@ -96,8 +96,6 @@ class ClientKeepKey extends Client {
     // Prepare transaction
     const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
-    // Serialize unsigned transaction
-    const unsignedHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
     // network
     const coinType = this.network === Network.Mainnet ? 'Bitcoin' : 'Testnet'
     /*
@@ -116,17 +114,18 @@ class ClientKeepKey extends Client {
         we will handle building the custom output you, use opReturnData object and attach to vault output.
      */
     const memo = params.memo || ''
-    // const txid = ''
-    // const hex = unsignedHex
-    const inputs = utxos.map(({ hash }) => ({
+
+    // inputs
+    const inputs = utxos.map(({ hash, txHex, index }) => ({
       addressNList: bip32ToAddressNList(path), // This is the path of the input address needed for signing
       scriptType: BTCOutputScriptType.PayToWitness,
       amount: params.amount.amount().toNumber(),
-      vout: 1,
+      vout: index,
       txid: hash,
-      hex: unsignedHex,
+      hex: txHex || '',
     }))
 
+    // outputs
     const outputs = psbt.txOutputs
       .map((output) => {
         const { value, address, change } = output as psbtTxOutput
@@ -148,25 +147,20 @@ class ClientKeepKey extends Client {
         return null
       })
       .filter(Boolean)
-
-    // Create the BTCSignTxKK message
-    const signPayload = {
+    // sign tx // currently fails
+    const signedTx = await app.utxo.utxoSignTransaction({
       coin: coinType,
       inputs,
       outputs,
-      version: 1,
-      locktime: 0,
       opReturnData: memo,
-    }
-    console.log('signPayload: ', JSON.stringify(signPayload)) //
-    const signedTx = 'await app.utxo.utxoSignTransaction(signPayload)'
-    console.log(signedTx)
+    })
+
     if (!signedTx) {
       throw new Error('Failed to sign transaction with KeepKey')
     }
 
     // Broadcast
-    const txHash = await this.broadcastTx(signedTx)
+    const txHash = await this.broadcastTx(signedTx.serializedTx.toString())
     if (!txHash) {
       throw new Error('Failed to broadcast transaction')
     }
