@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.14.2
+
+### Patch Changes
+
+- b93add9: Dependecies as external at building process
+- Updated dependencies [b93add9]
+  - @xchainjs/xchain-utxo-providers@0.2.14
+  - @xchainjs/xchain-client@0.16.4
+  - @xchainjs/xchain-crypto@0.3.2
+  - @xchainjs/xchain-util@0.13.4
+  - @xchainjs/xchain-utxo@0.1.6
+
 ## 0.14.1
 
 ### Patch Changes

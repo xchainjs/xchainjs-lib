@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-utxo-providers",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -25,19 +25,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "@xchainjs/xchain-client": "^0.16.3",
-    "@xchainjs/xchain-crypto": "^0.3.1",
-    "@xchainjs/xchain-util": "^0.13.3",
-    "axios": "^1.3.6"
-  },
-  "peerDependencies": {
-    "@xchainjs/xchain-client": "^0.16.3",
-    "@xchainjs/xchain-crypto": "^0.3.1",
-    "@xchainjs/xchain-util": "^0.13.3",
-    "axios": "^1.3.6"
-  },
   "dependencies": {
-    "@supercharge/promise-pool": "^2.4.0"
+    "@supercharge/promise-pool": "2.4.0",
+    "@xchainjs/xchain-client": "*",
+    "@xchainjs/xchain-util": "*",
+    "axios": "1.3.6"
+  },
+  "devDependencies": {
+    "axios-mock-adapter": "1.20.0"
   }
 }
