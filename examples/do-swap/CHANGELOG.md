@@ -1,5 +1,17 @@
 # xchainjs-do-swap
 
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [b379aeb]
+- Updated dependencies [b379aeb]
+  - @xchainjs/xchain-cosmos-sdk@0.2.7
+  - @xchainjs/xchain-thorchain@1.0.7
+  - @xchainjs/xchain-cosmos@1.1.0
+  - @xchainjs/xchain-wallet@0.1.11
+  - @xchainjs/xchain-thorchain-amm@1.1.6
+
 ## 1.0.6
 
 ### Patch Changes
