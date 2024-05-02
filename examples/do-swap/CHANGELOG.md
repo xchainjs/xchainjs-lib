@@ -1,5 +1,13 @@
 # xchainjs-do-swap
 
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [0fdfb1d]
+  - @xchainjs/xchain-doge@0.7.16
+  - @xchainjs/xchain-thorchain-amm@1.1.7
+
 ## 1.0.7
 
 ### Patch Changes

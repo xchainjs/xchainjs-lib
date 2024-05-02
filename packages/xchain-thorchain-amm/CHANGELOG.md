@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [0fdfb1d]
+  - @xchainjs/xchain-doge@0.7.16
+
 ## 1.1.6
 
 ### Patch Changes

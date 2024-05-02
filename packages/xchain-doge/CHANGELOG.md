@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.16
+
+### Patch Changes
+
+- 0fdfb1d: Used function PrepareTx instead of Buildtx
+
 ## 0.7.15
 
 ### Patch Changes
