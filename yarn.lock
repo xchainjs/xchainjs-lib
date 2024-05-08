@@ -337,6 +337,13 @@
   dependencies:
     regenerator-runtime "^0.13.11"
 
+"@babel/runtime@^7.11.2":
+  version "7.24.4"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.24.4.tgz#de795accd698007a66ba44add6cc86542aff1edd"
+  integrity sha512-dkxf7+hn8mFBwKjs9bvBlArzLVxVbS8usaPUDd5p2a9JCL9tB8OaOVN1isD4+Xyk4ns89/xeOmbQvgdK7IIVdA==
+  dependencies:
+    regenerator-runtime "^0.14.0"
+
 "@babel/runtime@^7.20.1", "@babel/runtime@^7.5.5":
   version "7.23.6"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.6.tgz#c05e610dc228855dc92ef1b53d07389ed8ab521d"
@@ -739,6 +746,19 @@
   dependencies:
     "@cosmjs/stream" "^0.31.1"
     xstream "^11.14.0"
+
+"@cosmjs/ledger-amino@0.31.1":
+  version "0.31.1"
+  resolved "https://registry.yarnpkg.com/@cosmjs/ledger-amino/-/ledger-amino-0.31.1.tgz#72e94ded17e11308561ce44f8e4c619454f4ff88"
+  integrity sha512-n937YQh9Fn1/UJiTPjqJUlszXzDxRRJcedc2yY1s6NQ0Hp2ELtQSqGFgNhqAelgjuXRtTgKuq18Kd0gpUPDVzQ==
+  dependencies:
+    "@cosmjs/amino" "^0.31.1"
+    "@cosmjs/crypto" "^0.31.1"
+    "@cosmjs/encoding" "^0.31.1"
+    "@cosmjs/math" "^0.31.1"
+    "@cosmjs/utils" "^0.31.1"
+    ledger-cosmos-js "^2.1.8"
+    semver "^7.5.2"
 
 "@cosmjs/math@^0.31.1":
   version "0.31.1"
@@ -1623,6 +1643,15 @@
     tiny-secp256k1 "1.1.6"
     varuint-bitcoin "1.1.2"
 
+"@ledgerhq/hw-app-cosmos@6.29.6":
+  version "6.29.6"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-app-cosmos/-/hw-app-cosmos-6.29.6.tgz#baa64de03c9ce3dab5437814c395415730e0d43c"
+  integrity sha512-WjH3GMe4ppa60iwABGFx57vrvwaRYRQlsGM4kQDc64k1ZxTLv7nZ1oNOj1EgZheLfRUgCVXvntr4CmgrADyD+A==
+  dependencies:
+    "@ledgerhq/errors" "^6.16.4"
+    "@ledgerhq/hw-transport" "^6.30.6"
+    bip32-path "^0.4.2"
+
 "@ledgerhq/hw-app-eth@6.36.0":
   version "6.36.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-app-eth/-/hw-app-eth-6.36.0.tgz#595f0712d9ae321faba031b728ad68be1461ae4c"
@@ -1661,18 +1690,7 @@
     "@ledgerhq/logs" "^5.50.0"
     node-hid "2.1.1"
 
-"@ledgerhq/hw-transport-node-hid-noevents@^6.29.0":
-  version "6.29.0"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.29.0.tgz#10cbb260d9af3e961675ca88695d521dbc8c5964"
-  integrity sha512-JJM0NGOmFxCJ0IvbGlCo3KHYhkckn7QPNgBlGTrV/UDoMZdtDfp3R971jGUVInUmqYmHRDCGXRpjwgZRI7MJhg==
-  dependencies:
-    "@ledgerhq/devices" "^8.1.0"
-    "@ledgerhq/errors" "^6.16.0"
-    "@ledgerhq/hw-transport" "^6.30.0"
-    "@ledgerhq/logs" "^6.12.0"
-    node-hid "^2.1.2"
-
-"@ledgerhq/hw-transport-node-hid-noevents@^6.29.6":
+"@ledgerhq/hw-transport-node-hid-noevents@^6.29.0", "@ledgerhq/hw-transport-node-hid-noevents@^6.29.6":
   version "6.29.6"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-6.29.6.tgz#a328bdde245283f3ca3b82ffa19f7f31b745a22d"
   integrity sha512-H1cGC4TLwSCxve3rbV7qfPJBZfy7VD7k9Czc9HOMDwQ9zHFtaoeiIotIMGjzHjfPtAGauMpAYvrpmEdBBX5sHg==
@@ -1756,7 +1774,7 @@
     "@ledgerhq/logs" "^6.12.0"
     events "^3.3.0"
 
-"@ledgerhq/hw-transport@^5.34.0", "@ledgerhq/hw-transport@^5.51.1":
+"@ledgerhq/hw-transport@^5.25.0", "@ledgerhq/hw-transport@^5.34.0", "@ledgerhq/hw-transport@^5.51.1":
   version "5.51.1"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-5.51.1.tgz#8dd14a8e58cbee4df0c29eaeef983a79f5f22578"
   integrity sha512-6wDYdbWrw9VwHIcoDnqWBaDFyviyjZWv6H9vz9Vyhe4Qd7TIFmbTl/eWs6hZvtZBza9K8y7zD8ChHwRI4s9tSw==
@@ -5798,6 +5816,16 @@ kleur@^4.1.5:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-4.1.5.tgz#95106101795f7050c6c650f350c683febddb1780"
   integrity sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==
 
+ledger-cosmos-js@^2.1.8:
+  version "2.1.8"
+  resolved "https://registry.yarnpkg.com/ledger-cosmos-js/-/ledger-cosmos-js-2.1.8.tgz#b409ecd1e77f630e6fb212a9f602fe5c6e8f054b"
+  integrity sha512-Gl7SWMq+3R9OTkF1hLlg5+1geGOmcHX9OdS+INDsGNxSiKRWlsWCvQipGoDnRIQ6CPo2i/Ze58Dw0Mt/l3UYyA==
+  dependencies:
+    "@babel/runtime" "^7.11.2"
+    "@ledgerhq/hw-transport" "^5.25.0"
+    bech32 "^1.1.4"
+    ripemd160 "^2.0.2"
+
 leven@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/leven/-/leven-3.1.0.tgz#77891de834064cccba82ae7842bb6b14a13ed7f2"
@@ -7207,6 +7235,13 @@ semver@^6.0.0, semver@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
+
+semver@^7.5.2:
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.0.tgz#1a46a4db4bffcccd97b743b5005c8325f23d4e2d"
+  integrity sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==
+  dependencies:
+    lru-cache "^6.0.0"
 
 semver@^7.5.3:
   version "7.5.4"

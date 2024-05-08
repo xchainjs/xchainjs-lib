@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.7
+
+### Patch Changes
+
+- b379aeb: Keystore logic move from cosmos-sdk client to chain clients
+
 ## 0.2.6
 
 ### Patch Changes

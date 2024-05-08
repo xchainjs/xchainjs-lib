@@ -33,16 +33,13 @@ export type CosmosClientParams = Partial<CosmosSdkClientParams>
 /**
  * Cosmos client class extending the Cosmos SDK client.
  */
-export class Client extends CosmosSDKClient {
+export abstract class Client extends CosmosSDKClient {
   /**
    * Constructor for the Cosmos client.
    * @param {CosmosClientParams} config Configuration parameters for the client.
    */
   constructor(config: CosmosClientParams = defaultClientConfig) {
-    super({
-      ...defaultClientConfig,
-      ...config,
-    })
+    super({ ...defaultClientConfig, ...config })
   }
 
   /**

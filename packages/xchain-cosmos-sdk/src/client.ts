@@ -1,13 +1,6 @@
 import { fromBase64, fromBech32 } from '@cosmjs/encoding'
-import {
-  DecodedTxRaw,
-  DirectSecp256k1HdWallet,
-  EncodeObject,
-  GeneratedType,
-  Registry,
-  decodeTxRaw,
-} from '@cosmjs/proto-signing'
-import { IndexedTx, SigningStargateClient, StargateClient, StdFee, defaultRegistryTypes } from '@cosmjs/stargate'
+import { GeneratedType, Registry } from '@cosmjs/proto-signing'
+import { IndexedTx, StargateClient, StdFee, defaultRegistryTypes } from '@cosmjs/stargate'
 import {
   AssetInfo,
   Balance,
@@ -27,14 +20,8 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import * as xchainCrypto from '@xchainjs/xchain-crypto'
 import { Address, Asset, BaseAmount, CachedValue, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import * as bech32 from 'bech32'
-import * as BIP32 from 'bip32'
-import * as crypto from 'crypto'
-import * as secp256k1 from 'secp256k1'
 
-import { makeClientPath } from './utils'
 /**
  * Represents the parameters required to configure a Cosmos SDK client.
  */
@@ -256,48 +243,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   getFees(): Promise<Fees> {
     return Promise.resolve(singleFee(FeeType.FlatFee, this.defaultFee))
   }
-  /**
-   * Hashes a buffer using SHA256 followed by RIPEMD160 or RMD160.
-   * @param {Uint8Array} buffer The buffer to hash
-   * @returns {Uint8Array} The hashed buffer
-   */
-  private hash160(buffer: Uint8Array) {
-    const sha256Hash: Buffer = crypto.createHash('sha256').update(buffer).digest()
-    try {
-      return crypto.createHash('rmd160').update(sha256Hash).digest()
-    } catch (err) {
-      return crypto.createHash('ripemd160').update(sha256Hash).digest()
-    }
-  }
-
-  /**
-   * Get the address derived from the provided phrase.
-   * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
-   * @returns {string} The user address at the specified walletIndex.
-   */
-  public getAddress(walletIndex?: number | undefined): string {
-    const seed = xchainCrypto.getSeed(this.phrase)
-    const node = BIP32.fromSeed(seed)
-    const child = node.derivePath(this.getFullDerivationPath(walletIndex || 0))
-
-    if (!child.privateKey) throw new Error('child does not have a privateKey')
-
-    // TODO: Make this method async and use CosmosJS official address generation strategy
-    const pubKey = secp256k1.publicKeyCreate(child.privateKey)
-    const rawAddress = this.hash160(Uint8Array.from(pubKey))
-    const words = bech32.toWords(Buffer.from(rawAddress))
-    const address = bech32.encode(this.prefix, words)
-    return address
-  }
-
-  /**
-   * Asynchronous version of getAddress method.
-   * @param {number} index Derivation path index of the address to be generated.
-   * @returns {string} A promise that resolves to the generated address.
-   */
-  async getAddressAsync(index = 0): Promise<string> {
-    return this.getAddress(index)
-  }
 
   /**
    * Validates the format of the provided address.
@@ -390,42 +335,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       throw Error(`Can not find transaction ${txId}`)
     }
     return this.mapIndexedTxToTx(tx)
-  }
-
-  public async transfer(params: TxParams): Promise<string> {
-    const sender = await this.getAddressAsync(params.walletIndex || 0)
-
-    const { rawUnsignedTx } = await this.prepareTx({
-      sender,
-      recipient: params.recipient,
-      asset: params.asset,
-      amount: params.amount,
-      memo: params.memo,
-    })
-
-    const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
-
-    const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
-      prefix: this.prefix,
-      hdPaths: [makeClientPath(this.getFullDerivationPath(params.walletIndex || 0))],
-    })
-
-    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
-      registry: this.registry,
-    })
-
-    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-      return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-    })
-
-    const tx = await signingClient.signAndBroadcast(
-      sender,
-      messages,
-      this.getStandardFee(this.getAssetInfo().asset),
-      unsignedTx.body.memo,
-    )
-
-    return tx.transactionHash
   }
 
   public async broadcastTx(txHex: string): Promise<string> {

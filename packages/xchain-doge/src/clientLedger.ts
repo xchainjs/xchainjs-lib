@@ -3,6 +3,7 @@ import { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { FeeOption, FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
+import * as Dogecoin from 'bitcoinjs-lib'
 
 import { Client } from './client'
 /**
@@ -49,34 +50,33 @@ class ClientLedger extends Client {
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
-    const derivePath = this.getFullDerivationPath(fromAddressIndex)
     // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
     // Prepare transaction
-    const { psbt, utxos } = await this.buildTx({
-      ...params,
-      feeRate,
-      sender,
-    })
+    const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
+    const psbt = Dogecoin.Psbt.fromBase64(rawUnsignedTx)
     // Prepare Ledger inputs
-    const inputs: Array<[Transaction, number, string | null, number | null]> = utxos.map(({ txHex, hash, index }) => {
-      if (!txHex) {
-        throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)
-      }
-      const splittedTx = app.splitTransaction(txHex, false /* no segwit support */)
-      return [splittedTx, index, null, null]
-    })
+    const ledgerInputs: Array<[Transaction, number, string | null, number | null]> = utxos.map(
+      ({ txHex, hash, index }) => {
+        if (!txHex) {
+          throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)
+        }
+        const splittedTx = app.splitTransaction(txHex, false /* no segwit support */)
+        return [splittedTx, index, null, null]
+      },
+    )
 
-    const associatedKeysets: string[] = inputs.map((_) => derivePath)
-    const newTxHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
-    const newTx: Transaction = app.splitTransaction(newTxHex, true)
-
+    // Prepare associated keysets
+    const associatedKeysets = ledgerInputs.map(() => this.getFullDerivationPath(fromAddressIndex))
+    // Convert the raw unsigned transaction to a Transaction object
+    // Serialize unsigned transaction
+    const unsignedHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
+    const newTx = app.splitTransaction(unsignedHex, true)
     const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
-
     const txHex = await app.createPaymentTransaction({
-      inputs,
+      inputs: ledgerInputs,
       associatedKeysets,
       outputScriptHex,
       // no additionals - similar to https://github.com/shapeshift/hdwallet/blob/a61234eb83081a4de54750b8965b873b15803a03/packages/hdwallet-ledger/src/bitcoin.ts#L222

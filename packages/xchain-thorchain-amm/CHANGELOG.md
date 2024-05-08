@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [0fdfb1d]
+  - @xchainjs/xchain-doge@0.7.16
+
+## 1.1.6
+
+### Patch Changes
+
+- Updated dependencies [b379aeb]
+- Updated dependencies [b379aeb]
+  - @xchainjs/xchain-thorchain@1.0.7
+  - @xchainjs/xchain-cosmos@1.1.0
+  - @xchainjs/xchain-wallet@0.1.11
+
 ## 1.1.5
 
 ### Patch Changes
