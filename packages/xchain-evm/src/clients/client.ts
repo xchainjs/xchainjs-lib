@@ -75,6 +75,7 @@ export class Client extends BaseXChainClient implements EVMClient {
   protected signer?: ISigner
   protected defaults: Record<Network, EvmDefaults>
   private cachedNetworkId: CachedValue<number>
+
   /**
    * Constructor for the EVM client.
    * @param {EVMClientParams} params - Parameters for configuring the EVM client.
@@ -117,6 +118,7 @@ export class Client extends BaseXChainClient implements EVMClient {
   getProvider(): Provider {
     return this.config.providers[this.network]
   }
+
   /**
    * Retrieves the explorer URL based on the current network.
    * @returns {string} The explorer URL for Ethereum based on the current network.
@@ -625,7 +627,6 @@ export class Client extends BaseXChainClient implements EVMClient {
 
   /**
    * Call a contract function.
-
    * @param {signer} Signer (optional) The address a transaction is send from. If not set, signer will be defined based on `walletIndex`
    * @param {Address} contractAddress The contract address.
    * @param {number} walletIndex (optional) HD wallet index
@@ -639,6 +640,21 @@ export class Client extends BaseXChainClient implements EVMClient {
     return call({ provider: this.getProvider(), signer, contractAddress, abi, funcName, funcParams })
   }
 
+  /**
+   * Transfers ETH or ERC20 token
+   *
+   * Note: A given `feeOption` wins over `gasPrice` and `gasLimit`
+   *
+   * @param {TxParams} params The transfer options.
+   * @param {feeOption} FeeOption Fee option (optional)
+   * @param {gasPrice} BaseAmount Gas price (optional)
+   * @param {maxFeePerGas} BaseAmount Optional. Following EIP-1559, maximum fee per gas. Parameter not compatible with gasPrice
+   * @param {maxPriorityFeePerGas} BaseAmount Optional. Following EIP-1559, maximum priority fee per gas. Parameter not compatible with gasPrice
+   * @param {gasLimit} BigNumber Gas limit (optional)
+   * @throws Error Thrown if address of given `Asset` could not be parsed
+   * @throws {Error} Error thrown if not compatible fee parameters are provided
+   * @returns {TxHash} The transaction hash.
+   */
   public async transfer({
     walletIndex,
     asset = this.getAssetInfo().asset,
@@ -738,6 +754,18 @@ export class Client extends BaseXChainClient implements EVMClient {
     return this.broadcastTx(signedTx)
   }
 
+  /**
+   * Approves an allowance for spending tokens.
+   *
+   * @param {ApproveParams} params - Parameters for approving an allowance.
+   * @param {Address} contractAddress The contract address.
+   * @param {Address} spenderAddress The spender address.
+   * @param {feeOption} FeeOption Fee option (optional)
+   * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
+   * @param {number} walletIndex (optional) HD wallet index
+   * @returns {TransactionResponse} The result of the approval transaction.
+   * @throws Error If gas estimation fails.
+   */
   public async approve({
     contractAddress,
     spenderAddress,
@@ -789,6 +817,9 @@ export class Client extends BaseXChainClient implements EVMClient {
     return this.broadcastTx(signedTx)
   }
 
+  /**
+   * Purge client
+   */
   public purgeClient(): void {
     super.purgeClient()
     if (this.signer) {
@@ -797,6 +828,11 @@ export class Client extends BaseXChainClient implements EVMClient {
     }
   }
 
+  /**
+   * Get the account signer the client is using
+   * @returns {ISigner}
+   * @throws {Error} if the client is not using an account
+   */
   protected getSigner(): ISigner {
     if (!this.signer) throw Error('Can not get signer')
     return this.signer

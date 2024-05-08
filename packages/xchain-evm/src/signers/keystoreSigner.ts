@@ -8,8 +8,14 @@ import { IKeystoreSigner, SignApproveParams, SignTransferParams } from '../types
 
 import { Signer, SignerParams } from './signer'
 
+/**
+ * Keystore signer parameters
+ */
 export type KeystoreSignerParams = SignerParams & { phrase: string }
 
+/**
+ * Signer which operates with an EVM account thanks to the seed phrase
+ */
 export class KeystoreSigner extends Signer implements IKeystoreSigner {
   private hdNode?: HDNode
   private phrase?: string
@@ -22,6 +28,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
 
   /**
    * Validates the given Ethereum address.
+   *
    * @param {Address} address - The address to validate.
    * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
@@ -61,8 +68,8 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
   }
 
   /**
-   * Get the current address.
-   * Asynchronously gets the current address.
+   * Get the current address asynchronously.
+   *
    * @param {number} walletIndex The current address.
    * @returns {Address} The current address.
    * @throws {Error} Thrown if HDNode is not defined, indicating that a phrase is needed to derive an address.
@@ -74,6 +81,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
 
   /**
    * Retrieves the Ethereum wallet interface.
+   *
    * @param {number} walletIndex - The index of the HD wallet (optional).
    * @returns {Wallet} The current Ethereum wallet interface.
    * @throws Error - Thrown if the HDNode is not defined, indicating that a phrase is needed to create a wallet and derive an address.
@@ -87,19 +95,12 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
   }
 
   /**
-   * Transfers ETH or ERC20 token
+   * Sign an EVM transaction with Ledger
    *
-   * Note: A given `feeOption` wins over `gasPrice` and `gasLimit`
-   *
-   * @param {TxParams} params The transfer options.
-   * @param {feeOption} FeeOption Fee option (optional)
-   * @param {gasPrice} BaseAmount Gas price (optional)
-   * @param {maxFeePerGas} BaseAmount Optional. Following EIP-1559, maximum fee per gas. Parameter not compatible with gasPrice
-   * @param {maxPriorityFeePerGas} BaseAmount Optional. Following EIP-1559, maximum priority fee per gas. Parameter not compatible with gasPrice
-   * @param {gasLimit} BigNumber Gas limit (optional)
-   * @throws Error Thrown if address of given `Asset` could not be parsed
-   * @throws {Error} Error thrown if not compatible fee parameters are provided
-   * @returns {TxHash} The transaction hash.
+   * @param {SignTransferParams} params Sign transfer params
+   * @param {string} SignTransferParams.sender Fee option (optional)
+   * @param {ethers.Transaction} SignTransferParams.tx Fee option (optional)
+   * @returns {string} The raw signed transaction.
    */
   public async signTransfer({ sender, tx }: SignTransferParams): Promise<TxHash> {
     // Get the signer
@@ -120,16 +121,12 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
   }
 
   /**
-   * Approves an allowance for spending tokens.
+   * Sign an EVM approve transaction with Ledger
    *
-   * @param {ApproveParams} params - Parameters for approving an allowance.
-   * @param {Address} contractAddress The contract address.
-   * @param {Address} spenderAddress The spender address.
-   * @param {feeOption} FeeOption Fee option (optional)
-   * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
-   * @param {number} walletIndex (optional) HD wallet index
-   * @returns {TransactionResponse} The result of the approval transaction.
-   * @throws Error If gas estimation fails.
+   * @param {SignTransferParams} params Sign transfer params
+   * @param {string} SignTransferParams.sender The sender address
+   * @param {ethers.Transaction} SignTransferParams.tx Approve transaction to sign
+   * @returns {string} The raw signed transaction.
    */
   public async signApprove({ sender, tx }: SignApproveParams): Promise<string> {
     return this.getWallet().signTransaction({
