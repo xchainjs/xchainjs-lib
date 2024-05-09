@@ -167,20 +167,17 @@ describe('EVM client', () => {
   })
 
   it('Should not have a phrase after purging', () => {
-    const avaxClient = new Client(avaxParams)
     avaxClient.purgeClient()
     expect(() => avaxClient.getAddress()).toThrowError()
   })
 
   it('Should set new phrase', () => {
-    const avaxClient = new Client(avaxParams)
     expect(avaxClient.getAddress()).toBe('0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e')
     const newAddress = avaxClient.setPhrase(newPhrase)
     expect(newAddress).toBe('0xd7aa2e8903782e02f3cee4fa3f317f5bcfd62a4d')
   })
 
   it('should fail to set new phrase', () => {
-    const avaxClient = new Client(avaxParams)
     expect(() => avaxClient.setPhrase('bad bad phrase')).toThrowError()
   })
 
@@ -189,12 +186,10 @@ describe('EVM client', () => {
   })
 
   it('Should get network', () => {
-    const avaxClient = new Client(avaxParams)
     expect(avaxClient.getNetwork()).toEqual('testnet')
   })
 
   it('Should set network', async () => {
-    const avaxClient = new Client(avaxParams)
     avaxClient.setNetwork(Network.Mainnet)
     expect(avaxClient.getNetwork()).toBe(Network.Mainnet)
   })
@@ -223,12 +218,10 @@ describe('EVM client', () => {
   })
 
   it('Should fail a bad address', () => {
-    const avaxClient = new Client(avaxParams)
     expect(avaxClient.validateAddress('0xBADbadBad')).toBeFalsy()
   })
 
   it('Should pass a good address', () => {
-    const avaxClient = new Client(avaxParams)
     const goodAddress = avaxClient.validateAddress(address)
     expect(goodAddress).toBeTruthy()
   })
@@ -238,8 +231,6 @@ describe('EVM client', () => {
       thornodeApiUrl,
       require('../__mocks__/responses/inbound_addresses_testnet.json'),
     )
-
-    const avaxClient = new Client(avaxParams)
 
     const { fast, fastest, average } = await avaxClient.estimateGasPrices()
 
