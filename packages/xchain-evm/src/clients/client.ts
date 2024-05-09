@@ -56,7 +56,7 @@ export interface EVMClient {
 /**
  * Parameters for configuring the EVM client.
  */
-export type EVMClientParams = XChainClientParams & {
+export type EVMClientParams = Omit<XChainClientParams, 'phrase'> & {
   chain: Chain
   gasAsset: Asset
   gasAssetDecimals: number
