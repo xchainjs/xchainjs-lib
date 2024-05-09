@@ -12,7 +12,7 @@ export type SignApproveParams = {
 }
 
 export interface ISigner {
-  getAddressAsync(walletIndex?: number): Promise<Address> // Get address asynchronously
+  getAddressAsync(walletIndex?: number, verify?: boolean): Promise<Address> // Get address asynchronously
   signTransfer(params: SignTransferParams): Promise<string> // Transfer
   signApprove(params: SignApproveParams): Promise<string>
   getFullDerivationPath(walletIndex: number): string

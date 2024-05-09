@@ -175,8 +175,8 @@ export class Client extends BaseXChainClient implements EVMClient {
     throw Error('Sync method not supported for Ledger')
   }
 
-  getAddressAsync(walletIndex?: number): Promise<string> {
-    return this.getSigner().getAddressAsync(walletIndex)
+  getAddressAsync(walletIndex?: number, verify = false): Promise<string> {
+    return this.getSigner().getAddressAsync(walletIndex, verify)
   }
 
   /**
