@@ -60,10 +60,10 @@ export const feesEstimationPublicKeys: { [networkId: number]: FeesEstimationPara
     publicKey: 'a47e22f21e16d80374f16d66224b56f6eda82a6db8279de267a74a49f0291e8b',
   },
   [NetworkId.Stokenet]: {
-    from: 'account_tdx_2_1292a230ugrfdq96skhg92ccam3h6dv0kw707curmzel0d92ctqun5z',
-    to: 'account_tdx_2_129wjagjzxltd0clr3q4z7hqpw5cc7weh9trs4e9k3zfwqpj636e5zf',
+    from: 'account_tdx_2_12927ya6vxtmhu8w0qkwtumw8kjmlv930agjzezfgg6yp3j6agn3gfc',
+    to: 'account_tdx_2_12xnfu4evyseqeq57rzhrh8ls6wy76vvc4jnw2kzx3l5ka7wyddxh3l',
     resourceAddress: XrdAssetStokenet.symbol,
-    publicKey: 'f926e5d67daa984375a86abbb305abc350c7dadba11d348c1cf4db27640c8d4e',
+    publicKey: '3ce4d36fd8bf40fa6f9b0cf2ef8d11853d088589ebdc79055f5a0af55bf7e758',
   },
 }
 
