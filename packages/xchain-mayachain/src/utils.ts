@@ -23,7 +23,7 @@ export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
     [Network.Testnet]: ['deprecated'],
     [Network.Stagenet]: ['https://stagenet.tendermint.mayachain.info'],
-    [Network.Mainnet]: ['https://tendermint.mayachain.info'],
+    [Network.Mainnet]: ['https://tendermint.mayachain.info', 'https://rpc-maya.liquify.com'],
   }
 }
 
