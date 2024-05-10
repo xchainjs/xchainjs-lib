@@ -19,11 +19,11 @@ const STAGENET_EXPLORER_URL = 'https://stagenet.mayascan.org'
  *
  * @returns {Record<Network, string>} Object containing default client URLs for each network.
  */
-export const getDefaultClientUrls = (): Record<Network, string> => {
+export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
-    [Network.Testnet]: 'deprecated',
-    [Network.Stagenet]: 'https://stagenet.tendermint.mayachain.info',
-    [Network.Mainnet]: 'https://tendermint.mayachain.info',
+    [Network.Testnet]: ['deprecated'],
+    [Network.Stagenet]: ['https://stagenet.tendermint.mayachain.info'],
+    [Network.Mainnet]: ['https://tendermint.mayachain.info'],
   }
 }
 

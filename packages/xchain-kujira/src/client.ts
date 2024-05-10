@@ -7,7 +7,7 @@ import {
   TxBodyEncodeObject,
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
-import { GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
+import { DeliverTxResponse, GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
 import { AssetInfo, PreparedTx, TxParams } from '@xchainjs/xchain-client'
 import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
@@ -85,20 +85,7 @@ export class Client extends CosmosSdkClient {
       hdPaths: [makeClientPath(this.getFullDerivationPath(params.walletIndex || 0))],
     })
 
-    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
-      registry: this.registry,
-    })
-
-    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-      return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-    })
-
-    const tx = await signingClient.signAndBroadcast(
-      sender,
-      messages,
-      this.getStandardFee(this.getAssetInfo().asset),
-      unsignedTx.body.memo,
-    )
+    const tx = await this.roundRobinSignAndBroadcast(sender, unsignedTx, signer)
 
     return tx.transactionHash
   }
@@ -262,5 +249,42 @@ export class Client extends CosmosSdkClient {
     } catch (err) {
       return createHash('ripemd160').update(sha256Hash).digest()
     }
+  }
+
+  /**
+   * Sign and broadcast a transaction making a round robin over the clients urls provided to the client
+   *
+   * @param {string} sender Sender address
+   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
+   * @param {DirectSecp256k1HdWallet} signer Signer
+   * @returns {DeliverTxResponse} The transaction broadcasted
+   */
+  private async roundRobinSignAndBroadcast(
+    sender: string,
+    unsignedTx: DecodedTxRaw,
+    signer: DirectSecp256k1HdWallet,
+  ): Promise<DeliverTxResponse> {
+    for (const url of this.clientUrls[this.network]) {
+      try {
+        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+          registry: this.registry,
+        })
+
+        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+        })
+
+        const tx = await signingClient.signAndBroadcast(
+          sender,
+          messages,
+          this.getStandardFee(this.getAssetInfo().asset),
+          unsignedTx.body.memo,
+        )
+
+        return tx
+      } catch {}
+    }
+
+    throw Error('No clients available. Can not sign and broadcast transaction')
   }
 }
