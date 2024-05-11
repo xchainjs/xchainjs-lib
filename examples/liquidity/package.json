@@ -12,7 +12,8 @@
     "estimateAddSaver": "npx ts-node estimate-add-saver.ts",
     "estimateWithdrawSaver": "npx ts-node estimate-withdraw-saver.ts",
     "addSaver": "npx ts-node add-savers.ts",
-    "withdrawSaver": "npx ts-node withdrawSavers.ts"
+    "withdrawSaver": "npx ts-node withdrawSavers.ts",
+    "build": "tsc --noEmit"
   },
   "description": "examples for adding liquidity",
   "main": "index.js",

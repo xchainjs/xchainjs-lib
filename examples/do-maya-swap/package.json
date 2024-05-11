@@ -3,7 +3,8 @@
   "private": true,
   "version": "1.0.6",
   "scripts": {
-    "doSwap": "npx ts-node do-maya-swap.ts"
+    "doSwap": "npx ts-node do-maya-swap.ts",
+    "build": "tsc --noEmit"
   },
   "description": "example of doing a swap with mayachain-amm package",
   "main": "index.js",

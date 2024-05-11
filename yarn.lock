@@ -2284,6 +2284,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/types-cryptoassets@npm:7.11.0":
+  version: 7.11.0
+  resolution: "@ledgerhq/types-cryptoassets@npm:7.11.0"
+  checksum: 10c0/98f2b3d9d3f9e36c0c29354797f82af0587c94e437082e40a5708eca1c6f18ac8052604fc91f2191bb6e40393514dafbdbdb5744299247148469d34ea87b4c46
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/types-devices@npm:6.24.0":
+  version: 6.24.0
+  resolution: "@ledgerhq/types-devices@npm:6.24.0"
+  checksum: 10c0/03584280bfa48835cc38562f1fa82a49b3c01e234fe7621aa04f0632c9b699d4b916f11b8f4747e8b0219fc9330647ca382c5494a7f477f2eea16617adc35cbf
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/types-live@npm:^6.45.0":
   version: 6.45.0
   resolution: "@ledgerhq/types-live@npm:6.45.0"
@@ -10266,6 +10280,8 @@ __metadata:
   dependencies:
     "@actions/core": "npm:1.10.0"
     "@changesets/cli": "npm:2.27.1"
+    "@ledgerhq/types-cryptoassets": "npm:7.11.0"
+    "@ledgerhq/types-devices": "npm:6.24.0"
     "@rollup/plugin-commonjs": "npm:^24.1.0"
     "@rollup/plugin-json": "npm:^6.0.0"
     "@rollup/plugin-node-resolve": "npm:^15.0.2"

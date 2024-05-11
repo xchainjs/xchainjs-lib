@@ -3,7 +3,8 @@
   "version": "1.0.2",
   "private": true,
   "scripts": {
-    "preparetx": "npx ts-node prepare-tx.ts"
+    "preparetx": "npx ts-node prepare-tx.ts",
+    "build": "tsc --noEmit"
   },
   "description": "Example of doing preparing a Tx",
   "main": "index.js",

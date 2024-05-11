@@ -3,7 +3,8 @@
   "private": true,
   "version": "1.0.3",
   "scripts": {
-    "checktx": "npx ts-node check-tx.ts"
+    "checktx": "npx ts-node check-tx.ts",
+    "build": "tsc --noEmit"
   },
   "description": "example of doing checking a Tx with thorchain-query package",
   "main": "index.js",

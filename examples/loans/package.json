@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "loanQuoteOpen": "npx ts-node loanQuoteOpen.ts",
-    "loanQuoteClosed": "npx ts-node loanQuoteClosed.ts"
+    "loanQuoteClosed": "npx ts-node loanQuoteClosed.ts",
+    "build": "tsc --noEmit"
   },
   "description": "examples for getting loan quotes",
   "main": "index.js",

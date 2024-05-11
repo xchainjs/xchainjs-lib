@@ -4,7 +4,8 @@
   "version": "1.0.8",
   "scripts": {
     "doSwap": "npx ts-node doSwap.ts",
-    "doStreamingSwap": "npx ts-node doStreamingSwap.ts"
+    "doStreamingSwap": "npx ts-node doStreamingSwap.ts",
+    "build": "tsc --noEmit"
   },
   "description": "example of doing a swap withthorchain-amm package",
   "main": "index.js",

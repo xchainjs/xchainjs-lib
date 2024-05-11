@@ -3,7 +3,8 @@
   "version": "1.0.5",
   "private": true,
   "scripts": {
-    "wallet": "npx ts-node wallet.ts"
+    "wallet": "npx ts-node wallet.ts",
+    "build": "tsc --noEmit"
   },
   "description": "Example using the Mayachain wallet",
   "main": "index.js",

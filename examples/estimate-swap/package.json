@@ -5,7 +5,8 @@
   "scripts": {
     "listPools": "npx ts-node listPools.ts",
     "estimateSwap": "npx ts-node estimateSwap.ts",
-    "doSwap": "npx ts-node doSwap.ts"
+    "doSwap": "npx ts-node doSwap.ts",
+    "build": "tsc --noEmit"
   },
   "description": "Test folder for xchainjs thorchain-amm package",
   "main": "index.js",
