@@ -26,7 +26,7 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn install --immutable && yarn yarn-audit-ci --high
+        run: yarn install --immutable && yarn npm audit --all --severity high
 
       - name: Build packages
         run: yarn build
