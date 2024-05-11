@@ -8,14 +8,15 @@
   },
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "tools/*"
   ],
   "scripts": {
     "clean": "turbo run clean && rm -rf ./.turbo",
     "clean:nodemodules": "rm -rf ./packages/*/node_modules && rm -rf ./node_modules",
     "build": "turbo run build --cache-dir=.turbo --filter='./packages/*'",
     "build:examples": "turbo run build --cache-dir=.turbo --filter='./examples/*'",
-    "build:tools": "tsc tools/**/*.ts --noEmit --skipLibCheck",
+    "build:tools": "turbo run build --cache-dir=.turbo --filter='./tools/*'",
     "test": "turbo run test --cache-dir=.turbo",
     "pub": "turbo publish",
     "e2e": "turbo run e2e",

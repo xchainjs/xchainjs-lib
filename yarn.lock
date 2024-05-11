@@ -5217,6 +5217,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:^9.4.1":
+  version: 9.5.0
+  resolution: "commander@npm:9.5.0"
+  checksum: 10c0/5f7784fbda2aaec39e89eb46f06a999e00224b3763dc65976e05929ec486e174fe9aac2655f03ba6a5e83875bd173be5283dc19309b7c65954701c02025b3c1d
+  languageName: node
+  linkType: hard
+
 "commondir@npm:^1.0.1":
   version: 1.0.1
   resolution: "commondir@npm:1.0.1"
@@ -11440,6 +11447,34 @@ __metadata:
   checksum: 10c0/069d9df51e8ad4a89fbe6f9806c68e06c65be3c7d42f0701cc43dba5f0d6064686b238bbff206c5addef8854e3ce00c643bff59432ea2f2c639feab0ee1a93f9
   languageName: node
   linkType: hard
+
+"txJammer@workspace:tools/txJammer":
+  version: 0.0.0-use.local
+  resolution: "txJammer@workspace:tools/txJammer"
+  dependencies:
+    "@xchainjs/xchain-avax": "workspace:*"
+    "@xchainjs/xchain-binance": "workspace:*"
+    "@xchainjs/xchain-bitcoin": "workspace:*"
+    "@xchainjs/xchain-bitcoincash": "workspace:*"
+    "@xchainjs/xchain-bsc": "workspace:*"
+    "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-cosmos": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
+    "@xchainjs/xchain-doge": "workspace:*"
+    "@xchainjs/xchain-ethereum": "workspace:*"
+    "@xchainjs/xchain-litecoin": "workspace:*"
+    "@xchainjs/xchain-midgard": "workspace:*"
+    "@xchainjs/xchain-thorchain": "workspace:*"
+    "@xchainjs/xchain-thorchain-amm": "workspace:*"
+    "@xchainjs/xchain-thorchain-query": "workspace:*"
+    "@xchainjs/xchain-thornode": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    "@xchainjs/xchain-wallet": "workspace:*"
+    bignumber.js: "npm:9.0.0"
+    commander: "npm:^9.4.1"
+    weighted: "npm:^1.0.0"
+  languageName: unknown
+  linkType: soft
 
 "type-check@npm:^0.4.0, type-check@npm:~0.4.0":
   version: 0.4.0
