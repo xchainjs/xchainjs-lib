@@ -10,10 +10,10 @@
   "author": "GRC",
   "license": "MIT",
   "dependencies": {
-    "@xchainjs/xchain-ethereum": "*",
-    "@xchainjs/xchain-bitcoin": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-client": "*"
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*"
   },
   "devDependencies": {
     "@cosmos-client/core": "^0.46.1",

@@ -35,15 +35,15 @@
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
   "dependencies": {
-    "@xchainjs/xchain-bitcoin": "*",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-ethereum": "*",
-    "@xchainjs/xchain-dash": "*",
-    "@xchainjs/xchain-kujira": "*",
-    "@xchainjs/xchain-mayachain-query": "*",
-    "@xchainjs/xchain-mayachain": "*",
-    "@xchainjs/xchain-thorchain": "*",
-    "@xchainjs/xchain-wallet": "*",
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-dash": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-kujira": "workspace:*",
+    "@xchainjs/xchain-mayachain": "workspace:*",
+    "@xchainjs/xchain-mayachain-query": "workspace:*",
+    "@xchainjs/xchain-thorchain": "workspace:*",
+    "@xchainjs/xchain-wallet": "workspace:*",
     "ethers": "5.7.2"
   },
   "devDependencies": {

@@ -2,6 +2,10 @@
   "name": "root",
   "private": true,
   "description": "XChainJS Chain Clients MonoRepo",
+  "packageManager": "yarn@4.2.2",
+  "engines": {
+    "yarn": ">=1.4.0"
+  },
   "workspaces": [
     "packages/*",
     "examples/*"
