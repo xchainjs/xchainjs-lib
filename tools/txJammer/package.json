@@ -1,6 +1,7 @@
 {
   "name": "txJammer",
   "version": "1.0.2",
+  "private": true,
   "description": "A simple script to test all types of transactions broadcasted to a thornode but on stagenet",
   "main": "index.js",
   "author": "thorianite",
@@ -8,7 +9,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "test": "jest",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "lint": "eslint \"*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags",
     "txJammer": "npx ts-node txJammerCommander.ts"
