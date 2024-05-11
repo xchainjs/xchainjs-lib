@@ -8,7 +8,6 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "jest",
     "lint": "eslint \"*.ts\" --fix --max-warnings 0",
     "prepublishOnly": "yarn build",
     "postversion": "git push --follow-tags",
