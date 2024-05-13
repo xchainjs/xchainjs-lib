@@ -5,8 +5,7 @@ import { Asset, assetAmount, assetFromStringEx, assetToBase, assetToString } fro
 import { BigNumber, ethers } from 'ethers'
 
 // Import necessary modules and classes from external packages and files
-import { EVMClientParams } from '../src'
-import { ClientLedger } from '../src/ClientLedger'
+import { ClientLedger, EVMClientParams, LedgerSigner } from '../src'
 
 // Define constants related to Avalanche
 const AVAX_DECIMAL = 18
@@ -133,11 +132,15 @@ jest.setTimeout(200000)
 describe('EVM Client Ledger', () => {
   let client: ClientLedger
   beforeAll(async () => {
-    const transport = await TransportNodeHid.create()
-
     client = new ClientLedger({
-      transport,
       ...defaultAvaxParams,
+      signer: new LedgerSigner({
+        transport: await TransportNodeHid.create(),
+        provider: defaultAvaxParams.providers[Network.Mainnet],
+        derivationPath: defaultAvaxParams.rootDerivationPaths
+          ? defaultAvaxParams.rootDerivationPaths[Network.Mainnet]
+          : '',
+      }),
     })
   })
   it('get address async without verification', async () => {

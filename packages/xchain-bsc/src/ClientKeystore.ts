@@ -1,7 +1,8 @@
 /**
  * Module importing and providing a customized client for the Binance Smart Chain (BSC).
  */
-import { ClientKeystore as EVMClientKeystore } from '@xchainjs/xchain-evm' // Importing the base client from xchain-evm library
+import { Network } from '@xchainjs/xchain-client'
+import { ClientKeystore as EVMClientKeystore, EVMClientParams, KeystoreSigner } from '@xchainjs/xchain-evm' // Importing the base client from xchain-evm library
 
 import { defaultBscParams } from './const' // Importing default parameters for BSC
 
@@ -14,7 +15,18 @@ export class ClientKeystore extends EVMClientKeystore {
    *
    * @param {Object} config Configuration parameters for the client. Defaults to defaultBscParams if not provided.
    */
-  constructor(config = defaultBscParams) {
-    super(config) // Calling the constructor of the base client with the provided configuration or default parameters
+  constructor(config: Omit<EVMClientParams, 'signer'> = defaultBscParams) {
+    super({
+      ...config,
+      signer: config.phrase
+        ? new KeystoreSigner({
+            phrase: config.phrase,
+            provider: config.providers[config.network || Network.Mainnet],
+            derivationPath: config.rootDerivationPaths
+              ? config.rootDerivationPaths[config.network || Network.Mainnet]
+              : '',
+          })
+        : undefined,
+    })
   }
 }
