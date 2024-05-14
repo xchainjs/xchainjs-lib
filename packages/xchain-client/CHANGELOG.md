@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.5
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-crypto@0.3.3
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.16.4
 
 ### Patch Changes

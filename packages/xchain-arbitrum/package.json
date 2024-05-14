@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-arbitrum",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Arbitrum EVM client for XChainJS",
   "keywords": [
     "XChain",

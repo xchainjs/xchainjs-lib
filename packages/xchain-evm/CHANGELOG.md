@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- 3ed8127: EVM Client phrase parameter removed.
+- 3ed8127: EVM Client works with signer parameter, which represents an account on the EVM chains. Keystore and Ledger signer are currently supported
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.5.1
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.7.14
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 5.7.13
 
 ### Patch Changes

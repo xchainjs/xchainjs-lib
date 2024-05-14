@@ -1,6 +1,6 @@
 {
   "name": "xchainjs-prepare-tx",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "scripts": {
     "preparetx": "npx ts-node prepare-tx.ts",

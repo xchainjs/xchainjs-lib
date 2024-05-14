@@ -1,5 +1,21 @@
 # xchainjs-liquidity
 
+## 1.0.9
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-thorchain-amm@1.1.8
+  - @xchainjs/xchain-thorchain-query@0.7.11
+  - @xchainjs/xchain-midgard-query@0.1.16
+  - @xchainjs/xchain-thornode@0.3.14
+  - @xchainjs/xchain-midgard@0.5.6
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-crypto@0.3.3
+  - @xchainjs/xchain-util@0.13.5
+
 ## 1.0.8
 
 ### Patch Changes
