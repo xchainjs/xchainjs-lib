@@ -1,5 +1,17 @@
 # xchainjs-prepare-tx
 
+## 1.0.3
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-bitcoin@0.23.16
+  - @xchainjs/xchain-ethereum@0.32.2
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 1.0.2
 
 ### Patch Changes

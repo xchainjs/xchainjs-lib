@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.12
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [dd3b45d]
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+- Updated dependencies [3ed8127]
+  - @xchainjs/xchain-mayachain@1.0.5
+  - @xchainjs/xchain-evm@0.6.0
+  - @xchainjs/xchain-thorchain@1.0.8
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+  - @xchainjs/xchain-utxo@0.1.7
+
 ## 0.1.11
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoincash",
-  "version": "0.17.13",
+  "version": "0.17.14",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
