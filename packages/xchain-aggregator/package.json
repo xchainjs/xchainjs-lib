@@ -27,22 +27,22 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-mayachain": "*",
-    "@xchainjs/xchain-mayachain-amm": "*",
-    "@xchainjs/xchain-mayachain-query": "*",
-    "@xchainjs/xchain-thorchain": "*",
-    "@xchainjs/xchain-thorchain-amm": "*",
-    "@xchainjs/xchain-thorchain-query": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-wallet": "*"
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-mayachain": "workspace:*",
+    "@xchainjs/xchain-mayachain-amm": "workspace:*",
+    "@xchainjs/xchain-mayachain-query": "workspace:*",
+    "@xchainjs/xchain-thorchain": "workspace:*",
+    "@xchainjs/xchain-thorchain-amm": "workspace:*",
+    "@xchainjs/xchain-thorchain-query": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-wallet": "workspace:*"
   },
   "devDependencies": {
-    "@xchainjs/xchain-avax": "*",
-    "@xchainjs/xchain-bitcoin": "*",
-    "@xchainjs/xchain-binance": "*",
-    "@xchainjs/xchain-ethereum": "*",
-    "@xchainjs/xchain-kujira": "*",
+    "@xchainjs/xchain-avax": "workspace:*",
+    "@xchainjs/xchain-binance": "workspace:*",
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-kujira": "workspace:*",
     "axios": "1.3.6",
     "axios-mock-adapter": "1.20.0"
   }

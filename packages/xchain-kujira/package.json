@@ -35,9 +35,9 @@
     "@cosmjs/encoding": "0.31.1",
     "@cosmjs/proto-signing": "0.31.1",
     "@cosmjs/stargate": "0.31.1",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-cosmos-sdk": "*",
-    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-cosmos-sdk": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "cosmjs-types": "0.8.0"
   },
   "publishConfig": {

@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@ledgerhq/hw-app-eth": "6.36.0",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "ethers": "5.7.2"
   },
   "devDependencies": {

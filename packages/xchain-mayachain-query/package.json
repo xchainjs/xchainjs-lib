@@ -32,11 +32,11 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-mayamidgard": "*",
-    "@xchainjs/xchain-mayamidgard-query": "*",
-    "@xchainjs/xchain-mayanode": "*",
-    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-mayamidgard": "workspace:*",
+    "@xchainjs/xchain-mayamidgard-query": "workspace:*",
+    "@xchainjs/xchain-mayanode": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.3.6",
     "axios-retry": "3.2.5",
     "bignumber.js": "9.0.0"

@@ -35,10 +35,10 @@
   },
   "dependencies": {
     "@ledgerhq/hw-transport": "6.30.6",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-evm": "*",
-    "@xchainjs/xchain-evm-providers": "*",
-    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-evm": "workspace:*",
+    "@xchainjs/xchain-evm-providers": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "ethers": "5.7.2"
   }
 }

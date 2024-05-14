@@ -34,11 +34,11 @@
   "dependencies": {
     "@dashevo/dashcore-lib": "0.19.41",
     "@ledgerhq/hw-app-btc": "10.1.0",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-crypto": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-utxo": "*",
-    "@xchainjs/xchain-utxo-providers": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-utxo": "workspace:*",
+    "@xchainjs/xchain-utxo-providers": "workspace:*",
     "bitcoinjs-lib": "5.2.0",
     "coininfo": "5.1.0",
     "coinselect": "3.1.12"

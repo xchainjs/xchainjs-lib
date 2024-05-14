@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@supercharge/promise-pool": "2.4.0",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.3.6",
     "ethers": "5.7.2"
   }
