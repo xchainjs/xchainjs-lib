@@ -7,11 +7,21 @@ import { AssetKUJI, DEFAULT_FEE } from './const'
  *
  * @returns {Record<Network, string>} URLs for different networks.
  */
-export const getDefaultClientUrls = (): Record<Network, string> => {
+export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
-    [Network.Testnet]: 'https://kujira-testnet-rpc.polkachu.com/',
-    [Network.Stagenet]: 'https://rpc.cosmos.directory/kujira/',
-    [Network.Mainnet]: 'https://rpc.cosmos.directory/kujira/',
+    [Network.Testnet]: ['https://kujira-testnet-rpc.polkachu.com'],
+    [Network.Stagenet]: [
+      'https://rpc.cosmos.directory/kujira',
+      'https://kujira-rpc.polkachu.com',
+      'https://kujira.rpc.ghostinnet.com',
+      'https://kujira-rpc.ibs.team',
+    ],
+    [Network.Mainnet]: [
+      'https://rpc.cosmos.directory/kujira',
+      'https://kujira-rpc.polkachu.com',
+      'https://kujira.rpc.ghostinnet.com',
+      'https://kujira-rpc.ibs.team',
+    ],
   }
 }
 

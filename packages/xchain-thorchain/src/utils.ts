@@ -11,11 +11,11 @@ import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL, RUNE_DENOM } from '
 /**
  * Function to retrieve default client URLs based on network configuration.
  */
-export const getDefaultClientUrls = (): Record<Network, string> => {
+export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
-    [Network.Testnet]: 'deprecated',
-    [Network.Stagenet]: 'https://stagenet-rpc.ninerealms.com',
-    [Network.Mainnet]: 'https://rpc-v1.ninerealms.com',
+    [Network.Testnet]: ['deprecated'],
+    [Network.Stagenet]: ['https://stagenet-rpc.ninerealms.com'],
+    [Network.Mainnet]: ['https://rpc-v1.ninerealms.com'],
   }
 }
 /**
