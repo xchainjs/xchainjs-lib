@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.1
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- 54ba9c2: Multiple URL clients support
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+  - @xchainjs/xchain-cosmos-sdk@0.2.8
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-crypto@0.3.3
+  - @xchainjs/xchain-util@0.13.5
+
 ## 1.1.0
 
 ### Minor Changes

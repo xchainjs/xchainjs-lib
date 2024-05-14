@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-avax",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Avax EVM client for XChainJS",
   "keywords": [
     "XChain",
@@ -34,10 +34,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-evm": "*",
-    "@xchainjs/xchain-evm-providers": "*",
-    "@xchainjs/xchain-util": "*",
+    "@ledgerhq/hw-transport": "6.30.6",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-evm": "workspace:*",
+    "@xchainjs/xchain-evm-providers": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "ethers": "5.7.2"
+  },
+  "devDependencies": {
+    "@ledgerhq/hw-transport-node-hid": "6.28.6"
   }
 }

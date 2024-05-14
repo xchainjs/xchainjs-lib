@@ -2,7 +2,7 @@ import { OfflineAminoSigner } from '@cosmjs/amino'
 import { fromBase64 } from '@cosmjs/encoding'
 import { LedgerSigner } from '@cosmjs/ledger-amino'
 import { DecodedTxRaw, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
-import { SigningStargateClient } from '@cosmjs/stargate'
+import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
 import CosmosApp from '@ledgerhq/hw-app-cosmos'
 import type Transport from '@ledgerhq/hw-transport'
 import { TxHash, TxParams } from '@xchainjs/xchain-client'
@@ -60,20 +60,45 @@ export class ClientLedger extends Client {
 
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
 
-    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], ledgerSigner, {
-      registry: this.registry,
-    })
+    const tx = await this.roundRobinSignAndBroadcast(fromAddress, unsignedTx, ledgerSigner)
 
-    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-      return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-    })
-
-    const tx = await signingClient.signAndBroadcast(
-      fromAddress,
-      messages,
-      this.getStandardFee(this.getAssetInfo().asset),
-      unsignedTx.body.memo,
-    )
     return tx.transactionHash
+  }
+
+  /**
+   * Sign a transaction making a round robin over the clients urls provided to the client
+   *
+   * @param {string} sender Sender address
+   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
+   * @param {OfflineAminoSigner} signer Signer
+   * @returns {DeliverTxResponse} The transaction broadcasted
+   */
+  private async roundRobinSignAndBroadcast(
+    sender: string,
+    unsignedTx: DecodedTxRaw,
+    signer: OfflineAminoSigner,
+  ): Promise<DeliverTxResponse> {
+    for (const url of this.clientUrls[this.network]) {
+      try {
+        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+          registry: this.registry,
+        })
+
+        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+        })
+
+        const tx = await signingClient.signAndBroadcast(
+          sender,
+          messages,
+          this.getStandardFee(this.getAssetInfo().asset),
+          unsignedTx.body.memo,
+        )
+
+        return tx
+      } catch {}
+    }
+
+    throw Error('No clients available. Can not sign and broadcast transaction')
   }
 }

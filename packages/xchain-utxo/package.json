@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-utxo",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Genereic UTXO client for XChainJS",
   "keywords": [
     "XChain",
@@ -32,8 +32,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-utxo-providers": "*"
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-utxo-providers": "workspace:*"
   }
 }

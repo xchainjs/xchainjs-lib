@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+
 ## 0.1.2
 
 ### Patch Changes

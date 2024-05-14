@@ -14,11 +14,11 @@ const TESTNET_EXPLORER_URL = 'https://explorer.theta-testnet.polypore.xyz'
  *
  * @returns {Record<Network, string>} Default RPC client URLs for different networks.
  */
-export const getDefaultClientUrls = (): Record<Network, string> => {
+export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
-    [Network.Testnet]: 'https://rpc.sentry-02.theta-testnet.polypore.xyz',
-    [Network.Stagenet]: 'https://rpc.cosmos.directory/cosmoshub',
-    [Network.Mainnet]: 'https://rpc.cosmos.directory/cosmoshub',
+    [Network.Testnet]: ['https://rpc.sentry-02.theta-testnet.polypore.xyz'],
+    [Network.Stagenet]: ['https://rpc.cosmos.directory/cosmoshub'],
+    [Network.Mainnet]: ['https://rpc.cosmos.directory/cosmoshub'],
   }
 }
 

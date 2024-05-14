@@ -1,5 +1,29 @@
 # xchainjs-wallet
 
+## 1.0.6
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [dd3b45d]
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+  - @xchainjs/xchain-mayachain@1.0.5
+  - @xchainjs/xchain-bitcoin@0.23.16
+  - @xchainjs/xchain-dash@0.3.3
+  - @xchainjs/xchain-mayamidgard-query@0.1.11
+  - @xchainjs/xchain-mayamidgard@0.1.3
+  - @xchainjs/xchain-thorchain@1.0.8
+  - @xchainjs/xchain-ethereum@0.32.2
+  - @xchainjs/xchain-mayanode@0.1.5
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-cosmos@1.1.1
+  - @xchainjs/xchain-crypto@0.3.3
+  - @xchainjs/xchain-kujira@0.1.16
+  - @xchainjs/xchain-wallet@0.1.12
+  - @xchainjs/xchain-util@0.13.5
+
 ## 1.0.5
 
 ### Patch Changes

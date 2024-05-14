@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-arbitrum",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Arbitrum EVM client for XChainJS",
   "keywords": [
     "XChain",
@@ -34,10 +34,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-evm": "*",
-    "@xchainjs/xchain-evm-providers": "*",
-    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-evm": "workspace:*",
+    "@xchainjs/xchain-evm-providers": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "ethers": "5.7.2"
   }
 }

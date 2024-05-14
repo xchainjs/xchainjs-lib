@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.13
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-mayamidgard-query@0.1.11
+  - @xchainjs/xchain-mayamidgard@0.1.3
+  - @xchainjs/xchain-mayanode@0.1.5
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.1.12
 
 ### Patch Changes

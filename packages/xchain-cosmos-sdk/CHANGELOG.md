@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.8
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- 54ba9c2: Multiple URL clients support
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-crypto@0.3.3
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.2.7
 
 ### Patch Changes

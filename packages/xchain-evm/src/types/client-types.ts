@@ -1,14 +1,5 @@
-import { Provider } from '@ethersproject/abstract-provider'
-import {
-  EvmOnlineDataProviders,
-  ExplorerProviders,
-  FeeOption,
-  Fees,
-  Network,
-  TxParams as BaseTxParams,
-  XChainClientParams,
-} from '@xchainjs/xchain-client'
-import { Address, Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
+import { FeeOption, Fees, Network, TxParams as BaseTxParams } from '@xchainjs/xchain-client'
+import { Address, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, ethers } from 'ethers'
 
 export type ClientUrl = Record<Network, string>
@@ -68,18 +59,6 @@ export type EvmDefaults = {
   transferTokenGasLimit: BigNumber
   approveGasLimit: BigNumber
   gasPrice: BigNumber // BaseAmount Unit
-}
-/**
- * Parameters for configuring the EVM client.
- */
-export type EVMClientParams = XChainClientParams & {
-  chain: Chain
-  gasAsset: Asset
-  gasAssetDecimals: number
-  defaults: Record<Network, EvmDefaults>
-  providers: Record<Network, Provider>
-  explorerProviders: ExplorerProviders
-  dataProviders: EvmOnlineDataProviders[]
 }
 
 export type TxParams = BaseTxParams & {

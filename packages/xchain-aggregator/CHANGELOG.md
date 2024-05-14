@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.14
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [dd3b45d]
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+  - @xchainjs/xchain-mayachain@1.0.5
+  - @xchainjs/xchain-mayachain-amm@2.0.3
+  - @xchainjs/xchain-thorchain-amm@1.1.8
+  - @xchainjs/xchain-mayachain-query@0.1.13
+  - @xchainjs/xchain-thorchain-query@0.7.11
+  - @xchainjs/xchain-thorchain@1.0.8
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-wallet@0.1.12
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.1.13
 
 ### Patch Changes

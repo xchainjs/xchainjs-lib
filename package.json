@@ -2,16 +2,21 @@
   "name": "root",
   "private": true,
   "description": "XChainJS Chain Clients MonoRepo",
+  "packageManager": "yarn@4.2.2",
+  "engines": {
+    "yarn": ">=1.4.0"
+  },
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "tools/*"
   ],
   "scripts": {
     "clean": "turbo run clean && rm -rf ./.turbo",
     "clean:nodemodules": "rm -rf ./packages/*/node_modules && rm -rf ./node_modules",
-    "build": "turbo run build --cache-dir=.turbo",
-    "build:examples": "tsc examples/**/*.ts --noEmit --skipLibCheck",
-    "build:tools": "tsc tools/**/*.ts --noEmit --skipLibCheck",
+    "build": "turbo run build --cache-dir=.turbo --filter='./packages/*'",
+    "build:examples": "turbo run build --cache-dir=.turbo --filter='./examples/*'",
+    "build:tools": "turbo run build --cache-dir=.turbo --filter='./tools/*'",
     "test": "turbo run test --cache-dir=.turbo",
     "pub": "turbo publish",
     "e2e": "turbo run e2e",
@@ -34,6 +39,8 @@
   "devDependencies": {
     "@actions/core": "1.10.0",
     "@changesets/cli": "2.27.1",
+    "@ledgerhq/types-cryptoassets": "7.11.0",
+    "@ledgerhq/types-devices": "6.24.0",
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
