@@ -34,6 +34,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@ledgerhq/hw-transport": "6.30.6",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
