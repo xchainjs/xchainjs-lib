@@ -18,7 +18,7 @@ import {
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, BaseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, assetFromString, eqAsset } from '@xchainjs/xchain-util'
 import { encode, toWords } from 'bech32'
 import BigNumber from 'bignumber.js'
 import { fromSeed } from 'bip32'
@@ -214,7 +214,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   public assetFromDenom(denom: string): Asset | null {
     if (denom === CACAO_DENOM) return AssetCacao
     if (denom === MAYA_DENOM) return AssetMaya
-    return null
+    return assetFromString(denom.toUpperCase())
   }
 
   /**

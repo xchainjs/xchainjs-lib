@@ -103,7 +103,7 @@ describe('Mayachain client', () => {
     })
     it('Should get asset for denom', () => {
       expect(client.assetFromDenom('cacao')).toEqual(AssetCacao)
-      expect(client.assetFromDenom('bnb/bnb')).toEqual(null)
+      expect(client.assetFromDenom('bnb/bnb')).toEqual({ chain: 'BNB', symbol: 'BNB', synth: true, ticker: 'BNB' })
     })
     it('should get asset decimals', async () => {
       expect(client.getAssetDecimals(AssetCacao)).toBe(10)
