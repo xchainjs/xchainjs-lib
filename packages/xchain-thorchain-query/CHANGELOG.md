@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.12
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-midgard-query@0.1.17
+  - @xchainjs/xchain-thornode@0.3.15
+  - @xchainjs/xchain-util@0.13.6
+
 ## 0.7.11
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-wallet",
   "description": "XChainjs clients wrapper to work with several chains at the same time",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",

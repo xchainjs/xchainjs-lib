@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+
+### Patch Changes
+
+- 15181f4: Release fix
+
 ## 0.1.5
 
 ### Patch Changes

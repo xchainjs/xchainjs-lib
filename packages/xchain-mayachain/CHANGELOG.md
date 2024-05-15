@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-cosmos-sdk@0.2.9
+  - @xchainjs/xchain-util@0.13.6
+
 ## 1.0.5
 
 ### Patch Changes

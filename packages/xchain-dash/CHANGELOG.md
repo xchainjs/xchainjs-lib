@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.4
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-crypto@0.3.4
+  - @xchainjs/xchain-util@0.13.6
+  - @xchainjs/xchain-utxo@0.1.8
+  - @xchainjs/xchain-utxo-providers@0.2.16
+
 ## 0.3.3
 
 ### Patch Changes
