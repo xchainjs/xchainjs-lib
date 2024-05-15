@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.13
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-midgard-query@0.1.18
+
 ## 0.7.12
 
 ### Patch Changes

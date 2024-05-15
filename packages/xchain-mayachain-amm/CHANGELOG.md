@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.5
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-bitcoin@0.23.18
+  - @xchainjs/xchain-dash@0.3.5
+  - @xchainjs/xchain-ethereum@0.32.4
+  - @xchainjs/xchain-kujira@0.1.18
+  - @xchainjs/xchain-mayachain@1.0.7
+  - @xchainjs/xchain-mayachain-query@0.1.15
+  - @xchainjs/xchain-thorchain@1.0.10
+  - @xchainjs/xchain-wallet@0.1.14
+
 ## 2.0.4
 
 ### Patch Changes
