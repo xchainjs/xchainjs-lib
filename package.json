@@ -23,7 +23,7 @@
     "lint": "turbo run lint",
     "update-packages": "yarn changeset",
     "increase-packages": "yarn changeset version",
-    "publish-packages": "turbo run build test --cache-dir=.turbo && yarn increase-packages && yarn changeset publish",
+    "publish-packages": "turbo run build test --cache-dir=.turbo && yarn increase-packages && yarn npm publish",
     "notification:prepare": "ts-node scripts/notification.ts"
   },
   "husky": {
