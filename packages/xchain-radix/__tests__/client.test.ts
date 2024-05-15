@@ -8,6 +8,7 @@ import {
 import { Convert, Instruction, RadixEngineToolkit } from '@radixdlt/radix-engine-toolkit'
 import { Balance, Fees, Network, Tx, TxParams, XChainClientParams } from '@xchainjs/xchain-client/src'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
+
 import {
   mockCommittedDetailsResponse,
   mockStreamTransactionsResponse,
@@ -390,6 +391,16 @@ describe('RadixClient Test', () => {
     }
   })
 
+  const getTransactionStatus = async (
+    transactionApi: TransactionApi,
+    transactionId: string,
+  ): Promise<TransactionStatusResponse> =>
+    transactionApi.transactionStatus({
+      transactionStatusRequest: {
+        intent_hash: transactionId,
+      },
+    })
+
   it('client should be able transfer without mock', async () => {
     const client = createClient()
     const txParams: TxParams = {
@@ -412,14 +423,4 @@ describe('RadixClient Test', () => {
     const transactionStatus = await getTransactionStatus(transactionApi, transactionId)
     expect(transactionStatus.status).toBe(TransactionStatus.CommittedSuccess)
   })
-
-  const getTransactionStatus = async (
-    transactionApi: TransactionApi,
-    transactionId: string,
-  ): Promise<TransactionStatusResponse> =>
-    transactionApi.transactionStatus({
-      transactionStatusRequest: {
-        intent_hash: transactionId,
-      },
-    })
 })

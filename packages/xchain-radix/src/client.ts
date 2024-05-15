@@ -612,16 +612,6 @@ export default class Client extends BaseXChainClient {
   }
 
   /**
-   * Helper method to check if a resource is included in a list of assets
-   * @param resource - The resource to be checked
-   * @param assets - The list of assets whret the resource is included
-   * @returns True if the resource is included in the assets list, False otherwise
-   */
-  filterByAssets(resource: any, assets: Asset[]): boolean {
-    return assets.length === 0 || assets.some((asset) => asset.symbol === resource.resource_address)
-  }
-
-  /**
    * Retrieves the balances of a given address.
    * @param {Address} address - The address to retrieve the balance for.
    * @param {Asset[]} assets - Assets to retrieve the balance for (optional).

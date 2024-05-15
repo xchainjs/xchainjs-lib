@@ -1,26 +1,3 @@
-import { FungibleResourcesCollection, NonFungibleResourcesCollection } from '@radixdlt/babylon-gateway-api-sdk'
-
-type LedgerState = {
-  network: string
-  state_version: number
-  proposer_round_timestamp: string
-  epoch: number
-  round: number
-}
-
-type EntityDetails = {
-  address: string
-  fungible_resources: FungibleResourcesCollection
-  non_fungible_resources: NonFungibleResourcesCollection
-  metadata: any
-  details: any
-}
-
-export type EntityDetailsResponse = {
-  ledger_state: LedgerState
-  items: EntityDetails[]
-}
-
 export type Transaction = {
   manifest: string
   start_epoch_inclusive: number
