@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.15
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-mayachain@1.0.6
+  - @xchainjs/xchain-mayachain-amm@2.0.4
+  - @xchainjs/xchain-mayachain-query@0.1.14
+  - @xchainjs/xchain-thorchain@1.0.9
+  - @xchainjs/xchain-thorchain-amm@1.1.9
+  - @xchainjs/xchain-thorchain-query@0.7.12
+  - @xchainjs/xchain-util@0.13.6
+  - @xchainjs/xchain-wallet@0.1.13
+
 ## 0.1.14
 
 ### Patch Changes

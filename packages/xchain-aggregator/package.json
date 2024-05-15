@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-aggregator",
   "description": "Protocol aggregator to make actions in different protocols",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
