@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.16.7
+
+### Patch Changes
+
+- 8d000a2: Package.json publish config
+
 ## 0.16.6
 
 ### Patch Changes

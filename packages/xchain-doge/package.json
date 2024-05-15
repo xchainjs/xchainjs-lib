@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-doge",
-  "version": "0.7.18",
+  "version": "0.7.19",
   "description": "Custom Doge client and utilities used by XChain clients",
   "keywords": [
     "Xchain",
