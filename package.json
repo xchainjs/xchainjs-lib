@@ -15,6 +15,7 @@
     "clean": "turbo run clean && rm -rf ./.turbo",
     "clean:nodemodules": "rm -rf ./packages/*/node_modules && rm -rf ./node_modules",
     "build": "turbo run build --cache-dir=.turbo --filter='./packages/*'",
+    "build:release": "turbo run build:release --cache-dir=.turbo --filter='./packages/*'",
     "build:examples": "turbo run build --cache-dir=.turbo --filter='./examples/*'",
     "build:tools": "turbo run build --cache-dir=.turbo --filter='./tools/*'",
     "test": "turbo run test --cache-dir=.turbo",
@@ -23,7 +24,7 @@
     "lint": "turbo run lint",
     "update-packages": "yarn changeset",
     "increase-packages": "yarn changeset version",
-    "publish-packages": "turbo run build test --cache-dir=.turbo && yarn increase-packages && yarn npm publish",
+    "publish-packages": "turbo run build:release test --cache-dir=.turbo && yarn increase-packages && yarn changeset publish",
     "notification:prepare": "ts-node scripts/notification.ts"
   },
   "husky": {
