@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-wallet",
   "description": "XChainjs clients wrapper to work with several chains at the same time",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -19,12 +19,14 @@
   },
   "scripts": {
     "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "clean": "rm -rf .turbo && rm -rf lib",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "release/package"
   },
   "dependencies": {
     "@xchainjs/xchain-client": "workspace:*",

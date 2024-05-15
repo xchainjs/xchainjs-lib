@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.11
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-util@0.13.6
+
 ## 0.1.10
 
 ### Patch Changes

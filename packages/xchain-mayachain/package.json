@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Custom Mayachain client and utilities used by XChainJS clients",
   "keywords": [
     "MAYAChain",
@@ -26,6 +26,7 @@
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
@@ -49,6 +50,7 @@
     "secp256k1": "^5.0.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "release/package"
   }
 }

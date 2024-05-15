@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.13
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-evm@0.6.1
+  - @xchainjs/xchain-mayachain@1.0.6
+  - @xchainjs/xchain-thorchain@1.0.9
+  - @xchainjs/xchain-util@0.13.6
+  - @xchainjs/xchain-utxo@0.1.8
+
 ## 0.1.12
 
 ### Patch Changes
