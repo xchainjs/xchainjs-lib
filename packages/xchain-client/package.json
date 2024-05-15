@@ -14,6 +14,7 @@
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "compile": "tsc -p tsconfig.build.json",
     "test": "jest --passWithNoTests"
   },
