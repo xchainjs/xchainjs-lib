@@ -17,7 +17,7 @@ import {
   stateEntityNonFungiblesPageResponse,
 } from '../__mocks__/mocks'
 import Client from '../src/client'
-import { XrdAssetStokenet } from '../src/const'
+import { XrdAssetStokenet, feesEstimationPublicKeys } from '../src/const'
 
 describe('RadixClient Test', () => {
   const createClient = (): Client => {
@@ -406,7 +406,7 @@ describe('RadixClient Test', () => {
     const txParams: TxParams = {
       asset: XrdAssetStokenet,
       amount: baseAmount(0.01),
-      recipient: 'account_tdx_2_129wjagjzxltd0clr3q4z7hqpw5cc7weh9trs4e9k3zfwqpj636e5zf',
+      recipient: feesEstimationPublicKeys[2].to,
       memo: 'test',
     }
     const transactionId = await client.transfer(txParams)
