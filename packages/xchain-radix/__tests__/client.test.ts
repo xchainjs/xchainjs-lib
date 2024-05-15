@@ -411,7 +411,7 @@ describe('RadixClient Test', () => {
     }
     const transactionId = await client.transfer(txParams)
 
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    await new Promise((resolve) => setTimeout(resolve, 5000))
     const NetworkConfiguration = {
       gatewayBaseUrl: 'https://stokenet.radixdlt.com',
       networkId: 0x02,
