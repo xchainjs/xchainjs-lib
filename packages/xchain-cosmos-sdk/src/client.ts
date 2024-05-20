@@ -406,6 +406,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       try {
         const tx = await client.getTx(txId)
         if (!tx) throw Error(`Can not find transaction ${txId}`)
+        return tx
       } catch {}
     }
 
