@@ -14,6 +14,12 @@ Radix module for XChainJS clients
 yarn add @xchainjs/xchain-radix
 ```
 
+## Fund an account in testnet
+
+```
+yarn fund account_address
+```
+
 ## Examples
 
 ### Creating a radix client
