@@ -1,5 +1,15 @@
 # txJammer
 
+## 1.0.6
+
+### Patch Changes
+
+- @xchainjs/xchain-avax@0.5.5
+- @xchainjs/xchain-bsc@0.5.5
+- @xchainjs/xchain-ethereum@0.32.5
+- @xchainjs/xchain-thorchain-amm@1.1.11
+- @xchainjs/xchain-wallet@0.1.15
+
 ## 1.0.5
 
 ### Patch Changes

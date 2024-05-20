@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.32.5
+
+### Patch Changes
+
+- Updated dependencies [540326d]
+  - @xchainjs/xchain-evm@0.6.3
+
 ## 0.32.4
 
 ### Patch Changes
