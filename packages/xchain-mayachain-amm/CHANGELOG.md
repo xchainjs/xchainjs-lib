@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.0.4
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-bitcoin@0.23.17
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-dash@0.3.4
+  - @xchainjs/xchain-ethereum@0.32.3
+  - @xchainjs/xchain-kujira@0.1.17
+  - @xchainjs/xchain-mayachain@1.0.6
+  - @xchainjs/xchain-mayachain-query@0.1.14
+  - @xchainjs/xchain-thorchain@1.0.9
+  - @xchainjs/xchain-wallet@0.1.13
+
 ## 2.0.3
 
 ### Patch Changes

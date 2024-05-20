@@ -17,6 +17,8 @@ packages/xchain-client/yarn-error.log
 packages/*/lib
 packages/*/yarn.lock
 
+packages/*/release/package
+
 .env
 *.txt
 !LICENSE.txt

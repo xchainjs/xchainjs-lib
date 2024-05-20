@@ -10,6 +10,14 @@
         "lib/**"
       ]
     },
+    "build:release": {
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [
+        "release/package/**"
+      ]
+    },
     "test": {
       "dependsOn": [
         "build"
