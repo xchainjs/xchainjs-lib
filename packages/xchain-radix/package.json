@@ -27,9 +27,11 @@
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
-    "test": "jest __tests__/client.test.ts",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
+    "test": "jest",
     "compile": "tsc -p tsconfig.build.json",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "fund": "ts-node src/utils.ts"
   },
   "devDependencies": {
     "@xchainjs/xchain-client": "^0.16.2",
