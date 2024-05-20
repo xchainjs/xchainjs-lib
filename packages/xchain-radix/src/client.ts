@@ -53,7 +53,7 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { getSeed } from '@xchainjs/xchain-crypto/lib'
+import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, Asset, baseAmount } from '@xchainjs/xchain-util'
 import { bech32m } from 'bech32'
 import BIP32Factory, { BIP32Interface } from 'bip32'

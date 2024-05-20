@@ -3747,11 +3747,6 @@ __metadata:
     bech32: "npm:^2.0.0"
     bip32: "npm:^4.0.0"
     ed25519-hd-key: "npm:^1.3.0"
-    rollup-plugin-peer-deps-external: "npm:^2.2.4"
-  peerDependencies:
-    "@xchainjs/xchain-client": ^0.16.2
-    "@xchainjs/xchain-crypto": ^0.3.1
-    "@xchainjs/xchain-util": ^0.13.3
   languageName: unknown
   linkType: soft
 
@@ -10430,15 +10425,6 @@ __metadata:
   bin:
     rlp: bin/rlp
   checksum: 10c0/166c449f4bc794d47f8e337bf0ffbcfdb26c33109030aac4b6e5a33a91fa85783f2290addeb7b3c89d6d9b90c8276e719494d193129bed0a60a2d4a6fd658277
-  languageName: node
-  linkType: hard
-
-"rollup-plugin-peer-deps-external@npm:^2.2.4":
-  version: 2.2.4
-  resolution: "rollup-plugin-peer-deps-external@npm:2.2.4"
-  peerDependencies:
-    rollup: "*"
-  checksum: 10c0/86c969e38165363d1831997cb765a351bbc03b76c68496aa3c5714e4545f3335489da92d069c6b7785cbf9b1df6d1d7e16c5ccfa31aad4f9f00dd4f9c6f2258b
   languageName: node
   linkType: hard
 

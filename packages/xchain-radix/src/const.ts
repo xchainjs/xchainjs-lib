@@ -1,6 +1,6 @@
 import { NetworkId } from '@radixdlt/radix-engine-toolkit'
-import { Network, RootDerivationPaths } from '@xchainjs/xchain-client/lib'
-import { Asset } from '@xchainjs/xchain-util/lib'
+import { Network, RootDerivationPaths } from '@xchainjs/xchain-client'
+import { Asset } from '@xchainjs/xchain-util'
 
 /**
  * Chain identifier for Radix.

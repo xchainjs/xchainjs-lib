@@ -1,4 +1,4 @@
-# `@xchainjs/xchain-client`
+# `@xchainjs/xchain-radix`
 
 Radix module for XChainJS clients
 
