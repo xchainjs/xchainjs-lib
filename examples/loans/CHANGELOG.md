@@ -1,5 +1,12 @@
 # xchainjs-loans
 
+## 1.0.13
+
+### Patch Changes
+
+- @xchainjs/xchain-cosmos@1.1.4
+- @xchainjs/xchain-thorchain-amm@1.1.12
+
 ## 1.0.12
 
 ### Patch Changes

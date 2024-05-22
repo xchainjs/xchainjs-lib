@@ -1,5 +1,14 @@
 # txJammer
 
+## 1.0.7
+
+### Patch Changes
+
+- @xchainjs/xchain-cosmos@1.1.4
+- @xchainjs/xchain-thorchain@1.0.11
+- @xchainjs/xchain-thorchain-amm@1.1.12
+- @xchainjs/xchain-wallet@0.1.16
+
 ## 1.0.6
 
 ### Patch Changes

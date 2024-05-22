@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.11
+
+### Patch Changes
+
+- 1a8f57d: Get transaction data bug fix
+
 ## 0.2.10
 
 ### Patch Changes

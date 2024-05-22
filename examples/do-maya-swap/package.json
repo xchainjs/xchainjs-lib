@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-maya-do-swap",
   "private": true,
-  "version": "1.0.10",
+  "version": "1.0.11",
   "scripts": {
     "doSwap": "npx ts-node do-maya-swap.ts",
     "build": "tsc --noEmit"
