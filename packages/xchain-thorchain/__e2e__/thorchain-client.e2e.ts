@@ -1,7 +1,7 @@
 import { Tx } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { AssetRuneNative as AssetRune, Client, DepositTx } from '../lib'
+import { AssetRuneNative as AssetRune, Client, DepositTx } from '../src'
 
 const getPrintableTx = (tx: Tx) => {
   return {

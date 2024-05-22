@@ -1980,7 +1980,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/devices@npm:^8.3.0":
+"@ledgerhq/devices@npm:^8.2.0, @ledgerhq/devices@npm:^8.3.0":
   version: 8.3.0
   resolution: "@ledgerhq/devices@npm:8.3.0"
   dependencies:
@@ -2021,7 +2021,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/errors@npm:^6.16.4":
+"@ledgerhq/errors@npm:^6.16.1, @ledgerhq/errors@npm:^6.16.4":
   version: 6.16.4
   resolution: "@ledgerhq/errors@npm:6.16.4"
   checksum: 10c0/6c0f31ac188486063f33ef3ae2e8b7cf5bdd73616ea4715caab3e3a7b722b3b230742c5dd6227b080f70f28598df6833b6c62f38a8a238035e4d48f2073c3636
@@ -2116,7 +2116,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport-node-hid-noevents@npm:^6.29.6":
+"@ledgerhq/hw-transport-node-hid-noevents@npm:^6.29.1, @ledgerhq/hw-transport-node-hid-noevents@npm:^6.29.6":
   version: 6.29.6
   resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:6.29.6"
   dependencies:
@@ -2126,6 +2126,22 @@ __metadata:
     "@ledgerhq/logs": "npm:^6.12.0"
     node-hid: "npm:^2.1.2"
   checksum: 10c0/d75f2b0d5bfd497c30c15645b66011e8a56cd8cc132db2f7834ac4f1092b8b37571e4f4b8999c8d4e02d63d28d1a38c130daada3befee3cb74da3840d763d22b
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-node-hid@npm:6.28.1":
+  version: 6.28.1
+  resolution: "@ledgerhq/hw-transport-node-hid@npm:6.28.1"
+  dependencies:
+    "@ledgerhq/devices": "npm:^8.2.0"
+    "@ledgerhq/errors": "npm:^6.16.1"
+    "@ledgerhq/hw-transport": "npm:^6.30.1"
+    "@ledgerhq/hw-transport-node-hid-noevents": "npm:^6.29.1"
+    "@ledgerhq/logs": "npm:^6.12.0"
+    lodash: "npm:^4.17.21"
+    node-hid: "npm:^2.1.2"
+    usb: "npm:2.9.0"
+  checksum: 10c0/019658077369b8cd580ea3f7e24c4a26bd294319f963f47b60d8a097c7ab3862d09863b5c0adada1d3011e1b4add4743d09f62d3be474e07305136450f422084
   languageName: node
   linkType: hard
 
@@ -2186,7 +2202,43 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport@npm:6.30.6, @ledgerhq/hw-transport@npm:^6.30.6":
+"@ledgerhq/hw-transport-webhid@npm:6.28.1":
+  version: 6.28.1
+  resolution: "@ledgerhq/hw-transport-webhid@npm:6.28.1"
+  dependencies:
+    "@ledgerhq/devices": "npm:^8.2.0"
+    "@ledgerhq/errors": "npm:^6.16.1"
+    "@ledgerhq/hw-transport": "npm:^6.30.1"
+    "@ledgerhq/logs": "npm:^6.12.0"
+  checksum: 10c0/e272144aca7c7e01593ddf79e3c5e9ffd7a365a82c225916c1216b82ff650d108e770386725edefac14e7b8c4f80f0d6d9601f0847c02f674747806c30614530
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-webusb@npm:6.28.1":
+  version: 6.28.1
+  resolution: "@ledgerhq/hw-transport-webusb@npm:6.28.1"
+  dependencies:
+    "@ledgerhq/devices": "npm:^8.2.0"
+    "@ledgerhq/errors": "npm:^6.16.1"
+    "@ledgerhq/hw-transport": "npm:^6.30.1"
+    "@ledgerhq/logs": "npm:^6.12.0"
+  checksum: 10c0/fb3218f9d4b1542dce16ac5da441f8156a41c17bb562270305dda310cfc082c80593d4302de7e0d9bef08370024d73c67d02c90337b3908437cb83fbadfebc94
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport@npm:6.30.1":
+  version: 6.30.1
+  resolution: "@ledgerhq/hw-transport@npm:6.30.1"
+  dependencies:
+    "@ledgerhq/devices": "npm:^8.2.0"
+    "@ledgerhq/errors": "npm:^6.16.1"
+    "@ledgerhq/logs": "npm:^6.12.0"
+    events: "npm:^3.3.0"
+  checksum: 10c0/ef53219330296f81f84fc116debd27218ee97da4477aa68a58a1baae9f1d5e0fa220d293a40c0415f60a977634efa7ebe6c8bce84ff817a898b0aa6a7719a8f1
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport@npm:6.30.6, @ledgerhq/hw-transport@npm:^6.30.1, @ledgerhq/hw-transport@npm:^6.30.6":
   version: 6.30.6
   resolution: "@ledgerhq/hw-transport@npm:6.30.6"
   dependencies:
@@ -3263,6 +3315,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xchainjs/ledger-thorchain@npm:0.2.0":
+  version: 0.2.0
+  resolution: "@xchainjs/ledger-thorchain@npm:0.2.0"
+  dependencies:
+    "@ledgerhq/hw-transport": "npm:6.30.1"
+    "@ledgerhq/hw-transport-node-hid": "npm:6.28.1"
+    "@ledgerhq/hw-transport-webhid": "npm:6.28.1"
+    "@ledgerhq/hw-transport-webusb": "npm:6.28.1"
+    bech32: "npm:^2.0.0"
+    crypto-browserify: "npm:^3.12.0"
+    ripemd160: "npm:^2.0.2"
+    stream-browserify: "npm:^3.0.0"
+  checksum: 10c0/eeaba8baa54b8119e435f05d1b07c7b28dd1fef1ee79f83f7cdd63c5437c8d8f76595dd09f0aec4f6049cbba04d1ff237d3270bc66774328d2a8a8f591316956
+  languageName: node
+  linkType: hard
+
 "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
@@ -3728,6 +3796,8 @@ __metadata:
     "@cosmjs/crypto": "npm:0.31.1"
     "@cosmjs/encoding": "npm:0.31.1"
     "@cosmjs/proto-signing": "npm:0.31.1"
+    "@ledgerhq/hw-transport": "npm:6.30.6"
+    "@xchainjs/ledger-thorchain": "npm:0.2.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"

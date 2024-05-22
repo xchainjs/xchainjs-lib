@@ -1,10 +1,10 @@
 /**
  * Import necessary modules and types for client URL configuration and utility functions.
  */
+import { Uint53 } from '@cosmjs/math'
 import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, assetToString, isSynthAsset } from '@xchainjs/xchain-util'
-import axios from 'axios' // Import axios for making HTTP requests
-
+import { Address, Asset, assetToString, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
+import axios from 'axios'
 //Import necessary constants for default client URLs
 import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL, RUNE_DENOM } from './const'
 
@@ -101,4 +101,45 @@ export const getPrefix = (network: Network): string => {
     case Network.Testnet:
       return 'tthor'
   }
+}
+
+export const parseDerivationPath = (path: string): number[] => {
+  if (!path.startsWith('m')) throw new Error("Path string must start with 'm'")
+  let rest = path.slice(1)
+
+  const out = new Array<number>()
+  while (rest) {
+    const match = rest.match(/^\/([0-9]+)('?)/)
+    if (!match) throw new Error('Syntax error while reading path component')
+    const [fullMatch, numberString] = match
+    const value = Uint53.fromString(numberString).toNumber()
+    if (value >= 2 ** 31) throw new Error('Component value too high. Must not exceed 2**31-1.')
+    out.push(value)
+    rest = rest.slice(fullMatch.length)
+  }
+  return out
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function sortedObject(obj: any): any {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(sortedObject)
+  }
+  const sortedKeys = Object.keys(obj).sort()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result: Record<string, any> = {}
+  // NOTE: Use forEach instead of reduce for performance with large objects eg Wasm code
+  sortedKeys.forEach((key) => {
+    result[key] = sortedObject(obj[key])
+  })
+  return result
+}
+
+/** Returns a JSON string with objects sorted by key */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
+export function sortAndStringifyJson(obj: any): string {
+  return JSON.stringify(sortedObject(obj))
 }

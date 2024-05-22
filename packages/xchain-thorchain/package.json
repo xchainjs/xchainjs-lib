@@ -38,6 +38,8 @@
     "@cosmjs/crypto": "0.31.1",
     "@cosmjs/encoding": "0.31.1",
     "@cosmjs/proto-signing": "0.31.1",
+    "@ledgerhq/hw-transport": "6.30.6",
+    "@xchainjs/ledger-thorchain": "0.2.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
