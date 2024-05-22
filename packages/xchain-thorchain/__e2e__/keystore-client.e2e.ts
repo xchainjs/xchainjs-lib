@@ -1,5 +1,5 @@
 import { Tx } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
 import { AssetRuneNative as AssetRune, Client, DepositTx } from '../src'
 
@@ -48,7 +48,7 @@ const getPrintableDepositTx = (depositTx: DepositTx) => {
   }
 }
 
-describe('Thorchain client e2e', () => {
+describe('Thorchain Keystore', () => {
   let client: Client
 
   beforeAll(() => {
@@ -150,5 +150,14 @@ describe('Thorchain client e2e', () => {
       amount: assetToBase(assetAmount(1, 8)),
     })
     console.log(txRaw)
+  })
+
+  it('Should make transaction with synth asset', async () => {
+    const hash = await client.transfer({
+      recipient: await client.getAddressAsync(0),
+      amount: assetToBase(assetAmount(0.05, 8)),
+      asset: assetFromStringEx('AVAX/AVAX'),
+    })
+    console.log({ hash })
   })
 })

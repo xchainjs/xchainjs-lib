@@ -1,9 +1,9 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
-import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 import { AssetRuneNative, ClientLedger } from '../src'
 
-describe('Thorchain client e2e', () => {
+describe('Thorchain Ledger', () => {
   let client: ClientLedger
 
   beforeAll(async () => {
@@ -25,17 +25,26 @@ describe('Thorchain client e2e', () => {
   it('Should transfer offline', async () => {
     const signedTx = await client.transferOffline({
       recipient: await client.getAddressAsync(0),
-      amount: assetToBase(assetAmount(0.1, 8)),
+      amount: assetToBase(assetAmount(1, 8)),
       asset: AssetRuneNative,
     })
     console.log({ signedTx })
   })
 
-  it('Should make transaction', async () => {
+  it('Should make transaction with native asset', async () => {
     const hash = await client.transfer({
       recipient: await client.getAddressAsync(0),
-      amount: assetToBase(assetAmount(0.1, 8)),
+      amount: assetToBase(assetAmount(1, 8)),
       asset: AssetRuneNative,
+    })
+    console.log({ hash })
+  })
+
+  it('Should make transaction with synth asset', async () => {
+    const hash = await client.transfer({
+      recipient: await client.getAddressAsync(0),
+      amount: assetToBase(assetAmount(1, 8)),
+      asset: assetFromStringEx('AVAX/AVAX'),
     })
     console.log({ hash })
   })
@@ -43,7 +52,7 @@ describe('Thorchain client e2e', () => {
   it('Should make transfer to index 0', async () => {
     const hash = await client.transfer({
       recipient: await client.getAddressAsync(0),
-      amount: assetToBase(assetAmount(0.1, 8)),
+      amount: assetToBase(assetAmount(0.01, 8)),
       asset: AssetRuneNative,
     })
     console.log({ hash })
