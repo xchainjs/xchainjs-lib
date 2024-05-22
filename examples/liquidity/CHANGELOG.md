@@ -1,5 +1,11 @@
 # xchainjs-liquidity
 
+## 1.0.12
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@1.1.11
+
 ## 1.0.11
 
 ### Patch Changes

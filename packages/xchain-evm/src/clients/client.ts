@@ -801,7 +801,7 @@ export class Client extends BaseXChainClient implements EVMClient {
 
     const tx = await ethers.utils.resolveProperties(transactionRequest)
     const signedTx = await this.getSigner().signApprove({
-      sender: await this.getAddressAsync(),
+      sender,
       tx: {
         type: 1,
         chainId: tx.chainId,
