@@ -1,6 +1,14 @@
 import { fromBase64, fromBech32 } from '@cosmjs/encoding'
 import { Coin, GeneratedType, Registry } from '@cosmjs/proto-signing'
-import { Block, DeliverTxResponse, IndexedTx, StargateClient, StdFee, defaultRegistryTypes } from '@cosmjs/stargate'
+import {
+  Account,
+  Block,
+  DeliverTxResponse,
+  IndexedTx,
+  StargateClient,
+  StdFee,
+  defaultRegistryTypes,
+} from '@cosmjs/stargate'
 import {
   AssetInfo,
   Balance,
@@ -335,6 +343,16 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return txResponse.transactionHash
   }
 
+  protected async getChainId(): Promise<string> {
+    return this.roundRobinGetChainId()
+  }
+
+  protected async getAccount(address: Address): Promise<Account> {
+    const account = await this.roundRobinGetAccount(address)
+    if (!account) throw Error('Con not retrieve account. Account is null')
+    return account
+  }
+
   /**
    * Connect to each url provided
    *
@@ -446,6 +464,29 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
 
     throw Error(`No clients available. Can not search transaction`)
+  }
+
+  private async roundRobinGetAccount(address: string): Promise<Account | null> {
+    const clients = await this.stargateClients.getValue()
+
+    for (const client of clients) {
+      try {
+        return await client.getAccount(address)
+      } catch {}
+    }
+    throw Error('No clients available. Can not get address account')
+  }
+
+  private async roundRobinGetChainId(): Promise<string> {
+    const clients = await this.stargateClients.getValue()
+
+    for (const client of clients) {
+      try {
+        return await client.getChainId()
+      } catch {}
+    }
+
+    throw Error(`No clients available. Can not get chain id`)
   }
 
   public abstract prepareTx({

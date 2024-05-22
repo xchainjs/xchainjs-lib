@@ -1,7 +1,7 @@
 import { AminoMsg, StdFee } from '@cosmjs/amino'
 import { toBase64 } from '@cosmjs/encoding'
 import { encodePubkey, makeAuthInfoBytes } from '@cosmjs/proto-signing'
-import { Account, AminoTypes, StargateClient } from '@cosmjs/stargate'
+import { AminoTypes } from '@cosmjs/stargate'
 import Transport from '@ledgerhq/hw-transport'
 import THORChainApp, { extractSignatureFromTLV } from '@xchainjs/ledger-thorchain'
 import { TxParams } from '@xchainjs/xchain-client'
@@ -50,7 +50,7 @@ export class ClientLedger extends Client {
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
   }: DepositParam): Promise<string> {
     const sender = await this.getAddressAsync(walletIndex || 0)
-    const account = await this.roundRobinGetAccount(sender)
+    const account = await this.getAccount(sender)
 
     const formattedDP = parseDerivationPath(this.getFullDerivationPath(walletIndex || 0))
 
@@ -83,7 +83,7 @@ export class ClientLedger extends Client {
       formattedDP,
       sortAndStringifyJson({
         account_number: account.accountNumber.toString(),
-        chain_id: await this.roundRobinGetChainId(),
+        chain_id: await this.getChainId(),
         fee,
         memo,
         msgs,
@@ -92,8 +92,6 @@ export class ClientLedger extends Client {
     )
 
     if (!signature) throw Error(`Can not sign deposit transaction. Return code ${returnCode}. Error: ${errorMessage}`)
-
-    // const msgToBroadcast = msgs.map(prepareMessageForBroadcast)
 
     const aminoTypes = this.getProtocolAminoMessages()
 
@@ -123,7 +121,7 @@ export class ClientLedger extends Client {
 
   public async transferOffline(params: TxParams): Promise<string> {
     const sender = await this.getAddressAsync(params.walletIndex || 0)
-    const account = await this.roundRobinGetAccount(sender)
+    const account = await this.getAccount(sender)
 
     const formattedDP = parseDerivationPath(this.getFullDerivationPath(params.walletIndex || 0))
 
@@ -156,7 +154,7 @@ export class ClientLedger extends Client {
       formattedDP,
       sortAndStringifyJson({
         account_number: account.accountNumber.toString(),
-        chain_id: await this.roundRobinGetChainId(),
+        chain_id: await this.getChainId(),
         fee,
         memo: params.memo || '',
         msgs,
@@ -189,18 +187,7 @@ export class ClientLedger extends Client {
       signatures: [extractSignatureFromTLV(signature)],
     })
 
-    return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
-  }
-
-  private async roundRobinGetAccount(address: string): Promise<Account> {
-    for (const url of this.clientUrls[this.network]) {
-      try {
-        const stargateClient = await StargateClient.connect(url)
-        const account = await stargateClient.getAccount(address)
-        if (account) return account
-      } catch {}
-    }
-    throw Error('No clients available. Can not get address account')
+    return toBase64(TxRaw.encode(rawTx).finish())
   }
 
   private getProtocolAminoMessages(): AminoTypes {
