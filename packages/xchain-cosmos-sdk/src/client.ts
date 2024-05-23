@@ -343,10 +343,21 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return txResponse.transactionHash
   }
 
+  /**
+   * Get the chain id of the network connected the client is connected
+   * @returns {string} - The chain id
+   * @throws {Error} If the chain id can not be retrieved
+   */
   protected async getChainId(): Promise<string> {
     return this.roundRobinGetChainId()
   }
 
+  /**
+   * Get the account of an address
+   * @param {Address} address - The address of which return the account
+   * @returns {Account} - The address account
+   * @throws {Error} If the account can not be retrieved
+   */
   protected async getAccount(address: Address): Promise<Account> {
     const account = await this.roundRobinGetAccount(address)
     if (!account) throw Error('Con not retrieve account. Account is null')
@@ -466,7 +477,13 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     throw Error(`No clients available. Can not search transaction`)
   }
 
-  private async roundRobinGetAccount(address: string): Promise<Account | null> {
+  /**
+   * Get the account of an address making a round robin system over the stargate clients
+   * @param {Address} address - The address of which return the account
+   * @returns {Account | null} - The account if it is found
+   * @throws {Error} If the account can not be retrieved from the stargate clients
+   */
+  private async roundRobinGetAccount(address: Address): Promise<Account | null> {
     const clients = await this.stargateClients.getValue()
 
     for (const client of clients) {
@@ -477,6 +494,12 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     throw Error('No clients available. Can not get address account')
   }
 
+  /**
+   * Get the chain id of the network connected the client is connected making a round robin over
+   * the stargate clients
+   * @returns {string} - The chain id
+   * @throws {Error} If the chain id can not be retrieved from the stargate clients
+   */
   private async roundRobinGetChainId(): Promise<string> {
     const clients = await this.stargateClients.getValue()
 

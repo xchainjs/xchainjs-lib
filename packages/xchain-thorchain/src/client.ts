@@ -37,7 +37,7 @@ export interface ThorchainClient {
 export type ThorchainClientParams = Partial<CosmosSdkClientParams>
 
 /**
- * Thorchain client
+ * Thorchain base client
  */
 export abstract class Client extends CosmosSDKClient implements ThorchainClient {
   /**

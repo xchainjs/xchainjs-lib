@@ -16,6 +16,9 @@ import { AssetRuneNative, DEPOSIT_GAS_LIMIT_VALUE, defaultClientConfig } from '.
 import { DepositParam } from './types'
 import { parseDerivationPath, sortAndStringifyJson, sortedObject } from './utils'
 
+/**
+ * Thorchain Ledger client
+ */
 export class ClientLedger extends Client {
   private app: THORChainApp
 
@@ -24,6 +27,12 @@ export class ClientLedger extends Client {
     this.app = new THORChainApp(params.transport)
   }
 
+  /**
+   * Asynchronous version of getAddress method.
+   * @param {number} index Derivation path index of the address to be generated.
+   * @param {boolean} verify True to check the address against the Ledger device, otherwise false
+   * @returns {string} A promise that resolves to the generated address.
+   */
   public async getAddressAsync(index?: number, verify = false): Promise<string> {
     const derivationPath = parseDerivationPath(this.getFullDerivationPath(index || 0))
     const { bech32Address } = verify
@@ -33,15 +42,46 @@ export class ClientLedger extends Client {
     return bech32Address
   }
 
+  /**
+   * @deprecated
+   * Asynchronous version of getAddress method. Not supported for ledger client
+   * @throws {Error} Not supported method
+   */
   public getAddress(): string {
     throw Error('Sync method not supported for Ledger')
   }
 
+  /**
+   * Transfers RUNE or synth token
+   *
+   * @param {TxParams} params The transfer options.
+   * @param {number} params.walletIndex Optional - The index to use to generate the address from the transaction will be done.
+   * If it is not set, address associated with index 0 will be used
+   * @param {asset} params.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
+   * used
+   * @param {BaseAmount} params.amount The amount that will be transfer
+   * @param {string} params.recipient Recipient of the transfer
+   * @param {string} params.memo Optional - The memo associated with the transfer
+   * @returns {TxHash} The transaction hash.
+   */
   public async transfer(params: TxParams): Promise<string> {
     const signedTx = await this.transferOffline(params)
     return this.broadcastTx(signedTx)
   }
 
+  /**
+   * Make a deposit
+   *
+   * @param {number} param.walletIndex Optional - The index to use to generate the address from the transaction will be done.
+   * If it is not set, address associated with index 0 will be used
+   * @param {Asset} param.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
+   * used
+   * @param {BaseAmount} param.amount The amount that will be deposit
+   * @param {string} param.memo Optional - The memo associated with the deposit
+   * @param {BigNumber} param.gasLimit Optional - The limit amount of gas allowed to spend in the deposit. If not set, default
+   * value of 600000000 will be used
+   * @returns {string} The deposit hash
+   */
   public async deposit({
     walletIndex = 0,
     asset = AssetRuneNative,
@@ -119,6 +159,20 @@ export class ClientLedger extends Client {
     return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
   }
 
+  /**
+   * @deprecated
+   * Create a transaction and sign it without broadcasting it
+   *
+   * @param {TxParams} params The transfer options.
+   * @param {number} params.walletIndex Optional - The index to use to generate the address from the transaction will be done.
+   * If it is not set, address associated with index 0 will be used
+   * @param {asset} params.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
+   * used
+   * @param {BaseAmount} params.amount The amount that will be transfer
+   * @param {string} params.recipient Recipient of the transfer
+   * @param {string} params.memo Optional - The memo associated with the transfer
+   * @returns {TxHash} The transaction hash.
+   */
   public async transferOffline(params: TxParams): Promise<string> {
     const sender = await this.getAddressAsync(params.walletIndex || 0)
     const account = await this.getAccount(sender)

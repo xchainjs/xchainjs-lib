@@ -18,7 +18,7 @@ import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { createHash } from 'crypto'
 import { publicKeyCreate } from 'secp256k1'
 
-import { Client as BaseClient } from './client'
+import { Client } from './client'
 import {
   AssetRuneNative as AssetRUNE,
   DEFAULT_GAS_LIMIT_VALUE,
@@ -27,7 +27,10 @@ import {
 } from './const'
 import { DepositParam, TxOfflineParams } from './types'
 
-export class Client extends BaseClient {
+/**
+ * Thorchain Keystore client
+ */
+export class ClientKeystore extends Client {
   /**
    * Asynchronous version of getAddress method.
    * @param {number} index Derivation path index of the address to be generated.

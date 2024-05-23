@@ -103,6 +103,11 @@ export const getPrefix = (network: Network): string => {
   }
 }
 
+/**
+ * Parse the derivation path from a string to an Array of numbers
+ * @param {string} path - Path to parse
+ * @returns {number[]} - The derivation path as Array of numbers
+ */
 export const parseDerivationPath = (path: string): number[] => {
   if (!path.startsWith('m')) throw new Error("Path string must start with 'm'")
   let rest = path.slice(1)
@@ -120,6 +125,11 @@ export const parseDerivationPath = (path: string): number[] => {
   return out
 }
 
+/**
+ * Sort JSON object
+ * @param {any} obj - JSON object
+ * @returns {any} JSON object sorted
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function sortedObject(obj: any): any {
   if (typeof obj !== 'object' || obj === null) {
@@ -138,7 +148,9 @@ export function sortedObject(obj: any): any {
   return result
 }
 
-/** Returns a JSON string with objects sorted by key */
+/**
+ * Returns a JSON string with objects sorted by key
+ * */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
 export function sortAndStringifyJson(obj: any): string {
   return JSON.stringify(sortedObject(obj))
