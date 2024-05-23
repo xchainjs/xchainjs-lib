@@ -87,7 +87,7 @@ describe('ThorchainAmm e2e tests', () => {
   describe('Swap', () => {
     let wallet: Wallet
     let thorchainAmm: ThorchainAMM
-    beforeAll(async () => {
+    beforeAll(() => {
       const phrase = process.env.PHRASE_MAINNET
       wallet = new Wallet({
         BTC: new BtcClient({ ...defaultBtcParams, phrase, network: Network.Mainnet }),
