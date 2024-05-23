@@ -32,10 +32,11 @@ describe('Wallet', () => {
 
   it('Should get all addresses', async () => {
     const addresses = await wallet.getAddresses()
-    expect(Object.keys(addresses).length).toBe(3)
+    expect(Object.keys(addresses).length).toBe(4)
     expect('THOR' in addresses).toBeTruthy()
     expect('MAYA' in addresses).toBeTruthy()
     expect('ETH' in addresses).toBeTruthy()
+    expect('BCH' in addresses).toBeTruthy()
   })
 
   it('Should get interested chain addresses', async () => {
@@ -65,33 +66,44 @@ describe('Wallet', () => {
 
   it('Should get all balances', async () => {
     const chainsBalances = await wallet.getBalances()
-    expect(Object.keys(chainsBalances).length).toBe(3)
+    expect(Object.keys(chainsBalances).length).toBe(4)
     Object.keys(chainsBalances).forEach((chain) => {
       const balances = chainsBalances[chain]
-      console.log(
-        balances.map((balance) => {
-          return {
-            asset: assetToString(balance.asset),
-            amount: baseToAsset(balance.amount).amount().toString(),
-          }
-        }),
-      )
+      if (balances.status === 'fulfilled') {
+        console.log(
+          balances.balances.map((balance) => {
+            return {
+              asset: assetToString(balance.asset),
+              amount: baseToAsset(balance.amount).amount().toString(),
+            }
+          }),
+        )
+      } else {
+        console.log(`Can not retrieve balance of ${chain}`)
+      }
     })
   })
 
   it('Should get interested chain balances', async () => {
-    const chainsBalances = await wallet.getBalances([assetFromStringEx('MAYA.CACAO'), assetFromStringEx('THOR.RUNE')])
+    const chainsBalances = await wallet.getBalances({
+      MAYA: [assetFromStringEx('MAYA.CACAO')],
+      THOR: [assetFromStringEx('THOR.RUNE')],
+    })
     expect(Object.keys(chainsBalances).length).toBe(2)
     Object.keys(chainsBalances).forEach((chain) => {
       const balances = chainsBalances[chain]
-      console.log(
-        balances.map((balance) => {
-          return {
-            asset: assetToString(balance.asset),
-            amount: baseToAsset(balance.amount).amount().toString(),
-          }
-        }),
-      )
+      if (balances.status === 'fulfilled') {
+        console.log(
+          balances.balances.map((balance) => {
+            return {
+              asset: assetToString(balance.asset),
+              amount: baseToAsset(balance.amount).amount().toString(),
+            }
+          }),
+        )
+      } else {
+        console.log(`Can not retrieve balance of ${chain}`)
+      }
     })
   })
 
