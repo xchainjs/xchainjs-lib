@@ -33,8 +33,8 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-btc": "10.1.0",
     "@keepkey/keepkey-sdk": "^0.2.55",
+    "@ledgerhq/hw-app-btc": "10.1.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",

@@ -1945,6 +1945,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@keepkey/keepkey-sdk@npm:^0.2.55":
+  version: 0.2.57
+  resolution: "@keepkey/keepkey-sdk@npm:0.2.57"
+  checksum: 10c0/36ea75da56f1ffc446415351ae6ed70943d57970c8d455a07ab1e75ccb5474b8280151606dd587c73766e39fb6f8ca4e40ffaafda5ee08217a37880b1996074e
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/cryptoassets@npm:^12.1.0":
   version: 12.1.0
   resolution: "@ledgerhq/cryptoassets@npm:12.1.0"
@@ -3330,6 +3337,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-bitcoin@workspace:packages/xchain-bitcoin"
   dependencies:
+    "@keepkey/keepkey-sdk": "npm:^0.2.55"
     "@ledgerhq/hw-app-btc": "npm:10.1.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
