@@ -29,7 +29,8 @@ import {
 } from '@xchainjs/xchain-litecoin'
 import {
   AssetRuneNative,
-  Client as ThorClient,
+  ClientKeystore as THORKeystoreClient,
+  ClientLedger as THORLedgerClient,
   THORChain,
   defaultClientConfig as defaultThorParams,
 } from '@xchainjs/xchain-thorchain'
@@ -86,7 +87,7 @@ describe('ThorchainAmm e2e tests', () => {
   describe('Swap', () => {
     let wallet: Wallet
     let thorchainAmm: ThorchainAMM
-    beforeAll(() => {
+    beforeAll(async () => {
       const phrase = process.env.PHRASE_MAINNET
       wallet = new Wallet({
         BTC: new BtcClient({ ...defaultBtcParams, phrase, network: Network.Mainnet }),
@@ -98,7 +99,7 @@ describe('ThorchainAmm e2e tests', () => {
         BSC: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
         GAIA: new GaiaClient({ phrase, network: Network.Mainnet }),
         BNB: new BnbClient({ phrase, network: Network.Mainnet }),
-        THOR: new ThorClient({ ...defaultThorParams, phrase, network: Network.Mainnet }),
+        THOR: new THORKeystoreClient({ ...defaultThorParams, phrase, network: Network.Mainnet }),
       })
       thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)
     })
@@ -339,7 +340,7 @@ describe('ThorchainAmm e2e tests', () => {
           network: Network.Mainnet,
           transport: await TransportNodeHid.create(),
         }),
-        THOR: new ThorClient({ phrase, network: Network.Mainnet }),
+        THOR: new THORKeystoreClient({ phrase, network: Network.Mainnet }),
       })
       const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
 
@@ -363,7 +364,7 @@ describe('ThorchainAmm e2e tests', () => {
           network: Network.Mainnet,
           transport: await TransportNodeHid.create(),
         }),
-        THOR: new ThorClient({ phrase, network: Network.Mainnet }),
+        THOR: new THORKeystoreClient({ phrase, network: Network.Mainnet }),
       })
       const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
 
@@ -396,6 +397,26 @@ describe('ThorchainAmm e2e tests', () => {
         fromAsset: USDCAsset,
         destinationAsset: AssetAVAX,
         amount: new CryptoAmount(assetToBase(assetAmount('10', 6)), USDCAsset),
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it('Should do swap from THOR Ledger', async () => {
+      const thorchainQuery = new ThorchainQuery()
+      const wallet = new Wallet({
+        THOR: new THORLedgerClient({ transport: await TransportNodeHid.create(), network: Network.Mainnet }),
+      })
+
+      const sAVAX = assetFromStringEx('AVAX/AVAX')
+      const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
+
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAddress: await wallet.getAddress(THORChain),
+        destinationAddress: await wallet.getAddress(THORChain),
+        fromAsset: sAVAX,
+        destinationAsset: AssetRuneNative,
+        amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), sAVAX),
       })
 
       console.log(txSubmitted)
