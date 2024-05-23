@@ -26,6 +26,11 @@ export const MAYA_DENOM = 'maya'
 export const MAYA_DECIMAL = 4
 
 /**
+ * Number of decimals for the synthetic assets.
+ */
+export const SYNTH_DECIMAL = 8
+
+/**
  * Default gas limit value for transactions.
  */
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
