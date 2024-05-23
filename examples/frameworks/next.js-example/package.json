@@ -12,10 +12,10 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "next": "14.1.4",
-    "@xchainjs/xchain-dash": "*",
-    "@xchainjs/xchain-crypto": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-client": "*",
+    "@xchainjs/xchain-dash": "workspace:*",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-client": "workspace:*",
     "ahooks": "3.7.10"
   },
   "devDependencies": {

@@ -11,6 +11,7 @@ export type TxDetail = {
   date?: Date
   action?: string
   result?: TxSubmitted | string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any
 }
 

@@ -1,19 +1,20 @@
 {
   "name": "xchainjs-prepare-tx",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "private": true,
   "scripts": {
-    "preparetx": "npx ts-node prepare-tx.ts"
+    "preparetx": "npx ts-node prepare-tx.ts",
+    "build": "tsc --noEmit"
   },
   "description": "Example of doing preparing a Tx",
   "main": "index.js",
   "author": "GRC",
   "license": "MIT",
   "dependencies": {
-    "@xchainjs/xchain-ethereum": "*",
-    "@xchainjs/xchain-bitcoin": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-client": "*"
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*"
   },
   "devDependencies": {
     "@cosmos-client/core": "^0.46.1",

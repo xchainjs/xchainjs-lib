@@ -198,9 +198,9 @@ abstract class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-  }): Promise<PreparedTx> {
+  }): Promise<PreparedTx & { utxos: UTXO[] }> {
     // Build the transaction (PSBT) with the specified transfer options
-    const { psbt } = await this.buildTx({
+    const { psbt, utxos } = await this.buildTx({
       sender,
       recipient,
       amount,
@@ -209,7 +209,7 @@ abstract class Client extends UTXOClient {
     })
 
     // Return the raw unsigned transaction (PSBT)
-    return { rawUnsignedTx: psbt.toBase64() }
+    return { rawUnsignedTx: psbt.toBase64(), utxos }
   }
 
   /**

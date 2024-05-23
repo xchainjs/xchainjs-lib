@@ -1,5 +1,68 @@
 # Changelog
 
+## 0.1.16
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain@1.0.8
+- @xchainjs/xchain-thorchain@1.0.11
+
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies [540326d]
+  - @xchainjs/xchain-evm@0.6.3
+
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-evm@0.6.2
+  - @xchainjs/xchain-mayachain@1.0.7
+  - @xchainjs/xchain-thorchain@1.0.10
+  - @xchainjs/xchain-utxo@0.1.9
+
+## 0.1.13
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-evm@0.6.1
+  - @xchainjs/xchain-mayachain@1.0.6
+  - @xchainjs/xchain-thorchain@1.0.9
+  - @xchainjs/xchain-util@0.13.6
+  - @xchainjs/xchain-utxo@0.1.8
+
+## 0.1.12
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [dd3b45d]
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+- Updated dependencies [3ed8127]
+  - @xchainjs/xchain-mayachain@1.0.5
+  - @xchainjs/xchain-evm@0.6.0
+  - @xchainjs/xchain-thorchain@1.0.8
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+  - @xchainjs/xchain-utxo@0.1.7
+
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [b379aeb]
+  - @xchainjs/xchain-mayachain@1.0.4
+  - @xchainjs/xchain-thorchain@1.0.7
+
 ## 0.1.10
 
 ### Patch Changes

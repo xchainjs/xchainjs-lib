@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.15
+
+### Patch Changes
+
+- 15181f4: Release fix
+
+## 0.3.14
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+
 ## 0.3.13
 
 ### Patch Changes

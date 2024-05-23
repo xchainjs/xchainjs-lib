@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayanode",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "license": "MIT",
   "description": "Mayanode module that exposes all mayanode functions using openapi-generator-cli",
   "keywords": [
@@ -26,6 +26,7 @@
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:mayanode && yarn generate:types:mayanode",
@@ -40,6 +41,7 @@
     "rimraf": "5.0.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "release/package"
   }
 }

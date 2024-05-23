@@ -3,7 +3,9 @@
  * Importing the `Client` class from the '@xchainjs/xchain-evm' module
  * Importing the `defaultEthParams` constant from the './const' file
  */
-import { ClientLedger as EVMClientLedger, EVMClientParams } from '@xchainjs/xchain-evm'
+import type Transport from '@ledgerhq/hw-transport'
+import { Network } from '@xchainjs/xchain-client'
+import { ClientLedger as EVMClientLedger, EVMClientParams, LedgerSigner } from '@xchainjs/xchain-evm'
 
 /**
  * Class definition for the Ethereum EVM client.
@@ -16,7 +18,15 @@ export class ClientLedger extends EVMClientLedger {
    *                          Defaults to `defaultEthParams` if not provided.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(config: EVMClientParams & { transport: any }) {
-    super(config) // Call the constructor of the parent class with the provided config or the default parameters
+  constructor(config: Omit<EVMClientParams, 'signer' | 'phrase'> & { transport: Transport }) {
+    // Call the constructor of the parent class with the provided config or the default parameters
+    super({
+      ...config,
+      signer: new LedgerSigner({
+        transport: config.transport,
+        provider: config.providers[config.network || Network.Mainnet],
+        derivationPath: config.rootDerivationPaths ? config.rootDerivationPaths[config.network || Network.Mainnet] : '',
+      }),
+    })
   }
 }

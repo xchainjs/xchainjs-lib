@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-aggregator",
   "description": "Protocol aggregator to make actions in different protocols",
-  "version": "0.1.11",
+  "version": "0.1.18",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -20,29 +20,31 @@
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "e2e": "jest --config jest.config.e2e.js",
     "test": "jest"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "release/package"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-mayachain": "*",
-    "@xchainjs/xchain-mayachain-amm": "*",
-    "@xchainjs/xchain-mayachain-query": "*",
-    "@xchainjs/xchain-thorchain": "*",
-    "@xchainjs/xchain-thorchain-amm": "*",
-    "@xchainjs/xchain-thorchain-query": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-wallet": "*"
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-mayachain": "workspace:*",
+    "@xchainjs/xchain-mayachain-amm": "workspace:*",
+    "@xchainjs/xchain-mayachain-query": "workspace:*",
+    "@xchainjs/xchain-thorchain": "workspace:*",
+    "@xchainjs/xchain-thorchain-amm": "workspace:*",
+    "@xchainjs/xchain-thorchain-query": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-wallet": "workspace:*"
   },
   "devDependencies": {
-    "@xchainjs/xchain-avax": "*",
-    "@xchainjs/xchain-bitcoin": "*",
-    "@xchainjs/xchain-binance": "*",
-    "@xchainjs/xchain-ethereum": "*",
-    "@xchainjs/xchain-kujira": "*",
+    "@xchainjs/xchain-avax": "workspace:*",
+    "@xchainjs/xchain-binance": "workspace:*",
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-kujira": "workspace:*",
     "axios": "1.3.6",
     "axios-mock-adapter": "1.20.0"
   }

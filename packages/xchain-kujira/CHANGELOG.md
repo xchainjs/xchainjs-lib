@@ -1,5 +1,50 @@
 # Changelog
 
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [1a8f57d]
+  - @xchainjs/xchain-cosmos-sdk@0.2.11
+
+## 0.1.18
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-cosmos-sdk@0.2.10
+
+## 0.1.17
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-cosmos-sdk@0.2.9
+  - @xchainjs/xchain-util@0.13.6
+
+## 0.1.16
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- 54ba9c2: Multiple URL clients support
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+  - @xchainjs/xchain-cosmos-sdk@0.2.8
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
+## 0.1.15
+
+### Patch Changes
+
+- b379aeb: Keystore logic move from cosmos-sdk client to chain clients
+- Updated dependencies [b379aeb]
+  - @xchainjs/xchain-cosmos-sdk@0.2.7
+
 ## 0.1.14
 
 ### Patch Changes

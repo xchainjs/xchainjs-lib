@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-mayamidgard-query@0.1.13
+
+## 0.1.14
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-mayamidgard@0.1.4
+  - @xchainjs/xchain-mayamidgard-query@0.1.12
+  - @xchainjs/xchain-mayanode@0.1.6
+  - @xchainjs/xchain-util@0.13.6
+
+## 0.1.13
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-mayamidgard-query@0.1.11
+  - @xchainjs/xchain-mayamidgard@0.1.3
+  - @xchainjs/xchain-mayanode@0.1.5
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.1.12
 
 ### Patch Changes

@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.17.16
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-utxo@0.1.9
+  - @xchainjs/xchain-utxo-providers@0.2.17
+
+## 0.17.15
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-crypto@0.3.4
+  - @xchainjs/xchain-util@0.13.6
+  - @xchainjs/xchain-utxo@0.1.8
+  - @xchainjs/xchain-utxo-providers@0.2.16
+
+## 0.17.14
+
+### Patch Changes
+
+- 3ed8127: @ledgerhq/hw-transport-node-hid dependency updated to 6.28.6
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-utxo-providers@0.2.15
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-crypto@0.3.3
+  - @xchainjs/xchain-util@0.13.5
+  - @xchainjs/xchain-utxo@0.1.7
+
 ## 0.17.13
 
 ### Patch Changes

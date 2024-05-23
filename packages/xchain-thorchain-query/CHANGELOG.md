@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.7.13
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-midgard-query@0.1.18
+
+## 0.7.12
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-midgard-query@0.1.17
+  - @xchainjs/xchain-thornode@0.3.15
+  - @xchainjs/xchain-util@0.13.6
+
+## 0.7.11
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-midgard-query@0.1.16
+  - @xchainjs/xchain-thornode@0.3.14
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.7.10
 
 ### Patch Changes

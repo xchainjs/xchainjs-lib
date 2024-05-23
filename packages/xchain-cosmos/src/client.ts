@@ -33,16 +33,13 @@ export type CosmosClientParams = Partial<CosmosSdkClientParams>
 /**
  * Cosmos client class extending the Cosmos SDK client.
  */
-export class Client extends CosmosSDKClient {
+export abstract class Client extends CosmosSDKClient {
   /**
    * Constructor for the Cosmos client.
    * @param {CosmosClientParams} config Configuration parameters for the client.
    */
   constructor(config: CosmosClientParams = defaultClientConfig) {
-    super({
-      ...defaultClientConfig,
-      ...config,
-    })
+    super({ ...defaultClientConfig, ...config })
   }
 
   /**
@@ -220,23 +217,7 @@ export class Client extends CosmosSDKClient {
       hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex))],
     })
 
-    const signingClient = await SigningStargateClient.connectWithSigner(this.clientUrls[this.network], signer, {
-      registry: this.registry,
-    })
-
-    const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-      return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-    })
-
-    const rawTx = await signingClient.sign(
-      sender,
-      messages,
-      {
-        amount: [],
-        gas: gasLimit.toString(),
-      },
-      unsignedTx.body.memo,
-    )
+    const rawTx = await this.roundRobinSign(sender, unsignedTx, signer, gasLimit)
 
     return toBase64(TxRaw.encode(rawTx).finish())
   }
@@ -271,5 +252,45 @@ export class Client extends CosmosSDKClient {
     const denom = this.getDenom(asset)
     const defaultGasPrice = GasPrice.fromString(`0.006${denom}`)
     return calculateFee(90_000, defaultGasPrice)
+  }
+
+  /**
+   * Sign a transaction making a round robin over the clients urls provided to the client
+   *
+   * @param {string} sender Sender address
+   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
+   * @param {DirectSecp256k1HdWallet} signer Signer
+   * @param {BigNumber} gasLimit Transaction gas limit
+   * @returns {TxRaw} The raw signed transaction
+   */
+  private async roundRobinSign(
+    sender: string,
+    unsignedTx: DecodedTxRaw,
+    signer: DirectSecp256k1HdWallet,
+    gasLimit: BigNumber,
+  ): Promise<TxRaw> {
+    for (const url of this.clientUrls[this.network]) {
+      try {
+        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+          registry: this.registry,
+        })
+
+        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+        })
+
+        return await signingClient.sign(
+          sender,
+          messages,
+          {
+            amount: [],
+            gas: gasLimit.toString(),
+          },
+          unsignedTx.body.memo,
+        )
+      } catch {}
+    }
+
+    throw Error('No clients available. Can not sign transaction')
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-amm",
-  "version": "1.1.5",
+  "version": "1.1.12",
   "description": "module that exposes estimating & swappping cryptocurrency assets on thorchain",
   "keywords": [
     "THORChain",
@@ -26,6 +26,7 @@
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
@@ -35,29 +36,30 @@
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
   "dependencies": {
-    "@xchainjs/xchain-avax": "*",
-    "@xchainjs/xchain-binance": "*",
-    "@xchainjs/xchain-bitcoin": "*",
-    "@xchainjs/xchain-bitcoincash": "*",
-    "@xchainjs/xchain-bsc": "*",
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-cosmos": "*",
-    "@xchainjs/xchain-doge": "*",
-    "@xchainjs/xchain-ethereum": "*",
-    "@xchainjs/xchain-evm": "*",
-    "@xchainjs/xchain-litecoin": "*",
-    "@xchainjs/xchain-thorchain": "*",
-    "@xchainjs/xchain-thorchain-query": "*",
-    "@xchainjs/xchain-util": "*",
-    "@xchainjs/xchain-wallet": "*",
+    "@xchainjs/xchain-avax": "workspace:*",
+    "@xchainjs/xchain-binance": "workspace:*",
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-bitcoincash": "workspace:*",
+    "@xchainjs/xchain-bsc": "workspace:*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-cosmos": "workspace:*",
+    "@xchainjs/xchain-doge": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-evm": "workspace:*",
+    "@xchainjs/xchain-litecoin": "workspace:*",
+    "@xchainjs/xchain-thorchain": "workspace:*",
+    "@xchainjs/xchain-thorchain-query": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-wallet": "workspace:*",
     "ethers": "5.7.2"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-node-hid": "6.28.0",
+    "@ledgerhq/hw-transport-node-hid": "6.28.6",
     "axios": "1.3.6",
     "axios-mock-adapter": "1.20.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "release/package"
   }
 }

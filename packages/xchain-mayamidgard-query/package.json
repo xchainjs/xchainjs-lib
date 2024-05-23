@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayamidgard-query",
-  "version": "0.1.10",
+  "version": "0.1.13",
   "license": "MIT",
   "description": "Module that is responsible for get data from Mayachain Midgard API",
   "keywords": [
@@ -25,15 +25,16 @@
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "*",
-    "@xchainjs/xchain-mayamidgard": "*",
-    "@xchainjs/xchain-util": "*",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-mayamidgard": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.3.6",
     "axios-retry": "3.2.5"
   },
@@ -41,6 +42,7 @@
     "axios-mock-adapter": "1.20.0"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "release/package"
   }
 }

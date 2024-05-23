@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.5.5
+
+### Patch Changes
+
+- Updated dependencies [540326d]
+  - @xchainjs/xchain-evm@0.6.3
+
+## 0.5.4
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-evm@0.6.2
+  - @xchainjs/xchain-evm-providers@0.1.12
+
+## 0.5.3
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-evm@0.6.1
+  - @xchainjs/xchain-evm-providers@0.1.11
+  - @xchainjs/xchain-util@0.13.6
+
+## 0.5.2
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+- Updated dependencies [3ed8127]
+  - @xchainjs/xchain-evm@0.6.0
+  - @xchainjs/xchain-evm-providers@0.1.10
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.5.1
 
 ### Patch Changes

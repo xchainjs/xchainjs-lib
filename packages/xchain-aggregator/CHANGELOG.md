@@ -1,5 +1,89 @@
 # Changelog
 
+## 0.1.18
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain@1.0.8
+- @xchainjs/xchain-thorchain@1.0.11
+- @xchainjs/xchain-thorchain-amm@1.1.12
+- @xchainjs/xchain-mayachain-amm@2.0.7
+- @xchainjs/xchain-wallet@0.1.16
+
+## 0.1.17
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@1.1.11
+- @xchainjs/xchain-wallet@0.1.15
+- @xchainjs/xchain-mayachain-amm@2.0.6
+
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-mayachain@1.0.7
+  - @xchainjs/xchain-mayachain-amm@2.0.5
+  - @xchainjs/xchain-mayachain-query@0.1.15
+  - @xchainjs/xchain-thorchain@1.0.10
+  - @xchainjs/xchain-thorchain-amm@1.1.10
+  - @xchainjs/xchain-thorchain-query@0.7.13
+  - @xchainjs/xchain-wallet@0.1.14
+
+## 0.1.15
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-mayachain@1.0.6
+  - @xchainjs/xchain-mayachain-amm@2.0.4
+  - @xchainjs/xchain-mayachain-query@0.1.14
+  - @xchainjs/xchain-thorchain@1.0.9
+  - @xchainjs/xchain-thorchain-amm@1.1.9
+  - @xchainjs/xchain-thorchain-query@0.7.12
+  - @xchainjs/xchain-util@0.13.6
+  - @xchainjs/xchain-wallet@0.1.13
+
+## 0.1.14
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [dd3b45d]
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+  - @xchainjs/xchain-mayachain@1.0.5
+  - @xchainjs/xchain-mayachain-amm@2.0.3
+  - @xchainjs/xchain-thorchain-amm@1.1.8
+  - @xchainjs/xchain-mayachain-query@0.1.13
+  - @xchainjs/xchain-thorchain-query@0.7.11
+  - @xchainjs/xchain-thorchain@1.0.8
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-wallet@0.1.12
+  - @xchainjs/xchain-util@0.13.5
+
+## 0.1.13
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@1.1.7
+
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [b379aeb]
+  - @xchainjs/xchain-mayachain@1.0.4
+  - @xchainjs/xchain-thorchain@1.0.7
+  - @xchainjs/xchain-mayachain-amm@2.0.2
+  - @xchainjs/xchain-wallet@0.1.11
+  - @xchainjs/xchain-thorchain-amm@1.1.6
+
 ## 0.1.11
 
 ### Patch Changes

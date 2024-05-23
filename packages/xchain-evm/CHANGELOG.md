@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.6.3
+
+### Patch Changes
+
+- 540326d: Bug fix related to the nonce at making approve and transfer transactions with Keystore clients
+
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+
+## 0.6.1
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-util@0.13.6
+
+## 0.6.0
+
+### Minor Changes
+
+- 3ed8127: EVM Client phrase parameter removed.
+- 3ed8127: EVM Client works with signer parameter, which represents an account on the EVM chains. Keystore and Ledger signer are currently supported
+
+### Patch Changes
+
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [582d682]
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-util@0.13.5
+
 ## 0.5.1
 
 ### Patch Changes

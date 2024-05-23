@@ -1,5 +1,82 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- @xchainjs/xchain-kujira@0.1.19
+- @xchainjs/xchain-mayachain@1.0.8
+- @xchainjs/xchain-thorchain@1.0.11
+- @xchainjs/xchain-wallet@0.1.16
+
+## 2.0.6
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@0.32.5
+- @xchainjs/xchain-wallet@0.1.15
+
+## 2.0.5
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-bitcoin@0.23.18
+  - @xchainjs/xchain-dash@0.3.5
+  - @xchainjs/xchain-ethereum@0.32.4
+  - @xchainjs/xchain-kujira@0.1.18
+  - @xchainjs/xchain-mayachain@1.0.7
+  - @xchainjs/xchain-mayachain-query@0.1.15
+  - @xchainjs/xchain-thorchain@1.0.10
+  - @xchainjs/xchain-wallet@0.1.14
+
+## 2.0.4
+
+### Patch Changes
+
+- 15181f4: Release fix
+- Updated dependencies [15181f4]
+  - @xchainjs/xchain-bitcoin@0.23.17
+  - @xchainjs/xchain-client@0.16.6
+  - @xchainjs/xchain-dash@0.3.4
+  - @xchainjs/xchain-ethereum@0.32.3
+  - @xchainjs/xchain-kujira@0.1.17
+  - @xchainjs/xchain-mayachain@1.0.6
+  - @xchainjs/xchain-mayachain-query@0.1.14
+  - @xchainjs/xchain-thorchain@1.0.9
+  - @xchainjs/xchain-wallet@0.1.13
+
+## 2.0.3
+
+### Patch Changes
+
+- 3ed8127: @ledgerhq/hw-transport-node-hid dependency updated to 6.28.6
+- 582d682: Internal dependencies updated to use workspace nomenclature
+- Updated dependencies [dd3b45d]
+- Updated dependencies [3ed8127]
+- Updated dependencies [582d682]
+- Updated dependencies [54ba9c2]
+  - @xchainjs/xchain-mayachain@1.0.5
+  - @xchainjs/xchain-bitcoin@0.23.16
+  - @xchainjs/xchain-dash@0.3.3
+  - @xchainjs/xchain-mayachain-query@0.1.13
+  - @xchainjs/xchain-thorchain@1.0.8
+  - @xchainjs/xchain-ethereum@0.32.2
+  - @xchainjs/xchain-client@0.16.5
+  - @xchainjs/xchain-kujira@0.1.16
+  - @xchainjs/xchain-wallet@0.1.12
+
+## 2.0.2
+
+### Patch Changes
+
+- Updated dependencies [b379aeb]
+  - @xchainjs/xchain-mayachain@1.0.4
+  - @xchainjs/xchain-thorchain@1.0.7
+  - @xchainjs/xchain-kujira@0.1.15
+  - @xchainjs/xchain-wallet@0.1.11
+
 ## 2.0.1
 
 ### Patch Changes
