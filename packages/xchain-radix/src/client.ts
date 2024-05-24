@@ -257,7 +257,8 @@ export class RadixSpecificClient {
 
     const previewReceipt = (await this.previewIntent(intentWithHardcodedFee)) as PartialTransactionPreviewResponse
     // Ensure that the preview was successful.
-
+    console.log(intentWithHardcodedFee)
+    console.log(previewReceipt)
     if (previewReceipt.receipt.status !== 'Succeeded') {
       throw new Error('Preview for fees was not successful')
     }
@@ -628,6 +629,7 @@ export default class Client extends BaseXChainClient {
    * @returns {TxsPage} The transaction history.
    */
   async getTransactions(params: TxHistoryParams): Promise<TxsPage> {
+    const { address, offset = 0, limit, asset } = params
     let hasNextPage = true
     let nextCursor = undefined
     let committedTransactions: CommittedTransactionInfo[] = []
@@ -636,12 +638,12 @@ export default class Client extends BaseXChainClient {
     while (hasNextPage) {
       const response = await this.radixSpecificClient.gatewayClient.stream.innerClient.streamTransactions({
         streamTransactionsRequest: {
-          affected_global_entities_filter: [params.address],
-          limit_per_page: params.limit && params.limit > 100 ? 100 : params.limit,
+          affected_global_entities_filter: [address],
+          limit_per_page: limit && limit > 100 ? 100 : limit,
           from_ledger_state: {
-            state_version: params.offset,
+            state_version: offset,
           },
-          manifest_resources_filter: [params.asset || ''],
+          manifest_resources_filter: asset ? [asset] : undefined,
           opt_ins: {
             raw_hex: true,
           },
@@ -668,6 +670,7 @@ export default class Client extends BaseXChainClient {
         }
       } catch (error) {}
     }
+    txList.total = txList.txs.length
     return txList
   }
 
@@ -795,6 +798,7 @@ export default class Client extends BaseXChainClient {
 
     const notarizedTransactionBytes = await RadixEngineToolkit.NotarizedTransaction.compile(notarizedTransaction)
     const transactionId = await this.broadcastTx(Convert.Uint8Array.toHexString(notarizedTransactionBytes))
+    console.log(transactionId)
     return transactionId
   }
 
