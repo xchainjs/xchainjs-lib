@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
+import { PoolDetail, Transaction } from '@xchainjs/xchain-mayamidgard'
 import { MAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
@@ -261,10 +261,7 @@ export class MayachainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions.map((action) => {
-        let transaction
-
-        const swapOut = action.out.filter((out) => out.txID !== '') // For non to protocol asset swap
-        transaction = swapOut[0]
+        let transaction: Transaction | undefined = action.out.filter((out) => out.txID !== '')[0] // For non to protocol asset swap
         if (!transaction) {
           // For to protocol asset swap
           transaction = action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
