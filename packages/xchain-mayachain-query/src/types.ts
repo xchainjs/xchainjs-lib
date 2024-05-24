@@ -82,7 +82,7 @@ export type Swap = {
   date: Date
   status: 'success' | 'pending'
   inboundTx: TransactionAction
-  outboundTx: TransactionAction
+  outboundTx?: TransactionAction
 }
 
 /**

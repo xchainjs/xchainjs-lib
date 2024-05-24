@@ -261,6 +261,7 @@ export class MayachainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions.map((action) => {
+        const swapOut = action.out.filter((out) => out.txID !== '')
         return {
           date: new Date(Number(action.date) / 10 ** 6),
           status: action.status,
@@ -269,11 +270,14 @@ export class MayachainQuery {
             address: action.in[0].address,
             amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
           },
-          outboundTx: {
-            hash: action.out[0].txID,
-            address: action.out[0].address,
-            amount: getCryptoAmount(assetDecimals, action.out[0].coins[0].asset, action.out[0].coins[0].amount),
-          },
+          outboundTx:
+            swapOut.length !== 0
+              ? {
+                  hash: swapOut[0].txID,
+                  address: swapOut[0].address,
+                  amount: getCryptoAmount(assetDecimals, swapOut[0].coins[0].asset, action.out[0].coins[0].amount),
+                }
+              : undefined,
         }
       }),
     }
