@@ -54,7 +54,7 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { bech32m } from 'bech32'
 import BIP32Factory, { BIP32Interface } from 'bip32'
 import { derivePath } from 'ed25519-hd-key'
@@ -137,7 +137,8 @@ export class RadixSpecificClient {
     const nonFungibleResources = await this.fetchNonFungibleResources(address)
     const fungibleBalances = this.convertResourcesToBalances(fungibleResources)
     const nonFungibleBalances = this.convertResourcesToBalances(nonFungibleResources)
-    return fungibleBalances.concat(nonFungibleBalances)
+    const balances = fungibleBalances.concat(nonFungibleBalances)
+    return balances
   }
 
   private convertResourcesToBalances(
@@ -145,7 +146,6 @@ export class RadixSpecificClient {
   ): Balance[] {
     const balances: Balance[] = []
     // Iterate through nonFungibleResources
-    const decimalDiff = XRD_DECIMAL - 8
     resources.forEach((item) => {
       if (item.aggregation_level === 'Global') {
         const asset: Asset = {
@@ -157,16 +157,11 @@ export class RadixSpecificClient {
 
         // We need to do this because item.amount can be either string or number
         // depending on the type of resource
-        let xrdAmount: number
-        if (typeof item.amount === 'string') {
-          xrdAmount = parseFloat(item.amount) * 10 ** decimalDiff
-        } else {
-          xrdAmount = item.amount * 10 ** decimalDiff
-        }
+        const amount = typeof item.amount === 'string' ? parseFloat(item.amount) : item.amount
 
         const balance: Balance = {
           asset: asset,
-          amount: baseAmount(xrdAmount, XRD_DECIMAL),
+          amount: assetToBase(assetAmount(amount)),
         }
         balances.push(balance)
       }
@@ -423,18 +418,16 @@ export class RadixSpecificClient {
 export default class Client extends BaseXChainClient {
   private radixSpecificClient: RadixSpecificClient
   private curve: Curve
-  constructor(
-    {
-      network = Network.Mainnet,
-      phrase,
-      rootDerivationPaths = xrdRootDerivationPaths,
-      feeBounds = {
-        lower: 0,
-        upper: 3,
-      },
-    }: XChainClientParams,
-    curve: Curve,
-  ) {
+  constructor({
+    network = Network.Mainnet,
+    phrase,
+    rootDerivationPaths = xrdRootDerivationPaths,
+    feeBounds = {
+      lower: 0,
+      upper: 3,
+    },
+    curve = 'Ed25519',
+  }: XChainClientParams & { curve?: Curve }) {
     super(RadixChain, {
       network: network,
       phrase: phrase,
@@ -489,7 +482,7 @@ export default class Client extends BaseXChainClient {
     return xChainJsNetworkToRadixNetworkId(this.getNetwork())
   }
 
-  getPrivateKey(): Buffer {
+  getPrivateKey(index: number): Buffer {
     const seed = getSeed(this.phrase)
     let derivationPath
     if (this.rootDerivationPaths) {
@@ -497,22 +490,22 @@ export default class Client extends BaseXChainClient {
     } else {
       derivationPath = xrdRootDerivationPaths[this.getNetwork()]
     }
-
+    const updatedDerivationPath = derivationPath.replace(/\/$/, '') + `/${index}'`
     if (this.curve === 'Ed25519') {
       const seedHex = seed.toString('hex')
-      const keys = derivePath(derivationPath, seedHex)
+      const keys = derivePath(updatedDerivationPath, seedHex)
       return keys.key
     } else {
       const bip32 = BIP32Factory(ecc)
       const node: BIP32Interface = bip32.fromSeed(seed)
-      const child: BIP32Interface = node.derivePath(derivationPath)
+      const child: BIP32Interface = node.derivePath(updatedDerivationPath)
       if (!child.privateKey) throw new Error('child does not have a privateKey')
       return child.privateKey
     }
   }
 
-  getRadixPrivateKey(): PrivateKey {
-    const privateKey = this.getPrivateKey()
+  getRadixPrivateKey(index: number): PrivateKey {
+    const privateKey = this.getPrivateKey(index)
     const privateKeyBytes = Uint8Array.from(privateKey)
     if (this.curve === 'Ed25519') {
       return new PrivateKey.Ed25519(privateKeyBytes)
@@ -534,9 +527,9 @@ export default class Client extends BaseXChainClient {
    * @returns {Address} A promise resolving to the current address.
    * A phrase is needed to create a wallet and to derive an address from it.
    */
-  async getAddressAsync(): Promise<string> {
+  async getAddressAsync(index = 0): Promise<string> {
     const networkId = this.getRadixNetwork()
-    const radixPrivateKey = this.getRadixPrivateKey()
+    const radixPrivateKey = this.getRadixPrivateKey(index)
     const address = await LTSRadixEngineToolkit.Derive.virtualAccountAddress(radixPrivateKey.publicKey(), networkId)
     return address.toString()
   }
@@ -617,8 +610,12 @@ export default class Client extends BaseXChainClient {
    * @param {Asset[]} assets - Assets to retrieve the balance for (optional).
    * @returns {Promise<Balance[]>} An array containing the balance of the address.
    */
-  async getBalance(address: Address, assets: Asset[]): Promise<Balance[]> {
+  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
     const balances: Balance[] = await this.radixSpecificClient.fetchBalances(address)
+    // If assets is undefined, return all balances
+    if (!assets) {
+      return balances
+    }
     const filteredBalances: Balance[] = balances.filter((balance) =>
       assets.some((asset) => balance.asset.symbol === asset.symbol),
     )
@@ -782,6 +779,7 @@ export default class Client extends BaseXChainClient {
    * @returns A signed transaction hex
    */
   async transfer(params: TxParams): Promise<string> {
+    const walletIndex = params.walletIndex ?? 0
     const intent = await this.prepareTx(params)
       .then((response) => response.rawUnsignedTx)
       .then(Convert.HexString.toUint8Array)
@@ -792,7 +790,7 @@ export default class Client extends BaseXChainClient {
         .header(intent.header)
         .message(intent.message)
         .manifest(intent.manifest)
-        .notarize(this.getRadixPrivateKey())
+        .notarize(this.getRadixPrivateKey(walletIndex))
     })
 
     const notarizedTransactionBytes = await RadixEngineToolkit.NotarizedTransaction.compile(notarizedTransaction)
@@ -820,6 +818,7 @@ export default class Client extends BaseXChainClient {
    * @returns a PreparedTx
    */
   async prepareTx(params: TxParams): Promise<PreparedTx> {
+    const walletIndex = params.walletIndex ?? 0
     const from = await this.getAddressAsync()
     const intent = await this.radixSpecificClient
       .constructSimpleTransferIntent(
@@ -827,7 +826,7 @@ export default class Client extends BaseXChainClient {
         params.recipient,
         (params.asset ?? assets[this.getRadixNetwork()]).symbol,
         params.amount.amount().toNumber(),
-        this.getRadixPrivateKey().publicKey(),
+        this.getRadixPrivateKey(walletIndex).publicKey(),
         params.memo,
       )
       .then((response) => response.intent)

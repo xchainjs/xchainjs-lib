@@ -27,7 +27,7 @@ describe('RadixClient Test', () => {
       phrase: phrase,
       feeBounds: { lower: 1, upper: 5 },
     }
-    return new Client(params, 'Ed25519')
+    return new Client(params)
   }
 
   it('Invalid phrase is thrown', async () => {
@@ -36,7 +36,7 @@ describe('RadixClient Test', () => {
       network: Network.Mainnet,
       phrase: phrase,
     }
-    expect(() => new Client(params, 'Ed25519')).toThrowError('Invalid phrase')
+    expect(() => new Client(params)).toThrowError('Invalid phrase')
   })
 
   it('client should be able to get address', async () => {
@@ -51,7 +51,7 @@ describe('RadixClient Test', () => {
       network: Network.Mainnet,
       phrase: phrase,
     }
-    const client = new Client(params, 'Secp256k1')
+    const client = new Client({ ...params, curve: 'Secp256k1' })
     const address: string = await client.getAddressAsync()
     expect(address).toBe('account_rdx16xmah09yu9p9ynrmuc8z3a206n02tsmmkdvlmnx3cgu4s9r59wsxt2')
   })
@@ -108,7 +108,7 @@ describe('RadixClient Test', () => {
       network: Network.Testnet,
       phrase: phrase,
     }
-    const stokenetClient = new Client(params, 'Secp256k1')
+    const stokenetClient = new Client(params)
     const explorerAddress = stokenetClient.getExplorerUrl()
     expect(explorerAddress).toBe('https://stokenet-dashboard.radixdlt.com')
   })
@@ -146,7 +146,7 @@ describe('RadixClient Test', () => {
       phrase: phrase,
       feeBounds: { lower: 1, upper: 5 },
     }
-    const client = new Client(params, 'Ed25519')
+    const client = new Client(params)
     const address: string = await client.getAddressAsync()
     const isValid = await client.validateAddressAsync(address)
     expect(isValid).toBe(true)
@@ -218,7 +218,6 @@ describe('RadixClient Test', () => {
 
     const balances: Balance[] = await client.getBalance(
       'account_rdx16x47guzq44lmplg0ykfn2eltwt5wweylpuupstsxnfm8lgva7tdg2w',
-      [],
     )
     balances.forEach((balance) => {
       expect(balance.amount.gte(0)).toBe(true)

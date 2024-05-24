@@ -33,11 +33,6 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "fund": "ts-node src/utils.ts"
   },
-  "devDependencies": {
-    "@xchainjs/xchain-client": "^0.16.2",
-    "@xchainjs/xchain-crypto": "^0.3.1",
-    "@xchainjs/xchain-util": "^0.13.3"
-  },
   "publishConfig": {
     "access": "public"
   },
