@@ -17,8 +17,8 @@ const TESTNET_EXPLORER_URL = 'https://explorer.theta-testnet.polypore.xyz'
 export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
     [Network.Testnet]: ['https://rpc.sentry-02.theta-testnet.polypore.xyz'],
-    [Network.Stagenet]: ['https://rpc.cosmos.directory/cosmoshub'],
-    [Network.Mainnet]: ['https://rpc.cosmos.directory/cosmoshub'],
+    [Network.Stagenet]: ['https://cosmos-rpc.publicnode.com', 'https://rpc.cosmos.directory/cosmoshub'],
+    [Network.Mainnet]: ['https://cosmos-rpc.publicnode.com', 'https://rpc.cosmos.directory/cosmoshub'],
   }
 }
 
