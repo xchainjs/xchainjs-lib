@@ -18,7 +18,7 @@ import {
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, BaseAmount, assetFromString, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, BaseAmount, assetFromString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
 import { encode, toWords } from 'bech32'
 import BigNumber from 'bignumber.js'
 import { fromSeed } from 'bip32'
@@ -37,6 +37,7 @@ import {
   MAYA_DENOM,
   MSG_DEPOSIT_TYPE_URL,
   MSG_SEND_TYPE_URL,
+  SYNTH_DECIMAL,
   defaultClientConfig,
 } from './const'
 import { DepositParam, DepositTx, TxOfflineParams } from './types'
@@ -173,6 +174,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   public getAssetDecimals(asset: Asset): number {
     if (eqAsset(asset, AssetCacao)) return CACAO_DECIMAL
     if (eqAsset(asset, AssetMaya)) return MAYA_DECIMAL
+    if (isSynthAsset(asset)) return SYNTH_DECIMAL
     return this.defaultDecimals
   }
 
