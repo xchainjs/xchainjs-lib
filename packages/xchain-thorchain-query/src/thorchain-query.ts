@@ -1365,7 +1365,14 @@ export class ThorchainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions.map((action) => {
-        const swapOut = action.out.filter((out) => out.txID !== '')
+        let transaction
+
+        const swapOut = action.out.filter((out) => out.txID !== '') // For non to protocol asset swap
+        transaction = swapOut[0]
+        if (!transaction) {
+          // For to protocol asset swap
+          transaction = action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+        }
         return {
           date: new Date(Number(action.date) / 10 ** 6),
           status: action.status,
@@ -1374,14 +1381,13 @@ export class ThorchainQuery {
             address: action.in[0].address,
             amount: getInboundCryptoAmount(pools, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
           },
-          outboundTx:
-            swapOut.length !== 0
-              ? {
-                  hash: swapOut[0].txID,
-                  address: swapOut[0].address,
-                  amount: getInboundCryptoAmount(pools, swapOut[0].coins[0].asset, swapOut[0].coins[0].amount),
-                }
-              : undefined,
+          outboundTx: transaction
+            ? {
+                hash: transaction.txID,
+                address: transaction.address,
+                amount: getInboundCryptoAmount(pools, transaction.coins[0].asset, transaction.coins[0].amount),
+              }
+            : undefined,
         }
       }),
     }

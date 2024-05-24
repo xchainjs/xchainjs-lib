@@ -69,12 +69,14 @@ describe('Aggregator', () => {
           .toString(),
       },
       out: {
-        hash: thorchainSwap?.outboundTx.hash,
-        address: thorchainSwap?.outboundTx.address,
-        asset: assetToString(thorchainSwap?.outboundTx.amount.asset as Asset),
-        amount: baseToAsset(thorchainSwap?.outboundTx.amount.baseAmount as BaseAmount)
-          .amount()
-          .toString(),
+        hash: thorchainSwap?.outboundTx?.hash,
+        address: thorchainSwap?.outboundTx?.address,
+        asset: thorchainSwap?.outboundTx ? assetToString(thorchainSwap?.outboundTx.amount.asset as Asset) : undefined,
+        amount: thorchainSwap?.outboundTx
+          ? baseToAsset(thorchainSwap?.outboundTx.amount.baseAmount as BaseAmount)
+              .amount()
+              .toString()
+          : undefined,
       },
     }).toEqual({
       date: new Date('2024-03-17T14:29:09.029Z'),
@@ -108,12 +110,14 @@ describe('Aggregator', () => {
           .toString(),
       },
       out: {
-        hash: mayachainSwap?.outboundTx.hash,
-        address: mayachainSwap?.outboundTx.address,
-        asset: assetToString(mayachainSwap?.outboundTx.amount.asset as Asset),
-        amount: baseToAsset(mayachainSwap?.outboundTx.amount.baseAmount as BaseAmount)
-          .amount()
-          .toString(),
+        hash: mayachainSwap?.outboundTx?.hash,
+        address: mayachainSwap?.outboundTx?.address,
+        asset: mayachainSwap?.outboundTx ? assetToString(mayachainSwap.outboundTx.amount.asset as Asset) : undefined,
+        amount: mayachainSwap?.outboundTx
+          ? baseToAsset(mayachainSwap.outboundTx.amount.baseAmount as BaseAmount)
+              .amount()
+              .toString()
+          : undefined,
       },
     }).toEqual({
       date: new Date('2024-03-12T02:28:28.760Z'),
