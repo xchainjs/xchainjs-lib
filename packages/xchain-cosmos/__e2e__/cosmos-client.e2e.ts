@@ -124,7 +124,10 @@ describe('Cosmos client e2e', () => {
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(process.env.PHRASE_MAINNET as string, {
       hdPaths: [makeCosmoshubPath(senderIndex)],
     })
-    const signingClient = await SigningStargateClient.connectWithSigner(getDefaultClientUrls()[Network.Mainnet], signer)
+    const signingClient = await SigningStargateClient.connectWithSigner(
+      getDefaultClientUrls()[Network.Mainnet][0],
+      signer,
+    )
 
     const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
       return { typeUrl: '/cosmos.bank.v1beta1.MsgSend', value: signingClient.registry.decode(message) }
