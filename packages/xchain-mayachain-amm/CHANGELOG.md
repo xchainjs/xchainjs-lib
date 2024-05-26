@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [3863979]
+- Updated dependencies [f29a7ad]
+- Updated dependencies [3c6a033]
+- Updated dependencies [a9fd322]
+  - @xchainjs/xchain-wallet@0.1.17
+  - @xchainjs/xchain-thorchain@1.1.0
+  - @xchainjs/xchain-kujira@0.1.20
+  - @xchainjs/xchain-mayachain@1.0.9
+
 ## 2.0.7
 
 ### Patch Changes

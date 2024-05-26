@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.9
+
+### Patch Changes
+
+- a9fd322: Synthetic assets decimals bug fix
+- Updated dependencies [f29a7ad]
+- Updated dependencies [f29a7ad]
+  - @xchainjs/xchain-cosmos-sdk@0.2.12
+
 ## 1.0.8
 
 ### Patch Changes

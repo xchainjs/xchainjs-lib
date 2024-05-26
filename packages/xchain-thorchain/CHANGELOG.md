@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- f29a7ad: Thorchain Ledger support
+
+### Patch Changes
+
+- Updated dependencies [f29a7ad]
+- Updated dependencies [f29a7ad]
+  - @xchainjs/xchain-cosmos-sdk@0.2.12
+
 ## 1.0.11
 
 ### Patch Changes

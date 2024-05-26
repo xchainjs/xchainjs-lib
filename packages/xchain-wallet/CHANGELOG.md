@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.17
+
+### Patch Changes
+
+- 3863979: The parameters and the return type of the method `getBalances` have been updated. Although the parameter `assets` remains optional, it is now a dictionary where the keys are the chains and the values are the assets of the chain. The response has also been updated, and although it remains as a dictionary where the keys are the chains, the value has a property to let the user if the balances of a chain could be retrieved or not.
+- Updated dependencies [f29a7ad]
+- Updated dependencies [a9fd322]
+  - @xchainjs/xchain-thorchain@1.1.0
+  - @xchainjs/xchain-mayachain@1.0.9
+
 ## 0.1.16
 
 ### Patch Changes

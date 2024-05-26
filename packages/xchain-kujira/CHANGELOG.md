@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.20
+
+### Patch Changes
+
+- 3c6a033: New RPC backup endpoint
+- Updated dependencies [f29a7ad]
+- Updated dependencies [f29a7ad]
+  - @xchainjs/xchain-cosmos-sdk@0.2.12
+
 ## 0.1.19
 
 ### Patch Changes
