@@ -1,3 +1,4 @@
+import { Transaction } from '@xchainjs/xchain-midgard'
 import { LastBlock } from '@xchainjs/xchain-thornode'
 import {
   Address,
@@ -1365,6 +1366,12 @@ export class ThorchainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions.map((action) => {
+        let transaction: Transaction | undefined = action.out.filter((out) => out.txID !== '')[0] // For non to protocol asset swap
+
+        if (!transaction) {
+          // For to protocol asset swap
+          transaction = action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+        }
         return {
           date: new Date(Number(action.date) / 10 ** 6),
           status: action.status,
@@ -1373,11 +1380,13 @@ export class ThorchainQuery {
             address: action.in[0].address,
             amount: getInboundCryptoAmount(pools, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
           },
-          outboundTx: {
-            hash: action.out[0].txID,
-            address: action.out[0].address,
-            amount: getInboundCryptoAmount(pools, action.out[0].coins[0].asset, action.out[0].coins[0].amount),
-          },
+          outboundTx: transaction
+            ? {
+                hash: transaction.txID,
+                address: transaction.address,
+                amount: getInboundCryptoAmount(pools, transaction.coins[0].asset, transaction.coins[0].amount),
+              }
+            : undefined,
         }
       }),
     }

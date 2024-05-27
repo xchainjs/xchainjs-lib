@@ -145,12 +145,14 @@ describe('Aggregator', () => {
             asset: assetToString(swap.inboundTx.amount.asset),
             amount: swap.inboundTx.amount.assetAmount.amount().toString(),
           },
-          outboundTx: {
-            hash: swap.outboundTx.hash,
-            address: swap.outboundTx.address,
-            asset: assetToString(swap.outboundTx.amount.asset),
-            amount: swap.outboundTx.amount.assetAmount.amount().toString(),
-          },
+          outboundTx: swap.outboundTx
+            ? {
+                hash: swap.outboundTx.hash,
+                address: swap.outboundTx.address,
+                asset: assetToString(swap.outboundTx.amount.asset),
+                amount: swap.outboundTx.amount.assetAmount.amount().toString(),
+              }
+            : undefined,
         }
       }),
     )

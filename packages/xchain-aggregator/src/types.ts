@@ -67,7 +67,7 @@ type SwapResume = {
   date: Date
   status: 'success' | 'pending'
   inboundTx: TransactionAction
-  outboundTx: TransactionAction
+  outboundTx?: TransactionAction
 }
 
 type SwapHistory = {
