@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.12
+
+### Patch Changes
+
+- f29a7ad: New protected method `getChainId` to retrieve the network id the client is connected to
+- f29a7ad: New protected method `getAccount` to retrieve the account of a given address
+
 ## 0.2.11
 
 ### Patch Changes
