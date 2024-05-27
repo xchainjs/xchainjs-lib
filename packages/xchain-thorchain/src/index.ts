@@ -1,6 +1,6 @@
 // Re-export all elements from the 'client' module.
-export * from './client'
-
+export { ClientKeystore, ClientKeystore as Client } from './clientKeystore'
+export { ClientLedger } from './clientLedger'
 // Re-export all elements from the 'types' module.
 export * from './types'
 

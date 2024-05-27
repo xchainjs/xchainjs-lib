@@ -1,5 +1,13 @@
 # xchainjs-loans
 
+## 1.0.14
+
+### Patch Changes
+
+- Updated dependencies [3c6a033]
+  - @xchainjs/xchain-cosmos@1.1.5
+  - @xchainjs/xchain-thorchain-amm@1.1.13
+
 ## 1.0.13
 
 ### Patch Changes

@@ -18,7 +18,7 @@ import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
 import { Address, Asset, BaseAmount, Chain, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
 
-import { EvmTxParams, UtxoTxParams } from './types'
+import { ChainBalances, EvmTxParams, UtxoTxParams } from './types'
 
 // Record type to hold network URLs
 export type NodeUrls = Record<Network, string>
@@ -146,9 +146,8 @@ export class Wallet {
    * @param {Chain[]} chains Optional chains to get addresses for, if not provided, returns all wallet addresses
    * @returns Addresses mapped by chain
    */
-  public async getAddresses(chains?: Chain[]): Promise<Record<Chain, Address>> {
-    const _chains: Chain[] = chains || Object.keys(this.clients)
-    const tasks = _chains.map((chain) => {
+  public async getAddresses(chains: Chain[] = Object.keys(this.clients)): Promise<Record<Chain, Address>> {
+    const tasks = chains.map((chain) => {
       return this.getAddress(chain)
     })
 
@@ -156,7 +155,7 @@ export class Wallet {
     const addresses = await Promise.all(tasks)
 
     addresses.map((walletAddress, index) => {
-      walletAddresses[_chains[index]] = walletAddress
+      walletAddresses[chains[index]] = walletAddress
     })
 
     return walletAddresses
@@ -189,21 +188,27 @@ export class Wallet {
    * @param {Assets[]} assets - Optional. Assets of which return the balance
    * @returns {Record<Chain, Balance[]>} Balances by chain
    */
-  public async getBalances(assets?: Asset[]): Promise<Record<Chain, Balance[]>> {
-    const chains: Chain[] = assets ? Array.from(new Set(assets.map((asset) => asset.chain))) : Object.keys(this.clients)
+  public async getBalances(
+    assets: Record<Chain, Asset[] | undefined> = Object.keys(this.clients).reduce((prev, client) => {
+      prev[client] = undefined
+      return prev
+    }, {} as Record<Chain, Asset[] | undefined>),
+  ): Promise<ChainBalances> {
+    const walletBalances: ChainBalances = {}
 
-    const tasks = chains.map(async (chain) => {
-      return await this.getBalance(
-        chain,
-        assets?.filter((asset) => asset.chain === chain),
-      )
-    })
+    const chains = Object.keys(assets)
 
-    const walletBalances: Record<Chain, Balance[]> = {}
-    const balances = await Promise.all(tasks)
+    const results = await Promise.allSettled(
+      chains.map((chain) => {
+        return this.getBalance(chain, assets[chain])
+      }),
+    )
 
-    balances.map((chainBalance, index) => {
-      walletBalances[chains[index]] = chainBalance
+    results.forEach((chainBalance, index) => {
+      if (chainBalance.status === 'fulfilled') {
+        walletBalances[chains[index]] = { status: 'fulfilled', balances: chainBalance.value }
+      } else if (chainBalance.status === 'rejected')
+        walletBalances[chains[index]] = { status: 'rejected', reason: chainBalance.reason }
     })
 
     return walletBalances
@@ -237,10 +242,8 @@ export class Wallet {
    * @param {Chain[]} chains - Optional. Chain of which return the transaction history
    * @returns {TxsPage} the chain transaction history
    */
-  public async getTransactionsHistories(chains?: Chain[]): Promise<Record<Chain, TxsPage>> {
-    const _chains: Chain[] = chains || Object.keys(this.clients)
-
-    const tasks = _chains.map(async (chain) => {
+  public async getTransactionsHistories(chains: Chain[] = Object.keys(this.clients)): Promise<Record<Chain, TxsPage>> {
+    const tasks = chains.map(async (chain) => {
       return this.getTransactionsHistory(chain)
     })
 
@@ -248,7 +251,7 @@ export class Wallet {
     const histories = await Promise.all(tasks)
 
     histories.map((history, index) => {
-      walletHistories[_chains[index]] = history
+      walletHistories[chains[index]] = history
     })
 
     return walletHistories

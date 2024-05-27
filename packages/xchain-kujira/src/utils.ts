@@ -11,12 +11,14 @@ export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
     [Network.Testnet]: ['https://kujira-testnet-rpc.polkachu.com'],
     [Network.Stagenet]: [
+      'https://kujira-rpc.publicnode.com',
       'https://rpc.cosmos.directory/kujira',
       'https://kujira-rpc.polkachu.com',
       'https://kujira.rpc.ghostinnet.com',
       'https://kujira-rpc.ibs.team',
     ],
     [Network.Mainnet]: [
+      'https://kujira-rpc.publicnode.com',
       'https://rpc.cosmos.directory/kujira',
       'https://kujira-rpc.polkachu.com',
       'https://kujira.rpc.ghostinnet.com',
