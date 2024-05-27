@@ -18,7 +18,7 @@ type Fees = {
   outboundFee: CryptoAmount // The outbound fee amount
 }
 
-type Protocol = 'Thorchain' | 'Mayachain'
+type Protocol = 'Thorchain' | 'Mayachain' | 'Chainflip'
 
 /**
  * Represents a quote for a swap operation.

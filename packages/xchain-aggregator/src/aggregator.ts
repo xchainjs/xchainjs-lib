@@ -1,7 +1,7 @@
 import { assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { MayachainProtocol, ThorchainProtocol } from './protocols'
+import { ChainflipProtocol, MayachainProtocol, ThorchainProtocol } from './protocols'
 import {
   IProtocol,
   Protocol,
@@ -18,7 +18,7 @@ export class Aggregator {
   private protocols: IProtocol[]
 
   constructor(wallet?: Wallet) {
-    this.protocols = [new ThorchainProtocol(wallet), new MayachainProtocol(wallet)]
+    this.protocols = [new ThorchainProtocol(wallet), new MayachainProtocol(wallet), new ChainflipProtocol(wallet)]
   }
 
   /**
