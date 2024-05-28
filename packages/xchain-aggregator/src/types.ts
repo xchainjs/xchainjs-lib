@@ -29,6 +29,7 @@ type QuoteSwap = {
   memo: string // The memo associated with the swap
   expectedAmount: CryptoAmount // The expected amount to be received after the swap
   dustThreshold: CryptoAmount // The dust threshold for the swap
+  // TODO: Update type to return an array of the fees
   fees: Fees // The fees associated with the swap
   totalSwapSeconds: number // The total time for the swap operation
   slipBasisPoints: number // The slip basis points for the swap
