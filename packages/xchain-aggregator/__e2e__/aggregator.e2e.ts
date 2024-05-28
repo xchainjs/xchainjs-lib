@@ -50,6 +50,8 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
   })
 }
 
+jest.deepUnmock('@chainflip/sdk/swap')
+
 describe('Aggregator', () => {
   let aggregator: Aggregator
   let wallet: Wallet
