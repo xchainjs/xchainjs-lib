@@ -1,12 +1,14 @@
 import { AssetData, SwapSDK } from '@chainflip/sdk/swap'
 import { Asset, CachedValue, Chain, CryptoAmount, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
-// import { Fees } from '@xchainjs/xchain-client'
 
 import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
 
 import { cChainToXChain, xAssetToCAsset } from './utils'
 
+/**
+ * Chainflip protocol
+ */
 export class ChainflipProtocol implements IProtocol {
   public readonly name = 'Chainflip'
   private sdk: SwapSDK
@@ -23,6 +25,11 @@ export class ChainflipProtocol implements IProtocol {
     }, 24 * 60 * 60 * 1000)
   }
 
+  /**
+   * Check if an asset is supported in the protocol
+   * @param {Asset} asset Asset to check if it is supported
+   * @returns {boolean} True if the asset is supported, otherwise false
+   */
   public async isAssetSupported(asset: Asset): Promise<boolean> {
     if (isSynthAsset(asset)) return false
     try {
@@ -33,11 +40,21 @@ export class ChainflipProtocol implements IProtocol {
     }
   }
 
+  /**
+   * Retrieve the supported chains by the protocol
+   * @returns {Chain[]} the supported chains by the protocol
+   */
   public async getSupportedChains(): Promise<Chain[]> {
     const chains = await this.sdk.getChains()
     return chains.map((chain) => cChainToXChain(chain.chain)).filter((chain) => chain !== null) as Chain[]
   }
 
+  /**
+   * Estimate swap by validating the swap parameters.
+   *
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
+   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
+   */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const srcAssetData = await this.getAssetData(params.fromAsset)
     const destAssetData = await this.getAssetData(params.destinationAsset)
@@ -45,7 +62,7 @@ export class ChainflipProtocol implements IProtocol {
     try {
       let toAddress = ''
       if (params.destinationAddress) {
-        const depositAddressResponse = await this.sdk.requestDepositAddress({
+        const { depositAddress } = await this.sdk.requestDepositAddress({
           srcChain: srcAssetData.chain,
           srcAsset: srcAssetData.asset,
           destChain: destAssetData.chain,
@@ -54,7 +71,7 @@ export class ChainflipProtocol implements IProtocol {
           amount: params.amount.baseAmount.amount().toString(),
         })
 
-        toAddress = depositAddressResponse.depositAddress
+        toAddress = depositAddress
       }
 
       const { quote } = await this.sdk.getQuote({
@@ -86,7 +103,7 @@ export class ChainflipProtocol implements IProtocol {
           ? 'Do not cache this response. Do not send funds after the expiry. The difference in the chainflip swap rate (excluding fees) is lower than the global index rate of the swap by more than a certain threshold (currently set to 5%)'
           : 'Do not cache this response. Do not send funds after the expiry.',
         errors: [],
-        slipBasisPoints: quote.boostQuote?.estimatedBoostFeeBps || 0,
+        slipBasisPoints: 0,
         fees: {
           asset: params.destinationAsset,
           outboundFee: new CryptoAmount(
@@ -123,6 +140,11 @@ export class ChainflipProtocol implements IProtocol {
     }
   }
 
+  /**
+   * Perform a swap operation between assets.
+   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
+   */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     const quoteSwap = await this.estimateSwap(params)
     if (!quoteSwap.canSwap) {
@@ -142,15 +164,29 @@ export class ChainflipProtocol implements IProtocol {
     }
   }
 
-  getSwapHistory(): Promise<SwapHistory> {
+  /**
+   * Get historical swaps
+   * @throws {Error} - Method not implemented.
+   * @returns the swap history
+   */
+  public async getSwapHistory(): Promise<SwapHistory> {
     throw new Error('Method not implemented.')
   }
 
+  /**
+   * Get asset data
+   * @param {Asset} asset - Asset of which return data
+   * @throws {Error} - If asset is not supported in Chainflip
+   * @returns the asset data
+   */
   private async getAssetData(asset: Asset): Promise<AssetData> {
     const chainAssets = await this.assetsData.getValue()
     const assetData = chainAssets.find((chainAsset) => {
       const contractAddress = asset.symbol.split('-').length > 1 ? asset.symbol.split('-')[1] : undefined
-      return chainAsset.asset === xAssetToCAsset(asset) && chainAsset.contractAddress === contractAddress
+      return (
+        chainAsset.asset === xAssetToCAsset(asset) &&
+        chainAsset.contractAddress?.toLowerCase() === contractAddress?.toLowerCase()
+      )
     })
     if (!assetData) throw Error(`${asset.ticker} asset not supported in ${asset.chain} chain`)
     return assetData
