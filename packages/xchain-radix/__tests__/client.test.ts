@@ -11,6 +11,7 @@ import { Asset, baseAmount } from '@xchainjs/xchain-util'
 
 import {
   mockCommittedDetailsResponse,
+  mockEntityDeatilsResponse,
   mockStreamTransactionsResponse,
   mockTransactionPreviewResponse,
   stateEntityFungiblesPageResponse,
@@ -216,6 +217,9 @@ describe('RadixClient Test', () => {
     const stateEntityNonFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityNonFungiblesPageResponse)
     client.radixClient.gatewayClient.state.innerClient.entityNonFungiblesPage = stateEntityNonFungiblesPageResponseMock
 
+    const stateEntityDetailsResponseMock = jest.fn().mockResolvedValue(mockEntityDeatilsResponse)
+    client.radixClient.gatewayClient.state.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
+
     const balances: Balance[] = await client.getBalance(
       'account_rdx16x47guzq44lmplg0ykfn2eltwt5wweylpuupstsxnfm8lgva7tdg2w',
     )
@@ -232,6 +236,9 @@ describe('RadixClient Test', () => {
 
     const stateEntityNonFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityNonFungiblesPageResponse)
     client.radixClient.gatewayClient.state.innerClient.entityNonFungiblesPage = stateEntityNonFungiblesPageResponseMock
+
+    const stateEntityDetailsResponseMock = jest.fn().mockResolvedValue(mockEntityDeatilsResponse)
+    client.radixClient.gatewayClient.state.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
 
     const assets: Asset[] = [
       {

@@ -4,6 +4,7 @@ import {
   GatewayApiClient,
   NonFungibleResourcesCollectionItem,
   PublicKey as GatewayPublicKey,
+  StateEntityDetailsVaultResponseItem,
   StateEntityFungiblesPageRequest,
   StateEntityFungiblesPageResponse,
   StateEntityNonFungiblesPageRequest,
@@ -134,38 +135,63 @@ export class RadixSpecificClient {
 
   public async fetchBalances(address: string): Promise<Balance[]> {
     const fungibleResources = await this.fetchFungibleResources(address)
-    const nonFungibleResources = await this.fetchNonFungibleResources(address)
     const fungibleBalances = this.convertResourcesToBalances(fungibleResources)
-    const nonFungibleBalances = this.convertResourcesToBalances(nonFungibleResources)
-    const balances = fungibleBalances.concat(nonFungibleBalances)
-    return balances
+    return fungibleBalances
   }
 
-  private convertResourcesToBalances(
+  public async fetchNFTBalances(address: string): Promise<Balance[]> {
+    const nonFungibleResources = await this.fetchNonFungibleResources(address)
+    const nonFungibleBalances = this.convertResourcesToBalances(nonFungibleResources)
+    return nonFungibleBalances
+  }
+
+  private async convertResourcesToBalances(
     resources: FungibleResourcesCollectionItem[] | NonFungibleResourcesCollectionItem[],
-  ): Balance[] {
+  ): Promise<Balance[]> {
     const balances: Balance[] = []
-    // Iterate through nonFungibleResources
-    resources.forEach((item) => {
-      if (item.aggregation_level === 'Global') {
-        const asset: Asset = {
-          chain: RadixChain,
-          symbol: item.resource_address,
-          ticker: item.resource_address,
-          synth: false,
-        }
+    const BATCH_SIZE = 50
 
-        // We need to do this because item.amount can be either string or number
-        // depending on the type of resource
-        const amount = typeof item.amount === 'string' ? parseFloat(item.amount) : item.amount
+    // Split resources into batches of up to 50 items
+    const resourceBatches = []
+    for (let i = 0; i < resources.length; i += BATCH_SIZE) {
+      resourceBatches.push(resources.slice(i, i + BATCH_SIZE))
+    }
 
-        const balance: Balance = {
-          asset: asset,
-          amount: assetToBase(assetAmount(amount)),
+    for (const batch of resourceBatches) {
+      const addresses = batch.map((item) => item.resource_address)
+      const response: StateEntityDetailsVaultResponseItem[] =
+        await this.gatewayClient.state.getEntityDetailsVaultAggregated(addresses)
+
+      const divisibilities = new Map<string, number>()
+      response.forEach((result) => {
+        if (result.details !== undefined) {
+          if (result.details.type === 'FungibleResource') {
+            divisibilities.set(result.address, result.details.divisibility)
+          }
         }
-        balances.push(balance)
-      }
-    })
+      })
+      batch.forEach((item) => {
+        if (item.aggregation_level === 'Global') {
+          const asset: Asset = {
+            chain: RadixChain,
+            symbol: item.resource_address,
+            ticker: item.resource_address,
+            synth: false,
+          }
+          const divisibility = divisibilities.get(item.resource_address) || 0
+          // We need to do this because item.amount can be either string or number
+          // depending on the type of resource
+          const amount = typeof item.amount === 'string' ? parseFloat(item.amount) : item.amount
+
+          const balance: Balance = {
+            asset: asset,
+            amount: assetToBase(assetAmount(amount, divisibility)),
+          }
+          balances.push(balance)
+        }
+      })
+    }
+    // Iterate through resources
     return balances
   }
 

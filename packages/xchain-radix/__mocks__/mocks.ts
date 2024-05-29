@@ -1,4 +1,5 @@
 import {
+  StateEntityDetailsVaultResponseItem,
   StateEntityFungiblesPageResponse,
   StateEntityNonFungiblesPageResponse,
   TransactionCommittedDetailsResponse,
@@ -298,6 +299,484 @@ export const mockCommittedDetailsResponse: TransactionCommittedDetailsResponse =
     manifest_classes: ['Transfer', 'General'],
   },
 }
+
+export const mockEntityDeatilsResponse: StateEntityDetailsVaultResponseItem[] = [
+  {
+    address: 'resource_rdx1t480axsxfrps66t3cw89mtusmssgrnf2y22q6vw709ez4cupc9sjdv',
+    fungible_resources: {
+      total_count: 0,
+      items: [],
+    },
+    non_fungible_resources: {
+      total_count: 0,
+      items: [],
+    },
+    metadata: {
+      total_count: 5,
+      items: [
+        {
+          key: 'tags',
+          value: {
+            raw_hex: '5c228001200c00',
+            programmatic_json: {
+              kind: 'Enum',
+              variant_id: 128,
+              fields: [
+                {
+                  kind: 'Array',
+                  element_kind: 'String',
+                  elements: [],
+                },
+              ],
+            },
+            typed: {
+              type: 'StringArray',
+              values: [],
+            },
+          },
+          is_locked: true,
+          last_updated_at_state_version: 3,
+        },
+        {
+          key: 'icon_url',
+          value: {
+            raw_hex:
+              '5c220d010c3d68747470733a2f2f6173736574732e7261646978646c742e636f6d2f69636f6e732f69636f6e2d6c69717569645f7374616b655f756e6974732e706e67',
+            programmatic_json: {
+              kind: 'Enum',
+              variant_id: 13,
+              fields: [
+                {
+                  kind: 'String',
+                  value: 'https://assets.radixdlt.com/icons/icon-liquid_stake_units.png',
+                },
+              ],
+            },
+            typed: {
+              type: 'Url',
+              value: 'https://assets.radixdlt.com/icons/icon-liquid_stake_units.png',
+            },
+          },
+          is_locked: true,
+          last_updated_at_state_version: 3,
+        },
+        {
+          key: 'description',
+          value: {
+            raw_hex:
+              '5c2200010c694c6971756964205374616b6520556e697420746f6b656e73207468617420726570726573656e7420612070726f706f7274696f6e206f6620585244207374616b652064656c65676174656420746f2061205261646978204e6574776f726b2076616c696461746f722e',
+            programmatic_json: {
+              kind: 'Enum',
+              variant_id: 0,
+              fields: [
+                {
+                  kind: 'String',
+                  value:
+                    'Liquid Stake Unit tokens that represent a proportion of XRD stake delegated to a Radix Network validator.',
+                },
+              ],
+            },
+            typed: {
+              type: 'String',
+              value:
+                'Liquid Stake Unit tokens that represent a proportion of XRD stake delegated to a Radix Network validator.',
+            },
+          },
+          is_locked: true,
+          last_updated_at_state_version: 3,
+        },
+        {
+          key: 'validator',
+          value: {
+            raw_hex: '5c220801808329428aca1155e76f05aeab620492fae43be7f8d8cc7a9f468fa0cd1ba3',
+            programmatic_json: {
+              kind: 'Enum',
+              variant_id: 8,
+              fields: [
+                {
+                  kind: 'Reference',
+                  value: 'validator_rdx1sv559zk2z927wmc9464kypyjltjrhelcmrx8486x37sv6xartj5x8h',
+                },
+              ],
+            },
+            typed: {
+              type: 'GlobalAddress',
+              value: 'validator_rdx1sv559zk2z927wmc9464kypyjltjrhelcmrx8486x37sv6xartj5x8h',
+            },
+          },
+          is_locked: true,
+          last_updated_at_state_version: 3,
+        },
+        {
+          key: 'name',
+          value: {
+            raw_hex: '5c2200010c124c6971756964205374616b6520556e697473',
+            programmatic_json: {
+              kind: 'Enum',
+              variant_id: 0,
+              fields: [
+                {
+                  kind: 'String',
+                  value: 'Liquid Stake Units',
+                },
+              ],
+            },
+            typed: {
+              type: 'String',
+              value: 'Liquid Stake Units',
+            },
+          },
+          is_locked: true,
+          last_updated_at_state_version: 3,
+        },
+      ],
+    },
+    details: {
+      type: 'FungibleResource',
+      role_assignments: {
+        owner: {
+          rule: {
+            type: 'Protected',
+            access_rule: {
+              type: 'ProofRule',
+              proof_rule: {
+                type: 'Require',
+                requirement: {
+                  type: 'NonFungible',
+                  non_fungible: {
+                    local_id: {
+                      id_type: 'Bytes',
+                      sbor_hex: '5cc002206f4d519f1bbc994fd7399ebecb16de79a441d4a9fae9e85cb78801e787e69ad5',
+                      simple_rep: '[6f4d519f1bbc994fd7399ebecb16de79a441d4a9fae9e85cb78801e787e69ad5]',
+                    },
+                    resource_address: 'resource_rdx1nfxxxxxxxxxxglcllrxxxxxxxxx002350006550xxxxxxxxxglcllr',
+                  },
+                },
+              },
+            },
+          },
+          updater: 'None',
+        },
+        entries: [
+          {
+            role_key: {
+              name: 'burner',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'Protected',
+                access_rule: {
+                  type: 'ProofRule',
+                  proof_rule: {
+                    type: 'Require',
+                    requirement: {
+                      type: 'NonFungible',
+                      non_fungible: {
+                        local_id: {
+                          id_type: 'Bytes',
+                          sbor_hex: '5cc002206f4d519f1bbc994fd7399ebecb16de79a441d4a9fae9e85cb78801e787e69ad5',
+                          simple_rep: '[6f4d519f1bbc994fd7399ebecb16de79a441d4a9fae9e85cb78801e787e69ad5]',
+                        },
+                        resource_address: 'resource_rdx1nfxxxxxxxxxxglcllrxxxxxxxxx002350006550xxxxxxxxxglcllr',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            updater_roles: [
+              {
+                name: 'burner_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'minter',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'Protected',
+                access_rule: {
+                  type: 'ProofRule',
+                  proof_rule: {
+                    type: 'Require',
+                    requirement: {
+                      type: 'NonFungible',
+                      non_fungible: {
+                        local_id: {
+                          id_type: 'Bytes',
+                          sbor_hex: '5cc002206f4d519f1bbc994fd7399ebecb16de79a441d4a9fae9e85cb78801e787e69ad5',
+                          simple_rep: '[6f4d519f1bbc994fd7399ebecb16de79a441d4a9fae9e85cb78801e787e69ad5]',
+                        },
+                        resource_address: 'resource_rdx1nfxxxxxxxxxxglcllrxxxxxxxxx002350006550xxxxxxxxxglcllr',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            updater_roles: [
+              {
+                name: 'minter_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'freezer',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'freezer_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'recaller',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'recaller_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'depositor',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'AllowAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'depositor_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'withdrawer',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'AllowAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'withdrawer_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'burner_updater',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'burner_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'minter_updater',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'minter_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'freezer_updater',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'freezer_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'recaller_updater',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'recaller_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'depositor_updater',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'depositor_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'withdrawer_updater',
+              module: 'Main',
+            },
+            assignment: {
+              resolution: 'Explicit',
+              explicit_rule: {
+                type: 'DenyAll',
+              },
+            },
+            updater_roles: [
+              {
+                name: 'withdrawer_updater',
+                module: 'Main',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'metadata_locker',
+              module: 'Metadata',
+            },
+            assignment: {
+              resolution: 'Owner',
+            },
+            updater_roles: [
+              {
+                name: 'metadata_locker_updater',
+                module: 'Metadata',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'metadata_locker_updater',
+              module: 'Metadata',
+            },
+            assignment: {
+              resolution: 'Owner',
+            },
+            updater_roles: [
+              {
+                name: 'metadata_locker_updater',
+                module: 'Metadata',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'metadata_setter',
+              module: 'Metadata',
+            },
+            assignment: {
+              resolution: 'Owner',
+            },
+            updater_roles: [
+              {
+                name: 'metadata_setter_updater',
+                module: 'Metadata',
+              },
+            ],
+          },
+          {
+            role_key: {
+              name: 'metadata_setter_updater',
+              module: 'Metadata',
+            },
+            assignment: {
+              resolution: 'Owner',
+            },
+            updater_roles: [
+              {
+                name: 'metadata_setter_updater',
+                module: 'Metadata',
+              },
+            ],
+          },
+        ],
+      },
+      divisibility: 18,
+      total_supply: '74548756.467659626333250862',
+      total_minted: '89655544.615103837636251448',
+      total_burned: '15106788.147444211303000586',
+    },
+  },
+]
 
 export const mockConstructionMetadataResponse = {
   ledger_state: {
