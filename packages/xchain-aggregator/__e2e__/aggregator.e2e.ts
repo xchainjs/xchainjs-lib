@@ -7,9 +7,9 @@ import {
   defaultBTCParams as defaultBtcParams,
 } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH } from '@xchainjs/xchain-ethereum'
+import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
-import { CryptoAmount, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { Aggregator, QuoteSwap } from '../src'
@@ -60,6 +60,11 @@ describe('Aggregator', () => {
     const phrase = process.env.PHRASE_MAINNET
     wallet = new Wallet({
       BTC: new BtcClient({ ...defaultBtcParams, phrase, network: Network.Mainnet }),
+      ETH: new EthClient({
+        ...defaultEthParams,
+        phrase,
+        network: Network.Mainnet,
+      }),
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
     })
@@ -114,6 +119,33 @@ describe('Aggregator', () => {
       destinationAsset: AssetAVAX,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
       destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should do ERC20 swap using chosen protocol', async () => {
+    const txEstimatedSwap = await aggregator.estimateSwap({
+      fromAsset: assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7'),
+      destinationAsset: AssetETH,
+      amount: new CryptoAmount(
+        assetToBase(assetAmount(20, 6)),
+        assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7'),
+      ),
+      destinationAddress: await wallet.getAddress(AssetETH.chain),
+    })
+
+    printQuoteSwap(txEstimatedSwap)
+
+    const txSubmitted = await aggregator.doSwap({
+      protocol: txEstimatedSwap.protocol,
+      fromAsset: assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7'),
+      destinationAsset: AssetETH,
+      amount: new CryptoAmount(
+        assetToBase(assetAmount(20, 6)),
+        assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7'),
+      ),
+      destinationAddress: await wallet.getAddress(AssetETH.chain),
     })
 
     console.log(txSubmitted)
