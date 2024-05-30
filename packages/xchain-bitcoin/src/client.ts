@@ -161,7 +161,8 @@ abstract class Client extends UTXOClient {
     }
     // Use the coinselect library to determine the inputs and outputs for the transaction.
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-    // If no suitable inputs or outputs are found, throw an error indicating insufficient balance.
+
+    // If no suitable inputs or outputs are found, throw an error indicating insuffic ient balance.
     if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
     // Initialize a new Bitcoin PSBT object.
     const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) }) // Network-specific
@@ -179,7 +180,7 @@ abstract class Client extends UTXOClient {
     outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
       // If the output address is not specified, it's considered a change address and set to the sender's address.
       if (!output.address) {
-        //an empty address means this is the  change ddress
+        //an empty address means this is the change address
         output.address = sender
       }
       // Add the output to the PSBT.

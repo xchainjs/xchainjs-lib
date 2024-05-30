@@ -122,8 +122,8 @@ class ClientKeepKey extends Client {
     // outputs
     const outputs = psbt.txOutputs
       .map((output) => {
-        const { value, address, change } = output as psbtTxOutput
-        if (change || address === sender) {
+        const { value, address } = output as psbtTxOutput
+        if (address === sender) {
           return {
             addressNList: bip32ToAddressNList(path),
             isChange: true,
@@ -139,21 +139,23 @@ class ClientKeepKey extends Client {
         return null
       })
       .filter(Boolean)
-
     // sign tx
-    const signedTx = await app.utxo.utxoSignTransaction({
+    const signPayLoad = {
       coin: coinType,
       inputs,
       outputs,
+      version: 1,
+      locktime: 0,
       opReturnData: memo,
-    })
-
+    }
+    const signedTx = await app.utxo.utxoSignTransaction(signPayLoad)
+    console.log(signedTx)
     if (!signedTx) {
       throw new Error('Failed to sign transaction with KeepKey')
     }
 
     // Broadcast
-    const txHash = await this.broadcastTx(signedTx.toString())
+    const txHash = 'await this.broadcastTx(signedTx.toString())'
     if (!txHash) {
       throw new Error('Failed to broadcast transaction')
     }
