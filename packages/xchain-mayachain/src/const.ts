@@ -48,7 +48,7 @@ export const MAYAChain = 'MAYA' as const
 /**
  * Default fee for MayaChain transactions.
  */
-export const DEFAULT_FEE = baseAmount(5000000000, CACAO_DECIMAL)
+export const DEFAULT_FEE = baseAmount(2000000000, CACAO_DECIMAL)
 
 /**
  * Base "chain" asset on MayaChain main net.
