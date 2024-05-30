@@ -51,7 +51,9 @@ export class Aggregator {
     })
 
     if (!optimalSwap)
-      throw Error(`Can not estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.fromAsset)}`)
+      throw Error(
+        `Can not estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
+      )
 
     return optimalSwap
   }
