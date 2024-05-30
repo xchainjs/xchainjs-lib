@@ -75,10 +75,10 @@ describe('Chainflip protocol', () => {
       fromAsset: AssetETH,
       destinationAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
-      destinationAddress: await wallet.getAddress('BTC'),
+      destinationAddress: 'BITCOINFakeAddress',
     })
     expect(estimatedSwap.protocol).toBe('Chainflip')
-    expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeaddress')
+    expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeAddress')
     expect(estimatedSwap.memo).toBe('')
     expect(assetToString(estimatedSwap.expectedAmount.asset)).toBe('BTC.BTC')
     expect(estimatedSwap.expectedAmount.baseAmount.amount().toString()).toBe('51193')
@@ -106,7 +106,7 @@ describe('Chainflip protocol', () => {
       fromAsset: USDT,
       destinationAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount(20, 6)), USDT),
-      destinationAddress: await wallet.getAddress('ETH'),
+      destinationAddress: 'ETHEREUMfakeaddress',
     })
     expect(estimatedSwap.protocol).toBe('Chainflip')
     expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeaddress')
@@ -137,7 +137,7 @@ describe('Chainflip protocol', () => {
       fromAsset: AssetETH,
       destinationAsset: USDT,
       amount: new CryptoAmount(assetToBase(assetAmount(0.01, 18)), AssetETH),
-      destinationAddress: await wallet.getAddress('ETH'),
+      destinationAddress: 'ETHEREUMfakeaddress',
     })
     expect(estimatedSwap.protocol).toBe('Chainflip')
     expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeaddress')
