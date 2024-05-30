@@ -78,7 +78,7 @@ describe('Chainflip protocol', () => {
       destinationAddress: 'BITCOINFakeAddress',
     })
     expect(estimatedSwap.protocol).toBe('Chainflip')
-    expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeAddress')
+    expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeaddress')
     expect(estimatedSwap.memo).toBe('')
     expect(assetToString(estimatedSwap.expectedAmount.asset)).toBe('BTC.BTC')
     expect(estimatedSwap.expectedAmount.baseAmount.amount().toString()).toBe('51193')
