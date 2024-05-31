@@ -30,7 +30,7 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:thornode && yarn generate:types:thornode",
-    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://gitlab.com/thorchain/thornode/-/raw/release-1.130.0/openapi/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --skip-validate-spec --generate-alias-as-model",
+    "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://gitlab.com/thorchain/thornode/-/raw/release-1.132.0/openapi/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --skip-validate-spec --generate-alias-as-model",
     "clean:types:thornode": "rimraf ./src/generated/thornodeApi"
   },
   "dependencies": {
