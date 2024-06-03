@@ -6,7 +6,7 @@ import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { ChainflipProtocol } from '../src/protocols'
+import { ChainflipProtocol } from '../src/protocols/chainflip'
 
 jest.setTimeout(60000)
 

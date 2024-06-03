@@ -15,6 +15,7 @@ import mockMayaMidgardApi from '../__mocks__/mayachain/midgard/api'
 import mockThorMidgardApi from '../__mocks__/thorchain/midgard/api'
 import mockMayanodeApi from '../__mocks__/thorchain/thornode/api'
 import { Aggregator } from '../src'
+import { SupportedProtocols } from '../src/const'
 
 describe('Aggregator', () => {
   let aggregator: Aggregator
@@ -35,6 +36,24 @@ describe('Aggregator', () => {
     mockThorMidgardApi.restore()
     mockMayanodeApi.restore()
     mockMayaMidgardApi.restore()
+  })
+
+  it('Should init with no parameters', () => {
+    expect(() => new Aggregator()).not.toThrowError()
+  })
+
+  it('Should init with all protocols enabled', () => {
+    const aggregator = new Aggregator()
+    expect(aggregator.getConfiguration().protocols.length).toBe(SupportedProtocols.length)
+  })
+
+  it('Should init with custom protocols enabled', () => {
+    const aggregator = new Aggregator({ protocols: ['Thorchain'] })
+    expect(aggregator.getConfiguration().protocols.length).toBe(1)
+  })
+
+  it('Should throw error if no protocols enabled', () => {
+    expect(() => new Aggregator({ protocols: [] })).toThrowError('No protocols enabled')
   })
 
   it('Should find swap with greatest expected amount', async () => {

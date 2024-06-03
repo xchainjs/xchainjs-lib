@@ -1,5 +1,6 @@
 import { TxHash } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 /**
  * TxSubmitted
@@ -19,6 +20,11 @@ type Fees = {
 }
 
 type Protocol = 'Thorchain' | 'Mayachain' | 'Chainflip'
+
+export type Config = {
+  protocols: Protocol[]
+  wallet?: Wallet
+}
 
 /**
  * Represents a quote for a swap operation.
@@ -77,7 +83,7 @@ type SwapHistory = {
 }
 
 interface IProtocol {
-  name: string
+  name: Protocol
   isAssetSupported(asset: Asset): Promise<boolean>
   getSupportedChains(): Promise<Chain[]>
   estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>

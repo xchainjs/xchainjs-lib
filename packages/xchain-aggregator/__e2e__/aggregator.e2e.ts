@@ -68,7 +68,7 @@ describe('Aggregator', () => {
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
     })
-    aggregator = new Aggregator(wallet)
+    aggregator = new Aggregator({ wallet })
   })
 
   it('Should find swap with greatest expected amount', async () => {

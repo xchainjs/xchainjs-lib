@@ -1,8 +1,9 @@
 import { assetToString } from '@xchainjs/xchain-util'
-import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { ChainflipProtocol, MayachainProtocol, ThorchainProtocol } from './protocols'
+import { DEFAULT_CONFIG } from './const'
+import { ProtocolFactory } from './protocols'
 import {
+  Config,
   IProtocol,
   Protocol,
   QuoteSwap,
@@ -16,9 +17,38 @@ import {
 // Class definition for an Aggregator
 export class Aggregator {
   private protocols: IProtocol[]
+  private config: Config
 
-  constructor(wallet?: Wallet) {
-    this.protocols = [new ThorchainProtocol(wallet), new MayachainProtocol(wallet), new ChainflipProtocol(wallet)]
+  constructor(config?: Partial<Config>) {
+    this.protocols = config?.protocols
+      ? config.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, config.wallet))
+      : ProtocolFactory.getAllProtocols(config?.wallet)
+
+    if (this.protocols.length === 0) throw Error('No protocols enabled')
+
+    this.config = { ...DEFAULT_CONFIG, ...config, protocols: this.protocols.map((protocol) => protocol.name) }
+  }
+
+  /**
+   * Get the current Aggregator configuration
+   * @returns {Omit<Config, 'wallet'>} the current Aggregator configuration
+   */
+  public getConfiguration(): Omit<Config, 'wallet'> {
+    return this.config
+  }
+
+  /**
+   * Update the Aggregator configuration
+   * @param {Configuration} config
+   */
+  public setConfiguration(config: Config) {
+    this.protocols = config?.protocols
+      ? config.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, config.wallet))
+      : ProtocolFactory.getAllProtocols(config?.wallet)
+
+    if (this.protocols.length === 0) throw Error('No protocols enabled')
+
+    this.config = { ...DEFAULT_CONFIG, ...config, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
   /**
