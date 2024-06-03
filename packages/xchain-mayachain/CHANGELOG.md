@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.10
+
+### Patch Changes
+
+- 9d4c162: correct default fee from 0.5 to 0.2
+
 ## 1.0.9
 
 ### Patch Changes
