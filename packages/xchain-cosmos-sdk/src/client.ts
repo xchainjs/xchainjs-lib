@@ -1,6 +1,14 @@
 import { fromBase64, fromBech32 } from '@cosmjs/encoding'
 import { Coin, GeneratedType, Registry } from '@cosmjs/proto-signing'
-import { Block, DeliverTxResponse, IndexedTx, StargateClient, StdFee, defaultRegistryTypes } from '@cosmjs/stargate'
+import {
+  Account,
+  Block,
+  DeliverTxResponse,
+  IndexedTx,
+  StargateClient,
+  StdFee,
+  defaultRegistryTypes,
+} from '@cosmjs/stargate'
 import {
   AssetInfo,
   Balance,
@@ -336,6 +344,27 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   /**
+   * Get the chain id of the network connected the client is connected
+   * @returns {string} - The chain id
+   * @throws {Error} If the chain id can not be retrieved
+   */
+  protected async getChainId(): Promise<string> {
+    return this.roundRobinGetChainId()
+  }
+
+  /**
+   * Get the account of an address
+   * @param {Address} address - The address of which return the account
+   * @returns {Account} - The address account
+   * @throws {Error} If the account can not be retrieved
+   */
+  protected async getAccount(address: Address): Promise<Account> {
+    const account = await this.roundRobinGetAccount(address)
+    if (!account) throw Error('Con not retrieve account. Account is null')
+    return account
+  }
+
+  /**
    * Connect to each url provided
    *
    * @param {string[]} urls URLs of the providers to connect
@@ -406,6 +435,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       try {
         const tx = await client.getTx(txId)
         if (!tx) throw Error(`Can not find transaction ${txId}`)
+        return tx
       } catch {}
     }
 
@@ -446,6 +476,41 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
 
     throw Error(`No clients available. Can not search transaction`)
+  }
+
+  /**
+   * Get the account of an address making a round robin system over the stargate clients
+   * @param {Address} address - The address of which return the account
+   * @returns {Account | null} - The account if it is found
+   * @throws {Error} If the account can not be retrieved from the stargate clients
+   */
+  private async roundRobinGetAccount(address: Address): Promise<Account | null> {
+    const clients = await this.stargateClients.getValue()
+
+    for (const client of clients) {
+      try {
+        return await client.getAccount(address)
+      } catch {}
+    }
+    throw Error('No clients available. Can not get address account')
+  }
+
+  /**
+   * Get the chain id of the network connected the client is connected making a round robin over
+   * the stargate clients
+   * @returns {string} - The chain id
+   * @throws {Error} If the chain id can not be retrieved from the stargate clients
+   */
+  private async roundRobinGetChainId(): Promise<string> {
+    const clients = await this.stargateClients.getValue()
+
+    for (const client of clients) {
+      try {
+        return await client.getChainId()
+      } catch {}
+    }
+
+    throw Error(`No clients available. Can not get chain id`)
   }
 
   public abstract prepareTx({

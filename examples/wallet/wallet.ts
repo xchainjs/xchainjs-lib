@@ -24,18 +24,20 @@ import axios from 'axios'
 register9Rheader(cosmosclient.config.globalAxios)
 register9Rheader(axios)
 
-const _getBalances = async (wallet: Wallet, assets?: Asset[]) => {
+const _getBalances = async (wallet: Wallet, assets?: Record<Chain, Asset[] | undefined>) => {
   const chainsBalances = await wallet.getBalances(assets)
   Object.keys(chainsBalances).forEach((chain) => {
-    const balances = chainsBalances[chain]
-    console.log(
-      balances.map((balance) => {
-        return {
-          asset: assetToString(balance.asset),
-          amount: baseToAsset(balance.amount).amount().toString(),
-        }
-      }),
-    )
+    const response = chainsBalances[chain]
+    if (response.status === 'fulfilled') {
+      console.log(
+        response.balances.map((balance) => {
+          return {
+            asset: assetToString(balance.asset),
+            amount: baseToAsset(balance.amount).amount().toString(),
+          }
+        }),
+      )
+    }
   })
 }
 
@@ -175,7 +177,7 @@ const main = async () => {
   await delay(5000)
 
   console.log('============= Get assets balances interested in ==============')
-  await _getBalances(wallet, [assetFromStringEx('MAYA.CACAO'), assetFromStringEx('THOR.RUNE')])
+  await _getBalances(wallet, { MAYA: [assetFromStringEx('MAYA.CACAO')], THOR: [assetFromStringEx('THOR.RUNE')] })
   await delay(5000)
 
   console.log('============= Get all balances from one single chain ==============')

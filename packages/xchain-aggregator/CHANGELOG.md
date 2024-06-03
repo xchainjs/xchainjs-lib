@@ -1,5 +1,69 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- 45e9238: Chainflip protocol support
+
+### Patch Changes
+
+- 662085f: `SwapResume` type updated, `outboundTx` property is now optional
+- Updated dependencies [662085f]
+- Updated dependencies [662085f]
+- Updated dependencies [9d4c162]
+  - @xchainjs/xchain-mayachain-query@0.1.16
+  - @xchainjs/xchain-thorchain-query@0.7.14
+  - @xchainjs/xchain-mayachain@1.0.10
+  - @xchainjs/xchain-mayachain-amm@2.0.9
+  - @xchainjs/xchain-thorchain-amm@1.1.14
+  - @xchainjs/xchain-wallet@0.1.18
+
+## 0.1.19
+
+### Patch Changes
+
+- Updated dependencies [3863979]
+- Updated dependencies [f29a7ad]
+- Updated dependencies [a9fd322]
+  - @xchainjs/xchain-wallet@0.1.17
+  - @xchainjs/xchain-thorchain@1.1.0
+  - @xchainjs/xchain-mayachain@1.0.9
+  - @xchainjs/xchain-mayachain-amm@2.0.8
+  - @xchainjs/xchain-thorchain-amm@1.1.13
+
+## 0.1.18
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain@1.0.8
+- @xchainjs/xchain-thorchain@1.0.11
+- @xchainjs/xchain-thorchain-amm@1.1.12
+- @xchainjs/xchain-mayachain-amm@2.0.7
+- @xchainjs/xchain-wallet@0.1.16
+
+## 0.1.17
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@1.1.11
+- @xchainjs/xchain-wallet@0.1.15
+- @xchainjs/xchain-mayachain-amm@2.0.6
+
+## 0.1.16
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-mayachain@1.0.7
+  - @xchainjs/xchain-mayachain-amm@2.0.5
+  - @xchainjs/xchain-mayachain-query@0.1.15
+  - @xchainjs/xchain-thorchain@1.0.10
+  - @xchainjs/xchain-thorchain-amm@1.1.10
+  - @xchainjs/xchain-thorchain-query@0.7.13
+  - @xchainjs/xchain-wallet@0.1.14
+
 ## 0.1.15
 
 ### Patch Changes

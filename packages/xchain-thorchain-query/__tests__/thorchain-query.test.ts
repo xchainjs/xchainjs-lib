@@ -116,10 +116,12 @@ describe('Thorchain-query tests', () => {
         amount: baseToAsset(swapResume.swaps[0].inboundTx.amount.baseAmount).amount().toString(),
       },
       out: {
-        hash: swapResume.swaps[0].outboundTx.hash,
-        address: swapResume.swaps[0].outboundTx.address,
-        asset: assetToString(swapResume.swaps[0].outboundTx.amount.asset),
-        amount: baseToAsset(swapResume.swaps[0].outboundTx.amount.baseAmount).amount().toString(),
+        hash: swapResume.swaps[0].outboundTx?.hash,
+        address: swapResume.swaps[0].outboundTx?.address,
+        asset: swapResume.swaps[0].outboundTx ? assetToString(swapResume.swaps[0].outboundTx.amount.asset) : undefined,
+        amount: swapResume.swaps[0].outboundTx
+          ? baseToAsset(swapResume.swaps[0].outboundTx?.amount.baseAmount).amount().toString()
+          : undefined,
       },
     }).toEqual({
       date: new Date('2024-03-17T14:29:09.029Z'),

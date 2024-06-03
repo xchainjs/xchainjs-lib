@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.16
+
+### Patch Changes
+
+- 662085f: `Swap` type updated, `outboundTx` property is now optional
+- 662085f: Outbound transaction bug fix in `getSwapHistory` method.
+
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-mayamidgard-query@0.1.13
+
 ## 0.1.14
 
 ### Patch Changes

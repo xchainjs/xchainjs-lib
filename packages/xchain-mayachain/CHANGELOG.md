@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.0.10
+
+### Patch Changes
+
+- 9d4c162: correct default fee from 0.5 to 0.2
+
+## 1.0.9
+
+### Patch Changes
+
+- a9fd322: Synthetic assets decimals bug fix
+- Updated dependencies [f29a7ad]
+- Updated dependencies [f29a7ad]
+  - @xchainjs/xchain-cosmos-sdk@0.2.12
+
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [1a8f57d]
+  - @xchainjs/xchain-cosmos-sdk@0.2.11
+
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+  - @xchainjs/xchain-cosmos-sdk@0.2.10
+
 ## 1.0.6
 
 ### Patch Changes

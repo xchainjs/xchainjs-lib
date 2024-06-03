@@ -111,6 +111,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
       to: tx.to,
       data: tx.data,
       value: tx.value,
+      nonce: tx.nonce ? ethers.BigNumber.from(tx.nonce).toNumber() : undefined,
       gasLimit: tx.gasLimit,
       gasPrice: tx.gasPrice,
       maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
@@ -134,6 +135,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
       to: tx.to,
       value: tx.value,
       data: tx.data,
+      nonce: tx.nonce ? ethers.BigNumber.from(tx.nonce).toNumber() : undefined,
       gasPrice: tx.gasPrice,
       gasLimit: tx.gasLimit,
     })

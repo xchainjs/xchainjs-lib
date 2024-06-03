@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.3
+
+### Patch Changes
+
+- 540326d: Bug fix related to the nonce at making approve and transfer transactions with Keystore clients
+
+## 0.6.2
+
+### Patch Changes
+
+- Updated dependencies [8d000a2]
+  - @xchainjs/xchain-client@0.16.7
+
 ## 0.6.1
 
 ### Patch Changes
