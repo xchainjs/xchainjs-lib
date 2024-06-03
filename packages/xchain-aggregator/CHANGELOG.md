@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.0
+
+### Minor Changes
+
+- 45e9238: Chainflip protocol support
+
+### Patch Changes
+
+- 662085f: `SwapResume` type updated, `outboundTx` property is now optional
+- Updated dependencies [662085f]
+- Updated dependencies [662085f]
+- Updated dependencies [9d4c162]
+  - @xchainjs/xchain-mayachain-query@0.1.16
+  - @xchainjs/xchain-thorchain-query@0.7.14
+  - @xchainjs/xchain-mayachain@1.0.10
+  - @xchainjs/xchain-mayachain-amm@2.0.9
+  - @xchainjs/xchain-thorchain-amm@1.1.14
+  - @xchainjs/xchain-wallet@0.1.18
+
 ## 0.1.19
 
 ### Patch Changes

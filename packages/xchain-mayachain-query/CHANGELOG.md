@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.16
+
+### Patch Changes
+
+- 662085f: `Swap` type updated, `outboundTx` property is now optional
+- 662085f: Outbound transaction bug fix in `getSwapHistory` method.
+
 ## 0.1.15
 
 ### Patch Changes

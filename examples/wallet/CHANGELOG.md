@@ -1,5 +1,13 @@
 # xchainjs-wallet
 
+## 1.0.12
+
+### Patch Changes
+
+- Updated dependencies [9d4c162]
+  - @xchainjs/xchain-mayachain@1.0.10
+  - @xchainjs/xchain-wallet@0.1.18
+
 ## 1.0.11
 
 ### Patch Changes

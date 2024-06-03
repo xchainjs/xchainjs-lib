@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.14
+
+### Patch Changes
+
+- Updated dependencies [662085f]
+- Updated dependencies [662085f]
+  - @xchainjs/xchain-thorchain-query@0.7.14
+  - @xchainjs/xchain-wallet@0.1.18
+
 ## 1.1.13
 
 ### Patch Changes
