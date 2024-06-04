@@ -276,6 +276,7 @@ export enum AssetCurrencySymbol {
   DASH = 'Đ',
   LTC = 'Ł',
   DOGE = 'Ð',
+  CACAO = '𐌂',
 }
 
 /**
