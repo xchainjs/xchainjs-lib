@@ -19,12 +19,51 @@ type Fees = {
   outboundFee: CryptoAmount // The outbound fee amount
 }
 
+/**
+ * Protocols supported by the Aggregator
+ */
 type Protocol = 'Thorchain' | 'Mayachain' | 'Chainflip'
 
-export type Config = {
-  protocols: Protocol[]
-  wallet?: Wallet
+/**
+ * Affiliate config for the aggregator
+ */
+type AffiliateConfig = {
+  /**
+   * Basis points for the affiliate fee calculation. Value must be between 0 and 10000
+   */
+  basisPoints: number
+  /**
+   * Affiliate address by protocol. ThorNames and MayaNames are supported for Thorchain and Mayachain protocols
+   */
+  affiliates: Partial<Record<Protocol, string>>
 }
+
+/**
+ * Aggregator config
+ */
+export type Config = Partial<{
+  /**
+   * List of protocols to enable. Undefined value means all protocols enabled
+   */
+  protocols: Protocol[]
+  /**
+   * Affiliate config
+   */
+  affiliate: AffiliateConfig
+  /**
+   * Wallet
+   */
+  wallet: Wallet
+}>
+
+/**
+ * Protocol config
+ */
+export type ProtocolConfig = Partial<{
+  wallet: Wallet
+  affiliateBps: number
+  affiliateAddress: string
+}>
 
 /**
  * Represents a quote for a swap operation.
@@ -55,8 +94,6 @@ type QuoteSwapParams = {
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap
   toleranceBps?: number // The tolerance basis points for the swap
-  affiliateBps?: number // The affiliate basis points for the swap
-  affiliateAddress?: string // The affiliate address for the swap
 }
 
 type SwapHistoryParams = {

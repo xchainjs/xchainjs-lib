@@ -17,24 +17,21 @@ import {
 // Class definition for an Aggregator
 export class Aggregator {
   private protocols: IProtocol[]
-  private config: Config
+  private config: Config & { protocols: Protocol[] }
 
-  constructor(config?: Partial<Config>) {
-    this.protocols = config?.protocols
-      ? config.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, config.wallet))
-      : ProtocolFactory.getAllProtocols(config?.wallet)
-
-    if (this.protocols.length === 0) throw Error('No protocols enabled')
-
-    this.config = { ...DEFAULT_CONFIG, ...config, protocols: this.protocols.map((protocol) => protocol.name) }
+  constructor(config?: Config) {
+    const fConfig = { ...DEFAULT_CONFIG, ...config }
+    this.verifyConfig(fConfig)
+    this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
+    this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
   /**
    * Get the current Aggregator configuration
    * @returns {Omit<Config, 'wallet'>} the current Aggregator configuration
    */
-  public getConfiguration(): Omit<Config, 'wallet'> {
-    return this.config
+  public getConfiguration(): Omit<Config & { protocols: Protocol[] }, 'wallet'> {
+    return { protocols: this.config.protocols, affiliate: this.config.affiliate }
   }
 
   /**
@@ -42,13 +39,14 @@ export class Aggregator {
    * @param {Configuration} config
    */
   public setConfiguration(config: Config) {
-    this.protocols = config?.protocols
-      ? config.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, config.wallet))
-      : ProtocolFactory.getAllProtocols(config?.wallet)
+    const fConfig = { ...DEFAULT_CONFIG, ...config }
+
+    this.verifyConfig(fConfig)
+    this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
 
     if (this.protocols.length === 0) throw Error('No protocols enabled')
 
-    this.config = { ...DEFAULT_CONFIG, ...config, protocols: this.protocols.map((protocol) => protocol.name) }
+    this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
   /**
@@ -141,5 +139,12 @@ export class Aggregator {
       count: swaps.length,
       swaps: swaps.sort((swapA, swapB) => swapB.date.getTime() - swapA.date.getTime()),
     }
+  }
+
+  private verifyConfig(config: Config & { protocols: Protocol[] }) {
+    if (config.affiliate && (config.affiliate.basisPoints < 0 || config.affiliate.basisPoints > 10_000))
+      throw Error('Invalid affiliate basis point due to it is out of bound. It must be between [0 - 10000]')
+
+    if (config.protocols.length === 0) throw Error('No protocols enabled')
   }
 }
