@@ -1,7 +1,7 @@
 import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { AssetBNB, BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
-import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
+import { BCHChain, Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { AssetBSC, BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM, Client as GaiaClient, GAIAChain } from '@xchainjs/xchain-cosmos'
@@ -45,7 +45,7 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
   switch (chain) {
     case BTCChain:
       return new BtcClient({ ...defaultBtcParams, network }).validateAddress(address)
-    case ETHChain:
+    case BCHChain:
       return new BchClient({ ...defaultBchParams, network }).validateAddress(address)
     case LTCChain:
       return new LtcClient({ ...defaultLtcParams, network }).validateAddress(address)
