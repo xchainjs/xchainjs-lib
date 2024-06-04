@@ -56,6 +56,18 @@ describe('Aggregator', () => {
     expect(() => new Aggregator({ protocols: [] })).toThrowError('No protocols enabled')
   })
 
+  it('Should throw error if basis points lower than 0', () => {
+    expect(() => new Aggregator({ affiliate: { basisPoints: -1, affiliates: {} } })).toThrowError(
+      'Invalid affiliate basis point due to it is out of bound. It must be between [0 - 10000]',
+    )
+  })
+
+  it('Should throw error if basis points greater than 10000', () => {
+    expect(() => new Aggregator({ affiliate: { basisPoints: 10001, affiliates: {} } })).toThrowError(
+      'Invalid affiliate basis point due to it is out of bound. It must be between [0 - 10000]',
+    )
+  })
+
   it('Should find swap with greatest expected amount', async () => {
     const txEstimated = await aggregator.estimateSwap({
       fromAsset: AssetBTC,

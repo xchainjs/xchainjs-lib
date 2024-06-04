@@ -71,6 +71,10 @@ describe('Aggregator', () => {
     aggregator = new Aggregator({ wallet })
   })
 
+  it('Should get configuration', () => {
+    console.log(aggregator.getConfiguration())
+  })
+
   it('Should find swap with greatest expected amount', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
