@@ -25,7 +25,7 @@ describe('Chainflip protocol', () => {
       }),
     })
 
-    protocol = new ChainflipProtocol(wallet)
+    protocol = new ChainflipProtocol({ wallet })
   })
 
   it('Should get supported chains', async () => {
