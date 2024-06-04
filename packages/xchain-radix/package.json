@@ -1,12 +1,13 @@
 {
-  "name": "@xchainjs/xchain-cosmos-sdk",
-  "version": "0.2.12",
-  "description": "Genereic Cosmos SDK client for XChainJS",
+  "name": "@xchainjs/xchain-radix",
+  "version": "0.1.0",
+  "description": "Custom Radix client and utilities used by XChainJS clients",
   "keywords": [
-    "XChain",
-    "CosmosSDK"
+    "XRD",
+    "Radix",
+    "XChain"
   ],
-  "author": "XChainJS",
+  "author": "RadixDLT",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
   "main": "lib/index.js",
@@ -27,28 +28,22 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
-    "test": "jest --passWithNoTests",
-    "e2e": "jest --config jest.config.e2e.js",
-    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
+    "test": "jest",
+    "compile": "tsc -p tsconfig.build.json",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "fund": "ts-node src/utils.ts"
   },
   "publishConfig": {
-    "access": "public",
-    "directory": "release/package"
+    "access": "public"
   },
   "dependencies": {
-    "@cosmjs/crypto": "0.31.1",
-    "@cosmjs/encoding": "0.31.1",
-    "@cosmjs/proto-signing": "0.31.1",
-    "@cosmjs/stargate": "0.31.1",
-    "@scure/base": "1.1.5",
+    "@radixdlt/babylon-gateway-api-sdk": "^1.4.1",
+    "@radixdlt/radix-engine-toolkit": "^1.0.3",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "bech32": "^1.1.3",
-    "bip32": "^2.0.6",
-    "secp256k1": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/secp256k1": "^4.0.3"
+    "bech32": "^2.0.0",
+    "bip32": "^4.0.0",
+    "ed25519-hd-key": "^1.3.0"
   }
 }
