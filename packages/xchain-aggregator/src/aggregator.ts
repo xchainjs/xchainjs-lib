@@ -21,7 +21,9 @@ export class Aggregator {
 
   constructor(config?: Config) {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
+
     this.verifyConfig(fConfig)
+
     this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
     this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
   }
@@ -42,10 +44,8 @@ export class Aggregator {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
 
     this.verifyConfig(fConfig)
+
     this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
-
-    if (this.protocols.length === 0) throw Error('No protocols enabled')
-
     this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
