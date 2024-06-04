@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.15
+
+### Patch Changes
+
+- Updated dependencies [99825cb]
+- Updated dependencies [6fe2b21]
+  - @xchainjs/xchain-thornode@0.3.16
+  - @xchainjs/xchain-util@0.13.7
+  - @xchainjs/xchain-client@0.16.8
+  - @xchainjs/xchain-midgard-query@0.1.19
+
 ## 0.7.14
 
 ### Patch Changes

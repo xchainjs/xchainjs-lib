@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.10
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-query@0.1.17
+- @xchainjs/xchain-bitcoin@0.23.19
+- @xchainjs/xchain-client@0.16.8
+- @xchainjs/xchain-dash@0.3.6
+- @xchainjs/xchain-ethereum@0.32.6
+- @xchainjs/xchain-kujira@0.1.21
+- @xchainjs/xchain-mayachain@1.0.11
+- @xchainjs/xchain-thorchain@1.1.1
+- @xchainjs/xchain-wallet@0.1.19
+
 ## 2.0.9
 
 ### Patch Changes

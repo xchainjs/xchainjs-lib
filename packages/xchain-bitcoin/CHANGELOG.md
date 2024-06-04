@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.23.19
+
+### Patch Changes
+
+- Updated dependencies [6fe2b21]
+  - @xchainjs/xchain-util@0.13.7
+  - @xchainjs/xchain-client@0.16.8
+  - @xchainjs/xchain-utxo@0.1.10
+  - @xchainjs/xchain-utxo-providers@0.2.18
+
 ## 0.23.18
 
 ### Patch Changes
