@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.7
+
+### Patch Changes
+
+- 6fe2b21: Added Cacao currency symbol 𐌂
+
 ## 0.13.6
 
 ### Patch Changes

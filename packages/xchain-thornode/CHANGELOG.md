@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.16
+
+### Patch Changes
+
+- 99825cb: Updated generated api files to the latest spec
+
 ## 0.3.15
 
 ### Patch Changes

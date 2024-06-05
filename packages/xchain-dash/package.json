@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-dash",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Custom Dash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
