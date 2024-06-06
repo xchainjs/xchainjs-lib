@@ -1,8 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
 import { PoolDetail, Transaction } from '@xchainjs/xchain-mayamidgard'
-import { MAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
+  Address,
   Asset,
   CryptoAmount,
   assetFromStringEx,
@@ -13,7 +13,7 @@ import {
 } from '@xchainjs/xchain-util'
 
 import { MayachainCache } from './mayachain-cache'
-import { InboundDetail, QuoteSwap, QuoteSwapParams, SwapHistoryParams, SwapsHistory } from './types'
+import { InboundDetail, MAYANameDetails, QuoteSwap, QuoteSwapParams, SwapHistoryParams, SwapsHistory } from './types'
 import {
   ArbAsset,
   ArbChain,
@@ -193,7 +193,10 @@ export class MayachainQuery {
    * @returns {MAYANameDetails | undefined} MAYANames details or undefined it is does not exist
    */
   public async getMAYANameDetails(MAYAName: string): Promise<MAYANameDetails | undefined> {
-    return this.mayachainCache.midgardQuery.getMAYANameDetails(MAYAName)
+    const details = await this.mayachainCache.midgardQuery.getMAYANameDetails(MAYAName)
+    if (!details) return undefined
+
+    return { ...details, name: MAYAName }
   }
 
   /**
@@ -284,5 +287,21 @@ export class MayachainQuery {
         }
       }),
     }
+  }
+
+  /**
+   * Get the MAYANames owned by an address
+   * @param {Address} owner - Thorchain address
+   * @returns {MAYANameDetails[]} List of MAYANames owned by the address
+   */
+  public async getMAYANamesByOwner(owner: Address): Promise<MAYANameDetails[]> {
+    const mayaNames = await this.mayachainCache.midgardQuery.getMAYANameReverseLookup(owner)
+
+    if (!mayaNames || mayaNames.length === 0) return []
+
+    const tasks = mayaNames.map((mayaName) => this.getMAYANameDetails(mayaName))
+
+    const mayaNamesDetails = await Promise.all(tasks)
+    return mayaNamesDetails.filter((mayaNameDetails) => mayaNameDetails !== undefined) as MAYANameDetails[]
   }
 }
