@@ -36,6 +36,7 @@
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
   "dependencies": {
+    "@xchainjs/xchain-arbitrum": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-dash": "workspace:*",

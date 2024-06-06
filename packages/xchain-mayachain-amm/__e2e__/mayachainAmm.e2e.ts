@@ -1,4 +1,5 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
+import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
 import { AssetBTC, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetDASH, ClientKeystore, ClientLedger, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
@@ -91,6 +92,7 @@ describe('MayachainAmm e2e tests', () => {
       KUJI: new KujiraClient({ ...defaultKujiParams, phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
       MAYA: new MayaClient({ phrase, network: Network.Mainnet }),
+      ARB: new ArbClient({ ...defaultArbParams, phrase, network: Network.Mainnet }),
     })
     mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
   })
