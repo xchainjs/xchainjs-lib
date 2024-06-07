@@ -2,7 +2,7 @@ import { AssetData, SwapSDK } from '@chainflip/sdk/swap'
 import { Asset, CachedValue, Chain, CryptoAmount, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
+import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
 
 import { cChainToXChain, xAssetToCAsset } from './utils'
 
@@ -12,14 +12,14 @@ import { cChainToXChain, xAssetToCAsset } from './utils'
 export class ChainflipProtocol implements IProtocol {
   public readonly name = 'Chainflip'
   private sdk: SwapSDK
-  private wallet: Wallet
+  private wallet?: Wallet
   private assetsData: CachedValue<AssetData[]>
 
-  constructor(wallet: Wallet = new Wallet({})) {
+  constructor(configuration?: ProtocolConfig) {
     this.sdk = new SwapSDK({
       network: 'mainnet',
     })
-    this.wallet = wallet
+    this.wallet = configuration?.wallet
     this.assetsData = new CachedValue(() => {
       return this.sdk.getAssets()
     }, 24 * 60 * 60 * 1000)
@@ -150,6 +150,8 @@ export class ChainflipProtocol implements IProtocol {
     if (!quoteSwap.canSwap) {
       throw Error(`Can not make swap. ${quoteSwap.errors.join('\n')}`)
     }
+
+    if (!this.wallet) throw Error('Wallet not configured. Can not do swap')
 
     const hash = await this.wallet.transfer({
       recipient: quoteSwap.toAddress,

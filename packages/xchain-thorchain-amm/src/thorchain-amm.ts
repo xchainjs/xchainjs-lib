@@ -33,7 +33,7 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAction } from './thorchain-action'
 import { AddLiquidity, ApproveParams, IsApprovedParams, TxSubmitted, WithdrawLiquidity } from './types'
-import { isProtocolERC20Asset } from './utils'
+import { isProtocolERC20Asset, validateAddress } from './utils'
 
 /**
  * THORChain Class for interacting with THORChain.
@@ -134,13 +134,21 @@ export class ThorchainAMM {
 
     if (
       destinationAddress &&
-      !this.wallet.validateAddress(destinationAsset.synth ? THORChain : destinationAsset.chain, destinationAddress)
+      !validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        destinationAsset.synth ? THORChain : destinationAsset.chain,
+        destinationAddress,
+      )
     ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
 
     if (affiliateAddress) {
-      const isThorAddress = this.wallet.validateAddress(THORChain, affiliateAddress)
+      const isThorAddress = validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        THORChain,
+        affiliateAddress,
+      )
       const isThorname =
         !!(await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(
           affiliateAddress,

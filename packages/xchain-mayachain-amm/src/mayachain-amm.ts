@@ -15,6 +15,7 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
 import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
+import { validateAddress } from './utils'
 
 /**
  * Mayachain Automated Market Maker (AMM) class.
@@ -129,13 +130,17 @@ export class MayachainAMM {
     // Validate destination address if provided
     if (
       destinationAddress &&
-      !this.wallet.validateAddress(destinationAsset.synth ? MAYAChain : destinationAsset.chain, destinationAddress)
+      !validateAddress(
+        this.mayachainQuery.getNetwork(),
+        destinationAsset.synth ? MAYAChain : destinationAsset.chain,
+        destinationAddress,
+      )
     ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
     // Validate affiliate address if provided
     if (affiliateAddress) {
-      const isMayaAddress = this.wallet.validateAddress(MAYAChain, affiliateAddress)
+      const isMayaAddress = validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, affiliateAddress)
       const isMayaName = await this.isMAYAName(affiliateAddress)
       if (!(isMayaAddress || isMayaName))
         errors.push(`affiliateAddress ${affiliateAddress} is not a valid MAYA address`)
