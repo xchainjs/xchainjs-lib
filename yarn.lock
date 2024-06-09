@@ -12828,9 +12828,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"xchainjs-maya-do-swap@workspace:examples/do-maya-swap":
+"xchainjs-mayachain-amm@workspace:examples/mayachain-amm":
   version: 0.0.0-use.local
-  resolution: "xchainjs-maya-do-swap@workspace:examples/do-maya-swap"
+  resolution: "xchainjs-mayachain-amm@workspace:examples/mayachain-amm"
   dependencies:
     "@binance-chain/javascript-sdk": "npm:^4.2.0"
     "@cosmos-client/core": "npm:^0.46.1"

@@ -1,12 +1,16 @@
 {
-  "name": "xchainjs-maya-do-swap",
+  "name": "xchainjs-mayachain-amm",
   "private": true,
   "version": "1.0.14",
   "scripts": {
-    "doSwap": "npx ts-node do-maya-swap.ts",
+    "approveRouter": "npx ts-node approve-router.ts",
+    "doSwap": "npx ts-node do-swap.ts",
+    "estimateSwap": "npx ts-node estimate-swap.ts",
+    "mayanameDetails": "npx ts-node mayaname-details.ts",
+    "mayanameOwned": "npx ts-node mayaname-owned.ts",
     "build": "tsc --noEmit"
   },
-  "description": "example of doing a swap with mayachain-amm package",
+  "description": "Examples using MAYAChainAMM",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
