@@ -5,7 +5,7 @@ import { assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/thorchain/midgard/api'
 import mockThornodeApi from '../__mocks__/thorchain/thornode/api'
-import { ThorchainProtocol } from '../src/protocols'
+import { ThorchainProtocol } from '../src/protocols/thorchain'
 
 describe('Thorchain protocol', () => {
   let protocol: ThorchainProtocol

@@ -6,7 +6,7 @@ import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { ChainflipProtocol } from '../src/protocols'
+import { ChainflipProtocol } from '../src/protocols/chainflip'
 
 jest.setTimeout(60000)
 
@@ -25,7 +25,7 @@ describe('Chainflip protocol', () => {
       }),
     })
 
-    protocol = new ChainflipProtocol(wallet)
+    protocol = new ChainflipProtocol({ wallet })
   })
 
   it('Should get supported chains', async () => {

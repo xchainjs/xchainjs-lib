@@ -2,18 +2,27 @@ import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Asset, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
-import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, SwapHistoryParams, TxSubmitted } from '../../types'
+import {
+  IProtocol,
+  ProtocolConfig,
+  QuoteSwap,
+  QuoteSwapParams,
+  SwapHistory,
+  SwapHistoryParams,
+  TxSubmitted,
+} from '../../types'
 
 export class ThorchainProtocol implements IProtocol {
-  public readonly name = 'Thorchain' as const
+  public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
   private thorchainAmm: ThorchainAMM
+  private configuration: Omit<ProtocolConfig, 'wallet'> | undefined
 
-  constructor(wallet?: Wallet) {
+  constructor(configuration?: ProtocolConfig) {
     this.thorchainQuery = new ThorchainQuery()
-    this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, wallet)
+    this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
+    this.configuration = configuration
   }
 
   /**
@@ -45,7 +54,11 @@ export class ThorchainProtocol implements IProtocol {
    * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
    */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
-    const estimatedSwap = await this.thorchainAmm.estimateSwap(params)
+    const estimatedSwap = await this.thorchainAmm.estimateSwap({
+      ...params,
+      affiliateBps: this.configuration?.affiliateBps,
+      affiliateAddress: this.configuration?.affiliateAddress,
+    })
     return {
       protocol: this.name,
       toAddress: estimatedSwap.toAddress,

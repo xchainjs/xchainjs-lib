@@ -1,8 +1,9 @@
 import { assetToString } from '@xchainjs/xchain-util'
-import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { ChainflipProtocol, MayachainProtocol, ThorchainProtocol } from './protocols'
+import { DEFAULT_CONFIG } from './const'
+import { ProtocolFactory } from './protocols'
 import {
+  Config,
   IProtocol,
   Protocol,
   QuoteSwap,
@@ -16,9 +17,36 @@ import {
 // Class definition for an Aggregator
 export class Aggregator {
   private protocols: IProtocol[]
+  private config: Config & { protocols: Protocol[] }
 
-  constructor(wallet?: Wallet) {
-    this.protocols = [new ThorchainProtocol(wallet), new MayachainProtocol(wallet), new ChainflipProtocol(wallet)]
+  constructor(config?: Config) {
+    const fConfig = { ...DEFAULT_CONFIG, ...config }
+
+    this.verifyConfig(fConfig)
+
+    this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
+    this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
+  }
+
+  /**
+   * Get the current Aggregator configuration
+   * @returns {Omit<Config, 'wallet'>} the current Aggregator configuration
+   */
+  public getConfiguration(): Omit<Config & { protocols: Protocol[] }, 'wallet'> {
+    return { protocols: this.config.protocols, affiliate: this.config.affiliate }
+  }
+
+  /**
+   * Update the Aggregator configuration
+   * @param {Configuration} config
+   */
+  public setConfiguration(config: Config) {
+    const fConfig = { ...DEFAULT_CONFIG, ...config }
+
+    this.verifyConfig(fConfig)
+
+    this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
+    this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
   /**
@@ -111,5 +139,12 @@ export class Aggregator {
       count: swaps.length,
       swaps: swaps.sort((swapA, swapB) => swapB.date.getTime() - swapA.date.getTime()),
     }
+  }
+
+  private verifyConfig(config: Config & { protocols: Protocol[] }) {
+    if (config.affiliate && (config.affiliate.basisPoints < 0 || config.affiliate.basisPoints > 10_000))
+      throw Error('Invalid affiliate basis point due to it is out of bound. It must be between [0 - 10000]')
+
+    if (config.protocols.length === 0) throw Error('No protocols enabled')
   }
 }
