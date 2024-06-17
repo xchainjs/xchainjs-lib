@@ -1,11 +1,41 @@
+import { AssetAETH } from '@xchainjs/xchain-arbitrum'
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
-import { Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { Client as KujiraClient, KUJIChain, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { AssetKUJI, Client as KujiraClient, KUJIChain, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
-import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
-import { Address, Chain } from '@xchainjs/xchain-util'
+import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
+import { Address, Asset, Chain, eqAsset } from '@xchainjs/xchain-util'
+
+/**
+ * Check if a chain is EVM and supported by the protocol
+ * @param {Chain} chain to check
+ * @returns true if chain is EVM, otherwise, false
+ */
+export const isProtocolEVMChain = (chain: Chain): boolean => {
+  return [AssetETH.chain, AssetAETH.chain].includes(chain)
+}
+
+/**
+ * Check if asset is ERC20
+ * @param {Asset} asset to check
+ * @returns true if asset is ERC20, otherwise, false
+ */
+export const isProtocolERC20Asset = (asset: Asset): boolean => {
+  return isProtocolEVMChain(asset.chain)
+    ? [AssetETH, AssetAETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 && !asset.synth
+    : false
+}
+
+/**
+ * Check if a chain is EVM and supported by the protocol
+ * @param {Chain} chain to check
+ * @returns true if chain is EVM, otherwise, false
+ */
+export const isProtocolBFTChain = (chain: Chain): boolean => {
+  return [AssetKUJI.chain, AssetRuneNative.chain].includes(chain)
+}
 
 export const validateAddress = (network: Network, chain: Chain, address: Address): boolean => {
   switch (chain) {
