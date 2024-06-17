@@ -9,14 +9,14 @@ import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
-import { MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
+import { MAYANameDetails, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { MayachainAction } from './mayachain-action'
 import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
-import { isProtocolERC20Asset } from './utils'
+import { isProtocolERC20Asset, validateAddress } from './utils'
 
 /**
  * Mayachain Automated Market Maker (AMM) class.
@@ -132,13 +132,17 @@ export class MayachainAMM {
     // Validate destination address if provided
     if (
       destinationAddress &&
-      !this.wallet.validateAddress(destinationAsset.synth ? MAYAChain : destinationAsset.chain, destinationAddress)
+      !validateAddress(
+        this.mayachainQuery.getNetwork(),
+        destinationAsset.synth ? MAYAChain : destinationAsset.chain,
+        destinationAddress,
+      )
     ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
     // Validate affiliate address if provided
     if (affiliateAddress) {
-      const isMayaAddress = this.wallet.validateAddress(MAYAChain, affiliateAddress)
+      const isMayaAddress = validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, affiliateAddress)
       const isMayaName = await this.isMAYAName(affiliateAddress)
       if (!(isMayaAddress || isMayaName))
         errors.push(`affiliateAddress ${affiliateAddress} is not a valid MAYA address`)
@@ -234,6 +238,24 @@ export class MayachainAMM {
     if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
 
     return errors
+  }
+
+  /**
+   * Get MAYAname details
+   * @param {string} MAYAName
+   * @returns {MAYANameDetails | undefined} MAYANames details or undefined it is does not exist
+   */
+  public async getMAYANameDetails(MAYAName: string): Promise<MAYANameDetails | undefined> {
+    return this.mayachainQuery.getMAYANameDetails(MAYAName)
+  }
+
+  /**
+   * Get the MAYANames owned by an address
+   * @param {Address} owner - Thorchain address
+   * @returns {MAYANameDetails[]} List of MAYANames owned by the address
+   */
+  public async getMAYANamesByOwner(owner: Address): Promise<MAYANameDetails[]> {
+    return this.mayachainQuery.getMAYANamesByOwner(owner)
   }
 
   /**

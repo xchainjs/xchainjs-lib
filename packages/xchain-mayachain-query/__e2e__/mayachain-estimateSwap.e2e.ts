@@ -91,4 +91,21 @@ describe('Estimate swap e2e tests', () => {
     const estimate = await mayachainQuery.quoteSwap(swapParams)
     printQuoteSwap(estimate)
   })
+
+  it('Get MAYANames by owner', async () => {
+    const mayaNames = await mayachainQuery.getMAYANamesByOwner('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
+    mayaNames.forEach((mayaName) => {
+      console.log({
+        name: mayaName.name,
+        owner: mayaName.owner,
+        expire: mayaName.expire,
+        entries: mayaName.entries.map((entry) => {
+          return {
+            address: entry.address,
+            chain: entry.chain,
+          }
+        }),
+      })
+    })
+  })
 })
