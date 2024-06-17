@@ -8,9 +8,9 @@ import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchai
 import { MAX_APPROVAL, abi } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
-import { MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
+import { MAYANameDetails, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { Asset, CryptoAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, CryptoAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
@@ -233,6 +233,24 @@ export class MayachainAMM {
     if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
 
     return errors
+  }
+
+  /**
+   * Get MAYAname details
+   * @param {string} MAYAName
+   * @returns {MAYANameDetails | undefined} MAYANames details or undefined it is does not exist
+   */
+  public async getMAYANameDetails(MAYAName: string): Promise<MAYANameDetails | undefined> {
+    return this.mayachainQuery.getMAYANameDetails(MAYAName)
+  }
+
+  /**
+   * Get the MAYANames owned by an address
+   * @param {Address} owner - Thorchain address
+   * @returns {MAYANameDetails[]} List of MAYANames owned by the address
+   */
+  public async getMAYANamesByOwner(owner: Address): Promise<MAYANameDetails[]> {
+    return this.mayachainQuery.getMAYANamesByOwner(owner)
   }
 
   /**

@@ -1,6 +1,9 @@
 import { TxHash } from '@xchainjs/xchain-client'
+import { MAYANameDetails as BaseMAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
+
+export type MAYANameDetails = BaseMAYANameDetails & { name: string }
 
 /**
  * Represents fees associated with a swap.
