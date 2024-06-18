@@ -1,6 +1,6 @@
 {
   "name": "xchainjs-liquidity",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "private": true,
   "scripts": {
     "checkLiquidity": "npx ts-node check-liquidity.ts",
