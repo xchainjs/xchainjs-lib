@@ -7,6 +7,9 @@ export { ClientKeystore as Client } from './clientKeystore'
 // Export the 'ClientLedger' class
 export { ClientLedger } from './clientLedger'
 
+// Export the 'ClientLedger' class
+export { ClientKeepKey } from './clientKeepKey'
+
 // Export the 'defaultBTCParams' constant from the 'client' file
 export { defaultBTCParams } from './client'
 
