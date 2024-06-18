@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- cd327ab: New method `getMAYANamesByOwner` to retrieve the MAYANames owned by an address
+- b45c0c8: Address validation without wallet dependency
+- e81d6be: Bug fix with Arbitrum chain
+- cd327ab: New method `getMAYANameDetails` to retrieve the details of a certain MAYAName.
+- e81d6be: Refactor of Mayachain action
+- Updated dependencies [cd327ab]
+  - @xchainjs/xchain-mayachain-query@0.1.18
+
 ## 2.0.10
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.18
+
+### Patch Changes
+
+- cd327ab: New method `getMAYANamesByOwner` to retrieve the MAYANames owned by an address
+
 ## 0.1.17
 
 ### Patch Changes

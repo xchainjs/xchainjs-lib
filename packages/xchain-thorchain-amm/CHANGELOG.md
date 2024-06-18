@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.16
+
+### Patch Changes
+
+- b45c0c8: Address validation without wallet dependency
+
 ## 1.1.15
 
 ### Patch Changes
