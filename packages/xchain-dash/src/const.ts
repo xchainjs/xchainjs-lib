@@ -1,5 +1,5 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
   BlockcypherNetwork,
@@ -45,7 +45,7 @@ export const DASHChain = 'DASH' as const
  * Definition based on Thorchain common asset.
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetDASH: Asset = { chain: DASHChain, symbol: 'DASH', ticker: 'DASH', synth: false }
+export const AssetDASH: Asset = { chain: DASHChain, symbol: 'DASH', ticker: 'DASH', type: AssetType.NATIVE }
 
 /**
  * Explorer provider for Dash mainnet.
