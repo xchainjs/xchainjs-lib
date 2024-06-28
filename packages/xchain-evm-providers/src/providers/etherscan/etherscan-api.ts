@@ -1,7 +1,9 @@
-import { Tx, TxType } from '@xchainjs/xchain-client'
-import { Asset, Chain, assetFromString, baseAmount, bnOrZero } from '@xchainjs/xchain-util'
+import { TxType } from '@xchainjs/xchain-client'
+import { Asset, Chain, TokenAsset, assetFromString, baseAmount, bnOrZero } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumberish } from 'ethers'
+
+import { Tx } from '../../types'
 
 import {
   ETHTransactionInfo,
@@ -79,7 +81,7 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo, chain: Chain
   const address = tx.contractAddress
 
   if (validateSymbol(symbol) && validateAddress(address)) {
-    const tokenAsset = assetFromString(`${chain}.${symbol}-${address}`)
+    const tokenAsset = assetFromString(`${chain}.${symbol}-${address}`) as Asset | TokenAsset
     if (tokenAsset) {
       return {
         asset: tokenAsset,
