@@ -1,7 +1,8 @@
 import * as bitcash from '@psf/bitcoincashjs-lib'
-import { FeeOption, FeeRate, TxHash, TxParams, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
 import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
+import { TxParams } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 
 import { Client } from './client' // Importing the base BitcoinCash client
 import { KeyPair, Transaction, TransactionBuilder } from './types/bitcoincashjs-types' // Importing utility functions
