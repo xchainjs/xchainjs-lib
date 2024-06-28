@@ -1,3 +1,3 @@
-import { Balance, PreparedTx, Tx, TxParams, TxsPage, UTXO, UtxoClientParams, Witness } from './types'
+import { Balance, PreparedTx, Tx, TxFrom, TxParams, TxTo, TxsPage, UTXO, UtxoClientParams, Witness } from './types'
 
-export { UTXO, UtxoClientParams, Witness, PreparedTx, Balance, Tx, TxsPage, TxParams }
+export { UTXO, UtxoClientParams, Witness, PreparedTx, Balance, Tx, TxsPage, TxParams, TxFrom, TxTo }

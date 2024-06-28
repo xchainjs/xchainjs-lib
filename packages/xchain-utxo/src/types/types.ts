@@ -6,7 +6,16 @@ import {
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
-import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider, Witness } from '@xchainjs/xchain-utxo-providers'
+import {
+  Balance,
+  Tx,
+  TxFrom,
+  TxTo,
+  TxsPage,
+  UTXO,
+  UtxoOnlineDataProvider,
+  Witness,
+} from '@xchainjs/xchain-utxo-providers'
 
 export type UtxoClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
@@ -23,4 +32,4 @@ export type TxParams = BaseTxParams & {
 
 export type UtxoOnlineDataProviders = Record<Network, UtxoOnlineDataProvider | undefined>
 
-export { UTXO, Witness, Balance, Tx, TxsPage }
+export { UTXO, Witness, Balance, Tx, TxsPage, TxFrom, TxTo }
