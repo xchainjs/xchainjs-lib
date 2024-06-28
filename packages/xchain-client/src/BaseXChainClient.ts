@@ -1,5 +1,5 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
-import { Address, Asset, Chain } from '@xchainjs/xchain-util'
+import { Address, AnyAsset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
 /**
  * This abstract class serves as the base for XChain clients.
@@ -161,7 +161,7 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getExplorerAddressUrl(address: string): string
   abstract getExplorerTxUrl(txID: string): string
   abstract validateAddress(address: string): boolean
-  abstract getBalance(address: string, assets?: Asset[]): Promise<Balance[]>
+  abstract getBalance(address: string, assets?: AnyAsset[]): Promise<Balance[]>
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>
   abstract transfer(params: TxParams): Promise<string>

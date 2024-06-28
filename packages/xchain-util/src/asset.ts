@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js'
 
 import { fixedBN, formatBN } from './bn'
 import { trimZeros as trimZerosHelper } from './string'
-import { Amount, Asset, AssetAmount, BaseAmount, Denomination } from './types'
+import { Amount, AnyAsset, Asset, AssetAmount, AssetType, BaseAmount, Denomination } from './types'
 
 export type Address = string
 
@@ -26,6 +26,21 @@ export const isBigNumberValue = (v: unknown): v is BigNumber.Value =>
  * ```
  * */
 const ASSET_DECIMAL = 8
+
+/**
+ * Native asset delimiter
+ */
+export const NATIVE_ASSET_DELIMITER = '.'
+
+/**
+ * Token asset delimiter
+ */
+export const TOKEN_ASSET_DELIMITER = '.'
+
+/**
+ * Synth asset delimiter
+ */
+export const SYNTH_ASSET_DELIMITER = '/'
 
 /**
  * Factory to create values of assets (e.g. RUNE)
@@ -169,7 +184,7 @@ export const formatBaseAmount = (amount: BaseAmount) => formatBN(amount.amount()
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: false }
+const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', type: AssetType.NATIVE }
 
 /**
  * Base "chain" asset on ethereum main net.
@@ -177,7 +192,7 @@ const AssetBTC: Asset = { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: fal
  * Based on definition in Thorchain `common`
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: false }
+const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.NATIVE }
 
 /**
  * Helper to check whether asset is valid
@@ -185,7 +200,7 @@ const AssetETH: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', synth: fal
  * @param {Asset} asset
  * @returns {boolean} `true` or `false`
  */
-export const isValidAsset = (asset: Asset): boolean => !!asset.chain && !!asset.ticker && !!asset.symbol
+export const isValidAsset = (asset: AnyAsset): boolean => !!asset.chain && !!asset.ticker && !!asset.symbol
 
 /**
  * Helper to check whether an asset is synth asset
@@ -193,10 +208,7 @@ export const isValidAsset = (asset: Asset): boolean => !!asset.chain && !!asset.
  * @param {Asset} asset
  * @returns {boolean} `true` or `false`
  */
-export const isSynthAsset = ({ synth }: Asset): boolean => synth
-
-const SYNTH_DELIMITER = '/'
-const NON_SYNTH_DELIMITER = '.'
+export const isSynthAsset = ({ type }: AnyAsset): boolean => type === AssetType.SYNTH
 
 /**
  * Creates an `Asset` by a given string
@@ -215,9 +227,9 @@ const NON_SYNTH_DELIMITER = '.'
  * @param {string} s The given string.
  * @returns {Asset|null} The asset from the given string.
  */
-export const assetFromString = (s: string): Asset | null => {
-  const isSynth = s.includes(SYNTH_DELIMITER)
-  const delimiter = isSynth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
+export const assetFromString = (s: string): AnyAsset | null => {
+  const isSynth = s.includes(SYNTH_ASSET_DELIMITER)
+  const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
     return null
@@ -229,16 +241,20 @@ export const assetFromString = (s: string): Asset | null => {
 
   const symbol = data[1]
   const ticker = symbol.split('-')[0]
+  const isToken = symbol.split('-')[1]?.length > 1
 
   if (!symbol) return null
 
-  return { chain, symbol, ticker, synth: isSynth }
+  if (isSynth) return { chain, symbol, ticker, type: AssetType.SYNTH }
+  if (isToken) return { chain, symbol, ticker, type: AssetType.TOKEN }
+
+  return { chain, symbol, ticker, type: AssetType.NATIVE }
 }
 
 /**
  * Similar to an `assetFromString`, but throws an exception for invalid asset strings
  */
-export const assetFromStringEx = (s: string): Asset => {
+export const assetFromStringEx = (s: string): AnyAsset => {
   const asset = assetFromString(s)
   if (!asset) throw Error('asset string not correct')
   return asset
@@ -259,9 +275,15 @@ export const assetFromStringEx = (s: string): Asset => {
  * @param {Asset} asset The given asset.
  * @returns {string} The string from the given asset.
  */
-export const assetToString = ({ chain, symbol, synth }: Asset) => {
-  const delimiter = synth ? SYNTH_DELIMITER : NON_SYNTH_DELIMITER
-  return `${chain}${delimiter}${symbol}`
+export const assetToString = ({ chain, symbol, type }: AnyAsset) => {
+  switch (type) {
+    case AssetType.SYNTH:
+      return `${chain}${SYNTH_ASSET_DELIMITER}${symbol}`
+    case AssetType.TOKEN:
+      return `${chain}${TOKEN_ASSET_DELIMITER}${symbol}`
+    default:
+      return `${chain}${NATIVE_ASSET_DELIMITER}${symbol}`
+  }
 }
 
 /**
@@ -285,7 +307,7 @@ export enum AssetCurrencySymbol {
  * @param {Asset} asset The given asset.
  * @returns {string} The currency symbol from the given asset.
  */
-export const currencySymbolByAsset = ({ ticker }: Asset): string => {
+export const currencySymbolByAsset = ({ ticker }: AnyAsset): string => {
   switch (true) {
     case ticker === 'RUNE':
       return AssetCurrencySymbol.RUNE
@@ -324,7 +346,7 @@ export const formatAssetAmountCurrency = ({
   trimZeros: shouldTrimZeros = false,
 }: {
   amount: AssetAmount
-  asset?: Asset
+  asset?: AnyAsset
   decimal?: number
   trimZeros?: boolean
 }) => {
@@ -396,8 +418,8 @@ export const formatBaseAsAssetAmount = ({
  * @param {Asset} b Asset two
  * @return {boolean} Result of equality check
  */
-export const eqAsset = (a: Asset, b: Asset) =>
-  a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.synth === b.synth
+export const eqAsset = (a: AnyAsset, b: AnyAsset) =>
+  a.chain === b.chain && a.symbol === b.symbol && a.ticker === b.ticker && a.type === b.type
 
 /**
  * Removes `0x` or `0X` from address
