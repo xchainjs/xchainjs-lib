@@ -1,4 +1,4 @@
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetType, TokenAsset, baseAmount } from '@xchainjs/xchain-util'
 /**
  * Decimal places for KUJI asset.
  */
@@ -22,7 +22,7 @@ export const KUJIChain = 'KUJI' as const
 /**
  * Asset information for KUJI.
  */
-export const AssetKUJI: Asset = { chain: KUJIChain, symbol: 'KUJI', ticker: 'KUJI', synth: false }
+export const AssetKUJI: Asset = { chain: KUJIChain, symbol: 'KUJI', ticker: 'KUJI', type: AssetType.NATIVE }
 
 /**
  * Denomination for USK asset.
@@ -32,7 +32,7 @@ export const USK_ASSET_DENOM = 'factory/kujira1qk00h5atutpsv900x202pxx42npjr9thg
 /**
  * Asset information for USK.
  */
-export const AssetUSK: Asset = { chain: KUJIChain, symbol: 'USK', ticker: 'USK', synth: false }
+export const AssetUSK: TokenAsset = { chain: KUJIChain, symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN }
 
 /**
  * Decimal places for USK asset.
