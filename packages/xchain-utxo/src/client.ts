@@ -1,5 +1,4 @@
 import {
-  Balance,
   BaseXChainClient,
   ExplorerProviders,
   FeeEstimateOptions,
@@ -9,17 +8,14 @@ import {
   Fees,
   FeesWithRates,
   Protocol,
-  Tx,
   TxHash,
   TxHistoryParams,
-  TxParams,
-  TxsPage,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
-import { UTXO, UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
+import { UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
-import { UtxoClientParams } from './types'
+import { Balance, Tx, TxParams, TxsPage, UTXO, UtxoClientParams } from './types'
 /**
  * Abstract base class for creating blockchain clients in the UTXO model.
  */
@@ -215,7 +211,7 @@ export abstract class Client extends BaseXChainClient {
     for (const provider of this.dataProviders) {
       try {
         const prov = provider[this.network]
-        if (prov) return await prov.getBalance(address, undefined)
+        if (prov) return await prov.getBalance(address)
       } catch (error) {
         console.warn(error)
       }

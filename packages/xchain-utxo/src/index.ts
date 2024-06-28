@@ -1,7 +1,7 @@
 import { Client } from './client'
-import { PreparedTx, UTXO, UtxoClientParams, Witness } from './types'
+import { Balance, PreparedTx, Tx, TxParams, TxsPage, UTXO, UtxoClientParams, Witness } from './types'
 
 /**
  * Exported symbols from the `Client`, `UTXO`, `UtxoClientParams`, `Witness`, and `PreparedTx` modules.
  */
-export { Client, UTXO, UtxoClientParams, Witness, PreparedTx }
+export { Client, UTXO, UtxoClientParams, Witness, PreparedTx, Balance, Tx, TxsPage, TxParams }
