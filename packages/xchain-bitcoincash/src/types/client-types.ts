@@ -1,6 +1,6 @@
-import { Balance, FeeOption, Fees, Network, PreparedTx, TxHash } from '@xchainjs/xchain-client'
+import { FeeOption, Fees, Network, TxHash } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { UTXO as BaseUTXO } from '@xchainjs/xchain-utxo'
+import { Balance, PreparedTx, UTXO as BaseUTXO } from '@xchainjs/xchain-utxo'
 
 export type FeeRate = number
 export type FeeRates = Record<FeeOption, FeeRate>

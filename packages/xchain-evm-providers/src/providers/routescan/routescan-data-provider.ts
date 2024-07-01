@@ -1,7 +1,8 @@
 import { Provider } from '@ethersproject/abstract-provider'
-import { Tx, TxHistoryParams, TxsPage } from '@xchainjs/xchain-client'
+import { TxHistoryParams } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 
+import { Tx, TxsPage } from '../../types'
 import * as etherscanAPI from '../etherscan/etherscan-api'
 import { EtherscanProvider } from '../etherscan/etherscan-data-provider'
 

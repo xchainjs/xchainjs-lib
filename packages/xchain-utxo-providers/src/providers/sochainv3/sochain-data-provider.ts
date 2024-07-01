@@ -1,7 +1,7 @@
-import { Balance, FeeRates, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
+import { FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { UTXO, UtxoOnlineDataProvider } from '../types'
+import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '../../types'
 
 import * as sochain from './sochain-api'
 import { AddressUTXO, SochainNetwork } from './sochain-api-types'
@@ -68,8 +68,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     return this.mapUTXOs(allUnspent)
   }
 
-  async getBalance(address: Address, assets?: Asset[] /*ignored*/, confirmedOnly?: boolean): Promise<Balance[]> {
-    assets // TODO can we fix this?
+  async getBalance(address: Address, confirmedOnly?: boolean): Promise<Balance[]> {
     try {
       const amount = await sochain.getBalance({
         apiKey: this._apiKey,

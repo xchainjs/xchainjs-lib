@@ -2,7 +2,7 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, AssetType, TokenAsset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
 // Define constants related to Arbitrum
@@ -12,14 +12,14 @@ export const UPPER_FEE_BOUND = 1_000_000_000
 export const ARB_GAS_ASSET_DECIMAL = 18
 export const ARBChain = 'ARB' as const
 // ARB ETH Gas asset
-export const AssetAETH: Asset = { chain: ARBChain, symbol: 'ETH', ticker: 'ETH', synth: false }
+export const AssetAETH: Asset = { chain: ARBChain, symbol: 'ETH', ticker: 'ETH', type: AssetType.NATIVE }
 
 // ARB
-export const AssetARB: Asset = {
+export const AssetARB: TokenAsset = {
   chain: ARBChain,
   symbol: 'ARB-0x912ce59144191c1204e64559fe8253a0e49e6548',
   ticker: 'ARB',
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
 // Define JSON-RPC providers for mainnet and testnet

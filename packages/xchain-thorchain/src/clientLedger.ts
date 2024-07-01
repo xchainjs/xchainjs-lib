@@ -4,7 +4,6 @@ import { encodePubkey, makeAuthInfoBytes } from '@cosmjs/proto-signing'
 import { AminoTypes } from '@cosmjs/stargate'
 import Transport from '@ledgerhq/hw-transport'
 import THORChainApp, { extractSignatureFromTLV } from '@xchainjs/ledger-thorchain'
-import { TxParams } from '@xchainjs/xchain-client'
 import { base64ToBech32, bech32ToBase64 } from '@xchainjs/xchain-cosmos-sdk'
 import { Asset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -13,7 +12,7 @@ import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import { Client, ThorchainClientParams } from './client'
 import { AssetRuneNative, DEPOSIT_GAS_LIMIT_VALUE, defaultClientConfig } from './const'
-import { DepositParam } from './types'
+import { DepositParam, TxParams } from './types'
 import { parseDerivationPath, sortAndStringifyJson, sortedObject } from './utils'
 
 /**

@@ -1,16 +1,8 @@
-import {
-  Balance,
-  EvmOnlineDataProvider,
-  FeeRates,
-  Tx,
-  TxFrom,
-  TxHistoryParams,
-  TxTo,
-  TxType,
-  TxsPage,
-} from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { FeeRates, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
+import { Address, Asset, AssetType, Chain, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
+
+import { Balance, CompatibleAsset, EvmOnlineDataProvider, Tx, TxFrom, TxTo, TxsPage } from '../../types'
 
 import {
   GetBalanceResponse,
@@ -20,8 +12,9 @@ import {
   getTxsParams,
 } from './types'
 
+// TODO: Study why this is needed
 const AVAXChain: Chain = 'AVAX'
-const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
 export class CovalentProvider implements EvmOnlineDataProvider {
   private baseUrl = 'https://api.covalenthq.com'
@@ -40,7 +33,7 @@ export class CovalentProvider implements EvmOnlineDataProvider {
     this.nativeAsset
   }
 
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+  async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
     const balances: Balance[] = []
     const response = (
       await axios.get<GetBalanceResponse>(
@@ -53,19 +46,28 @@ export class CovalentProvider implements EvmOnlineDataProvider {
       if (balance.contract_address === '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') {
         //gas token, no contract associated
         symbol = balance.contract_ticker_symbol
+        balances.push({
+          asset: {
+            chain: this.chain,
+            symbol,
+            ticker: balance.contract_ticker_symbol,
+            type: AssetType.NATIVE,
+          },
+          amount: baseAmount(balance.balance, balance.contract_decimals),
+        })
       } else {
         //different token
         symbol = `${balance.contract_ticker_symbol}-${balance.contract_address}`
+        balances.push({
+          asset: {
+            chain: this.chain,
+            symbol,
+            ticker: balance.contract_ticker_symbol,
+            type: AssetType.TOKEN,
+          },
+          amount: baseAmount(balance.balance, balance.contract_decimals),
+        })
       }
-      balances.push({
-        asset: {
-          chain: this.chain,
-          symbol,
-          ticker: balance.contract_ticker_symbol,
-          synth: false,
-        },
-        amount: baseAmount(balance.balance, balance.contract_decimals),
-      })
     }
 
     let finalBalances = balances
@@ -122,7 +124,7 @@ export class CovalentProvider implements EvmOnlineDataProvider {
         chain: this.chain,
         symbol,
         ticker: transferEvent.sender_contract_ticker_symbol as string,
-        synth: false,
+        type: AssetType.TOKEN,
       },
       from,
       to,

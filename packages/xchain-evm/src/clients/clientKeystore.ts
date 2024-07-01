@@ -1,4 +1,4 @@
-import { Address } from '@xchainjs/xchain-util/lib'
+import { Address } from '@xchainjs/xchain-util'
 
 import { KeystoreSigner } from '../signers'
 import { IKeystoreSigner } from '../types'

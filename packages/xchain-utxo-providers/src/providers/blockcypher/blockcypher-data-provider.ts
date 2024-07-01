@@ -1,8 +1,8 @@
 import PromisePool from '@supercharge/promise-pool'
-import { Balance, FeeOption, FeeRates, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
-import { UTXO, UtxoOnlineDataProvider } from '../types'
+import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '../../types'
 
 import * as blockcypher from './blockcypher-api'
 import { BlockcypherNetwork, Transaction } from './blockcypher-api-types'
@@ -59,8 +59,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     return this.mapUTXOs(address, allUnspent)
   }
 
-  async getBalance(address: Address, assets?: Asset[] /*ignored*/, confirmedOnly?: boolean): Promise<Balance[]> {
-    assets // TODO can we fix this?
+  async getBalance(address: Address, confirmedOnly?: boolean): Promise<Balance[]> {
     const amount = await blockcypher.getBalance({
       apiKey: this._apiKey,
       baseUrl: this.baseUrl,

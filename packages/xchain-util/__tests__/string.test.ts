@@ -1,4 +1,4 @@
-import { trimZeros } from './string'
+import { trimZeros } from '../src/string'
 
 describe('trimZeros', () => {
   it('removes leading zeros', () => {

@@ -1,12 +1,13 @@
 import * as dashcore from '@dashevo/dashcore-lib'
 import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
-import { FeeOption, FeeRate, TxHash, TxParams, checkFeeBounds } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import * as nodeApi from '@xchainjs/xchain-dash/src/node-api'
 import { Address } from '@xchainjs/xchain-util'
+import { TxParams } from '@xchainjs/xchain-utxo'
 import * as Dash from 'bitcoinjs-lib'
 
 import { Client } from './client'
+import * as nodeApi from './node-api'
 import * as Utils from './utils'
 
 export class ClientKeystore extends Client {

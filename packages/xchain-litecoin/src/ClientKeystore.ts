@@ -1,6 +1,7 @@
-import { FeeOption, FeeRate, TxHash, TxParams, checkFeeBounds } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
+import { TxParams } from '@xchainjs/xchain-utxo'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import { Client } from './client'

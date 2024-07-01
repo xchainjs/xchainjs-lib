@@ -11,24 +11,20 @@ import {
 } from '@cosmjs/stargate'
 import {
   AssetInfo,
-  Balance,
   BaseXChainClient,
   FeeType,
   Fees,
   Network,
   PreparedTx,
-  Tx,
-  TxFrom,
   TxHistoryParams,
-  TxParams,
-  TxTo,
   TxType,
-  TxsPage,
   XChainClient,
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
 import { Address, Asset, BaseAmount, CachedValue, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+
+import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 
 /**
  * Represents the parameters required to configure a Cosmos SDK client.
@@ -130,8 +126,8 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * @returns {Promise<Tx>} The transformed transaction
    */
   private async mapIndexedTxToTx(indexedTx: IndexedTx): Promise<Tx> {
-    const mapTo: Map<string, { amount: BaseAmount; asset: Asset | undefined; address: Address }> = new Map()
-    const mapFrom: Map<string, { amount: BaseAmount; asset: Asset | undefined; address: Address }> = new Map()
+    const mapTo: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
+    const mapFrom: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
 
     /**
      * Approach to be compatible with other clients. Due to Cosmos transaction sorted events, the first 7 events
@@ -177,7 +173,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
               if (mapTo.has(recipientAssetKey)) {
                 const currentTo = mapTo.get(keyRecipient.value) as {
                   amount: BaseAmount
-                  asset: Asset
+                  asset: CompatibleAsset
                   address: Address
                 }
                 currentTo.amount = currentTo.amount.plus(amount)
@@ -194,7 +190,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
               if (mapFrom.has(senderAssetKey)) {
                 const currentTo = mapFrom.get(senderAssetKey) as {
                   amount: BaseAmount
-                  asset: Asset
+                  asset: CompatibleAsset
                   address: Address
                 }
                 currentTo.amount = currentTo.amount.plus(amount)
@@ -237,7 +233,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const blockData = await this.roundRobinGetBlock(indexedTx.height)
     // Return the mapped transaction object
     return {
-      asset: txFrom[0].asset as Asset,
+      asset: txFrom[0].asset as CompatibleAsset,
       from: txFrom,
       to: txTo,
       date: new Date(blockData.header.time),
@@ -277,7 +273,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * @param {Asset[] | undefined} _assets An array of assets. Ignored in this implementation.
    * @returns {Balance[]} A promise that resolves to an array of balances.
    */
-  public async getBalance(address: string, _assets?: Asset[] | undefined): Promise<Balance[]> {
+  public async getBalance(address: string, _assets?: CompatibleAsset[]): Promise<Balance[]> {
     const result = await this.roundRobinGetBalance(address)
     // TODO: Filter using assets
     const balances: Balance[] = []
@@ -524,9 +520,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   abstract getExplorerUrl(): string
   abstract getExplorerAddressUrl(_address: string): string
   abstract getExplorerTxUrl(txID: string): string
-  abstract assetFromDenom(denom: string): Asset | null
-  abstract getDenom(asset: Asset): string | null
-  public abstract getAssetDecimals(asset: Asset): number
+  abstract assetFromDenom(denom: string): CompatibleAsset | null
+  abstract getDenom(asset: CompatibleAsset): string | null
+  public abstract getAssetDecimals(asset: CompatibleAsset): number
   protected abstract getMsgTypeUrlByType(msgType: MsgTypes): string
   protected abstract getStandardFee(asset: Asset): StdFee
   protected abstract getPrefix(network: Network): string

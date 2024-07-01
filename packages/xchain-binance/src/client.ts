@@ -4,7 +4,6 @@ import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
 import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
 import {
   AssetInfo,
-  Balance,
   BaseXChainClient,
   FeeType,
   Fees,
@@ -23,6 +22,7 @@ import {
   Address,
   Asset,
   BaseAmount,
+  TokenAsset,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -35,12 +35,13 @@ import axios from 'axios'
 import { AssetBNB, BNBChain, BNB_DECIMAL } from './const'
 import {
   Account,
-  Balance as BinanceBalance,
+  Balance,
+  BinanceBalance,
   Fees as BinanceFees,
   TransactionResult,
   TransferFee,
   TxPage as BinanceTxPage,
-} from './types/binance'
+} from './types'
 import { getPrefix, isAccount, isTransferFee, parseTx } from './utils'
 // Define a type for private key
 type PrivKey = string
@@ -244,16 +245,16 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
    * Get the balance of a given address.
    * @param {Address} address The address to get the balance for. (optional)
    * By default, it will return the balance of the current wallet.
-   * @param {Asset} asset If not set, it will return all assets available. (optional)
+   * @param {(Asset | TokenAsset)[]} asset If not set, it will return all assets available. (optional)
    * @returns {Balance[]} The balance of the address.
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+  async getBalance(address: Address, assets?: (Asset | TokenAsset)[]): Promise<Balance[]> {
     const balances: BinanceBalance[] = await this.bncClient.getBalance(address)
 
     return balances
       .map((balance) => {
         return {
-          asset: assetFromString(`${BNBChain}.${balance.symbol}`) || AssetBNB,
+          asset: (assetFromString(`${BNBChain}.${balance.symbol}`) as Asset | TokenAsset) || AssetBNB,
           amount: assetToBase(assetAmount(balance.free, 8)),
         }
       })

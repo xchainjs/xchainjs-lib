@@ -4,7 +4,7 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client' // Importing ExplorerProvider and Network from xchain-client
 import { EVMClientParams } from '@xchainjs/xchain-evm' // Importing EVMClientParams from xchain-evm
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers' // Importing EtherscanProvider from xchain-evm-providers
-import { Asset } from '@xchainjs/xchain-util' // Importing Asset from xchain-util
+import { Asset, AssetType } from '@xchainjs/xchain-util' // Importing Asset from xchain-util
 import { BigNumber, ethers } from 'ethers' // Importing BigNumber and ethers from ethers library
 
 /**
@@ -33,7 +33,7 @@ export const AssetBSC: Asset = {
   chain: BSCChain,
   symbol: 'BNB',
   ticker: 'BNB',
-  synth: false,
+  type: AssetType.NATIVE,
 }
 
 // Ethers providers

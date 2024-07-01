@@ -1,8 +1,8 @@
 // Import statements for necessary modules and types
 import * as bitcash from '@psf/bitcoincashjs-lib'
-import { AssetInfo, FeeRate, Network, TxParams } from '@xchainjs/xchain-client' // Importing various types and constants from xchain-client module
+import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client' // Importing various types and constants from xchain-client module
 import { Address } from '@xchainjs/xchain-util' // Importing the Address type from xchain-util module
-import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
+import { Client as UTXOClient, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 import accumulative from 'coinselect/accumulative' // Importing accumulative function from coinselect/accumulative module
 
 import {

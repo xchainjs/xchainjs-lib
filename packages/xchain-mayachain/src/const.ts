@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetType, TokenAsset, baseAmount } from '@xchainjs/xchain-util'
 
 import types from './types/proto/MsgCompiled'
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
@@ -55,12 +55,12 @@ export const DEFAULT_FEE = baseAmount(2000000000, CACAO_DECIMAL)
  * Based on definition in mayachain `common`
  * @see https://gitlab.com/mayachain/mayanode
  */
-export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', synth: false }
+export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', type: AssetType.NATIVE }
 
 /**
  * Maya asset.
  */
-export const AssetMaya: Asset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', synth: false }
+export const AssetMaya: TokenAsset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', type: AssetType.TOKEN }
 
 /**
  * Message type URL used to send transactions.

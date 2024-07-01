@@ -2,7 +2,7 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
 import { EtherscanProvider, RoutescanProvider } from '@xchainjs/xchain-evm-providers'
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, AssetType } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
 // Define constants related to Avalanche
@@ -11,7 +11,7 @@ export const LOWER_FEE_BOUND = 2_000_000_000
 export const UPPER_FEE_BOUND = 1_000_000_000_000
 export const AVAX_GAS_ASSET_DECIMAL = 18
 export const AVAXChain = 'AVAX' as const
-export const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+export const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
 // Define JSON-RPC providers for mainnet and testnet
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/avalanche')

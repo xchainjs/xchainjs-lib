@@ -8,9 +8,9 @@ import {
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
 import { GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
-import { AssetInfo, FeeType, Fees, PreparedTx, TxParams, singleFee } from '@xchainjs/xchain-client'
+import { AssetInfo, FeeType, Fees, PreparedTx, singleFee } from '@xchainjs/xchain-client'
 import { Client as CosmosSDKClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
-import { Address, Asset, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, AssetType, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
@@ -23,7 +23,7 @@ import {
   MSG_SEND_TYPE_URL,
   defaultClientConfig,
 } from './const'
-import { TxOfflineParams } from './types'
+import { CompatibleAsset, TxOfflineParams, TxParams } from './types'
 import { getDefaultExplorers, getDenom, getPrefix } from './utils'
 
 /**
@@ -54,10 +54,10 @@ export abstract class Client extends CosmosSDKClient {
   }
   /**
    * Get the number of decimals for a given asset.
-   * @param {Asset} asset The asset to get the decimals for.
+   * @param {CompatibleAsset} asset The asset to get the decimals for.
    * @returns {number} The number of decimals.
    */
-  public getAssetDecimals(asset: Asset): number {
+  public getAssetDecimals(asset: CompatibleAsset): number {
     if (eqAsset(asset, AssetATOM)) return COSMOS_DECIMAL
     return this.defaultDecimals
   }
@@ -93,9 +93,9 @@ export abstract class Client extends CosmosSDKClient {
   /**
    * Get the asset from a given denomination.
    * @param {string} denom The denomination to convert.
-   * @returns {Asset | null} The asset corresponding to the given denomination.
+   * @returns {CompatibleAsset | null} The asset corresponding to the given denomination.
    */
-  public assetFromDenom(denom: string): Asset | null {
+  public assetFromDenom(denom: string): CompatibleAsset | null {
     if (denom === this.getDenom(AssetATOM)) return AssetATOM
     // IBC assets
     if (denom.startsWith('ibc/'))
@@ -107,7 +107,7 @@ export abstract class Client extends CosmosSDKClient {
         // Get readable ticker for IBC assets from denom #600 https://github.com/xchainjs/xchainjs-lib/issues/600
         // At the meantime ticker will be empty
         ticker: '',
-        synth: false,
+        type: AssetType.TOKEN,
       }
     return null
   }
@@ -117,7 +117,7 @@ export abstract class Client extends CosmosSDKClient {
    * @param {Asset} asset The asset to get the denomination for.
    * @returns {string | null} The denomination of the given asset.
    */
-  public getDenom(asset: Asset): string | null {
+  public getDenom(asset: CompatibleAsset): string | null {
     return getDenom(asset)
   }
 

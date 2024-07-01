@@ -1,8 +1,9 @@
 import { Network, RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Asset, eqAsset } from '@xchainjs/xchain-util'
+import { eqAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { ATOM_DENOM, AssetATOM } from './const'
+import { CompatibleAsset } from './types'
 
 // Explorer URLs for Mainnet and Testnet
 const MAINNET_EXPLORER_URL = 'https://bigdipper.live/cosmos'
@@ -50,10 +51,10 @@ export const getDefaultExplorers = (): Record<Network, string> => ({
  * Function to get the denomination of a given asset.
  * Currently only supports 'ATOM'.
  *
- * @param {Asset} asset The asset for which denomination is requested.
+ * @param {CompatibleAsset} asset The asset for which denomination is requested.
  * @returns {string} The denomination of the given asset, or null if not supported.
  */
-export const getDenom = (asset: Asset): string | null => {
+export const getDenom = (asset: CompatibleAsset): string | null => {
   if (eqAsset(asset, AssetATOM)) return ATOM_DENOM
   return null
 }

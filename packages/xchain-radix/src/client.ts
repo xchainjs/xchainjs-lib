@@ -38,24 +38,18 @@ import {
 } from '@radixdlt/radix-engine-toolkit'
 import {
   AssetInfo,
-  Balance,
   BaseXChainClient,
   FeeType,
   Fees,
   Network,
   PreparedTx,
-  Tx,
-  TxFrom,
   TxHistoryParams,
-  TxParams,
-  TxTo,
   TxType,
-  TxsPage,
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { Address, AssetType, TokenAsset, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { bech32m } from 'bech32'
 import BIP32Factory, { BIP32Interface } from 'bip32'
 import { derivePath } from 'ed25519-hd-key'
@@ -70,6 +64,7 @@ import {
   feesEstimationPublicKeys,
   xrdRootDerivationPaths,
 } from './const'
+import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types/radix'
 
 const xChainJsNetworkToRadixNetworkId = (network: Network): number => {
   switch (network) {
@@ -172,11 +167,11 @@ export class RadixSpecificClient {
       })
       batch.forEach((item) => {
         if (item.aggregation_level === 'Global') {
-          const asset: Asset = {
+          const asset: TokenAsset = {
             chain: RadixChain,
             symbol: item.resource_address,
             ticker: item.resource_address,
-            synth: false,
+            type: AssetType.TOKEN,
           }
           const divisibility = divisibilities.get(item.resource_address) || 0
           // We need to do this because item.amount can be either string or number
@@ -633,7 +628,7 @@ export default class Client extends BaseXChainClient {
    * @param {Asset[]} assets - Assets to retrieve the balance for (optional).
    * @returns {Promise<Balance[]>} An array containing the balance of the address.
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+  async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
     const balances: Balance[] = await this.radixSpecificClient.fetchBalances(address)
     // If assets is undefined, return all balances
     if (!assets) {
@@ -758,7 +753,7 @@ export default class Client extends BaseXChainClient {
           from.push({
             from: withdrawAccount,
             amount: baseAmount(withdrawAmount),
-            asset: { symbol: withdrawResource, ticker: withdrawResource, synth: false, chain: RadixChain },
+            asset: { symbol: withdrawResource, ticker: withdrawResource, type: AssetType.TOKEN, chain: RadixChain },
           })
         }
       }
@@ -770,7 +765,7 @@ export default class Client extends BaseXChainClient {
           to.push({
             to: depositAccount,
             amount: baseAmount(depositAmount),
-            asset: { symbol: depositResource, ticker: depositResource, synth: false, chain: RadixChain },
+            asset: { symbol: depositResource, ticker: depositResource, type: AssetType.TOKEN, chain: RadixChain },
           })
         }
       }
@@ -781,7 +776,7 @@ export default class Client extends BaseXChainClient {
         date: confirmed_at,
         type: TxType.Transfer,
         hash: intent_hash,
-        asset: { symbol: '', ticker: '', synth: false, chain: RadixChain },
+        asset: { symbol: '', ticker: '', type: AssetType.TOKEN, chain: RadixChain },
       }
 
       return transaction

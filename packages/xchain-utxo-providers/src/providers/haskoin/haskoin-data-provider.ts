@@ -1,7 +1,7 @@
-import { Balance, FeeRates, Tx, TxHash, TxHistoryParams, TxType, TxsPage } from '@xchainjs/xchain-client'
+import { FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
-import { UTXO, UtxoOnlineDataProvider } from '../types'
+import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '../../types'
 
 import * as haskoin from './haskoin-api'
 import { HaskoinNetwork, Transaction, TxUnspent } from './haskoin-api-types'
@@ -55,8 +55,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
     return await this.mapUTXOs(allUnspent)
   }
 
-  async getBalance(address: Address, assets?: Asset[] /*ignored*/, confirmedOnly?: boolean): Promise<Balance[]> {
-    assets // TODO can we fix this?
+  async getBalance(address: Address, confirmedOnly?: boolean): Promise<Balance[]> {
     const amount = await haskoin.getBalance({
       haskoinUrl: this.baseUrl,
       haskoinNetwork: this.haskoinNetwork,

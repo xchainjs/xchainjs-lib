@@ -1,8 +1,8 @@
 import AppBtc from '@ledgerhq/hw-app-btc'
 import { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
-import { FeeOption, FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, TxHash } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Dogecoin from 'bitcoinjs-lib'
 
 import { Client } from './client'

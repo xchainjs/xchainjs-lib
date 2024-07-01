@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client/lib'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetType, baseAmount } from '@xchainjs/xchain-util'
 
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
 
@@ -33,7 +33,7 @@ export const GAIAChain = 'GAIA' as const
  * Based on the definition in Thorchain `common`.
  * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
  */
-export const AssetATOM: Asset = { chain: GAIAChain, symbol: 'ATOM', ticker: 'ATOM', synth: false }
+export const AssetATOM: Asset = { chain: GAIAChain, symbol: 'ATOM', ticker: 'ATOM', type: AssetType.NATIVE }
 
 /**
  * Denomination for the native Cosmos asset.

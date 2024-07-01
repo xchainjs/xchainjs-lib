@@ -1,17 +1,7 @@
 import * as dashcore from '@dashevo/dashcore-lib'
-import {
-  AssetInfo,
-  Balance,
-  FeeRate,
-  Network,
-  Tx,
-  TxHistoryParams,
-  TxParams,
-  TxType,
-  TxsPage,
-} from '@xchainjs/xchain-client'
+import { AssetInfo, FeeRate, Network, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
 import { Address, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { Balance, Client as UTXOClient, Tx, TxParams, TxsPage, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import {
   AssetDASH,
