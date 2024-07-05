@@ -15,10 +15,18 @@ import {
 } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
-import { Address, Asset, BaseAmount, Chain, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  AnyAsset,
+  BaseAmount,
+  Chain,
+  TokenAsset,
+  baseAmount,
+  getContractAddressFromAsset,
+} from '@xchainjs/xchain-util'
 import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
 
-import { ChainBalances, EvmTxParams, UtxoTxParams } from './types'
+import { ChainBalances, CosmosTxParams, EvmTxParams, UtxoTxParams } from './types'
 
 // Record type to hold network URLs
 export type NodeUrls = Record<Network, string>
@@ -175,9 +183,10 @@ export class Wallet {
   /**
    * Get chain balances
    * @param {Chain} chain The chain to retrieve the balance of
+   * @param {AnyAsset[]} chain Optional - Assets to retrieve the balance of
    * @returns {Balance[]} the chain balances
    */
-  public async getBalance(chain: Chain, assets?: Asset[]): Promise<Balance[]> {
+  public async getBalance(chain: Chain, assets?: AnyAsset[]): Promise<Balance[]> {
     const client = this.getClient(chain)
     return client.getBalance(await client.getAddressAsync(), assets)
   }
@@ -185,14 +194,14 @@ export class Wallet {
   /**
    * By default, it returns all the wallet balances unless assets are provided, in that case,
    * only asset balances will be returned by chain
-   * @param {Assets[]} assets - Optional. Assets of which return the balance
+   * @param {AnyAsset[]} assets - Optional. Assets of which return the balance
    * @returns {Record<Chain, Balance[]>} Balances by chain
    */
   public async getBalances(
-    assets: Record<Chain, Asset[] | undefined> = Object.keys(this.clients).reduce((prev, client) => {
+    assets: Record<Chain, AnyAsset[] | undefined> = Object.keys(this.clients).reduce((prev, client) => {
       prev[client] = undefined
       return prev
-    }, {} as Record<Chain, Asset[] | undefined>),
+    }, {} as Record<Chain, AnyAsset[] | undefined>),
   ): Promise<ChainBalances> {
     const walletBalances: ChainBalances = {}
 
@@ -355,7 +364,7 @@ export class Wallet {
    * @param {TxParams} txParams txParams - The parameters to make the transfer
    * @returns The transaction hash
    */
-  public async transfer(params: UtxoTxParams | EvmTxParams): Promise<string> {
+  public async transfer(params: UtxoTxParams | EvmTxParams | CosmosTxParams): Promise<string> {
     const client = this.getClient(params.asset.chain)
     if (this.isEvmClient(client)) {
       if (!this.isEvmTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
@@ -404,7 +413,7 @@ export class Wallet {
     sequence,
     gasLimit,
     chain,
-  }: DepositParam & { asset: Asset; chain: Chain }): Promise<string> {
+  }: DepositParam & { asset: AnyAsset; chain: Chain }): Promise<string> {
     const client = this.getClient(chain)
     if (!('deposit' in client)) throw Error(`Can not deposit with ${chain} client`)
 
@@ -420,7 +429,7 @@ export class Wallet {
    * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
    * @throws {Error} If asset is a non ERC20 asset
    */
-  async approve(asset: Asset, amount: BaseAmount, spenderAddress: string): Promise<string> {
+  async approve(asset: TokenAsset, amount: BaseAmount, spenderAddress: string): Promise<string> {
     const client = this.getClient(asset.chain)
     if (!this.isEvmClient(client)) throw Error('Can not make approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not make approve over native asset')
@@ -439,7 +448,12 @@ export class Wallet {
    * @returns true if the spenderAddress is allowed to spend the amount, otherwise, false
    * @throws {Error} If asset is a non ERC20 asset
    */
-  async isApproved(asset: Asset, amount: BaseAmount, fromAddress: string, spenderAddress: string): Promise<boolean> {
+  async isApproved(
+    asset: TokenAsset,
+    amount: BaseAmount,
+    fromAddress: string,
+    spenderAddress: string,
+  ): Promise<boolean> {
     const client = this.getClient(asset.chain)
     if (!this.isEvmClient(client)) throw Error('Can not validate approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not validate approve over native asset')
@@ -483,7 +497,7 @@ export class Wallet {
    * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
    * @returns {boolean} True if params is EvmTxParams
    */
-  private isEvmTxParams(params: EvmTxParams | UtxoTxParams): params is EvmTxParams {
+  private isEvmTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams): params is EvmTxParams {
     return !('feeRate' in params)
   }
 
@@ -492,7 +506,7 @@ export class Wallet {
    * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
    * @returns {boolean} True if params is UtxoTxParams
    */
-  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams): params is UtxoTxParams {
+  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams): params is UtxoTxParams {
     return !('gasPrice' in params)
   }
 

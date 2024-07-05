@@ -2,7 +2,17 @@ import BigNumber from 'bignumber.js'
 
 import { fixedBN, formatBN } from './bn'
 import { trimZeros as trimZerosHelper } from './string'
-import { Amount, AnyAsset, Asset, AssetAmount, AssetType, BaseAmount, Denomination } from './types'
+import {
+  Amount,
+  AnyAsset,
+  Asset,
+  AssetAmount,
+  AssetType,
+  BaseAmount,
+  Denomination,
+  SynthAsset,
+  TokenAsset,
+} from './types'
 
 export type Address = string
 
@@ -208,7 +218,7 @@ export const isValidAsset = (asset: AnyAsset): boolean => !!asset.chain && !!ass
  * @param {Asset} asset
  * @returns {boolean} `true` or `false`
  */
-export const isSynthAsset = ({ type }: AnyAsset): boolean => type === AssetType.SYNTH
+export const isSynthAsset = (asset: AnyAsset): asset is SynthAsset => asset.type === AssetType.SYNTH
 
 /**
  * Creates an `Asset` by a given string
@@ -426,7 +436,7 @@ export const eqAsset = (a: AnyAsset, b: AnyAsset) =>
  */
 export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')
 
-export const getContractAddressFromAsset = (asset: Asset): Address => {
+export const getContractAddressFromAsset = (asset: TokenAsset): Address => {
   const assetAddress = asset.symbol.slice(asset.ticker.length + 1)
   return strip0x(assetAddress)
 }
