@@ -1,5 +1,14 @@
 import { AssetData, SwapSDK } from '@chainflip/sdk/swap'
-import { Asset, CachedValue, Chain, CryptoAmount, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CachedValue,
+  Chain,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
@@ -181,7 +190,10 @@ export class ChainflipProtocol implements IProtocol {
    * @throws {Error} - If asset is not supported in Chainflip
    * @returns the asset data
    */
-  private async getAssetData(asset: Asset): Promise<AssetData> {
+  private async getAssetData(asset: Asset | TokenAsset | SynthAsset): Promise<AssetData> {
+    if (isSynthAsset(asset)) {
+      throw Error('Synth asset not supported in Chainflip protocol')
+    }
     const chainAssets = await this.assetsData.getValue()
     const assetData = chainAssets.find((chainAsset) => {
       const contractAddress = asset.symbol.split('-').length > 1 ? asset.symbol.split('-')[1] : undefined
