@@ -3894,6 +3894,7 @@ __metadata:
     "@ledgerhq/hw-transport": "npm:6.30.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.3.6"
     ethers: "npm:5.7.2"

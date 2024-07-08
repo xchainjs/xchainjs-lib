@@ -19,14 +19,11 @@ export const getBaseAmountWithDiffDecimals = (
 }
 
 // TODO: Move this util functions to xchain-util to avoid replication between Thorchain and Mayachain
-export const getCryptoAmountWithNotation = <T extends CryptoAmount<CompatibleAsset>>(
-  amount: T,
+export const getCryptoAmountWithNotation = <T extends CompatibleAsset>(
+  amount: CryptoAmount<T>,
   notation: number,
 ): CryptoAmount<CompatibleAsset> => {
   const inputAmountBaseNotation = amount.baseAmount.amount()
   const decimalsDiff = notation - amount.baseAmount.decimal
-  return new CryptoAmount<typeof amount.asset>(
-    baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation),
-    amount.asset,
-  ) as T
+  return new CryptoAmount<T>(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
 }
