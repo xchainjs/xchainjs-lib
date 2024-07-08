@@ -9,14 +9,20 @@ import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
-import { MAYANameDetails, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
+import {
+  CompatibleAsset,
+  MAYANameDetails,
+  MayachainQuery,
+  QuoteSwap,
+  QuoteSwapParams,
+} from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { Address, CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, CryptoAmount, assetToString, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { MayachainAction } from './mayachain-action'
 import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
-import { isProtocolERC20Asset, validateAddress } from './utils'
+import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
  * Mayachain Automated Market Maker (AMM) class.
@@ -81,12 +87,12 @@ export class MayachainAMM {
       return {
         toAddress: ``,
         memo: ``,
-        expectedAmount: new CryptoAmount(baseAmount(0), destinationAsset),
+        expectedAmount: new CryptoAmount<CompatibleAsset>(baseAmount(0), destinationAsset),
         dustThreshold: this.mayachainQuery.getChainDustValue(fromAsset.chain),
         fees: {
           asset: destinationAsset,
-          affiliateFee: new CryptoAmount(baseAmount(0), destinationAsset),
-          outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          affiliateFee: new CryptoAmount<CompatibleAsset>(baseAmount(0), destinationAsset),
+          outboundFee: new CryptoAmount<CompatibleAsset>(baseAmount(0), destinationAsset),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
@@ -134,7 +140,7 @@ export class MayachainAMM {
       destinationAddress &&
       !validateAddress(
         this.mayachainQuery.getNetwork(),
-        destinationAsset.synth ? MAYAChain : destinationAsset.chain,
+        isSynthAsset(destinationAsset) ? MAYAChain : destinationAsset.chain,
         destinationAddress,
       )
     ) {
@@ -153,12 +159,16 @@ export class MayachainAMM {
     }
     // Validate approval if asset is an ERC20 token and fromAddress is provided
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {
-      const approveErrors = await this.isRouterApprovedToSpend({
-        asset: fromAsset,
-        address: fromAddress,
-        amount,
-      })
-      errors.push(...approveErrors)
+      if (!isTokenCryptoAmount(amount)) {
+        errors.push(`${assetToString(amount.asset)} is not Token asset amount`)
+      } else {
+        const approveErrors = await this.isRouterApprovedToSpend({
+          asset: fromAsset,
+          address: fromAddress,
+          amount,
+        })
+        errors.push(...approveErrors)
+      }
     }
 
     return errors

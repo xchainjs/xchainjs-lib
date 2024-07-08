@@ -3,7 +3,7 @@ import { PoolDetail, Transaction } from '@xchainjs/xchain-mayamidgard'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
   Address,
-  Asset,
+  AssetCryptoAmount,
   CryptoAmount,
   assetFromStringEx,
   assetToString,
@@ -13,7 +13,15 @@ import {
 } from '@xchainjs/xchain-util'
 
 import { MayachainCache } from './mayachain-cache'
-import { InboundDetail, MAYANameDetails, QuoteSwap, QuoteSwapParams, SwapHistoryParams, SwapsHistory } from './types'
+import {
+  CompatibleAsset,
+  InboundDetail,
+  MAYANameDetails,
+  QuoteSwap,
+  QuoteSwapParams,
+  SwapHistoryParams,
+  SwapsHistory,
+} from './types'
 import {
   ArbAsset,
   ArbChain,
@@ -100,18 +108,18 @@ export class MayachainQuery {
       return {
         toAddress: ``,
         memo: ``,
-        expectedAmount: new CryptoAmount(
+        expectedAmount: new CryptoAmount<CompatibleAsset>(
           baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
           destinationAsset,
         ),
         dustThreshold: this.getChainDustValue(fromAsset.chain),
         fees: {
           asset: destinationAsset,
-          affiliateFee: new CryptoAmount(
+          affiliateFee: new CryptoAmount<CompatibleAsset>(
             baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
             destinationAsset,
           ),
-          outboundFee: new CryptoAmount(
+          outboundFee: new CryptoAmount<CompatibleAsset>(
             baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
             destinationAsset,
           ),
@@ -128,7 +136,7 @@ export class MayachainQuery {
       }
     }
 
-    const feeAsset = assetFromStringEx(swapQuote.fees.asset)
+    const feeAsset = assetFromStringEx(swapQuote.fees.asset) as CompatibleAsset
 
     const errors: string[] = []
     if (swapQuote.memo === undefined) errors.push(`Error parsing swap quote: Memo is ${swapQuote.memo}`)
@@ -137,15 +145,21 @@ export class MayachainQuery {
     return {
       toAddress: swapQuote.inbound_address || '',
       memo: swapQuote.memo || '',
-      expectedAmount: new CryptoAmount(
+      expectedAmount: new CryptoAmount<CompatibleAsset>(
         baseAmount(swapQuote.expected_amount_out, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
         destinationAsset,
       ),
       dustThreshold: this.getChainDustValue(fromAsset.chain),
       fees: {
         asset: feeAsset,
-        affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8), feeAsset),
-        outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8), feeAsset),
+        affiliateFee: new CryptoAmount<CompatibleAsset>(
+          baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8),
+          feeAsset,
+        ),
+        outboundFee: new CryptoAmount<CompatibleAsset>(
+          baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8),
+          feeAsset,
+        ),
       },
       slipBasisPoints: swapQuote.slippage_bps,
       outboundDelayBlocks: swapQuote.outbound_delay_blocks,
@@ -163,16 +177,16 @@ export class MayachainQuery {
    * Return mayachain supported chains dust amounts
    * @returns a map where chain is the key and dust amount cryptoAmount as value
    */
-  public getDustValues(): Record<string, CryptoAmount> {
+  public getDustValues(): Record<string, AssetCryptoAmount> {
     // TODO: Find out how to fetch native asset decimals
     return {
-      [BtcChain]: new CryptoAmount(baseAmount(10000, 8), BtcAsset),
-      [EthChain]: new CryptoAmount(baseAmount(0, 18), EthAsset),
-      [DashChain]: new CryptoAmount(baseAmount(10000, 8), DashAsset),
-      [KujiraChain]: new CryptoAmount(baseAmount(0, 6), KujiraAsset),
-      [ThorChain]: new CryptoAmount(baseAmount(0, 8), RuneAsset),
-      [MayaChain]: new CryptoAmount(baseAmount(0, 10), CacaoAsset),
-      [ArbChain]: new CryptoAmount(baseAmount(0, 18), ArbAsset),
+      [BtcChain]: new AssetCryptoAmount(baseAmount(10000, 8), BtcAsset),
+      [EthChain]: new AssetCryptoAmount(baseAmount(0, 18), EthAsset),
+      [DashChain]: new AssetCryptoAmount(baseAmount(10000, 8), DashAsset),
+      [KujiraChain]: new AssetCryptoAmount(baseAmount(0, 6), KujiraAsset),
+      [ThorChain]: new AssetCryptoAmount(baseAmount(0, 8), RuneAsset),
+      [MayaChain]: new AssetCryptoAmount(baseAmount(0, 10), CacaoAsset),
+      [ArbChain]: new AssetCryptoAmount(baseAmount(0, 18), ArbAsset),
     }
   }
 
@@ -181,7 +195,7 @@ export class MayachainQuery {
    * @param {string} chain Chain to retrieve the dust amount of
    * @returns a map where chain is the key and dust amount cryptoAmount as value
    */
-  public getChainDustValue(chain: string): CryptoAmount {
+  public getChainDustValue(chain: string): AssetCryptoAmount {
     const dustValue = this.getDustValues()[chain]
     if (!dustValue) throw Error(`No dust value known for ${chain} chain`)
     return dustValue
@@ -223,7 +237,7 @@ export class MayachainQuery {
    * @returns the asset decimals
    * @throws {Error} if the asset is not supported in Mayachain
    */
-  public async getAssetDecimals(asset: Asset): Promise<number> {
+  public async getAssetDecimals(asset: CompatibleAsset): Promise<number> {
     if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
 
     const assetNotation = assetToString(asset)
@@ -254,11 +268,19 @@ export class MayachainQuery {
     })
     const assetDecimals = await this.mayachainCache.getAssetDecimals()
 
-    const getCryptoAmount = (assetDecimals: Record<string, number>, asset: string, amount: string): CryptoAmount => {
+    const getCryptoAmount = (
+      assetDecimals: Record<string, number>,
+      asset: string,
+      amount: string,
+    ): CryptoAmount<CompatibleAsset> => {
       const decimals = asset in assetDecimals ? assetDecimals[asset] : DEFAULT_MAYACHAIN_DECIMALS
-      return decimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFromStringEx(asset))
-        ? new CryptoAmount(baseAmount(amount, decimals), assetFromStringEx(asset))
-        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFromStringEx(asset)), decimals)
+      const assetFormatted = assetFromStringEx(asset) as CompatibleAsset
+      return decimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
+        ? new CryptoAmount<typeof assetFormatted>(baseAmount(amount, decimals), assetFormatted)
+        : getCryptoAmountWithNotation(
+            new CryptoAmount<typeof assetFormatted>(baseAmount(amount), assetFormatted),
+            decimals,
+          )
     }
 
     return {
