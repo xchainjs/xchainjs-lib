@@ -1,9 +1,17 @@
 import { Saver, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
-import { Asset, Chain, CryptoAmount, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  Chain,
+  CryptoAmount,
+  TokenAsset,
+  assetFromStringEx,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { ThorchainCache } from './thorchain-cache'
-import { ChainAttributes } from './types'
+import { ChainAttributes, CompatibleAsset } from './types'
 import { AssetRuneNative, THORChain, isAssetRuneNative } from './utils'
 /**
  * Enum representing different types of transactions.
@@ -92,7 +100,7 @@ export type AddLpInfo = {
   assetTx?: InboundTx
   runeTx?: InboundTx
   assetConfirmationDate?: Date
-  pool: Asset
+  pool: Asset | TokenAsset
 }
 /**
  * Object representing withdraw saver information.
@@ -292,10 +300,10 @@ export class TransactionStage {
    * @param asset - Asset object.
    * @returns Promise<CryptoAmount> - CryptoAmount object.
    */
-  private async getCryptoAmount(baseAmt: string, asset: Asset): Promise<CryptoAmount> {
+  private async getCryptoAmount(baseAmt: string, asset: CompatibleAsset): Promise<CryptoAmount<CompatibleAsset>> {
     const decimals =
       THORChain === asset.chain ? 8 : Number(await this.thorchainCache.midgardQuery.getDecimalForAsset(asset))
-    return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
+    return new CryptoAmount<CompatibleAsset>(baseAmount(baseAmt, decimals), asset)
   }
   /**
    * Determines the observed status of a transaction.
@@ -363,7 +371,7 @@ export class TransactionStage {
       // Extract memo fields
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseAddLpMemo(memo)
-      const asset = assetFromStringEx(memoFields.asset)
+      const asset = assetFromStringEx(memoFields.asset) as Asset | TokenAsset
       const isSymmetric = memoFields.pairedAddress ? true : false
       // Determine if assetTx or runeTx
       const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
@@ -633,11 +641,11 @@ export class TransactionStage {
    * @param asset - Asset for which block height is needed.
    * @returns Block height.
    */
-  private async blockHeight(asset: Asset) {
+  private async blockHeight(asset: CompatibleAsset) {
     const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
     const currentHeight = lastBlockObj.find((obj) => obj.chain == asset.chain)
     let blockHeight
-    if (asset.chain === THORChain || asset.synth) {
+    if (asset.chain === THORChain || isSynthAsset(asset)) {
       const currentHeight = lastBlockObj.find((obj) => obj)
       blockHeight = Number(`${currentHeight?.thorchain}`)
     } else {
