@@ -108,18 +108,18 @@ export class MayachainQuery {
       return {
         toAddress: ``,
         memo: ``,
-        expectedAmount: new CryptoAmount<CompatibleAsset>(
+        expectedAmount: new CryptoAmount(
           baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
           destinationAsset,
         ),
         dustThreshold: this.getChainDustValue(fromAsset.chain),
         fees: {
           asset: destinationAsset,
-          affiliateFee: new CryptoAmount<CompatibleAsset>(
+          affiliateFee: new CryptoAmount(
             baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
             destinationAsset,
           ),
-          outboundFee: new CryptoAmount<CompatibleAsset>(
+          outboundFee: new CryptoAmount(
             baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
             destinationAsset,
           ),
@@ -145,21 +145,15 @@ export class MayachainQuery {
     return {
       toAddress: swapQuote.inbound_address || '',
       memo: swapQuote.memo || '',
-      expectedAmount: new CryptoAmount<CompatibleAsset>(
+      expectedAmount: new CryptoAmount(
         baseAmount(swapQuote.expected_amount_out, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
         destinationAsset,
       ),
       dustThreshold: this.getChainDustValue(fromAsset.chain),
       fees: {
         asset: feeAsset,
-        affiliateFee: new CryptoAmount<CompatibleAsset>(
-          baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8),
-          feeAsset,
-        ),
-        outboundFee: new CryptoAmount<CompatibleAsset>(
-          baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8),
-          feeAsset,
-        ),
+        affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8), feeAsset),
+        outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8), feeAsset),
       },
       slipBasisPoints: swapQuote.slippage_bps,
       outboundDelayBlocks: swapQuote.outbound_delay_blocks,
@@ -276,11 +270,8 @@ export class MayachainQuery {
       const decimals = asset in assetDecimals ? assetDecimals[asset] : DEFAULT_MAYACHAIN_DECIMALS
       const assetFormatted = assetFromStringEx(asset) as CompatibleAsset
       return decimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
-        ? new CryptoAmount<typeof assetFormatted>(baseAmount(amount, decimals), assetFormatted)
-        : getCryptoAmountWithNotation(
-            new CryptoAmount<typeof assetFormatted>(baseAmount(amount), assetFormatted),
-            decimals,
-          )
+        ? new CryptoAmount(baseAmount(amount, decimals), assetFormatted)
+        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFormatted), decimals)
     }
 
     return {

@@ -170,8 +170,8 @@ export type TransactionStatus = {
  * Represents liquidity to add to a pool.
  */
 export type LiquidityToAdd = {
-  asset: CryptoAmount // The amount of asset to add
-  rune: CryptoAmount // The amount of RUNE to add
+  asset: CryptoAmount<Asset | TokenAsset> // The amount of asset to add
+  rune: AssetCryptoAmount // The amount of RUNE to add
 }
 
 /**

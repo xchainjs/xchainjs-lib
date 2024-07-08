@@ -74,15 +74,12 @@ export class MidgardQuery {
 
       if (asset) {
         const poolDetail = await this.getPool(saver.pool)
-        const depositAmount = new CryptoAmount<Asset | TokenAsset>(
-          baseAmount(saver.assetAdded).minus(saver.assetWithdrawn),
-          asset,
-        )
+        const depositAmount = new CryptoAmount(baseAmount(saver.assetAdded).minus(saver.assetWithdrawn), asset)
         const ownerUnits = Number(saver?.saverUnits)
         const saverUnits = Number(poolDetail.saversUnits)
         const assetDepth = Number(poolDetail.saversDepth)
         const redeemableValue = (ownerUnits / saverUnits) * assetDepth
-        const redeemableAssetAmount = new CryptoAmount<Asset | TokenAsset>(baseAmount(redeemableValue), asset)
+        const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), asset)
         const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
         const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
 

@@ -303,7 +303,7 @@ export class TransactionStage {
   private async getCryptoAmount(baseAmt: string, asset: CompatibleAsset): Promise<CryptoAmount<CompatibleAsset>> {
     const decimals =
       THORChain === asset.chain ? 8 : Number(await this.thorchainCache.midgardQuery.getDecimalForAsset(asset))
-    return new CryptoAmount<CompatibleAsset>(baseAmount(baseAmt, decimals), asset)
+    return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
   }
   /**
    * Determines the observed status of a transaction.

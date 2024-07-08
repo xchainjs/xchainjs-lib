@@ -9,13 +9,7 @@ import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
-import {
-  CompatibleAsset,
-  MAYANameDetails,
-  MayachainQuery,
-  QuoteSwap,
-  QuoteSwapParams,
-} from '@xchainjs/xchain-mayachain-query'
+import { MAYANameDetails, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import { Address, CryptoAmount, assetToString, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
@@ -87,12 +81,12 @@ export class MayachainAMM {
       return {
         toAddress: ``,
         memo: ``,
-        expectedAmount: new CryptoAmount<CompatibleAsset>(baseAmount(0), destinationAsset),
+        expectedAmount: new CryptoAmount(baseAmount(0), destinationAsset),
         dustThreshold: this.mayachainQuery.getChainDustValue(fromAsset.chain),
         fees: {
           asset: destinationAsset,
-          affiliateFee: new CryptoAmount<CompatibleAsset>(baseAmount(0), destinationAsset),
-          outboundFee: new CryptoAmount<CompatibleAsset>(baseAmount(0), destinationAsset),
+          affiliateFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
