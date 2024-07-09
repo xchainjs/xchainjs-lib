@@ -1,5 +1,5 @@
 import { Balance, FeeOption, Network, TxType } from '@xchainjs/xchain-client'
-import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client as ArbClient } from '../src/client'
 import { ARBChain, AssetARB, defaultArbParams } from '../src/const'
@@ -16,18 +16,18 @@ const testnetClient = new ArbClient({
   network: Network.Testnet,
 })
 
-const MainnetUSDTAsset: Asset = {
+const MainnetUSDTAsset: TokenAsset = {
   chain: 'ARB',
   symbol: 'USDT-0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
   ticker: 'USDT',
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
-const TestnetUSDCAsset: Asset = {
+const TestnetUSDCAsset: TokenAsset = {
   chain: 'ARB',
   symbol: 'USDC-0x179522635726710dd7d2035a81d856de4aa7836c',
   ticker: 'USDC',
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
 describe('Arbitrum', () => {

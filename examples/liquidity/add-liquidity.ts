@@ -16,7 +16,16 @@ import {
 } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { AddliquidityPosition, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetCryptoAmount,
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  register9Rheader,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import axios from 'axios'
 
@@ -29,13 +38,16 @@ register9Rheader(axios)
  */
 const addLp = async (tcAmm: ThorchainAMM) => {
   try {
-    const rune = new CryptoAmount(assetToBase(assetAmount(process.argv[4])), assetFromStringEx(process.argv[5]))
+    const rune = new AssetCryptoAmount(
+      assetToBase(assetAmount(process.argv[4])),
+      assetFromStringEx(process.argv[5]) as Asset,
+    )
     if (!isAssetRuneNative(rune.asset)) {
       throw Error('THOR.RUNE  must be the first argument')
     }
     const asset = new CryptoAmount(
       assetToBase(assetAmount(process.argv[6], Number(process.argv[7]))),
-      assetFromStringEx(process.argv[8]),
+      assetFromStringEx(process.argv[8]) as Asset | TokenAsset,
     )
 
     const addLpParams: AddliquidityPosition = {

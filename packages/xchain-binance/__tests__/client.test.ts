@@ -1,5 +1,5 @@
 import { FeeType, Network } from '@xchainjs/xchain-client'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetType, baseAmount } from '@xchainjs/xchain-util'
 import nock from 'nock'
 
 import { Client as BinanceClient } from '../src/client'
@@ -214,7 +214,7 @@ describe('BinanceClient Test', () => {
       sequence: 5,
     })
 
-    const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE', synth: false }
+    const AssetRune: Asset = { chain: BNBChain, symbol: 'RUNE', ticker: 'RUNE', type: AssetType.NATIVE }
 
     const balances = await bnbClient.getBalance('tbnb1zd87q9dywg3nu7z38mxdcxpw8hssrfp9htcrvj', [AssetBNB, AssetRune])
 

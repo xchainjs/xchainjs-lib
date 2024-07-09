@@ -1,7 +1,15 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { EstimateAddSaver, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  register9Rheader,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
@@ -40,7 +48,7 @@ const estimateAddSaver = async () => {
 
     const asset = new CryptoAmount(
       assetToBase(assetAmount(process.argv[3], Number(process.argv[4]))),
-      assetFromStringEx(process.argv[5]),
+      assetFromStringEx(process.argv[5]) as Asset | TokenAsset,
     )
     const estimate = await thorchainQueryMainnet.estimateAddSaver(asset)
     printSaver(estimate)

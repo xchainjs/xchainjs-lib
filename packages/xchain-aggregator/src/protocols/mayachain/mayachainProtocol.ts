@@ -1,7 +1,7 @@
 import { AssetCacao, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
-import { Asset, Chain, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
+import { AnyAsset, Chain, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
 
 import {
   IProtocol,
@@ -30,7 +30,7 @@ export class MayachainProtocol implements IProtocol {
    * @param {Asset} asset Asset to check if it is supported
    * @returns {boolean} True if the asset is supported, otherwise false
    */
-  public async isAssetSupported(asset: Asset): Promise<boolean> {
+  public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (eqAsset(asset, AssetCacao)) return true
     const pools = await this.mayachainQuery.getPools()
     return (

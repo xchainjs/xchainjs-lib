@@ -5,12 +5,13 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetDASH, ClientKeystore, ClientLedger, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetUSK, Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
-import { AssetCacao, Client as MayaClient } from '@xchainjs/xchain-mayachain'
+import { AssetCacao, CACAO_DECIMAL, Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
 import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
-  Asset,
-  CryptoAmount,
+  AssetCryptoAmount,
+  TokenAsset,
+  TokenCryptoAmount,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -61,7 +62,7 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
   })
 }
 
-const ETH_USDT: Asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+const ETH_USDT: TokenAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
 const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('homestead', process.env.ETHERSCAN_API_KEY)
 const network = ethers.providers.getNetwork('sepolia')
@@ -101,7 +102,7 @@ describe('MayachainAmm e2e tests', () => {
     const errors = await mayachainAmm.validateSwap({
       fromAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+      amount: new AssetCryptoAmount(baseAmount(688598892692), AssetRuneNative),
     })
 
     console.log(errors)
@@ -111,7 +112,7 @@ describe('MayachainAmm e2e tests', () => {
     const errors = await mayachainAmm.validateSwap({
       fromAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+      amount: new AssetCryptoAmount(baseAmount(688598892692), AssetRuneNative),
       affiliateAddress: 'randomAffiliateAddress',
     })
 
@@ -122,7 +123,7 @@ describe('MayachainAmm e2e tests', () => {
     const errors = await mayachainAmm.validateSwap({
       fromAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+      amount: new AssetCryptoAmount(baseAmount(688598892692), AssetRuneNative),
       affiliateBps: -1,
     })
 
@@ -133,7 +134,7 @@ describe('MayachainAmm e2e tests', () => {
     const errors = await mayachainAmm.validateSwap({
       fromAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+      amount: new AssetCryptoAmount(baseAmount(688598892692), AssetRuneNative),
       destinationAddress: 'randomDestinationAddress',
     })
 
@@ -144,18 +145,18 @@ describe('MayachainAmm e2e tests', () => {
     const quoteSwap = await mayachainAmm.estimateSwap({
       fromAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+      amount: new AssetCryptoAmount(baseAmount(688598892692), AssetRuneNative),
     })
 
     printQuoteSwap(quoteSwap)
   })
 
   it(`Should estimate swap from USDT to ETH`, async () => {
-    const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+    const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
     const quoteSwap = await mayachainAmm.estimateSwap({
       fromAsset,
       destinationAsset: assetFromStringEx('ETH.ETH'),
-      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
+      amount: new TokenCryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
     })
 
     printQuoteSwap(quoteSwap)
@@ -167,7 +168,7 @@ describe('MayachainAmm e2e tests', () => {
       fromAddress: await wallet.getAddress('KUJI'),
       destinationAsset: AssetRuneNative,
       destinationAddress: await wallet.getAddress('THOR'),
-      amount: new CryptoAmount(assetToBase(assetAmount(1, 6)), AssetUSK),
+      amount: new TokenCryptoAmount(assetToBase(assetAmount(1, 6)), AssetUSK),
     })
 
     printQuoteSwap(quoteSwap)
@@ -177,7 +178,7 @@ describe('MayachainAmm e2e tests', () => {
     const errors = await mayachainAmm.validateSwap({
       fromAsset: ETH_USDT,
       destinationAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(688598892692), ETH_USDT),
+      amount: new TokenCryptoAmount(baseAmount(688598892692), ETH_USDT),
       fromAddress: '0x7f7b5ae886b3c194125277d1875998ff7fb8ba04',
       affiliateAddress: 'eld',
       destinationAddress: 'bc1q3gf722qm79433nycvuflh3uh37z72elrd73r7x',
@@ -189,7 +190,7 @@ describe('MayachainAmm e2e tests', () => {
     const quoteSwap = await mayachainAmm.estimateSwap({
       fromAsset: AssetRuneNative,
       destinationAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+      amount: new AssetCryptoAmount(baseAmount(688598892692), AssetRuneNative),
       affiliateAddress: 'maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz',
       affiliateBps: 300,
       destinationAddress: 'bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj',
@@ -200,10 +201,10 @@ describe('MayachainAmm e2e tests', () => {
 
   it('Should do non protocol asset swap. Rune -> Cacao', async () => {
     const txSubmitted = await mayachainAmm.doSwap({
-      fromAsset: AssetRuneNative,
-      destinationAsset: AssetCacao,
-      amount: new CryptoAmount(assetToBase(assetAmount(0.5)), AssetRuneNative),
-      destinationAddress: await wallet.getAddress(AssetCacao.chain),
+      fromAsset: AssetCacao,
+      destinationAsset: AssetRuneNative,
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(1, CACAO_DECIMAL)), AssetCacao),
+      destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
     })
 
     console.log(txSubmitted)
@@ -215,7 +216,7 @@ describe('MayachainAmm e2e tests', () => {
       fromAddress: await wallet.getAddress('KUJI'),
       destinationAsset: AssetRuneNative,
       destinationAddress: await wallet.getAddress('THOR'),
-      amount: new CryptoAmount(assetToBase(assetAmount(1, 6)), AssetUSK),
+      amount: new TokenCryptoAmount(assetToBase(assetAmount(1, 6)), AssetUSK),
     })
 
     console.log(txSubmitted)
@@ -225,7 +226,7 @@ describe('MayachainAmm e2e tests', () => {
     const txSubmitted = await mayachainAmm.doSwap({
       fromAsset: AssetCacao,
       destinationAsset: AssetRuneNative,
-      amount: new CryptoAmount(assetToBase(assetAmount(1.5, 10)), AssetCacao),
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(1.5, 10)), AssetCacao),
       destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
     })
 
@@ -233,22 +234,22 @@ describe('MayachainAmm e2e tests', () => {
   })
 
   it('Should approve Mayachain router to spend', async () => {
-    const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+    const asset: TokenAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
     const txSubmitted = await mayachainAmm.approveRouterToSpend({
       asset,
-      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), asset),
+      amount: new TokenCryptoAmount(assetToBase(assetAmount(10, 6)), asset),
     })
 
     console.log(txSubmitted)
   })
 
   it('Should check if Mayachain router is allowed to spend', async () => {
-    const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+    const asset: TokenAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
     const isApprovedToSpend = await mayachainAmm.isRouterApprovedToSpend({
       asset,
-      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), asset),
+      amount: new TokenCryptoAmount(assetToBase(assetAmount(10, 6)), asset),
       address: '0x6e08C7bBC09D68c6b9be0613ae32D4B5EAA63247',
     })
 
@@ -256,14 +257,14 @@ describe('MayachainAmm e2e tests', () => {
   })
 
   it('Should do ERC20 asset swap. USDT -> ETH', async () => {
-    const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+    const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
     const txSubmitted = await mayachainAmm.doSwap({
       fromAddress: await wallet.getAddress(fromAsset.chain),
       destinationAddress: await wallet.getAddress(AssetETH.chain),
       fromAsset,
       destinationAsset: AssetETH,
-      amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
+      amount: new TokenCryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
     })
 
     console.log(txSubmitted)
@@ -287,7 +288,7 @@ describe('MayachainAmm e2e tests', () => {
       destinationAddress: await wallet.getAddress(THORChain),
       fromAsset: AssetDASH,
       destinationAsset: AssetRuneNative,
-      amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetDASH),
+      amount: new AssetCryptoAmount(assetToBase(assetAmount('1', 8)), AssetDASH),
     })
 
     console.log(txSubmitted)

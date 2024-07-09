@@ -1,5 +1,6 @@
 import { AssetData, SwapSDK } from '@chainflip/sdk/swap'
 import {
+  AnyAsset,
   Asset,
   CachedValue,
   Chain,
@@ -39,7 +40,7 @@ export class ChainflipProtocol implements IProtocol {
    * @param {Asset} asset Asset to check if it is supported
    * @returns {boolean} True if the asset is supported, otherwise false
    */
-  public async isAssetSupported(asset: Asset): Promise<boolean> {
+  public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (isSynthAsset(asset)) return false
     try {
       await this.getAssetData(asset)

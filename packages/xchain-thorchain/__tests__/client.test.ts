@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Asset } from '@xchainjs/xchain-util'
+import { AssetType, SynthAsset } from '@xchainjs/xchain-util'
 
-import { AssetRuneNative as AssetRUNE, Client } from '../'
+import { AssetRuneNative as AssetRUNE, Client } from '../src'
 
 describe('Thorchain client', () => {
   describe('Instantiation', () => {
@@ -92,18 +92,23 @@ describe('Thorchain client', () => {
 
     it('Should get native asset', () => {
       const nativeAsset = client.getAssetInfo()
-      expect(nativeAsset.asset).toEqual({ chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', synth: false })
+      expect(nativeAsset.asset).toEqual({ chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', type: AssetType.NATIVE })
       expect(nativeAsset.decimal).toBe(8)
     })
 
     it('Should get denom for asset', () => {
-      const synthBNBAsset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true }
+      const synthBNBAsset: SynthAsset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', type: AssetType.SYNTH }
       expect(client.getDenom(synthBNBAsset)).toEqual('bnb/bnb')
       expect(client.getDenom(AssetRUNE)).toEqual('rune')
     })
     it('Should get asset for denom', () => {
       expect(client.assetFromDenom('rune')).toEqual(AssetRUNE)
-      expect(client.assetFromDenom('bnb/bnb')).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true })
+      expect(client.assetFromDenom('bnb/bnb')).toEqual({
+        chain: 'BNB',
+        symbol: 'BNB',
+        ticker: 'BNB',
+        type: AssetType.SYNTH,
+      })
     })
     it('should get asset decimals', async () => {
       expect(client.getAssetDecimals(AssetRUNE)).toBe(8)
