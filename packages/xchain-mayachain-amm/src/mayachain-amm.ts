@@ -1,20 +1,22 @@
 /**
  * Import necessary modules and libraries
  */
+import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
-import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { MAX_APPROVAL, abi } from '@xchainjs/xchain-evm'
+import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { MAYANameDetails, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { Address, Asset, CryptoAmount, baseAmount, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Address, CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
-import { ethers } from 'ethers'
 
+import { MayachainAction } from './mayachain-action'
 import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
+import { isProtocolERC20Asset, validateAddress } from './utils'
 
 /**
  * Mayachain Automated Market Maker (AMM) class.
@@ -40,6 +42,7 @@ export class MayachainAMM {
       ETH: new EthClient({ ...defaultEthParams, network: Network.Mainnet }),
       DASH: new DashClient({ ...defaultDashParams, network: Network.Mainnet }),
       KUJI: new KujiraClient({ ...defaultKujiParams, network: Network.Mainnet }),
+      ARB: new ArbClient({ ...defaultArbParams, network: Network.Mainnet }),
       THOR: new ThorClient({ network: Network.Mainnet }),
       MAYA: new MayaClient({ network: Network.Mainnet }),
     }),
@@ -129,13 +132,17 @@ export class MayachainAMM {
     // Validate destination address if provided
     if (
       destinationAddress &&
-      !this.wallet.validateAddress(destinationAsset.synth ? MAYAChain : destinationAsset.chain, destinationAddress)
+      !validateAddress(
+        this.mayachainQuery.getNetwork(),
+        destinationAsset.synth ? MAYAChain : destinationAsset.chain,
+        destinationAddress,
+      )
     ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
     // Validate affiliate address if provided
     if (affiliateAddress) {
-      const isMayaAddress = this.wallet.validateAddress(MAYAChain, affiliateAddress)
+      const isMayaAddress = validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, affiliateAddress)
       const isMayaName = await this.isMAYAName(affiliateAddress)
       if (!(isMayaAddress || isMayaName))
         errors.push(`affiliateAddress ${affiliateAddress} is not a valid MAYA address`)
@@ -145,7 +152,7 @@ export class MayachainAMM {
       errors.push(`affiliateBps ${affiliateBps} out of range [0 - 10000]`)
     }
     // Validate approval if asset is an ERC20 token and fromAddress is provided
-    if (this.isERC20Asset(fromAsset) && fromAddress) {
+    if (isProtocolERC20Asset(fromAsset) && fromAddress) {
       const approveErrors = await this.isRouterApprovedToSpend({
         asset: fromAsset,
         address: fromAddress,
@@ -184,10 +191,13 @@ export class MayachainAMM {
     })
     // Check if the swap can be performed
     if (!quoteSwap.canSwap) throw Error(`Can not swap. ${quoteSwap.errors.join(' ')}`)
-    // Perform the swap based on the asset chain
-    return fromAsset.chain === MAYAChain || fromAsset.synth
-      ? this.doProtocolAssetSwap(amount, quoteSwap.memo)
-      : this.doNonProtocolAssetSwap(amount, quoteSwap.toAddress, quoteSwap.memo)
+
+    return MayachainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: amount,
+      memo: quoteSwap.memo,
+      recipient: `${quoteSwap.toAddress}`,
+    })
   }
 
   /**
@@ -255,107 +265,5 @@ export class MayachainAMM {
    */
   private async isMAYAName(name: string): Promise<boolean> {
     return !!(await this.mayachainQuery.getMAYANameDetails(name))
-  }
-
-  /**
-   * Perform a swap from a native protocol asset to any other asset
-   * @param {CryptoAmount} amount Amount to swap
-   * @param {string} memo Memo to add to the transaction
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
-   */
-  private async doProtocolAssetSwap(amount: CryptoAmount, memo: string): Promise<TxSubmitted> {
-    // Deposit the amount and return transaction hash and URL
-    const hash = await this.wallet.deposit({ chain: MAYAChain, asset: amount.asset, amount: amount.baseAmount, memo })
-
-    return {
-      hash,
-      url: await this.wallet.getExplorerTxUrl(MAYAChain, hash),
-    }
-  }
-
-  /**
-   * Perform a swap between assets
-   * @param {CryptoAmount} amount Amount to swap
-   * @param {string} memo Memo to add to the transaction to successfully make the swap
-   * @param {string} recipient inbound address to make swap transaction to
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
-   */
-  private async doNonProtocolAssetSwap(amount: CryptoAmount, recipient: string, memo: string): Promise<TxSubmitted> {
-    // For non-EVM assets, perform a transfer and return transaction hash and URL
-    if (!this.isEVMChain(amount.asset.chain)) {
-      const hash = await this.wallet.transfer({
-        asset: amount.asset,
-        amount: amount.baseAmount,
-        recipient,
-        memo,
-      })
-      return {
-        hash,
-        url: await this.wallet.getExplorerTxUrl(amount.asset.chain, hash),
-      }
-    }
-
-    // For EVM assets, perform a deposit with expiry and return transaction hash and URL
-    const inboundDetails = await this.mayachainQuery.getChainInboundDetails(amount.asset.chain)
-    if (!inboundDetails.router) throw Error(`Unknown router for ${amount.asset.chain} chain`)
-    const isERC20 = this.isERC20Asset(amount.asset)
-
-    const checkSummedContractAddress = isERC20
-      ? ethers.utils.getAddress(getContractAddressFromAsset(amount.asset))
-      : ethers.constants.AddressZero
-
-    const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
-    const depositParams = [
-      recipient,
-      checkSummedContractAddress,
-      amount.baseAmount.amount().toFixed(),
-      memo,
-      expiration,
-    ]
-
-    const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
-
-    const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
-
-    const gasPrices = await this.wallet.getGasFeeRates(amount.asset.chain)
-
-    const nativeAsset = this.wallet.getAssetInfo(amount.asset.chain)
-
-    const hash = await this.wallet.transfer({
-      asset: nativeAsset.asset,
-      amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : amount.baseAmount,
-      memo: unsignedTx.data,
-      recipient: inboundDetails.router,
-      gasPrice: gasPrices.fast,
-      isMemoEncoded: true,
-      gasLimit: ethers.BigNumber.from(160000),
-    })
-
-    return {
-      hash,
-      url: await this.wallet.getExplorerTxUrl(amount.asset.chain, hash),
-    }
-  }
-
-  /**
-   * Check if the asset is an ERC20 token
-   * @param {Asset} asset Asset to check
-   * @returns True if the asset is an ERC20 token, otherwise false
-   */
-  private isERC20Asset(asset: Asset): boolean {
-    // Check if the asset's chain is an EVM chain and if the symbol matches AssetETH.symbol
-    return this.isEVMChain(asset.chain)
-      ? [AssetETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 && !asset.synth
-      : false
-  }
-
-  /**
-   * Check if the chain is an EVM (Ethereum Virtual Machine) chain
-   * @param {Chain} chain Chain to check
-   * @returns True if the chain is an EVM chain, otherwise false
-   */
-  private isEVMChain(chain: string): boolean {
-    // Check if the chain matches AssetETH.chain
-    return [AssetETH.chain].includes(chain)
   }
 }

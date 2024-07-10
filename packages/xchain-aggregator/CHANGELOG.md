@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.2
+
+### Patch Changes
+
+- b45c0c8: New method `getConfiguration` to retrieve the current Aggregator configuration
+- b45c0c8: New method `setConfiguration` to update the Aggregator configuration
+- b45c0c8: Aggregator config. You can now disable protocols to work with through the Aggregator.
+- b45c0c8: Quote swap affiliate params removed for `estimateSwap` and `doSwap` methods. Aggregator use the configuration set by the user for the Aggregator to automatically use affiliates with each protocol
+- Updated dependencies [cd327ab]
+- Updated dependencies [b45c0c8]
+- Updated dependencies [e81d6be]
+- Updated dependencies [cd327ab]
+- Updated dependencies [e81d6be]
+  - @xchainjs/xchain-mayachain-query@0.1.18
+  - @xchainjs/xchain-mayachain-amm@2.0.11
+  - @xchainjs/xchain-thorchain-amm@1.1.16
+
 ## 0.2.1
 
 ### Patch Changes

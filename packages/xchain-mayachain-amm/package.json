@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-amm",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "module that exposes estimating & swapping cryptocurrency assets on mayachain",
   "keywords": [
     "MAYAChain",
@@ -36,6 +36,7 @@
     "url": "https://github.com/xchainjs/xchainjs-lib/issues"
   },
   "dependencies": {
+    "@xchainjs/xchain-arbitrum": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-dash": "workspace:*",

@@ -14,6 +14,20 @@ Radix module for XChainJS clients
 yarn add @xchainjs/xchain-radix
 ```
 
+## Create a new account
+
+```
+import { generateMnemonic } from 'bip39'
+
+const mnemonic = generateMnemonic()
+const params: XChainClientParams = {
+  network: Network.Testnet,
+  phrase: mnemonic,
+}
+const client = new Client(params)
+const address = await client.getAddressAsync()
+```
+
 ## Fund an account in testnet
 
 ```

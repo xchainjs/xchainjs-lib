@@ -3,7 +3,7 @@ import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { assetFromStringEx, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/mayachain/midgard/api'
-import { MayachainProtocol } from '../src/protocols'
+import { MayachainProtocol } from '../src/protocols/mayachain'
 
 describe('Mayachain protocol', () => {
   let protocol: MayachainProtocol

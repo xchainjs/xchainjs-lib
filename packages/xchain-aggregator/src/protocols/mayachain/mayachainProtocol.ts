@@ -2,18 +2,27 @@ import { AssetCacao, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import { Asset, Chain, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
-import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, QuoteSwap, QuoteSwapParams, SwapHistory, SwapHistoryParams, TxSubmitted } from '../../types'
+import {
+  IProtocol,
+  ProtocolConfig,
+  QuoteSwap,
+  QuoteSwapParams,
+  SwapHistory,
+  SwapHistoryParams,
+  TxSubmitted,
+} from '../../types'
 
 export class MayachainProtocol implements IProtocol {
-  public readonly name = 'Mayachain' as const
+  public readonly name = 'Mayachain'
   private mayachainQuery: MayachainQuery
   private mayachainAmm: MayachainAMM
+  private configuration: Omit<ProtocolConfig, 'wallet'> | undefined
 
-  constructor(wallet?: Wallet) {
+  constructor(configuration?: ProtocolConfig) {
     this.mayachainQuery = new MayachainQuery()
-    this.mayachainAmm = new MayachainAMM(this.mayachainQuery, wallet)
+    this.mayachainAmm = new MayachainAMM(this.mayachainQuery, configuration?.wallet)
+    this.configuration = configuration
   }
 
   /**
@@ -45,7 +54,11 @@ export class MayachainProtocol implements IProtocol {
    * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
    */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
-    const estimatedSwap = await this.mayachainAmm.estimateSwap(params)
+    const estimatedSwap = await this.mayachainAmm.estimateSwap({
+      ...params,
+      affiliateBps: this.configuration?.affiliateBps,
+      affiliateAddress: this.configuration?.affiliateAddress,
+    })
     return {
       protocol: this.name,
       toAddress: estimatedSwap.toAddress,

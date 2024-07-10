@@ -9,6 +9,9 @@ import { Convert, Instruction, RadixEngineToolkit } from '@radixdlt/radix-engine
 import { Balance, Fees, Network, Tx, TxParams, XChainClientParams } from '@xchainjs/xchain-client/src'
 import { Asset, baseAmount } from '@xchainjs/xchain-util'
 
+// eslint-disable-next-line ordered-imports/ordered-imports
+import { generateMnemonic } from 'bip39'
+
 import {
   mockCommittedDetailsResponse,
   mockEntityDeatilsResponse,
@@ -30,6 +33,28 @@ describe('RadixClient Test', () => {
     }
     return new Client(params)
   }
+
+  it('Create mainnet account', async () => {
+    const mnemonic = generateMnemonic()
+    const params: XChainClientParams = {
+      network: Network.Mainnet,
+      phrase: mnemonic,
+    }
+    const client = new Client(params)
+    const address = await client.getAddressAsync()
+    expect(address).toMatch(/^account_rdx/)
+  })
+
+  it('Create stokenet account', async () => {
+    const mnemonic = generateMnemonic()
+    const params: XChainClientParams = {
+      network: Network.Testnet,
+      phrase: mnemonic,
+    }
+    const client = new Client(params)
+    const address = await client.getAddressAsync()
+    expect(address).toMatch(/^account_tdx_2/)
+  })
 
   it('Invalid phrase is thrown', async () => {
     const phrase = 'rural bright ball negative already grass good grant nation screen model'
