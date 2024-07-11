@@ -196,7 +196,12 @@ export class MayachainQuery {
     const details = await this.mayachainCache.midgardQuery.getMAYANameDetails(MAYAName)
     if (!details) return undefined
 
-    return { ...details, name: MAYAName }
+    return {
+      name: MAYAName,
+      owner: details.owner,
+      expireBlockHeight: Number(details.expire),
+      aliases: details.entries,
+    }
   }
 
   /**

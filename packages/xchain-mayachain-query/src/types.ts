@@ -1,9 +1,6 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { MAYANameDetails as BaseMAYANameDetails } from '@xchainjs/xchain-mayamidgard-query'
 import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
-
-export type MAYANameDetails = BaseMAYANameDetails & { name: string }
 
 /**
  * Represents fees associated with a swap.
@@ -94,4 +91,40 @@ export type Swap = {
 export type SwapsHistory = {
   swaps: Swap[]
   count: number
+}
+
+/**
+ * Represents an alias for a MAYAName.
+ */
+export type MAYANameAlias = {
+  /**
+   * The chain of the alias
+   */
+  chain: Chain
+  /**
+   * The address of the alias
+   */
+  address: Address
+}
+
+/**
+ * Represents details about a MAYAName.
+ */
+export type MAYANameDetails = {
+  /**
+   * The MAYAName
+   */
+  name: string
+  /**
+   * The expiry block height
+   */
+  expireBlockHeight: number
+  /**
+   * The owner of the MAYAName
+   */
+  owner: string
+  /**
+   * List of MAYAName aliases
+   */
+  aliases: MAYANameAlias[]
 }
