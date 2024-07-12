@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+### Patch Changes
+
+- d9de5e2: Affiliate bug fix in `doSwap` function
+
 ## 0.2.2
 
 ### Patch Changes
