@@ -81,7 +81,11 @@ export class ThorchainProtocol implements IProtocol {
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
-    return this.thorchainAmm.doSwap(params)
+    return this.thorchainAmm.doSwap({
+      ...params,
+      affiliateBps: this.configuration?.affiliateBps,
+      affiliateAddress: this.configuration?.affiliateAddress,
+    })
   }
 
   /**x
