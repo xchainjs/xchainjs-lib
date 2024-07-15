@@ -13,7 +13,16 @@ import {
 } from '@xchainjs/xchain-util'
 
 import { MayachainCache } from './mayachain-cache'
-import { InboundDetail, MAYANameDetails, QuoteSwap, QuoteSwapParams, SwapHistoryParams, SwapsHistory } from './types'
+import {
+  InboundDetail,
+  MAYANameDetails,
+  QuoteMAYAName,
+  QuoteMAYANameParams,
+  QuoteSwap,
+  QuoteSwapParams,
+  SwapHistoryParams,
+  SwapsHistory,
+} from './types'
 import {
   ArbAsset,
   ArbChain,
@@ -308,5 +317,61 @@ export class MayachainQuery {
 
     const mayaNamesDetails = await Promise.all(tasks)
     return mayaNamesDetails.filter((mayaNameDetails) => mayaNameDetails !== undefined) as MAYANameDetails[]
+  }
+
+  /**
+   * Estimate the cost of an update or MAYAName registration
+   * @param {QuoteMAYANameParams} params Params to make the update or the registration
+   * @returns {QuoteMAYAName} Memo to make the update or the registration and the estimation of the operation
+   */
+  public async estimateMAYAName({
+    name,
+    owner,
+    isUpdate,
+    expiry,
+    chain,
+    chainAddress,
+  }: QuoteMAYANameParams): Promise<QuoteMAYAName> {
+    const details = await this.getMAYANameDetails(name)
+
+    if (details?.owner && !isUpdate) {
+      throw Error('MAYAName already registered')
+    }
+
+    const lastMayaBlockHeight = await this.mayachainCache.mayanode
+      .getLatestBlock()
+      .then((latestBlocks) => latestBlocks[0].mayachain)
+
+    const currentHeightForExpiry: number = details ? details.expireBlockHeight : lastMayaBlockHeight
+
+    let numberOfBlocksToAddToExpiry = isUpdate ? 0 : 5_256_000 // Average blocks per year https://docs.mayaprotocol.com/mayachain-dev-docs/introduction/mayaname-guide
+
+    if (expiry) {
+      const numberOfSecondsToExpire = Math.floor(expiry.getTime() / 1000) - Math.floor(Date.now() / 1000)
+      if (numberOfSecondsToExpire < 0) throw Error('Can not update expiry time before the one already registered')
+      const numberOfBlocks = Math.round(numberOfSecondsToExpire / 6) // 1 block every 6 seconds
+      numberOfBlocksToAddToExpiry = currentHeightForExpiry + numberOfBlocks
+    }
+
+    // Calculate fee
+
+    const constantsDetails = await this.mayachainCache.mayanode.getMimir()
+    const assetDecimals = await this.mayachainCache.getAssetDecimals()
+    const oneTimeFee = isUpdate
+      ? baseAmount(0, assetDecimals[assetToString(CacaoAsset)])
+      : baseAmount(constantsDetails['TNSREGISTERFEE'], assetDecimals[assetToString(CacaoAsset)])
+
+    const totalFeePerBlock = baseAmount(constantsDetails['TNSFEEPERBLOCK']).times(
+      numberOfBlocksToAddToExpiry > 0 ? numberOfBlocksToAddToExpiry : 0,
+    )
+
+    const txFee = baseAmount(constantsDetails['NATIVETRANSACTIONFEE'], assetDecimals[assetToString(CacaoAsset)])
+
+    return {
+      value: new CryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), CacaoAsset),
+      memo: `~:${name}:${chain}:${chainAddress}:${owner ? owner : ''}::${
+        isUpdate ? '' : currentHeightForExpiry + numberOfBlocksToAddToExpiry
+      }`,
+    }
   }
 }

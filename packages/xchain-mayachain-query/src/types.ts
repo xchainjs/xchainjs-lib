@@ -128,3 +128,47 @@ export type MAYANameDetails = {
    */
   aliases: MAYANameAlias[]
 }
+
+/**
+ * Quote MAYAName params
+ */
+export type QuoteMAYANameParams = {
+  /**
+   * Represents if the estimation is an update of an already registered MAYAName or a new MAYAName registration
+   */
+  isUpdate?: boolean
+  /**
+   * MAYAName
+   */
+  name: string
+  /**
+   * Owner of the MAYAName
+   */
+  owner?: Address
+  /**
+   * Expiry time
+   */
+  expiry?: Date
+  /**
+   * Chain to register the alias
+   */
+  chain: Chain
+  /**
+   * Address of the chain to register the alias
+   */
+  chainAddress: Address
+}
+
+/**
+ * Estimation quote to register or update a MAYAName
+ */
+export type QuoteMAYAName = {
+  /**
+   * Memo for the deposit transaction
+   */
+  memo: string
+  /**
+   * Estimation of the update or the registration of the MAYAName
+   */
+  value: CryptoAmount
+}
