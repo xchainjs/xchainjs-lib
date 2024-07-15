@@ -23,5 +23,13 @@ export default {
 
       return [200, {}]
     })
+    mock.onGet(/\/mayachain\/mimir/).reply(function () {
+      const resp = require(`./responses/mayanode/mimir.json`)
+      return [200, resp]
+    })
+    mock.onGet(/\/mayachain\/lastblock/).reply(function () {
+      const resp = require(`./responses/mayanode/latestBlock.json`)
+      return [200, resp]
+    })
   },
 }
