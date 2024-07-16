@@ -46,7 +46,7 @@ export type GetActionsParams = Partial<{
   asset: string
   type: ActionType
   affiliate: string
-  limit: number
+  limit: string
   offset: number
   nextPageToken: number
   timestamp: number
