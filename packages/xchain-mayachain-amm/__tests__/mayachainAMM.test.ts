@@ -230,4 +230,71 @@ describe('Mayachain Client Test', () => {
     expect(mayaNames[0]?.aliases[5].address).toBe('thor1gnehec7mf4uytuw3wj4uwpptvkyvzclgqap7e4')
     expect(mayaNames[0]?.aliases[5].chain).toBe('THOR')
   })
+
+  it('Should estimate MAYAName registration', async () => {
+    const estimated = await mayachainAmm.estimateMAYANameRegistration({
+      name: 'pg',
+      chain: 'BTC',
+      chainAddress: 'bc1qslx5546zjfqa027ate6j0seg8lla5k9z278g86',
+      owner: 'maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz',
+    })
+
+    const splittedMemo = estimated.memo.split(':')
+    expect(estimated.allowed).toBeTruthy()
+    expect(estimated.errors.length).toBe(0)
+    expect(splittedMemo[0] ?? splittedMemo[0]).toBe('~')
+    expect(splittedMemo[1] ?? splittedMemo[1]).toBe('pg')
+    expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
+    expect(splittedMemo[3] ?? splittedMemo[3]).toBe('bc1qslx5546zjfqa027ate6j0seg8lla5k9z278g86')
+    expect(splittedMemo[4] ?? splittedMemo[4]).toBe('maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz')
+    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('MAYA.CACAO')
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+    expect(estimated.value.assetAmount.amount().toString()).toBe('11.5512')
+  })
+
+  it('Should not estimate register over already registered MAYAName', async () => {
+    const estimated = await mayachainAmm.estimateMAYANameRegistration({
+      name: 'eld',
+      chain: 'BTC',
+      chainAddress: 'bc1qslx5546zjfqa027ate6j0seg8lla5k9z278g86',
+      owner: 'maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz',
+    })
+
+    expect(estimated.allowed).toBeFalsy()
+    expect(estimated.errors.length).toBe(1)
+    expect(estimated.errors[0]).toBe('MAYAName already registered')
+    expect(estimated.memo).toBe('')
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+    expect(estimated.value.assetAmount.amount().toString()).toBe('0')
+  })
+
+  it('Should estimate new MAYAName alias', async () => {
+    const estimated = await mayachainAmm.estimateMAYANameUpdate({
+      name: 'eld',
+      chain: 'BTC',
+      chainAddress: 'bc1qslx5546zjfqa027ate6j0seg8lla5k9z278g86',
+    })
+
+    expect(estimated.allowed).toBeTruthy()
+    expect(estimated.errors.length).toBe(0)
+    expect(estimated.memo).toBe(
+      '~:eld:BTC:bc1qslx5546zjfqa027ate6j0seg8lla5k9z278g86:maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09:MAYA.CACAO',
+    )
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+    expect(estimated.value.assetAmount.amount().toString()).toBe('0.5')
+  })
+
+  it('Should update expiry', async () => {
+    const estimated = await mayachainAmm.estimateMAYANameUpdate({
+      name: 'eld',
+      expiry: new Date(1921137503000),
+    })
+
+    expect(estimated.allowed).toBeTruthy()
+    expect(estimated.errors.length).toBe(0)
+    expect(estimated.memo).toBe(
+      '~:eld:BTC:bc1qdjqcm3fsadjn9zth9wk30gy5su6hkwkhfr0re9:maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09:MAYA.CACAO',
+    )
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+  })
 })

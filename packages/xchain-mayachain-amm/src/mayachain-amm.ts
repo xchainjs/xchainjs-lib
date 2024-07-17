@@ -291,7 +291,7 @@ export class MayachainAMM {
     }
 
     try {
-      const estimated = await this.mayachainQuery.estimateMAYAName({ ...params, isUpdate: true })
+      const estimated = await this.mayachainQuery.estimateMAYAName({ ...params })
 
       return {
         ...estimated,
