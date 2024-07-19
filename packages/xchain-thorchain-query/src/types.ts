@@ -462,19 +462,6 @@ export type ThornameAlias = {
   address: Address // The address of the alias
 }
 
-/**
- * Represents parameters for quoting a THORName operation.
- */
-export type QuoteThornameParams = {
-  thorname: string // The THORName
-  chain: string // The chain
-  chainAddress: string // The chain address
-  owner?: string // The owner of the THORName
-  preferredAsset?: Asset | null // The preferred asset
-  expirity?: Date // The expiry date
-  isUpdate?: boolean // Indicates if the THORName is being updated
-}
-
 export type SwapHistoryParams = {
   addresses: Address[]
 }
@@ -504,4 +491,74 @@ export type Swap = {
 export type SwapsHistory = {
   swaps: Swap[]
   count: number
+}
+
+export type RegisterTHORName = {
+  /**
+   * THORName to register
+   */
+  name: string
+  /**
+   * THORName owner
+   */
+  owner: Address
+  /**
+   * THORName expiry time, by default, it will be one year more or less
+   */
+  expiry?: Date
+  /**
+   * Chain on which create the alias of the THORName
+   */
+  chain: Chain
+  /**
+   * Address of the chain provided to create the alias of the THORName
+   */
+  chainAddress: Address
+  /**
+   * Preferred asset to be paid
+   */
+  preferredAsset?: Asset
+}
+
+export type UpdateTHORName = {
+  /**
+   * THORName to update
+   */
+  name: string
+  /**
+   * THORName owner, if not provided, memo response will have the current owner
+   */
+  owner?: Address
+  /**
+   * THORName expiry
+   */
+  expiry?: Date
+  /**
+   * Chain on which update the alias of the THORName, if not provided, memo response will have one of the already registered chains of the THORName
+   */
+  chain?: Chain
+  /**
+   * Address of the chain provided to update the alias of the THORName, if not provided, memo response will have the address of the chain returned
+   */
+  chainAddress?: Address
+  /**
+   * Preferred asset to be paid, if not provided, memo response will have the current preferred asset
+   */
+  preferredAsset?: Asset
+}
+
+export type QuoteTHORNameParams = (RegisterTHORName & { isUpdate?: false }) | (UpdateTHORName & { isUpdate: true })
+
+/**
+ * Estimation quote to register or update a THORName
+ */
+export type QuoteTHORName = {
+  /**
+   * Memo for the deposit transaction
+   */
+  memo: string
+  /**
+   * Estimation of the update or the registration of the THORName
+   */
+  value: CryptoAmount
 }
