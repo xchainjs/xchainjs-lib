@@ -581,7 +581,7 @@ export class ThorchainAMM {
         params.owner,
       )
     ) {
-      errors.push(`Invalid owner ${params.chainAddress} due it is not a THORChain address`)
+      errors.push(`Invalid owner ${params.owner} due it is not a THORChain address`)
     }
 
     if (errors.length) {
@@ -644,7 +644,7 @@ export class ThorchainAMM {
         params.owner,
       )
     ) {
-      errors.push(`Invalid owner ${params.chainAddress} due it is not a THORChain address`)
+      errors.push(`Invalid owner ${params.owner} due it is not a THORChain address`)
     }
 
     if (errors.length) {

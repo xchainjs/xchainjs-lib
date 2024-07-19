@@ -278,7 +278,7 @@ export class MayachainAMM {
     }
 
     if (!validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, params.owner)) {
-      errors.push(`Invalid owner ${params.chainAddress} due it is not a MAYAChain address`)
+      errors.push(`Invalid owner ${params.owner} due it is not a MAYAChain address`)
     }
 
     if (errors.length) {
@@ -330,7 +330,7 @@ export class MayachainAMM {
     }
 
     if (params.owner && !validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, params.owner)) {
-      errors.push(`Invalid owner ${params.chainAddress} due it is not a MAYAChain address`)
+      errors.push(`Invalid owner ${params.owner} due it is not a MAYAChain address`)
     }
 
     if (errors.length) {
