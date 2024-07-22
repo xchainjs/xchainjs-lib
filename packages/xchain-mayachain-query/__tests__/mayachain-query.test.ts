@@ -33,6 +33,8 @@ describe('Mayachain-query tests', () => {
       amount: new CryptoAmount(assetToBase(assetAmount(1)), BtcAsset),
       fromAsset: BtcAsset,
       destinationAsset: EthAsset,
+      streamingInterval: 5,
+      streamingQuantity: 0,
     })
     expect(quoteSwap.toAddress).toBe('bc1q0cyg49kz2u982x0m57f8ces0296s04wedddrcs')
     expect(quoteSwap.memo).toBe('')
@@ -54,7 +56,7 @@ describe('Mayachain-query tests', () => {
     expect(quoteSwap.outboundDelayBlocks).toBe(248)
     expect(quoteSwap.outboundDelaySeconds).toBe(3720)
     expect(quoteSwap.totalSwapSeconds).toBe(600 + 3720)
-    expect(quoteSwap.slipBasisPoints).toBe(189)
+    expect(quoteSwap.slipBasisPoints).toBe(undefined)
     expect(quoteSwap.canSwap).toBe(false)
     expect(quoteSwap.errors.length).toBe(1)
     expect(quoteSwap.warning).toBe('')
@@ -67,6 +69,8 @@ describe('Mayachain-query tests', () => {
       amount: new CryptoAmount(baseAmount('688598892692', 8), BtcAsset),
       fromAddress: 'thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55',
       destinationAddress: 'bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj',
+      streamingInterval: 5,
+      streamingQuantity: 0,
       affiliateAddress: 'maya17hwqt302e5f2xm4h95ma8wuggqkvfzgvsyfc54',
       affiliateBps: 1000,
     })
@@ -92,7 +96,7 @@ describe('Mayachain-query tests', () => {
     expect(quoteSwap.outboundDelayBlocks).toBe(225)
     expect(quoteSwap.outboundDelaySeconds).toBe(135000)
     expect(quoteSwap.totalSwapSeconds).toBe(0 + 135000)
-    expect(quoteSwap.slipBasisPoints).toBe(83)
+    expect(quoteSwap.slipBasisPoints).toBe(undefined)
     expect(quoteSwap.canSwap).toBe(true)
     expect(quoteSwap.errors.length).toBe(0)
     expect(quoteSwap.warning).toBe('')

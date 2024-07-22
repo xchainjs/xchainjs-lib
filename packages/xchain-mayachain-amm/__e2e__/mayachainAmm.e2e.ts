@@ -53,6 +53,8 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
     inboundConfirmationBlocks: quoteSwap.inboundConfirmationBlocks,
     outboundDelaySeconds: quoteSwap.outboundDelaySeconds,
     outboundDelayBlocks: quoteSwap.outboundDelayBlocks,
+    streamingSwapBlocks: quoteSwap.streamingSwapBlocks,
+    streamingSwapSeconds: quoteSwap.streamingSwapSeconds,
     totalSwapSeconds: quoteSwap.totalSwapSeconds,
     slipBasisPoints: quoteSwap.slipBasisPoints,
     canSwap: quoteSwap.canSwap,

@@ -9,7 +9,7 @@ import {
 
 import { MayachainQuery } from '../src/mayachain-query'
 import { QuoteSwap, QuoteSwapParams } from '../src/types'
-import { CacaoAsset, EthAsset } from '../src/utils'
+import { CacaoAsset, RuneAsset } from '../src/utils'
 
 const mayachainQuery = new MayachainQuery()
 
@@ -46,10 +46,13 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
         decimals: quoteSwap.fees.outboundFee.baseAmount.decimal,
       },
     },
+    maxStreamingQuantity: quoteSwap.maxStreamingQuantity,
     inboundConfirmationSeconds: quoteSwap.inboundConfirmationSeconds,
     inboundConfirmationBlocks: quoteSwap.inboundConfirmationBlocks,
     outboundDelaySeconds: quoteSwap.outboundDelaySeconds,
     outboundDelayBlocks: quoteSwap.outboundDelayBlocks,
+    streamingSwapBlocks: quoteSwap.streamingSwapBlocks,
+    streamingSwapSeconds: quoteSwap.streamingSwapSeconds,
     totalSwapSeconds: quoteSwap.totalSwapSeconds,
     slipBasisPoints: quoteSwap.slipBasisPoints,
     canSwap: quoteSwap.canSwap,
@@ -65,7 +68,19 @@ describe('Estimate swap e2e tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(baseAmount(100000), AssetBTC),
-      destinationAsset: EthAsset,
+      destinationAsset: RuneAsset,
+    }
+    const estimate = await mayachainQuery.quoteSwap(swapParams)
+    printQuoteSwap(estimate)
+  })
+  it('should estimate a swap of 1 BTC to RUNE streaming', async () => {
+    const swapParams: QuoteSwapParams = {
+      fromAsset: AssetBTC,
+      amount: new CryptoAmount(baseAmount(100000000), AssetBTC),
+      destinationAsset: RuneAsset,
+      destinationAddress: 'thor166n4w5039meulfa3p6ydg60ve6ueac7tlt0jws',
+      streamingInterval: 5,
+      streamingQuantity: 0,
     }
     const estimate = await mayachainQuery.quoteSwap(swapParams)
     printQuoteSwap(estimate)

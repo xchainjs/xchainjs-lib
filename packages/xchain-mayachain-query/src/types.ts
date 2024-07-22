@@ -12,21 +12,27 @@ export type Fees = {
   asset: Asset // The asset for which fees are calculated
   affiliateFee: CryptoAmount // The affiliate fee amount
   outboundFee: CryptoAmount // The outbound fee amount
+  liquidity: CryptoAmount // The liquidity fee amount
+  total: CryptoAmount // Total fees
 }
 
 /**
  * Represents a quote for a swap operation.
  */
 export type QuoteSwap = {
-  toAddress: Address // The destination address for the swap
+  toAddress: Address // The destination address for the swap (inbound address)
   memo: string // The memo associated with the swap
   expectedAmount: CryptoAmount // The expected amount to be received after the swap
   dustThreshold: CryptoAmount // The dust threshold for the swap
   fees: Fees // The fees associated with the swap
+  maxStreamingQuantity: number // The maximum streaming quantity
   inboundConfirmationSeconds?: number // The inbound confirmation time in seconds
   inboundConfirmationBlocks?: number // The inbound confirmation time in blocks
   outboundDelaySeconds: number // The outbound delay time in seconds
   outboundDelayBlocks: number // The outbound delay time in blocks
+  recommendedMinAmountIn?: string // The recommended minimum amount for the swap input
+  streamingSwapBlocks: number // The number of blocks for streaming swap
+  streamingSwapSeconds: number // The time for streaming swap in seconds
   totalSwapSeconds: number // The total time for the swap operation
   slipBasisPoints: number // The slip basis points for the swap
   canSwap: boolean // Indicates whether the swap can be performed
@@ -43,10 +49,12 @@ export type QuoteSwapParams = {
   amount: CryptoAmount // The amount to swap
   fromAddress?: string // The source address for the swap
   destinationAddress?: string // The destination address for the swap
-  height?: number // The block height for the swap
+  streamingInterval?: number // The streaming interval (optional)
+  streamingQuantity?: number // The streaming quantity (optional)
   toleranceBps?: number // The tolerance basis points for the swap
   affiliateBps?: number // The affiliate basis points for the swap
   affiliateAddress?: string // The affiliate address for the swap
+  height?: number // The block height for the swap
 }
 
 /**

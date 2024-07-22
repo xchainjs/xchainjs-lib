@@ -146,7 +146,7 @@ describe('Mayachain Client Test', () => {
     expect(quoteSwap.outboundDelayBlocks).toBe(179)
     expect(quoteSwap.outboundDelaySeconds).toBe(107400)
     expect(quoteSwap.totalSwapSeconds).toBe(107400)
-    expect(quoteSwap.slipBasisPoints).toBe(83)
+    expect(quoteSwap.slipBasisPoints).toBe(undefined)
     expect(quoteSwap.canSwap).toBe(true)
     expect(quoteSwap.errors.length).toBe(0)
     expect(quoteSwap.warning).toBe('')
