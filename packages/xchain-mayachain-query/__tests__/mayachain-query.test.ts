@@ -163,41 +163,109 @@ describe('Mayachain-query tests', () => {
     const details = await mayachainQuery.getMAYANameDetails('eld')
     expect(details).toBeTruthy()
     expect(details?.name).toBe('eld')
-    expect(details?.expire).toBe('66754201')
+    expect(details?.expireBlockHeight).toBe(66754201)
     expect(details?.owner).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(details?.entries.length).toBe(6)
-    expect(details?.entries[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
-    expect(details?.entries[0].chain).toBe('BTC')
-    expect(details?.entries[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
-    expect(details?.entries[1].chain).toBe('DASH')
-    expect(details?.entries[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
-    expect(details?.entries[2].chain).toBe('ETH')
-    expect(details?.entries[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
-    expect(details?.entries[3].chain).toBe('KUJI')
-    expect(details?.entries[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(details?.entries[4].chain).toBe('MAYA')
-    expect(details?.entries[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
-    expect(details?.entries[5].chain).toBe('THOR')
+    expect(details?.aliases.length).toBe(6)
+    expect(details?.aliases[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
+    expect(details?.aliases[0].chain).toBe('BTC')
+    expect(details?.aliases[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
+    expect(details?.aliases[1].chain).toBe('DASH')
+    expect(details?.aliases[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
+    expect(details?.aliases[2].chain).toBe('ETH')
+    expect(details?.aliases[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
+    expect(details?.aliases[3].chain).toBe('KUJI')
+    expect(details?.aliases[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
+    expect(details?.aliases[4].chain).toBe('MAYA')
+    expect(details?.aliases[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
+    expect(details?.aliases[5].chain).toBe('THOR')
   })
 
   it('Should get the MAYAnames owned by an address', async () => {
     const mayaNames = await mayachainQuery.getMAYANamesByOwner('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
     expect(mayaNames.length).toBe(1)
     expect(mayaNames[0]?.name).toBe('eld')
-    expect(mayaNames[0]?.expire).toBe('66754201')
+    expect(mayaNames[0]?.expireBlockHeight).toBe(66754201)
     expect(mayaNames[0]?.owner).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(mayaNames[0]?.entries.length).toBe(6)
-    expect(mayaNames[0]?.entries[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
-    expect(mayaNames[0]?.entries[0].chain).toBe('BTC')
-    expect(mayaNames[0]?.entries[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
-    expect(mayaNames[0]?.entries[1].chain).toBe('DASH')
-    expect(mayaNames[0]?.entries[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
-    expect(mayaNames[0]?.entries[2].chain).toBe('ETH')
-    expect(mayaNames[0]?.entries[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
-    expect(mayaNames[0]?.entries[3].chain).toBe('KUJI')
-    expect(mayaNames[0]?.entries[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(mayaNames[0]?.entries[4].chain).toBe('MAYA')
-    expect(mayaNames[0]?.entries[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
-    expect(mayaNames[0]?.entries[5].chain).toBe('THOR')
+    expect(mayaNames[0]?.aliases.length).toBe(6)
+    expect(mayaNames[0]?.aliases[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
+    expect(mayaNames[0]?.aliases[0].chain).toBe('BTC')
+    expect(mayaNames[0]?.aliases[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
+    expect(mayaNames[0]?.aliases[1].chain).toBe('DASH')
+    expect(mayaNames[0]?.aliases[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
+    expect(mayaNames[0]?.aliases[2].chain).toBe('ETH')
+    expect(mayaNames[0]?.aliases[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
+    expect(mayaNames[0]?.aliases[3].chain).toBe('KUJI')
+    expect(mayaNames[0]?.aliases[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
+    expect(mayaNames[0]?.aliases[4].chain).toBe('MAYA')
+    expect(mayaNames[0]?.aliases[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
+    expect(mayaNames[0]?.aliases[5].chain).toBe('THOR')
+  })
+
+  it('Should estimate MAYAName registration', async () => {
+    const estimated = await mayachainQuery.estimateMAYAName({
+      name: 'pg',
+      chain: 'BTC',
+      chainAddress: 'chainAddress',
+    })
+
+    const splittedMemo = estimated.memo.split(':')
+    expect(splittedMemo[0] ?? splittedMemo[0]).toBe('~')
+    expect(splittedMemo[1] ?? splittedMemo[1]).toBe('pg')
+    expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
+    expect(splittedMemo[3] ?? splittedMemo[3]).toBe('chainAddress')
+    expect(splittedMemo[4] ?? splittedMemo[4]).toBe('')
+    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('')
+    expect(splittedMemo[6] ?? splittedMemo[6]).toBe('12197409')
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+    expect(estimated.value.assetAmount.amount().toString()).toBe('11.2512')
+  })
+
+  it('Should estimate MAYAName registration', async () => {
+    const estimated = await mayachainQuery.estimateMAYAName({
+      name: 'pg',
+      chain: 'BTC',
+      chainAddress: 'chainAddress',
+    })
+
+    const splittedMemo = estimated.memo.split(':')
+    expect(splittedMemo[0] ?? splittedMemo[0]).toBe('~')
+    expect(splittedMemo[1] ?? splittedMemo[1]).toBe('pg')
+    expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
+    expect(splittedMemo[3] ?? splittedMemo[3]).toBe('chainAddress')
+    expect(splittedMemo[4] ?? splittedMemo[4]).toBe('')
+    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('')
+    expect(splittedMemo[6] ?? splittedMemo[6]).toBe('12197409')
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+    expect(estimated.value.assetAmount.amount().toString()).toBe('11.2512')
+  })
+
+  it('Should estimate MAYAName registration with owner', async () => {
+    const estimated = await mayachainQuery.estimateMAYAName({
+      name: 'pg',
+      chain: 'BTC',
+      chainAddress: 'chainAddress',
+      owner: 'mayaOwner',
+    })
+
+    const splittedMemo = estimated.memo.split(':')
+    expect(splittedMemo[0] ?? splittedMemo[0]).toBe('~')
+    expect(splittedMemo[1] ?? splittedMemo[1]).toBe('pg')
+    expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
+    expect(splittedMemo[3] ?? splittedMemo[3]).toBe('chainAddress')
+    expect(splittedMemo[4] ?? splittedMemo[4]).toBe('mayaOwner')
+    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('')
+    expect(splittedMemo[6] ?? splittedMemo[6]).toBe('12197409')
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+    expect(estimated.value.assetAmount.amount().toString()).toBe('11.2512')
+  })
+
+  it('Should not estimate register over already registered MAYAName', async () => {
+    expect(
+      mayachainQuery.estimateMAYAName({
+        name: 'eld',
+        chain: 'BTC',
+        chainAddress: 'chainAddress',
+      }),
+    ).rejects.toThrowError('MAYAName already registered')
   })
 })
