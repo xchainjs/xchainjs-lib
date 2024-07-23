@@ -1,0 +1,247 @@
+[
+  {
+    "asset": "AVAX~AVAX",
+    "units": "328935026564",
+    "depth": "328935026564"
+  },
+  {
+    "asset": "AVAX~SOL-0XFE6B19286885A4F7F55ADAD09C3CD1F906D2478F",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "AVAX~USDC",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "AVAX~USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E",
+    "units": "7102037471973",
+    "depth": "7102037471973"
+  },
+  {
+    "asset": "AVAX~USDT-0X9702230A8EA53601F5CD2DC00FDBC13D4DF4A8C7",
+    "units": "2257304026310",
+    "depth": "2257304026310"
+  },
+  {
+    "asset": "BCH~BCH",
+    "units": "26784125734",
+    "depth": "26784125734"
+  },
+  {
+    "asset": "BNB~BNB",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "BSC~BNB",
+    "units": "90627137262",
+    "depth": "90627137262"
+  },
+  {
+    "asset": "BSC~USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D",
+    "units": "2012036814702",
+    "depth": "2012036814702"
+  },
+  {
+    "asset": "BSC~USDT-0X55D398326F99059FF775485246999027B3197955",
+    "units": "1600328670160",
+    "depth": "1600328670160"
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "12294709954",
+    "depth": "12294709954"
+  },
+  {
+    "asset": "DOGE~DOGE",
+    "units": "87463086868160",
+    "depth": "87463086868160"
+  },
+  {
+    "asset": "ETH~AAAA",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~AAVE-0X7FC66500C84A76AD7E9C93437BFC5AC33E2DDAE9",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~BUSD-0X4FABB145D64652A948D72533023F6E7A623C7C53",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~CELR-0X4F9254C83EB525F9FCF346490BBB3ED28A81C667",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~DAI-0X6B175474E89094C44DA98B954EEDEAC495271D0F",
+    "units": "3586322903762",
+    "depth": "3586322903762"
+  },
+  {
+    "asset": "ETH~DPI-0X1494CA1F11D487C2BBE4543E90080AEBA4BA3C2B",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~ETH",
+    "units": "109433998092",
+    "depth": "109433998092"
+  },
+  {
+    "asset": "ETH~FLIP-0X826180541412D574CF1336D22C0C0A287822678A",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~FOX-0XC770EEFAD204B5180DF6A14EE197D99D808EE52D",
+    "units": "33564055436479",
+    "depth": "33564055436479"
+  },
+  {
+    "asset": "ETH~GUSD-0X056FD409E1D7A124BD7017459DFEA2F387B6D5CD",
+    "units": "443853931",
+    "depth": "443853931"
+  },
+  {
+    "asset": "ETH~HOT-0X6C6EE5E31D828DE241282B9606C8E98EA48526E2",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~KYL-0X67B6D479C7BB412C54E03DCA8E1BC6740CE6B99C",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~LENDS-0X2C06BA9E7F0DACCBC1F6A33EA67E85BB68FBEE3A",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~LINK-0X514910771AF9CA656AF840DFF83E8264ECF986CA",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~LUSD-0X5F98805A4E8BE255A32880FDEC7F6728C6568BA0",
+    "units": "80607031790",
+    "depth": "80607031790"
+  },
+  {
+    "asset": "ETH~MKR-0X9F8F72AA9304C8B593D555F12EF6589CC3A579A2",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~QWERTY",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~RAZE-0X5EAA69B29F99C84FE5DE8200340B4E9B4AB38EAC",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~SNX-0XC011A73EE8576FB46F5E1C5751CA3B9FE0AF2A6F",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~TGT-0X108A850856DB3F85D0269A2693D896B394C80325",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~THOR-0XA5F2211B9B8170F694421F2046281775E8468044",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~TVK-0XD084B83C305DAFD76AE3E1B4E1F1FE2ECCCB3988",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~UOS-0XD13C7342E1EF687C5AD21B27C2B65D772CAB5C8C",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48",
+    "units": "85041014313426",
+    "depth": "85041014313426"
+  },
+  {
+    "asset": "ETH~USDP-0X8E870D67F660D95D5BE530380D0EC0BD388289E1",
+    "units": "754421879935",
+    "depth": "754421879935"
+  },
+  {
+    "asset": "ETH~USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
+    "units": "63015056172063",
+    "depth": "63015056172063"
+  },
+  {
+    "asset": "ETH~VIU-0X519475B31653E46D20CD09F9FDCF3B12BDACB4F5",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~VTHOR-0X815C23ECA83261B6EC689B60CC4A58B54BC24D8D",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~WBTC-0X2260FAC5E5542A773AA44FBCFEDF7C193BC2C599",
+    "units": "179150355",
+    "depth": "179150355"
+  },
+  {
+    "asset": "ETH~WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~XDEFI-0X72B886D09C117654AB7DA13A14D603001DE0B777",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~XRUNE-0X69FA0FEE221AD11012BAB0FDB45D444D3D2CE71C",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~XRUNEE",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~YCURVE-0XDF5E0E81DFF6FAF3A7E52BA697820C5E32D806A8",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "ETH~YFI-0X0BC529C00C6401AEF6D220BE8C6EA1667F6AD93E",
+    "units": "0",
+    "depth": "0"
+  },
+  {
+    "asset": "GAIA~ATOM",
+    "units": "365587226514",
+    "depth": "365587226514"
+  },
+  {
+    "asset": "LTC~LTC",
+    "units": "96577481689",
+    "depth": "96577481689"
+  }
+]
