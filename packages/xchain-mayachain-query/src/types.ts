@@ -130,34 +130,58 @@ export type MAYANameDetails = {
 }
 
 /**
- * Quote MAYAName params
+ * Register MAYAName parameters
  */
-export type QuoteMAYANameParams = {
+export type RegisterMAYAName = {
   /**
-   * Represents if the estimation is an update of an already registered MAYAName or a new MAYAName registration
-   */
-  isUpdate?: boolean
-  /**
-   * MAYAName
+   * MAYAName to register
    */
   name: string
   /**
-   * Owner of the MAYAName
+   * MAYAName owner
    */
-  owner?: Address
+  owner: Address
   /**
-   * Expiry time
+   * MAYAName expiry time, by default, it will be one year more or less
    */
   expiry?: Date
   /**
-   * Chain to register the alias
+   * Chain on which create the alias of the MAYAName
    */
   chain: Chain
   /**
-   * Address of the chain to register the alias
+   * Address of the chain provided to create the alias of the MAYAName
    */
   chainAddress: Address
 }
+
+/**
+ * Update MAYAName parameters
+ */
+export type UpdateMAYAName = {
+  /**
+   * MAYAName to update
+   */
+  name: string
+  /**
+   * MAYAName owner, if not provided, memo response will have the current owner
+   */
+  owner?: Address
+  /**
+   * MAYAName expiry
+   */
+  expiry?: Date
+  /**
+   * Chain on which update the alias of the MAYAName, if not provided, memo response will have one of the already registered chains of the MAYAName
+   */
+  chain?: Chain
+  /**
+   * Address of the chain provided to update the alias of the MAYAName, if not provided, memo response will have the address of the chain returned
+   */
+  chainAddress?: Address
+}
+
+export type QuoteMAYANameParams = (RegisterMAYAName & { isUpdate?: false }) | (UpdateMAYAName & { isUpdate: true })
 
 /**
  * Estimation quote to register or update a MAYAName

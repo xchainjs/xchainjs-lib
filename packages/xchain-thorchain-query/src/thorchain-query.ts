@@ -34,7 +34,8 @@ import {
   PoolRatios,
   PostionDepositValue,
   QuoteSwapParams,
-  QuoteThornameParams,
+  QuoteTHORName,
+  QuoteTHORNameParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
@@ -1275,9 +1276,9 @@ export class ThorchainQuery {
    * @param isUpdate - True only if the domain is already registered and you want to update its data.
    * @returns Memo and value of deposit.
    */
-  public async estimateThorname(params: QuoteThornameParams) {
+  public async estimateThorname(params: QuoteTHORNameParams): Promise<QuoteTHORName> {
     // Check if THORName already exists
-    const thornameDetails = await this.getThornameDetails(params.thorname)
+    const thornameDetails = await this.getThornameDetails(params.name)
 
     if (thornameDetails.owner !== '' && !params.isUpdate) {
       throw Error('Thorname already registered')
@@ -1293,9 +1294,9 @@ export class ThorchainQuery {
     let numberOfBlocksToAddToExpirity = params.isUpdate ? 0 : 5259600 // One year by default
 
     // Compute expiry height
-    if (params.expirity) {
+    if (params.expiry) {
       const currentTimestamp = Math.floor(Date.now() / 1000)
-      const expirityTimestamp = Math.floor(params.expirity.getTime() / 1000)
+      const expirityTimestamp = Math.floor(params.expiry.getTime() / 1000)
       const numberOfSecondsToExpire = expirityTimestamp - currentTimestamp
       const numberOfBlocks = Math.round(numberOfSecondsToExpire / 6)
       const newHeightExpirity = currentThorchainHeight + numberOfBlocks
@@ -1309,8 +1310,11 @@ export class ThorchainQuery {
     const totalFeePerBlock = baseAmount(constantsDetails['TNSFeePerBlock']).times(
       numberOfBlocksToAddToExpirity > 0 ? numberOfBlocksToAddToExpirity : 0,
     )
-    const totalCost = new CryptoAmount(oneTimeFee.plus(totalFeePerBlock), AssetRuneNative)
-    const thornameMemo = `~:${params.thorname}:${params.chain}:${params.chainAddress}:${
+    const txFee = baseAmount(constantsDetails['NativeTransactionFee'], THORCHAIN_DECIMAL)
+    const totalCost = new CryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), AssetRuneNative)
+    const thornameMemo = `~:${params.name}:${
+      params.isUpdate ? params.chain || thornameDetails?.aliases[0].chain : params.chain
+    }:${params.isUpdate ? params.chainAddress || thornameDetails?.aliases[0].address : params.chainAddress}:${
       params.owner ? params.owner : ''
     }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${
       params.isUpdate ? '' : currentHeightForExpirity + numberOfBlocksToAddToExpirity

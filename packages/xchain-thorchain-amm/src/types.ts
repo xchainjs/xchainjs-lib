@@ -1,5 +1,5 @@
 import { Balance, FeeOption } from '@xchainjs/xchain-client'
-import { LiquidityPool } from '@xchainjs/xchain-thorchain-query'
+import { LiquidityPool, QuoteTHORName as BaseQuoteTHORName } from '@xchainjs/xchain-thorchain-query'
 import { Address, Asset, BaseAmount, Chain, CryptoAmount } from '@xchainjs/xchain-util'
 
 /**
@@ -127,4 +127,18 @@ export type IsApprovedParams = {
 export type ApproveParams = {
   asset: Asset // The asset to approve
   amount: CryptoAmount | undefined // The amount to approve, or undefined for an infinite approval
+}
+
+/**
+ * Estimation quote to register or update a THORName
+ */
+export type QuoteTHORName = BaseQuoteTHORName & {
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
 }

@@ -201,44 +201,6 @@ describe('Mayachain-query tests', () => {
     expect(mayaNames[0]?.aliases[5].chain).toBe('THOR')
   })
 
-  it('Should estimate MAYAName registration', async () => {
-    const estimated = await mayachainQuery.estimateMAYAName({
-      name: 'pg',
-      chain: 'BTC',
-      chainAddress: 'chainAddress',
-    })
-
-    const splittedMemo = estimated.memo.split(':')
-    expect(splittedMemo[0] ?? splittedMemo[0]).toBe('~')
-    expect(splittedMemo[1] ?? splittedMemo[1]).toBe('pg')
-    expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
-    expect(splittedMemo[3] ?? splittedMemo[3]).toBe('chainAddress')
-    expect(splittedMemo[4] ?? splittedMemo[4]).toBe('')
-    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('')
-    expect(splittedMemo[6] ?? splittedMemo[6]).toBe('12197409')
-    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
-    expect(estimated.value.assetAmount.amount().toString()).toBe('11.2512')
-  })
-
-  it('Should estimate MAYAName registration', async () => {
-    const estimated = await mayachainQuery.estimateMAYAName({
-      name: 'pg',
-      chain: 'BTC',
-      chainAddress: 'chainAddress',
-    })
-
-    const splittedMemo = estimated.memo.split(':')
-    expect(splittedMemo[0] ?? splittedMemo[0]).toBe('~')
-    expect(splittedMemo[1] ?? splittedMemo[1]).toBe('pg')
-    expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
-    expect(splittedMemo[3] ?? splittedMemo[3]).toBe('chainAddress')
-    expect(splittedMemo[4] ?? splittedMemo[4]).toBe('')
-    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('')
-    expect(splittedMemo[6] ?? splittedMemo[6]).toBe('12197409')
-    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
-    expect(estimated.value.assetAmount.amount().toString()).toBe('11.2512')
-  })
-
   it('Should estimate MAYAName registration with owner', async () => {
     const estimated = await mayachainQuery.estimateMAYAName({
       name: 'pg',
@@ -253,8 +215,7 @@ describe('Mayachain-query tests', () => {
     expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
     expect(splittedMemo[3] ?? splittedMemo[3]).toBe('chainAddress')
     expect(splittedMemo[4] ?? splittedMemo[4]).toBe('mayaOwner')
-    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('')
-    expect(splittedMemo[6] ?? splittedMemo[6]).toBe('12197409')
+    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('MAYA.CACAO')
     expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
     expect(estimated.value.assetAmount.amount().toString()).toBe('11.2512')
   })
@@ -265,6 +226,7 @@ describe('Mayachain-query tests', () => {
         name: 'eld',
         chain: 'BTC',
         chainAddress: 'chainAddress',
+        owner: 'mayaOwner',
       }),
     ).rejects.toThrowError('MAYAName already registered')
   })

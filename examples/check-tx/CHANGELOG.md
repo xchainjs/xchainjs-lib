@@ -1,5 +1,12 @@
 # xchainjs-check-tx
 
+## 1.0.9
+
+### Patch Changes
+
+- Updated dependencies [7df3870]
+  - @xchainjs/xchain-thorchain-query@0.7.16
+
 ## 1.0.8
 
 ### Patch Changes

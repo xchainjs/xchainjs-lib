@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.16
+
+### Patch Changes
+
+- 7df3870: `estimateThorname` method updated. `QuoteThornameParams` params replace by `QuoteTHORNameParams`.
+
 ## 0.7.15
 
 ### Patch Changes
