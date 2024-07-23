@@ -1,5 +1,17 @@
 # xchainjs-do-swap
 
+## 1.0.18
+
+### Patch Changes
+
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+  - @xchainjs/xchain-thorchain-amm@1.1.17
+  - @xchainjs/xchain-thorchain-query@0.7.16
+
 ## 1.0.17
 
 ### Patch Changes

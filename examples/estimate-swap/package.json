@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-estimate-swap",
   "private": true,
-  "version": "1.0.8",
+  "version": "1.0.9",
   "scripts": {
     "listPools": "npx ts-node listPools.ts",
     "estimateSwap": "npx ts-node estimateSwap.ts",
