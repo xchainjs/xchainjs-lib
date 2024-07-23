@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.19
+
+### Patch Changes
+
+- 52498ec: `getMAYANameDetails` method response type updated. `expire` parameter replaced by `expireBlockHeight` and `entries` replaced by `alias`.
+- 52498ec: New method `estimateMAYAName` to estimate the cost of the update or the registration of a MAYAName
+
 ## 0.1.18
 
 ### Patch Changes

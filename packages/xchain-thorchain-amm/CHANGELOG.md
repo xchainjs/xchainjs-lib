@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.1.17
+
+### Patch Changes
+
+- 7df3870: New method `estimateTHORNameUpdate` to estimate the cost of the update of a THORName.
+- 7df3870: New method `estimateTHORNameRegistration` to estimate the cost of the registration of a THORName.
+- 7df3870: New method `registerTHORName` to register a THORName.
+- 7df3870: New method `updateTHORName` to update a THORName.
+- Updated dependencies [7df3870]
+  - @xchainjs/xchain-thorchain-query@0.7.16
+
 ## 1.1.16
 
 ### Patch Changes
