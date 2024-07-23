@@ -18,5 +18,10 @@ export default {
       const resp = require(`./responses/quote-swap.json`)
       return [200, resp]
     })
+    // Latest block
+    mock.onGet(/\/mayachain\/lastblock/).reply(() => {
+      const resp = require(`./responses/latestBlock.json`)
+      return [200, resp]
+    })
   },
 }

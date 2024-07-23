@@ -6,8 +6,8 @@ const getMAYANamesOwned = async (mayachainAMM: MayachainAMM, address: string) =>
     console.log({
       name: mayaName.name,
       owner: mayaName.owner,
-      expire: mayaName.expire,
-      entries: mayaName.entries.map((entry) => {
+      expire: mayaName.expireBlockHeight,
+      entries: mayaName.aliases.map((entry) => {
         return {
           address: entry.address,
           chain: entry.chain,

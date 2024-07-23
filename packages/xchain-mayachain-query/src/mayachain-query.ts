@@ -338,23 +338,20 @@ export class MayachainQuery {
   }: QuoteMAYANameParams): Promise<QuoteMAYAName> {
     const details = await this.getMAYANameDetails(name)
 
+    if (!details && isUpdate) {
+      throw Error('Can not update an unregistered MAYAName')
+    }
+
     if (details?.owner && !isUpdate) {
       throw Error('MAYAName already registered')
     }
-
-    const lastMayaBlockHeight = await this.mayachainCache.mayanode
-      .getLatestBlock()
-      .then((latestBlocks) => latestBlocks[0].mayachain)
-
-    const currentHeightForExpiry: number = details ? details.expireBlockHeight : lastMayaBlockHeight
 
     let numberOfBlocksToAddToExpiry = isUpdate ? 0 : 5_256_000 // Average blocks per year https://docs.mayaprotocol.com/mayachain-dev-docs/introduction/mayaname-guide
 
     if (expiry) {
       const numberOfSecondsToExpire = Math.floor(expiry.getTime() / 1000) - Math.floor(Date.now() / 1000)
       if (numberOfSecondsToExpire < 0) throw Error('Can not update expiry time before the one already registered')
-      const numberOfBlocks = Math.round(numberOfSecondsToExpire / 6) // 1 block every 6 seconds
-      numberOfBlocksToAddToExpiry = currentHeightForExpiry + numberOfBlocks
+      numberOfBlocksToAddToExpiry = Math.round(numberOfSecondsToExpire / 6) // 1 block every 6 seconds
     }
 
     // Calculate fee
@@ -373,9 +370,9 @@ export class MayachainQuery {
 
     return {
       value: new CryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), CacaoAsset),
-      memo: `~:${name}:${chain}:${chainAddress}:${owner ? owner : ''}::${
-        isUpdate ? '' : currentHeightForExpiry + numberOfBlocksToAddToExpiry
-      }`,
+      memo: `~:${name}:${isUpdate ? chain || details?.aliases[0].chain : chain}:${
+        isUpdate ? chainAddress || details?.aliases[0].address : chainAddress
+      }:${isUpdate ? owner || details?.owner : owner}:MAYA.CACAO`,
     }
   }
 }
