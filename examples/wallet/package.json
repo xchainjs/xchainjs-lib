@@ -1,6 +1,6 @@
 {
   "name": "xchainjs-wallet",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "private": true,
   "scripts": {
     "wallet": "npx ts-node wallet.ts",
