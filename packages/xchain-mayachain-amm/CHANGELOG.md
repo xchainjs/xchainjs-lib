@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayachain-query@0.1.20
+
 ## 2.0.12
 
 ### Patch Changes

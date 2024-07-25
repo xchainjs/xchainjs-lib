@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-amm",
-  "version": "2.0.12",
+  "version": "2.0.13",
   "description": "module that exposes estimating & swapping cryptocurrency assets on mayachain",
   "keywords": [
     "MAYAChain",

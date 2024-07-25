@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayamidgard@0.1.5
+
 ## 0.1.14
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.20
+
+### Patch Changes
+
+- 7d70a1c: `getActions` method updated with new parameter `TxType`.
+- Updated dependencies [7d70a1c]
+  - @xchainjs/xchain-midgard@0.5.8
+
 ## 0.1.19
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.17
+
+### Patch Changes
+
+- Updated dependencies [7d70a1c]
+- Updated dependencies [7d70a1c]
+  - @xchainjs/xchain-thornode@0.3.17
+  - @xchainjs/xchain-midgard-query@0.1.20
+
 ## 0.7.16
 
 ### Patch Changes
