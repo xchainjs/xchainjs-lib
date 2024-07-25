@@ -84,6 +84,8 @@ export class MayachainQuery {
     affiliateBps,
     affiliateAddress,
     height,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<QuoteSwap> {
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
@@ -98,6 +100,8 @@ export class MayachainQuery {
       toAssetString,
       inputAmount.toNumber(),
       destinationAddress,
+      streamingInterval,
+      streamingQuantity,
       toleranceBps,
       affiliateBps,
       affiliateAddress,
@@ -156,7 +160,7 @@ export class MayachainQuery {
         affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8), feeAsset),
         outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8), feeAsset),
       },
-      slipBasisPoints: swapQuote.slippage_bps,
+      slipBasisPoints: swapQuote.fees.slippage_bps,
       outboundDelayBlocks: swapQuote.outbound_delay_blocks,
       outboundDelaySeconds: swapQuote.outbound_delay_seconds,
       inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,

@@ -44,6 +44,8 @@ export type QuoteSwapParams = {
   toleranceBps?: number // The tolerance basis points for the swap
   affiliateBps?: number // The affiliate basis points for the swap
   affiliateAddress?: string // The affiliate address for the swap
+  streamingInterval?: number
+  streamingQuantity?: number
 }
 
 /**
