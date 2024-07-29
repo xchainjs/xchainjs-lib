@@ -1,4 +1,5 @@
 import {
+  Asset,
   CryptoAmount,
   assetAmount,
   assetFromStringEx,
@@ -93,6 +94,51 @@ describe('Mayachain-query tests', () => {
     expect(quoteSwap.outboundDelaySeconds).toBe(135000)
     expect(quoteSwap.totalSwapSeconds).toBe(0 + 135000)
     expect(quoteSwap.slipBasisPoints).toBe(83)
+    expect(quoteSwap.canSwap).toBe(true)
+    expect(quoteSwap.errors.length).toBe(0)
+    expect(quoteSwap.warning).toBe('')
+  })
+
+  it('Should fetch ETH to BTC streaming swap', async () => {
+    const quoteSwap = await mayachainQuery.quoteSwap({
+      fromAsset: EthAsset,
+      destinationAsset: BtcAsset,
+      amount: new CryptoAmount(baseAmount('688598892692', 8), BtcAsset),
+      fromAddress: '0xe3985E6b61b814F7Cdb188766562ba71b446B46d',
+      destinationAddress: 'bc1q07kx42qz758yhr7jn3pu9ffz2rwy0snlwztwf8',
+      streamingInterval: 100,
+      streamingQuantity: 10,
+    })
+
+    expect(quoteSwap.toAddress).toBe('0xb9ac6d689a18be4588f348301208e40f57a868d4')
+    expect(quoteSwap.memo).toBe('=:BTC.BTC:bc1q07kx42qz758yhr7jn3pu9ffz2rwy0snlwztwf8:5216435/100/2')
+    expect(assetToString(quoteSwap.expectedAmount.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.expectedAmount.baseAmount.amount().toString()).toBe('5248264')
+    expect(quoteSwap.expectedAmount.baseAmount.decimal).toBe(8)
+    expect(assetToString(quoteSwap.dustThreshold.asset)).toBe(assetToString(EthAsset))
+    expect(quoteSwap.dustThreshold.baseAmount.amount().toString()).toBe('0')
+    expect(quoteSwap.dustThreshold.baseAmount.decimal).toBe(18)
+    expect(assetToString(quoteSwap.fees.asset)).toBe(assetToString(BtcAsset))
+    expect(assetToString(quoteSwap.fees.affiliateFee.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.fees.affiliateFee.baseAmount.amount().toString()).toBe('0')
+    expect(quoteSwap.fees.affiliateFee.baseAmount.decimal).toBe(8)
+    expect(assetToString(quoteSwap.fees.outboundFee.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.fees.outboundFee.baseAmount.amount().toString()).toBe('9110')
+    expect(quoteSwap.fees.outboundFee.baseAmount.decimal).toBe(8)
+    expect(quoteSwap.inboundConfirmationBlocks).toBe(undefined)
+    expect(quoteSwap.inboundConfirmationSeconds).toBe(undefined)
+    expect(quoteSwap.outboundDelayBlocks).toBe(14)
+    expect(quoteSwap.outboundDelaySeconds).toBe(84)
+    expect(quoteSwap.totalSwapSeconds).toBe(600)
+    expect(quoteSwap.slipBasisPoints).toBe(11)
+    expect(quoteSwap.streamingSwapBlocks).toBe(100)
+    expect(quoteSwap.streamingSwapSeconds).toBe(600)
+    expect(quoteSwap.maxStreamingQuantity).toBe(2)
+    expect(quoteSwap.expiry).toBe(1721775525)
+    expect(quoteSwap.router).toBe('0xe3985E6b61b814F7Cdb188766562ba71b446B46d')
+    expect(quoteSwap.gasRateUnits).toBe('gwei')
+    expect(quoteSwap.recommendedGasRate).toBe('1')
+    expect(assetToString(quoteSwap.recommendedMinAmountIn?.asset as Asset)).toBe('ETH.ETH')
     expect(quoteSwap.canSwap).toBe(true)
     expect(quoteSwap.errors.length).toBe(0)
     expect(quoteSwap.warning).toBe('')

@@ -9,5 +9,6 @@
   "inbound_address": "thor10cyg49kz2u982x0m57f8ces0296s04weas2nfz",
   "memo": "=:BTC.BTC:bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj::maya17hwqt302e5f2xm4h95ma8wuggqkvfzgvsyfc54:1000",
   "outbound_delay_blocks": 225,
-  "outbound_delay_seconds": 135000
+  "outbound_delay_seconds": 135000,
+  "total_swap_seconds": 135000
 }
