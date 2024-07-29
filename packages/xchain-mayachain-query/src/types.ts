@@ -9,6 +9,14 @@ export type Fees = {
   asset: Asset // The asset for which fees are calculated
   affiliateFee: CryptoAmount // The affiliate fee amount
   outboundFee: CryptoAmount // The outbound fee amount
+  /**
+   * The liquidity fees paid to pools
+   */
+  liquidityFee: CryptoAmount
+  /**
+   * Total fees
+   */
+  totalFee: CryptoAmount
 }
 
 /**
@@ -26,6 +34,38 @@ export type QuoteSwap = {
   outboundDelayBlocks: number // The outbound delay time in blocks
   totalSwapSeconds: number // The total time for the swap operation
   slipBasisPoints: number // The slip basis points for the swap
+  /**
+   * The EVM chain router contract address
+   */
+  router?: string
+  /**
+   * Expiration timestamp in unix seconds
+   */
+  expiry: number
+  /**
+   * The recommended minimum inbound amount for this transaction type & inbound asset. Sending less than this amount could result in failed refunds.
+   */
+  recommendedMinAmountIn?: CryptoAmount
+  /**
+   * The recommended gas rate to use for the inbound to ensure timely confirmation
+   */
+  recommendedGasRate?: string
+  /**
+   * The units of the recommended gas rate
+   */
+  gasRateUnits?: string
+  /**
+   * The maximum amount of trades a streaming swap can do for a trade
+   */
+  streamingSwapSeconds?: number
+  /**
+   * The number of blocks the streaming swap will execute over
+   */
+  streamingSwapBlocks?: number
+  /**
+   * Approx the number of seconds the streaming swap will execute over
+   */
+  maxStreamingQuantity?: number
   canSwap: boolean // Indicates whether the swap can be performed
   errors: string[] // Any errors encountered during the swap operation
   warning: string // Any warning messages associated with the swap

@@ -73,6 +73,8 @@ export class MayachainAMM {
     affiliateAddress,
     affiliateBps,
     toleranceBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<QuoteSwap> {
     const errors = await this.validateSwap({
       fromAsset,
@@ -82,6 +84,8 @@ export class MayachainAMM {
       destinationAddress,
       affiliateAddress,
       affiliateBps,
+      streamingInterval,
+      streamingQuantity,
     })
 
     if (errors.length > 0) {
@@ -94,6 +98,8 @@ export class MayachainAMM {
           asset: destinationAsset,
           affiliateFee: new CryptoAmount(baseAmount(0), destinationAsset),
           outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          liquidityFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          totalFee: new CryptoAmount(baseAmount(0), destinationAsset),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
@@ -103,6 +109,7 @@ export class MayachainAMM {
         errors,
         slipBasisPoints: 0,
         totalSwapSeconds: 0,
+        expiry: 0,
         warning: '',
       }
     }
@@ -116,6 +123,8 @@ export class MayachainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      streamingInterval,
+      streamingQuantity,
     })
   }
 
@@ -133,6 +142,8 @@ export class MayachainAMM {
     amount,
     affiliateAddress,
     affiliateBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
@@ -166,6 +177,14 @@ export class MayachainAMM {
         amount,
       })
       errors.push(...approveErrors)
+    }
+
+    if (streamingQuantity && streamingQuantity < 0) {
+      errors.push('streaming quantity can not be lower than 0')
+    }
+
+    if (streamingInterval && streamingInterval < 0) {
+      errors.push('streaming interval can not be lower than 0')
     }
 
     return errors
