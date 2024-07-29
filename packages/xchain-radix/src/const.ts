@@ -29,19 +29,19 @@ export const XrdAssetStokenet: Asset = {
 
 export const xrdRootDerivationPaths: RootDerivationPaths = {
   [Network.Mainnet]: "m/44'/1022'/1'/525'/1460'",
-  [Network.Stagenet]: "m/44'/1022'/2'/525'/1460'",
+  [Network.Stagenet]: "m/44'/1022'/1'/525'/1460'",
   [Network.Testnet]: "m/44'/1022'/2'/525'/1460'",
 }
 
 export const bech32Networks: { [key: number]: string } = {
   1: 'rdx',
-  2: 'tdx',
+  2: 'rdx',
   3: 'tdx',
 }
 
 export const bech32Lengths: { [key: number]: number } = {
   1: 66,
-  2: 69,
+  2: 66,
   3: 69,
 }
 
