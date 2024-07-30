@@ -53,6 +53,11 @@ export const TOKEN_ASSET_DELIMITER = '.'
 export const SYNTH_ASSET_DELIMITER = '/'
 
 /**
+ * Trade asset delimiter
+ */
+export const TRADE_ASSET_DELIMITER = '~'
+
+/**
  * Factory to create values of assets (e.g. RUNE)
  *
  * @param {string|number|BigNumber|undefined} value - The asset amount, If the value is undefined, AssetAmount with value `0` will be returned.
@@ -239,7 +244,8 @@ export const isSynthAsset = (asset: AnyAsset): asset is SynthAsset => asset.type
  */
 export const assetFromString = (s: string): AnyAsset | null => {
   const isSynth = s.includes(SYNTH_ASSET_DELIMITER)
-  const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
+  const isTrade = s.includes(TRADE_ASSET_DELIMITER)
+  const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : isTrade ? TRADE_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
     return null
@@ -256,6 +262,7 @@ export const assetFromString = (s: string): AnyAsset | null => {
   if (!symbol) return null
 
   if (isSynth) return { chain, symbol, ticker, type: AssetType.SYNTH }
+  if (isTrade) return { chain, symbol, ticker, type: AssetType.TRADE }
   if (isToken) return { chain, symbol, ticker, type: AssetType.TOKEN }
 
   return { chain, symbol, ticker, type: AssetType.NATIVE }
@@ -291,6 +298,8 @@ export const assetToString = ({ chain, symbol, type }: AnyAsset) => {
       return `${chain}${SYNTH_ASSET_DELIMITER}${symbol}`
     case AssetType.TOKEN:
       return `${chain}${TOKEN_ASSET_DELIMITER}${symbol}`
+    case AssetType.TRADE:
+      return `${chain}${TRADE_ASSET_DELIMITER}${symbol}`
     default:
       return `${chain}${NATIVE_ASSET_DELIMITER}${symbol}`
   }

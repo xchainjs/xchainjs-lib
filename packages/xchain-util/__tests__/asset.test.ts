@@ -324,14 +324,42 @@ describe('asset', () => {
       const result = assetFromString('BNB/BNB')
       expect(result).toEqual({ chain: 'BNB', symbol: 'BNB', ticker: 'BNB', type: AssetType.SYNTH })
     })
+
+    it('trade BTC~BTC', () => {
+      const result = assetFromString('BTC~BTC')
+      expect(result).toEqual({ chain: 'BTC', symbol: 'BTC', ticker: 'BTC', type: AssetType.TRADE })
+    })
+
+    it('trade ETH~ETH', () => {
+      const result = assetFromString('ETH~ETH')
+      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.TRADE })
+    })
+
+    it('trade AVAX~USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E', () => {
+      const result = assetFromString('AVAX~USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E')
+      expect(result).toEqual({
+        chain: 'AVAX',
+        ticker: 'USDC',
+        symbol: 'USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E',
+        type: AssetType.TRADE,
+      })
+    })
+
     it('null for chain only', () => {
       const result = assetFromString('BNB')
       expect(result).toBeNull()
     })
+
     it('null for chain and a `.`', () => {
       const result = assetFromString('BNB.')
       expect(result).toBeNull()
     })
+
+    it('null for chain and a `~`', () => {
+      const result = assetFromString('AVAX~')
+      expect(result).toBeNull()
+    })
+
     it('null for empty string', () => {
       const result = assetFromString('')
       expect(result).toBeNull()
