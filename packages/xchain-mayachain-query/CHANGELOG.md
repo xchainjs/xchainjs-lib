@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.20
+
+### Patch Changes
+
+- f086da3: `quoteSwap` method updated. New parameters `streamingInterval` and `streamingQuantity` for streaming swaps
+- Updated dependencies [f086da3]
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayanode@0.1.8
+  - @xchainjs/xchain-mayamidgard@0.1.5
+  - @xchainjs/xchain-mayamidgard-query@0.1.15
+
+## 0.1.19
+
+### Patch Changes
+
+- 52498ec: `getMAYANameDetails` method response type updated. `expire` parameter replaced by `expireBlockHeight` and `entries` replaced by `alias`.
+- 52498ec: New method `estimateMAYAName` to estimate the cost of the update or the registration of a MAYAName
+
 ## 0.1.18
 
 ### Patch Changes

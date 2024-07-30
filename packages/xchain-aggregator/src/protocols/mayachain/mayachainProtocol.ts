@@ -80,7 +80,11 @@ export class MayachainProtocol implements IProtocol {
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
-    return this.mayachainAmm.doSwap(params)
+    return this.mayachainAmm.doSwap({
+      ...params,
+      affiliateBps: this.configuration?.affiliateBps,
+      affiliateAddress: this.configuration?.affiliateAddress,
+    })
   }
 
   /**

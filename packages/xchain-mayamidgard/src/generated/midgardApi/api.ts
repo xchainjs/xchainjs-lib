@@ -3413,7 +3413,7 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those thornames. 
+         * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those mayanames. 
          * @summary THORName owner
          * @param {string} address Address which owns a THORName.
          * @param {*} [options] Override http request option.
@@ -3791,7 +3791,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those thornames. 
+         * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those mayanames. 
          * @summary THORName owner
          * @param {string} address Address which owns a THORName.
          * @param {*} [options] Override http request option.
@@ -4087,7 +4087,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.getTHORNamesByAddress(address, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those thornames. 
+         * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those mayanames. 
          * @summary THORName owner
          * @param {string} address Address which owns a THORName.
          * @param {*} [options] Override http request option.
@@ -4427,7 +4427,7 @@ export class DefaultApi extends BaseAPI {
     }
 
     /**
-     * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those thornames. 
+     * Returns an array of THORNames owned by the address. The address is not necessarily an associated address for those mayanames. 
      * @summary THORName owner
      * @param {string} address Address which owns a THORName.
      * @param {*} [options] Override http request option.

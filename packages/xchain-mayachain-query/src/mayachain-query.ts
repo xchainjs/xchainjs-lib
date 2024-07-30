@@ -17,6 +17,8 @@ import {
   CompatibleAsset,
   InboundDetail,
   MAYANameDetails,
+  QuoteMAYAName,
+  QuoteMAYANameParams,
   QuoteSwap,
   QuoteSwapParams,
   SwapHistoryParams,
@@ -83,6 +85,8 @@ export class MayachainQuery {
     affiliateBps,
     affiliateAddress,
     height,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<QuoteSwap> {
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
@@ -97,6 +101,8 @@ export class MayachainQuery {
       toAssetString,
       inputAmount.toNumber(),
       destinationAddress,
+      streamingInterval,
+      streamingQuantity,
       toleranceBps,
       affiliateBps,
       affiliateAddress,
@@ -123,6 +129,14 @@ export class MayachainQuery {
             baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
             destinationAsset,
           ),
+          liquidityFee: new CryptoAmount(
+            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
+            destinationAsset,
+          ),
+          totalFee: new CryptoAmount(
+            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
+            destinationAsset,
+          ),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
@@ -130,8 +144,12 @@ export class MayachainQuery {
         inboundConfirmationBlocks: 0,
         canSwap: false,
         errors: [`Mayanode request quote: ${response.error}`],
+        expiry: 0,
         slipBasisPoints: 0,
         totalSwapSeconds: 0,
+        streamingSwapSeconds: 0,
+        streamingSwapBlocks: 0,
+        maxStreamingQuantity: 0,
         warning: '',
       }
     }
@@ -154,13 +172,26 @@ export class MayachainQuery {
         asset: feeAsset,
         affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8), feeAsset),
         outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8), feeAsset),
+        liquidityFee: new CryptoAmount(baseAmount(swapQuote.fees.liquidity, isFeeAssetCacao ? 10 : 8), feeAsset),
+        totalFee: new CryptoAmount(baseAmount(swapQuote.fees.total, isFeeAssetCacao ? 10 : 8), feeAsset),
       },
-      slipBasisPoints: swapQuote.slippage_bps,
+      expiry: swapQuote.expiry,
+      recommendedMinAmountIn: new CryptoAmount(
+        baseAmount(swapQuote.recommended_min_amount_in || '0', eqAsset(fromAsset, CacaoAsset) ? 10 : 8),
+        fromAsset,
+      ),
+      router: swapQuote.router,
+      recommendedGasRate: swapQuote.recommended_gas_rate,
+      gasRateUnits: swapQuote.gas_rate_units,
+      slipBasisPoints: swapQuote.fees.slippage_bps,
       outboundDelayBlocks: swapQuote.outbound_delay_blocks,
       outboundDelaySeconds: swapQuote.outbound_delay_seconds,
       inboundConfirmationSeconds: swapQuote.inbound_confirmation_seconds,
       inboundConfirmationBlocks: swapQuote.inbound_confirmation_blocks,
-      totalSwapSeconds: (swapQuote.inbound_confirmation_seconds || 0) + swapQuote.outbound_delay_seconds,
+      maxStreamingQuantity: swapQuote.max_streaming_quantity,
+      streamingSwapBlocks: swapQuote.streaming_swap_blocks,
+      streamingSwapSeconds: swapQuote.streaming_swap_seconds,
+      totalSwapSeconds: swapQuote.total_swap_seconds || 0,
       canSwap: !(!swapQuote.memo || errors.length > 0),
       errors,
       warning: '',
@@ -204,7 +235,12 @@ export class MayachainQuery {
     const details = await this.mayachainCache.midgardQuery.getMAYANameDetails(MAYAName)
     if (!details) return undefined
 
-    return { ...details, name: MAYAName }
+    return {
+      name: MAYAName,
+      owner: details.owner,
+      expireBlockHeight: Number(details.expire),
+      aliases: details.entries,
+    }
   }
 
   /**
@@ -316,5 +352,58 @@ export class MayachainQuery {
 
     const mayaNamesDetails = await Promise.all(tasks)
     return mayaNamesDetails.filter((mayaNameDetails) => mayaNameDetails !== undefined) as MAYANameDetails[]
+  }
+
+  /**
+   * Estimate the cost of an update or MAYAName registration
+   * @param {QuoteMAYANameParams} params Params to make the update or the registration
+   * @returns {QuoteMAYAName} Memo to make the update or the registration and the estimation of the operation
+   */
+  public async estimateMAYAName({
+    name,
+    owner,
+    isUpdate,
+    expiry,
+    chain,
+    chainAddress,
+  }: QuoteMAYANameParams): Promise<QuoteMAYAName> {
+    const details = await this.getMAYANameDetails(name)
+
+    if (!details && isUpdate) {
+      throw Error('Can not update an unregistered MAYAName')
+    }
+
+    if (details?.owner && !isUpdate) {
+      throw Error('MAYAName already registered')
+    }
+
+    let numberOfBlocksToAddToExpiry = isUpdate ? 0 : 5_256_000 // Average blocks per year https://docs.mayaprotocol.com/mayachain-dev-docs/introduction/mayaname-guide
+
+    if (expiry) {
+      const numberOfSecondsToExpire = Math.floor(expiry.getTime() / 1000) - Math.floor(Date.now() / 1000)
+      if (numberOfSecondsToExpire < 0) throw Error('Can not update expiry time before the one already registered')
+      numberOfBlocksToAddToExpiry = Math.round(numberOfSecondsToExpire / 6) // 1 block every 6 seconds
+    }
+
+    // Calculate fee
+
+    const constantsDetails = await this.mayachainCache.mayanode.getMimir()
+    const assetDecimals = await this.mayachainCache.getAssetDecimals()
+    const oneTimeFee = isUpdate
+      ? baseAmount(0, assetDecimals[assetToString(CacaoAsset)])
+      : baseAmount(constantsDetails['TNSREGISTERFEE'], assetDecimals[assetToString(CacaoAsset)])
+
+    const totalFeePerBlock = baseAmount(constantsDetails['TNSFEEPERBLOCK']).times(
+      numberOfBlocksToAddToExpiry > 0 ? numberOfBlocksToAddToExpiry : 0,
+    )
+
+    const txFee = baseAmount(constantsDetails['NATIVETRANSACTIONFEE'], assetDecimals[assetToString(CacaoAsset)])
+
+    return {
+      value: new AssetCryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), CacaoAsset),
+      memo: `~:${name}:${isUpdate ? chain || details?.aliases[0].chain : chain}:${
+        isUpdate ? chainAddress || details?.aliases[0].address : chainAddress
+      }:${isUpdate ? owner || details?.owner : owner}:MAYA.CACAO`,
+    }
   }
 }

@@ -1,5 +1,15 @@
 # xchainjs-wallet
 
+## 1.0.14
+
+### Patch Changes
+
+- Updated dependencies [f086da3]
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayanode@0.1.8
+  - @xchainjs/xchain-mayamidgard@0.1.5
+  - @xchainjs/xchain-mayamidgard-query@0.1.15
+
 ## 1.0.13
 
 ### Patch Changes

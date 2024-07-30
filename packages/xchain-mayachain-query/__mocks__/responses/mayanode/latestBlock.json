@@ -1,0 +1,38 @@
+[
+  {
+    "chain": "ARB",
+    "last_observed_in": 232410594,
+    "last_signed_out": 6941360,
+    "mayachain": 6941409
+  },
+  {
+    "chain": "BTC",
+    "last_observed_in": 852281,
+    "last_signed_out": 6941360,
+    "mayachain": 6941409
+  },
+  {
+    "chain": "DASH",
+    "last_observed_in": 2104905,
+    "last_signed_out": 6941360,
+    "mayachain": 6941409
+  },
+  {
+    "chain": "ETH",
+    "last_observed_in": 20310615,
+    "last_signed_out": 6941360,
+    "mayachain": 6941409
+  },
+  {
+    "chain": "KUJI",
+    "last_observed_in": 20471652,
+    "last_signed_out": 6941360,
+    "mayachain": 6941409
+  },
+  {
+    "chain": "THOR",
+    "last_observed_in": 16836666,
+    "last_signed_out": 6941360,
+    "mayachain": 6941409
+  }
+]

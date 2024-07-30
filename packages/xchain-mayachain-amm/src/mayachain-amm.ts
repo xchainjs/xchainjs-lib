@@ -8,14 +8,28 @@ import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
-import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
-import { MAYANameDetails, MayachainQuery, QuoteSwap, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
+import { AssetCacao, CACAO_DECIMAL, Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
+import {
+  MAYANameDetails,
+  MayachainQuery,
+  QuoteSwap,
+  QuoteSwapParams,
+  RegisterMAYAName,
+  UpdateMAYAName,
+} from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { Address, CryptoAmount, assetToString, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  AssetCryptoAmount,
+  CryptoAmount,
+  assetToString,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { MayachainAction } from './mayachain-action'
-import { ApproveParams, IsApprovedParams, TxSubmitted } from './types'
+import { ApproveParams, IsApprovedParams, QuoteMAYAName, TxSubmitted } from './types'
 import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
@@ -66,6 +80,8 @@ export class MayachainAMM {
     affiliateAddress,
     affiliateBps,
     toleranceBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<QuoteSwap> {
     const errors = await this.validateSwap({
       fromAsset,
@@ -75,6 +91,8 @@ export class MayachainAMM {
       destinationAddress,
       affiliateAddress,
       affiliateBps,
+      streamingInterval,
+      streamingQuantity,
     })
 
     if (errors.length > 0) {
@@ -87,6 +105,8 @@ export class MayachainAMM {
           asset: destinationAsset,
           affiliateFee: new CryptoAmount(baseAmount(0), destinationAsset),
           outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          liquidityFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          totalFee: new CryptoAmount(baseAmount(0), destinationAsset),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
@@ -96,6 +116,7 @@ export class MayachainAMM {
         errors,
         slipBasisPoints: 0,
         totalSwapSeconds: 0,
+        expiry: 0,
         warning: '',
       }
     }
@@ -109,6 +130,8 @@ export class MayachainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      streamingInterval,
+      streamingQuantity,
     })
   }
 
@@ -126,6 +149,8 @@ export class MayachainAMM {
     amount,
     affiliateAddress,
     affiliateBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
@@ -163,6 +188,14 @@ export class MayachainAMM {
         })
         errors.push(...approveErrors)
       }
+    }
+
+    if (streamingQuantity && streamingQuantity < 0) {
+      errors.push('streaming quantity can not be lower than 0')
+    }
+
+    if (streamingInterval && streamingInterval < 0) {
+      errors.push('streaming interval can not be lower than 0')
     }
 
     return errors
@@ -260,6 +293,136 @@ export class MayachainAMM {
    */
   public async getMAYANamesByOwner(owner: Address): Promise<MAYANameDetails[]> {
     return this.mayachainQuery.getMAYANamesByOwner(owner)
+  }
+
+  /**
+   * Estimate the cost of a MAYAName registration
+   * @param {RegisterMAYAName} params Params to make the registration
+   * @returns {QuoteMAYAName} Memo to make the registration and the estimation of the operation
+   */
+  public async estimateMAYANameRegistration(params: RegisterMAYAName): Promise<QuoteMAYAName> {
+    const errors: string[] = []
+
+    if (!validateAddress(this.mayachainQuery.getNetwork(), params.chain, params.chainAddress)) {
+      errors.push(`Invalid address ${params.chainAddress} for ${params.chain} chain`)
+    }
+
+    if (!validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, params.owner)) {
+      errors.push(`Invalid owner ${params.owner} due it is not a MAYAChain address`)
+    }
+
+    if (errors.length) {
+      return {
+        memo: '',
+        errors,
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        allowed: false,
+      }
+    }
+
+    try {
+      const estimated = await this.mayachainQuery.estimateMAYAName({ ...params })
+
+      return {
+        ...estimated,
+        allowed: true,
+        errors: [],
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return {
+        memo: '',
+        errors: ['message' in e ? e.message : `Unknown error: ${e}`],
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        allowed: false,
+      }
+    }
+  }
+
+  /**
+   * Estimate the cost of an update of a MAYAName
+   * @param {QuoteMAYANameParams} params Params to make the update
+   * @returns {QuoteMAYAName} Memo to make the update and the estimation of the operation
+   */
+  public async estimateMAYANameUpdate(params: UpdateMAYAName): Promise<QuoteMAYAName> {
+    const errors: string[] = []
+
+    if ((params.chain && !params.chainAddress) || (!params.chain && params.chainAddress)) {
+      errors.push(`Alias not provided correctly`)
+    }
+
+    if (
+      params.chain &&
+      params.chainAddress &&
+      !validateAddress(this.mayachainQuery.getNetwork(), params.chain, params.chainAddress)
+    ) {
+      errors.push(`Invalid alias ${params.chainAddress} for ${params.chain} chain`)
+    }
+
+    if (params.owner && !validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, params.owner)) {
+      errors.push(`Invalid owner ${params.owner} due it is not a MAYAChain address`)
+    }
+
+    if (errors.length) {
+      return {
+        memo: '',
+        errors,
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        allowed: false,
+      }
+    }
+
+    try {
+      const estimated = await this.mayachainQuery.estimateMAYAName({ ...params, isUpdate: true })
+
+      return {
+        ...estimated,
+        allowed: true,
+        errors: [],
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return {
+        memo: '',
+        errors: ['message' in e ? e.message : `Unknown error: ${e}`],
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        allowed: false,
+      }
+    }
+  }
+
+  /**
+   * Register a MAYAName
+   * @param {RegisterMAYAName} params Params to make the registration
+   * @returns {QuoteMAYAName} Memo to make the update or the registration and the estimation of the operation
+   */
+  public async registerMAYAName(params: RegisterMAYAName): Promise<TxSubmitted> {
+    const quote = await this.estimateMAYANameRegistration(params)
+
+    if (!quote.allowed) throw Error(`Can not register MAYAName. ${quote.errors.join(' ')}`)
+
+    return MayachainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
+    })
+  }
+
+  /**
+   * Update a MAYAName
+   * @param {QuoteMAYANameParams} params Params to make the update
+   * @returns {QuoteMAYAName} Memo to make the update or the registration and the estimation of the operation
+   */
+  public async updateMAYAName(params: UpdateMAYAName): Promise<TxSubmitted> {
+    const quote = await this.estimateMAYANameUpdate(params)
+
+    if (!quote.allowed) throw Error(`Can not update MAYAName. ${quote.errors.join(' ')}`)
+
+    return MayachainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
+    })
   }
 
   /**

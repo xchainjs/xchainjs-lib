@@ -1,0 +1,27 @@
+{
+  "inbound_address": "0x37f4bc8b3a06a751fc36baa928d3fa5b63a540fc",
+  "outbound_delay_blocks": 720,
+  "outbound_delay_seconds": 4320,
+  "fees": {
+    "asset": "BTC.BTC",
+    "affiliate": "0",
+    "outbound": "5691",
+    "liquidity": "8895135200",
+    "total": "8895140891",
+    "slippage_bps": 4396,
+    "total_bps": 4391
+  },
+  "router": "0xe3985E6b61b814F7Cdb188766562ba71b446B46d",
+  "expiry": 1722246842,
+  "warning": "Do not cache this response. Do not send funds after the expiry.",
+  "notes": "Base Asset: Send the inbound_address the asset with the memo encoded in hex in the data field. Tokens: First approve router to spend tokens from user: asset.approve(router, amount). Then call router.depositWithExpiry(inbound_address, asset, amount, memo, expiry). Asset is the token contract address. Amount should be in native asset decimals (eg 1e18 for most tokens). Do not send to or from contract addresses.",
+  "recommended_min_amount_in": "467840",
+  "recommended_gas_rate": "1",
+  "gas_rate_units": "gwei",
+  "memo": "=:BTC.BTC:bc1q07kx42qz758yhr7jn3pu9ffz2rwy0snlwztwf8:0/100/10",
+  "expected_amount_out": "11361662429",
+  "max_streaming_quantity": 144,
+  "streaming_swap_blocks": 900,
+  "streaming_swap_seconds": 5400,
+  "total_swap_seconds": 5400
+}
