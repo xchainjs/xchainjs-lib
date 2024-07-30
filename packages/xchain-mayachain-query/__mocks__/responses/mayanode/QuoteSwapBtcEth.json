@@ -10,5 +10,6 @@
   "inbound_confirmation_blocks": 1,
   "inbound_confirmation_seconds": 600,
   "outbound_delay_blocks": 248,
-  "outbound_delay_seconds": 3720
+  "outbound_delay_seconds": 3720,
+  "total_swap_seconds": 4320
 }
