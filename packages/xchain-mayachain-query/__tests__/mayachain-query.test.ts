@@ -1,4 +1,5 @@
 import {
+  Asset,
   CryptoAmount,
   assetAmount,
   assetFromStringEx,
@@ -98,6 +99,51 @@ describe('Mayachain-query tests', () => {
     expect(quoteSwap.warning).toBe('')
   })
 
+  it('Should fetch ETH to BTC streaming swap', async () => {
+    const quoteSwap = await mayachainQuery.quoteSwap({
+      fromAsset: EthAsset,
+      destinationAsset: BtcAsset,
+      amount: new CryptoAmount(baseAmount('688598892692', 8), BtcAsset),
+      fromAddress: '0xe3985E6b61b814F7Cdb188766562ba71b446B46d',
+      destinationAddress: 'bc1q07kx42qz758yhr7jn3pu9ffz2rwy0snlwztwf8',
+      streamingInterval: 100,
+      streamingQuantity: 10,
+    })
+
+    expect(quoteSwap.toAddress).toBe('0xb9ac6d689a18be4588f348301208e40f57a868d4')
+    expect(quoteSwap.memo).toBe('=:BTC.BTC:bc1q07kx42qz758yhr7jn3pu9ffz2rwy0snlwztwf8:5216435/100/2')
+    expect(assetToString(quoteSwap.expectedAmount.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.expectedAmount.baseAmount.amount().toString()).toBe('5248264')
+    expect(quoteSwap.expectedAmount.baseAmount.decimal).toBe(8)
+    expect(assetToString(quoteSwap.dustThreshold.asset)).toBe(assetToString(EthAsset))
+    expect(quoteSwap.dustThreshold.baseAmount.amount().toString()).toBe('0')
+    expect(quoteSwap.dustThreshold.baseAmount.decimal).toBe(18)
+    expect(assetToString(quoteSwap.fees.asset)).toBe(assetToString(BtcAsset))
+    expect(assetToString(quoteSwap.fees.affiliateFee.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.fees.affiliateFee.baseAmount.amount().toString()).toBe('0')
+    expect(quoteSwap.fees.affiliateFee.baseAmount.decimal).toBe(8)
+    expect(assetToString(quoteSwap.fees.outboundFee.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.fees.outboundFee.baseAmount.amount().toString()).toBe('9110')
+    expect(quoteSwap.fees.outboundFee.baseAmount.decimal).toBe(8)
+    expect(quoteSwap.inboundConfirmationBlocks).toBe(undefined)
+    expect(quoteSwap.inboundConfirmationSeconds).toBe(undefined)
+    expect(quoteSwap.outboundDelayBlocks).toBe(14)
+    expect(quoteSwap.outboundDelaySeconds).toBe(84)
+    expect(quoteSwap.totalSwapSeconds).toBe(600)
+    expect(quoteSwap.slipBasisPoints).toBe(11)
+    expect(quoteSwap.streamingSwapBlocks).toBe(100)
+    expect(quoteSwap.streamingSwapSeconds).toBe(600)
+    expect(quoteSwap.maxStreamingQuantity).toBe(2)
+    expect(quoteSwap.expiry).toBe(1721775525)
+    expect(quoteSwap.router).toBe('0xe3985E6b61b814F7Cdb188766562ba71b446B46d')
+    expect(quoteSwap.gasRateUnits).toBe('gwei')
+    expect(quoteSwap.recommendedGasRate).toBe('1')
+    expect(assetToString(quoteSwap.recommendedMinAmountIn?.asset as Asset)).toBe('ETH.ETH')
+    expect(quoteSwap.canSwap).toBe(true)
+    expect(quoteSwap.errors.length).toBe(0)
+    expect(quoteSwap.warning).toBe('')
+  })
+
   it('Should return the number of decimals of Mayachain assets', async () => {
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC.BTC'))).toBe(8)
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC/BTC'))).toBe(8)
@@ -163,41 +209,71 @@ describe('Mayachain-query tests', () => {
     const details = await mayachainQuery.getMAYANameDetails('eld')
     expect(details).toBeTruthy()
     expect(details?.name).toBe('eld')
-    expect(details?.expire).toBe('66754201')
+    expect(details?.expireBlockHeight).toBe(66754201)
     expect(details?.owner).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(details?.entries.length).toBe(6)
-    expect(details?.entries[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
-    expect(details?.entries[0].chain).toBe('BTC')
-    expect(details?.entries[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
-    expect(details?.entries[1].chain).toBe('DASH')
-    expect(details?.entries[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
-    expect(details?.entries[2].chain).toBe('ETH')
-    expect(details?.entries[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
-    expect(details?.entries[3].chain).toBe('KUJI')
-    expect(details?.entries[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(details?.entries[4].chain).toBe('MAYA')
-    expect(details?.entries[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
-    expect(details?.entries[5].chain).toBe('THOR')
+    expect(details?.aliases.length).toBe(6)
+    expect(details?.aliases[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
+    expect(details?.aliases[0].chain).toBe('BTC')
+    expect(details?.aliases[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
+    expect(details?.aliases[1].chain).toBe('DASH')
+    expect(details?.aliases[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
+    expect(details?.aliases[2].chain).toBe('ETH')
+    expect(details?.aliases[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
+    expect(details?.aliases[3].chain).toBe('KUJI')
+    expect(details?.aliases[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
+    expect(details?.aliases[4].chain).toBe('MAYA')
+    expect(details?.aliases[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
+    expect(details?.aliases[5].chain).toBe('THOR')
   })
 
   it('Should get the MAYAnames owned by an address', async () => {
     const mayaNames = await mayachainQuery.getMAYANamesByOwner('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
     expect(mayaNames.length).toBe(1)
     expect(mayaNames[0]?.name).toBe('eld')
-    expect(mayaNames[0]?.expire).toBe('66754201')
+    expect(mayaNames[0]?.expireBlockHeight).toBe(66754201)
     expect(mayaNames[0]?.owner).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(mayaNames[0]?.entries.length).toBe(6)
-    expect(mayaNames[0]?.entries[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
-    expect(mayaNames[0]?.entries[0].chain).toBe('BTC')
-    expect(mayaNames[0]?.entries[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
-    expect(mayaNames[0]?.entries[1].chain).toBe('DASH')
-    expect(mayaNames[0]?.entries[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
-    expect(mayaNames[0]?.entries[2].chain).toBe('ETH')
-    expect(mayaNames[0]?.entries[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
-    expect(mayaNames[0]?.entries[3].chain).toBe('KUJI')
-    expect(mayaNames[0]?.entries[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
-    expect(mayaNames[0]?.entries[4].chain).toBe('MAYA')
-    expect(mayaNames[0]?.entries[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
-    expect(mayaNames[0]?.entries[5].chain).toBe('THOR')
+    expect(mayaNames[0]?.aliases.length).toBe(6)
+    expect(mayaNames[0]?.aliases[0].address).toBe('bc1qvqxs558vgquwkchw64erd5hfpxfj5kmn7lyklz')
+    expect(mayaNames[0]?.aliases[0].chain).toBe('BTC')
+    expect(mayaNames[0]?.aliases[1].address).toBe('XgYRN3TLoYaodB5Y6AMZuYhjv8fKKG5tgh')
+    expect(mayaNames[0]?.aliases[1].chain).toBe('DASH')
+    expect(mayaNames[0]?.aliases[2].address).toBe('0x7316da75796f74e83b71c72ed6f138dd3b6b4957')
+    expect(mayaNames[0]?.aliases[2].chain).toBe('ETH')
+    expect(mayaNames[0]?.aliases[3].address).toBe('kujira1x8z69wuczjk42l22c3u6qzzd5vdeqdyhwkv84v')
+    expect(mayaNames[0]?.aliases[3].chain).toBe('KUJI')
+    expect(mayaNames[0]?.aliases[4].address).toBe('maya13x0f2r0jltfplmxe40cc67hhca27np34ezmcjn')
+    expect(mayaNames[0]?.aliases[4].chain).toBe('MAYA')
+    expect(mayaNames[0]?.aliases[5].address).toBe('thor13x0f2r0jltfplmxe40cc67hhca27np34e495yr')
+    expect(mayaNames[0]?.aliases[5].chain).toBe('THOR')
+  })
+
+  it('Should estimate MAYAName registration with owner', async () => {
+    const estimated = await mayachainQuery.estimateMAYAName({
+      name: 'pg',
+      chain: 'BTC',
+      chainAddress: 'chainAddress',
+      owner: 'mayaOwner',
+    })
+
+    const splittedMemo = estimated.memo.split(':')
+    expect(splittedMemo[0] ?? splittedMemo[0]).toBe('~')
+    expect(splittedMemo[1] ?? splittedMemo[1]).toBe('pg')
+    expect(splittedMemo[2] ?? splittedMemo[2]).toBe('BTC')
+    expect(splittedMemo[3] ?? splittedMemo[3]).toBe('chainAddress')
+    expect(splittedMemo[4] ?? splittedMemo[4]).toBe('mayaOwner')
+    expect(splittedMemo[5] ?? splittedMemo[5]).toBe('MAYA.CACAO')
+    expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
+    expect(estimated.value.assetAmount.amount().toString()).toBe('11.2512')
+  })
+
+  it('Should not estimate register over already registered MAYAName', async () => {
+    expect(
+      mayachainQuery.estimateMAYAName({
+        name: 'eld',
+        chain: 'BTC',
+        chainAddress: 'chainAddress',
+        owner: 'mayaOwner',
+      }),
+    ).rejects.toThrowError('MAYAName already registered')
   })
 })

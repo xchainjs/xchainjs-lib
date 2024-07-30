@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.17
+
+### Patch Changes
+
+- 7d70a1c: Client aligned with Thornode v1.133.0
+
 ## 0.3.16
 
 ### Patch Changes

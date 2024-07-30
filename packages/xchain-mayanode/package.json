@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayanode",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "license": "MIT",
   "description": "Mayanode module that exposes all mayanode functions using openapi-generator-cli",
   "keywords": [
@@ -30,7 +30,7 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "test": "jest --passWithNoTests",
     "generate:types": "yarn clean:types:mayanode && yarn generate:types:mayanode",
-    "generate:types:mayanode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://mayanode.mayachain.info/mayachain/doc//openapi.yaml -g typescript-axios -o ./src/generated/mayanodeApi --skip-validate-spec --generate-alias-as-model",
+    "generate:types:mayanode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://mayanode.mayachain.info/mayachain/doc/openapi.yaml -g typescript-axios -o ./src/generated/mayanodeApi --skip-validate-spec --generate-alias-as-model",
     "clean:types:mayanode": "rimraf ./src/generated/mayanodeApi"
   },
   "dependencies": {

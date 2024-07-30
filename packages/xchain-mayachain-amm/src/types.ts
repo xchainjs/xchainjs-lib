@@ -1,3 +1,4 @@
+import { QuoteMAYAName as BaseQuoteMAYAName } from '@xchainjs/xchain-mayachain-query'
 import { Address, TokenAsset, TokenCryptoAmount } from '@xchainjs/xchain-util'
 // Object representing a submitted transaction
 export type TxSubmitted = {
@@ -16,4 +17,18 @@ export type IsApprovedParams = {
   asset: TokenAsset // The asset to check approval for
   amount: TokenCryptoAmount // The amount of the asset to be spent
   address: Address // The address to check approval for
+}
+
+/**
+ * MAYAName quote parameters
+ */
+export type QuoteMAYAName = BaseQuoteMAYAName & {
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
 }

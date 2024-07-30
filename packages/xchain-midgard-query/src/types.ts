@@ -40,6 +40,36 @@ export type MidgardConfig = {
 export type ActionType = 'swap' | 'addLiquidity' | 'withdraw' | 'donate' | 'refund' | 'switch'
 
 /**
+ * Action Tx type
+ */
+export type ActionTxType =
+  | 'unknown'
+  | 'add'
+  | 'withdraw'
+  | 'unknown'
+  | 'add'
+  | 'withdraw'
+  | 'swap'
+  | 'limitOrder'
+  | 'outbound'
+  | 'donate'
+  | 'bond'
+  | 'unbond'
+  | 'leave'
+  | 'yggdrasilFund'
+  | 'yggdrasilReturn'
+  | 'reserve'
+  | 'refund'
+  | 'migrate'
+  | 'ragnarok'
+  | 'switch'
+  | 'noOp'
+  | 'consolidate'
+  | 'thorname'
+  | 'loanOpen'
+  | 'loanRepayment'
+
+/**
  * Get action params
  */
 export type GetActionsParams = Partial<{
@@ -47,6 +77,7 @@ export type GetActionsParams = Partial<{
   txid: string
   asset: string
   type: ActionType
+  txType: ActionTxType
   affiliate: string
   limit: number
   offset: number

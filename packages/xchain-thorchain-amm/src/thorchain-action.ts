@@ -1,8 +1,16 @@
 import { Protocol } from '@xchainjs/xchain-client'
 import { abi } from '@xchainjs/xchain-evm'
 import { THORChain } from '@xchainjs/xchain-thorchain'
-import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { Address, CryptoAmount, baseAmount, getContractAddressFromAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { CompatibleAsset, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
+import {
+  Address,
+  Asset,
+  CryptoAmount,
+  TokenAsset,
+  baseAmount,
+  getContractAddressFromAsset,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
@@ -11,14 +19,14 @@ import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './
 
 export type NonProtocolActionParams = {
   wallet: Wallet
-  assetAmount: CryptoAmount
+  assetAmount: CryptoAmount<Asset | TokenAsset>
   recipient: Address
   memo: string
 }
 
 export type ProtocolActionParams = {
   wallet: Wallet
-  assetAmount: CryptoAmount
+  assetAmount: CryptoAmount<CompatibleAsset>
   memo: string
 }
 

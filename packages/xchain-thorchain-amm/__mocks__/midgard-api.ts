@@ -28,5 +28,10 @@ export default {
       const resp = require(`./responses/midgard/health.json`)
       return [200, resp]
     })
+    //Mock midgard health
+    mock.onGet(/\/v2\/thorname\/lookup\/odin/).reply(function () {
+      const resp = require(`./responses/midgard/thorname.json`)
+      return [200, resp]
+    })
   },
 }
