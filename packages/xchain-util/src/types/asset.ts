@@ -10,6 +10,16 @@ export enum AssetType {
 }
 
 /**
+ * Any Asset XChainJS can work with
+ */
+export type AnyAsset = {
+  chain: Chain
+  symbol: string
+  ticker: string
+  type: AssetType
+}
+
+/**
  * Asset type for native assets
  */
 export type Asset = {
@@ -38,8 +48,3 @@ export type SynthAsset = {
   ticker: string
   type: AssetType.SYNTH
 }
-
-/**
- * Any Asset XChainJS can work with
- */
-export type AnyAsset = Asset | TokenAsset | SynthAsset

@@ -1,5 +1,5 @@
 import { Pool } from '@xchainjs/xchain-thornode/lib'
-import { Asset, BaseAmount, assetFromString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, TokenAsset, assetFromString, baseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 /**
@@ -10,14 +10,14 @@ export class LiquidityPool {
   readonly assetBalance: BaseAmount // Balance of the asset in the pool
   readonly runeBalance: BaseAmount // Balance of Rune in the pool
 
-  readonly asset: Asset // Asset of the pool
+  readonly asset: Asset | TokenAsset // Asset of the pool
   readonly assetString: string // String representation of the asset
   readonly runeToAssetRatio: BigNumber // Ratio of Rune to the asset in the pool
   readonly assetToRuneRatio: BigNumber // Ratio of the asset to Rune in the pool
 
   constructor(thornodeDetails: Pool) {
     this.thornodeDetails = thornodeDetails
-    const asset = assetFromString(this.thornodeDetails.asset)
+    const asset = assetFromString(this.thornodeDetails.asset) as Asset | TokenAsset
     if (!asset) throw new Error(`could not parse ${this.thornodeDetails.asset}`)
 
     this.asset = asset

@@ -9,7 +9,13 @@ import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
-import { Client as ThorClient, THORChain, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
+import {
+  AssetRuneNative,
+  Client as ThorClient,
+  RUNE_DECIMAL,
+  THORChain,
+  defaultClientConfig as defaultThorParams,
+} from '@xchainjs/xchain-thorchain'
 import {
   AddliquidityPosition,
   EstimateAddLP,
@@ -21,19 +27,29 @@ import {
   LoanOpenParams,
   LoanOpenQuote,
   QuoteSwapParams,
+  RegisterTHORName,
   SaversPosition,
   SaversWithdraw,
   ThorchainQuery,
   TxDetails,
+  UpdateTHORName,
   WithdrawLiquidityPosition,
   getSaver,
 } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetCryptoAmount,
+  CryptoAmount,
+  TokenAsset,
+  assetToString,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAction } from './thorchain-action'
-import { AddLiquidity, ApproveParams, IsApprovedParams, TxSubmitted, WithdrawLiquidity } from './types'
-import { isProtocolERC20Asset, validateAddress } from './utils'
+import { AddLiquidity, ApproveParams, IsApprovedParams, QuoteTHORName, TxSubmitted, WithdrawLiquidity } from './types'
+import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
  * THORChain Class for interacting with THORChain.
@@ -136,7 +152,7 @@ export class ThorchainAMM {
       destinationAddress &&
       !validateAddress(
         this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
-        destinationAsset.synth ? THORChain : destinationAsset.chain,
+        isSynthAsset(destinationAsset) ? THORChain : destinationAsset.chain,
         destinationAddress,
       )
     ) {
@@ -170,12 +186,16 @@ export class ThorchainAMM {
     }
 
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {
-      const approveErrors = await this.isRouterApprovedToSpend({
-        asset: fromAsset,
-        address: fromAddress,
-        amount,
-      })
-      errors.push(...approveErrors)
+      if (!isTokenCryptoAmount(amount)) {
+        errors.push(`${assetToString(amount.asset)} is not Token asset amount`)
+      } else {
+        const approveErrors = await this.isRouterApprovedToSpend({
+          asset: fromAsset,
+          address: fromAddress,
+          amount,
+        })
+        errors.push(...approveErrors)
+      }
     }
 
     return errors
@@ -431,7 +451,7 @@ export class ThorchainAMM {
    * @param addAssetAmount The amount to add to the saver.
    * @returns The estimated addition to the saver object.
    */
-  public async estimateAddSaver(addAssetAmount: CryptoAmount): Promise<EstimateAddSaver> {
+  public async estimateAddSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
     return await this.thorchainQuery.estimateAddSaver(addAssetAmount)
   }
   /**
@@ -458,7 +478,7 @@ export class ThorchainAMM {
    * @param addAssetAmount - The amount to add to the saver.
    * @returns - The submitted transaction.
    */
-  public async addSaver(addAssetAmount: CryptoAmount): Promise<TxSubmitted> {
+  public async addSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<TxSubmitted> {
     const addEstimate = await this.thorchainQuery.estimateAddSaver(addAssetAmount)
     if (!addEstimate.canAddSaver) throw Error(`Cannot add to savers`)
 
@@ -546,5 +566,158 @@ export class ThorchainAMM {
    */
   public async getThornamesByAddress(address: string) {
     return this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameReverseLookup(address)
+  }
+
+  /**
+   * Estimate the cost of a THORName registration
+   * @param {RegisterTHORName} params Params to make the registration
+   * @returns {QuoteTHORName} Memo to make the registration and the estimation of the operation
+   */
+  public async estimateTHORNameRegistration(params: RegisterTHORName): Promise<QuoteTHORName> {
+    const errors: string[] = []
+
+    if (
+      !validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        params.chain,
+        params.chainAddress,
+      )
+    ) {
+      errors.push(`Invalid address ${params.chainAddress} for ${params.chain} chain`)
+    }
+
+    if (
+      !validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        THORChain,
+        params.owner,
+      )
+    ) {
+      errors.push(`Invalid owner ${params.owner} due it is not a THORChain address`)
+    }
+
+    if (errors.length) {
+      return {
+        memo: '',
+        errors,
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        allowed: false,
+      }
+    }
+
+    try {
+      const estimated = await this.thorchainQuery.estimateThorname({ ...params })
+
+      return {
+        ...estimated,
+        allowed: true,
+        errors: [],
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return {
+        memo: '',
+        errors: ['message' in e ? e.message : `Unknown error: ${e}`],
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        allowed: false,
+      }
+    }
+  }
+
+  /**
+   * Estimate the cost of an update of a THORName
+   * @param {QuoteTHORNameParams} params Params to make the update
+   * @returns {QuoteTHORName} Memo to make the update and the estimation of the operation
+   */
+  public async estimateTHORNameUpdate(params: UpdateTHORName): Promise<QuoteTHORName> {
+    const errors: string[] = []
+
+    if ((params.chain && !params.chainAddress) || (!params.chain && params.chainAddress)) {
+      errors.push(`Alias not provided correctly`)
+    }
+
+    if (
+      params.chain &&
+      params.chainAddress &&
+      !validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        params.chain,
+        params.chainAddress,
+      )
+    ) {
+      errors.push(`Invalid alias ${params.chainAddress} for ${params.chain} chain`)
+    }
+
+    if (
+      params.owner &&
+      !validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        THORChain,
+        params.owner,
+      )
+    ) {
+      errors.push(`Invalid owner ${params.owner} due it is not a THORChain address`)
+    }
+
+    if (errors.length) {
+      return {
+        memo: '',
+        errors,
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        allowed: false,
+      }
+    }
+
+    try {
+      const estimated = await this.thorchainQuery.estimateThorname({ ...params, isUpdate: true })
+
+      return {
+        ...estimated,
+        allowed: true,
+        errors: [],
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      return {
+        memo: '',
+        errors: ['message' in e ? e.message : `Unknown error: ${e}`],
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        allowed: false,
+      }
+    }
+  }
+
+  /**
+   * Register a THORName
+   * @param {RegisterTHORName} params Params to make the registration
+   * @returns {TxSubmitted} Transaction made to register the THORName
+   */
+  public async registerTHORName(params: RegisterTHORName): Promise<TxSubmitted> {
+    const quote = await this.estimateTHORNameRegistration(params)
+
+    if (!quote.allowed) throw Error(`Can not register THORName. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
+    })
+  }
+
+  /**
+   * Update a THORName
+   * @param {UpdateTHORName} params Params to make the update
+   * @returns {TxSubmitted} Transaction made to update the THORName
+   */
+  public async updateTHORName(params: UpdateTHORName): Promise<TxSubmitted> {
+    const quote = await this.estimateTHORNameUpdate(params)
+
+    if (!quote.allowed) throw Error(`Can not update THORName. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
+    })
   }
 }

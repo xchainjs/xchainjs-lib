@@ -1,0 +1,13 @@
+{
+  "name": "odin",
+  "expire_block_height": 36044058,
+  "owner": "thor1hhjupkzy3t6ccelhz7qw8epyx4rm8a06nlm5ce",
+  "preferred_asset": ".",
+  "affiliate_collector_rune": "0",
+  "aliases": [
+    {
+      "chain": "THOR",
+      "address": "thor1hhjupkzy3t6ccelhz7qw8epyx4rm8a06nlm5ce"
+    }
+  ]
+}

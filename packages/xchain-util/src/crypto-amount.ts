@@ -18,23 +18,27 @@ import {
  * Utility Class to combine an amount (asset/base) with the Asset
  *
  */
-class BaseCryptoAmount<T extends Asset | TokenAsset | SynthAsset> {
+class BaseCryptoAmount<T extends AnyAsset> {
   baseAmount: BaseAmount
   readonly asset: T
+
   constructor(amount: BaseAmount, asset: T) {
     this.asset = asset
     this.baseAmount = amount
   }
+
   plus(v: BaseCryptoAmount<T>): BaseCryptoAmount<T> {
     this.check(v)
     const assetAmountResult = assetToBase(this.assetAmount.plus(v.assetAmount))
     return new BaseCryptoAmount(assetAmountResult, this.asset)
   }
+
   minus(v: BaseCryptoAmount<T>): BaseCryptoAmount<T> {
     this.check(v)
     const assetAmountResult = assetToBase(this.assetAmount.minus(v.assetAmount))
     return new BaseCryptoAmount(assetAmountResult, this.asset)
   }
+
   times(v: BaseCryptoAmount<T> | number | BigNumber): BaseCryptoAmount<T> {
     this.check(v)
     if (v instanceof BaseCryptoAmount) {
@@ -45,6 +49,7 @@ class BaseCryptoAmount<T extends Asset | TokenAsset | SynthAsset> {
       return new BaseCryptoAmount(assetAmountResult, this.asset)
     }
   }
+
   div(v: BaseCryptoAmount<T> | number | BigNumber): BaseCryptoAmount<T> {
     this.check(v)
     if (v instanceof BaseCryptoAmount) {
@@ -55,27 +60,33 @@ class BaseCryptoAmount<T extends Asset | TokenAsset | SynthAsset> {
       return new BaseCryptoAmount(assetAmountResult, this.asset)
     }
   }
+
   lt(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.lt(v.assetAmount)
   }
+
   lte(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.lte(v.assetAmount)
   }
+
   gt(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.gt(v.assetAmount)
   }
+
   gte(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
 
     return this.assetAmount.gte(v.assetAmount)
   }
+
   eq(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.eq(v.assetAmount)
   }
+
   formatedAssetString(): string {
     return formatAssetAmountCurrency({
       amount: this.assetAmount,
@@ -83,9 +94,11 @@ class BaseCryptoAmount<T extends Asset | TokenAsset | SynthAsset> {
       trimZeros: true,
     })
   }
+
   assetAmountFixedString(): string {
     return this.assetAmount.amount().toFixed()
   }
+
   get assetAmount(): AssetAmount {
     return baseToAsset(this.baseAmount)
   }
@@ -109,7 +122,7 @@ class BaseCryptoAmount<T extends Asset | TokenAsset | SynthAsset> {
   }
 }
 
-export class CryptoAmount extends BaseCryptoAmount<AnyAsset> {}
+export class CryptoAmount<T extends AnyAsset = AnyAsset> extends BaseCryptoAmount<T> {}
 export class AssetCryptoAmount extends BaseCryptoAmount<Asset> {}
-export class TokenAssetCryptoAmount extends BaseCryptoAmount<TokenAsset> {}
-export class SynthAssetCryptoAmount extends BaseCryptoAmount<SynthAsset> {}
+export class TokenCryptoAmount extends BaseCryptoAmount<TokenAsset> {}
+export class SynthCryptoAmount extends BaseCryptoAmount<SynthAsset> {}

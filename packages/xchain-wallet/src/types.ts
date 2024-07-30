@@ -1,15 +1,21 @@
 import { Balance, TxParams as BaseTxParams } from '@xchainjs/xchain-client'
 import { TxParams as BaseEvmTxParams } from '@xchainjs/xchain-evm'
-import { Asset, BaseAmount, Chain } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, Chain, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
+import { TxParams as BaseUtxoTxParams } from '@xchainjs/xchain-utxo'
 
 /**
  * UTXO transfer params
  */
-export type UtxoTxParams = BaseTxParams & { asset: Asset; feeRate?: BaseAmount }
+export type UtxoTxParams = BaseUtxoTxParams & { asset: Asset; feeRate?: BaseAmount }
 /**
  * EVM transfer params
  */
-export type EvmTxParams = BaseEvmTxParams & { asset: Asset }
+export type EvmTxParams = BaseEvmTxParams & { asset: Asset | TokenAsset }
+
+/**
+ * Cosmos transfer params
+ */
+export type CosmosTxParams = BaseTxParams & { asset: Asset | TokenAsset | SynthAsset }
 
 /**
  * Fulfilled balance from a Chain

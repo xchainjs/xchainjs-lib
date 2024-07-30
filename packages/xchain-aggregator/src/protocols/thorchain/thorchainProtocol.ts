@@ -1,7 +1,7 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { Asset, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { AnyAsset, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
 
 import {
   IProtocol,
@@ -30,7 +30,7 @@ export class ThorchainProtocol implements IProtocol {
    * @param {Asset} asset Asset to check if it is supported
    * @returns {boolean} True if the asset is supported, otherwise false
    */
-  public async isAssetSupported(asset: Asset): Promise<boolean> {
+  public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (eqAsset(asset, AssetRuneNative)) return true
     const pools = await this.thorchainQuery.thorchainCache.getPools()
     return (
@@ -81,7 +81,11 @@ export class ThorchainProtocol implements IProtocol {
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
-    return this.thorchainAmm.doSwap(params)
+    return this.thorchainAmm.doSwap({
+      ...params,
+      affiliateBps: this.configuration?.affiliateBps,
+      affiliateAddress: this.configuration?.affiliateAddress,
+    })
   }
 
   /**x

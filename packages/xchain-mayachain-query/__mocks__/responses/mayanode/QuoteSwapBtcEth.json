@@ -3,12 +3,13 @@
   "fees": {
     "affiliate": "0",
     "asset": "ETH.ETH",
-    "outbound": "360000"
+    "outbound": "360000",
+    "slippage_bps": 189
   },
   "inbound_address": "bc1q0cyg49kz2u982x0m57f8ces0296s04wedddrcs",
   "inbound_confirmation_blocks": 1,
   "inbound_confirmation_seconds": 600,
   "outbound_delay_blocks": 248,
   "outbound_delay_seconds": 3720,
-  "slippage_bps": 189
+  "total_swap_seconds": 4320
 }

@@ -2,6 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import {
   Configuration,
   InboundAddress,
+  LastBlock,
   MimirApi,
   MimirResponse,
   NetworkApi,
@@ -55,6 +56,8 @@ export class Mayanode {
    * @param toAsset - output asset
    * @param amount - amount to swap
    * @param destinationAddress - destination address for the swap
+   * @param streamingInterval - the interval in which streaming swaps are swapped
+   * @param streamingQuantity - the quantity of swaps within a streaming swap
    * @param toleranceBps - slip percent
    * @param affiliateBps - affiliate percent
    * @param affiliate - affiliate address
@@ -66,6 +69,8 @@ export class Mayanode {
     toAsset: string,
     amount: number,
     destinationAddress?: string,
+    streamingInterval?: number,
+    streamingQuantity?: number,
     toleranceBps?: number,
     affiliateBps?: number,
     affiliate?: string,
@@ -80,6 +85,8 @@ export class Mayanode {
             toAsset,
             amount,
             destinationAddress,
+            streamingInterval,
+            streamingQuantity,
             toleranceBps,
             affiliateBps,
             affiliate,
@@ -115,5 +122,19 @@ export class Mayanode {
       } catch (e) {}
     }
     throw new Error(`MAYANode not responding`)
+  }
+
+  /**
+   * Return the last block of every chain at a certain MAYAChain height
+   * @param height - optional MAYAChain height, default, latest block
+   * @returns - last block data or block data pertaining to that height number
+   */
+  public async getLatestBlock(height?: number): Promise<LastBlock[]> {
+    for (const api of this.networkApis) {
+      try {
+        return (await api.lastblock(height)).data
+      } catch (e) {}
+    }
+    throw Error(`MAYANode not responding`)
   }
 }

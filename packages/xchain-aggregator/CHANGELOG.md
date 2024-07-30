@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.2.5
+
+### Patch Changes
+
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayachain-query@0.1.20
+  - @xchainjs/xchain-thorchain-query@0.7.17
+  - @xchainjs/xchain-mayachain-amm@2.0.13
+  - @xchainjs/xchain-thorchain-amm@1.1.18
+
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [7df3870]
+- Updated dependencies [52498ec]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [52498ec]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+- Updated dependencies [7df3870]
+  - @xchainjs/xchain-thorchain-amm@1.1.17
+  - @xchainjs/xchain-mayachain-query@0.1.19
+  - @xchainjs/xchain-mayachain-amm@2.0.12
+  - @xchainjs/xchain-thorchain-query@0.7.16
+
+## 0.2.3
+
+### Patch Changes
+
+- d9de5e2: Affiliate bug fix in `doSwap` function
+
 ## 0.2.2
 
 ### Patch Changes

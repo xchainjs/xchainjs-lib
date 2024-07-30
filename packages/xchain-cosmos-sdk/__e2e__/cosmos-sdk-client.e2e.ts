@@ -1,20 +1,43 @@
 import { StdFee } from '@cosmjs/stargate'
-import { AssetInfo, Network, PreparedTx, TxParams } from '@xchainjs/xchain-client'
-import { Asset, assetFromString, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import { AssetInfo, Network, PreparedTx } from '@xchainjs/xchain-client'
+import {
+  Asset,
+  AssetType,
+  TokenAsset,
+  assetFromString,
+  assetToString,
+  baseAmount,
+  eqAsset,
+} from '@xchainjs/xchain-util'
 
-import Client from '../src/client'
+import { Client, CompatibleAsset, TxParams } from '../src'
 
 const AssetKUJI = assetFromString('KUJI.KUJI') as Asset
-const AssetTokenKuji = {
+const AssetTokenKuji: TokenAsset = {
   chain: 'KUJI',
   symbol: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo',
   ticker: '',
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
 let xchainClient: Client
 
 class CustomSdkClient extends Client {
+  public getAssetDecimals(): number {
+    throw new Error('Method not implemented.')
+  }
+  protected getPrefix(): string {
+    throw new Error('Method not implemented.')
+  }
+  getAddress(): string {
+    throw new Error('Method not implemented.')
+  }
+  getAddressAsync(): Promise<string> {
+    throw new Error('Method not implemented.')
+  }
+  transfer(): Promise<string> {
+    throw new Error('Method not implemented.')
+  }
   public prepareTx(): Promise<PreparedTx> {
     throw new Error('Method not implemented.')
   }
@@ -27,17 +50,17 @@ class CustomSdkClient extends Client {
   getAssetInfo(): AssetInfo {
     throw new Error('Method not implemented.')
   }
-  getDenom(asset: Asset): string | null {
+  getDenom(asset: CompatibleAsset): string | null {
     if (eqAsset(asset, AssetKUJI)) return 'ukuji'
     return null
   }
-  assetFromDenom(denom: string): Asset | null {
+  assetFromDenom(denom: string): CompatibleAsset | null {
     if (denom === this.baseDenom) return AssetKUJI
     return {
       chain: AssetKUJI.chain,
       symbol: denom,
       ticker: '',
-      synth: false,
+      type: AssetType.TOKEN,
     }
   }
   getExplorerUrl(): string {
@@ -67,9 +90,9 @@ describe('Cosmos SDK client Integration Tests', () => {
         [Network.Stagenet]: `44'/118'/0'/0/`,
       },
       clientUrls: {
-        [Network.Testnet]: 'https://test-rpc-kujira.mintthemoon.xyz/',
-        [Network.Stagenet]: 'wip',
-        [Network.Mainnet]: 'wip',
+        [Network.Testnet]: ['https://test-rpc-kujira.mintthemoon.xyz/'],
+        [Network.Stagenet]: ['wip'],
+        [Network.Mainnet]: ['wip'],
       },
       registryTypes: [],
     }

@@ -19,7 +19,7 @@ import {
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, BaseAmount, assetFromString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, assetFromString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
 import { encode, toWords } from 'bech32'
 import BigNumber from 'bignumber.js'
 import { fromSeed } from 'bip32'
@@ -169,10 +169,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   /**
    * Get the number of decimals for a given asset.
    *
-   * @param {Asset} asset The asset for which to retrieve the decimals.
+   * @param {CompatibleAsset} asset The asset for which to retrieve the decimals.
    * @returns {number} The number of decimals.
    */
-  public getAssetDecimals(asset: Asset): number {
+  public getAssetDecimals(asset: CompatibleAsset): number {
     if (eqAsset(asset, AssetCacao)) return CACAO_DECIMAL
     if (eqAsset(asset, AssetMaya)) return MAYA_DECIMAL
     if (isSynthAsset(asset)) return SYNTH_DECIMAL

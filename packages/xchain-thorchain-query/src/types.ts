@@ -1,23 +1,34 @@
 import { FeeOption, TxHash } from '@xchainjs/xchain-client'
 import { LiquidityProviderSummary } from '@xchainjs/xchain-thornode'
-import { Address, Asset, BaseAmount, Chain, CryptoAmount } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  AssetCryptoAmount,
+  BaseAmount,
+  Chain,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+} from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
+
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset
 
 /**
  * Represents the total fees associated with a swap.
  */
 export type TotalFees = {
-  asset: Asset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount // The affiliate fee
-  outboundFee: CryptoAmount // The outbound fee
+  asset: Asset | TokenAsset | SynthAsset // The asset for which fees are calculated
+  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The affiliate fee
+  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The outbound fee
 }
 /**
  * Represents an estimate for a swap transaction.
  */
 export type SwapEstimate = {
-  netOutput: CryptoAmount // The net output amount after fees
+  netOutput: CryptoAmount<Asset | TokenAsset | SynthAsset> // The net output amount after fees
   totalFees: TotalFees // The total fees associated with the swap
-  netOutputStreaming: CryptoAmount // The net output amount for streaming
+  netOutputStreaming: CryptoAmount<Asset | TokenAsset | SynthAsset> // The net output amount for streaming
   maxStreamingQuantity: number // The maximum streaming quantity
   inboundConfirmationSeconds?: number // The inbound confirmation time in seconds
   outboundDelaySeconds: number // The outbound delay time in seconds
@@ -37,9 +48,9 @@ export type SwapEstimate = {
  */
 export type QuoteSwapParams = {
   fromAddress?: Address // The address to swap from
-  fromAsset: Asset // The asset to swap from
-  destinationAsset: Asset // The asset to swap to
-  amount: CryptoAmount // The amount to swap
+  fromAsset: Asset | TokenAsset | SynthAsset // The asset to swap from
+  destinationAsset: Asset | TokenAsset | SynthAsset // The asset to swap to
+  amount: CryptoAmount<Asset | TokenAsset | SynthAsset> // The amount to swap
   destinationAddress?: string // The destination address (optional)
   streamingInterval?: number // The streaming interval (optional)
   streamingQuantity?: number // The streaming quantity (optional)
@@ -54,8 +65,8 @@ export type QuoteSwapParams = {
  * Represents the output of a swap transaction.
  */
 export type SwapOutput = {
-  output: CryptoAmount // The output amount
-  swapFee: CryptoAmount // The swap fee
+  output: CryptoAmount<Asset | TokenAsset | SynthAsset> // The output amount
+  swapFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The swap fee
   slip: BigNumber // The slip
 }
 /**
@@ -70,7 +81,7 @@ export type UnitData = {
  * Represents liquidity data.
  */
 export type LiquidityData = {
-  rune: CryptoAmount // The amount of RUNE
+  rune: Asset // The amount of RUNE
   asset: CryptoAmount // The amount of the asset
 }
 /**
@@ -159,8 +170,8 @@ export type TransactionStatus = {
  * Represents liquidity to add to a pool.
  */
 export type LiquidityToAdd = {
-  asset: CryptoAmount // The amount of asset to add
-  rune: CryptoAmount // The amount of RUNE to add
+  asset: CryptoAmount<Asset | TokenAsset> // The amount of asset to add
+  rune: AssetCryptoAmount // The amount of RUNE to add
 }
 
 /**
@@ -175,8 +186,8 @@ export type PostionDepositValue = {
  * Represents the share detail of a pool.
  */
 export type PoolShareDetail = {
-  assetShare: CryptoAmount // The share of asset in the pool
-  runeShare: CryptoAmount // The share of RUNE in the pool
+  assetShare: CryptoAmount<Asset | TokenAsset> // The share of asset in the pool
+  runeShare: AssetCryptoAmount // The share of RUNE in the pool
 }
 
 /**
@@ -211,8 +222,8 @@ export type EstimateWithdrawLP = {
     fees: LPAmounts // The fees associated with inbound liquidity
   }
   outboundFee: LPAmounts // The outbound fees
-  assetAmount: CryptoAmount // The amount of asset
-  runeAmount: CryptoAmount // The amount of RUNE
+  assetAmount: CryptoAmount<Asset | TokenAsset> // The amount of asset
+  runeAmount: AssetCryptoAmount // The amount of RUNE
   lpGrowth: string // The LP growth
   impermanentLossProtection: ILProtectionData // The impermanent loss protection data
   estimatedWaitSeconds: number // The estimated wait time in seconds
@@ -223,32 +234,32 @@ export type EstimateWithdrawLP = {
  * Represents liquidity pool amounts.
  */
 export type LPAmounts = {
-  rune: CryptoAmount // The amount of RUNE
-  asset: CryptoAmount // The amount of asset
-  total: CryptoAmount // The total amount
+  rune: AssetCryptoAmount // The amount of RUNE
+  asset: CryptoAmount<Asset | TokenAsset> // The amount of asset
+  total: AssetCryptoAmount // The total amount
 }
 
 /**
  * Represents dust values for assets and RUNE.
  */
 export type DustValues = {
-  asset: CryptoAmount // The dust value for assets
-  rune: CryptoAmount // The dust value for RUNE
+  asset: AssetCryptoAmount // The dust value for assets
+  rune: AssetCryptoAmount // The dust value for RUNE
 }
 
 /**
  * Represents liquidity to be added to a position.
  */
 export type AddliquidityPosition = {
-  asset: CryptoAmount // The amount of asset to add to the position
-  rune: CryptoAmount // The amount of RUNE to add to the position
+  asset: CryptoAmount<Asset | TokenAsset> // The amount of asset to add to the position
+  rune: AssetCryptoAmount // The amount of RUNE to add to the position
 }
 
 /**
  * Represents a position for withdrawing liquidity.
  */
 export type WithdrawLiquidityPosition = {
-  asset: Asset // The asset of the position
+  asset: Asset | TokenAsset // The asset of the position
   percentage: number // The percentage of liquidity to withdraw
   assetAddress?: string // The asset address (optional)
   runeAddress?: string // The RUNE address (optional)
@@ -276,7 +287,7 @@ export type PoolRatios = {
  * Represents parameters for getting a saver.
  */
 export type getSaver = {
-  asset: Asset // The asset of the saver
+  asset: Asset | TokenAsset // The asset of the saver
   address: Address // The address of the saver
   height?: number // The height (optional)
 }
@@ -285,8 +296,8 @@ export type getSaver = {
  * Represents an estimate for adding a saver.
  */
 export type EstimateAddSaver = {
-  assetAmount: CryptoAmount // The amount of asset to add
-  estimatedDepositValue: CryptoAmount // The estimated deposit value
+  assetAmount: CryptoAmount<Asset | TokenAsset> // The amount of asset to add
+  estimatedDepositValue: CryptoAmount<Asset | TokenAsset> // The estimated deposit value
   slipBasisPoints: number // The slip basis points
   fee: SaverFees // The saver fees
   expiry: Date // The expiry date
@@ -303,9 +314,9 @@ export type EstimateAddSaver = {
  * Represents an estimate for withdrawing a saver.
  */
 export type EstimateWithdrawSaver = {
-  dustAmount: CryptoAmount // The dust amount
-  dustThreshold: CryptoAmount // The dust threshold
-  expectedAssetAmount: CryptoAmount // The expected asset amount
+  dustAmount: AssetCryptoAmount // The dust amount
+  dustThreshold: AssetCryptoAmount // The dust threshold
+  expectedAssetAmount: CryptoAmount<Asset | TokenAsset> // The expected asset amount
   fee: SaverFees // The saver fees
   expiry: Date // The expiry date
   toAddress: Address // The recipient address
@@ -322,10 +333,10 @@ export type EstimateWithdrawSaver = {
  * Represents fees for a saver.
  */
 export type SaverFees = {
-  affiliate: CryptoAmount // The affiliate fee
-  asset: Asset // The asset
-  liquidity: CryptoAmount // The liquidity fee
-  outbound: CryptoAmount // The outbound fee
+  affiliate: CryptoAmount<Asset | TokenAsset> // The affiliate fee
+  asset: Asset | TokenAsset // The asset
+  liquidity: CryptoAmount<Asset | TokenAsset> // The liquidity fee
+  outbound: CryptoAmount<Asset | TokenAsset> // The outbound fee
   totalBps: number // The total basis points
 }
 
@@ -343,13 +354,13 @@ export type QuoteFees = {
  * Represents a saver's position.
  */
 export type SaversPosition = {
-  depositValue: CryptoAmount // The deposit value
-  redeemableValue: CryptoAmount // The redeemable value
+  depositValue: CryptoAmount<Asset | TokenAsset> // The deposit value
+  redeemableValue: CryptoAmount<Asset | TokenAsset> // The redeemable value
   lastAddHeight: number // The last add height
   percentageGrowth: number // The percentage growth
   ageInYears: number // The age in years
   ageInDays: number // The age in days
-  asset: Asset // The asset
+  asset: Asset | TokenAsset // The asset
   errors: string[] // Any errors encountered
 }
 
@@ -358,7 +369,7 @@ export type SaversPosition = {
  */
 export type SaversWithdraw = {
   height?: number // The height (optional)
-  asset: Asset // The asset
+  asset: Asset | TokenAsset // The asset
   address: Address // The address
   withdrawBps: number // The withdrawal basis points
 }
@@ -367,9 +378,9 @@ export type SaversWithdraw = {
  * Represents parameters for opening a loan.
  */
 export type LoanOpenParams = {
-  asset: Asset // The asset
-  amount: CryptoAmount // The amount
-  targetAsset: Asset // The target asset
+  asset: Asset | TokenAsset // The asset
+  amount: CryptoAmount<Asset | TokenAsset> // The amount
+  targetAsset: Asset | TokenAsset // The target asset
   destination: string // The destination
   height?: number // The height (optional)
   minOut?: string // The minimum output (optional)
@@ -380,9 +391,9 @@ export type LoanOpenParams = {
  * Represents parameters for closing a loan.
  */
 export type LoanCloseParams = {
-  asset: Asset // The asset
-  amount: CryptoAmount // The amount
-  loanAsset: Asset // The loan asset
+  asset: Asset | TokenAsset // The asset
+  amount: CryptoAmount<Asset | TokenAsset> // The amount
+  loanAsset: Asset | TokenAsset // The loan asset
   loanOwner: Address // The loan owner
   minOut?: string // The minimum output (optional)
   height?: number // The height (optional)
@@ -462,19 +473,6 @@ export type ThornameAlias = {
   address: Address // The address of the alias
 }
 
-/**
- * Represents parameters for quoting a THORName operation.
- */
-export type QuoteThornameParams = {
-  thorname: string // The THORName
-  chain: string // The chain
-  chainAddress: string // The chain address
-  owner?: string // The owner of the THORName
-  preferredAsset?: Asset | null // The preferred asset
-  expirity?: Date // The expiry date
-  isUpdate?: boolean // Indicates if the THORName is being updated
-}
-
 export type SwapHistoryParams = {
   addresses: Address[]
 }
@@ -504,4 +502,74 @@ export type Swap = {
 export type SwapsHistory = {
   swaps: Swap[]
   count: number
+}
+
+export type RegisterTHORName = {
+  /**
+   * THORName to register
+   */
+  name: string
+  /**
+   * THORName owner
+   */
+  owner: Address
+  /**
+   * THORName expiry time, by default, it will be one year more or less
+   */
+  expiry?: Date
+  /**
+   * Chain on which create the alias of the THORName
+   */
+  chain: Chain
+  /**
+   * Address of the chain provided to create the alias of the THORName
+   */
+  chainAddress: Address
+  /**
+   * Preferred asset to be paid
+   */
+  preferredAsset?: Asset
+}
+
+export type UpdateTHORName = {
+  /**
+   * THORName to update
+   */
+  name: string
+  /**
+   * THORName owner, if not provided, memo response will have the current owner
+   */
+  owner?: Address
+  /**
+   * THORName expiry
+   */
+  expiry?: Date
+  /**
+   * Chain on which update the alias of the THORName, if not provided, memo response will have one of the already registered chains of the THORName
+   */
+  chain?: Chain
+  /**
+   * Address of the chain provided to update the alias of the THORName, if not provided, memo response will have the address of the chain returned
+   */
+  chainAddress?: Address
+  /**
+   * Preferred asset to be paid, if not provided, memo response will have the current preferred asset
+   */
+  preferredAsset?: Asset
+}
+
+export type QuoteTHORNameParams = (RegisterTHORName & { isUpdate?: false }) | (UpdateTHORName & { isUpdate: true })
+
+/**
+ * Estimation quote to register or update a THORName
+ */
+export type QuoteTHORName = {
+  /**
+   * Memo for the deposit transaction
+   */
+  memo: string
+  /**
+   * Estimation of the update or the registration of the THORName
+   */
+  value: AssetCryptoAmount
 }

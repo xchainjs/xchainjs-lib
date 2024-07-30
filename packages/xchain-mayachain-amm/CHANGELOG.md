@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayachain-query@0.1.20
+
+## 2.0.12
+
+### Patch Changes
+
+- 7df3870: New method `estimateMAYANameUpdate` to estimate the cost of the update of a MAYAName.
+- 7df3870: New method `estimateMAYANameRegistration` to estimate the cost of the registration of a MAYAName.
+- 7df3870: New method `registerMAYAName` to register a MAYAName.
+- 7df3870: New method `updateMAYAName` to update a MAYAName.
+- Updated dependencies [52498ec]
+- Updated dependencies [52498ec]
+  - @xchainjs/xchain-mayachain-query@0.1.19
+
 ## 2.0.11
 
 ### Patch Changes
