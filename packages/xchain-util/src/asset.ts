@@ -12,6 +12,7 @@ import {
   Denomination,
   SynthAsset,
   TokenAsset,
+  TradeAsset,
 } from './types'
 
 export type Address = string
@@ -224,6 +225,14 @@ export const isValidAsset = (asset: AnyAsset): boolean => !!asset.chain && !!ass
  * @returns {boolean} `true` or `false`
  */
 export const isSynthAsset = (asset: AnyAsset): asset is SynthAsset => asset.type === AssetType.SYNTH
+
+/**
+ * Helper to check whether an asset is trade asset
+ *
+ * @param {AnyAsset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isTradeAsset = (asset: AnyAsset): asset is TradeAsset => asset.type === AssetType.TRADE
 
 /**
  * Creates an `Asset` by a given string
