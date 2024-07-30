@@ -681,7 +681,7 @@ export class ThorchainAMM {
       return {
         memo: '',
         errors: ['message' in e ? e.message : `Unknown error: ${e}`],
-        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        value: new CryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
         allowed: false,
       }
     }

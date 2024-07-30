@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.21
+
+### Patch Changes
+
+- f54dcd2: `QuoteSwap` type updated. `Fees` type with `liquidityFee` and `totalFee` parameters.
+- f54dcd2: Streaming swap parameters for `quoteSwap` method.
+
 ## 0.1.20
 
 ### Patch Changes
