@@ -3,7 +3,7 @@
  */
 import { Network } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
-import { Asset, BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, AssetType, BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import types from './types/proto/MsgCompiled'
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
@@ -51,7 +51,12 @@ export const THORChain = 'THOR' as const
 /**
  * Native asset representation for RUNE in Thorchain
  */
-export const AssetRuneNative: Asset = { chain: THORChain, symbol: RUNE_TICKER, ticker: RUNE_TICKER, synth: false }
+export const AssetRuneNative: Asset = {
+  chain: THORChain,
+  symbol: RUNE_TICKER,
+  ticker: RUNE_TICKER,
+  type: AssetType.NATIVE,
+}
 
 /**
  * Message type URL used to make send transactions

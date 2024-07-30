@@ -5,8 +5,17 @@ import { Client as DashClient, DASHChain, defaultDashParams } from '@xchainjs/xc
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI, Client as KujiraClient, KUJIChain, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
+import { CompatibleAsset } from '@xchainjs/xchain-mayachain-query'
 import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
-import { Address, Asset, Chain, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Chain,
+  CryptoAmount,
+  TokenAsset,
+  TokenCryptoAmount,
+  eqAsset,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 
 /**
  * Check if a chain is EVM and supported by the protocol
@@ -22,9 +31,21 @@ export const isProtocolEVMChain = (chain: Chain): boolean => {
  * @param {Asset} asset to check
  * @returns true if asset is ERC20, otherwise, false
  */
-export const isProtocolERC20Asset = (asset: Asset): boolean => {
+export const isProtocolERC20Asset = (asset: CompatibleAsset): asset is TokenAsset => {
   return isProtocolEVMChain(asset.chain)
-    ? [AssetETH, AssetAETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 && !asset.synth
+    ? [AssetETH, AssetAETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 && !isSynthAsset(asset)
+    : false
+}
+
+/**
+ * Check if asset is ERC20
+ * @param {Asset} asset to check
+ * @returns true if asset is ERC20, otherwise, false
+ */
+export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCryptoAmount => {
+  return isProtocolEVMChain(amount.asset.chain)
+    ? [AssetETH, AssetAETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, amount.asset)) === -1 &&
+        !isSynthAsset(amount.asset)
     : false
 }
 

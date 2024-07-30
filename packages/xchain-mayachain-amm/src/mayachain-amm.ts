@@ -18,12 +18,19 @@ import {
   UpdateMAYAName,
 } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { Address, CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Address,
+  AssetCryptoAmount,
+  CryptoAmount,
+  assetToString,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { MayachainAction } from './mayachain-action'
 import { ApproveParams, IsApprovedParams, QuoteMAYAName, TxSubmitted } from './types'
-import { isProtocolERC20Asset, validateAddress } from './utils'
+import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
  * Mayachain Automated Market Maker (AMM) class.
@@ -73,6 +80,8 @@ export class MayachainAMM {
     affiliateAddress,
     affiliateBps,
     toleranceBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<QuoteSwap> {
     const errors = await this.validateSwap({
       fromAsset,
@@ -82,6 +91,8 @@ export class MayachainAMM {
       destinationAddress,
       affiliateAddress,
       affiliateBps,
+      streamingInterval,
+      streamingQuantity,
     })
 
     if (errors.length > 0) {
@@ -94,6 +105,8 @@ export class MayachainAMM {
           asset: destinationAsset,
           affiliateFee: new CryptoAmount(baseAmount(0), destinationAsset),
           outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          liquidityFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          totalFee: new CryptoAmount(baseAmount(0), destinationAsset),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
@@ -103,6 +116,7 @@ export class MayachainAMM {
         errors,
         slipBasisPoints: 0,
         totalSwapSeconds: 0,
+        expiry: 0,
         warning: '',
       }
     }
@@ -116,6 +130,8 @@ export class MayachainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      streamingInterval,
+      streamingQuantity,
     })
   }
 
@@ -133,6 +149,8 @@ export class MayachainAMM {
     amount,
     affiliateAddress,
     affiliateBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
@@ -141,7 +159,7 @@ export class MayachainAMM {
       destinationAddress &&
       !validateAddress(
         this.mayachainQuery.getNetwork(),
-        destinationAsset.synth ? MAYAChain : destinationAsset.chain,
+        isSynthAsset(destinationAsset) ? MAYAChain : destinationAsset.chain,
         destinationAddress,
       )
     ) {
@@ -160,12 +178,24 @@ export class MayachainAMM {
     }
     // Validate approval if asset is an ERC20 token and fromAddress is provided
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {
-      const approveErrors = await this.isRouterApprovedToSpend({
-        asset: fromAsset,
-        address: fromAddress,
-        amount,
-      })
-      errors.push(...approveErrors)
+      if (!isTokenCryptoAmount(amount)) {
+        errors.push(`${assetToString(amount.asset)} is not Token asset amount`)
+      } else {
+        const approveErrors = await this.isRouterApprovedToSpend({
+          asset: fromAsset,
+          address: fromAddress,
+          amount,
+        })
+        errors.push(...approveErrors)
+      }
+    }
+
+    if (streamingQuantity && streamingQuantity < 0) {
+      errors.push('streaming quantity can not be lower than 0')
+    }
+
+    if (streamingInterval && streamingInterval < 0) {
+      errors.push('streaming interval can not be lower than 0')
     }
 
     return errors
@@ -285,7 +315,7 @@ export class MayachainAMM {
       return {
         memo: '',
         errors,
-        value: new CryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
         allowed: false,
       }
     }
@@ -303,7 +333,7 @@ export class MayachainAMM {
       return {
         memo: '',
         errors: ['message' in e ? e.message : `Unknown error: ${e}`],
-        value: new CryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
         allowed: false,
       }
     }
@@ -337,7 +367,7 @@ export class MayachainAMM {
       return {
         memo: '',
         errors,
-        value: new CryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
         allowed: false,
       }
     }
@@ -355,7 +385,7 @@ export class MayachainAMM {
       return {
         memo: '',
         errors: ['message' in e ? e.message : `Unknown error: ${e}`],
-        value: new CryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
+        value: new AssetCryptoAmount(baseAmount(0, CACAO_DECIMAL), AssetCacao),
         allowed: false,
       }
     }

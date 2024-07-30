@@ -1,14 +1,16 @@
 import {
   // Address,
   Asset,
+  AssetCryptoAmount,
   Chain,
   CryptoAmount,
   baseAmount,
   eqAsset,
+  isSynthAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-import { InboundDetail } from '../types'
+import { CompatibleAsset, InboundDetail } from '../types'
 // eslint-disable-next-line ordered-imports/ordered-imports
 import {
   AVAXChain,
@@ -43,10 +45,13 @@ export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDeci
   return baseAmount(baseAmountOut, outDecimals).amount()
 }
 
-export const getCryptoAmountWithNotation = (amount: CryptoAmount, notation: number): CryptoAmount => {
+export const getCryptoAmountWithNotation = <T extends CompatibleAsset>(
+  amount: CryptoAmount<T>,
+  notation: number,
+): CryptoAmount<T> => {
   const inputAmountBaseNotation = amount.baseAmount.amount()
   const decimalsDiff = notation - amount.baseAmount.decimal
-  return new CryptoAmount(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
+  return new CryptoAmount<T>(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
 }
 
 /**
@@ -88,7 +93,7 @@ export const getChainAsset = (chain: Chain): Asset => {
  * @param asset
  * @returns a boolean based on Assets being compared are equal
  */
-export const isNativeChainAsset = (asset: Asset): boolean => {
+export const isNativeChainAsset = (asset: CompatibleAsset): asset is Asset => {
   return eqAsset(asset, getChainAsset(asset.chain))
 }
 
@@ -101,60 +106,48 @@ export const isNativeChainAsset = (asset: Asset): boolean => {
  * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
  * @returns
  */
-export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
+export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): AssetCryptoAmount => {
   // synths are always 0.02R fee
-  if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+  if (isSynthAsset(asset)) return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
   // if you are swapping a non-gas asset  on a multiAsset chain (ex. ERC-20 on ETH), the
   // gas fees will be paid in a diff asset than the one you are swapping
 
   switch (asset.chain) {
     case BTCChain:
-      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBTC)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBTC)
     case BCHChain:
-      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBCH)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBCH)
     case LTCChain:
-      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetLTC)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetLTC)
     case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
-      return new CryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)
     case BNBChain:
-      //flat fee
-      return new CryptoAmount(baseAmount(inbound.gasRate), AssetBNB)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBNB)
     case ETHChain:
       const gasRateinETHGwei = inbound.gasRate
       const gasRateinETHWei = baseAmount(gasRateinETHGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetETH)) {
-        return new CryptoAmount(gasRateinETHWei.times(21000), AssetETH)
+        return new AssetCryptoAmount(gasRateinETHWei.times(21000), AssetETH)
       } else {
-        return new CryptoAmount(gasRateinETHWei.times(70000), AssetETH)
+        return new AssetCryptoAmount(gasRateinETHWei.times(70000), AssetETH)
       }
-      break
     case AVAXChain:
       const gasRateinAVAXGwei = inbound.gasRate
       const gasRateinAVAXWei = baseAmount(gasRateinAVAXGwei.multipliedBy(10 ** 9), 18)
       if (eqAsset(asset, AssetAVAX)) {
-        return new CryptoAmount(gasRateinAVAXWei.times(21000), AssetAVAX)
+        return new AssetCryptoAmount(gasRateinAVAXWei.times(21000), AssetAVAX)
       } else {
-        return new CryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
+        return new AssetCryptoAmount(gasRateinAVAXWei.times(70000), AssetAVAX)
       }
-      break
     case GAIAChain:
-      return new CryptoAmount(baseAmount(inbound.gasRate), AssetATOM)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetATOM)
     case THORChain:
-      return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
-      break
+      return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
     case BSCChain:
-      return new CryptoAmount(baseAmount(inbound.gasRate), AssetBSC)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBSC)
     case MAYAChain:
-      return new CryptoAmount(baseAmount(inbound.gasRate), AssetMAYA)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetMAYA)
   }
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
@@ -168,44 +161,33 @@ export const calcNetworkFee = (asset: Asset, inbound: InboundDetail): CryptoAmou
  * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
  * @returns
  */
-export const calcOutboundFee = (asset: Asset, inbound: InboundDetail): CryptoAmount => {
-  if (asset.synth) return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
+export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail): AssetCryptoAmount => {
+  if (isSynthAsset(asset)) return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
     case BTCChain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBTC)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBTC)
     case BCHChain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
     case LTCChain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetLTC)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetLTC)
     case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
     case BNBChain:
       //flat fee
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBNB)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBNB)
     case ETHChain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetETH)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetETH)
     case AVAXChain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetAVAX)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetAVAX)
     case GAIAChain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetATOM)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetATOM)
     case BSCChain:
-      return new CryptoAmount(baseAmount(inbound.outboundFee), AssetBSC)
-      break
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBSC)
     case THORChain:
-      return new CryptoAmount(baseAmount(2000000), AssetRuneNative)
-      break
+      return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
     case MAYAChain:
-      return new CryptoAmount(baseAmount(2000000), AssetMAYA)
-      break
+      return new AssetCryptoAmount(baseAmount(2000000), AssetMAYA)
   }
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
 }

@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { THORNameDetails } from '@xchainjs/xchain-midgard'
-import { assetFromStringEx } from '@xchainjs/xchain-util'
+import { AssetType, assetFromStringEx } from '@xchainjs/xchain-util'
 
 import { MidgardCache } from '../src/midgard-cache'
 import { MidgardQuery } from '../src/midgard-query'
@@ -53,7 +53,7 @@ describe('Midgard-query liquidity action end to end Tests', () => {
       address: addressAvax,
     }
     const saverInvalid: getSaver = {
-      asset: { chain: 'x', symbol: 'x', ticker: 'x', synth: false },
+      asset: { chain: 'x', symbol: 'x', ticker: 'x', type: AssetType.NATIVE },
       address: addressAvax,
     }
     const getSavers = await midgardQuery.getSaverPositions([saverAtom, saverBtc, saverAvax, saverInvalid])

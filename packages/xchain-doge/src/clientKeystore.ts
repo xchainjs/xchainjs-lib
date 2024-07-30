@@ -1,6 +1,7 @@
-import { FeeOption, FeeRate, TxHash, TxParams, checkFeeBounds } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
+import { TxParams } from '@xchainjs/xchain-utxo'
 import * as Dogecoin from 'bitcoinjs-lib' // Importing the base Doge client
 
 import { Client } from './client' // Importing utility functions

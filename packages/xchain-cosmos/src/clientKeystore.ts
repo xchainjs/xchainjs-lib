@@ -1,7 +1,6 @@
 import { fromBase64 } from '@cosmjs/encoding'
 import { DecodedTxRaw, DirectSecp256k1HdWallet, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
-import { TxParams } from '@xchainjs/xchain-client'
 import { MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { encode, toWords } from 'bech32'
@@ -11,6 +10,7 @@ import { publicKeyCreate } from 'secp256k1'
 
 import { Client, CosmosClientParams } from './client'
 import { defaultClientConfig } from './const'
+import { TxParams } from './types'
 
 export class ClientKeystore extends Client {
   constructor(params: CosmosClientParams = defaultClientConfig) {

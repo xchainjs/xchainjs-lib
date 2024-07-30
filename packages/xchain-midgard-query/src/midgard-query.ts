@@ -1,8 +1,16 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
-import { Asset, CryptoAmount, assetFromString, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  TokenAsset,
+  assetFromString,
+  assetToString,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 
 import { MidgardCache } from './midgard-cache'
-import { ActionHistory, GetActionsParams, SaversPosition, getSaver } from './types'
+import { ActionHistory, CompatibleAsset, GetActionsParams, SaversPosition, getSaver } from './types'
 import { isAssetRuneNative } from './utils/const'
 
 /**
@@ -62,7 +70,7 @@ export class MidgardQuery {
 
     const saversPositions: SaversPosition[] = []
     const allPositionsPromises = saversDetail.pools.map(async (saver) => {
-      const asset = assetFromString(saver.pool)
+      const asset = assetFromString(saver.pool) as Asset | TokenAsset
 
       if (asset) {
         const poolDetail = await this.getPool(saver.pool)
@@ -97,8 +105,8 @@ export class MidgardQuery {
    * @param {Asset} asset - The asset for getting decimals.
    * @returns {number} - Number of decimals from Midgard. Reference: https://gitlab.com/thorchain/midgard#refresh-native-decimals
    */
-  public async getDecimalForAsset(asset: Asset): Promise<number> {
-    if (isAssetRuneNative(asset) || asset.synth) return DEFAULT_THORCHAIN_DECIMALS
+  public async getDecimalForAsset(asset: CompatibleAsset): Promise<number> {
+    if (isAssetRuneNative(asset) || isSynthAsset(asset)) return DEFAULT_THORCHAIN_DECIMALS
 
     const pool = await this.getPool(assetToString(asset))
     return Number(pool.nativeDecimal)

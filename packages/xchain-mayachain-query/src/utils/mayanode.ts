@@ -56,6 +56,8 @@ export class Mayanode {
    * @param toAsset - output asset
    * @param amount - amount to swap
    * @param destinationAddress - destination address for the swap
+   * @param streamingInterval - the interval in which streaming swaps are swapped
+   * @param streamingQuantity - the quantity of swaps within a streaming swap
    * @param toleranceBps - slip percent
    * @param affiliateBps - affiliate percent
    * @param affiliate - affiliate address
@@ -67,6 +69,8 @@ export class Mayanode {
     toAsset: string,
     amount: number,
     destinationAddress?: string,
+    streamingInterval?: number,
+    streamingQuantity?: number,
     toleranceBps?: number,
     affiliateBps?: number,
     affiliate?: string,
@@ -81,6 +85,8 @@ export class Mayanode {
             toAsset,
             amount,
             destinationAddress,
+            streamingInterval,
+            streamingQuantity,
             toleranceBps,
             affiliateBps,
             affiliate,

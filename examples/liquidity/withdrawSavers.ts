@@ -11,7 +11,7 @@ import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin
 import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { SaversWithdraw, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { assetFromString, register9Rheader } from '@xchainjs/xchain-util'
+import { Asset, TokenAsset, assetFromString, register9Rheader } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import axios from 'axios'
 
@@ -23,7 +23,7 @@ register9Rheader(axios)
  */
 const withdrawSavers = async (tcAmm: ThorchainAMM) => {
   try {
-    const asset = assetFromString(process.argv[4])
+    const asset = assetFromString(process.argv[4]) as Asset | TokenAsset
     const address = process.argv[5] || ''
     const withdrawBps = Number(process.argv[6])
 

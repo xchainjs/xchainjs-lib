@@ -1,17 +1,17 @@
-import { Asset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
+import { AnyAsset, Asset, TokenAsset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 
-export const AssetBNB = assetFromStringEx('BNB.BNB')
-export const AssetAVAX = assetFromStringEx('AVAX.AVAX')
-export const AssetBTC = assetFromStringEx('BTC.BTC')
-export const AssetBCH = assetFromStringEx('BCH.BCH')
-export const AssetETH = assetFromStringEx('ETH.ETH')
-export const AssetDOGE = assetFromStringEx('DOGE.DOGE')
-export const AssetLTC = assetFromStringEx('LTC.LTC')
-export const AssetATOM = assetFromStringEx('GAIA.ATOM')
-export const AssetMAYA = assetFromStringEx('MAYA.CACAO')
-export const AssetBSC = assetFromStringEx('BSC.BNB')
-export const AssetRuneNative = assetFromStringEx('THOR.RUNE')
-export const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+export const AssetBNB = assetFromStringEx('BNB.BNB') as Asset
+export const AssetAVAX = assetFromStringEx('AVAX.AVAX') as Asset
+export const AssetBTC = assetFromStringEx('BTC.BTC') as Asset
+export const AssetBCH = assetFromStringEx('BCH.BCH') as Asset
+export const AssetETH = assetFromStringEx('ETH.ETH') as Asset
+export const AssetDOGE = assetFromStringEx('DOGE.DOGE') as Asset
+export const AssetLTC = assetFromStringEx('LTC.LTC') as Asset
+export const AssetATOM = assetFromStringEx('GAIA.ATOM') as Asset
+export const AssetMAYA = assetFromStringEx('MAYA.CACAO') as Asset
+export const AssetBSC = assetFromStringEx('BSC.BNB') as Asset
+export const AssetRuneNative = assetFromStringEx('THOR.RUNE') as Asset
+export const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48') as TokenAsset
 
 export const BNBChain = 'BNB'
 export const BTCChain = 'BTC'
@@ -27,4 +27,4 @@ export const THORChain = 'THOR'
 
 export const THORCHAIN_DECIMAL = 8
 
-export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRuneNative)
+export const isAssetRuneNative = (asset: AnyAsset): boolean => assetToString(asset) === assetToString(AssetRuneNative)

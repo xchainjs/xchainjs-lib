@@ -1,5 +1,14 @@
 import { Pool } from '@xchainjs/xchain-thornode'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetCryptoAmount,
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
@@ -18,10 +27,10 @@ import {
 
 const thorchainQuery = new ThorchainQuery()
 
-const BUSD = assetFromStringEx('BNB.BUSD-BD1')
-const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
-const AssetBTC = assetFromStringEx('BTC.BTC')
-const AssetETH = assetFromStringEx('ETH.ETH')
+const BUSD = assetFromStringEx('BNB.BUSD-BD1') as TokenAsset
+const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48') as TokenAsset
+const AssetBTC = assetFromStringEx('BTC.BTC') as Asset
+const AssetETH = assetFromStringEx('ETH.ETH') as Asset
 
 const BusdThornodePoolDetails1: Pool = {
   LP_units: '52543071634074',
@@ -42,6 +51,7 @@ const BusdThornodePoolDetails1: Pool = {
   loan_collateral: '',
   loan_cr: '',
   loan_collateral_remaining: '',
+  asset_tor_price: '11960553161',
 }
 
 describe(`Liquidity calc tests`, () => {
@@ -74,7 +84,7 @@ describe(`Liquidity calc tests`, () => {
     const getLPoolShare = getPoolShare(unitData, busdPool)
     const correctShare: PoolShareDetail = {
       assetShare: new CryptoAmount(assetToBase(assetAmount(`2.05028139`)), BUSD),
-      runeShare: new CryptoAmount(assetToBase(assetAmount('1.02857666')), AssetRuneNative),
+      runeShare: new AssetCryptoAmount(assetToBase(assetAmount('1.02857666')), AssetRuneNative),
     }
     expect(getLPoolShare.assetShare.assetAmount.amount()).toEqual(correctShare.assetShare.assetAmount.amount())
     expect(getLPoolShare.runeShare.assetAmount.amount()).toEqual(correctShare.runeShare.assetAmount.amount())

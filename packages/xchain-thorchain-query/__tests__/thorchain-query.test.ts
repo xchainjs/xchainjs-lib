@@ -1,5 +1,7 @@
 import {
+  Asset,
   CryptoAmount,
+  SynthAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -24,10 +26,10 @@ const thorchainQuery = new ThorchainQuery(thorchainCache)
 // const sATOM = assetFromStringEx('GAIA/ATOM')
 // const sETH = assetFromStringEx('ETH/ETH')
 
-const AssetsBTC = assetFromStringEx('BTC/BTC')
-const AssetBTC = assetFromStringEx('BTC.BTC')
-const AssetETH = assetFromStringEx('ETH.ETH')
-const AssetsETH = assetFromStringEx('ETH/ETH')
+const AssetsBTC = assetFromStringEx('BTC/BTC') as SynthAsset
+const AssetBTC = assetFromStringEx('BTC.BTC') as Asset
+const AssetETH = assetFromStringEx('ETH.ETH') as Asset
+const AssetsETH = assetFromStringEx('ETH/ETH') as SynthAsset
 
 const ethAddress = '0x690B9A9E9aa1C9dB991C7721a92d351Db4FaC990'
 

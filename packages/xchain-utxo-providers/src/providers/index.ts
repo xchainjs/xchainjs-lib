@@ -1,7 +1,6 @@
 export * from './sochainv3/sochain-api-types'
 export * from './sochainv3/sochain-api'
 export * from './sochainv3/sochain-data-provider'
-export * from './types'
 
 export {
   AddressDTO,

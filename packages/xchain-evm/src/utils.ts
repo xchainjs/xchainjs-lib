@@ -1,4 +1,4 @@
-import { Address, Asset, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, TokenAsset, baseAmount } from '@xchainjs/xchain-util'
 import { Signer, ethers, providers } from 'ethers'
 
 import erc20ABI from './data/erc20.json'
@@ -25,10 +25,10 @@ export const validateAddress = (address: Address): boolean => {
 /**
  * Get token address from asset.
  *
- * @param {Asset} asset The asset to extract the token address from.
+ * @param {TokenAsset} asset The asset to extract the token address from.
  * @returns {Address|null} The token address if found, otherwise `null`.
  */
-export const getTokenAddress = (asset: Asset): Address | null => {
+export const getTokenAddress = (asset: TokenAsset): Address | null => {
   try {
     // strip 0X only - 0x is still valid
     return ethers.utils.getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))

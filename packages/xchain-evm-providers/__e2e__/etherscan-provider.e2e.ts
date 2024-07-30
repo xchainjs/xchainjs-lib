@@ -1,5 +1,5 @@
 import { Balance } from '@xchainjs/xchain-client'
-import { Asset, assetToString } from '@xchainjs/xchain-util'
+import { Asset, AssetType, assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import { EtherscanProvider } from '../src/providers'
@@ -23,7 +23,7 @@ describe('etherscan Integration Tests (AVAX)', () => {
   )
   // Define here to avoid cyclic dependency
   const AVAXChain = 'AVAX'
-  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
   const avaxProvider = new EtherscanProvider(
     AVALANCHE_TESTNET_ETHERS_PROVIDER,
     'https://api-testnet.snowtrace.io',
@@ -81,7 +81,7 @@ describe('etherscan Integration Tests (BSC)', () => {
     chain: BSCChain,
     symbol: 'BNB',
     ticker: 'BNB',
-    synth: false,
+    type: AssetType.NATIVE,
   }
   const provider = new EtherscanProvider(
     BSC_TESTNET_ETHERS_PROVIDER,
@@ -125,7 +125,7 @@ describe('etherscan Integration Tests (ETH)', () => {
     chain: ETHChain,
     symbol: 'ETH',
     ticker: 'ETH',
-    synth: false,
+    type: AssetType.NATIVE,
   }
   const provider = new EtherscanProvider(
     ETH_TESTNET_ETHERS_PROVIDER,

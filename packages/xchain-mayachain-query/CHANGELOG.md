@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.21
+
+### Patch Changes
+
+- f54dcd2: `QuoteSwap` type updated. `Fees` type with `liquidityFee` and `totalFee` parameters.
+- f54dcd2: Streaming swap parameters for `quoteSwap` method.
+
+## 0.1.20
+
+### Patch Changes
+
+- f086da3: `quoteSwap` method updated. New parameters `streamingInterval` and `streamingQuantity` for streaming swaps
+- Updated dependencies [f086da3]
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayanode@0.1.8
+  - @xchainjs/xchain-mayamidgard@0.1.5
+  - @xchainjs/xchain-mayamidgard-query@0.1.15
+
 ## 0.1.19
 
 ### Patch Changes

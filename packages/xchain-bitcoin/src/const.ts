@@ -1,5 +1,5 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
   BlockcypherNetwork,
@@ -37,7 +37,7 @@ export const BTCChain = 'BTC' as const
 /**
  * Base "chain" asset on bitcoin main net.
  */
-export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC', synth: false }
+export const AssetBTC: Asset = { chain: BTCChain, symbol: 'BTC', ticker: 'BTC', type: AssetType.NATIVE }
 
 // Explorer providers for Bitcoin
 const BTC_MAINNET_EXPLORER = new ExplorerProvider(

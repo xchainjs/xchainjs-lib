@@ -21,6 +21,11 @@ export default {
         return [200, resp]
       }
 
+      if (from_asset === 'ETH.ETH' && to_asset === 'BTC.BTC') {
+        const resp = require(`./responses/mayanode/QuoteSSwapEthBtc.json`)
+        return [200, resp]
+      }
+
       return [200, {}]
     })
     mock.onGet(/\/mayachain\/mimir/).reply(function () {

@@ -9,16 +9,17 @@ import {
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
-import { AssetInfo, Network, PreparedTx, TxHash, TxParams } from '@xchainjs/xchain-client'
+import { AssetInfo, Network, PreparedTx, TxHash } from '@xchainjs/xchain-client'
 import {
   Client as CosmosSDKClient,
+  CompatibleAsset,
   CosmosSdkClientParams,
   MsgTypes,
   bech32ToBase64,
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, BaseAmount, assetFromString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, assetFromString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
 import { encode, toWords } from 'bech32'
 import BigNumber from 'bignumber.js'
 import { fromSeed } from 'bip32'
@@ -40,7 +41,7 @@ import {
   SYNTH_DECIMAL,
   defaultClientConfig,
 } from './const'
-import { DepositParam, DepositTx, TxOfflineParams } from './types'
+import { DepositParam, DepositTx, TxOfflineParams, TxParams } from './types'
 import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
 
 /**
@@ -168,10 +169,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   /**
    * Get the number of decimals for a given asset.
    *
-   * @param {Asset} asset The asset for which to retrieve the decimals.
+   * @param {CompatibleAsset} asset The asset for which to retrieve the decimals.
    * @returns {number} The number of decimals.
    */
-  public getAssetDecimals(asset: Asset): number {
+  public getAssetDecimals(asset: CompatibleAsset): number {
     if (eqAsset(asset, AssetCacao)) return CACAO_DECIMAL
     if (eqAsset(asset, AssetMaya)) return MAYA_DECIMAL
     if (isSynthAsset(asset)) return SYNTH_DECIMAL
@@ -211,9 +212,9 @@ export class Client extends CosmosSDKClient implements MayachainClient {
    * Get the asset corresponding to the provided denomination.
    *
    * @param {string} denom The denomination for which to retrieve the asset.
-   * @returns {Asset|null} The asset corresponding to the denomination, or null if not found.
+   * @returns {CompatibleAsset|null} The asset corresponding to the denomination, or null if not found.
    */
-  public assetFromDenom(denom: string): Asset | null {
+  public assetFromDenom(denom: string): CompatibleAsset | null {
     if (denom === CACAO_DENOM) return AssetCacao
     if (denom === MAYA_DENOM) return AssetMaya
     return assetFromString(denom.toUpperCase())
@@ -222,10 +223,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   /**
    * Get the denomination of the provided asset.
    *
-   * @param {Asset} asset The asset for which to retrieve the denomination.
+   * @param {CompatibleAsset} asset The asset for which to retrieve the denomination.
    * @returns {string|null} The denomination of the asset, or null if not found.
    */
-  public getDenom(asset: Asset): string | null {
+  public getDenom(asset: CompatibleAsset): string | null {
     return getDenom(asset)
   }
 
@@ -516,7 +517,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     gasLimit: BigNumber,
     amount: BaseAmount,
     memo: string,
-    asset: Asset,
+    asset: CompatibleAsset,
   ): Promise<DeliverTxResponse> {
     for (const url of this.clientUrls[this.network]) {
       try {

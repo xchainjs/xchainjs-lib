@@ -10,6 +10,8 @@ import {
   Asset,
   AssetAmount,
   Chain,
+  SynthAsset,
+  TokenAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -41,7 +43,7 @@ const _getBalances = async (wallet: Wallet, assets?: Record<Chain, Asset[] | und
   })
 }
 
-const _getBalance = async (wallet: Wallet, chain: Chain, assets?: Asset[]) => {
+const _getBalance = async (wallet: Wallet, chain: Chain, assets?: (Asset | TokenAsset | SynthAsset)[]) => {
   const balances = await wallet.getBalance(chain, assets)
   console.log(
     balances.map((balance) => {
@@ -177,7 +179,10 @@ const main = async () => {
   await delay(5000)
 
   console.log('============= Get assets balances interested in ==============')
-  await _getBalances(wallet, { MAYA: [assetFromStringEx('MAYA.CACAO')], THOR: [assetFromStringEx('THOR.RUNE')] })
+  await _getBalances(wallet, {
+    MAYA: [assetFromStringEx('MAYA.CACAO') as Asset],
+    THOR: [assetFromStringEx('THOR.RUNE') as Asset],
+  })
   await delay(5000)
 
   console.log('============= Get all balances from one single chain ==============')
@@ -185,7 +190,9 @@ const main = async () => {
   await delay(5000)
 
   console.log('============= Get asset balance from chain ==============')
-  await _getBalance(wallet, 'ETH', [assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')])
+  await _getBalance(wallet, 'ETH', [
+    assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7') as TokenAsset,
+  ])
   await delay(5000)
 
   console.log('============= Get all wallet addresses ==============')

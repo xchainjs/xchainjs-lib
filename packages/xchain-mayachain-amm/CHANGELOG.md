@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.0.14
+
+### Patch Changes
+
+- f54dcd2: Streaming swap parameters for `estimateSwap`, `validateSwap` and `doSwap` method.
+- Updated dependencies [f54dcd2]
+- Updated dependencies [f54dcd2]
+  - @xchainjs/xchain-mayachain-query@0.1.21
+
+## 2.0.13
+
+### Patch Changes
+
+- Updated dependencies [f086da3]
+  - @xchainjs/xchain-mayachain-query@0.1.20
+
 ## 2.0.12
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
-import { Asset, Chain } from '@xchainjs/xchain-util'
+import { Asset, AssetType, Chain } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 import nock from 'nock'
 
@@ -8,7 +8,7 @@ import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-a
 import { Client, EVMKeystoreClientParams, KeystoreSigner } from '../src'
 
 const AVAXChain: Chain = 'AVAX'
-const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
 const phrase = 'canyon throw labor waste awful century ugly they found post source draft'
 const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august remain ready'

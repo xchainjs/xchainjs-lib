@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.8
+
+### Patch Changes
+
+- 7d70a1c: Client aligned with Midgard 2.23.2
+
 ## 0.5.7
 
 ### Patch Changes

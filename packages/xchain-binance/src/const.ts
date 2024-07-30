@@ -1,5 +1,5 @@
 // Import necessary types from external package
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, AssetType } from '@xchainjs/xchain-util'
 
 /**
  * Chain identifier for BNB.
@@ -12,7 +12,7 @@ export const BNBChain = 'BNB' as const
  * This constant represents the base asset of the Binance Chain.
  * It includes information about the chain, symbol, ticker, and whether it's synthetic or not.
  */
-export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB', synth: false }
+export const AssetBNB: Asset = { chain: BNBChain, symbol: 'BNB', ticker: 'BNB', type: AssetType.NATIVE }
 
 /**
  * Asset Decimal.
