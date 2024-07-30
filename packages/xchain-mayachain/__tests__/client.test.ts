@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Asset } from '@xchainjs/xchain-util'
+import { AssetType, SynthAsset } from '@xchainjs/xchain-util'
 
 import { AssetCacao, AssetMaya, Client } from '../src'
 
@@ -92,18 +92,23 @@ describe('Mayachain client', () => {
 
     it('Should get native asset', () => {
       const nativeAsset = client.getAssetInfo()
-      expect(nativeAsset.asset).toEqual({ chain: 'MAYA', symbol: 'CACAO', ticker: 'CACAO', synth: false })
+      expect(nativeAsset.asset).toEqual({ chain: 'MAYA', symbol: 'CACAO', ticker: 'CACAO', type: AssetType.NATIVE })
       expect(nativeAsset.decimal).toBe(10)
     })
 
     it('Should get denom for asset', () => {
-      const synthBNBAsset: Asset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', synth: true }
+      const synthBNBAsset: SynthAsset = { chain: 'BNB', symbol: 'BNB', ticker: 'BNB', type: AssetType.SYNTH }
       expect(client.getDenom(synthBNBAsset)).toEqual('bnb/bnb')
       expect(client.getDenom(AssetCacao)).toEqual('cacao')
     })
     it('Should get asset for denom', () => {
       expect(client.assetFromDenom('cacao')).toEqual(AssetCacao)
-      expect(client.assetFromDenom('bnb/bnb')).toEqual({ chain: 'BNB', symbol: 'BNB', synth: true, ticker: 'BNB' })
+      expect(client.assetFromDenom('bnb/bnb')).toEqual({
+        chain: 'BNB',
+        symbol: 'BNB',
+        type: AssetType.SYNTH,
+        ticker: 'BNB',
+      })
     })
     it('should get asset decimals', async () => {
       expect(client.getAssetDecimals(AssetCacao)).toBe(10)

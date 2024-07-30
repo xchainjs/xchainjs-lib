@@ -9,8 +9,8 @@ import { AssetCacao, Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
 import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
-  Asset,
   CryptoAmount,
+  TokenAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -85,7 +85,7 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
   })
 }
 
-const ETH_USDT: Asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+const ETH_USDT: TokenAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
 const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('homestead', process.env.ETHERSCAN_API_KEY)
 const network = ethers.providers.getNetwork('sepolia')
@@ -258,7 +258,7 @@ describe('MayachainAmm e2e tests', () => {
     })
 
     it('Should approve Mayachain router to spend', async () => {
-      const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+      const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
       const txSubmitted = await mayachainAmm.approveRouterToSpend({
         asset,
@@ -269,7 +269,7 @@ describe('MayachainAmm e2e tests', () => {
     })
 
     it('Should check if Mayachain router is allowed to spend', async () => {
-      const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+      const asset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
       const isApprovedToSpend = await mayachainAmm.isRouterApprovedToSpend({
         asset,

@@ -35,7 +35,14 @@ import {
   defaultClientConfig as defaultThorParams,
 } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery, TxDetails } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
@@ -285,7 +292,7 @@ describe('ThorchainAmm e2e tests', () => {
     })
 
     it('Should check if Thorchain router is allowed to spend', async () => {
-      const asset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E')
+      const asset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E') as TokenAsset
 
       const isApprovedToSpend = await thorchainAmm.isRouterApprovedToSpend({
         asset,
@@ -297,7 +304,7 @@ describe('ThorchainAmm e2e tests', () => {
     })
 
     it('Should do non protocol ERC20 asset swap. AVAX.USDC -> AVAX', async () => {
-      const fromAsset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E')
+      const fromAsset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E') as TokenAsset
 
       const txSubmitted = await thorchainAmm.doSwap({
         fromAddress: await wallet.getAddress(fromAsset.chain),
@@ -322,7 +329,7 @@ describe('ThorchainAmm e2e tests', () => {
     })
 
     it(`Should approve Thorchain router to spend`, async () => {
-      const asset = assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e')
+      const asset = assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e') as TokenAsset
       const txSubmitted = await thorchainAmm.approveRouterToSpend({
         asset,
         amount: new CryptoAmount(assetToBase(assetAmount('10', 6)), asset),

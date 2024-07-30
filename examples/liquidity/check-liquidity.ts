@@ -2,7 +2,7 @@ import cosmosclient from '@cosmos-client/core'
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { LiquidityPosition, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { assetFromString, register9Rheader } from '@xchainjs/xchain-util'
+import { Asset, TokenAsset, assetFromString, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
@@ -35,7 +35,7 @@ const checkLiquidityPosition = async () => {
     const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
-    const asset = assetFromString(process.argv[3])
+    const asset = assetFromString(process.argv[3]) as Asset | TokenAsset
     const address = process.argv[4] || ''
 
     const lp = await thorchainQueryMainnet.checkLiquidityPosition(asset, address)

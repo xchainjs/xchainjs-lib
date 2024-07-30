@@ -7,7 +7,7 @@ import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { ApproveParams, MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, TokenAsset, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 const approveRouter = async (mayachainAmm: MayachainAMM, params: ApproveParams) => {
@@ -18,7 +18,7 @@ const approveRouter = async (mayachainAmm: MayachainAMM, params: ApproveParams) 
 const main = async () => {
   const seed = process.argv[2]
   const network = process.argv[3] as Network
-  const asset = assetFromString(`${process.argv[4]}`)
+  const asset = assetFromString(`${process.argv[4]}`) as TokenAsset
   const assetDecimals = Number(process.argv[5])
   const amount = process.argv[6]
 

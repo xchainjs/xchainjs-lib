@@ -1,7 +1,15 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { Balance, ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EtherscanProvider, RoutescanProvider } from '@xchainjs/xchain-evm-providers'
-import { Asset, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetType,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
 // Import necessary modules and classes from external packages and files
@@ -13,7 +21,7 @@ const LOWER_FEE_BOUND = 2_000_000_000
 const UPPER_FEE_BOUND = 1_000_000_000_000
 const AVAX_GAS_ASSET_DECIMAL = 18
 const AVAXChain = 'AVAX' as const
-const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
 // Define JSON-RPC providers for mainnet and testnet
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/avalanche')
@@ -165,7 +173,7 @@ describe('EVM Client Ledger', () => {
     try {
       const amount = assetToBase(assetAmount('1', 6))
       const txid = await client.transfer({
-        asset: assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e'),
+        asset: assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e') as TokenAsset,
         recipient: await client.getAddressAsync(0),
         amount,
       })
