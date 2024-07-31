@@ -151,3 +151,39 @@ export type QuoteTHORName = BaseQuoteTHORName & {
    */
   errors: string[]
 }
+
+/**
+ * Add to trade account params
+ */
+export type AddToTradeAccountParams = {
+  /**
+   * Amount to add to the account
+   */
+  amount: CryptoAmount<Asset | TokenAsset>
+  /**
+   * Trade account address
+   */
+  address: Address
+}
+
+/**
+ * Estimation to add amount to trade account
+ */
+export type AddToTradeAccount = {
+  /**
+   * Memo to add to the transaction to add the trade amount
+   */
+  memo: string
+  /**
+   * Amount to send to the address
+   */
+  value: CryptoAmount<Asset | TokenAsset>
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
+}

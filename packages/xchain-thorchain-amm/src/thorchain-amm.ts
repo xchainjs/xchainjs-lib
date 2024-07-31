@@ -48,7 +48,16 @@ import {
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAction } from './thorchain-action'
-import { AddLiquidity, ApproveParams, IsApprovedParams, QuoteTHORName, TxSubmitted, WithdrawLiquidity } from './types'
+import {
+  AddLiquidity,
+  AddToTradeAccount,
+  AddToTradeAccountParams,
+  ApproveParams,
+  IsApprovedParams,
+  QuoteTHORName,
+  TxSubmitted,
+  WithdrawLiquidity,
+} from './types'
 import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
@@ -713,6 +722,54 @@ export class ThorchainAMM {
     const quote = await this.estimateTHORNameUpdate(params)
 
     if (!quote.allowed) throw Error(`Can not update THORName. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
+    })
+  }
+
+  /**
+   * Estimate adding trade amount to account
+   * @param {AddToTradeAccountParams} param Add to trade account params
+   * @returns {AddToTradeAccount} Estimation to add amount to trade account
+   */
+  public async estimateAddToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<AddToTradeAccount> {
+    const errors: string[] = []
+
+    if (
+      validateAddress(this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network, THORChain, address)
+    ) {
+      errors.push('Invalid trade account address')
+    }
+
+    if (errors.length) {
+      return {
+        allowed: false,
+        errors,
+        value: new CryptoAmount(baseAmount(0), amount.asset),
+        memo: '',
+      }
+    }
+
+    return {
+      memo: `TRADE+:${address}`,
+      value: amount,
+      allowed: true,
+      errors,
+    }
+  }
+
+  /**
+   * Add trade amount to account
+   * @param {AddToTradeAccountParams} param Add to trade account params
+   * @returns {TxSubmitted} Transaction made to add the trade amount
+   */
+  public async addToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<TxSubmitted> {
+    const quote = await this.estimateAddToTradeAccount({ amount, address })
+
+    if (!quote.allowed) throw Error(`Can not add to trade account. ${quote.errors.join(' ')}`)
 
     return ThorchainAction.makeAction({
       wallet: this.wallet,
