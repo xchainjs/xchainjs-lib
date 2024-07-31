@@ -1,0 +1,72 @@
+[
+  {
+    "asset": "BTC~BTC",
+    "units": "359979303",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949720,
+    "last_withdraw_height": 16949725
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "1390",
+    "owner": "thor1547pg8p3tm2cu23sud0vuatpz0pttucvch03ll",
+    "last_add_height": 16894785,
+    "last_withdraw_height": 0
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "3127498814",
+    "owner": "thor166n4w5039meulfa3p6ydg60ve6ueac7tlt0jws",
+    "last_add_height": 16949650,
+    "last_withdraw_height": 16949554
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "113801049",
+    "owner": "thor17hwqt302e5f2xm4h95ma8wuggqkvfzgvsnh5z9",
+    "last_add_height": 16949730,
+    "last_withdraw_height": 16949733
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "45000",
+    "owner": "thor17unftkdeuwcyqrsx32wpzqsmjjyl7ym5na5fqf",
+    "last_add_height": 16358552,
+    "last_withdraw_height": 0
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "225443863",
+    "owner": "thor19emplkuphjk2y9gkkv06m8vcstc0ufn4pevv5u",
+    "last_add_height": 16948468,
+    "last_withdraw_height": 16948049
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "27994",
+    "owner": "thor1ppjxcc0yn6kq94j99hzny38hd40frvnkq4fpg6",
+    "last_add_height": 16943874,
+    "last_withdraw_height": 0
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "126229",
+    "owner": "thor1qefmyzkgkvu2kz57yv5x5r6k9tvr65v3uany68",
+    "last_add_height": 16476640,
+    "last_withdraw_height": 0
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "54645",
+    "owner": "thor1ua9ff625w4d8jtm8ngdmfm9m2tnwyjg23sjqz0",
+    "last_add_height": 16603836,
+    "last_withdraw_height": 0
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "8294717414",
+    "owner": "thor1ukwhpglu7yh2g2rw8h7jvee2r0fv0e90nyxv6v",
+    "last_add_height": 16949721,
+    "last_withdraw_height": 16949691
+  }
+]

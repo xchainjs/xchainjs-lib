@@ -1,0 +1,114 @@
+[
+  {
+    "asset": "AVAX~AVAX",
+    "units": "47632915497",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949652,
+    "last_withdraw_height": 16949626
+  },
+  {
+    "asset": "AVAX~USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E",
+    "units": "552670139895",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949518,
+    "last_withdraw_height": 16949396
+  },
+  {
+    "asset": "AVAX~USDT-0X9702230A8EA53601F5CD2DC00FDBC13D4DF4A8C7",
+    "units": "254020119655",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16947724,
+    "last_withdraw_height": 16947725
+  },
+  {
+    "asset": "BCH~BCH",
+    "units": "3335481666",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949656,
+    "last_withdraw_height": 16949734
+  },
+  {
+    "asset": "BSC~BNB",
+    "units": "16905304",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949665,
+    "last_withdraw_height": 16949726
+  },
+  {
+    "asset": "BSC~USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D",
+    "units": "275727299843",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16948802,
+    "last_withdraw_height": 16949042
+  },
+  {
+    "asset": "BSC~USDT-0X55D398326F99059FF775485246999027B3197955",
+    "units": "29375159216",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949345,
+    "last_withdraw_height": 16949654
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "359979303",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949720,
+    "last_withdraw_height": 16949725
+  },
+  {
+    "asset": "DOGE~DOGE",
+    "units": "26999229468117",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949578,
+    "last_withdraw_height": 16949693
+  },
+  {
+    "asset": "ETH~DAI-0X6B175474E89094C44DA98B954EEDEAC495271D0F",
+    "units": "11034918304",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16945547,
+    "last_withdraw_height": 16949042
+  },
+  {
+    "asset": "ETH~ETH",
+    "units": "3655053689",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949714,
+    "last_withdraw_height": 16949730
+  },
+  {
+    "asset": "ETH~USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48",
+    "units": "6505859409337",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949730,
+    "last_withdraw_height": 16949669
+  },
+  {
+    "asset": "ETH~USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
+    "units": "5832622922140",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949726,
+    "last_withdraw_height": 16949713
+  },
+  {
+    "asset": "ETH~WBTC-0X2260FAC5E5542A773AA44FBCFEDF7C193BC2C599",
+    "units": "122081",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16946818,
+    "last_withdraw_height": 16947704
+  },
+  {
+    "asset": "GAIA~ATOM",
+    "units": "143742309997",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16948803,
+    "last_withdraw_height": 16949345
+  },
+  {
+    "asset": "LTC~LTC",
+    "units": "143174314",
+    "owner": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+    "last_add_height": 16949713,
+    "last_withdraw_height": 16949714
+  }
+]

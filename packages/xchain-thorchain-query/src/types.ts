@@ -9,10 +9,12 @@ import {
   CryptoAmount,
   SynthAsset,
   TokenAsset,
+  TradeAsset,
+  TradeCryptoAmount,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-export type CompatibleAsset = Asset | TokenAsset | SynthAsset
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset
 
 /**
  * Represents the total fees associated with a swap.
@@ -572,4 +574,126 @@ export type QuoteTHORName = {
    * Estimation of the update or the registration of the THORName
    */
   value: AssetCryptoAmount
+}
+
+/**
+ * Get trade asset unit params
+ */
+export type TradeAssetUnitsParams = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Get trade asset unit params
+ */
+export type TradeAssetUnits = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Total units of trade asset
+   */
+  units: TradeCryptoAmount
+  /**
+   * Total depth of trade asset
+   */
+  depth: TradeCryptoAmount
+}
+
+/**
+ * Get trade asset unit params
+ */
+export type TradeAssetsUnitsParams = {
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Get trade asset information from address
+ */
+export type AddressTradeAccountsParams = {
+  /**
+   * Thorchain address
+   */
+  address: Address
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Trade asset account information
+ */
+export type AddressTradeAccounts = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Address
+   */
+  address: Address
+  /**
+   * Trade asset balance
+   */
+  balance: TradeCryptoAmount
+  /**
+   * Last thorchain height trade assets were added to trade account
+   */
+  lastAddHeight?: number
+  /**
+   * Last thorchain height trade assets were withdrawn from trade account
+   */
+  lastWithdrawHeight?: number
+}
+
+/**
+ * Get trade asset accounts
+ */
+export type TradeAssetAccountsParams = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Trade asset account information
+ */
+export type TradeAssetAccounts = {
+  /**
+   * Trade asset balance
+   */
+  asset: TradeAsset
+  /**
+   * Last thorchain height trade assets were added to trade account
+   */
+  address: Address
+  /**
+   * Trade asset balance
+   */
+  balance: TradeCryptoAmount
+  /**
+   * Last thorchain height trade assets were added to trade account
+   */
+  lastAddHeight?: number
+  /**
+   * Last thorchain height trade assets were withdrawn from trade account
+   */
+  lastWithdrawHeight?: number
 }
