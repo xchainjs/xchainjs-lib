@@ -12,14 +12,14 @@ import {
   MsgTypes,
   bech32ToBase64,
 } from '@xchainjs/xchain-cosmos-sdk'
-import { Address, Asset, assetFromString, eqAsset } from '@xchainjs/xchain-util'
+import { Address, assetFromString, eqAsset } from '@xchainjs/xchain-util'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 /**
  * Import constants and types
  */
 import { AssetRuneNative as AssetRUNE, MSG_SEND_TYPE_URL, RUNE_DECIMAL, RUNE_DENOM, defaultClientConfig } from './const'
-import { DepositParam, DepositTx, TxOfflineParams } from './types'
+import { CompatibleAsset, DepositParam, DepositTx, TxOfflineParams } from './types'
 import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
 
 /**
@@ -76,10 +76,10 @@ export abstract class Client extends CosmosSDKClient implements ThorchainClient 
   /**
    * Returns the number of the decimals of known assets
    *
-   * @param {Asset} asset - Asset of which return the number of decimals
+   * @param {CompatibleAsset} asset - Asset of which return the number of decimals
    * @returns {number} the number of decimals of the assets
    */
-  public getAssetDecimals(asset: Asset): number {
+  public getAssetDecimals(asset: CompatibleAsset): number {
     if (eqAsset(asset, AssetRUNE)) return RUNE_DECIMAL
     return this.defaultDecimals
   }
@@ -116,9 +116,9 @@ export abstract class Client extends CosmosSDKClient implements ThorchainClient 
    * Get Asset from denomination
    *
    * @param {string} denom The denomination for which to get the asset.
-   * @returns {Asset|null} The asset of the given denomination.
+   * @returns {CompatibleAsset|null} The asset of the given denomination.
    */
-  public assetFromDenom(denom: string): Asset | null {
+  public assetFromDenom(denom: string): CompatibleAsset | null {
     if (denom === RUNE_DENOM) return AssetRUNE
     return assetFromString(denom.toUpperCase())
   }
@@ -126,10 +126,10 @@ export abstract class Client extends CosmosSDKClient implements ThorchainClient 
   /**
    * Get denomination from Asset
    *
-   * @param {Asset} asset The asset for which to get the denomination.
+   * @param {CompatibleAsset} asset The asset for which to get the denomination.
    * @returns {string} The denomination of the given asset.
    */
-  public getDenom(asset: Asset): string | null {
+  public getDenom(asset: CompatibleAsset): string | null {
     return getDenom(asset)
   }
 

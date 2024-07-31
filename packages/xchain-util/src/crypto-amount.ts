@@ -1,9 +1,12 @@
 import { BigNumber } from 'bignumber.js'
 
 import {
+  AnyAsset,
   Asset,
   AssetAmount,
   BaseAmount,
+  SynthAsset,
+  TokenAsset,
   assetToBase,
   assetToString,
   baseToAsset,
@@ -11,70 +14,79 @@ import {
   formatAssetAmountCurrency,
 } from './'
 
-type CryptoNumeric = CryptoAmount | number | BigNumber
-
 /**
  * Utility Class to combine an amount (asset/base) with the Asset
  *
  */
-export class CryptoAmount {
+class BaseCryptoAmount<T extends AnyAsset> {
   baseAmount: BaseAmount
-  readonly asset: Asset
-  constructor(amount: BaseAmount, asset: Asset) {
+  readonly asset: T
+
+  constructor(amount: BaseAmount, asset: T) {
     this.asset = asset
     this.baseAmount = amount
   }
-  plus(v: CryptoAmount): CryptoAmount {
+
+  plus(v: BaseCryptoAmount<T>): BaseCryptoAmount<T> {
     this.check(v)
     const assetAmountResult = assetToBase(this.assetAmount.plus(v.assetAmount))
-    return new CryptoAmount(assetAmountResult, this.asset)
+    return new BaseCryptoAmount(assetAmountResult, this.asset)
   }
-  minus(v: CryptoAmount): CryptoAmount {
+
+  minus(v: BaseCryptoAmount<T>): BaseCryptoAmount<T> {
     this.check(v)
     const assetAmountResult = assetToBase(this.assetAmount.minus(v.assetAmount))
-    return new CryptoAmount(assetAmountResult, this.asset)
+    return new BaseCryptoAmount(assetAmountResult, this.asset)
   }
-  times(v: CryptoNumeric): CryptoAmount {
+
+  times(v: BaseCryptoAmount<T> | number | BigNumber): BaseCryptoAmount<T> {
     this.check(v)
-    if (v instanceof CryptoAmount) {
+    if (v instanceof BaseCryptoAmount) {
       const assetAmountResult = assetToBase(this.assetAmount.times(v.assetAmount))
-      return new CryptoAmount(assetAmountResult, this.asset)
+      return new BaseCryptoAmount(assetAmountResult, this.asset)
     } else {
       const assetAmountResult = assetToBase(this.assetAmount.times(v))
-      return new CryptoAmount(assetAmountResult, this.asset)
+      return new BaseCryptoAmount(assetAmountResult, this.asset)
     }
   }
-  div(v: CryptoNumeric): CryptoAmount {
+
+  div(v: BaseCryptoAmount<T> | number | BigNumber): BaseCryptoAmount<T> {
     this.check(v)
-    if (v instanceof CryptoAmount) {
+    if (v instanceof BaseCryptoAmount) {
       const assetAmountResult = assetToBase(this.assetAmount.div(v.assetAmount))
-      return new CryptoAmount(assetAmountResult, this.asset)
+      return new BaseCryptoAmount(assetAmountResult, this.asset)
     } else {
       const assetAmountResult = assetToBase(this.assetAmount.div(v))
-      return new CryptoAmount(assetAmountResult, this.asset)
+      return new BaseCryptoAmount(assetAmountResult, this.asset)
     }
   }
-  lt(v: CryptoAmount): boolean {
+
+  lt(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.lt(v.assetAmount)
   }
-  lte(v: CryptoAmount): boolean {
+
+  lte(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.lte(v.assetAmount)
   }
-  gt(v: CryptoAmount): boolean {
+
+  gt(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.gt(v.assetAmount)
   }
-  gte(v: CryptoAmount): boolean {
+
+  gte(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
 
     return this.assetAmount.gte(v.assetAmount)
   }
-  eq(v: CryptoAmount): boolean {
+
+  eq(v: BaseCryptoAmount<T>): boolean {
     this.check(v)
     return this.assetAmount.eq(v.assetAmount)
   }
+
   formatedAssetString(): string {
     return formatAssetAmountCurrency({
       amount: this.assetAmount,
@@ -82,9 +94,11 @@ export class CryptoAmount {
       trimZeros: true,
     })
   }
+
   assetAmountFixedString(): string {
     return this.assetAmount.amount().toFixed()
   }
+
   get assetAmount(): AssetAmount {
     return baseToAsset(this.baseAmount)
   }
@@ -99,11 +113,16 @@ export class CryptoAmount {
    *
    * @param v - CryptoNumeric
    */
-  private check(v: CryptoNumeric) {
-    if (v instanceof CryptoAmount) {
+  private check(v: BaseCryptoAmount<T> | number | BigNumber) {
+    if (v instanceof BaseCryptoAmount) {
       if (!eqAsset(this.asset, v.asset)) {
         throw Error(`cannot perform math on 2 diff assets ${assetToString(this.asset)} ${assetToString(v.asset)}`)
       }
     }
   }
 }
+
+export class CryptoAmount<T extends AnyAsset = AnyAsset> extends BaseCryptoAmount<T> {}
+export class AssetCryptoAmount extends BaseCryptoAmount<Asset> {}
+export class TokenCryptoAmount extends BaseCryptoAmount<TokenAsset> {}
+export class SynthCryptoAmount extends BaseCryptoAmount<SynthAsset> {}

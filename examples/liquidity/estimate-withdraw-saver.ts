@@ -7,7 +7,7 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetFromStringEx, register9Rheader } from '@xchainjs/xchain-util'
+import { Asset, TokenAsset, assetFromStringEx, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
@@ -40,7 +40,7 @@ const estimateWithdrawSaver = async () => {
     const midgardCache = new MidgardCache(new Midgard(network))
     const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
-    const asset = assetFromStringEx(process.argv[4])
+    const asset = assetFromStringEx(process.argv[4]) as Asset | TokenAsset
     const withdrawPos: SaversWithdraw = {
       address: process.argv[3],
       asset: asset,

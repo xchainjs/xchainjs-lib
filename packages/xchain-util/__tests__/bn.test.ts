@@ -7,7 +7,7 @@ import {
   formatBNCurrency,
   isValidBN,
   validBNOrZero,
-} from './bn'
+} from '../src/bn'
 
 describe('util/bn', () => {
   describe('bn', () => {

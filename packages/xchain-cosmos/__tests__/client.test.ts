@@ -1,4 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
+import { AssetType } from '@xchainjs/xchain-util'
 
 import { AssetATOM, Client } from '../src'
 
@@ -93,7 +94,7 @@ describe('Cosmos client', () => {
 
     it('Should get native asset', () => {
       const nativeAsset = client.getAssetInfo()
-      expect(nativeAsset.asset).toEqual({ chain: 'GAIA', symbol: 'ATOM', ticker: 'ATOM', synth: false })
+      expect(nativeAsset.asset).toEqual({ chain: 'GAIA', symbol: 'ATOM', ticker: 'ATOM', type: AssetType.NATIVE })
       expect(nativeAsset.decimal).toBe(6)
     })
 

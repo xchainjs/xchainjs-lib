@@ -1,6 +1,15 @@
 import { Balance, FeeOption } from '@xchainjs/xchain-client'
 import { LiquidityPool, QuoteTHORName as BaseQuoteTHORName } from '@xchainjs/xchain-thorchain-query'
-import { Address, Asset, BaseAmount, Chain, CryptoAmount } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  AssetCryptoAmount,
+  BaseAmount,
+  Chain,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+} from '@xchainjs/xchain-util'
 
 /**
  * Represents the balance information for all assets on a particular chain.
@@ -15,8 +24,8 @@ export type AllBalances = {
  * Represents the parameters for executing a swap transaction.
  */
 export type ExecuteSwap = {
-  input: CryptoAmount // The amount to swap
-  destinationAsset: Asset // The asset to receive after swapping
+  input: CryptoAmount<Asset | TokenAsset | SynthAsset> // The amount to swap
+  destinationAsset: Asset | TokenAsset | SynthAsset // The asset to receive after swapping
   destinationAddress?: Address // The address to receive the swapped asset (optional)
   memo: string // Memo to include with the transaction
   feeOption?: FeeOption // Fee option for the transaction (optional)
@@ -36,8 +45,8 @@ export type TxSubmitted = {
  */
 export type LiquidityPosition = {
   assetPool: LiquidityPool // The liquidity pool in which the position exists
-  assetAmount: CryptoAmount // The amount of asset in the position
-  runeAmount: CryptoAmount // The amount of RUNE in the position
+  assetAmount: CryptoAmount<Asset | TokenAsset> // The amount of asset in the position
+  runeAmount: AssetCryptoAmount // The amount of RUNE in the position
   impermanentLossProtection: number // The level of impermanent loss protection
 }
 
@@ -45,8 +54,8 @@ export type LiquidityPosition = {
  * Represents the parameters for adding liquidity to a pool.
  */
 export type AddLiquidity = {
-  asset: CryptoAmount // The amount of asset to add to the pool
-  rune: CryptoAmount // The amount of RUNE to add to the pool
+  asset: CryptoAmount<Asset | TokenAsset> // The amount of asset to add to the pool
+  rune: AssetCryptoAmount // The amount of RUNE to add to the pool
   waitTimeSeconds: number // Estimated wait time for the transaction to be processed
   assetPool: string // The pool's asset address
 }
@@ -55,8 +64,8 @@ export type AddLiquidity = {
  * Represents the parameters for withdrawing liquidity from a pool.
  */
 export type WithdrawLiquidity = {
-  assetFee: CryptoAmount // The fee in asset for withdrawing liquidity
-  runeFee: CryptoAmount // The fee in RUNE for withdrawing liquidity
+  assetFee: CryptoAmount<Asset | TokenAsset> // The fee in asset for withdrawing liquidity
+  runeFee: AssetCryptoAmount // The fee in RUNE for withdrawing liquidity
   waitTimeSeconds: number // Estimated wait time for the transaction to be processed
   percentage: number // Percentage of liquidity to withdraw
   assetPool: string // The pool's asset address
@@ -118,15 +127,15 @@ export type UpdateThornameParams = {
 }
 
 export type IsApprovedParams = {
-  asset: Asset
-  amount: CryptoAmount
+  asset: TokenAsset
+  amount: CryptoAmount<TokenAsset>
   address: Address
 }
 
 // Object representing parameters for approving a transaction
 export type ApproveParams = {
-  asset: Asset // The asset to approve
-  amount: CryptoAmount | undefined // The amount to approve, or undefined for an infinite approval
+  asset: TokenAsset // The asset to approve
+  amount?: CryptoAmount<TokenAsset> // The amount to approve, or undefined for an infinite approval
 }
 
 /**

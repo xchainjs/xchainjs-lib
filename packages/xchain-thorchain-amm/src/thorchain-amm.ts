@@ -36,12 +36,20 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetCryptoAmount,
+  CryptoAmount,
+  TokenAsset,
+  assetToString,
+  baseAmount,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAction } from './thorchain-action'
 import { AddLiquidity, ApproveParams, IsApprovedParams, QuoteTHORName, TxSubmitted, WithdrawLiquidity } from './types'
-import { isProtocolERC20Asset, validateAddress } from './utils'
+import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
  * THORChain Class for interacting with THORChain.
@@ -144,7 +152,7 @@ export class ThorchainAMM {
       destinationAddress &&
       !validateAddress(
         this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
-        destinationAsset.synth ? THORChain : destinationAsset.chain,
+        isSynthAsset(destinationAsset) ? THORChain : destinationAsset.chain,
         destinationAddress,
       )
     ) {
@@ -178,12 +186,16 @@ export class ThorchainAMM {
     }
 
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {
-      const approveErrors = await this.isRouterApprovedToSpend({
-        asset: fromAsset,
-        address: fromAddress,
-        amount,
-      })
-      errors.push(...approveErrors)
+      if (!isTokenCryptoAmount(amount)) {
+        errors.push(`${assetToString(amount.asset)} is not Token asset amount`)
+      } else {
+        const approveErrors = await this.isRouterApprovedToSpend({
+          asset: fromAsset,
+          address: fromAddress,
+          amount,
+        })
+        errors.push(...approveErrors)
+      }
     }
 
     return errors
@@ -439,7 +451,7 @@ export class ThorchainAMM {
    * @param addAssetAmount The amount to add to the saver.
    * @returns The estimated addition to the saver object.
    */
-  public async estimateAddSaver(addAssetAmount: CryptoAmount): Promise<EstimateAddSaver> {
+  public async estimateAddSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
     return await this.thorchainQuery.estimateAddSaver(addAssetAmount)
   }
   /**
@@ -466,7 +478,7 @@ export class ThorchainAMM {
    * @param addAssetAmount - The amount to add to the saver.
    * @returns - The submitted transaction.
    */
-  public async addSaver(addAssetAmount: CryptoAmount): Promise<TxSubmitted> {
+  public async addSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<TxSubmitted> {
     const addEstimate = await this.thorchainQuery.estimateAddSaver(addAssetAmount)
     if (!addEstimate.canAddSaver) throw Error(`Cannot add to savers`)
 
@@ -588,7 +600,7 @@ export class ThorchainAMM {
       return {
         memo: '',
         errors,
-        value: new CryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
         allowed: false,
       }
     }
@@ -606,7 +618,7 @@ export class ThorchainAMM {
       return {
         memo: '',
         errors: ['message' in e ? e.message : `Unknown error: ${e}`],
-        value: new CryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
         allowed: false,
       }
     }
@@ -651,7 +663,7 @@ export class ThorchainAMM {
       return {
         memo: '',
         errors,
-        value: new CryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
         allowed: false,
       }
     }

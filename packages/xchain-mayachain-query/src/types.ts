@@ -1,22 +1,24 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, AssetCryptoAmount, Chain, CryptoAmount, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
+
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset
 
 /**
  * Represents fees associated with a swap.
  */
 export type Fees = {
-  asset: Asset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount // The affiliate fee amount
-  outboundFee: CryptoAmount // The outbound fee amount
+  asset: CompatibleAsset // The asset for which fees are calculated
+  affiliateFee: CryptoAmount<CompatibleAsset> // The affiliate fee amount
+  outboundFee: CryptoAmount<CompatibleAsset> // The outbound fee amount
   /**
    * The liquidity fees paid to pools
    */
-  liquidityFee: CryptoAmount
+  liquidityFee: CryptoAmount<CompatibleAsset>
   /**
    * Total fees
    */
-  totalFee: CryptoAmount
+  totalFee: CryptoAmount<CompatibleAsset>
 }
 
 /**
@@ -25,8 +27,8 @@ export type Fees = {
 export type QuoteSwap = {
   toAddress: Address // The destination address for the swap
   memo: string // The memo associated with the swap
-  expectedAmount: CryptoAmount // The expected amount to be received after the swap
-  dustThreshold: CryptoAmount // The dust threshold for the swap
+  expectedAmount: CryptoAmount<CompatibleAsset> // The expected amount to be received after the swap
+  dustThreshold: AssetCryptoAmount // The dust threshold for the swap
   fees: Fees // The fees associated with the swap
   inboundConfirmationSeconds?: number // The inbound confirmation time in seconds
   inboundConfirmationBlocks?: number // The inbound confirmation time in blocks
@@ -75,9 +77,9 @@ export type QuoteSwap = {
  * Represents parameters for quoting a swap operation.
  */
 export type QuoteSwapParams = {
-  fromAsset: Asset // The asset to swap from
-  destinationAsset: Asset // The asset to swap to
-  amount: CryptoAmount // The amount to swap
+  fromAsset: CompatibleAsset // The asset to swap from
+  destinationAsset: CompatibleAsset // The asset to swap to
+  amount: CryptoAmount<CompatibleAsset> // The amount to swap
   fromAddress?: string // The source address for the swap
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap
@@ -114,7 +116,7 @@ export type SwapHistoryParams = {
 export type TransactionAction = {
   hash: TxHash
   address: Address
-  amount: CryptoAmount
+  amount: CryptoAmount<CompatibleAsset>
 }
 
 /**
@@ -236,5 +238,5 @@ export type QuoteMAYAName = {
   /**
    * Estimation of the update or the registration of the MAYAName
    */
-  value: CryptoAmount
+  value: AssetCryptoAmount
 }

@@ -1,12 +1,12 @@
-import { assetFromStringEx } from '@xchainjs/xchain-util'
+import { Asset, assetFromStringEx } from '@xchainjs/xchain-util'
 
-export const BtcAsset = assetFromStringEx('BTC.BTC')
-export const EthAsset = assetFromStringEx('ETH.ETH')
-export const CacaoAsset = assetFromStringEx('MAYA.CACAO')
-export const RuneAsset = assetFromStringEx('THOR.RUNE')
-export const DashAsset = assetFromStringEx('DASH.DASH')
-export const KujiraAsset = assetFromStringEx('KUJI.KUJI')
-export const ArbAsset = assetFromStringEx('ARB.ETH')
+export const BtcAsset = assetFromStringEx('BTC.BTC') as Asset
+export const EthAsset = assetFromStringEx('ETH.ETH') as Asset
+export const CacaoAsset = assetFromStringEx('MAYA.CACAO') as Asset
+export const RuneAsset = assetFromStringEx('THOR.RUNE') as Asset
+export const DashAsset = assetFromStringEx('DASH.DASH') as Asset
+export const KujiraAsset = assetFromStringEx('KUJI.KUJI') as Asset
+export const ArbAsset = assetFromStringEx('ARB.ETH') as Asset
 
 export const BtcChain = 'BTC'
 export const EthChain = 'ETH'

@@ -1,6 +1,6 @@
 import { NetworkId } from '@radixdlt/radix-engine-toolkit'
 import { Network, RootDerivationPaths } from '@xchainjs/xchain-client'
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, AssetType } from '@xchainjs/xchain-util'
 
 /**
  * Chain identifier for Radix.
@@ -16,14 +16,14 @@ export const XRD_DECIMAL = 18
 export const XrdAssetMainnet: Asset = {
   symbol: 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc',
   ticker: 'XRD',
-  synth: false,
+  type: AssetType.NATIVE,
   chain: RadixChain,
 }
 
 export const XrdAssetStokenet: Asset = {
   symbol: 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc',
   ticker: 'XRD',
-  synth: false,
+  type: AssetType.NATIVE,
   chain: RadixChain,
 }
 

@@ -1,9 +1,7 @@
 import { Provider } from '@ethersproject/abstract-provider'
 import {
   AssetInfo,
-  Balance,
   BaseXChainClient,
-  EvmOnlineDataProviders,
   ExplorerProviders,
   FeeOption,
   FeeRates,
@@ -12,14 +10,13 @@ import {
   Network,
   PreparedTx,
   Protocol,
-  Tx,
   TxHash,
   TxHistoryParams,
-  TxsPage,
   XChainClientParams,
   checkFeeBounds,
   standardFeeRates,
 } from '@xchainjs/xchain-client'
+import { EvmOnlineDataProviders } from '@xchainjs/xchain-evm-providers'
 import { Address, Asset, CachedValue, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 import { toUtf8Bytes } from 'ethers/lib/utils'
@@ -27,7 +24,9 @@ import { toUtf8Bytes } from 'ethers/lib/utils'
 import erc20ABI from '../data/erc20.json'
 import {
   ApproveParams,
+  Balance,
   CallParams,
+  CompatibleAsset,
   EstimateApproveParams,
   EstimateCallParams,
   EvmDefaults,
@@ -35,7 +34,9 @@ import {
   GasPrices,
   ISigner,
   IsApprovedParams,
+  Tx,
   TxParams,
+  TxsPage,
 } from '../types'
 import {
   call,
@@ -412,7 +413,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @param {Asset} asset - The asset to check.
    * @returns {boolean} True if the asset matches the gas asset, false otherwise.
    */
-  private isGasAsset(asset: Asset): boolean {
+  private isGasAsset(asset: CompatibleAsset): asset is Asset {
     return eqAsset(this.config.gasAsset, asset)
   }
 

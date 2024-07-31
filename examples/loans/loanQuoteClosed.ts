@@ -2,7 +2,15 @@ import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { LoanCloseParams, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  register9Rheader,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
@@ -15,10 +23,10 @@ const getLoanQuoteClosed = async (tcAmm: ThorchainAMM) => {
   try {
     const assetAmnt = new CryptoAmount(
       assetToBase(assetAmount(process.argv[4], Number(process.argv[5]))),
-      assetFromStringEx(process.argv[6]),
+      assetFromStringEx(process.argv[6]) as Asset | TokenAsset,
     )
     const loanQuoteParams: LoanCloseParams = {
-      asset: assetFromStringEx(process.argv[3]), // Asset recieved from loan Open
+      asset: assetFromStringEx(process.argv[3]) as Asset | TokenAsset, // Asset recieved from loan Open
       amount: assetAmnt, // asset amount used to provide collateral around the loan
       loanAsset: assetAmnt.asset, // asset
       loanOwner: process.argv[7], // asset address

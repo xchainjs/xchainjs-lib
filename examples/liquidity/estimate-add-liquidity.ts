@@ -8,12 +8,21 @@ import {
   ThorchainQuery,
   Thornode,
 } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, register9Rheader } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetCryptoAmount,
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  register9Rheader,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
 
-function print(estimate: EstimateAddLP, rune: CryptoAmount, asset: CryptoAmount) {
+function print(estimate: EstimateAddLP, rune: AssetCryptoAmount, asset: CryptoAmount<Asset | TokenAsset>) {
   const expanded = {
     rune: rune.formatedAssetString(),
     asset: asset.formatedAssetString(),
@@ -43,13 +52,16 @@ const estimateAddLp = async () => {
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
     // TODO check if synth?
-    const rune = new CryptoAmount(assetToBase(assetAmount(process.argv[3])), assetFromStringEx(process.argv[4]))
+    const rune = new AssetCryptoAmount(
+      assetToBase(assetAmount(process.argv[3])),
+      assetFromStringEx(process.argv[4]) as Asset,
+    )
     if (!isAssetRuneNative(rune.asset)) {
       throw Error('THOR.RUNE  must be the first argument')
     }
     const asset = new CryptoAmount(
       assetToBase(assetAmount(process.argv[5], Number(process.argv[6]))),
-      assetFromStringEx(process.argv[7]),
+      assetFromStringEx(process.argv[7]) as Asset | TokenAsset,
     )
     // const rune =
     const addLpParams: AddliquidityPosition = {

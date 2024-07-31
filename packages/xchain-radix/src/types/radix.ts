@@ -1,3 +1,15 @@
+import {
+  Balance as BaseBalance,
+  Tx as BaseTx,
+  TxFrom as BaseTxFrom,
+  TxParams as BaseTxParams,
+  TxTo as BaseTxTo,
+  TxsPage as BaseTxsPage,
+} from '@xchainjs/xchain-client'
+import { Asset, TokenAsset } from '@xchainjs/xchain-util'
+
+export type CompatibleAsset = Asset | TokenAsset
+
 export type Transaction = {
   manifest: string
   start_epoch_inclusive: number
@@ -17,4 +29,45 @@ type TransactionFlag = {
   use_free_credit: boolean
   assume_all_signature_proofs: boolean
   skip_epoch_check: boolean
+}
+
+/**
+ * Radix balance
+ */
+export type Balance = BaseBalance & {
+  asset: CompatibleAsset
+}
+
+/**
+ * Type definition for the sender of a Radix transaction.
+ */
+export type TxFrom = BaseTxFrom & {
+  asset?: CompatibleAsset
+}
+
+/**
+ * Type definition for the recipient of a Radix transaction.
+ */
+export type TxTo = BaseTxTo & {
+  asset?: CompatibleAsset
+}
+
+/**
+ * Type definition for a Radix transaction.
+ */
+export type Tx = BaseTx & {
+  asset: CompatibleAsset
+  from: TxFrom[]
+  to: TxTo[]
+}
+
+/**
+ * Type definition for a page of Radix transactions.
+ */
+export type TxsPage = BaseTxsPage & {
+  txs: Tx[]
+}
+
+export type TxParams = BaseTxParams & {
+  asset?: CompatibleAsset
 }

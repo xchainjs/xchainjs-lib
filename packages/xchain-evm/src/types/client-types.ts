@@ -1,4 +1,5 @@
 import { FeeOption, Fees, Network, TxParams as BaseTxParams } from '@xchainjs/xchain-client'
+import { Balance, CompatibleAsset, Tx, TxsPage } from '@xchainjs/xchain-evm-providers'
 import { Address, BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber, Signer, ethers } from 'ethers'
 
@@ -62,6 +63,7 @@ export type EvmDefaults = {
 }
 
 export type TxParams = BaseTxParams & {
+  asset?: CompatibleAsset
   feeOption?: FeeOption
   gasPrice?: BaseAmount
   maxFeePerGas?: BaseAmount
@@ -69,3 +71,5 @@ export type TxParams = BaseTxParams & {
   gasLimit?: BigNumber
   isMemoEncoded?: boolean
 }
+
+export { CompatibleAsset, Balance, Tx, TxsPage }

@@ -9,7 +9,16 @@ import { Client as DogeClient, DOGEChain, defaultDogeParams } from '@xchainjs/xc
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient, LTCChain, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, THORChain, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
-import { Address, Asset, Chain, eqAsset } from '@xchainjs/xchain-util'
+import { CompatibleAsset } from '@xchainjs/xchain-thorchain-query'
+import {
+  Address,
+  Chain,
+  CryptoAmount,
+  TokenAsset,
+  TokenCryptoAmount,
+  eqAsset,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 
 /**
  * Check if a chain is EVM and supported by the protocol
@@ -25,10 +34,22 @@ export const isProtocolEVMChain = (chain: Chain): boolean => {
  * @param {Asset} asset to check
  * @returns true if asset is ERC20, otherwise, false
  */
-export const isProtocolERC20Asset = (asset: Asset): boolean => {
+export const isProtocolERC20Asset = (asset: CompatibleAsset): asset is TokenAsset => {
   return isProtocolEVMChain(asset.chain)
     ? [AssetETH, AssetAVAX, AssetBSC].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 &&
-        !asset.synth
+        !isSynthAsset(asset)
+    : false
+}
+
+/**
+ * Check if asset is ERC20
+ * @param {Asset} asset to check
+ * @returns true if asset is ERC20, otherwise, false
+ */
+export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCryptoAmount => {
+  return isProtocolEVMChain(amount.asset.chain)
+    ? [AssetETH, AssetAVAX, AssetBSC].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, amount.asset)) === -1 &&
+        !isSynthAsset(amount.asset)
     : false
 }
 

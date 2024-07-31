@@ -1,16 +1,19 @@
 import { Provider } from '@ethersproject/abstract-provider'
+import { FeeOption, FeeRates, TxHistoryParams } from '@xchainjs/xchain-client'
 import {
-  Balance,
-  EvmOnlineDataProvider,
-  FeeOption,
-  FeeRates,
-  Tx,
-  TxHistoryParams,
-  TxsPage,
-} from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+  Address,
+  Asset,
+  AssetType,
+  BaseAmount,
+  Chain,
+  TokenAsset,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { BigNumber, ethers } from 'ethers'
+
+import { Balance, CompatibleAsset, EvmOnlineDataProvider, Tx, TxsPage } from '../../types'
 
 import erc20ABI from './erc20.json'
 import * as etherscanAPI from './etherscan-api'
@@ -42,7 +45,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     this.chain
   }
 
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+  async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
     //validate assets are for the correct chain
     assets?.forEach((i) => {
       if (i.chain !== this.chain) throw Error(`${assetToString(i)} is not an asset of ${this.chain}`)
@@ -78,7 +81,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
 
     return balances
   }
-  private async getNativeAssetBalance(address: Address): Promise<Balance> {
+  private async getNativeAssetBalance(address: Address): Promise<{ asset: Asset; amount: BaseAmount }> {
     const gasAssetBalance: BigNumber = await this.provider.getBalance(address)
     const amount = baseAmount(gasAssetBalance.toString(), this.nativeAssetDecimals)
     return {
@@ -86,12 +89,16 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
       amount,
     }
   }
-  private async getTokenBalance(address: Address, contractAddress: string, tokenTicker: string): Promise<Balance> {
-    const asset: Asset = {
+  private async getTokenBalance(
+    address: Address,
+    contractAddress: string,
+    tokenTicker: string,
+  ): Promise<{ asset: TokenAsset; amount: BaseAmount }> {
+    const asset: TokenAsset = {
       chain: this.chain,
       symbol: `${tokenTicker}-${contractAddress}`,
       ticker: tokenTicker,
-      synth: false,
+      type: AssetType.TOKEN,
     }
 
     const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, this.provider)

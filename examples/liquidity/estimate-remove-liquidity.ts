@@ -7,7 +7,7 @@ import {
   Thornode,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { assetFromString, register9Rheader } from '@xchainjs/xchain-util'
+import { Asset, TokenAsset, assetFromString, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
@@ -42,7 +42,7 @@ const estimateWithdrawLp = async () => {
     const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
 
-    const asset = assetFromString(process.argv[3])
+    const asset = assetFromString(process.argv[3]) as Asset | TokenAsset
     const percentage = Number(process.argv[4])
     const assetAddress = process.argv[5] || ''
     const runeAddress = process.argv[6] || ''
