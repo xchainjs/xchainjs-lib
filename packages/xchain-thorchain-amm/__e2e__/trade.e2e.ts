@@ -1,8 +1,8 @@
-import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { AssetCryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetCryptoAmount, AssetType, TradeCryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
@@ -44,6 +44,42 @@ describe('ThorchainAmm e2e tests', () => {
       const txSubmitted = await thorchainAmm.addToTradeAccount({
         amount: new AssetCryptoAmount(assetToBase(assetAmount(1, 18)), AssetAVAX),
         address: await wallet.getAddress(THORChain),
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it('Should estimate withdraw from trade amount', async () => {
+      const quote = await thorchainAmm.estimateWithdrawFromTradeAccount({
+        amount: new TradeCryptoAmount(assetToBase(assetAmount(0.25, 8)), {
+          chain: AVAXChain,
+          symbol: 'AVAX',
+          ticker: 'AVAX',
+          type: AssetType.TRADE,
+        }),
+        address: await wallet.getAddress(AVAXChain),
+      })
+
+      console.log({
+        memo: quote.memo,
+        allowed: quote.allowed,
+        errors: quote.errors,
+        value: {
+          amount: quote.value.assetAmount.amount().toString(),
+          asset: quote.value.asset,
+        },
+      })
+    })
+
+    it('Should withdraw from trade amount', async () => {
+      const txSubmitted = await thorchainAmm.withdrawFromTradeAccount({
+        amount: new TradeCryptoAmount(assetToBase(assetAmount(0.25, 8)), {
+          chain: AVAXChain,
+          symbol: 'AVAX',
+          ticker: 'AVAX',
+          type: AssetType.TRADE,
+        }),
+        address: await wallet.getAddress(AVAXChain),
       })
 
       console.log(txSubmitted)

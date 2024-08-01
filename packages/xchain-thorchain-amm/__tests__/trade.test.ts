@@ -1,5 +1,13 @@
+import { AVAXChain } from '@xchainjs/xchain-avax'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
-import { AssetCryptoAmount, AssetType, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  AssetCryptoAmount,
+  AssetType,
+  TradeCryptoAmount,
+  assetAmount,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
@@ -70,6 +78,43 @@ describe('ThorchainAMM', () => {
       expect(quote.allowed).toBeFalsy()
       expect(quote.errors.length).toBe(1)
       expect(quote.errors[0]).toBe('Can not get inbound address for ETHH')
+    })
+
+    it('Should estimate withdraw from trade account with no errors', async () => {
+      const quote = await thorchainAMM.estimateWithdrawFromTradeAccount({
+        amount: new TradeCryptoAmount(assetToBase(assetAmount(1, 18)), {
+          chain: AVAXChain,
+          symbol: 'AVAX',
+          ticker: 'AVAX',
+          type: AssetType.TRADE,
+        }),
+        address: '0x09383137C1eEe3E1A8bc781228E4199f6b4A9bbf',
+      })
+
+      expect(quote.memo).toBe('TRADE-:0x09383137C1eEe3E1A8bc781228E4199f6b4A9bbf')
+      expect(assetToString(quote.value.asset)).toBe('AVAX~AVAX')
+      expect(quote.value.assetAmount.amount().toString()).toBe('1')
+      expect(quote.allowed).toBeTruthy()
+      expect(quote.errors.length).toBe(0)
+    })
+
+    it('Should estimate withdraw from trade account with address errors', async () => {
+      const quote = await thorchainAMM.estimateWithdrawFromTradeAccount({
+        amount: new TradeCryptoAmount(assetToBase(assetAmount(0.25, 8)), {
+          chain: AVAXChain,
+          symbol: 'AVAX',
+          ticker: 'AVAX',
+          type: AssetType.TRADE,
+        }),
+        address: '0x09383137C1eEe3E1A8bc781f',
+      })
+
+      expect(quote.memo).toBe('')
+      expect(assetToString(quote.value.asset)).toBe('AVAX~AVAX')
+      expect(quote.value.assetAmount.amount().toString()).toBe('0')
+      expect(quote.allowed).toBeFalsy()
+      expect(quote.errors.length).toBe(1)
+      expect(quote.errors[0]).toBe('Invalid address to send the withdraw')
     })
   })
 })

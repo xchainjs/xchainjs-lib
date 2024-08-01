@@ -57,6 +57,8 @@ import {
   IsApprovedParams,
   QuoteTHORName,
   TxSubmitted,
+  WithdrawFromTradeAccount,
+  WithdrawFromTradeAccountParams,
   WithdrawLiquidity,
 } from './types'
 import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
@@ -786,6 +788,61 @@ export class ThorchainAMM {
       assetAmount: quote.value,
       memo: quote.memo,
       recipient: quote.toAddress,
+    })
+  }
+
+  /**
+   * Estimate withdrawing trade amount from account
+   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
+   * @returns {WithdrawFromTradeAccount} Estimation to withdraw amount from trade account
+   */
+  public async estimateWithdrawFromTradeAccount({
+    amount,
+    address,
+  }: WithdrawFromTradeAccountParams): Promise<WithdrawFromTradeAccount> {
+    const errors: string[] = []
+
+    if (
+      !validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        amount.asset.chain,
+        address,
+      )
+    ) {
+      errors.push('Invalid address to send the withdraw')
+    }
+
+    if (errors.length) {
+      return {
+        allowed: false,
+        errors,
+        value: new CryptoAmount(baseAmount(0, amount.assetAmount.decimal), amount.asset),
+        memo: '',
+      }
+    }
+
+    return {
+      memo: `TRADE-:${address}`,
+      value: amount,
+      allowed: true,
+      errors,
+    }
+  }
+
+  /**
+   * Withdraw trade amount from account
+   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
+   * @returns {TxSubmitted} Estimation to withdraw amount from trade account
+   */
+  public async withdrawFromTradeAccount({ amount, address }: WithdrawFromTradeAccountParams): Promise<TxSubmitted> {
+    const quote = await this.estimateWithdrawFromTradeAccount({ amount, address })
+
+    if (!quote.allowed) throw Error(`Can not withdraw from trade account. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
     })
   }
 }

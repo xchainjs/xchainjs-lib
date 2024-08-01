@@ -9,6 +9,7 @@ import {
   CryptoAmount,
   SynthAsset,
   TokenAsset,
+  TradeCryptoAmount,
 } from '@xchainjs/xchain-util'
 
 /**
@@ -182,6 +183,42 @@ export type AddToTradeAccount = {
    * Amount to send to the address
    */
   value: CryptoAmount<Asset | TokenAsset>
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
+}
+
+/**
+ * Withdraw from trade account params
+ */
+export type WithdrawFromTradeAccountParams = {
+  /**
+   * Amount to withdraw from the account
+   */
+  amount: TradeCryptoAmount
+  /**
+   * Address to make to the withdraw to
+   */
+  address: Address
+}
+
+/**
+ * Estimation to add amount to trade account
+ */
+export type WithdrawFromTradeAccount = {
+  /**
+   * Memo to add to the transaction to add the trade amount
+   */
+  memo: string
+  /**
+   * Amount to send to the address
+   */
+  value: TradeCryptoAmount
   /**
    * If the action can be or not can be done
    */
