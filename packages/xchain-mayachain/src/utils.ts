@@ -1,5 +1,5 @@
 import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
-import { Address, assetToString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, AssetType, assetToString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { AssetCacao, AssetMaya, CACAO_DENOM, MAYA_DENOM } from './const'
@@ -114,5 +114,24 @@ export const getPrefix = (network: Network) => {
       return 'smaya'
     case Network.Testnet:
       return 'tmaya'
+  }
+}
+
+/**
+ * Parser XChainJS asset to Mayanode asset
+ */
+export const parseAssetToMayanodeAsset = (
+  asset: CompatibleAsset,
+): {
+  chain: string
+  symbol: string
+  ticker: string
+  synth: boolean
+} => {
+  return {
+    chain: asset.chain,
+    symbol: asset.symbol,
+    ticker: asset.ticker,
+    synth: asset.type === AssetType.SYNTH,
   }
 }

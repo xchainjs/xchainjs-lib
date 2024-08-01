@@ -25,6 +25,7 @@ import {
   MSG_DEPOSIT_TYPE_URL,
 } from './const'
 import { CompatibleAsset, DepositParam, TxOfflineParams, TxParams } from './types'
+import { parseAssetToTHORNodeAsset } from './utils'
 
 /**
  * Thorchain Keystore client
@@ -310,7 +311,7 @@ export class ClientKeystore extends Client {
                 coins: [
                   {
                     amount: amount.amount().toString(),
-                    asset,
+                    asset: parseAssetToTHORNodeAsset(asset),
                   },
                 ],
               },
