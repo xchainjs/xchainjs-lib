@@ -171,6 +171,10 @@ export type AddToTradeAccountParams = {
  */
 export type AddToTradeAccount = {
   /**
+   * Address to send transaction
+   */
+  toAddress: string
+  /**
    * Memo to add to the transaction to add the trade amount
    */
   memo: string

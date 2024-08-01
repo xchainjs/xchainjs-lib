@@ -22,6 +22,7 @@ import {
   EstimateAddSaver,
   EstimateWithdrawLP,
   EstimateWithdrawSaver,
+  InboundDetail,
   LoanCloseParams,
   LoanCloseQuote,
   LoanOpenParams,
@@ -739,21 +740,30 @@ export class ThorchainAMM {
     const errors: string[] = []
 
     if (
-      validateAddress(this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network, THORChain, address)
+      !validateAddress(this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network, THORChain, address)
     ) {
       errors.push('Invalid trade account address')
+    }
+
+    let inboundDetails: InboundDetail | undefined
+    try {
+      inboundDetails = await this.thorchainQuery.getChainInboundDetails(amount.asset.chain)
+    } catch {
+      errors.push(`Can not get inbound address for ${amount.asset.chain}`)
     }
 
     if (errors.length) {
       return {
         allowed: false,
         errors,
-        value: new CryptoAmount(baseAmount(0), amount.asset),
+        value: new CryptoAmount(baseAmount(0, amount.assetAmount.decimal), amount.asset),
         memo: '',
+        toAddress: '',
       }
     }
 
     return {
+      toAddress: inboundDetails ? inboundDetails.address : '',
       memo: `TRADE+:${address}`,
       value: amount,
       allowed: true,
@@ -775,6 +785,7 @@ export class ThorchainAMM {
       wallet: this.wallet,
       assetAmount: quote.value,
       memo: quote.memo,
+      recipient: quote.toAddress,
     })
   }
 }
