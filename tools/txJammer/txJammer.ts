@@ -34,6 +34,7 @@ import {
   CryptoAmount,
   SynthAsset,
   TokenAsset,
+  TradeAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -380,7 +381,9 @@ export class TxJammer {
     }
     this.txRecords.push(result)
   }
-  private async createCryptoAmount<T extends Asset | TokenAsset | SynthAsset>(asset: T): Promise<CryptoAmount<T>> {
+  private async createCryptoAmount<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
+    asset: T,
+  ): Promise<CryptoAmount<T>> {
     const amount = this.getRandomFloat(this.minAmount, this.maxAmount)
     const usdPool = await this.getDeepestUSDPool()
     const usdAmount = new CryptoAmount(assetToBase(assetAmount(amount)), usdPool.asset)
@@ -418,7 +421,10 @@ export class TxJammer {
     const rand = this.getRandomInt(0, 1)
     return rand == 0 ? [this.wallet1, this.wallet2] : [this.wallet2, this.wallet1]
   }
-  private getRandomSwapAssets(): [Asset | TokenAsset | SynthAsset, Asset | TokenAsset | SynthAsset] {
+  private getRandomSwapAssets(): [
+    Asset | TokenAsset | SynthAsset | TradeAsset,
+    Asset | TokenAsset | SynthAsset | TradeAsset,
+  ] {
     const sourceAndDestAssetString = weighted.select(this.weightedSwap) as string
     const assets = sourceAndDestAssetString.split(' ')
     const sourceAsset = assetFromStringEx(assets[0])
