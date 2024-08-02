@@ -1,7 +1,15 @@
 import { AssetCacao, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
-import { AnyAsset, Chain, assetFromStringEx, eqAsset } from '@xchainjs/xchain-util'
+import {
+  AnyAsset,
+  Chain,
+  CryptoAmount,
+  assetFromStringEx,
+  eqAsset,
+  isSynthAsset,
+  isTradeAsset,
+} from '@xchainjs/xchain-util'
 
 import {
   IProtocol,
@@ -12,6 +20,8 @@ import {
   SwapHistoryParams,
   TxSubmitted,
 } from '../../types'
+
+import { CompatibleAsset } from './types'
 
 export class MayachainProtocol implements IProtocol {
   public readonly name = 'Mayachain'
@@ -31,7 +41,8 @@ export class MayachainProtocol implements IProtocol {
    * @returns {boolean} True if the asset is supported, otherwise false
    */
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
-    if (eqAsset(asset, AssetCacao)) return true
+    if (isTradeAsset(asset)) return false
+    if (eqAsset(asset, AssetCacao) || isSynthAsset(asset)) return true
     const pools = await this.mayachainQuery.getPools()
     return (
       pools.findIndex((pool) => pool.status === 'available' && eqAsset(asset, assetFromStringEx(pool.asset))) !== -1
@@ -56,6 +67,9 @@ export class MayachainProtocol implements IProtocol {
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const estimatedSwap = await this.mayachainAmm.estimateSwap({
       ...params,
+      fromAsset: params.fromAsset as CompatibleAsset,
+      destinationAsset: params.destinationAsset as CompatibleAsset,
+      amount: params.amount as CryptoAmount<CompatibleAsset>,
       affiliateBps: this.configuration?.affiliateBps,
       affiliateAddress: this.configuration?.affiliateAddress,
     })
@@ -82,6 +96,9 @@ export class MayachainProtocol implements IProtocol {
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     return this.mayachainAmm.doSwap({
       ...params,
+      fromAsset: params.fromAsset as CompatibleAsset,
+      destinationAsset: params.destinationAsset as CompatibleAsset,
+      amount: params.amount as CryptoAmount<CompatibleAsset>,
       affiliateBps: this.configuration?.affiliateBps,
       affiliateAddress: this.configuration?.affiliateAddress,
     })

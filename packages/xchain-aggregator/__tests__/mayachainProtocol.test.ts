@@ -32,6 +32,10 @@ describe('Mayachain protocol', () => {
     expect(await protocol.isAssetSupported(assetFromStringEx('AVAX.AVAX'))).toBeFalsy()
   })
 
+  it('Should check trade assets are not supported', async () => {
+    expect(await protocol.isAssetSupported(assetFromStringEx('AVAX~AVAX'))).toBeFalsy()
+  })
+
   it('Should get all swaps with correct protocol name', async () => {
     const swaps = await protocol.getSwapHistory({ chainAddresses: [{ chain: 'chain', address: 'address' }] })
     expect(swaps.swaps.every((swap) => swap.protocol === 'Mayachain')).toEqual(true)

@@ -9,6 +9,7 @@ import {
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
+import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
@@ -67,6 +68,7 @@ describe('Aggregator', () => {
       }),
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
+      THOR: new ThorClient({ phrase, network: Network.Mainnet }),
     })
     aggregator = new Aggregator({ wallet })
   })
@@ -89,6 +91,16 @@ describe('Aggregator', () => {
       fromAsset: AssetBTC,
       destinationAsset: AssetKUJI,
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
+    })
+    printQuoteSwap(estimatedSwap)
+  })
+
+  it('Should find estimated swap with trade assets', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: assetFromStringEx('BTC~BTC'),
+      destinationAsset: assetFromStringEx('ETH~ETH'),
+      amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), assetFromStringEx('BTC~BTC')),
+      destinationAddress: await wallet.getAddress(THORChain),
     })
     printQuoteSwap(estimatedSwap)
   })
