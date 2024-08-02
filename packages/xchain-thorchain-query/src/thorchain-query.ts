@@ -204,7 +204,7 @@ export class ThorchainQuery {
       expiry: new Date(swapQuote.expiry * 1000),
       txEstimate: {
         totalFees: {
-          asset: fromAsset,
+          asset: destinationAsset,
           affiliateFee: getCryptoAmountWithNotation(
             new CryptoAmount(baseAmount(swapQuote.fees.affiliate), feeAsset),
             feeAssetDecimals,
@@ -329,8 +329,8 @@ export class ThorchainQuery {
    * @param ouAsset - the Asset you want to convert to
    * @returns CryptoAmount of input
    */
-  async convert<T extends Asset | TokenAsset | SynthAsset>(
-    input: CryptoAmount<Asset | TokenAsset | SynthAsset>,
+  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
+    input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset>,
     outAsset: T,
   ): Promise<CryptoAmount<T>> {
     // Convert the input amount to the specified asset

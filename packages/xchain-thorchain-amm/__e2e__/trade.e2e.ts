@@ -1,4 +1,5 @@
 import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { BTCChain } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
@@ -80,6 +81,32 @@ describe('ThorchainAmm e2e tests', () => {
           type: AssetType.TRADE,
         }),
         address: await wallet.getAddress(AVAXChain),
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it('Should swap trade assets', async () => {
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAsset: {
+          chain: AVAXChain,
+          symbol: 'AVAX',
+          ticker: 'AVAX',
+          type: AssetType.TRADE,
+        },
+        amount: new TradeCryptoAmount(assetToBase(assetAmount('10')), {
+          chain: AVAXChain,
+          symbol: 'AVAX',
+          ticker: 'AVAX',
+          type: AssetType.TRADE,
+        }),
+        destinationAddress: await wallet.getAddress(THORChain),
+        destinationAsset: {
+          chain: BTCChain,
+          symbol: 'BTC',
+          ticker: 'BTC',
+          type: AssetType.TRADE,
+        },
       })
 
       console.log(txSubmitted)

@@ -3,8 +3,10 @@ import { AssetETH } from '@xchainjs/xchain-ethereum'
 import {
   AssetCryptoAmount,
   AssetType,
+  CryptoAmount,
   TradeCryptoAmount,
   assetAmount,
+  assetFromStringEx,
   assetToBase,
   assetToString,
 } from '@xchainjs/xchain-util'
@@ -115,6 +117,75 @@ describe('ThorchainAMM', () => {
       expect(quote.allowed).toBeFalsy()
       expect(quote.errors.length).toBe(1)
       expect(quote.errors[0]).toBe('Invalid address to send the withdraw')
+    })
+
+    it('Should validate trade swap with no errors', async () => {
+      const errors = await thorchainAMM.validateSwap({
+        fromAsset: assetFromStringEx('AVAX~AVAX'),
+        amount: new CryptoAmount(assetToBase(assetAmount('100')), assetFromStringEx('AVAX~AVAX')),
+        destinationAddress: 'thor12fw3syyy4ff78llh3fvhrvdy7xnqlegvru7seg',
+        destinationAsset: assetFromStringEx('ETH~ETH'),
+      })
+      expect(errors.length).toBe(0)
+    })
+
+    it('Should validate trade swap with incompatible destination asset error', async () => {
+      const errors = await thorchainAMM.validateSwap({
+        fromAsset: assetFromStringEx('AVAX~AVAX'),
+        amount: new CryptoAmount(assetToBase(assetAmount('100')), assetFromStringEx('AVAX~AVAX')),
+        destinationAddress: '0x09383137C1eEe3E1A8bc781228E4199f6b4A9bbf',
+        destinationAsset: assetFromStringEx('ETH.ETH'),
+      })
+      expect(errors.length).toBe(1)
+      expect(errors[0]).toBe(
+        'Can not make swap from trade asset to non trade asset. Use withdrawFromTrade (TRADE-) operation',
+      )
+    })
+
+    it('Should validate trade swap with incompatible source asset error', async () => {
+      const errors = await thorchainAMM.validateSwap({
+        fromAsset: assetFromStringEx('AVAX.AVAX'),
+        amount: new CryptoAmount(assetToBase(assetAmount('100')), assetFromStringEx('AVAX.AVAX')),
+        destinationAddress: 'thor12fw3syyy4ff78llh3fvhrvdy7xnqlegvru7seg',
+        destinationAsset: assetFromStringEx('ETH~ETH'),
+      })
+      expect(errors.length).toBe(1)
+      expect(errors[0]).toBe('Can not make swap from non trade asset to trade asset. Use addToTrade (TRADE+) operation')
+    })
+
+    it('Should estimate trade asset swap', async () => {
+      const tAvax = assetFromStringEx('AVAX~AVAX')
+      const tEth = assetFromStringEx('ETH~ETH')
+
+      const quote = await thorchainAMM.estimateSwap({
+        fromAsset: assetFromStringEx('AVAX~AVAX'),
+        amount: new CryptoAmount(assetToBase(assetAmount('100')), tAvax),
+        destinationAddress: 'thor12fw3syyy4ff78llh3fvhrvdy7xnqlegvru7seg',
+        destinationAsset: tEth,
+      })
+
+      expect(quote.toAddress).toBe('')
+      expect(quote.memo).toBe('=:ETH~ETH:thor12fw3syyy4ff78llh3fvhrvdy7xnqlegvru7seg')
+      expect(assetToString(quote.txEstimate.netOutput.asset)).toBe(assetToString(tEth))
+      expect(quote.txEstimate.netOutput.baseAmount.amount().toString()).toBe('7940816')
+      expect(quote.txEstimate.netOutput.baseAmount.decimal).toBe(8)
+      expect(assetToString(quote.dustThreshold.asset)).toBe(assetToString(tAvax))
+      expect(quote.dustThreshold.baseAmount.amount().toString()).toBe('0')
+      expect(quote.dustThreshold.baseAmount.decimal).toBe(8)
+      expect(assetToString(quote.txEstimate.totalFees.asset)).toBe(assetToString(tEth))
+      expect(assetToString(quote.txEstimate.totalFees.affiliateFee.asset)).toBe(assetToString(tEth))
+      expect(quote.txEstimate.totalFees.affiliateFee.baseAmount.amount().toString()).toBe('0')
+      expect(quote.txEstimate.totalFees.affiliateFee.baseAmount.decimal).toBe(8)
+      expect(assetToString(quote.txEstimate.totalFees.outboundFee.asset)).toBe(assetToString(tEth))
+      expect(quote.txEstimate.totalFees.outboundFee.baseAmount.amount().toString()).toBe('0')
+      expect(quote.txEstimate.totalFees.outboundFee.baseAmount.decimal).toBe(8)
+      expect(quote.txEstimate.outboundDelayBlocks).toBe(1)
+      expect(quote.txEstimate.outboundDelaySeconds).toBe(6)
+      expect(quote.txEstimate.totalSwapSeconds).toBe(6)
+      expect(quote.txEstimate.slipBasisPoints).toBe(5)
+      expect(quote.txEstimate.canSwap).toBe(true)
+      expect(quote.txEstimate.errors.length).toBe(0)
+      expect(quote.txEstimate.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
     })
   })
 })

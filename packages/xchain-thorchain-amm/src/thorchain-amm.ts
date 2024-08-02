@@ -45,6 +45,7 @@ import {
   assetToString,
   baseAmount,
   isSynthAsset,
+  isTradeAsset,
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
@@ -164,11 +165,19 @@ export class ThorchainAMM {
       destinationAddress &&
       !validateAddress(
         this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
-        isSynthAsset(destinationAsset) ? THORChain : destinationAsset.chain,
+        isSynthAsset(destinationAsset) || isTradeAsset(destinationAsset) ? THORChain : destinationAsset.chain,
         destinationAddress,
       )
     ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
+    }
+
+    if (!isTradeAsset(fromAsset) && isTradeAsset(destinationAsset)) {
+      errors.push('Can not make swap from non trade asset to trade asset. Use addToTrade (TRADE+) operation')
+    }
+
+    if (isTradeAsset(fromAsset) && !isTradeAsset(destinationAsset)) {
+      errors.push('Can not make swap from trade asset to non trade asset. Use withdrawFromTrade (TRADE-) operation')
     }
 
     if (affiliateAddress) {
