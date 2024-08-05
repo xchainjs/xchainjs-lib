@@ -1,0 +1,32 @@
+[
+  {
+    "rune_address": "thor1099eqjssupxhaaf9c3glsxvt2j8q4uaf7awayr",
+    "units": "83486766394",
+    "value": "86588295723",
+    "pnl": "1694295723",
+    "deposit_amount": "84894000000",
+    "withdraw_amount": "0",
+    "last_deposit_height": 17087643,
+    "last_withdraw_height": 0
+  },
+  {
+    "rune_address": "thor10mng80qpckfqvsy2r24ntnne3etdratz63pawh",
+    "units": "497019269851",
+    "value": "515483511661",
+    "pnl": "15483511661",
+    "deposit_amount": "500000000000",
+    "withdraw_amount": "0",
+    "last_deposit_height": 17070187,
+    "last_withdraw_height": 0
+  },
+  {
+    "rune_address": "thor10pv8xhkxvsgzuvf9ayzuhn2c8lupv0w0nzmgxs",
+    "units": "10812564288",
+    "value": "11214250528",
+    "pnl": "214250528",
+    "deposit_amount": "11000000000",
+    "withdraw_amount": "0",
+    "last_deposit_height": 17096088,
+    "last_withdraw_height": 0
+  }
+]

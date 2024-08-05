@@ -18,6 +18,10 @@ import {
   QuoteSaverDepositResponse,
   QuoteSaverWithdrawResponse,
   QuoteSwapResponse,
+  RUNEPoolApi,
+  RUNEPoolResponse,
+  RUNEProvider,
+  RUNEProvidersResponse,
   Saver,
   SaversApi,
   SaversResponse,
@@ -65,6 +69,7 @@ export class Thornode {
   private quoteApi: QuoteApi[]
   private mimirApi: MimirApi[]
   private thornamesApi: ThornamesApi[]
+  private runePoolApi: RUNEPoolApi[]
 
   constructor(network: Network = Network.Mainnet, config?: ThornodeConfig) {
     this.network = network
@@ -85,6 +90,7 @@ export class Thornode {
     this.thornamesApi = this.config.thornodeBaseUrls.map(
       (url) => new ThornamesApi(new Configuration({ basePath: url })),
     )
+    this.runePoolApi = this.config.thornodeBaseUrls.map((url) => new RUNEPoolApi(new Configuration({ basePath: url })))
   }
 
   /**
@@ -508,5 +514,51 @@ export class Thornode {
       } catch (e) {}
     }
     throw new Error(`THORNode is not responding`)
+  }
+
+  /**
+   * Get rune pool information
+   * @param {number} height block height
+   * @returns {RUNEPoolResponse} the pool information for the RUNE pool.
+   */
+  async getRunePool(height?: number): Promise<RUNEPoolResponse> {
+    for (const api of this.runePoolApi) {
+      try {
+        const resp = (await api.runePool(height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`THORNode is not responding. Can not ger Rune pool`)
+  }
+
+  /**
+   * Get Rune pool provider information
+   * @param {string} address of which return the info
+   * @param {number} height block height
+   * @returns {RUNEProvider} the RUNE Provider information for an address.
+   */
+  async getRunePoolProvider(address: string, height?: number): Promise<RUNEProvider> {
+    for (const api of this.runePoolApi) {
+      try {
+        const resp = (await api.runeProvider(address, height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`THORNode is not responding. Can not get Rune pool provider info`)
+  }
+
+  /**
+   * Get all Rune pool providers information
+   * @param {number} height block height
+   * @returns {RUNEProvidersResponse} all Rune Providers.
+   */
+  async getRunePoolProviders(height?: number): Promise<RUNEProvidersResponse> {
+    for (const api of this.runePoolApi) {
+      try {
+        const resp = (await api.runeProviders(height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`THORNode is not responding. Can not get all Rune providers info`)
   }
 }

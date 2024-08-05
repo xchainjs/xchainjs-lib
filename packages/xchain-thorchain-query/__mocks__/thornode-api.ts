@@ -80,5 +80,20 @@ export default {
       const resp = require('./responses/thornode/mimir.json')
       return [200, resp]
     })
+
+    mock.onGet(/\/thorchain\/runepool/).reply(function () {
+      const resp = require('./responses/thornode/runePool.json')
+      return [200, resp]
+    })
+
+    mock.onGet(/\/thorchain\/rune_providers/).reply(function () {
+      const resp = require('./responses/thornode/runePoolProviders.json')
+      return [200, resp]
+    })
+
+    mock.onGet(/\/thorchain\/rune_provider/).reply(function () {
+      const resp = require('./responses/thornode/runePoolProvider.json')
+      return [200, resp]
+    })
   },
 }
