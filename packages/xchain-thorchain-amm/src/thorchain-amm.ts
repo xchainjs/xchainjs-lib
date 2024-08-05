@@ -44,6 +44,7 @@ import {
   TokenAsset,
   assetToString,
   baseAmount,
+  eqAsset,
   isSynthAsset,
   isTradeAsset,
 } from '@xchainjs/xchain-util'
@@ -172,12 +173,16 @@ export class ThorchainAMM {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
 
-    if (!isTradeAsset(fromAsset) && isTradeAsset(destinationAsset)) {
-      errors.push('Can not make swap from non trade asset to trade asset. Use addToTrade (TRADE+) operation')
+    if (!isTradeAsset(fromAsset) && !eqAsset(fromAsset, AssetRuneNative) && isTradeAsset(destinationAsset)) {
+      errors.push(
+        'Can not make swap from non trade asset or non Rune asset to trade asset. Use addToTrade (TRADE+) operation',
+      )
     }
 
-    if (isTradeAsset(fromAsset) && !isTradeAsset(destinationAsset)) {
-      errors.push('Can not make swap from trade asset to non trade asset. Use withdrawFromTrade (TRADE-) operation')
+    if (isTradeAsset(fromAsset) && !isTradeAsset(destinationAsset) && !eqAsset(destinationAsset, AssetRuneNative)) {
+      errors.push(
+        'Can not make swap from trade asset to non trade asset or non Rune asset. Use withdrawFromTrade (TRADE-) operation',
+      )
     }
 
     if (affiliateAddress) {

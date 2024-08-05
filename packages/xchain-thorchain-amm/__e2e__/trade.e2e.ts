@@ -1,7 +1,7 @@
 import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { BTCChain } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
+import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { AssetCryptoAmount, AssetType, TradeCryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
@@ -100,6 +100,22 @@ describe('ThorchainAmm e2e tests', () => {
           ticker: 'AVAX',
           type: AssetType.TRADE,
         }),
+        destinationAddress: await wallet.getAddress(THORChain),
+        destinationAsset: {
+          chain: BTCChain,
+          symbol: 'BTC',
+          ticker: 'BTC',
+          type: AssetType.TRADE,
+        },
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it('Should swap Rune to trade asset', async () => {
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAsset: AssetRuneNative,
+        amount: new AssetCryptoAmount(assetToBase(assetAmount('10')), AssetRuneNative),
         destinationAddress: await wallet.getAddress(THORChain),
         destinationAsset: {
           chain: BTCChain,

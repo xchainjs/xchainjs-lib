@@ -138,7 +138,7 @@ describe('ThorchainAMM', () => {
       })
       expect(errors.length).toBe(1)
       expect(errors[0]).toBe(
-        'Can not make swap from trade asset to non trade asset. Use withdrawFromTrade (TRADE-) operation',
+        'Can not make swap from trade asset to non trade asset or non Rune asset. Use withdrawFromTrade (TRADE-) operation',
       )
     })
 
@@ -150,7 +150,9 @@ describe('ThorchainAMM', () => {
         destinationAsset: assetFromStringEx('ETH~ETH'),
       })
       expect(errors.length).toBe(1)
-      expect(errors[0]).toBe('Can not make swap from non trade asset to trade asset. Use addToTrade (TRADE+) operation')
+      expect(errors[0]).toBe(
+        'Can not make swap from non trade asset or non Rune asset to trade asset. Use addToTrade (TRADE+) operation',
+      )
     })
 
     it('Should estimate trade asset swap', async () => {
