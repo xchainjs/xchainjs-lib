@@ -41,6 +41,8 @@ import {
   QuoteSwapParams,
   QuoteTHORName,
   QuoteTHORNameParams,
+  RunePool,
+  RunePoolParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
@@ -1411,6 +1413,47 @@ export class ThorchainQuery {
             : undefined,
         }
       }),
+    }
+  }
+
+  /**
+   * Get Rune pool
+   * @param {GetRunePoolParmas} params Get Rune pool params
+   * @returns {RunePool} Rune pool information
+   */
+  public async getRunePool(params?: RunePoolParams): Promise<RunePool> {
+    const pool = await this.thorchainCache.thornode.getRunePool(params?.height)
+    return {
+      pol: {
+        runeDeposited: new AssetCryptoAmount(baseAmount(pool.pol.rune_deposited, THORCHAIN_DECIMAL), AssetRuneNative),
+        runeWithdrawn: new AssetCryptoAmount(baseAmount(pool.pol.rune_withdrawn, THORCHAIN_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(pool.pol.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.pol.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.pol.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+      providers: {
+        units: pool.providers.units,
+        pendingUnits: pool.providers.pending_units,
+        pendingRune: new AssetCryptoAmount(baseAmount(pool.providers.pending_rune, THORCHAIN_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(pool.providers.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.providers.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.providers.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+      reserve: {
+        units: pool.reserve.units,
+        value: new AssetCryptoAmount(baseAmount(pool.reserve.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.reserve.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.reserve.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
     }
   }
 }

@@ -573,3 +573,88 @@ export type QuoteTHORName = {
    */
   value: AssetCryptoAmount
 }
+
+/**
+ * Get Rune pool params
+ */
+export type RunePoolParams = {
+  height?: number
+}
+
+type POL = {
+  /**
+   * Total amount of RUNE deposited into the pools
+   */
+  runeDeposited: AssetCryptoAmount
+  /**
+   * Total amount of RUNE withdrawn from the pools
+   */
+  runeWithdrawn: AssetCryptoAmount
+  /**
+   * Total value of protocol's LP position in RUNE value
+   */
+  value: AssetCryptoAmount
+  /**
+   * Profit and loss of protocol owned liquidity
+   */
+  pnl: AssetCryptoAmount
+  /**
+   * Current amount of rune deposited
+   */
+  currentRuneDeposited: AssetCryptoAmount
+}
+
+type Providers = {
+  /**
+   * The units of RUNEPool owned by providers (including pending)
+   */
+  units: string
+  /**
+   * The units of RUNEPool owned by providers that remain pending
+   */
+  pendingUnits: string
+  /**
+   * The amount of RUNE pending
+   */
+  pendingRune: AssetCryptoAmount
+  /**
+   * The value of the provider share of the RUNEPool (includes pending RUNE)
+   */
+  value: AssetCryptoAmount
+  /**
+   * The profit and loss of the provider share of the RUNEPool
+   */
+  pnl: AssetCryptoAmount
+  /**
+   * The current RUNE deposited by providers
+   */
+  currentRuneDeposited: AssetCryptoAmount
+}
+
+type Reserve = {
+  /**
+   * The units of RUNEPool owned by the reserve
+   */
+  units: string
+  /**
+   * The value of the reserve share of the RUNEPool
+   */
+  value: AssetCryptoAmount
+  /**
+   * The profit and loss of the reserve share of the RUNEPool
+   */
+  pnl: AssetCryptoAmount
+  /**
+   * The current RUNE deposited by the reserve
+   */
+  currentRuneDeposited: AssetCryptoAmount
+}
+
+/**
+ * Rune pool
+ */
+export type RunePool = {
+  pol: POL
+  providers: Providers
+  reserve: Reserve
+}
