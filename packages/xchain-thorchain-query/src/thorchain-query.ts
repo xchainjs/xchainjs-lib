@@ -206,13 +206,13 @@ export class ThorchainQuery {
             feeAssetDecimals,
           ),
         },
-        slipBasisPoints: swapQuote.slippage_bps,
+        slipBasisPoints: swapQuote.fees.slippage_bps,
         netOutput: getCryptoAmountWithNotation(
           new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
           destinationAssetDecimals,
         ),
         netOutputStreaming: getCryptoAmountWithNotation(
-          new CryptoAmount(baseAmount(swapQuote.expected_amount_out_streaming), destinationAsset),
+          new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
           destinationAssetDecimals,
         ),
         outboundDelaySeconds: swapQuote.outbound_delay_seconds,
@@ -220,7 +220,7 @@ export class ThorchainQuery {
         recommendedMinAmountIn: swapQuote.recommended_min_amount_in,
         maxStreamingQuantity: swapQuote.max_streaming_quantity ? swapQuote.max_streaming_quantity : 0,
         outboundDelayBlocks: swapQuote.outbound_delay_blocks,
-        streamingSlipBasisPoints: swapQuote.streaming_slippage_bps,
+        streamingSlipBasisPoints: swapQuote.fees.slippage_bps,
         streamingSwapBlocks: swapQuote.streaming_swap_blocks ? swapQuote.streaming_swap_blocks : 0,
         streamingSwapSeconds: swapQuote.streaming_swap_seconds ? swapQuote.streaming_swap_seconds : 0,
         totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
@@ -779,7 +779,7 @@ export class ThorchainQuery {
       memo: depositQuote.memo, // Memo
       estimatedWaitTime: depositQuote.inbound_confirmation_seconds || 0, // Estimated wait time
       canAddSaver: errors.length === 0, // Can add saver flag
-      slipBasisPoints: depositQuote.slippage_bps, // Slip basis points
+      slipBasisPoints: depositQuote.fees.slippage_bps, // Slip basis points
       saverCapFilledPercent, // Saver filled capacity
       recommendedMinAmountIn: depositQuote.recommended_min_amount_in, // Recommended minimum amount in
       errors, // Errors
@@ -927,7 +927,7 @@ export class ThorchainQuery {
       // Set the outbound delay seconds
       outBoundDelaySeconds: withdrawQuote.outbound_delay_seconds || 0,
       // Set the slip basis points
-      slipBasisPoints: withdrawQuote.slippage_bps,
+      slipBasisPoints: withdrawQuote.fees.slippage_bps,
       // Set the errors
       errors,
     }
@@ -1123,7 +1123,7 @@ export class ThorchainQuery {
         outbound: loanOpenResp.fees.outbound,
         total_bps: loanOpenResp.fees.total_bps,
       },
-      slippageBps: loanOpenResp.slippage_bps,
+      slippageBps: loanOpenResp.fees.slippage_bps,
       router: loanOpenResp.router,
       expiry: loanOpenResp.expiry,
       warning: loanOpenResp.warning,
@@ -1208,7 +1208,7 @@ export class ThorchainQuery {
         outbound: loanCloseResp.fees.outbound,
         total_bps: loanCloseResp.fees.total_bps,
       },
-      slippageBps: loanCloseResp.slippage_bps,
+      slippageBps: loanCloseResp.fees.slippage_bps,
       router: loanCloseResp.router,
       expiry: loanCloseResp.expiry,
       warning: loanCloseResp.warning,

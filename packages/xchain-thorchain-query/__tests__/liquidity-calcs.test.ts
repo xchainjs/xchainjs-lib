@@ -52,6 +52,8 @@ const BusdThornodePoolDetails1: Pool = {
   loan_cr: '',
   loan_collateral_remaining: '',
   asset_tor_price: '11960553161',
+  savers_fill_bps: '4500',
+  savers_capacity_remaining: '1000',
 }
 
 describe(`Liquidity calc tests`, () => {
