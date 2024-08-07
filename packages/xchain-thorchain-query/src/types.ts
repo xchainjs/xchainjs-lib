@@ -682,18 +682,41 @@ export type RunePoolProvider = {
    */
   address: Address
   /**
-   *
+   * The units of RUNEPool owned by the provider
    */
   units: string
+  /**
+   * Current amount the provider has in the Rune pool
+   */
   value: AssetCryptoAmount
+  /**
+   * The profit and loss of the provider
+   */
+  pnl: AssetCryptoAmount
+  /**
+   * Amount deposited by the provider
+   */
   depositAmount: AssetCryptoAmount
+  /**
+   * Amount withdrawn by the provider
+   */
   withdrawAmount: AssetCryptoAmount
   /**
-   *
+   * Last block height the provider made a deposit
    */
   lastDepositHeight: number
   /**
-   *
+   * Last block height the provider made a withdraw
    */
   lastWithdrawHeight: number
+}
+
+/**
+ * Rune pool provider params
+ */
+export type RunePoolProvidersParams = {
+  /**
+   * Block height
+   */
+  height?: number
 }

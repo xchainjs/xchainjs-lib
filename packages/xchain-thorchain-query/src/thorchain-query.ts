@@ -45,6 +45,7 @@ import {
   RunePoolParams,
   RunePoolProvider,
   RunePoolProviderParams,
+  RunePoolProvidersParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
@@ -1460,7 +1461,9 @@ export class ThorchainQuery {
   }
 
   /**
-   *
+   * Get Rune pool provider position
+   * @param {RunePoolProviderParams} params Get Rune pool provider position params
+   * @returns {RunePoolProvider} Rune pool provider position
    */
   public async getRunePoolProvider({ address, height }: RunePoolProviderParams): Promise<RunePoolProvider> {
     const position = await this.thorchainCache.thornode.getRunePoolProvider(address, height)
@@ -1469,10 +1472,33 @@ export class ThorchainQuery {
       address: position.rune_address,
       units: position.units,
       value: new AssetCryptoAmount(baseAmount(position.value), AssetRuneNative),
+      pnl: new AssetCryptoAmount(baseAmount(position.pnl), AssetRuneNative),
       depositAmount: new AssetCryptoAmount(baseAmount(position.deposit_amount), AssetRuneNative),
       withdrawAmount: new AssetCryptoAmount(baseAmount(position.withdraw_amount), AssetRuneNative),
       lastDepositHeight: position.last_deposit_height,
       lastWithdrawHeight: position.last_withdraw_height,
     }
+  }
+
+  /**
+   * Get all Rune pool providers position
+   * @param {RunePoolProvidersParams} params Get Rune pool provider position params
+   * @returns {RunePoolProvider[]} All Rune pool providers position
+   */
+  public async getRunePoolProviders(params?: RunePoolProvidersParams): Promise<RunePoolProvider[]> {
+    const positions = await this.thorchainCache.thornode.getRunePoolProviders(params?.height)
+
+    return positions.map((position) => {
+      return {
+        address: position.rune_address,
+        units: position.units,
+        value: new AssetCryptoAmount(baseAmount(position.value), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(position.pnl), AssetRuneNative),
+        depositAmount: new AssetCryptoAmount(baseAmount(position.deposit_amount), AssetRuneNative),
+        withdrawAmount: new AssetCryptoAmount(baseAmount(position.withdraw_amount), AssetRuneNative),
+        lastDepositHeight: position.last_deposit_height,
+        lastWithdrawHeight: position.last_withdraw_height,
+      }
+    })
   }
 }
