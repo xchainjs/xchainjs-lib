@@ -528,7 +528,7 @@ export class Thornode {
         return resp
       } catch (e) {}
     }
-    throw new Error(`THORNode is not responding. Can not ger Rune pool`)
+    throw new Error(`THORNode is not responding. Can not get Rune pool`)
   }
 
   /**

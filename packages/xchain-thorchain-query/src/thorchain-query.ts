@@ -43,6 +43,8 @@ import {
   QuoteTHORNameParams,
   RunePool,
   RunePoolParams,
+  RunePoolProvider,
+  RunePoolProviderParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
@@ -1454,6 +1456,23 @@ export class ThorchainQuery {
           AssetRuneNative,
         ),
       },
+    }
+  }
+
+  /**
+   *
+   */
+  public async getRunePoolProvider({ address, height }: RunePoolProviderParams): Promise<RunePoolProvider> {
+    const position = await this.thorchainCache.thornode.getRunePoolProvider(address, height)
+
+    return {
+      address: position.rune_address,
+      units: position.units,
+      value: new AssetCryptoAmount(baseAmount(position.value), AssetRuneNative),
+      depositAmount: new AssetCryptoAmount(baseAmount(position.deposit_amount), AssetRuneNative),
+      withdrawAmount: new AssetCryptoAmount(baseAmount(position.withdraw_amount), AssetRuneNative),
+      lastDepositHeight: position.last_deposit_height,
+      lastWithdrawHeight: position.last_withdraw_height,
     }
   }
 }

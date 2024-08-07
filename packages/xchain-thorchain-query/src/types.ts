@@ -658,3 +658,42 @@ export type RunePool = {
   providers: Providers
   reserve: Reserve
 }
+
+/**
+ * Rune pool provider params
+ */
+export type RunePoolProviderParams = {
+  /**
+   * Thorchain address
+   */
+  address: Address
+  /**
+   * Block height
+   */
+  height?: number
+}
+
+/**
+ * Rune pool provider position
+ */
+export type RunePoolProvider = {
+  /**
+   * Thorchain address
+   */
+  address: Address
+  /**
+   *
+   */
+  units: string
+  value: AssetCryptoAmount
+  depositAmount: AssetCryptoAmount
+  withdrawAmount: AssetCryptoAmount
+  /**
+   *
+   */
+  lastDepositHeight: number
+  /**
+   *
+   */
+  lastWithdrawHeight: number
+}
