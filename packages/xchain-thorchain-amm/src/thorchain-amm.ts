@@ -48,7 +48,15 @@ import {
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAction } from './thorchain-action'
-import { AddLiquidity, ApproveParams, IsApprovedParams, QuoteTHORName, TxSubmitted, WithdrawLiquidity } from './types'
+import {
+  AddLiquidity,
+  ApproveParams,
+  DepositToRunePoolParams,
+  IsApprovedParams,
+  QuoteTHORName,
+  TxSubmitted,
+  WithdrawLiquidity,
+} from './types'
 import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
@@ -718,6 +726,19 @@ export class ThorchainAMM {
       wallet: this.wallet,
       assetAmount: quote.value,
       memo: quote.memo,
+    })
+  }
+
+  /**
+   * Deposit amount to Rune pool
+   * @param {DepositToRunePoolParams} amount Amount to deposit to Rune pool
+   * @returns {TxSubmitted} Transaction made to deposit to Rune pool
+   */
+  public async depositToRunePool({ amount }: DepositToRunePoolParams): Promise<TxSubmitted> {
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: amount,
+      memo: 'POOL+',
     })
   }
 }

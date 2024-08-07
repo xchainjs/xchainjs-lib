@@ -151,3 +151,10 @@ export type QuoteTHORName = BaseQuoteTHORName & {
    */
   errors: string[]
 }
+
+/**
+ * Deposit to Rune pool params
+ */
+export type DepositToRunePoolParams = {
+  amount: AssetCryptoAmount
+}
