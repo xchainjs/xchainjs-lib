@@ -156,5 +156,8 @@ export type QuoteTHORName = BaseQuoteTHORName & {
  * Deposit to Rune pool params
  */
 export type DepositToRunePoolParams = {
+  /**
+   * Rune amount to deposit to the Rune pool
+   */
   amount: AssetCryptoAmount
 }
