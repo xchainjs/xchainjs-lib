@@ -161,3 +161,69 @@ export type DepositToRunePoolParams = {
    */
   amount: AssetCryptoAmount
 }
+
+/**
+ * Withdraw from Rune pool params
+ */
+export type WithdrawFromRunePoolParams = {
+  /**
+   * Basis points to retrieve from the Rune pool position. Range 0-10000, where 10000 = 100%.
+   */
+  withdrawBps: number
+  /**
+   * Affiliate address
+   */
+  affiliate?: Address
+  /**
+   * Basis points to send to the affiliate address. Ranges from 0 to 1000 Basis Points.
+   */
+  feeBps?: number
+}
+
+/**
+ * Estimation to quote to withdraw from Rune pool
+ */
+export type EstimateWithdrawFromRunePool = {
+  /**
+   * Amount to send in the transaction to make the withdraw
+   */
+  amount: AssetCryptoAmount
+  /**
+   * Memo to send in the transaction to make the withdraw
+   */
+  memo: string
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
+}
+
+/**
+ * Estimation to quote to deposit to Rune pool
+ */
+export type EstimateDepositToRunePool = {
+  /**
+   * Amount to send in the transaction to make the deposit
+   */
+  amount: AssetCryptoAmount
+  /**
+   * Memo to send in the transaction to make the deposit
+   */
+  memo: string
+  /**
+   * Number of blocks from the last deposit that a withdraw is allowed
+   */
+  maturityBlocks: number
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
+}

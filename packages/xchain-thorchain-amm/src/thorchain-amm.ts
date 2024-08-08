@@ -52,9 +52,12 @@ import {
   AddLiquidity,
   ApproveParams,
   DepositToRunePoolParams,
+  EstimateDepositToRunePool,
+  EstimateWithdrawFromRunePool,
   IsApprovedParams,
   QuoteTHORName,
   TxSubmitted,
+  WithdrawFromRunePoolParams,
   WithdrawLiquidity,
 } from './types'
 import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
@@ -730,15 +733,106 @@ export class ThorchainAMM {
   }
 
   /**
+   * Estimate Rune pool deposit
+   * @param {DepositToRunePoolParams} params Deposit to Rune pool params
+   * @returns {EstimateDepositToRunePool} Estimation to make the deposit
+   */
+  public async estimateDepositToRunePool({ amount }: DepositToRunePoolParams): Promise<EstimateDepositToRunePool> {
+    const constants = await this.thorchainQuery.thorchainCache.thornode.getTcConstants()
+    return {
+      allowed: true,
+      maturityBlocks: Number(constants['RUNEPoolDepositMaturityBlocks']),
+      amount,
+      errors: [],
+      memo: 'POOL+',
+    }
+  }
+
+  /**
    * Deposit amount to Rune pool
    * @param {DepositToRunePoolParams} amount Amount to deposit to Rune pool
    * @returns {TxSubmitted} Transaction made to deposit to Rune pool
    */
-  public async depositToRunePool({ amount }: DepositToRunePoolParams): Promise<TxSubmitted> {
+  public async depositToRunePool(params: DepositToRunePoolParams): Promise<TxSubmitted> {
+    const quote = await this.estimateDepositToRunePool(params)
+
+    if (!quote.allowed) throw Error(`Can not deposit to Rune pool. ${quote.errors.join(' ')}`)
+
     return ThorchainAction.makeAction({
       wallet: this.wallet,
-      assetAmount: amount,
-      memo: 'POOL+',
+      assetAmount: quote.amount,
+      memo: quote.memo,
     })
+  }
+
+  /**
+   * Estimate Rune pool withdraw
+   * @param {WithdrawFromRunePoolParams} params Withdraw from Rune pool params
+   * @returns {EstimateWithdrawFromRunePool} Estimation to make a withdraw from Rune pool
+   */
+  public async estimateWithdrawFromRunePool({
+    withdrawBps,
+    affiliate,
+    feeBps,
+  }: WithdrawFromRunePoolParams): Promise<EstimateWithdrawFromRunePool> {
+    const errors: string[] = []
+
+    if (withdrawBps <= 0 || withdrawBps > 10000) {
+      errors.push('withdrawBps out of range. Range 0-10000')
+    }
+
+    if (affiliate) {
+      if (
+        !validateAddress(
+          this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+          THORChain,
+          affiliate,
+        ) &&
+        !(await this.isTHORName(affiliate))
+      ) {
+        errors.push('Invalid affiliate. Affiliate must be a THORName or THOR address')
+      }
+      if (!feeBps || feeBps <= 0 || feeBps > 1000) {
+        errors.push('feeBps out of range. Range 0-1000')
+      }
+    }
+
+    if (errors.length) {
+      return {
+        amount: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
+        memo: '',
+        allowed: false,
+        errors,
+      }
+    }
+
+    return {
+      amount: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
+      memo: `POOL-:${withdrawBps}:${affiliate || ''}:${affiliate ? feeBps : ''}`,
+      allowed: true,
+      errors,
+    }
+  }
+
+  /**
+   * Withdraw amount from Rune pool
+   * @param {WithdrawFromRunePoolParams} params Withdraw from Rune pool params
+   * @returns {TxSubmitted} Transaction made to withdraw from Rune pool
+   */
+  public async withdrawFromRunePool(params: WithdrawFromRunePoolParams): Promise<TxSubmitted> {
+    const quote = await this.estimateWithdrawFromRunePool(params)
+
+    if (!quote.allowed) throw Error(`Can not withdraw from Rune pool. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.amount,
+      memo: quote.memo,
+    })
+  }
+
+  private async isTHORName(thorname: string): Promise<boolean> {
+    const details = await this.thorchainQuery.getThornameDetails(thorname)
+    return details.owner !== ''
   }
 }

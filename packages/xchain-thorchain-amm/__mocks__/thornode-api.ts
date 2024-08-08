@@ -51,5 +51,9 @@ export default {
       const resp = require('./responses/thornode/thorname.json')
       return [200, resp]
     })
+    mock.onGet(/\/thorchain\/constants/).reply(function () {
+      const resp = require(`./responses/thornode/constants.json`)
+      return [200, resp]
+    })
   },
 }
