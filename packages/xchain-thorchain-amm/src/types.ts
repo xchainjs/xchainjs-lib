@@ -303,12 +303,4 @@ export type WithdrawFromRunePoolParams = {
    * Basis points to send to the affiliate address. Ranges from 0 to 1000 Basis Points.
    */
   feeBps?: number
-  /**
-   * If the action can be or not can be done
-   */
-  allowed: boolean
-  /**
-   * If any, list of errors with the reason the operation is not allowed
-   */
-  errors: string[]
 }
