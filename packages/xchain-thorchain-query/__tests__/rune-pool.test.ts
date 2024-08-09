@@ -1,0 +1,112 @@
+import { assetToString } from '@xchainjs/xchain-util'
+
+import mockMidgardApi from '../__mocks__/midgard-api'
+import mockThornodeApi from '../__mocks__/thornode-api'
+import { ThorchainCache } from '../src/thorchain-cache'
+import { ThorchainQuery } from '../src/thorchain-query'
+
+const thorchainCache = new ThorchainCache()
+const thorchainQuery = new ThorchainQuery(thorchainCache)
+
+describe('ThorchainQuery', () => {
+  describe('Rune pool', () => {
+    beforeAll(() => {
+      mockMidgardApi.init()
+      mockThornodeApi.init()
+    })
+    afterAll(() => {
+      mockMidgardApi.restore()
+      mockThornodeApi.restore()
+    })
+    it('Should get Rune pool info', async () => {
+      const pool = await thorchainQuery.getRunePool()
+      expect(assetToString(pool.pol.runeDeposited.asset)).toBe('THOR.RUNE')
+      expect(pool.pol.currentRuneDeposited.assetAmount.amount().toString()).toBe('5000002.74528557')
+      expect(assetToString(pool.pol.runeWithdrawn.asset)).toBe('THOR.RUNE')
+      expect(pool.pol.runeWithdrawn.assetAmount.amount().toString()).toBe('6407075.77980043')
+      expect(assetToString(pool.pol.value.asset)).toBe('THOR.RUNE')
+      expect(pool.pol.value.assetAmount.amount().toString()).toBe('4791673.89833294')
+      expect(assetToString(pool.pol.pnl.asset)).toBe('THOR.RUNE')
+      expect(pool.pol.pnl.assetAmount.amount().toString()).toBe('-208328.84695263')
+      expect(assetToString(pool.pol.currentRuneDeposited.asset)).toBe('THOR.RUNE')
+      expect(pool.pol.currentRuneDeposited.assetAmount.amount().toString()).toBe('5000002.74528557')
+      expect(pool.providers.units).toBe('82549657185151')
+      expect(pool.providers.pendingUnits).toBe('0')
+      expect(assetToString(pool.providers.pendingRune.asset)).toBe('THOR.RUNE')
+      expect(pool.providers.pendingRune.assetAmount.amount().toString()).toBe('0')
+      expect(assetToString(pool.providers.value.asset)).toBe('THOR.RUNE')
+      expect(pool.providers.value.assetAmount.amount().toString()).toBe('856066.46388056')
+      expect(assetToString(pool.providers.pnl.asset)).toBe('THOR.RUNE')
+      expect(pool.providers.pnl.assetAmount.amount().toString()).toBe('27363.12529281')
+      expect(assetToString(pool.providers.currentRuneDeposited.asset)).toBe('THOR.RUNE')
+      expect(pool.providers.currentRuneDeposited.assetAmount.amount().toString()).toBe('828703.33858775')
+      expect(pool.reserve.units).toBe('379506800274219')
+      expect(assetToString(pool.reserve.value.asset)).toBe('THOR.RUNE')
+      expect(pool.reserve.value.assetAmount.amount().toString()).toBe('3935607.43445238')
+      expect(assetToString(pool.reserve.pnl.asset)).toBe('THOR.RUNE')
+      expect(pool.reserve.pnl.assetAmount.amount().toString()).toBe('-235691.97224544')
+      expect(assetToString(pool.reserve.currentRuneDeposited.asset)).toBe('THOR.RUNE')
+      expect(pool.reserve.currentRuneDeposited.assetAmount.amount().toString()).toBe('4171299.40669782')
+    })
+
+    it('Should get Rune pool provider position', async () => {
+      const position = await thorchainQuery.getRunePoolProvider({
+        address: 'thor1z8kfpfekj08v6jtdvd33w33mut5grhxs767vxg',
+      })
+      expect(position.address).toBe('thor1z8kfpfekj08v6jtdvd33w33mut5grhxs767vxg')
+      expect(position.units).toBe('99209281509')
+      expect(position.value.baseAmount.amount().toString()).toBe('102878405990')
+      expect(assetToString(position.value.asset)).toBe('THOR.RUNE')
+      expect(position.pnl.baseAmount.amount().toString()).toBe('2778405990')
+      expect(assetToString(position.pnl.asset)).toBe('THOR.RUNE')
+      expect(position.depositAmount.baseAmount.amount().toString()).toBe('100100000000')
+      expect(assetToString(position.depositAmount.asset)).toBe('THOR.RUNE')
+      expect(position.withdrawAmount.baseAmount.amount().toString()).toBe('0')
+      expect(assetToString(position.withdrawAmount.asset)).toBe('THOR.RUNE')
+      expect(position.lastDepositHeight).toBe(17073232)
+      expect(position.lastWithdrawHeight).toBe(0)
+    })
+
+    it('Should get all Rune pool providers position', async () => {
+      const positions = await thorchainQuery.getRunePoolProviders()
+      expect(positions[0].address).toBe('thor1099eqjssupxhaaf9c3glsxvt2j8q4uaf7awayr')
+      expect(positions[0].units).toBe('83486766394')
+      expect(positions[0].value.baseAmount.amount().toString()).toBe('86588295723')
+      expect(assetToString(positions[0].value.asset)).toBe('THOR.RUNE')
+      expect(positions[0].pnl.baseAmount.amount().toString()).toBe('1694295723')
+      expect(assetToString(positions[0].pnl.asset)).toBe('THOR.RUNE')
+      expect(positions[0].depositAmount.baseAmount.amount().toString()).toBe('84894000000')
+      expect(assetToString(positions[0].depositAmount.asset)).toBe('THOR.RUNE')
+      expect(positions[0].withdrawAmount.baseAmount.amount().toString()).toBe('0')
+      expect(assetToString(positions[0].withdrawAmount.asset)).toBe('THOR.RUNE')
+      expect(positions[0].lastDepositHeight).toBe(17087643)
+      expect(positions[0].lastWithdrawHeight).toBe(0)
+
+      expect(positions[1].address).toBe('thor10mng80qpckfqvsy2r24ntnne3etdratz63pawh')
+      expect(positions[1].units).toBe('497019269851')
+      expect(positions[1].value.baseAmount.amount().toString()).toBe('515483511661')
+      expect(assetToString(positions[1].value.asset)).toBe('THOR.RUNE')
+      expect(positions[1].pnl.baseAmount.amount().toString()).toBe('15483511661')
+      expect(assetToString(positions[1].pnl.asset)).toBe('THOR.RUNE')
+      expect(positions[1].depositAmount.baseAmount.amount().toString()).toBe('500000000000')
+      expect(assetToString(positions[1].depositAmount.asset)).toBe('THOR.RUNE')
+      expect(positions[1].withdrawAmount.baseAmount.amount().toString()).toBe('0')
+      expect(assetToString(positions[1].withdrawAmount.asset)).toBe('THOR.RUNE')
+      expect(positions[1].lastDepositHeight).toBe(17070187)
+      expect(positions[1].lastWithdrawHeight).toBe(0)
+
+      expect(positions[2].address).toBe('thor10pv8xhkxvsgzuvf9ayzuhn2c8lupv0w0nzmgxs')
+      expect(positions[2].units).toBe('10812564288')
+      expect(positions[2].value.baseAmount.amount().toString()).toBe('11214250528')
+      expect(assetToString(positions[2].value.asset)).toBe('THOR.RUNE')
+      expect(positions[2].pnl.baseAmount.amount().toString()).toBe('214250528')
+      expect(assetToString(positions[2].pnl.asset)).toBe('THOR.RUNE')
+      expect(positions[2].depositAmount.baseAmount.amount().toString()).toBe('11000000000')
+      expect(assetToString(positions[2].depositAmount.asset)).toBe('THOR.RUNE')
+      expect(positions[2].withdrawAmount.baseAmount.amount().toString()).toBe('0')
+      expect(assetToString(positions[2].withdrawAmount.asset)).toBe('THOR.RUNE')
+      expect(positions[2].lastDepositHeight).toBe(17096088)
+      expect(positions[2].lastWithdrawHeight).toBe(0)
+    })
+  })
+})

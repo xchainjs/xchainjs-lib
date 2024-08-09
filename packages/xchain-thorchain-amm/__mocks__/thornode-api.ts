@@ -51,6 +51,10 @@ export default {
       const resp = require('./responses/thornode/thorname.json')
       return [200, resp]
     })
+    mock.onGet(/\/thorchain\/constants/).reply(function () {
+      const resp = require(`./responses/thornode/constants.json`)
+      return [200, resp]
+    })
     mock.onGet(/\/thorchain\/quote\/swap/).reply(function (config) {
       const parsedUrl = new URL(`${config.url}`)
       const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''

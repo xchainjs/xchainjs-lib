@@ -4,7 +4,8 @@
   "fees": {
     "affiliate": "0",
     "asset": "ETH/ETH",
-    "outbound": "1436"
+    "outbound": "1436",
+    "slippage_bps": 0
   },
   "inbound_address": "bnb18my83gyjy95dya9e0j8vzsjz5hz786zltm0z62",
   "memo": "=:ETH/ETH:thor1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcl3pqu",

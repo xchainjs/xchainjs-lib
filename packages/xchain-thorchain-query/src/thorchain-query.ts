@@ -44,6 +44,11 @@ import {
   QuoteSwapParams,
   QuoteTHORName,
   QuoteTHORNameParams,
+  RunePool,
+  RunePoolParams,
+  RunePoolProvider,
+  RunePoolProviderParams,
+  RunePoolProvidersParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
@@ -214,13 +219,13 @@ export class ThorchainQuery {
             feeAssetDecimals,
           ),
         },
-        slipBasisPoints: swapQuote.slippage_bps,
+        slipBasisPoints: swapQuote.fees.slippage_bps,
         netOutput: getCryptoAmountWithNotation(
           new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
           destinationAssetDecimals,
         ),
         netOutputStreaming: getCryptoAmountWithNotation(
-          new CryptoAmount(baseAmount(swapQuote.expected_amount_out_streaming), destinationAsset),
+          new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
           destinationAssetDecimals,
         ),
         outboundDelaySeconds: swapQuote.outbound_delay_seconds,
@@ -228,7 +233,7 @@ export class ThorchainQuery {
         recommendedMinAmountIn: swapQuote.recommended_min_amount_in,
         maxStreamingQuantity: swapQuote.max_streaming_quantity ? swapQuote.max_streaming_quantity : 0,
         outboundDelayBlocks: swapQuote.outbound_delay_blocks,
-        streamingSlipBasisPoints: swapQuote.streaming_slippage_bps,
+        streamingSlipBasisPoints: swapQuote.fees.slippage_bps,
         streamingSwapBlocks: swapQuote.streaming_swap_blocks ? swapQuote.streaming_swap_blocks : 0,
         streamingSwapSeconds: swapQuote.streaming_swap_seconds ? swapQuote.streaming_swap_seconds : 0,
         totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
@@ -787,7 +792,7 @@ export class ThorchainQuery {
       memo: depositQuote.memo, // Memo
       estimatedWaitTime: depositQuote.inbound_confirmation_seconds || 0, // Estimated wait time
       canAddSaver: errors.length === 0, // Can add saver flag
-      slipBasisPoints: depositQuote.slippage_bps, // Slip basis points
+      slipBasisPoints: depositQuote.fees.slippage_bps, // Slip basis points
       saverCapFilledPercent, // Saver filled capacity
       recommendedMinAmountIn: depositQuote.recommended_min_amount_in, // Recommended minimum amount in
       errors, // Errors
@@ -935,7 +940,7 @@ export class ThorchainQuery {
       // Set the outbound delay seconds
       outBoundDelaySeconds: withdrawQuote.outbound_delay_seconds || 0,
       // Set the slip basis points
-      slipBasisPoints: withdrawQuote.slippage_bps,
+      slipBasisPoints: withdrawQuote.fees.slippage_bps,
       // Set the errors
       errors,
     }
@@ -1131,7 +1136,7 @@ export class ThorchainQuery {
         outbound: loanOpenResp.fees.outbound,
         total_bps: loanOpenResp.fees.total_bps,
       },
-      slippageBps: loanOpenResp.slippage_bps,
+      slippageBps: loanOpenResp.fees.slippage_bps,
       router: loanOpenResp.router,
       expiry: loanOpenResp.expiry,
       warning: loanOpenResp.warning,
@@ -1216,7 +1221,7 @@ export class ThorchainQuery {
         outbound: loanCloseResp.fees.outbound,
         total_bps: loanCloseResp.fees.total_bps,
       },
-      slippageBps: loanCloseResp.slippage_bps,
+      slippageBps: loanCloseResp.fees.slippage_bps,
       router: loanCloseResp.router,
       expiry: loanCloseResp.expiry,
       warning: loanCloseResp.warning,
@@ -1422,7 +1427,7 @@ export class ThorchainQuery {
     }
   }
 
-  /**
+  /*
    * Returns the total units and depth of a trade asset
    * @param {TradeAssetUnitsParams} params Get trade asset unit params
    * @returns {TradeAssetUnits} Returns the total units and depth of a trade asset
@@ -1437,7 +1442,7 @@ export class ThorchainQuery {
     }
   }
 
-  /**
+  /*
    * Returns the total units and depth for each trade asset
    * @param {TradeAssetsUnitsParams} params Get trade asset unit params
    * @returns {TradeAssetUnits[]} Returns the total units and depth for each trade asset
@@ -1497,6 +1502,89 @@ export class ThorchainQuery {
         balance: new CryptoAmount(baseAmount(account.units, decimals), asset),
         lastAddHeight: account.last_add_height ? +account.last_add_height : undefined,
         lastWithdrawHeight: account.last_withdraw_height ? +account.last_withdraw_height : undefined,
+      }
+    })
+  }
+
+  /**
+   * Get Rune pool
+   * @param {GetRunePoolParmas} params Get Rune pool params
+   * @returns {RunePool} Rune pool information
+   */
+  public async getRunePool(params?: RunePoolParams): Promise<RunePool> {
+    const pool = await this.thorchainCache.thornode.getRunePool(params?.height)
+    return {
+      pol: {
+        runeDeposited: new AssetCryptoAmount(baseAmount(pool.pol.rune_deposited, THORCHAIN_DECIMAL), AssetRuneNative),
+        runeWithdrawn: new AssetCryptoAmount(baseAmount(pool.pol.rune_withdrawn, THORCHAIN_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(pool.pol.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.pol.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.pol.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+      providers: {
+        units: pool.providers.units,
+        pendingUnits: pool.providers.pending_units,
+        pendingRune: new AssetCryptoAmount(baseAmount(pool.providers.pending_rune, THORCHAIN_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(pool.providers.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.providers.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.providers.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+      reserve: {
+        units: pool.reserve.units,
+        value: new AssetCryptoAmount(baseAmount(pool.reserve.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.reserve.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.reserve.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+    }
+  }
+
+  /**
+   * Get Rune pool provider position
+   * @param {RunePoolProviderParams} params Get Rune pool provider position params
+   * @returns {RunePoolProvider} Rune pool provider position
+   */
+  public async getRunePoolProvider({ address, height }: RunePoolProviderParams): Promise<RunePoolProvider> {
+    const position = await this.thorchainCache.thornode.getRunePoolProvider(address, height)
+
+    return {
+      address: position.rune_address,
+      units: position.units,
+      value: new AssetCryptoAmount(baseAmount(position.value), AssetRuneNative),
+      pnl: new AssetCryptoAmount(baseAmount(position.pnl), AssetRuneNative),
+      depositAmount: new AssetCryptoAmount(baseAmount(position.deposit_amount), AssetRuneNative),
+      withdrawAmount: new AssetCryptoAmount(baseAmount(position.withdraw_amount), AssetRuneNative),
+      lastDepositHeight: position.last_deposit_height,
+      lastWithdrawHeight: position.last_withdraw_height,
+    }
+  }
+
+  /**
+   * Get all Rune pool providers position
+   * @param {RunePoolProvidersParams} params Get Rune pool provider position params
+   * @returns {RunePoolProvider[]} All Rune pool providers position
+   */
+  public async getRunePoolProviders(params?: RunePoolProvidersParams): Promise<RunePoolProvider[]> {
+    const positions = await this.thorchainCache.thornode.getRunePoolProviders(params?.height)
+
+    return positions.map((position) => {
+      return {
+        address: position.rune_address,
+        units: position.units,
+        value: new AssetCryptoAmount(baseAmount(position.value), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(position.pnl), AssetRuneNative),
+        depositAmount: new AssetCryptoAmount(baseAmount(position.deposit_amount), AssetRuneNative),
+        withdrawAmount: new AssetCryptoAmount(baseAmount(position.withdraw_amount), AssetRuneNative),
+        lastDepositHeight: position.last_deposit_height,
+        lastWithdrawHeight: position.last_withdraw_height,
       }
     })
   }
