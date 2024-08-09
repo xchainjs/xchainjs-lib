@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Asset type refactor
+
+### Patch Changes
+
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-cosmos-sdk@1.0.0
+
 ## 0.1.21
 
 ### Patch Changes

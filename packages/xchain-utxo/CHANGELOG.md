@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: New types `Witness`, `UTXO`, `Balance`, `TxFrom`, `TxTo`, `Tx`, `TxsPage` with UTXO chain based properties.
+
+### Patch Changes
+
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-utxo-providers@1.0.0
+
 ## 0.1.10
 
 ### Patch Changes

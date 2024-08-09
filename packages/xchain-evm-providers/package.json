@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-evm-providers",
-  "version": "0.1.13",
+  "version": "1.0.0",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
