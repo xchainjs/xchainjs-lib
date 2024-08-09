@@ -193,7 +193,7 @@ export type AddToTradeAccount = {
   errors: string[]
 }
 
-/*
+/**
  * Withdraw from trade account params
  */
 export type WithdrawFromTradeAccountParams = {
