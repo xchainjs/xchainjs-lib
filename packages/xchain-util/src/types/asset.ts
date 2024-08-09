@@ -7,6 +7,7 @@ export enum AssetType {
   NATIVE,
   TOKEN,
   SYNTH,
+  TRADE,
 }
 
 /**
@@ -47,4 +48,14 @@ export type SynthAsset = {
   symbol: string
   ticker: string
   type: AssetType.SYNTH
+}
+
+/**
+ * Asset type for synthetic assets which lives in networks like Thorchain or Mayachain
+ */
+export type TradeAsset = {
+  chain: Chain
+  symbol: string
+  ticker: string
+  type: AssetType.TRADE
 }

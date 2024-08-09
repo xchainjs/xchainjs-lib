@@ -1,5 +1,14 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { Address, AnyAsset, Asset, Chain, CryptoAmount, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  AnyAsset,
+  Asset,
+  Chain,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  TradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 /**
@@ -14,9 +23,9 @@ type TxSubmitted = {
  * Fees
  */
 type Fees = {
-  asset: Asset | TokenAsset | SynthAsset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The affiliate fee amount
-  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The outbound fee amount
+  asset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset for which fees are calculated
+  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The affiliate fee amount
+  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The outbound fee amount
 }
 
 /**
@@ -72,8 +81,8 @@ type QuoteSwap = {
   protocol: Protocol
   toAddress: Address // The destination address for the swap
   memo: string // The memo associated with the swap
-  expectedAmount: CryptoAmount<Asset | TokenAsset | SynthAsset> // The expected amount to be received after the swap
-  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset> // The dust threshold for the swap
+  expectedAmount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The expected amount to be received after the swap
+  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The dust threshold for the swap
   // TODO: Update type to return an array of the fees
   fees: Fees // The fees associated with the swap
   totalSwapSeconds: number // The total time for the swap operation
@@ -87,9 +96,9 @@ type QuoteSwap = {
  * Represents parameters for quoting a swap operation.
  */
 type QuoteSwapParams = {
-  fromAsset: Asset | TokenAsset | SynthAsset // The asset to swap from
-  destinationAsset: Asset | TokenAsset | SynthAsset // The asset to swap to
-  amount: CryptoAmount<Asset | TokenAsset | SynthAsset> // The amount to swap
+  fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap from
+  destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap to
+  amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The amount to swap
   fromAddress?: string // The source address for the swap
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap

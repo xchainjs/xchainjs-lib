@@ -9,26 +9,28 @@ import {
   CryptoAmount,
   SynthAsset,
   TokenAsset,
+  TradeAsset,
+  TradeCryptoAmount,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-export type CompatibleAsset = Asset | TokenAsset | SynthAsset
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset
 
 /**
  * Represents the total fees associated with a swap.
  */
 export type TotalFees = {
-  asset: Asset | TokenAsset | SynthAsset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The affiliate fee
-  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The outbound fee
+  asset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset for which fees are calculated
+  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The affiliate fee
+  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The outbound fee
 }
 /**
  * Represents an estimate for a swap transaction.
  */
 export type SwapEstimate = {
-  netOutput: CryptoAmount<Asset | TokenAsset | SynthAsset> // The net output amount after fees
+  netOutput: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The net output amount after fees
   totalFees: TotalFees // The total fees associated with the swap
-  netOutputStreaming: CryptoAmount<Asset | TokenAsset | SynthAsset> // The net output amount for streaming
+  netOutputStreaming: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The net output amount for streaming
   maxStreamingQuantity: number // The maximum streaming quantity
   inboundConfirmationSeconds?: number // The inbound confirmation time in seconds
   outboundDelaySeconds: number // The outbound delay time in seconds
@@ -48,9 +50,9 @@ export type SwapEstimate = {
  */
 export type QuoteSwapParams = {
   fromAddress?: Address // The address to swap from
-  fromAsset: Asset | TokenAsset | SynthAsset // The asset to swap from
-  destinationAsset: Asset | TokenAsset | SynthAsset // The asset to swap to
-  amount: CryptoAmount<Asset | TokenAsset | SynthAsset> // The amount to swap
+  fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap from
+  destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap to
+  amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The amount to swap
   destinationAddress?: string // The destination address (optional)
   streamingInterval?: number // The streaming interval (optional)
   streamingQuantity?: number // The streaming quantity (optional)
@@ -143,7 +145,7 @@ export type ConstructMemo = {
  */
 export type TxDetails = {
   memo: string // The memo for the transaction
-  dustThreshold: CryptoAmount // The dust threshold for the transaction
+  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The dust threshold for the transaction
   toAddress: Address // The recipient address for the transaction
   expiry: Date // The expiry date for the transaction
   txEstimate: SwapEstimate // The swap estimate for the transaction
@@ -572,4 +574,126 @@ export type QuoteTHORName = {
    * Estimation of the update or the registration of the THORName
    */
   value: AssetCryptoAmount
+}
+
+/**
+ * Get trade asset unit params
+ */
+export type TradeAssetUnitsParams = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Get trade asset unit params
+ */
+export type TradeAssetUnits = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Total units of trade asset
+   */
+  units: TradeCryptoAmount
+  /**
+   * Total depth of trade asset
+   */
+  depth: TradeCryptoAmount
+}
+
+/**
+ * Get trade asset unit params
+ */
+export type TradeAssetsUnitsParams = {
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Get trade asset information from address
+ */
+export type AddressTradeAccountsParams = {
+  /**
+   * Thorchain address
+   */
+  address: Address
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Trade asset account information
+ */
+export type AddressTradeAccounts = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Address
+   */
+  address: Address
+  /**
+   * Trade asset balance
+   */
+  balance: TradeCryptoAmount
+  /**
+   * Last thorchain height trade assets were added to trade account
+   */
+  lastAddHeight?: number
+  /**
+   * Last thorchain height trade assets were withdrawn from trade account
+   */
+  lastWithdrawHeight?: number
+}
+
+/**
+ * Get trade asset accounts
+ */
+export type TradeAssetAccountsParams = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Height
+   */
+  height?: number
+}
+
+/**
+ * Trade asset account information
+ */
+export type TradeAssetAccounts = {
+  /**
+   * Trade asset balance
+   */
+  asset: TradeAsset
+  /**
+   * Last thorchain height trade assets were added to trade account
+   */
+  address: Address
+  /**
+   * Trade asset balance
+   */
+  balance: TradeCryptoAmount
+  /**
+   * Last thorchain height trade assets were added to trade account
+   */
+  lastAddHeight?: number
+  /**
+   * Last thorchain height trade assets were withdrawn from trade account
+   */
+  lastWithdrawHeight?: number
 }

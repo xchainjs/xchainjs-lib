@@ -12,7 +12,6 @@ import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
 import { AssetInfo, Network, PreparedTx, TxHash } from '@xchainjs/xchain-client'
 import {
   Client as CosmosSDKClient,
-  CompatibleAsset,
   CosmosSdkClientParams,
   MsgTypes,
   bech32ToBase64,
@@ -41,8 +40,15 @@ import {
   SYNTH_DECIMAL,
   defaultClientConfig,
 } from './const'
-import { DepositParam, DepositTx, TxOfflineParams, TxParams } from './types'
-import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
+import { CompatibleAsset, DepositParam, DepositTx, TxOfflineParams, TxParams } from './types'
+import {
+  getDefaultExplorers,
+  getDenom,
+  getExplorerAddressUrl,
+  getExplorerTxUrl,
+  getPrefix,
+  parseAssetToMayanodeAsset,
+} from './utils'
 
 /**
  * Interface representing a MayaChain client.
@@ -330,10 +336,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     // Prepare the transaction
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
-      recipient: recipient,
-      asset: asset,
-      amount: amount,
-      memo: memo,
+      recipient,
+      asset,
+      amount,
+      memo,
     })
     // Decode the unsigned transaction
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
@@ -536,7 +542,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
                 coins: [
                   {
                     amount: amount.amount().toString(),
-                    asset,
+                    asset: parseAssetToMayanodeAsset(asset),
                   },
                 ],
               },

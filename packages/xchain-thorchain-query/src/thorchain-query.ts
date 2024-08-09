@@ -1,5 +1,5 @@
 import { Transaction } from '@xchainjs/xchain-midgard'
-import { LastBlock } from '@xchainjs/xchain-thornode'
+import { LastBlock, TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
 import {
   Address,
   Asset,
@@ -8,6 +8,7 @@ import {
   CryptoAmount,
   SynthAsset,
   TokenAsset,
+  TradeAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -22,6 +23,8 @@ import { LiquidityPool } from './liquidity-pool'
 import { ThorchainCache } from './thorchain-cache'
 import {
   AddliquidityPosition,
+  AddressTradeAccounts,
+  AddressTradeAccountsParams,
   Block,
   ChainAttributes,
   CompatibleAsset,
@@ -49,6 +52,11 @@ import {
   ThornameAlias,
   ThornameDetails,
   TotalFees,
+  TradeAssetAccounts,
+  TradeAssetAccountsParams,
+  TradeAssetUnits,
+  TradeAssetUnitsParams,
+  TradeAssetsUnitsParams,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
@@ -196,7 +204,7 @@ export class ThorchainQuery {
       expiry: new Date(swapQuote.expiry * 1000),
       txEstimate: {
         totalFees: {
-          asset: fromAsset,
+          asset: destinationAsset,
           affiliateFee: getCryptoAmountWithNotation(
             new CryptoAmount(baseAmount(swapQuote.fees.affiliate), feeAsset),
             feeAssetDecimals,
@@ -321,8 +329,8 @@ export class ThorchainQuery {
    * @param ouAsset - the Asset you want to convert to
    * @returns CryptoAmount of input
    */
-  async convert<T extends Asset | TokenAsset | SynthAsset>(
-    input: CryptoAmount<Asset | TokenAsset | SynthAsset>,
+  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
+    input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset>,
     outAsset: T,
   ): Promise<CryptoAmount<T>> {
     // Convert the input amount to the specified asset
@@ -1412,5 +1420,84 @@ export class ThorchainQuery {
         }
       }),
     }
+  }
+
+  /**
+   * Returns the total units and depth of a trade asset
+   * @param {TradeAssetUnitsParams} params Get trade asset unit params
+   * @returns {TradeAssetUnits} Returns the total units and depth of a trade asset
+   */
+  public async getTradeAssetUnits({ asset, height }: TradeAssetUnitsParams): Promise<TradeAssetUnits> {
+    const { units, depth } = await this.thorchainCache.thornode.getTradeAssetUnits(assetToString(asset), height)
+    const decimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
+    return {
+      asset,
+      units: new CryptoAmount(baseAmount(units, decimals), asset),
+      depth: new CryptoAmount(baseAmount(depth, decimals), asset),
+    }
+  }
+
+  /**
+   * Returns the total units and depth for each trade asset
+   * @param {TradeAssetsUnitsParams} params Get trade asset unit params
+   * @returns {TradeAssetUnits[]} Returns the total units and depth for each trade asset
+   */
+  public async getTradeAssetsUnits(params?: TradeAssetsUnitsParams): Promise<TradeAssetUnits[]> {
+    const tradeAssetsUnits = await this.thorchainCache.thornode.getTradeAssetsUnits(params?.height)
+    const parseData = async ({ asset, units, depth }: TradeUnitResponse): Promise<TradeAssetUnits> => {
+      const tradeAsset = assetFromStringEx(asset) as TradeAsset
+      const decimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(tradeAsset)
+      return {
+        asset: tradeAsset,
+        units: new CryptoAmount(baseAmount(units, decimals), tradeAsset),
+        depth: new CryptoAmount(baseAmount(depth, decimals), tradeAsset),
+      }
+    }
+    return Promise.all(tradeAssetsUnits.map(parseData))
+  }
+
+  /**
+   * Returns the units and depth of a trade account address
+   * @param {TradeAssetsUnitsParams} params Get trade asset unit params
+   * @returns {TradeAssetUnits[]} Returns the total units and depth for each trade asset
+   */
+  public async getAddressTradeAccounts({
+    address,
+    height,
+  }: AddressTradeAccountsParams): Promise<AddressTradeAccounts[]> {
+    const account = await this.thorchainCache.thornode.getTradeAssetAccount(address, height)
+
+    const parseData = async (tradeAssetInfo: TradeAccountResponse): Promise<AddressTradeAccounts> => {
+      const asset = assetFromStringEx(tradeAssetInfo.asset) as TradeAsset
+      return {
+        asset,
+        address,
+        balance: new CryptoAmount(baseAmount(tradeAssetInfo.units), asset),
+        lastAddHeight: tradeAssetInfo.last_add_height ? +tradeAssetInfo.last_add_height : undefined,
+        lastWithdrawHeight: tradeAssetInfo.last_withdraw_height ? +tradeAssetInfo.last_withdraw_height : undefined,
+      }
+    }
+
+    return Promise.all(account.map(parseData))
+  }
+
+  /**
+   * Returns all trade accounts for a trade asset
+   * @param {TradeAssetAccountsParams} params Get Trade asset accounts params
+   * @param {number} height Optional - Block height
+   * @returns Returns all trade accounts for an asset
+   */
+  public async getTradeAssetAccounts({ asset, height }: TradeAssetAccountsParams): Promise<TradeAssetAccounts[]> {
+    const accounts = await this.thorchainCache.thornode.getTradeAssetAccounts(assetToString(asset), height)
+    const decimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
+    return accounts.map((account) => {
+      return {
+        address: account.owner,
+        asset,
+        balance: new CryptoAmount(baseAmount(account.units, decimals), asset),
+        lastAddHeight: account.last_add_height ? +account.last_add_height : undefined,
+        lastWithdrawHeight: account.last_withdraw_height ? +account.last_withdraw_height : undefined,
+      }
+    })
   }
 }

@@ -28,6 +28,7 @@ $root.common = (function() {
          * @property {string|null} [symbol] Asset symbol
          * @property {string|null} [ticker] Asset ticker
          * @property {boolean|null} [synth] Asset synth
+         * @property {boolean|null} [trade] Asset trade
          */
 
         /**
@@ -78,6 +79,14 @@ $root.common = (function() {
         Asset.prototype.synth = false;
 
         /**
+         * Asset trade.
+         * @member {boolean} trade
+         * @memberof common.Asset
+         * @instance
+         */
+        Asset.prototype.trade = false;
+
+        /**
          * Creates a new Asset instance using the specified properties.
          * @function create
          * @memberof common.Asset
@@ -109,6 +118,8 @@ $root.common = (function() {
                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.ticker);
             if (message.synth != null && Object.hasOwnProperty.call(message, "synth"))
                 writer.uint32(/* id 4, wireType 0 =*/32).bool(message.synth);
+            if (message.trade != null && Object.hasOwnProperty.call(message, "trade"))
+                writer.uint32(/* id 5, wireType 0 =*/40).bool(message.trade);
             return writer;
         };
 
@@ -154,6 +165,9 @@ $root.common = (function() {
                     break;
                 case 4:
                     message.synth = reader.bool();
+                    break;
+                case 5:
+                    message.trade = reader.bool();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -202,6 +216,9 @@ $root.common = (function() {
             if (message.synth != null && message.hasOwnProperty("synth"))
                 if (typeof message.synth !== "boolean")
                     return "synth: boolean expected";
+            if (message.trade != null && message.hasOwnProperty("trade"))
+                if (typeof message.trade !== "boolean")
+                    return "trade: boolean expected";
             return null;
         };
 
@@ -225,6 +242,8 @@ $root.common = (function() {
                 message.ticker = String(object.ticker);
             if (object.synth != null)
                 message.synth = Boolean(object.synth);
+            if (object.trade != null)
+                message.trade = Boolean(object.trade);
             return message;
         };
 
@@ -246,6 +265,7 @@ $root.common = (function() {
                 object.symbol = "";
                 object.ticker = "";
                 object.synth = false;
+                object.trade = false;
             }
             if (message.chain != null && message.hasOwnProperty("chain"))
                 object.chain = message.chain;
@@ -255,6 +275,8 @@ $root.common = (function() {
                 object.ticker = message.ticker;
             if (message.synth != null && message.hasOwnProperty("synth"))
                 object.synth = message.synth;
+            if (message.trade != null && message.hasOwnProperty("trade"))
+                object.trade = message.trade;
             return object;
         };
 
@@ -1326,6 +1348,193 @@ $root.common = (function() {
         };
 
         return Fee;
+    })();
+
+    common.ProtoUint = (function() {
+
+        /**
+         * Properties of a ProtoUint.
+         * @memberof common
+         * @interface IProtoUint
+         * @property {string|null} [value] ProtoUint value
+         */
+
+        /**
+         * Constructs a new ProtoUint.
+         * @memberof common
+         * @classdesc Represents a ProtoUint.
+         * @implements IProtoUint
+         * @constructor
+         * @param {common.IProtoUint=} [properties] Properties to set
+         */
+        function ProtoUint(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * ProtoUint value.
+         * @member {string} value
+         * @memberof common.ProtoUint
+         * @instance
+         */
+        ProtoUint.prototype.value = "";
+
+        /**
+         * Creates a new ProtoUint instance using the specified properties.
+         * @function create
+         * @memberof common.ProtoUint
+         * @static
+         * @param {common.IProtoUint=} [properties] Properties to set
+         * @returns {common.ProtoUint} ProtoUint instance
+         */
+        ProtoUint.create = function create(properties) {
+            return new ProtoUint(properties);
+        };
+
+        /**
+         * Encodes the specified ProtoUint message. Does not implicitly {@link common.ProtoUint.verify|verify} messages.
+         * @function encode
+         * @memberof common.ProtoUint
+         * @static
+         * @param {common.IProtoUint} message ProtoUint message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ProtoUint.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.value != null && Object.hasOwnProperty.call(message, "value"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.value);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified ProtoUint message, length delimited. Does not implicitly {@link common.ProtoUint.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof common.ProtoUint
+         * @static
+         * @param {common.IProtoUint} message ProtoUint message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        ProtoUint.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a ProtoUint message from the specified reader or buffer.
+         * @function decode
+         * @memberof common.ProtoUint
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {common.ProtoUint} ProtoUint
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ProtoUint.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.common.ProtoUint();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.value = reader.string();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a ProtoUint message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof common.ProtoUint
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {common.ProtoUint} ProtoUint
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        ProtoUint.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a ProtoUint message.
+         * @function verify
+         * @memberof common.ProtoUint
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        ProtoUint.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.value != null && message.hasOwnProperty("value"))
+                if (!$util.isString(message.value))
+                    return "value: string expected";
+            return null;
+        };
+
+        /**
+         * Creates a ProtoUint message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof common.ProtoUint
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {common.ProtoUint} ProtoUint
+         */
+        ProtoUint.fromObject = function fromObject(object) {
+            if (object instanceof $root.common.ProtoUint)
+                return object;
+            var message = new $root.common.ProtoUint();
+            if (object.value != null)
+                message.value = String(object.value);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a ProtoUint message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof common.ProtoUint
+         * @static
+         * @param {common.ProtoUint} message ProtoUint
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        ProtoUint.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults)
+                object.value = "";
+            if (message.value != null && message.hasOwnProperty("value"))
+                object.value = message.value;
+            return object;
+        };
+
+        /**
+         * Converts this ProtoUint to JSON.
+         * @function toJSON
+         * @memberof common.ProtoUint
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        ProtoUint.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return ProtoUint;
     })();
 
     return common;
