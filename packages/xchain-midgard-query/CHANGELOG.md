@@ -10,14 +10,6 @@
 
 - bece78b: `getDecimalForAsset` can work with trade assets.
 - Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [bece78b]
-- Updated dependencies [bece78b]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
   - @xchainjs/xchain-util@1.0.0
   - @xchainjs/xchain-client@1.0.0
 

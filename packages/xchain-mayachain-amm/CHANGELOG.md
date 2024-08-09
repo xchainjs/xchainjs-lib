@@ -9,13 +9,6 @@
 ### Patch Changes
 
 - c74614f: Streaming swap parameters for `estimateSwap`, `validateSwap` and `doSwap` method.
-- Updated dependencies [bece78b]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
 - Updated dependencies [c74614f]
   - @xchainjs/xchain-mayachain@2.0.0
   - @xchainjs/xchain-thorchain@2.0.0

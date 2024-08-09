@@ -9,16 +9,6 @@
 ### Patch Changes
 
 - Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [bece78b]
-- Updated dependencies [bece78b]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
-- Updated dependencies [c74614f]
   - @xchainjs/xchain-util@1.0.0
   - @xchainjs/xchain-client@1.0.0
   - @xchainjs/xchain-utxo-providers@1.0.0
