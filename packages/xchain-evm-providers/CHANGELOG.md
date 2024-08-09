@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: `EvmOnlineDataProvider` and `EvmOnlineDataProviders` interfaces with EVM chain based properties.
+- c74614f: New types `Balance`, `TxFrom`, `TxTo`, `Tx`, `TxsPage` with EVM chain based properties.
+
+### Patch Changes
+
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [bece78b]
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+
 ## 0.1.13
 
 ### Patch Changes

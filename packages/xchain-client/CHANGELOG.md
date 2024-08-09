@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Types and interfaces updated with `AnyAsset`.
+- c74614f: `OnlineDataProvider`, `EvmOnlineDataProvider`, `OnlineDataProviders` and `EvmOnlineDataProviders` removed.
+
+### Patch Changes
+
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [bece78b]
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+
 ## 0.16.8
 
 ### Patch Changes

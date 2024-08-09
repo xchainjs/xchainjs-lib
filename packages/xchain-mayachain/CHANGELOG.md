@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- c74614f: Asset type refactor
+
+### Patch Changes
+
+- bece78b: Bug fix in deposit function. XChainJS asset parsed to Node nomenclature.
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-cosmos-sdk@1.0.0
+
 ## 1.0.11
 
 ### Patch Changes

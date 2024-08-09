@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Asset type refactor. `synth` property removed and `type` property added to distinguish the type of the asset.
+- c74614f: New types `AnyAsset` and `AssetType`, `AssetCryptoAmount`, `TokenAssetCryptoAmount` and `SynthAssetCryptoAmount`.
+- c74614f: `Asset` type represents native assets.
+- c74614f: `SynthAsset` represents synthetic assets that lives in networks like THORChain and MAYAChain.
+- c74614f: `TokenAsset` represents tokens that lives in EVM and Cosmos networks but they are not the native ones.
+
+### Patch Changes
+
+- bece78b: New asset `TradeAsset`.
+- bece78b: New crypto amount type `TradeAmount`.
+
 ## 0.13.7
 
 ### Patch Changes

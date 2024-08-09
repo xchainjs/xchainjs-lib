@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: New type `CosmosTxParams` for Cosmos transfers.
+
+### Patch Changes
+
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [bece78b]
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-mayachain@2.0.0
+  - @xchainjs/xchain-thorchain@2.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-evm@1.0.0
+  - @xchainjs/xchain-utxo@1.0.0
+
 ## 0.1.19
 
 ### Patch Changes

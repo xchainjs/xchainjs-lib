@@ -1,5 +1,33 @@
 # Changelog
 
+## 3.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- c74614f: Streaming swap parameters for `estimateSwap`, `validateSwap` and `doSwap` method.
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-mayachain@2.0.0
+  - @xchainjs/xchain-thorchain@2.0.0
+  - @xchainjs/xchain-wallet@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-arbitrum@1.0.0
+  - @xchainjs/xchain-ethereum@1.0.0
+  - @xchainjs/xchain-bitcoin@1.0.0
+  - @xchainjs/xchain-kujira@1.0.0
+  - @xchainjs/xchain-dash@1.0.0
+  - @xchainjs/xchain-mayachain-query@1.0.0
+
 ## 2.0.14
 
 ### Patch Changes

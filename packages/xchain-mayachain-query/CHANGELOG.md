@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- c74614f: `QuoteSwap` type updated. `Fees` type with `liquidityFee` and `totalFee` parameters.
+- c74614f: Streaming swap parameters for `quoteSwap` method.
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+- Updated dependencies [bece78b]
+- Updated dependencies [bece78b]
+- Updated dependencies [c74614f]
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-mayamidgard-query@0.1.16
+
 ## 0.1.21
 
 ### Patch Changes
