@@ -1,0 +1,27 @@
+{
+  "outbound_delay_blocks": 1,
+  "outbound_delay_seconds": 6,
+  "fees": {
+    "asset": "ETH~ETH",
+    "affiliate": "0",
+    "outbound": "0",
+    "liquidity": "4058",
+    "total": "4058",
+    "slippage_bps": 5,
+    "total_bps": 5
+  },
+  "slippage_bps": 5,
+  "streaming_slippage_bps": 5,
+  "expiry": 1722589495,
+  "warning": "Do not cache this response. Do not send funds after the expiry.",
+  "notes": "Broadcast a MsgDeposit to the THORChain network with the appropriate memo. Do not use multi-in, multi-out transactions.",
+  "recommended_min_amount_in": "620346",
+  "recommended_gas_rate": "7",
+  "gas_rate_units": "nAVAX",
+  "memo": "=:ETH~ETH:thor12fw3syyy4ff78llh3fvhrvdy7xnqlegvru7seg",
+  "expected_amount_out": "7940816",
+  "expected_amount_out_streaming": "",
+  "max_streaming_quantity": 0,
+  "streaming_swap_blocks": 0,
+  "total_swap_seconds": 6
+}

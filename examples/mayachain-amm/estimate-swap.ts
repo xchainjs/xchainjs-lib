@@ -1,5 +1,5 @@
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
-import { QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
+import { CompatibleAsset, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { CryptoAmount, assetAmount, assetFromString, assetToBase } from '@xchainjs/xchain-util'
 
 import { printQuoteSwap } from './utils'
@@ -17,8 +17,8 @@ const estimateSwap = async (mayachainAmm: MayachainAMM, quoteSwapParams: QuoteSw
 const main = async () => {
   const amount = process.argv[2]
   const decimals = Number(process.argv[3])
-  const fromAsset = assetFromString(`${process.argv[4]}`)
-  const toAsset = assetFromString(`${process.argv[5]}`)
+  const fromAsset = assetFromString(`${process.argv[4]}`) as CompatibleAsset
+  const toAsset = assetFromString(`${process.argv[5]}`) as CompatibleAsset
   const affiliateAddress = process.argv[6]
   let affiliateBps = 0
 

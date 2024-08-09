@@ -1,7 +1,7 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { AnyAsset, Chain, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
 
 import {
   IProtocol,
@@ -31,7 +31,7 @@ export class ThorchainProtocol implements IProtocol {
    * @returns {boolean} True if the asset is supported, otherwise false
    */
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
-    if (eqAsset(asset, AssetRuneNative)) return true
+    if (eqAsset(asset, AssetRuneNative) || isTradeAsset(asset) || isSynthAsset(asset)) return true
     const pools = await this.thorchainQuery.thorchainCache.getPools()
     return (
       Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1

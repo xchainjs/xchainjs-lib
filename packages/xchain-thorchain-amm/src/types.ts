@@ -9,6 +9,7 @@ import {
   CryptoAmount,
   SynthAsset,
   TokenAsset,
+  TradeCryptoAmount,
 } from '@xchainjs/xchain-util'
 
 /**
@@ -153,45 +154,71 @@ export type QuoteTHORName = BaseQuoteTHORName & {
 }
 
 /**
- * Deposit to Rune pool params
+ * Add to trade account params
  */
-export type DepositToRunePoolParams = {
+export type AddToTradeAccountParams = {
   /**
-   * Rune amount to deposit to the Rune pool
+   * Amount to add to the account
    */
-  amount: AssetCryptoAmount
+  amount: CryptoAmount<Asset | TokenAsset>
+  /**
+   * Trade account address
+   */
+  address: Address
 }
 
 /**
- * Withdraw from Rune pool params
+ * Estimation to add amount to trade account
  */
-export type WithdrawFromRunePoolParams = {
+export type AddToTradeAccount = {
   /**
-   * Basis points to retrieve from the Rune pool position. Range 0-10000, where 10000 = 100%.
+   * Address to send transaction
    */
-  withdrawBps: number
+  toAddress: string
   /**
-   * Affiliate address
-   */
-  affiliate?: Address
-  /**
-   * Basis points to send to the affiliate address. Ranges from 0 to 1000 Basis Points.
-   */
-  feeBps?: number
-}
-
-/**
- * Estimation to quote to withdraw from Rune pool
- */
-export type EstimateWithdrawFromRunePool = {
-  /**
-   * Amount to send in the transaction to make the withdraw
-   */
-  amount: AssetCryptoAmount
-  /**
-   * Memo to send in the transaction to make the withdraw
+   * Memo to add to the transaction to add the trade amount
    */
   memo: string
+  /**
+   * Amount to send to the address
+   */
+  value: CryptoAmount<Asset | TokenAsset>
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
+}
+
+/*
+ * Withdraw from trade account params
+ */
+export type WithdrawFromTradeAccountParams = {
+  /**
+   * Amount to withdraw from the account
+   */
+  amount: TradeCryptoAmount
+  /**
+   * Address to make to the withdraw to
+   */
+  address: Address
+}
+
+/**
+ * Estimation to add amount to trade account
+ */
+export type WithdrawFromTradeAccount = {
+  /**
+   * Memo to add to the transaction to add the trade amount
+   */
+  memo: string
+  /**
+   * Amount to send to the address
+   */
+  value: TradeCryptoAmount
   /**
    * If the action can be or not can be done
    */
@@ -218,6 +245,64 @@ export type EstimateDepositToRunePool = {
    * Number of blocks from the last deposit that a withdraw is allowed
    */
   maturityBlocks: number
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
+}
+
+/**
+ * Deposit to Rune pool params
+ */
+export type DepositToRunePoolParams = {
+  /**
+   * Rune amount to deposit to the Rune pool
+   */
+  amount: AssetCryptoAmount
+}
+
+/**
+ * Estimation to quote to withdraw from Rune pool
+ */
+export type EstimateWithdrawFromRunePool = {
+  /**
+   * Amount to send in the transaction to make the withdraw
+   */
+  amount: AssetCryptoAmount
+  /**
+   * Memo to send in the transaction to make the withdraw
+   */
+  memo: string
+  /**
+   * If the action can be or not can be done
+   */
+  allowed: boolean
+  /**
+   * If any, list of errors with the reason the operation is not allowed
+   */
+  errors: string[]
+}
+
+/**
+ * Withdraw from Rune pool params
+ */
+export type WithdrawFromRunePoolParams = {
+  /**
+   * Basis points to retrieve from the Rune pool position. Range 0-10000, where 10000 = 100%.
+   */
+  withdrawBps: number
+  /**
+   * Affiliate address
+   */
+  affiliate?: Address
+  /**
+   * Basis points to send to the affiliate address. Ranges from 0 to 1000 Basis Points.
+   */
+  feeBps?: number
   /**
    * If the action can be or not can be done
    */

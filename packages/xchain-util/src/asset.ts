@@ -12,6 +12,7 @@ import {
   Denomination,
   SynthAsset,
   TokenAsset,
+  TradeAsset,
 } from './types'
 
 export type Address = string
@@ -51,6 +52,11 @@ export const TOKEN_ASSET_DELIMITER = '.'
  * Synth asset delimiter
  */
 export const SYNTH_ASSET_DELIMITER = '/'
+
+/**
+ * Trade asset delimiter
+ */
+export const TRADE_ASSET_DELIMITER = '~'
 
 /**
  * Factory to create values of assets (e.g. RUNE)
@@ -221,6 +227,14 @@ export const isValidAsset = (asset: AnyAsset): boolean => !!asset.chain && !!ass
 export const isSynthAsset = (asset: AnyAsset): asset is SynthAsset => asset.type === AssetType.SYNTH
 
 /**
+ * Helper to check whether an asset is trade asset
+ *
+ * @param {AnyAsset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isTradeAsset = (asset: AnyAsset): asset is TradeAsset => asset.type === AssetType.TRADE
+
+/**
  * Creates an `Asset` by a given string
  *
  * This helper function expects a string with following naming convention:
@@ -239,7 +253,8 @@ export const isSynthAsset = (asset: AnyAsset): asset is SynthAsset => asset.type
  */
 export const assetFromString = (s: string): AnyAsset | null => {
   const isSynth = s.includes(SYNTH_ASSET_DELIMITER)
-  const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
+  const isTrade = s.includes(TRADE_ASSET_DELIMITER)
+  const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : isTrade ? TRADE_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
   const data = s.split(delimiter)
   if (data.length <= 1 || data[1]?.length < 1) {
     return null
@@ -256,6 +271,7 @@ export const assetFromString = (s: string): AnyAsset | null => {
   if (!symbol) return null
 
   if (isSynth) return { chain, symbol, ticker, type: AssetType.SYNTH }
+  if (isTrade) return { chain, symbol, ticker, type: AssetType.TRADE }
   if (isToken) return { chain, symbol, ticker, type: AssetType.TOKEN }
 
   return { chain, symbol, ticker, type: AssetType.NATIVE }
@@ -291,6 +307,8 @@ export const assetToString = ({ chain, symbol, type }: AnyAsset) => {
       return `${chain}${SYNTH_ASSET_DELIMITER}${symbol}`
     case AssetType.TOKEN:
       return `${chain}${TOKEN_ASSET_DELIMITER}${symbol}`
+    case AssetType.TRADE:
+      return `${chain}${TRADE_ASSET_DELIMITER}${symbol}`
     default:
       return `${chain}${NATIVE_ASSET_DELIMITER}${symbol}`
   }

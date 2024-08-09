@@ -7,6 +7,7 @@ import {
   BaseAmount,
   SynthAsset,
   TokenAsset,
+  TradeAsset,
   assetToBase,
   assetToString,
   baseToAsset,
@@ -126,3 +127,4 @@ export class CryptoAmount<T extends AnyAsset = AnyAsset> extends BaseCryptoAmoun
 export class AssetCryptoAmount extends BaseCryptoAmount<Asset> {}
 export class TokenCryptoAmount extends BaseCryptoAmount<TokenAsset> {}
 export class SynthCryptoAmount extends BaseCryptoAmount<SynthAsset> {}
+export class TradeCryptoAmount extends BaseCryptoAmount<TradeAsset> {}

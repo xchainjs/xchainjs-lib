@@ -55,5 +55,15 @@ export default {
       const resp = require(`./responses/thornode/constants.json`)
       return [200, resp]
     })
+    mock.onGet(/\/thorchain\/quote\/swap/).reply(function (config) {
+      const parsedUrl = new URL(`${config.url}`)
+      const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''
+      const to_asset = parsedUrl.searchParams.get('to_asset') ?? ''
+      if (from_asset === 'AVAX~AVAX' && to_asset === 'ETH~ETH') {
+        const resp = require(`./responses/thornode/tradeSwap.json`)
+        return [200, resp]
+      }
+      return [500, { error: 'Not found' }]
+    })
   },
 }

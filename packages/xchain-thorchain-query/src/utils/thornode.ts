@@ -27,11 +27,19 @@ import {
   SaversResponse,
   Thorname,
   ThornamesApi,
+  TradeAccountApi,
+  TradeAccountsApi,
+  TradeAccountsResponse,
+  TradeUnitApi,
+  TradeUnitResponse,
+  TradeUnitsApi,
+  TradeUnitsResponse,
   TransactionsApi,
   TxDetailsResponse,
   TxOutItem,
   TxResponse,
 } from '@xchainjs/xchain-thornode'
+import { Address } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
@@ -68,6 +76,10 @@ export class Thornode {
   private saversApi: SaversApi[]
   private quoteApi: QuoteApi[]
   private mimirApi: MimirApi[]
+  private tradeUnitApi: TradeUnitApi[]
+  private tradeUnitsApi: TradeUnitsApi[]
+  private tradeAccountApi: TradeAccountApi[]
+  private tradeAccountsApi: TradeAccountsApi[]
   private thornamesApi: ThornamesApi[]
   private runePoolApi: RUNEPoolApi[]
 
@@ -89,6 +101,18 @@ export class Thornode {
     this.mimirApi = this.config.thornodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
     this.thornamesApi = this.config.thornodeBaseUrls.map(
       (url) => new ThornamesApi(new Configuration({ basePath: url })),
+    )
+    this.tradeUnitApi = this.config.thornodeBaseUrls.map(
+      (url) => new TradeUnitApi(new Configuration({ basePath: url })),
+    )
+    this.tradeUnitsApi = this.config.thornodeBaseUrls.map(
+      (url) => new TradeUnitsApi(new Configuration({ basePath: url })),
+    )
+    this.tradeAccountApi = this.config.thornodeBaseUrls.map(
+      (url) => new TradeAccountApi(new Configuration({ basePath: url })),
+    )
+    this.tradeAccountsApi = this.config.thornodeBaseUrls.map(
+      (url) => new TradeAccountsApi(new Configuration({ basePath: url })),
     )
     this.runePoolApi = this.config.thornodeBaseUrls.map((url) => new RUNEPoolApi(new Configuration({ basePath: url })))
   }
@@ -514,6 +538,69 @@ export class Thornode {
       } catch (e) {}
     }
     throw new Error(`THORNode is not responding`)
+  }
+
+  /*
+   * Returns the total units and depth of a trade asset
+   * @param {string} asset Trade asset
+   * @param {number} height Optional - Block height
+   * @returns Returns the total units and depth of a trade asset
+   */
+  public async getTradeAssetUnits(asset: string, height?: number): Promise<TradeUnitResponse> {
+    for (const api of this.tradeUnitApi) {
+      try {
+        const resp = (await api.tradeUnit(asset, height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`THORNode is not responding. Can not get asset trade units`)
+  }
+
+  /**
+   * Returns the total units and depth for each trade asset
+   * @param {number} height Block height
+   * @returns Returns the total units and depth for each trade asset
+   */
+  public async getTradeAssetsUnits(height?: number): Promise<TradeUnitsResponse> {
+    for (const api of this.tradeUnitsApi) {
+      try {
+        const resp = (await api.tradeUnits(height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`THORNode is not responding. Can not get trade units`)
+  }
+
+  /**
+   * Returns the units and depth of a trade account address
+   * @param {Address} address Thorchain address
+   * @param {number} height Optional - Block height
+   * @returns Returns the units and depth of a trade account
+   */
+  public async getTradeAssetAccount(address: Address, height?: number): Promise<TradeAccountsResponse> {
+    for (const api of this.tradeAccountApi) {
+      try {
+        const resp = (await api.tradeAccount(address, height)).data
+        return resp as unknown as TradeAccountsResponse
+      } catch (e) {}
+    }
+    throw new Error(`THORNode is not responding. Can not get trade asset account`)
+  }
+
+  /**
+   * Returns all trade accounts for an asset
+   * @param {Address} address Thorchain address
+   * @param {number} height Optional - Block height
+   * @returns Returns all trade accounts for an asset
+   */
+  public async getTradeAssetAccounts(asset: string, height?: number): Promise<TradeAccountsResponse> {
+    for (const api of this.tradeAccountsApi) {
+      try {
+        const resp = (await api.tradeAccounts(asset, height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`THORNode is not responding. Can not get trade asset accounts`)
   }
 
   /**

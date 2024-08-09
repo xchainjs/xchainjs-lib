@@ -81,6 +81,26 @@ export default {
       return [200, resp]
     })
 
+    mock.onGet(/\/thorchain\/trade\/units/).reply(function () {
+      const resp = require('./responses/thornode/tradeAssetUnits.json')
+      return [200, resp]
+    })
+
+    mock.onGet(/\/thorchain\/trade\/unit/).reply(function () {
+      const resp = require('./responses/thornode/tradeAssetUnit.json')
+      return [200, resp]
+    })
+
+    mock.onGet(/\/thorchain\/trade\/accounts/).reply(function () {
+      const resp = require('./responses/thornode/tradeAssetAccounts.json')
+      return [200, resp]
+    })
+
+    mock.onGet(/\/thorchain\/trade\/account/).reply(function () {
+      const resp = require('./responses/thornode/tradeAssetAccount.json')
+      return [200, resp]
+    })
+
     mock.onGet(/\/thorchain\/runepool/).reply(function () {
       const resp = require('./responses/thornode/runePool.json')
       return [200, resp]
