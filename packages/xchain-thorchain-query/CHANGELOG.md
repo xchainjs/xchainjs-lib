@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- 20a1f7c: New method `getRunePool` for `ThorchainQuery` to retrieve Rune pool data.
+- 20a1f7c: New method `getRunePoolProvider` for `ThorchainQuery` to return Rune pool provider data.
+- bece78b: New method `getTradeAssetUnits` for `ThorchainQuery` to return the total units and depth of a trade asset.
+- bece78b: New method `getTradeAssetAccounts` for `Thornode` to all trade accounts for an asset.
+- 20a1f7c: New method `withdrawFromRunePool` for `ThorchainAMM` to withdraw from Rune pool.
+- bece78b: New method `getTradeAssetsUnits` to return the total units and depth for each trade asset for `Thornode`.
+- 20a1f7c: New method `estimateWithdrawFromRunePool` for `ThorchainAMM` to estimate the withdraw from Rune pool.
+- 20a1f7c: New method `getRunePool` for `Thornode` to retrieve Rune pool data.
+- bece78b: New method `getTradeAssetsUnits` for `ThorchainQuery` to return the total units and depth for each trade asset.
+- bece78b: New method `getAddressTradeAccounts` for `ThorchainQuery` to return the units and depth of a trade account address.
+- 20a1f7c: New method `getRunePoolProviders` for `Thornode` to return all Rune pool providers data.
+- bece78b: New method `getTradeAssetsUnits` for `Thornode` to return the total units and depth for each trade asset.
+- bece78b: New method `getTradeAssetUnits` for `Thornode` to return the total units and depth of a trade asset.
+- 20a1f7c: New method `getRunePoolProviders` for `ThorchainQuery` to return all Rune pool providers data.
+- 20a1f7c: New method `getRunePoolProvider` for `Thornode` to return Rune pool provider data.
+- bece78b: New method `getTradeAssetAccount` for `Thornode` to the units and depth of a trade account address.
+- bece78b: New method `getTradeAssetAccounts` for `ThorchainQuery` to return all trade accounts for a trade asset.
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-midgard-query@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-thornode@0.3.18
+
 ## 0.7.17
 
 ### Patch Changes

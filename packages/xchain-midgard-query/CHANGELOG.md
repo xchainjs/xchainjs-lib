@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- bece78b: `getDecimalForAsset` can work with trade assets.
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+
 ## 0.1.20
 
 ### Patch Changes

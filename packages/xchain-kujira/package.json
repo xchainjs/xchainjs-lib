@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-kujira",
-  "version": "0.1.21",
+  "version": "1.0.0",
   "description": "Custom Kujira client",
   "keywords": [
     "XChain",

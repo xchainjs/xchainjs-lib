@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- bece78b: Trade assets support for swaps. Currently supported by Thorchain.
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-thorchain-query@1.0.0
+  - @xchainjs/xchain-thorchain-amm@2.0.0
+  - @xchainjs/xchain-mayachain@2.0.0
+  - @xchainjs/xchain-thorchain@2.0.0
+  - @xchainjs/xchain-wallet@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-mayachain-amm@3.0.0
+  - @xchainjs/xchain-mayachain-query@1.0.0
+
 ## 0.2.6
 
 ### Patch Changes
