@@ -12872,6 +12872,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"xchainjs-thorchain-amm@workspace:examples/thorchain-amm":
+  version: 0.0.0-use.local
+  resolution: "xchainjs-thorchain-amm@workspace:examples/thorchain-amm"
+  dependencies:
+    "@types/node": "npm:20.11.28"
+    "@xchainjs/xchain-thorchain": "workspace:*"
+    "@xchainjs/xchain-thorchain-amm": "workspace:*"
+    "@xchainjs/xchain-thorchain-query": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    "@xchainjs/xchain-wallet": "workspace:*"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
 "xchainjs-wallet@workspace:examples/wallet":
   version: 0.0.0-use.local
   resolution: "xchainjs-wallet@workspace:examples/wallet"
