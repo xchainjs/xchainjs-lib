@@ -39,7 +39,7 @@
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
-    "axios": "1.3.6",
+    "axios": "1.7.4",
     "bitcoinjs-lib": "5.2.0",
     "coininfo": "5.1.0",
     "coinselect": "3.1.12"
