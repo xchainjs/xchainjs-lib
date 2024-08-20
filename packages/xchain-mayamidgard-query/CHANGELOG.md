@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.17
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-mayamidgard@0.1.6
+  - @xchainjs/xchain-client@1.0.1
+
 ## 0.1.16
 
 ### Patch Changes
