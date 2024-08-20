@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+- Updated dependencies [be1c45f]
+  - @xchainjs/xchain-thorchain-query@1.0.1
+  - @xchainjs/xchain-bitcoincash@1.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-litecoin@1.0.1
+  - @xchainjs/xchain-binance@6.0.1
+  - @xchainjs/xchain-bitcoin@1.0.1
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-cosmos@2.0.1
+  - @xchainjs/xchain-doge@1.0.1
+  - @xchainjs/xchain-evm@1.0.1
+  - @xchainjs/xchain-wallet@1.0.1
+  - @xchainjs/xchain-avax@1.0.1
+  - @xchainjs/xchain-bsc@1.0.1
+  - @xchainjs/xchain-ethereum@1.0.1
+
 ## 2.0.0
 
 ### Major Changes

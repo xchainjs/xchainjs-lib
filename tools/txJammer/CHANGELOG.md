@@ -1,5 +1,29 @@
 # txJammer
 
+## 1.0.15
+
+### Patch Changes
+
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+- Updated dependencies [be1c45f]
+  - @xchainjs/xchain-thorchain-query@1.0.1
+  - @xchainjs/xchain-thorchain-amm@2.0.1
+  - @xchainjs/xchain-bitcoincash@1.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-litecoin@1.0.1
+  - @xchainjs/xchain-thornode@0.3.19
+  - @xchainjs/xchain-binance@6.0.1
+  - @xchainjs/xchain-bitcoin@1.0.1
+  - @xchainjs/xchain-midgard@0.5.9
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-cosmos@2.0.1
+  - @xchainjs/xchain-doge@1.0.1
+  - @xchainjs/xchain-wallet@1.0.1
+  - @xchainjs/xchain-avax@1.0.1
+  - @xchainjs/xchain-bsc@1.0.1
+  - @xchainjs/xchain-ethereum@1.0.1
+
 ## 1.0.14
 
 ### Patch Changes
