@@ -61,7 +61,7 @@ Using THORChain AMM package, you could easily implement the following features
 
 - Estimate swaps
 - Do swaps, streaming swaps and trade asset swaps
-- Approve THORChain router to spend to be able to do ERC-20 swaps
+- Approve THORChain router to be able to do ERC-20 swaps
 
 
 ### Liquidity pools
