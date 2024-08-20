@@ -1,4 +1,4 @@
-import { Address, AnyAsset, Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { Address, AnyAsset, Asset, BaseAmount, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
 
 /**
  * Enumeration of network types.
@@ -14,6 +14,30 @@ export enum Network {
  */
 export type AssetInfo = {
   asset: Asset // The asset
+  decimal: number // The decimal value
+}
+
+/**
+ * Type definition for token asset information.
+ */
+export type TokenAssetInfo = {
+  asset: TokenAsset // The asset
+  decimal: number // The decimal value
+}
+
+/**
+ * Type definition for synth asset information.
+ */
+export type SynthAssetInfo = {
+  asset: SynthAsset // The asset
+  decimal: number // The decimal value
+}
+
+/**
+ * Type definition for trade asset information.
+ */
+export type TradeAssetInfo = {
+  asset: TradeAsset // The asset
   decimal: number // The decimal value
 }
 
