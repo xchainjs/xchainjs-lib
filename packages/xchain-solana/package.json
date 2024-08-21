@@ -31,7 +31,14 @@
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@solana/addresses": "2.0.0-rc.1",
+    "@solana/web3.js": "1.95.2",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "micro-ed25519-hdkey": "0.1.2"
+  },
   "publishConfig": {
     "access": "public",
     "directory": "release/package"
