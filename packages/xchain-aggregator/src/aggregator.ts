@@ -1,4 +1,4 @@
-import { assetToString } from '@xchainjs/xchain-util'
+import { TokenAsset, assetToString } from '@xchainjs/xchain-util'
 
 import { DEFAULT_CONFIG } from './const'
 import { ProtocolFactory } from './protocols'
@@ -87,16 +87,43 @@ export class Aggregator {
   }
 
   /**
+   * Should be approved
+   * @param errors
+   * Check if the tx should be approved
+   * @returns boolean
+   */
+  private shouldBeApproved(errors: string[]) {
+    return (
+      errors.some((error) => error === 'Thorchain router has not been approved to spend this amount') &&
+      errors.some((error) => error !== 'Asset should be ERC20')
+    )
+  }
+
+  /**
    * Do swap
    * @param {QuoteSwapParams & { protocol?: Protocol }} params Swap parameters. If protocol is not set,
    * estimateSwap will be call and swap will be done in protocol with the greatest expected amount
+   * Aprove the tx if needed
    * @returns the swap with the greatest expected amount estimated in the supported protocols
    */
   public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
     const protocolName = params.protocol ? params.protocol : (await this.estimateSwap(params)).protocol
     const protocol = this.protocols.find((protocol) => protocol.name === protocolName)
 
-    if (!protocol) throw Error(`${protocolName} protocol is not supported`)
+    if (!protocol) {
+      throw Error(`${protocolName} protocol is not supported`)
+    }
+
+    const isApprovedErrors = await protocol.isRouterApprovedToSpend({
+      asset: params.fromAsset as TokenAsset,
+      amount: params.amount,
+      address: params.fromAddress || '',
+    })
+
+    if (this.shouldBeApproved(isApprovedErrors)) {
+      await protocol.approveRouterToSpend({ asset: params.fromAsset as TokenAsset, amount: params.amount })
+    }
+
     return protocol.doSwap(params)
   }
 

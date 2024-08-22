@@ -309,6 +309,8 @@ export class ThorchainAMM {
    */
   public async isRouterApprovedToSpend({ asset, amount, address }: IsApprovedParams): Promise<string[]> {
     const errors: string[] = []
+    const isERC20 = isProtocolERC20Asset(asset)
+    if (!isERC20) errors.push('Asset should be ERC20')
 
     const inboundDetails = await this.thorchainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)

@@ -1,5 +1,5 @@
 import { AssetCacao, MAYAChain } from '@xchainjs/xchain-mayachain'
-import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
+import { ApproveParams, IsApprovedParams, MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import {
   AnyAsset,
@@ -33,6 +33,27 @@ export class MayachainProtocol implements IProtocol {
     this.mayachainQuery = new MayachainQuery()
     this.mayachainAmm = new MayachainAMM(this.mayachainQuery, configuration?.wallet)
     this.configuration = configuration
+  }
+  /**
+   * Aprove tx for ERC-20
+   * @param {ApproveParams} approveParams params to approve tx
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
+   */
+  async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
+    const { asset, amount } = params
+    return await this.mayachainAmm.approveRouterToSpend({ asset, amount })
+  }
+
+  /**
+   * Check if tx is approved for ERC-20
+   * @param {IsApprovedParams} isApprovedParams params to check if tx is approved
+   * @returns {string[]} array of errors
+   */
+  async isRouterApprovedToSpend(params: IsApprovedParams): Promise<string[]> {
+    const { asset, amount, address } = params
+    const errors = await this.mayachainAmm.isRouterApprovedToSpend({ asset, amount, address })
+
+    return errors
   }
 
   /**

@@ -128,6 +128,17 @@ type SwapHistory = {
   swaps: SwapResume[]
 }
 
+type ApproveParams = {
+  asset: TokenAsset
+  amount?: CryptoAmount
+}
+
+type IsApprovedParams = {
+  asset: TokenAsset
+  amount: CryptoAmount
+  address: string
+}
+
 interface IProtocol {
   name: Protocol
   isAssetSupported(asset: AnyAsset): Promise<boolean>
@@ -135,6 +146,8 @@ interface IProtocol {
   estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>
   doSwap(params: QuoteSwapParams): Promise<TxSubmitted>
   getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory>
+  approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted>
+  isRouterApprovedToSpend(params: IsApprovedParams): Promise<string[]>
 }
 
 export { IProtocol, QuoteSwapParams, QuoteSwap, TxSubmitted, Protocol, SwapHistory, SwapResume, SwapHistoryParams }

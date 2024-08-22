@@ -1,5 +1,5 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
-import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
 
@@ -23,6 +23,28 @@ export class ThorchainProtocol implements IProtocol {
     this.thorchainQuery = new ThorchainQuery()
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
+  }
+
+  /**
+   * Aprove tx for ERC-20
+   * @param {ApproveParams} approveParams params to approve tx
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
+   */
+  async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
+    const { asset, amount } = params
+    return await this.thorchainAmm.approveRouterToSpend({ asset, amount })
+  }
+
+  /**
+   * Check if tx is approved for ERC-20
+   * @param {IsApprovedParams} isApprovedParams params to check if tx is approved
+   * @returns {string[]} array of errors
+   */
+  async isRouterApprovedToSpend(params: IsApprovedParams): Promise<string[]> {
+    const { asset, amount, address } = params
+    const errors = await this.thorchainAmm.isRouterApprovedToSpend({ asset, amount, address })
+
+    return errors
   }
 
   /**
