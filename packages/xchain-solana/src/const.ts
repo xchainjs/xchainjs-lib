@@ -21,8 +21,8 @@ export const SOLAsset: Asset = {
 export const defaultSolanaParams: SOLClientParams = {
   network: Network.Mainnet,
   rootDerivationPaths: {
-    [Network.Mainnet]: "m/44'/501'/0'/0/",
-    [Network.Testnet]: "m/44'/501'/0'/0/",
-    [Network.Stagenet]: "m/44'/501'/0'/0/",
+    [Network.Mainnet]: "m/44'/501'/",
+    [Network.Testnet]: "m/44'/501'/",
+    [Network.Stagenet]: "m/44'/501'/",
   },
 }

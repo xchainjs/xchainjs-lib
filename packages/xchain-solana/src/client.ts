@@ -28,23 +28,50 @@ export class Client extends BaseXChainClient {
     throw new Error('Method not implemented.')
   }
 
-  public getAddress(index = 0): string {
+  /**
+   * Get the current address asynchronously.
+   * @param {number} index The index of the address.
+   * @returns {Address} The Solana address related to the index provided.
+   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
+   */
+  public async getAddressAsync(index?: number): Promise<string> {
     if (!this.phrase) throw new Error('Phrase must be provided')
 
     const seed = getSeed(this.phrase)
     const hd = HDKey.fromMasterSeed(seed.toString('hex'))
 
-    const keypair = Keypair.fromSeed(hd.derive(this.getFullDerivationPath(index || 0), true).privateKey)
+    const keypair = Keypair.fromSeed(hd.derive(this.getFullDerivationPath(index || 0)).privateKey)
 
     return keypair.publicKey.toBase58()
   }
 
+  /**
+   * Get the current address synchronously.
+   * @deprecated
+   */
+  public getAddress(): string {
+    throw Error('Sync method not supported')
+  }
+
+  /**
+   * Validate the given Solana address.
+   * @param {string} address Solana address to validate.
+   * @returns {boolean} `true` if the address is valid, `false` otherwise.
+   */
   public validateAddress(address: Address): boolean {
     return isAddress(address)
   }
 
-  public async getAddressAsync(index?: number): Promise<string> {
-    return this.getAddress(index)
+  /**
+   * Get the full derivation path based on the wallet index.
+   * @param {number} walletIndex The HD wallet index
+   * @returns {string} The full derivation path
+   */
+  public getFullDerivationPath(walletIndex: number): string {
+    if (!this.rootDerivationPaths) {
+      throw Error('Can not generate derivation path due to root derivation path is undefined')
+    }
+    return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
   }
 
   getFees(): Promise<Fees> {
