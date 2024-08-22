@@ -103,7 +103,7 @@ export class Aggregator {
    * Do swap
    * @param {QuoteSwapParams & { protocol?: Protocol }} params Swap parameters. If protocol is not set,
    * estimateSwap will be call and swap will be done in protocol with the greatest expected amount
-   * Aprove the tx if needed
+   * Approve the tx if needed
    * @returns the swap with the greatest expected amount estimated in the supported protocols
    */
   public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
