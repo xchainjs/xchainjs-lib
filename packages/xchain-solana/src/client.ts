@@ -1,5 +1,6 @@
 import { isAddress } from '@solana/addresses'
-import { Keypair } from '@solana/web3.js'
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import {
   AssetInfo,
   Balance,
@@ -12,20 +13,37 @@ import {
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address } from '@xchainjs/xchain-util'
+import { Address, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 import { HDKey } from 'micro-ed25519-hdkey'
 
-import { SOLChain, defaultSolanaParams } from './const'
+import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
+import { TokenAssetData } from './solana-types'
 import { SOLClientParams } from './types'
+import { getSolanaNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
+  private connection: Connection
+
   constructor(params: SOLClientParams = defaultSolanaParams) {
     super(SOLChain, {
       ...defaultSolanaParams,
       ...params,
     })
     this.explorerProviders = params.explorerProviders
+    this.connection = new Connection(clusterApiUrl(getSolanaNetwork(this.getNetwork())))
+  }
+
+  /**
+   * Get information about the native asset of the Solana.
+   *
+   * @returns {AssetInfo} Information about the native asset.
+   */
+  public getAssetInfo(): AssetInfo {
+    return {
+      asset: SOLAsset,
+      decimal: SOL_DECIMALS,
+    }
   }
 
   /**
@@ -104,11 +122,33 @@ export class Client extends BaseXChainClient {
     return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
   }
 
-  getFees(): Promise<Fees> {
-    throw new Error('Method not implemented.')
+  public async getBalance(address: Address): Promise<Balance[]> {
+    const balances: Balance[] = []
+
+    const nativeBalance = await this.connection.getBalance(new PublicKey(address))
+
+    balances.push({
+      asset: SOLAsset,
+      amount: baseAmount(nativeBalance, SOL_DECIMALS),
+    })
+
+    const tokenBalances = await this.connection.getParsedTokenAccountsByOwner(new PublicKey(address), {
+      programId: TOKEN_PROGRAM_ID,
+    })
+
+    tokenBalances.value.forEach((balance) => {
+      const parsedData = balance.account.data.parsed as TokenAssetData
+      const symbol = 'TBD' // TODO: Find a way to retrieve symbol data
+      balances.push({
+        amount: baseAmount(parsedData.info.tokenAmount.amount, parsedData.info.tokenAmount.decimals),
+        asset: assetFromStringEx(`SOL.${symbol}-${parsedData.info.mint}`),
+      })
+    })
+
+    return balances
   }
 
-  getBalance(): Promise<Balance[]> {
+  getFees(): Promise<Fees> {
     throw new Error('Method not implemented.')
   }
 
@@ -125,10 +165,6 @@ export class Client extends BaseXChainClient {
   }
 
   broadcastTx(): Promise<TxHash> {
-    throw new Error('Method not implemented.')
-  }
-
-  getAssetInfo(): AssetInfo {
     throw new Error('Method not implemented.')
   }
 

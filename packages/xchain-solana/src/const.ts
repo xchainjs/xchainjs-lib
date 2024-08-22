@@ -9,6 +9,11 @@ import { SOLClientParams } from './types'
 export const SOLChain = 'SOL' as const
 
 /**
+ * Solana native asset decimals
+ */
+export const SOL_DECIMALS = 9
+
+/**
  * Solana native asset
  */
 export const SOLAsset: Asset = {

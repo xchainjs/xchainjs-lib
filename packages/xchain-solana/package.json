@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@solana/addresses": "2.0.0-rc.1",
+    "@solana/spl-token": "0.4.8",
     "@solana/web3.js": "1.95.2",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
