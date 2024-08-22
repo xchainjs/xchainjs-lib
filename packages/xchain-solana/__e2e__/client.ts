@@ -1,10 +1,11 @@
-import { Client } from '../src'
+import { Client, defaultSolanaParams } from '../src'
 
 describe('Solana client', () => {
   let client: Client
 
   beforeAll(() => {
     client = new Client({
+      ...defaultSolanaParams,
       phrase: process.env.PHRASE_MAINNET,
     })
   })

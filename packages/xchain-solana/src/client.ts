@@ -1,6 +1,16 @@
 import { isAddress } from '@solana/addresses'
 import { Keypair } from '@solana/web3.js'
-import { AssetInfo, Balance, BaseXChainClient, Fees, PreparedTx, Tx, TxHash, TxsPage } from '@xchainjs/xchain-client'
+import {
+  AssetInfo,
+  Balance,
+  BaseXChainClient,
+  ExplorerProviders,
+  Fees,
+  PreparedTx,
+  Tx,
+  TxHash,
+  TxsPage,
+} from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { HDKey } from 'micro-ed25519-hdkey'
@@ -9,27 +19,47 @@ import { SOLChain, defaultSolanaParams } from './const'
 import { SOLClientParams } from './types'
 
 export class Client extends BaseXChainClient {
+  private explorerProviders: ExplorerProviders
   constructor(params: SOLClientParams = defaultSolanaParams) {
     super(SOLChain, {
       ...defaultSolanaParams,
       ...params,
     })
+    this.explorerProviders = params.explorerProviders
   }
 
-  getExplorerUrl(): string {
-    throw new Error('Method not implemented.')
+  /**
+   * Get the explorer URL.
+   *
+   * @returns {string} The explorer URL.
+   */
+  public getExplorerUrl(): string {
+    return this.explorerProviders[this.getNetwork()].getExplorerUrl()
   }
 
-  getExplorerAddressUrl(): string {
-    throw new Error('Method not implemented.')
+  /**
+   * Get the explorer url for the given address.
+   *
+   * @param {Address} address
+   * @returns {string} The explorer url for the given address.
+   */
+  public getExplorerAddressUrl(address: Address): string {
+    return this.explorerProviders[this.getNetwork()].getExplorerAddressUrl(address)
   }
 
-  getExplorerTxUrl(): string {
-    throw new Error('Method not implemented.')
+  /**
+   * Get the explorer url for the given transaction id.
+   *
+   * @param {string} txID
+   * @returns {string} The explorer url for the given transaction id.
+   */
+  public getExplorerTxUrl(txID: TxHash): string {
+    return this.explorerProviders[this.getNetwork()].getExplorerTxUrl(txID)
   }
 
   /**
    * Get the current address asynchronously.
+   *
    * @param {number} index The index of the address.
    * @returns {Address} The Solana address related to the index provided.
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
