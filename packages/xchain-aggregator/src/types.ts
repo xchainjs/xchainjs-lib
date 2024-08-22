@@ -150,4 +150,15 @@ interface IProtocol {
   isRouterApprovedToSpend(params: IsApprovedParams): Promise<string[]>
 }
 
-export { IProtocol, QuoteSwapParams, QuoteSwap, TxSubmitted, Protocol, SwapHistory, SwapResume, SwapHistoryParams }
+export {
+  IProtocol,
+  QuoteSwapParams,
+  QuoteSwap,
+  TxSubmitted,
+  Protocol,
+  SwapHistory,
+  SwapResume,
+  SwapHistoryParams,
+  ApproveParams,
+  IsApprovedParams,
+}
