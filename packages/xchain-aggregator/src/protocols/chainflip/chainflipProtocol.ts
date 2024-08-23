@@ -40,7 +40,7 @@ export class ChainflipProtocol implements IProtocol {
   approveRouterToSpend(_params: { asset: TokenAsset; amount?: CryptoAmount }): Promise<TxSubmitted> {
     throw new Error('Method not implemented.')
   }
-  isRouterApprovedToSpend(_params: { asset: TokenAsset; amount: CryptoAmount; address: string }): Promise<string[]> {
+  shouldBeApproved(_params: { asset: TokenAsset; amount: CryptoAmount; address: string }): Promise<boolean> {
     throw new Error('Method not implemented.')
   }
 

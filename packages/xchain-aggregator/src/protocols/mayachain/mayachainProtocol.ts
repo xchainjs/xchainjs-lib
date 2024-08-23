@@ -49,11 +49,10 @@ export class MayachainProtocol implements IProtocol {
    * @param {IsApprovedParams} isApprovedParams params to check if tx is approved
    * @returns {string[]} array of errors
    */
-  async isRouterApprovedToSpend(params: IsApprovedParams): Promise<string[]> {
+  async shouldBeApproved(params: IsApprovedParams): Promise<boolean> {
     const { asset, amount, address } = params
     const errors = await this.mayachainAmm.isRouterApprovedToSpend({ asset, amount, address })
-
-    return errors
+    return errors.some((error) => error === 'Maya router has not been approved to spend this amount')
   }
 
   /**
