@@ -36,15 +36,14 @@ export class ThorchainProtocol implements IProtocol {
   }
 
   /**
-   * Check if tx is approved for ERC-20
+   * Check if tx should be approved for ERC-20
    * @param {IsApprovedParams} isApprovedParams params to check if tx is approved
-   * @returns {string[]} array of errors
+   * @returns {boolean} array of errors
    */
-  async isRouterApprovedToSpend(params: IsApprovedParams): Promise<string[]> {
+  async shouldBeApproved(params: IsApprovedParams): Promise<boolean> {
     const { asset, amount, address } = params
     const errors = await this.thorchainAmm.isRouterApprovedToSpend({ asset, amount, address })
-
-    return errors
+    return errors.some((error) => error === 'Thorchain router has not been approved to spend this amount')
   }
 
   /**

@@ -266,6 +266,12 @@ export class MayachainAMM {
    */
   public async isRouterApprovedToSpend({ asset, amount, address }: IsApprovedParams): Promise<string[]> {
     const errors: string[] = []
+
+    if (!isProtocolERC20Asset(asset)) {
+      errors.push('Asset should be ERC20')
+      return errors
+    }
+
     // Get inbound details for the asset chain
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)

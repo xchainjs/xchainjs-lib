@@ -147,7 +147,7 @@ interface IProtocol {
   doSwap(params: QuoteSwapParams): Promise<TxSubmitted>
   getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory>
   approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted>
-  isRouterApprovedToSpend(params: IsApprovedParams): Promise<string[]>
+  shouldBeApproved(params: IsApprovedParams): Promise<boolean>
 }
 
 export {

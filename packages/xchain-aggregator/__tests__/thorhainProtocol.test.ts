@@ -70,7 +70,7 @@ describe('Thorchain protocol', () => {
   it('Should check if tx is approved', async () => {
     const asset = assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306') as TokenAsset
     const amount = new CryptoAmount(assetToBase(assetAmount('1', 6)), asset)
-    const errors = await protocol.isRouterApprovedToSpend({
+    const errors = await protocol.shouldBeApproved({
       asset,
       amount,
       address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
@@ -82,7 +82,7 @@ describe('Thorchain protocol', () => {
       address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
     })
 
-    expect(errors).toEqual(['Thorchain router has not been approved to spend this amount'])
+    expect(errors).toEqual(true)
   })
 
   it('Should check asset is supported', async () => {
