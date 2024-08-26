@@ -8,7 +8,7 @@ import {
 } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { AssetKUJI } from '@xchainjs/xchain-kujira'
+import { AssetKUJI, AssetUSK, Client as KujiraClient } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
@@ -58,7 +58,7 @@ describe('Aggregator', () => {
   let wallet: Wallet
 
   beforeAll(() => {
-    const phrase = process.env.PHRASE_MAINNET
+    const phrase = 'where diary dog rather where soccer eyebrow pilot more city angle inhale'
     wallet = new Wallet({
       BTC: new BtcClient({ ...defaultBtcParams, phrase, network: Network.Mainnet }),
       ETH: new EthClient({
@@ -69,6 +69,7 @@ describe('Aggregator', () => {
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
+      KUJI: new KujiraClient({ phrase, network: Network.Mainnet }),
     })
     aggregator = new Aggregator({ wallet })
   })
@@ -206,5 +207,19 @@ describe('Aggregator', () => {
         }
       }),
     )
+  })
+
+  it.only('Should do ERC20 swap with auto approve', async () => {
+    await aggregator.doSwap({
+      fromAsset: AssetUSK,
+      destinationAsset: assetFromStringEx('ETH.ETH'),
+      amount: new CryptoAmount(assetToBase(assetAmount(10000, 6)), AssetUSK),
+      destinationAddress: await wallet.getAddress(AssetETH.chain),
+      fromAddress: await wallet.getAddress(AssetKUJI.chain),
+    })
+  })
+
+  it('algo', async () => {
+    console.log(assetFromStringEx('KUJI.USK'))
   })
 })
