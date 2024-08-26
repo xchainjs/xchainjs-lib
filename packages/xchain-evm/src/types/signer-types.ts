@@ -2,12 +2,12 @@ import { Address } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 export type SignTransferParams = {
-  sender: Address
+  walletIndex: number
   tx: ethers.Transaction
 }
 
 export type SignApproveParams = {
-  sender: Address
+  walletIndex: number
   tx: ethers.Transaction
 }
 

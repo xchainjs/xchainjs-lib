@@ -102,12 +102,12 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
    * @param {ethers.Transaction} SignTransferParams.tx Fee option (optional)
    * @returns {string} The raw signed transaction.
    */
-  public async signTransfer({ sender, tx }: SignTransferParams): Promise<TxHash> {
+  public async signTransfer({ walletIndex, tx }: SignTransferParams): Promise<TxHash> {
     // Get the signer
     const signer = this.getWallet()
     // Populate the transaction with necessary details
     const completedTx = await signer.populateTransaction({
-      from: sender,
+      from: await this.getAddressAsync(walletIndex),
       to: tx.to,
       data: tx.data,
       value: tx.value,
@@ -129,9 +129,9 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
    * @param {ethers.Transaction} SignTransferParams.tx Approve transaction to sign
    * @returns {string} The raw signed transaction.
    */
-  public async signApprove({ sender, tx }: SignApproveParams): Promise<string> {
+  public async signApprove({ walletIndex, tx }: SignApproveParams): Promise<string> {
     return this.getWallet().signTransaction({
-      from: sender,
+      from: await this.getAddressAsync(walletIndex),
       to: tx.to,
       value: tx.value,
       data: tx.data,
