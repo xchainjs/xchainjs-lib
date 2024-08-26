@@ -1,82 +1,109 @@
-# `@xchainjs/xchain-thorchain-amm`
+<div align="center">
+  <h1 align="center">THORChain AMM</h1>
 
-## Modules
+  <p align="center">
+    <a href='https://www.npmjs.com/package/@xchainjs/xchain-thorchain-amm' target='_blank'>
+      <img alt="NPM Version" src="https://img.shields.io/npm/v/%40xchainjs%2Fxchain-thorchain-amm" />
+    </a>
+      <a href='https://www.npmjs.com/package/@xchainjs/xchain-thorchain-amm' target='_blank'>
+      <img alt="NPM Downloads" src="https://img.shields.io/npm/d18m/%40xchainjs%2Fxchain-thorchain-amm" />
+    </a>
+  </p>
+</div>
 
-Thorchain AMM module
+<br />
+
+
+THORChain AMM is a module that allows users and developers to interact with the THORChain protocol without having to worry about the underlining particularities of the protocol.
 
 ## Installation
 
-```
+```sh
 yarn add @xchainjs/xchain-thorchain-amm
 ```
 
-Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-thorchain-amm`.
+or 
 
-```bash
-  "dependencies": {
-   "@binance-chain/javascript-sdk": "^4.2.0",
-    "@cosmos-client/core": "0.46.1",
-    "@psf/bitcoincashjs-lib": "^4.0.2",
-    "@xchainjs/xchain-binance": "^5.6.6",
-    "@xchainjs/xchain-bitcoin": "^0.20.7",
-    "@xchainjs/xchain-bitcoincash": "^0.15.6",
-    "@xchainjs/xchain-client": "^0.13.5",
-    "@xchainjs/xchain-cosmos": "^0.20.6",
-    "@xchainjs/xchain-crypto": "^0.2.6",
-    "@xchainjs/xchain-doge": "^0.5.6",
-    "@xchainjs/xchain-ethereum": "^0.27.6",
-    "@xchainjs/xchain-evm": "^0.1.3",
-    "@xchainjs/xchain-avax": "^0.1.3",
-    "@xchainjs/xchain-litecoin": "^0.10.8",
-    "@xchainjs/xchain-midgard": "0.4.1",
-    "@xchainjs/xchain-thorchain": "^0.27.7",
-    "@xchainjs/xchain-thorchain-query": "^0.1.12",
-    "@xchainjs/xchain-thornode": "^0.1.5",
-    "@xchainjs/xchain-util": "^0.12.0",
-    "axios": "^0.25.0",
-    "axios-retry": "^3.2.5",
-    "bchaddrjs": "^0.5.2",
-    "bech32": "^2.0.0",
-    "bech32-buffer": "^0.2.0",
-    "bignumber.js": "^9.0.0",
-    "bitcoinjs-lib": "^5.2.0",
-    "coininfo": "^5.1.0",
-    "coinselect": "^3.1.12",
-    "ethers": "^5.6.6",
-    "wif": "^2.0.6"
-  }
-
+```sh
+npm install @xchainjs/xchain-thorchain-amm
 ```
 
-## For live examples
+## Initialization
 
-Do Swap: https://replit.com/@thorchain/doSwap-Single \
-Add Liquidity: https://replit.com/@thorchain/addLiquidity \
-Withdraw liquidity: https://replit.com/@thorchain/removeLiquidity \
-Add Savers & withdraw Savers: https://replit.com/@thorchain/saversTs#index.ts
+Using Thorchain AMM, you can initialize the main class of the module in consultation mode if you do not provide any parameters, this means you could retrieve information from the protocol, but you will not be able to make actions the protocol needs you to sign.
+
+```ts
+  import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+
+  const thorchainAmm = new ThorchainAMM()
+```
+
+Otherwise, if you want to be able make actions the protocol needs you to sign, you will need to initialize the main class of the protocol as follows
+
+```ts
+  import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+  import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+  import { Wallet } from '@xchainjs/xchain-wallet'
+
+  const thorChainQuery = new ThorchainQuery()
+  const wallet = new Wallet({
+    // Your XChainJS clients
+  })
+  const thorchainAmm = new ThorchainAMM(thorChainQuery, wallet)
+```
+
+
+## Features
+
+Using THORChain AMM package, you could easily implement the following features
+
+### Swaps
+
+- Estimate swaps
+- Do swaps, streaming swaps and trade asset swaps
+- Approve THORChain router to be able to do ERC-20 swaps
+
+
+### Liquidity pools
+
+- Add liquidity to pools, symmetrical and asymmetrical
+- Withdraw liquidity from pools
+
+
+### Rune pool
+
+- Deposit Rune to Rune pool
+- Withdraw Rune from Rune pool
+
+
+### Savers
+
+- Add a position in a THORChain savers vault
+- Withdraw a position from a THORChain savers vault
+
+
+### Trade assets
+
+- Deposit L1 assets into the THORChain network to mint trade assets to receive accredited shares
+- Swap trade assets with RUNE or another trade asset
+- Withdraw trade asset balance
+
+
+### THORNames
+
+- Get THORNames details
+- Get THORNames by owner
+- Register and update THORNames
+
+
+## Examples
+
+You can find examples using the THORChain AMM package in the [thorchain-amm](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/thorchain-amm) examples folder.
+
 
 ## Documentation
 
-[xchain-thorchain-amm](http://docs.xchainjs.org/xchain-thorchain-amm/) \
-[How thorchain-amm works](http://docs.xchainjs.org/xchain-thorchain-amm/how-it-works.html)\
-[How to use thorchain-amm](http://docs.xchainjs.org/xchain-thorchain-amm/how-to-use.html)
-
-## Compiler options
-
-tsconfig compiler options
-
-```ts
-{
-    "compilerOptions": {
-        "module":"commonjs",
-        "target": "es5",
-        "noEmitOnError": true,
-        "resolveJsonModule": true,
-        "esModuleInterop": true,
-        "lib": ["es6", "dom", "es2016", "es2017"]
-    }
-}
-```
+More information about how to use the Thorchain AMM package can be found on [documentation](https://xchainjs.gitbook.io/xchainjs/protocols/thorchain/xchain-thorchain-amm)
 
 ### Setting Headers for Nine Realms endpoints
 
@@ -85,26 +112,6 @@ If you plan on using the publically accessible endpoints provided by Nine Realms
 - https://midgard.ninerealms.com
 - https://haskoin.ninerealms.com (BTC/BCH/LTC)
 - https://thornode.ninerealms.com
-
-### Setting environment variables
-
-```sh
-SNOWTRACE_API_KEY={YOUR_SNOWTRACE_API_KEY}
-COVALENT_API_KEY={YOUR_COVALENT_API_KEY}
-BLOCKCYPHER_API_KEY={YOUR_BLOCKCYPHER_API_KEY}
-SOCHAIN_API_KEY={YOUR_SOCHAIN_API_KEY}
-BSCSCAN_API_KEY={YOUR_BSCSCAN_API_KEY}
-```
-
-//Default config can access.
-
-```sh
-process.env.SNOWTRACE_API_KEY
-process.env.COVALENT_API_KEY
-process.env.BLOCKCYPHER_API_KEY
-process.env.SOCHAIN_API_KEY
-process.env.BSCSCAN_API_KEY
-```
 
 Example
 
@@ -116,5 +123,3 @@ import { register9Rheader } from '@xchainjs/xchain-util'
 register9Rheader(axios)
 register9Rheader(cosmosclient.config.globalAxios)
 ```
-
-For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)
