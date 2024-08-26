@@ -1,4 +1,4 @@
-import { assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { TokenAsset, assetFromStringEx, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
 import { Client, defaultSolanaParams } from '../src'
 
@@ -22,8 +22,18 @@ describe('Solana client', () => {
     console.log(address)
   })
 
-  it('Should get address balance', async () => {
+  it('Should get all address balances', async () => {
     const balances = await client.getBalance('94bPUbh8iazbg2UgUDrmMkgWoZz9Q1H813JZifZRB35v')
+
+    balances.forEach((balance) => {
+      console.log(`${assetToString(balance.asset)}: ${baseToAsset(balance.amount).amount().toString()}`)
+    })
+  })
+
+  it('Should get address balance filtering tokens', async () => {
+    const balances = await client.getBalance('94bPUbh8iazbg2UgUDrmMkgWoZz9Q1H813JZifZRB35v', [
+      assetFromStringEx('SOL.USDT-Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB') as TokenAsset,
+    ])
 
     balances.forEach((balance) => {
       console.log(`${assetToString(balance.asset)}: ${baseToAsset(balance.amount).amount().toString()}`)

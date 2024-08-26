@@ -1,9 +1,11 @@
+import { fetchAllDigitalAsset, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
+import { PublicKey as UmiPubliKey, Umi, publicKey } from '@metaplex-foundation/umi'
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { isAddress } from '@solana/addresses'
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js'
 import {
   AssetInfo,
-  Balance,
   BaseXChainClient,
   ExplorerProviders,
   Fees,
@@ -13,17 +15,18 @@ import {
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
+import { Address, TokenAsset, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
 import { HDKey } from 'micro-ed25519-hdkey'
 
 import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
 import { TokenAssetData } from './solana-types'
-import { SOLClientParams } from './types'
+import { Balance, SOLClientParams } from './types'
 import { getSolanaNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
   private connection: Connection
+  private umi: Umi
 
   constructor(params: SOLClientParams = defaultSolanaParams) {
     super(SOLChain, {
@@ -32,6 +35,7 @@ export class Client extends BaseXChainClient {
     })
     this.explorerProviders = params.explorerProviders
     this.connection = new Connection(clusterApiUrl(getSolanaNetwork(this.getNetwork())))
+    this.umi = createUmi(this.connection).use(mplTokenMetadata())
   }
 
   /**
@@ -122,7 +126,7 @@ export class Client extends BaseXChainClient {
     return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
   }
 
-  public async getBalance(address: Address): Promise<Balance[]> {
+  public async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     const balances: Balance[] = []
 
     const nativeBalance = await this.connection.getBalance(new PublicKey(address))
@@ -136,13 +140,32 @@ export class Client extends BaseXChainClient {
       programId: TOKEN_PROGRAM_ID,
     })
 
+    const tokensToRequest = !assets
+      ? tokenBalances.value
+      : tokenBalances.value.filter((tokenBalance) => {
+          const tokenData = tokenBalance.account.data.parsed as TokenAssetData
+          assets.findIndex((asset) => {
+            return asset.symbol.toLowerCase().includes(tokenData.info.mint.toLowerCase())
+          }) !== -1
+        })
+
+    const mintPublicKeys: UmiPubliKey[] = tokensToRequest.map((tokenBalance) => {
+      const tokenData = tokenBalance.account.data.parsed as TokenAssetData
+      return publicKey(tokenData.info.mint)
+    })
+
+    const assetsData = await fetchAllDigitalAsset(this.umi, mintPublicKeys)
+
     tokenBalances.value.forEach((balance) => {
       const parsedData = balance.account.data.parsed as TokenAssetData
-      const symbol = 'TBD' // TODO: Find a way to retrieve symbol data
-      balances.push({
-        amount: baseAmount(parsedData.info.tokenAmount.amount, parsedData.info.tokenAmount.decimals),
-        asset: assetFromStringEx(`SOL.${symbol}-${parsedData.info.mint}`),
-      })
+      const assetData = assetsData.find((assetData) => assetData.publicKey.toString() === parsedData.info.mint)
+
+      if (assetData) {
+        balances.push({
+          amount: baseAmount(parsedData.info.tokenAmount.amount, parsedData.info.tokenAmount.decimals),
+          asset: assetFromStringEx(`SOL.${assetData.metadata.symbol.trim()}-${parsedData.info.mint}`) as TokenAsset,
+        })
+      }
     })
 
     return balances
