@@ -3,11 +3,21 @@ import { PublicKey as UmiPubliKey, Umi, publicKey } from '@metaplex-foundation/u
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { isAddress } from '@solana/addresses'
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
-import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js'
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  TransactionInstruction,
+  clusterApiUrl,
+} from '@solana/web3.js'
 import {
   AssetInfo,
   BaseXChainClient,
   ExplorerProviders,
+  FeeOption,
+  FeeType,
   Fees,
   PreparedTx,
   Tx,
@@ -15,12 +25,12 @@ import {
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, TokenAsset, assetFromStringEx, baseAmount } from '@xchainjs/xchain-util'
+import { Address, TokenAsset, assetFromStringEx, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { HDKey } from 'micro-ed25519-hdkey'
 
 import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
 import { TokenAssetData } from './solana-types'
-import { Balance, SOLClientParams } from './types'
+import { Balance, SOLClientParams, TxParams } from './types'
 import { getSolanaNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
@@ -126,6 +136,12 @@ export class Client extends BaseXChainClient {
     return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
   }
 
+  /**
+   * Retrieves the balance of a given address.
+   * @param {Address} address - The address to retrieve the balance for.
+   * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
+   * @returns {Promise<Balance[]>} An array containing the balance of the address.
+   */
   public async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     const balances: Balance[] = []
 
@@ -171,8 +187,51 @@ export class Client extends BaseXChainClient {
     return balances
   }
 
-  getFees(): Promise<Fees> {
-    throw new Error('Method not implemented.')
+  /**
+   *
+   * @param params
+   * @returns
+   */
+  public async getFees(params?: TxParams): Promise<Fees> {
+    if (!params) throw new Error('Params need to be passed')
+
+    const sender = Keypair.generate()
+
+    const transaction = new Transaction()
+
+    transaction.recentBlockhash = await this.connection.getLatestBlockhash().then((block) => block.blockhash)
+    transaction.feePayer = sender.publicKey
+
+    if (!params.asset || eqAsset(params.asset, this.getAssetInfo().asset)) {
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: sender.publicKey,
+          toPubkey: new PublicKey(params.recipient),
+          lamports: params.amount.amount().toNumber(),
+        }),
+      )
+    } else {
+      // TODO: Add Token instruction
+    }
+
+    if (params.memo) {
+      transaction.add(
+        new TransactionInstruction({
+          keys: [{ pubkey: sender.publicKey, isSigner: true, isWritable: true }],
+          data: Buffer.from(params.memo, 'utf-8'),
+          programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+        }),
+      )
+    }
+
+    const fee = await transaction.getEstimatedFee(this.connection)
+
+    return {
+      type: FeeType.FlatFee,
+      [FeeOption.Average]: baseAmount(fee || 0, SOL_DECIMALS),
+      [FeeOption.Fast]: baseAmount(fee || 0, SOL_DECIMALS),
+      [FeeOption.Fastest]: baseAmount(fee || 0, SOL_DECIMALS),
+    }
   }
 
   getTransactions(): Promise<TxsPage> {

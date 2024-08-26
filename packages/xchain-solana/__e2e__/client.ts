@@ -1,4 +1,11 @@
-import { TokenAsset, assetFromStringEx, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import {
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseToAsset,
+} from '@xchainjs/xchain-util'
 
 import { Client, defaultSolanaParams } from '../src'
 
@@ -37,6 +44,35 @@ describe('Solana client', () => {
 
     balances.forEach((balance) => {
       console.log(`${assetToString(balance.asset)}: ${baseToAsset(balance.amount).amount().toString()}`)
+    })
+  })
+
+  it('Should estimate simple transaction fee', async () => {
+    const fees = await client.getFees({
+      recipient: await client.getAddressAsync(),
+      amount: assetToBase(assetAmount(1, 9)),
+    })
+
+    console.log({
+      type: fees.type,
+      average: fees.average.amount().toString(),
+      fast: fees.fast.amount().toString(),
+      fastest: fees.fastest.amount().toString(),
+    })
+  })
+
+  it('Should estimate transaction fee with memo', async () => {
+    const fees = await client.getFees({
+      recipient: await client.getAddressAsync(),
+      amount: assetToBase(assetAmount(1, 9)),
+      memo: 'Example of memo',
+    })
+
+    console.log({
+      type: fees.type,
+      average: fees.average.amount().toString(),
+      fast: fees.fast.amount().toString(),
+      fastest: fees.fastest.amount().toString(),
     })
   })
 })
