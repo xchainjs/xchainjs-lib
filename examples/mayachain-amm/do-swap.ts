@@ -7,7 +7,17 @@ import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayaChain, MayachainQuery, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, assetAmount, assetFromString, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+  assetToString,
+  isSynthAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { printQuoteSwap } from './utils'
@@ -37,8 +47,8 @@ const main = async () => {
   const network = process.argv[3] as Network
   const amount = process.argv[4]
   const decimals = Number(process.argv[5])
-  const fromAsset = assetFromString(`${process.argv[6]}`)
-  const toAsset = assetFromString(`${process.argv[7]}`)
+  const fromAsset = assetFromString(`${process.argv[6]}`) as Asset | TokenAsset | SynthAsset
+  const toAsset = assetFromString(`${process.argv[7]}`) as Asset | TokenAsset | SynthAsset
   const affiliateAddress = process.argv[8]
   let affiliateBps = 0
 
@@ -54,7 +64,7 @@ const main = async () => {
     THOR: new ThorClient({ network, phrase: seed }),
     MAYA: new MayaClient({ network, phrase: seed }),
   })
-  const toChain = toAsset.synth ? MayaChain : toAsset.chain
+  const toChain = isSynthAsset(toAsset) ? MayaChain : toAsset.chain
   const quoteSwapParams: QuoteSwapParams = {
     fromAsset,
     destinationAsset: toAsset,

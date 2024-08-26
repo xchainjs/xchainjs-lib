@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-check-tx",
   "private": true,
-  "version": "1.0.10",
+  "version": "1.0.12",
   "scripts": {
     "checktx": "npx ts-node check-tx.ts",
     "build": "tsc --noEmit"
@@ -18,7 +18,7 @@
     "@xchainjs/xchain-thorchain-query": "workspace:*",
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "^1.3.6",
+    "axios": "1.7.4",
     "axios-retry": "^3.2.5",
     "bignumber.js": "9.0.1",
     "rimraf": "~3.0.2"

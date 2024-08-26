@@ -1,10 +1,10 @@
-import { Tx, TxParams } from '@xchainjs/xchain-client'
-import { Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { CompatibleAsset, Tx, TxParams as BaseTxParams } from '@xchainjs/xchain-cosmos-sdk'
+import { BaseAmount } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
 export type DepositParam = {
   walletIndex?: number
-  asset?: Asset
+  asset?: CompatibleAsset
   amount: BaseAmount
   memo: string
   gasLimit?: BigNumber
@@ -13,6 +13,12 @@ export type DepositParam = {
 
 export type DepositTx = Omit<Tx, 'date'>
 
+export type TxParams = BaseTxParams & {
+  asset?: CompatibleAsset
+}
+
 export type TxOfflineParams = TxParams & {
   gasLimit?: BigNumber
 }
+
+export { CompatibleAsset }

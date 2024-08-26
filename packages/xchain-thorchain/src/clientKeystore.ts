@@ -2,7 +2,6 @@ import { Bip39, EnglishMnemonic, Secp256k1, Slip10, Slip10Curve } from '@cosmjs/
 import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import { DecodedTxRaw, DirectSecp256k1HdWallet, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
-import { TxParams } from '@xchainjs/xchain-client'
 import {
   // Import client-related types and functions from @xchainjs/xchain-cosmos-sdk for Cosmos SDK client configuration.
   MsgTypes,
@@ -10,7 +9,7 @@ import {
   makeClientPath,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { BaseAmount } from '@xchainjs/xchain-util'
 import { encode, toWords } from 'bech32'
 import { BigNumber } from 'bignumber.js'
 import { fromSeed } from 'bip32'
@@ -25,7 +24,8 @@ import {
   DEPOSIT_GAS_LIMIT_VALUE,
   MSG_DEPOSIT_TYPE_URL,
 } from './const'
-import { DepositParam, TxOfflineParams } from './types'
+import { CompatibleAsset, DepositParam, TxOfflineParams, TxParams } from './types'
+import { parseAssetToTHORNodeAsset } from './utils'
 
 /**
  * Thorchain Keystore client
@@ -123,7 +123,7 @@ export class ClientKeystore extends Client {
    *
    * @param {number} param.walletIndex Optional - The index to use to generate the address from the transaction will be done.
    * If it is not set, address associated with index 0 will be used
-   * @param {Asset} param.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
+   * @param {CompatibleAsset} param.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
    * used
    * @param {BaseAmount} param.amount The amount that will be deposit
    * @param {string} param.memo Optional - The memo associated with the deposit
@@ -282,7 +282,7 @@ export class ClientKeystore extends Client {
    * @param {BigNumber} gasLimit Gas limit for the transaction
    * @param {BaseAmount} amount Amount to deposit
    * @param {string} memo Deposit memo
-   * @param {Asset} asset Asset to deposit
+   * @param {CompatibleAsset} asset Asset to deposit
    * @returns {DeliverTxResponse} The transaction broadcasted
    */
   private async roundRobinSignAndBroadcastDeposit(
@@ -291,7 +291,7 @@ export class ClientKeystore extends Client {
     gasLimit: BigNumber,
     amount: BaseAmount,
     memo: string,
-    asset: Asset,
+    asset: CompatibleAsset,
   ): Promise<DeliverTxResponse> {
     for (const url of this.clientUrls[this.network]) {
       try {
@@ -311,7 +311,7 @@ export class ClientKeystore extends Client {
                 coins: [
                   {
                     amount: amount.amount().toString(),
-                    asset,
+                    asset: parseAssetToTHORNodeAsset(asset),
                   },
                 ],
               },

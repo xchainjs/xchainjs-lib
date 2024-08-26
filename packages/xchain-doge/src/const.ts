@@ -1,5 +1,5 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { Asset } from '@xchainjs/xchain-util'
+import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
   BlockcypherNetwork,
@@ -43,7 +43,7 @@ export const DOGEChain = 'DOGE' as const
  * Base asset object for Dogecoin.
  * Represents the Dogecoin asset in various contexts.
  */
-export const AssetDOGE: Asset = { chain: DOGEChain, symbol: 'DOGE', ticker: 'DOGE', synth: false }
+export const AssetDOGE: Asset = { chain: DOGEChain, symbol: 'DOGE', ticker: 'DOGE', type: AssetType.NATIVE }
 
 /**
  * Explorer provider for Dogecoin mainnet and testnet.

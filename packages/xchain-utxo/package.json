@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-utxo",
-  "version": "0.1.10",
+  "version": "1.0.1",
   "description": "Genereic UTXO client for XChainJS",
   "keywords": [
     "XChain",

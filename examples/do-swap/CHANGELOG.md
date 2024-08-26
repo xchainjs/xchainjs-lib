@@ -1,5 +1,66 @@
 # xchainjs-do-swap
 
+## 1.0.21
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+- Updated dependencies [be1c45f]
+  - @xchainjs/xchain-thorchain-query@1.0.1
+  - @xchainjs/xchain-utxo-providers@1.0.1
+  - @xchainjs/xchain-evm-providers@1.0.1
+  - @xchainjs/xchain-midgard-query@1.0.1
+  - @xchainjs/xchain-thorchain-amm@2.0.1
+  - @xchainjs/xchain-bitcoincash@1.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-litecoin@1.0.1
+  - @xchainjs/xchain-thornode@0.3.19
+  - @xchainjs/xchain-binance@6.0.1
+  - @xchainjs/xchain-bitcoin@1.0.1
+  - @xchainjs/xchain-midgard@0.5.9
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-cosmos@2.0.1
+  - @xchainjs/xchain-dash@1.0.1
+  - @xchainjs/xchain-doge@1.0.1
+  - @xchainjs/xchain-evm@1.0.1
+  - @xchainjs/xchain-wallet@1.0.1
+  - @xchainjs/xchain-utxo@1.0.1
+  - @xchainjs/xchain-avax@1.0.1
+  - @xchainjs/xchain-bsc@1.0.1
+  - @xchainjs/xchain-ethereum@1.0.1
+  - @xchainjs/xchain-cosmos-sdk@1.0.1
+
+## 1.0.20
+
+### Patch Changes
+
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-thorchain-query@1.0.0
+  - @xchainjs/xchain-thorchain-amm@2.0.0
+  - @xchainjs/xchain-midgard-query@1.0.0
+  - @xchainjs/xchain-thorchain@2.0.0
+  - @xchainjs/xchain-evm-providers@1.0.0
+  - @xchainjs/xchain-wallet@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-bitcoincash@1.0.0
+  - @xchainjs/xchain-ethereum@1.0.0
+  - @xchainjs/xchain-litecoin@1.0.0
+  - @xchainjs/xchain-binance@6.0.0
+  - @xchainjs/xchain-bitcoin@1.0.0
+  - @xchainjs/xchain-cosmos@2.0.0
+  - @xchainjs/xchain-avax@1.0.0
+  - @xchainjs/xchain-dash@1.0.0
+  - @xchainjs/xchain-doge@1.0.0
+  - @xchainjs/xchain-bsc@1.0.0
+  - @xchainjs/xchain-cosmos-sdk@1.0.0
+  - @xchainjs/xchain-thornode@0.3.18
+  - @xchainjs/xchain-utxo-providers@1.0.0
+  - @xchainjs/xchain-evm@1.0.0
+  - @xchainjs/xchain-utxo@1.0.0
+
 ## 1.0.19
 
 ### Patch Changes

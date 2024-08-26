@@ -1,7 +1,7 @@
-import { Balance, Network, OnlineDataProviders, TxType } from '@xchainjs/xchain-client'
+import { Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
-import { CovalentProvider } from '@xchainjs/xchain-evm-providers'
-import { Asset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { CovalentProvider, EvmOnlineDataProvider } from '@xchainjs/xchain-evm-providers'
+import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import AvaxClient from '../src'
 import { AVAXChain, AssetAVAX, defaultAvaxParams } from '../src/const'
@@ -10,11 +10,11 @@ import { AVAXChain, AssetAVAX, defaultAvaxParams } from '../src/const'
 
 // =====Erc-20 asset=====
 
-const assetRIP: Asset = {
+const assetRIP: TokenAsset = {
   chain: AVAXChain,
   symbol: `RIP-0x224695ba2a98e4a096a519b503336e06d9116e48`,
   ticker: `RIP`,
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
 const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(
@@ -40,9 +40,9 @@ const avaxProviders = {
 }
 
 const fakeProviders = {
-  [Network.Mainnet]: {} as OnlineDataProviders,
-  [Network.Testnet]: {} as OnlineDataProviders,
-  [Network.Stagenet]: {} as OnlineDataProviders,
+  [Network.Mainnet]: {} as EvmOnlineDataProvider,
+  [Network.Testnet]: {} as EvmOnlineDataProvider,
+  [Network.Stagenet]: {} as EvmOnlineDataProvider,
 }
 
 defaultAvaxParams.network = Network.Testnet

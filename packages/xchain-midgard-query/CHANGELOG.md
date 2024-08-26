@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-midgard@0.5.9
+  - @xchainjs/xchain-client@1.0.1
+
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- bece78b: `getDecimalForAsset` can work with trade assets.
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+
 ## 0.1.20
 
 ### Patch Changes

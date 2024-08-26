@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.9
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+
 ## 0.5.8
 
 ### Patch Changes

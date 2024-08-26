@@ -1,13 +1,13 @@
 import * as dashcore from '@dashevo/dashcore-lib'
 import AppBtc from '@ledgerhq/hw-app-btc'
 import { Transaction as LedgerTransaction } from '@ledgerhq/hw-app-btc/lib/types'
-import { FeeOption, FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
-import * as nodeApi from '@xchainjs/xchain-dash/src/node-api'
+import { FeeOption, FeeRate, TxHash } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import { Client } from './client'
 import { getRawTx } from './insight-api'
+import * as nodeApi from './node-api'
 import { NodeAuth, NodeUrls } from './types'
 
 /**

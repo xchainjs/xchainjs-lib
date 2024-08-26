@@ -1,15 +1,20 @@
 import { Transaction } from '@xchainjs/xchain-midgard'
-import { LastBlock } from '@xchainjs/xchain-thornode'
+import { LastBlock, TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
 import {
   Address,
   Asset,
+  AssetCryptoAmount,
   Chain,
   CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  TradeAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
   assetToString,
   baseAmount,
+  isSynthAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
@@ -18,8 +23,11 @@ import { LiquidityPool } from './liquidity-pool'
 import { ThorchainCache } from './thorchain-cache'
 import {
   AddliquidityPosition,
+  AddressTradeAccounts,
+  AddressTradeAccountsParams,
   Block,
   ChainAttributes,
+  CompatibleAsset,
   DustValues,
   EstimateAddLP,
   EstimateAddSaver,
@@ -36,6 +44,11 @@ import {
   QuoteSwapParams,
   QuoteTHORName,
   QuoteTHORNameParams,
+  RunePool,
+  RunePoolParams,
+  RunePoolProvider,
+  RunePoolProviderParams,
+  RunePoolProvidersParams,
   SaverFees,
   SaversPosition,
   SaversWithdraw,
@@ -44,6 +57,11 @@ import {
   ThornameAlias,
   ThornameDetails,
   TotalFees,
+  TradeAssetAccounts,
+  TradeAssetAccountsParams,
+  TradeAssetUnits,
+  TradeAssetUnitsParams,
+  TradeAssetsUnitsParams,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
@@ -141,13 +159,13 @@ export class ThorchainQuery {
       return {
         memo: ``,
         toAddress: ``,
-        dustThreshold: new CryptoAmount(baseAmount(0), AssetRuneNative),
+        dustThreshold: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
         expiry: new Date(),
         txEstimate: {
           totalFees: {
             asset: destinationAsset,
-            affiliateFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
-            outboundFee: new CryptoAmount(baseAmount(0), AssetRuneNative),
+            affiliateFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
+            outboundFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
           },
           slipBasisPoints: 0,
           netOutput: new CryptoAmount(baseAmount(0), destinationAsset),
@@ -155,7 +173,7 @@ export class ThorchainQuery {
           inboundConfirmationSeconds: 0,
           canSwap: false,
           errors,
-          netOutputStreaming: new CryptoAmount(baseAmount(0), AssetRuneNative),
+          netOutputStreaming: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
           maxStreamingQuantity: 0,
           outboundDelayBlocks: 0,
           streamingSlipBasisPoints: 0,
@@ -168,7 +186,7 @@ export class ThorchainQuery {
     }
     // The recommended minimum inbound amount for this transaction type & inbound asset.
     // Sending less than this amount could result in failed refunds
-    const feeAsset = assetFromStringEx(swapQuote.fees.asset)
+    const feeAsset = assetFromStringEx(swapQuote.fees.asset) as Asset | TokenAsset | SynthAsset
     const feeAssetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(feeAsset)
     const destinationAssetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(destinationAsset)
     if (swapQuote.recommended_min_amount_in && inputAmount.toNumber() < Number(swapQuote.recommended_min_amount_in))
@@ -191,7 +209,7 @@ export class ThorchainQuery {
       expiry: new Date(swapQuote.expiry * 1000),
       txEstimate: {
         totalFees: {
-          asset: fromAsset,
+          asset: destinationAsset,
           affiliateFee: getCryptoAmountWithNotation(
             new CryptoAmount(baseAmount(swapQuote.fees.affiliate), feeAsset),
             feeAssetDecimals,
@@ -201,13 +219,13 @@ export class ThorchainQuery {
             feeAssetDecimals,
           ),
         },
-        slipBasisPoints: swapQuote.slippage_bps,
+        slipBasisPoints: swapQuote.fees.slippage_bps,
         netOutput: getCryptoAmountWithNotation(
           new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
           destinationAssetDecimals,
         ),
         netOutputStreaming: getCryptoAmountWithNotation(
-          new CryptoAmount(baseAmount(swapQuote.expected_amount_out_streaming), destinationAsset),
+          new CryptoAmount(baseAmount(swapQuote.expected_amount_out), destinationAsset),
           destinationAssetDecimals,
         ),
         outboundDelaySeconds: swapQuote.outbound_delay_seconds,
@@ -215,7 +233,7 @@ export class ThorchainQuery {
         recommendedMinAmountIn: swapQuote.recommended_min_amount_in,
         maxStreamingQuantity: swapQuote.max_streaming_quantity ? swapQuote.max_streaming_quantity : 0,
         outboundDelayBlocks: swapQuote.outbound_delay_blocks,
-        streamingSlipBasisPoints: swapQuote.streaming_slippage_bps,
+        streamingSlipBasisPoints: swapQuote.fees.slippage_bps,
         streamingSwapBlocks: swapQuote.streaming_swap_blocks ? swapQuote.streaming_swap_blocks : 0,
         streamingSwapSeconds: swapQuote.streaming_swap_seconds ? swapQuote.streaming_swap_seconds : 0,
         totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
@@ -232,7 +250,7 @@ export class ThorchainQuery {
    * @param {CryptoAmount} cryptoAmount - CryptoAmount to validate
    * @returns {void | Error} Error if the cryptoAmount is not well formed
    */
-  public async validateAmount(cryptoAmount: CryptoAmount): Promise<Error | void> {
+  public async validateAmount(cryptoAmount: CryptoAmount<CompatibleAsset>): Promise<Error | void> {
     // Get the number of decimals for the asset
     const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(cryptoAmount.asset)
     // Check if the base amount decimal is equal to the asset's decimal
@@ -248,23 +266,23 @@ export class ThorchainQuery {
    * @returns required delay in seconds
    * @see https://gitlab.com/thorchain/thornode/-/blob/develop/x/thorchain/manager_txout_current.go#L548
    */
-  async outboundDelay(outboundAmount: CryptoAmount): Promise<number> {
+  async outboundDelay(outboundAmount: CryptoAmount<Asset | TokenAsset>): Promise<number> {
     // Retrieve network values
     const networkValues = await this.thorchainCache.getNetworkValues()
     // Create CryptoAmounts for minimum transaction out volume threshold and maximum transaction out offset
-    const minTxOutVolumeThreshold = new CryptoAmount(
+    const minTxOutVolumeThreshold = new AssetCryptoAmount(
       baseAmount(networkValues['MINTXOUTVOLUMETHRESHOLD']),
       AssetRuneNative,
     )
     const maxTxOutOffset = networkValues['MAXTXOUTOFFSET']
     // Get the delay rate for outbound transactions
-    let txOutDelayRate = new CryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
+    let txOutDelayRate = new AssetCryptoAmount(baseAmount(networkValues['TXOUTDELAYRATE']), AssetRuneNative).assetAmount
       .amount()
       .toNumber()
     // Get the outbound queue
     const getQueue = await this.thorchainCache.thornode.getQueue()
     // Create a CryptoAmount for the scheduled outbound value
-    const outboundValue = new CryptoAmount(baseAmount(getQueue.scheduled_outbound_value), AssetRuneNative)
+    const outboundValue = new AssetCryptoAmount(baseAmount(getQueue.scheduled_outbound_value), AssetRuneNative)
     // Get the average block time for THORChain
     const thorChainblocktime = this.chainAttributes[THORChain].avgBlockTimeInSecs // blocks required to confirm tx
     // Convert the outbound amount to its value in RUNE
@@ -298,10 +316,10 @@ export class ThorchainQuery {
    * @param asset: Asset - the asset you want the fees converted to
    * @returns TotalFees in asset
    */
-  async getFeesIn(fees: TotalFees, asset: Asset): Promise<TotalFees> {
+  async getFeesIn(fees: TotalFees, asset: Asset | TokenAsset | SynthAsset): Promise<TotalFees> {
     // Return the fees converted to the specified asset
     return {
-      asset: fees.asset,
+      asset: fees.asset, // Shouldn't be asset?
       // swapFee: await this.convert(fees.swapFee, asset),
       outboundFee: await this.convert(fees.outboundFee, asset),
       affiliateFee: await this.convert(fees.affiliateFee, asset),
@@ -316,7 +334,10 @@ export class ThorchainQuery {
    * @param ouAsset - the Asset you want to convert to
    * @returns CryptoAmount of input
    */
-  async convert(input: CryptoAmount, outAsset: Asset): Promise<CryptoAmount> {
+  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
+    input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset>,
+    outAsset: T,
+  ): Promise<CryptoAmount<T>> {
     // Convert the input amount to the specified asset
     return await this.thorchainCache.convert(input, outAsset)
   }
@@ -334,7 +355,7 @@ export class ThorchainQuery {
       isAssetRuneNative(inbound.asset) ||
       inbound.asset.chain == BNBChain ||
       inbound.asset.chain == GAIAChain ||
-      inbound.asset.synth
+      isSynthAsset(inbound.asset)
     ) {
       // Return the average block time for THORChain
       return this.chainAttributes[THORChain].avgBlockTimeInSecs
@@ -359,7 +380,9 @@ export class ThorchainQuery {
   public async estimateAddLP(params: AddliquidityPosition): Promise<EstimateAddLP> {
     const errors: string[] = []
     // Check if either of the assets are synths or if the rune is not THOR.RUNE
-    if (params.asset.asset.synth || params.rune.asset.synth) errors.push('you cannot add liquidity with a synth')
+    if (isSynthAsset(params.asset.asset) || isSynthAsset(params.rune.asset)) {
+      errors.push('you cannot add liquidity with a synth')
+    }
     if (!isAssetRuneNative(params.rune.asset)) errors.push('params.rune must be THOR.RUNE')
     // Get the pool for the asset
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset.asset)
@@ -380,7 +403,7 @@ export class ThorchainQuery {
     const waitTimeSeconds = assetWaitTimeSeconds > runeWaitTimeSeconds ? assetWaitTimeSeconds : runeWaitTimeSeconds
     // Calculate inbound fees
     let assetInboundFee = new CryptoAmount(baseAmount(0), params.asset.asset)
-    let runeInboundFee = new CryptoAmount(baseAmount(0), AssetRuneNative)
+    let runeInboundFee = new AssetCryptoAmount(baseAmount(0), AssetRuneNative)
 
     if (!params.asset.assetAmount.eq(0)) {
       assetInboundFee = calcNetworkFee(params.asset.asset, inboundDetails[params.asset.asset.chain])
@@ -422,7 +445,10 @@ export class ThorchainQuery {
    * @param address - address used for LP
    * @returns - Object of type LiquidityPosition
    */
-  public async checkLiquidityPosition(asset: Asset, assetOrRuneAddress?: string): Promise<LiquidityPosition> {
+  public async checkLiquidityPosition(
+    asset: Asset | TokenAsset,
+    assetOrRuneAddress?: string,
+  ): Promise<LiquidityPosition> {
     const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
     if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
     if (!assetOrRuneAddress) throw Error(`No address provided ${assetOrRuneAddress}`)
@@ -511,7 +537,7 @@ export class ThorchainQuery {
     // Check liquidity position for the provided asset
     const memberDetail = await this.checkLiquidityPosition(params.asset, assetOrRuneAddress)
     // Get dust values
-    const dustValues = await this.getDustValues(params.asset) // returns asset and rune dust values
+    const dustValues = await this.getDustValues(getChainAsset(params.asset.chain)) // returns asset and rune dust values
     // Get asset pool
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
     // Calculate pool share
@@ -596,58 +622,58 @@ export class ThorchainQuery {
     switch (asset.chain) {
       case 'BNB':
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0.000001, assetDecimals)), AssetBNB),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0.000001, assetDecimals)), AssetBNB),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'BTC':
       case `BCH`:
       case `LTC`:
         // Dust value: 10k sats
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0.0001, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0.0001, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'ETH':
         // Dust value: 0 wei
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'THOR':
         // Dust value: 0 Rune
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'GAIA':
         // Dust value: 0 GAIA
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'DOGE':
         // Dust value: 1 million sats
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0.01, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0.01, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'AVAX':
         // Dust value: 0 AVAX
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'BSC':
         // Dust value: 0 BSC
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       case 'MAYA':
         // Dust value: 0 MAYA
         return {
-          asset: new CryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
+          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
+          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
         }
       default:
         throw Error('Unknown chain') // Throw error for unknown chain
@@ -661,7 +687,7 @@ export class ThorchainQuery {
    * @param addAmount - The amount to be added to the saver
    * @returns - Object of type EstimateAddSaver
    */
-  public async estimateAddSaver(addAmount: CryptoAmount): Promise<EstimateAddSaver> {
+  public async estimateAddSaver(addAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
     let errors: string[] = [] // Initialize errors array
     // Check for errors before sending quote
     errors = await this.getAddSaversEstimateErrors(addAmount)
@@ -722,21 +748,24 @@ export class ThorchainQuery {
     // Get fee asset decimals
     const feeAssetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(addAmount.asset)
     // Organize fees
+
+    const feeAsset = assetFromStringEx(depositQuote.fees.asset) as Asset | TokenAsset
+
     const saverFees: SaverFees = {
       affiliate: getCryptoAmountWithNotation(
         // Affiliate fee
         new CryptoAmount(baseAmount(depositQuote.fees.affiliate), addAmount.asset), // Convert to base amount
         assetDecimals, // Asset decimals
       ),
-      asset: assetFromStringEx(depositQuote.fees.asset), // Asset fee
+      asset: feeAsset, // Asset fee
       outbound: getCryptoAmountWithNotation(
         // Outbound fee
-        new CryptoAmount(baseAmount(depositQuote.fees.outbound), assetFromStringEx(depositQuote.fees.asset)), // Convert to base amount
+        new CryptoAmount(baseAmount(depositQuote.fees.outbound), feeAsset), // Convert to base amount
         feeAssetDecimals, // Fee asset decimals
       ),
       liquidity: getCryptoAmountWithNotation(
         // Liquidity fee
-        new CryptoAmount(baseAmount(depositQuote.fees.liquidity), assetFromStringEx(depositQuote.fees.asset)), // Convert to base amount
+        new CryptoAmount(baseAmount(depositQuote.fees.liquidity), feeAsset), // Convert to base amount
         feeAssetDecimals, // Fee asset decimals
       ),
       totalBps: depositQuote.fees.total_bps || 0, // Total basis points
@@ -763,7 +792,7 @@ export class ThorchainQuery {
       memo: depositQuote.memo, // Memo
       estimatedWaitTime: depositQuote.inbound_confirmation_seconds || 0, // Estimated wait time
       canAddSaver: errors.length === 0, // Can add saver flag
-      slipBasisPoints: depositQuote.slippage_bps, // Slip basis points
+      slipBasisPoints: depositQuote.fees.slippage_bps, // Slip basis points
       saverCapFilledPercent, // Saver filled capacity
       recommendedMinAmountIn: depositQuote.recommended_min_amount_in, // Recommended minimum amount in
       errors, // Errors
@@ -780,7 +809,7 @@ export class ThorchainQuery {
     const errors: string[] = [] // Initialize errors array
 
     // Return error if asset in is incorrect
-    if (isAssetRuneNative(withdrawParams.asset) || withdrawParams.asset.synth)
+    if (isAssetRuneNative(withdrawParams.asset) || isSynthAsset(withdrawParams.asset))
       errors.push(`Native Rune and synth assets are not supported only L1's`)
 
     // Get inbound details
@@ -795,8 +824,8 @@ export class ThorchainQuery {
         errors.push(checkPositon.errors[i])
       }
       return {
-        dustAmount: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)), // Dust amount
-        dustThreshold: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)), // Dust threshold
+        dustAmount: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)), // Dust amount
+        dustThreshold: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)), // Dust threshold
         expectedAssetAmount: new CryptoAmount( // Expected asset amount
           assetToBase(assetAmount(checkPositon.redeemableValue.assetAmount.amount())), // Convert to base amount
           withdrawParams.asset, // Asset
@@ -835,8 +864,8 @@ export class ThorchainQuery {
     if (errors.length > 0) {
       // Return default values and errors if there are any errors
       return {
-        dustAmount: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
-        dustThreshold: new CryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
+        dustAmount: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
+        dustThreshold: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
         expectedAssetAmount: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
         fee: {
           affiliate: new CryptoAmount(baseAmount(0), withdrawParams.asset),
@@ -857,7 +886,7 @@ export class ThorchainQuery {
       }
     }
     // Extract the withdraw asset and chain asset from the withdraw quote
-    const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset)
+    const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset) as Asset | TokenAsset
     const chainAsset = getChainAsset(withdrawParams.asset.chain)
     // Get the decimals for the withdraw asset and chain asset
     const withdrawAssetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(withdrawAsset)
@@ -866,12 +895,12 @@ export class ThorchainQuery {
     const estimateWithdrawSaver: EstimateWithdrawSaver = {
       // Format the dust amount with appropriate notation and decimals
       dustAmount: getCryptoAmountWithNotation(
-        new CryptoAmount(baseAmount(withdrawQuote.dust_amount), chainAsset),
+        new AssetCryptoAmount(baseAmount(withdrawQuote.dust_amount), chainAsset),
         chainAssetDecimals,
       ),
       // Format the dust threshold with appropriate notation and decimals
       dustThreshold: getCryptoAmountWithNotation(
-        new CryptoAmount(baseAmount(withdrawQuote.dust_threshold), chainAsset),
+        new AssetCryptoAmount(baseAmount(withdrawQuote.dust_threshold), chainAsset),
         chainAssetDecimals,
       ),
       // Format the expected asset amount with appropriate notation and decimals
@@ -911,7 +940,7 @@ export class ThorchainQuery {
       // Set the outbound delay seconds
       outBoundDelaySeconds: withdrawQuote.outbound_delay_seconds || 0,
       // Set the slip basis points
-      slipBasisPoints: withdrawQuote.slippage_bps,
+      slipBasisPoints: withdrawQuote.fees.slippage_bps,
       // Set the errors
       errors,
     }
@@ -999,7 +1028,7 @@ export class ThorchainQuery {
    * @param addAmount - Amount of funds to be added to the saver's pool.
    * @returns An array of strings representing any errors encountered during the estimation process.
    */
-  private async getAddSaversEstimateErrors(addAmount: CryptoAmount): Promise<string[]> {
+  private async getAddSaversEstimateErrors(addAmount: CryptoAmount<Asset | TokenAsset>): Promise<string[]> {
     const errors = []
     // Retrieve all pools
     const pools = await this.thorchainCache.getPools()
@@ -1021,7 +1050,9 @@ export class ThorchainQuery {
     // Calculate inbound fee for the provided asset
     const inboundFee = new CryptoAmount(baseAmount(inboundDetails[addAmount.asset.chain].gasRate), addAmount.asset)
     // Convert inbound fee to the same asset as the addAmount to ensure consistency in calculations
-    const inboundFeeInAddAmountAsset = await this.convert(inboundFee, addAmount.asset)
+    const inboundFeeInAddAmountAsset = (await this.convert(inboundFee, addAmount.asset)) as CryptoAmount<
+      Asset | TokenAsset
+    >
     // Check if the addAmount covers the inbound fees
     if (addAmount.lte(inboundFeeInAddAmountAsset)) errors.push(`Add amount does not cover fees`)
     // Return array of errors encountered during estimation
@@ -1105,7 +1136,7 @@ export class ThorchainQuery {
         outbound: loanOpenResp.fees.outbound,
         total_bps: loanOpenResp.fees.total_bps,
       },
-      slippageBps: loanOpenResp.slippage_bps,
+      slippageBps: loanOpenResp.fees.slippage_bps,
       router: loanOpenResp.router,
       expiry: loanOpenResp.expiry,
       warning: loanOpenResp.warning,
@@ -1190,7 +1221,7 @@ export class ThorchainQuery {
         outbound: loanCloseResp.fees.outbound,
         total_bps: loanCloseResp.fees.total_bps,
       },
-      slippageBps: loanCloseResp.slippage_bps,
+      slippageBps: loanCloseResp.fees.slippage_bps,
       router: loanCloseResp.router,
       expiry: loanCloseResp.expiry,
       warning: loanCloseResp.warning,
@@ -1394,5 +1425,167 @@ export class ThorchainQuery {
         }
       }),
     }
+  }
+
+  /*
+   * Returns the total units and depth of a trade asset
+   * @param {TradeAssetUnitsParams} params Get trade asset unit params
+   * @returns {TradeAssetUnits} Returns the total units and depth of a trade asset
+   */
+  public async getTradeAssetUnits({ asset, height }: TradeAssetUnitsParams): Promise<TradeAssetUnits> {
+    const { units, depth } = await this.thorchainCache.thornode.getTradeAssetUnits(assetToString(asset), height)
+    const decimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
+    return {
+      asset,
+      units: new CryptoAmount(baseAmount(units, decimals), asset),
+      depth: new CryptoAmount(baseAmount(depth, decimals), asset),
+    }
+  }
+
+  /*
+   * Returns the total units and depth for each trade asset
+   * @param {TradeAssetsUnitsParams} params Get trade asset unit params
+   * @returns {TradeAssetUnits[]} Returns the total units and depth for each trade asset
+   */
+  public async getTradeAssetsUnits(params?: TradeAssetsUnitsParams): Promise<TradeAssetUnits[]> {
+    const tradeAssetsUnits = await this.thorchainCache.thornode.getTradeAssetsUnits(params?.height)
+    const parseData = async ({ asset, units, depth }: TradeUnitResponse): Promise<TradeAssetUnits> => {
+      const tradeAsset = assetFromStringEx(asset) as TradeAsset
+      const decimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(tradeAsset)
+      return {
+        asset: tradeAsset,
+        units: new CryptoAmount(baseAmount(units, decimals), tradeAsset),
+        depth: new CryptoAmount(baseAmount(depth, decimals), tradeAsset),
+      }
+    }
+    return Promise.all(tradeAssetsUnits.map(parseData))
+  }
+
+  /**
+   * Returns the units and depth of a trade account address
+   * @param {TradeAssetsUnitsParams} params Get trade asset unit params
+   * @returns {TradeAssetUnits[]} Returns the total units and depth for each trade asset
+   */
+  public async getAddressTradeAccounts({
+    address,
+    height,
+  }: AddressTradeAccountsParams): Promise<AddressTradeAccounts[]> {
+    const account = await this.thorchainCache.thornode.getTradeAssetAccount(address, height)
+
+    const parseData = async (tradeAssetInfo: TradeAccountResponse): Promise<AddressTradeAccounts> => {
+      const asset = assetFromStringEx(tradeAssetInfo.asset) as TradeAsset
+      return {
+        asset,
+        address,
+        balance: new CryptoAmount(baseAmount(tradeAssetInfo.units), asset),
+        lastAddHeight: tradeAssetInfo.last_add_height ? +tradeAssetInfo.last_add_height : undefined,
+        lastWithdrawHeight: tradeAssetInfo.last_withdraw_height ? +tradeAssetInfo.last_withdraw_height : undefined,
+      }
+    }
+
+    return Promise.all(account.map(parseData))
+  }
+
+  /**
+   * Returns all trade accounts for a trade asset
+   * @param {TradeAssetAccountsParams} params Get Trade asset accounts params
+   * @param {number} height Optional - Block height
+   * @returns Returns all trade accounts for an asset
+   */
+  public async getTradeAssetAccounts({ asset, height }: TradeAssetAccountsParams): Promise<TradeAssetAccounts[]> {
+    const accounts = await this.thorchainCache.thornode.getTradeAssetAccounts(assetToString(asset), height)
+    const decimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
+    return accounts.map((account) => {
+      return {
+        address: account.owner,
+        asset,
+        balance: new CryptoAmount(baseAmount(account.units, decimals), asset),
+        lastAddHeight: account.last_add_height ? +account.last_add_height : undefined,
+        lastWithdrawHeight: account.last_withdraw_height ? +account.last_withdraw_height : undefined,
+      }
+    })
+  }
+
+  /**
+   * Get Rune pool
+   * @param {GetRunePoolParmas} params Get Rune pool params
+   * @returns {RunePool} Rune pool information
+   */
+  public async getRunePool(params?: RunePoolParams): Promise<RunePool> {
+    const pool = await this.thorchainCache.thornode.getRunePool(params?.height)
+    return {
+      pol: {
+        runeDeposited: new AssetCryptoAmount(baseAmount(pool.pol.rune_deposited, THORCHAIN_DECIMAL), AssetRuneNative),
+        runeWithdrawn: new AssetCryptoAmount(baseAmount(pool.pol.rune_withdrawn, THORCHAIN_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(pool.pol.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.pol.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.pol.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+      providers: {
+        units: pool.providers.units,
+        pendingUnits: pool.providers.pending_units,
+        pendingRune: new AssetCryptoAmount(baseAmount(pool.providers.pending_rune, THORCHAIN_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(pool.providers.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.providers.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.providers.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+      reserve: {
+        units: pool.reserve.units,
+        value: new AssetCryptoAmount(baseAmount(pool.reserve.value, THORCHAIN_DECIMAL), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(pool.reserve.pnl, THORCHAIN_DECIMAL), AssetRuneNative),
+        currentRuneDeposited: new AssetCryptoAmount(
+          baseAmount(pool.reserve.current_deposit, THORCHAIN_DECIMAL),
+          AssetRuneNative,
+        ),
+      },
+    }
+  }
+
+  /**
+   * Get Rune pool provider position
+   * @param {RunePoolProviderParams} params Get Rune pool provider position params
+   * @returns {RunePoolProvider} Rune pool provider position
+   */
+  public async getRunePoolProvider({ address, height }: RunePoolProviderParams): Promise<RunePoolProvider> {
+    const position = await this.thorchainCache.thornode.getRunePoolProvider(address, height)
+
+    return {
+      address: position.rune_address,
+      units: position.units,
+      value: new AssetCryptoAmount(baseAmount(position.value), AssetRuneNative),
+      pnl: new AssetCryptoAmount(baseAmount(position.pnl), AssetRuneNative),
+      depositAmount: new AssetCryptoAmount(baseAmount(position.deposit_amount), AssetRuneNative),
+      withdrawAmount: new AssetCryptoAmount(baseAmount(position.withdraw_amount), AssetRuneNative),
+      lastDepositHeight: position.last_deposit_height,
+      lastWithdrawHeight: position.last_withdraw_height,
+    }
+  }
+
+  /**
+   * Get all Rune pool providers position
+   * @param {RunePoolProvidersParams} params Get Rune pool provider position params
+   * @returns {RunePoolProvider[]} All Rune pool providers position
+   */
+  public async getRunePoolProviders(params?: RunePoolProvidersParams): Promise<RunePoolProvider[]> {
+    const positions = await this.thorchainCache.thornode.getRunePoolProviders(params?.height)
+
+    return positions.map((position) => {
+      return {
+        address: position.rune_address,
+        units: position.units,
+        value: new AssetCryptoAmount(baseAmount(position.value), AssetRuneNative),
+        pnl: new AssetCryptoAmount(baseAmount(position.pnl), AssetRuneNative),
+        depositAmount: new AssetCryptoAmount(baseAmount(position.deposit_amount), AssetRuneNative),
+        withdrawAmount: new AssetCryptoAmount(baseAmount(position.withdraw_amount), AssetRuneNative),
+        lastDepositHeight: position.last_deposit_height,
+        lastWithdrawHeight: position.last_withdraw_height,
+      }
+    })
   }
 }

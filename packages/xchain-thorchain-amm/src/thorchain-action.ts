@@ -1,8 +1,17 @@
 import { Protocol } from '@xchainjs/xchain-client'
 import { abi } from '@xchainjs/xchain-evm'
 import { THORChain } from '@xchainjs/xchain-thorchain'
-import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
-import { Address, CryptoAmount, baseAmount, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { CompatibleAsset, ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
+import {
+  Address,
+  Asset,
+  CryptoAmount,
+  TokenAsset,
+  baseAmount,
+  getContractAddressFromAsset,
+  isSynthAsset,
+  isTradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
@@ -11,14 +20,14 @@ import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './
 
 export type NonProtocolActionParams = {
   wallet: Wallet
-  assetAmount: CryptoAmount
+  assetAmount: CryptoAmount<Asset | TokenAsset>
   recipient: Address
   memo: string
 }
 
 export type ProtocolActionParams = {
   wallet: Wallet
-  assetAmount: CryptoAmount
+  assetAmount: CryptoAmount<CompatibleAsset>
   memo: string
 }
 
@@ -125,12 +134,18 @@ export class ThorchainAction {
 
   private static isNonProtocolParams(params: ActionParams): params is NonProtocolActionParams {
     if (
-      (params.assetAmount.asset.chain === THORChain || params.assetAmount.asset.synth) &&
+      (params.assetAmount.asset.chain === THORChain ||
+        isSynthAsset(params.assetAmount.asset) ||
+        isTradeAsset(params.assetAmount.asset)) &&
       'address' in params &&
       !!params.address
     ) {
       throw Error('Inconsistent params. Native actions do not support recipient')
     }
-    return params.assetAmount.asset.chain !== THORChain && !params.assetAmount.asset.synth
+    return (
+      params.assetAmount.asset.chain !== THORChain &&
+      !isSynthAsset(params.assetAmount.asset) &&
+      !isTradeAsset(params.assetAmount.asset)
+    )
   }
 }

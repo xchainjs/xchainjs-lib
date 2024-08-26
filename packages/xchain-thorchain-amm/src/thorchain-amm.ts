@@ -22,6 +22,7 @@ import {
   EstimateAddSaver,
   EstimateWithdrawLP,
   EstimateWithdrawSaver,
+  InboundDetail,
   LoanCloseParams,
   LoanCloseQuote,
   LoanOpenParams,
@@ -36,12 +37,37 @@ import {
   WithdrawLiquidityPosition,
   getSaver,
 } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetCryptoAmount,
+  CryptoAmount,
+  TokenAsset,
+  assetToString,
+  baseAmount,
+  eqAsset,
+  isSynthAsset,
+  isTradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAction } from './thorchain-action'
-import { AddLiquidity, ApproveParams, IsApprovedParams, QuoteTHORName, TxSubmitted, WithdrawLiquidity } from './types'
-import { isProtocolERC20Asset, validateAddress } from './utils'
+import {
+  AddLiquidity,
+  AddToTradeAccount,
+  AddToTradeAccountParams,
+  ApproveParams,
+  DepositToRunePoolParams,
+  EstimateDepositToRunePool,
+  EstimateWithdrawFromRunePool,
+  IsApprovedParams,
+  QuoteTHORName,
+  TxSubmitted,
+  WithdrawFromRunePoolParams,
+  WithdrawFromTradeAccount,
+  WithdrawFromTradeAccountParams,
+  WithdrawLiquidity,
+} from './types'
+import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
  * THORChain Class for interacting with THORChain.
@@ -144,11 +170,23 @@ export class ThorchainAMM {
       destinationAddress &&
       !validateAddress(
         this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
-        destinationAsset.synth ? THORChain : destinationAsset.chain,
+        isSynthAsset(destinationAsset) || isTradeAsset(destinationAsset) ? THORChain : destinationAsset.chain,
         destinationAddress,
       )
     ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
+    }
+
+    if (!isTradeAsset(fromAsset) && !eqAsset(fromAsset, AssetRuneNative) && isTradeAsset(destinationAsset)) {
+      errors.push(
+        'Can not make swap from non trade asset or non Rune asset to trade asset. Use addToTrade (TRADE+) operation',
+      )
+    }
+
+    if (isTradeAsset(fromAsset) && !isTradeAsset(destinationAsset) && !eqAsset(destinationAsset, AssetRuneNative)) {
+      errors.push(
+        'Can not make swap from trade asset to non trade asset or non Rune asset. Use withdrawFromTrade (TRADE-) operation',
+      )
     }
 
     if (affiliateAddress) {
@@ -178,12 +216,16 @@ export class ThorchainAMM {
     }
 
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {
-      const approveErrors = await this.isRouterApprovedToSpend({
-        asset: fromAsset,
-        address: fromAddress,
-        amount,
-      })
-      errors.push(...approveErrors)
+      if (!isTokenCryptoAmount(amount)) {
+        errors.push(`${assetToString(amount.asset)} is not Token asset amount`)
+      } else {
+        const approveErrors = await this.isRouterApprovedToSpend({
+          asset: fromAsset,
+          address: fromAddress,
+          amount,
+        })
+        errors.push(...approveErrors)
+      }
     }
 
     return errors
@@ -439,7 +481,7 @@ export class ThorchainAMM {
    * @param addAssetAmount The amount to add to the saver.
    * @returns The estimated addition to the saver object.
    */
-  public async estimateAddSaver(addAssetAmount: CryptoAmount): Promise<EstimateAddSaver> {
+  public async estimateAddSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
     return await this.thorchainQuery.estimateAddSaver(addAssetAmount)
   }
   /**
@@ -466,7 +508,7 @@ export class ThorchainAMM {
    * @param addAssetAmount - The amount to add to the saver.
    * @returns - The submitted transaction.
    */
-  public async addSaver(addAssetAmount: CryptoAmount): Promise<TxSubmitted> {
+  public async addSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<TxSubmitted> {
     const addEstimate = await this.thorchainQuery.estimateAddSaver(addAssetAmount)
     if (!addEstimate.canAddSaver) throw Error(`Cannot add to savers`)
 
@@ -588,7 +630,7 @@ export class ThorchainAMM {
       return {
         memo: '',
         errors,
-        value: new CryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
         allowed: false,
       }
     }
@@ -606,7 +648,7 @@ export class ThorchainAMM {
       return {
         memo: '',
         errors: ['message' in e ? e.message : `Unknown error: ${e}`],
-        value: new CryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
         allowed: false,
       }
     }
@@ -651,7 +693,7 @@ export class ThorchainAMM {
       return {
         memo: '',
         errors,
-        value: new CryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
+        value: new AssetCryptoAmount(baseAmount(0, RUNE_DECIMAL), AssetRuneNative),
         allowed: false,
       }
     }
@@ -707,5 +749,221 @@ export class ThorchainAMM {
       assetAmount: quote.value,
       memo: quote.memo,
     })
+  }
+
+  /**
+   * Estimate adding trade amount to account
+   * @param {AddToTradeAccountParams} param Add to trade account params
+   * @returns {AddToTradeAccount} Estimation to add amount to trade account
+   */
+  public async estimateAddToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<AddToTradeAccount> {
+    const errors: string[] = []
+
+    if (
+      !validateAddress(this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network, THORChain, address)
+    ) {
+      errors.push('Invalid trade account address')
+    }
+
+    let inboundDetails: InboundDetail | undefined
+    try {
+      inboundDetails = await this.thorchainQuery.getChainInboundDetails(amount.asset.chain)
+    } catch {
+      errors.push(`Can not get inbound address for ${amount.asset.chain}`)
+    }
+
+    if (errors.length) {
+      return {
+        allowed: false,
+        errors,
+        value: new CryptoAmount(baseAmount(0, amount.assetAmount.decimal), amount.asset),
+        memo: '',
+        toAddress: '',
+      }
+    }
+
+    return {
+      toAddress: inboundDetails ? inboundDetails.address : '',
+      memo: `TRADE+:${address}`,
+      value: amount,
+      allowed: true,
+      errors,
+    }
+  }
+
+  /**
+   * Add trade amount to account
+   * @param {AddToTradeAccountParams} param Add to trade account params
+   * @returns {TxSubmitted} Transaction made to add the trade amount
+   */
+  public async addToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<TxSubmitted> {
+    const quote = await this.estimateAddToTradeAccount({ amount, address })
+
+    if (!quote.allowed) throw Error(`Can not add to trade account. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
+      recipient: quote.toAddress,
+    })
+  }
+
+  /**
+   * Estimate withdrawing trade amount from account
+   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
+   * @returns {WithdrawFromTradeAccount} Estimation to withdraw amount from trade account
+   */
+  public async estimateWithdrawFromTradeAccount({
+    amount,
+    address,
+  }: WithdrawFromTradeAccountParams): Promise<WithdrawFromTradeAccount> {
+    const errors: string[] = []
+
+    if (
+      !validateAddress(
+        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+        amount.asset.chain,
+        address,
+      )
+    ) {
+      errors.push('Invalid address to send the withdraw')
+    }
+
+    if (errors.length) {
+      return {
+        allowed: false,
+        errors,
+        value: new CryptoAmount(baseAmount(0, amount.assetAmount.decimal), amount.asset),
+        memo: '',
+      }
+    }
+
+    return {
+      memo: `TRADE-:${address}`,
+      value: amount,
+      allowed: true,
+      errors,
+    }
+  }
+
+  /**
+   * Withdraw trade amount from account
+   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
+   * @returns {TxSubmitted} Estimation to withdraw amount from trade account
+   */
+  public async withdrawFromTradeAccount({ amount, address }: WithdrawFromTradeAccountParams): Promise<TxSubmitted> {
+    const quote = await this.estimateWithdrawFromTradeAccount({ amount, address })
+
+    if (!quote.allowed) throw Error(`Can not withdraw from trade account. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.value,
+      memo: quote.memo,
+    })
+  }
+  /**
+   * Estimate Rune pool deposit
+   * @param {DepositToRunePoolParams} params Deposit to Rune pool params
+   * @returns {EstimateDepositToRunePool} Estimation to make the deposit
+   */
+  public async estimateDepositToRunePool({ amount }: DepositToRunePoolParams): Promise<EstimateDepositToRunePool> {
+    const constants = await this.thorchainQuery.thorchainCache.thornode.getTcConstants()
+    return {
+      allowed: true,
+      maturityBlocks: Number(constants['RUNEPoolDepositMaturityBlocks']),
+      amount,
+      errors: [],
+      memo: 'POOL+',
+    }
+  }
+
+  /**
+   * Deposit amount to Rune pool
+   * @param {DepositToRunePoolParams} amount Amount to deposit to Rune pool
+   * @returns {TxSubmitted} Transaction made to deposit to Rune pool
+   */
+  public async depositToRunePool(params: DepositToRunePoolParams): Promise<TxSubmitted> {
+    const quote = await this.estimateDepositToRunePool(params)
+
+    if (!quote.allowed) throw Error(`Can not deposit to Rune pool. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.amount,
+      memo: quote.memo,
+    })
+  }
+
+  /**
+   * Estimate Rune pool withdraw
+   * @param {WithdrawFromRunePoolParams} params Withdraw from Rune pool params
+   * @returns {EstimateWithdrawFromRunePool} Estimation to make a withdraw from Rune pool
+   */
+  public async estimateWithdrawFromRunePool({
+    withdrawBps,
+    affiliate,
+    feeBps,
+  }: WithdrawFromRunePoolParams): Promise<EstimateWithdrawFromRunePool> {
+    const errors: string[] = []
+
+    if (withdrawBps <= 0 || withdrawBps > 10000) {
+      errors.push('withdrawBps out of range. Range 0-10000')
+    }
+
+    if (affiliate) {
+      if (
+        !validateAddress(
+          this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
+          THORChain,
+          affiliate,
+        ) &&
+        !(await this.isTHORName(affiliate))
+      ) {
+        errors.push('Invalid affiliate. Affiliate must be a THORName or THOR address')
+      }
+      if (!feeBps || feeBps <= 0 || feeBps > 1000) {
+        errors.push('feeBps out of range. Range 0-1000')
+      }
+    }
+
+    if (errors.length) {
+      return {
+        amount: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
+        memo: '',
+        allowed: false,
+        errors,
+      }
+    }
+
+    return {
+      amount: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
+      memo: `POOL-:${withdrawBps}:${affiliate || ''}:${affiliate ? feeBps : ''}`,
+      allowed: true,
+      errors,
+    }
+  }
+
+  /**
+   * Withdraw amount from Rune pool
+   * @param {WithdrawFromRunePoolParams} params Withdraw from Rune pool params
+   * @returns {TxSubmitted} Transaction made to withdraw from Rune pool
+   */
+  public async withdrawFromRunePool(params: WithdrawFromRunePoolParams): Promise<TxSubmitted> {
+    const quote = await this.estimateWithdrawFromRunePool(params)
+
+    if (!quote.allowed) throw Error(`Can not withdraw from Rune pool. ${quote.errors.join(' ')}`)
+
+    return ThorchainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: quote.amount,
+      memo: quote.memo,
+    })
+  }
+
+  private async isTHORName(thorname: string): Promise<boolean> {
+    const details = await this.thorchainQuery.getThornameDetails(thorname)
+    return details.owner !== ''
   }
 }

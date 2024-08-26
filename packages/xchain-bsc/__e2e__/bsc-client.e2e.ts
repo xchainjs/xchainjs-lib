@@ -1,24 +1,24 @@
 import { AssetInfo, Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
-import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import BscClient from '../src'
 import { AssetBSC, BSCChain, BSC_GAS_ASSET_DECIMAL, defaultBscParams } from '../src/const'
 
 // =====Erc-20 asset=====
 
-const assetETH: Asset = {
+const assetETH: TokenAsset = {
   chain: BSCChain,
   symbol: `ETH-0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378`,
   ticker: `ETH`,
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
-const AssetBNB: Asset = {
+const AssetBNB: TokenAsset = {
   chain: BSCChain,
   symbol: `BNB`,
   ticker: `BNB`,
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
 defaultBscParams.network = Network.Testnet

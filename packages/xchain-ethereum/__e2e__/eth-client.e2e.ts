@@ -1,24 +1,24 @@
 import { Balance, FeeOption, Network, Protocol, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
-import { Asset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { Asset, AssetType, TokenAsset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
 import { Client } from '../src'
 import { AssetETH, ETHChain, defaultEthParams } from '../src/const'
 
 // =====Erc-20 asset=====
 
-const assetETH: Asset = {
+const assetETH: TokenAsset = {
   chain: ETHChain,
   symbol: `ETH-0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378`,
   ticker: `ETH`,
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
 const AssetBNB: Asset = {
   chain: ETHChain,
   symbol: `ETH`,
   ticker: `ETH`,
-  synth: false,
+  type: AssetType.NATIVE,
 }
 
 defaultEthParams.network = Network.Testnet
@@ -180,7 +180,7 @@ describe('xchain-evm (Eth) Integration Tests', () => {
           chain: 'ETH',
           symbol: `ETH-${erc20Address}`,
           ticker: 'ETH',
-          synth: false,
+          type: AssetType.TOKEN,
         },
         amount: assetToBase(assetAmount(0.1, 6)),
       })

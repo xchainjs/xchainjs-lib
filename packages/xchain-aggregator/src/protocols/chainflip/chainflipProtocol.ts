@@ -1,9 +1,22 @@
 import { AssetData, SwapSDK } from '@chainflip/sdk/swap'
-import { Asset, CachedValue, Chain, CryptoAmount, baseAmount, isSynthAsset } from '@xchainjs/xchain-util'
+import {
+  AnyAsset,
+  Asset,
+  CachedValue,
+  Chain,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  TradeAsset,
+  baseAmount,
+  isSynthAsset,
+  isTradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
 
+import { CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
 
 /**
@@ -30,8 +43,8 @@ export class ChainflipProtocol implements IProtocol {
    * @param {Asset} asset Asset to check if it is supported
    * @returns {boolean} True if the asset is supported, otherwise false
    */
-  public async isAssetSupported(asset: Asset): Promise<boolean> {
-    if (isSynthAsset(asset)) return false
+  public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
+    if (isSynthAsset(asset) || isTradeAsset(asset)) return false
     try {
       await this.getAssetData(asset)
       return true
@@ -156,7 +169,7 @@ export class ChainflipProtocol implements IProtocol {
     const hash = await this.wallet.transfer({
       recipient: quoteSwap.toAddress,
       amount: params.amount.baseAmount,
-      asset: params.fromAsset,
+      asset: params.fromAsset as CompatibleAsset,
       memo: quoteSwap.memo,
     })
 
@@ -181,7 +194,13 @@ export class ChainflipProtocol implements IProtocol {
    * @throws {Error} - If asset is not supported in Chainflip
    * @returns the asset data
    */
-  private async getAssetData(asset: Asset): Promise<AssetData> {
+  private async getAssetData(asset: Asset | TokenAsset | SynthAsset | TradeAsset): Promise<AssetData> {
+    if (isSynthAsset(asset)) {
+      throw Error('Synth asset not supported in Chainflip protocol')
+    }
+    if (isTradeAsset(asset)) {
+      throw Error('Trade asset not supported in Chainflip protocol')
+    }
     const chainAssets = await this.assetsData.getValue()
     const assetData = chainAssets.find((chainAsset) => {
       const contractAddress = asset.symbol.split('-').length > 1 ? asset.symbol.split('-')[1] : undefined

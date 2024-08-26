@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 import { SaversPosition, ThorchainCache, ThorchainQuery, Thornode, getSaver } from '@xchainjs/xchain-thorchain-query'
-import { assetFromString, register9Rheader } from '@xchainjs/xchain-util'
+import { Asset, TokenAsset, assetFromString, register9Rheader } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 register9Rheader(axios)
@@ -27,7 +27,7 @@ const getSaverPosition = async () => {
     const thorchainCacheMainnet = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     const thorchainQueryMainnet = new ThorchainQuery(thorchainCacheMainnet)
     const getSaver: getSaver = {
-      asset: assetFromString(process.argv[4]),
+      asset: assetFromString(process.argv[4]) as Asset | TokenAsset,
       address: process.argv[3] || '',
     }
 

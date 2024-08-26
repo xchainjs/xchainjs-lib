@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-client@1.0.1
+
+## 1.0.0
+
+### Major Changes
+
+- c74614f: `UtxoOnlineDataProvider` and `UtxoOnlineDataProviders` interfaces with UTXO chain based properties.
+- c74614f: New types `Witness`, `UTXO`, `Balance`, `TxFrom`, `TxTo`, `Tx`, `TxsPage` with UTXO chain based properties.
+
+### Patch Changes
+
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+
 ## 0.2.18
 
 ### Patch Changes

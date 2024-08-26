@@ -6,8 +6,8 @@ import {
   TransactionStatusResponse,
 } from '@radixdlt/babylon-gateway-api-sdk'
 import { Convert, Instruction, RadixEngineToolkit } from '@radixdlt/radix-engine-toolkit'
-import { Balance, Fees, Network, Tx, TxParams, XChainClientParams } from '@xchainjs/xchain-client/src'
-import { Asset, baseAmount } from '@xchainjs/xchain-util'
+import { Balance, Fees, Network, XChainClientParams } from '@xchainjs/xchain-client'
+import { Asset, AssetType, baseAmount } from '@xchainjs/xchain-util'
 
 // eslint-disable-next-line ordered-imports/ordered-imports
 import { generateMnemonic } from 'bip39'
@@ -20,8 +20,7 @@ import {
   stateEntityFungiblesPageResponse,
   stateEntityNonFungiblesPageResponse,
 } from '../__mocks__/mocks'
-import Client from '../src/client'
-import { XRD_DECIMAL, XrdAssetStokenet, feesEstimationPublicKeys } from '../src/const'
+import { Client, Tx, TxParams, XRD_DECIMAL, XrdAssetStokenet, feesEstimationPublicKeys } from '../src'
 
 describe('RadixClient Test', () => {
   const createClient = (): Client => {
@@ -270,7 +269,7 @@ describe('RadixClient Test', () => {
         symbol: 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd',
         ticker: 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd',
         chain: 'radix',
-        synth: false,
+        type: AssetType.NATIVE,
       },
     ]
     const balances: Balance[] = await client.getBalance(

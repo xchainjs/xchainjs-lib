@@ -3,7 +3,16 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, ETH_GAS_ASSET_DECIMAL, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ChainflipProtocol } from '../src/protocols/chainflip'
@@ -41,6 +50,10 @@ describe('Chainflip protocol', () => {
   it('Should check native assets are not supported', async () => {
     expect(await protocol.isAssetSupported(AssetCacao)).toBeFalsy()
     expect(await protocol.isAssetSupported(AssetRuneNative)).toBeFalsy()
+  })
+
+  it('Should check trade assets are not supported', async () => {
+    expect(await protocol.isAssetSupported(assetFromStringEx('AVAX~AVAX'))).toBeFalsy()
   })
 
   it('Should check ERC20 assets are supported', async () => {
@@ -101,7 +114,10 @@ describe('Chainflip protocol', () => {
   })
 
   it('Should estimate from ERC-20 swap', async () => {
-    const USDT = assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')
+    const USDT = assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7') as
+      | Asset
+      | TokenAsset
+      | SynthAsset
     const estimatedSwap = await protocol.estimateSwap({
       fromAsset: USDT,
       destinationAsset: AssetETH,
@@ -132,7 +148,10 @@ describe('Chainflip protocol', () => {
   })
 
   it('Should estimate to ERC-20 swap', async () => {
-    const USDT = assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')
+    const USDT = assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7') as
+      | Asset
+      | TokenAsset
+      | SynthAsset
     const estimatedSwap = await protocol.estimateSwap({
       fromAsset: AssetETH,
       destinationAsset: USDT,

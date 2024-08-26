@@ -3,10 +3,11 @@
  */
 import { Uint53 } from '@cosmjs/math'
 import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, assetToString, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
+import { Address, AssetType, assetToString, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
 import axios from 'axios'
 //Import necessary constants for default client URLs
 import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL, RUNE_DENOM } from './const'
+import { CompatibleAsset } from './types'
 
 /**
  * Function to retrieve default client URLs based on network configuration.
@@ -54,18 +55,18 @@ export const getExplorerTxUrl = (tx: TxHash): Record<Network, string> => ({
 /**
  * Checks whether an asset is the native RUNE asset
  *
- * @param {Asset} asset
+ * @param {CompatibleAsset} asset
  * @returns {boolean} `true` or `false`
  */
-export const isAssetRuneNative = (asset: Asset): boolean => assetToString(asset) === assetToString(AssetRUNE)
+export const isAssetRuneNative = (asset: CompatibleAsset): boolean => assetToString(asset) === assetToString(AssetRUNE)
 
 /**
  * Get denomination from Asset
  *
- * @param {Asset} asset
+ * @param {CompatibleAsset} asset
  * @returns {string} The denomination of the given asset
  */
-export const getDenom = (asset: Asset) => {
+export const getDenom = (asset: CompatibleAsset) => {
   if (isAssetRuneNative(asset)) return RUNE_DENOM
   if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
   return asset.symbol.toLowerCase()
@@ -154,4 +155,25 @@ export function sortedObject(obj: any): any {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
 export function sortAndStringifyJson(obj: any): string {
   return JSON.stringify(sortedObject(obj))
+}
+
+/**
+ * Parse XChainJS asset to Thornode asset
+ */
+export const parseAssetToTHORNodeAsset = (
+  asset: CompatibleAsset,
+): {
+  chain: string
+  symbol: string
+  ticker: string
+  synth: boolean
+  trade: boolean
+} => {
+  return {
+    chain: asset.chain,
+    symbol: asset.symbol,
+    ticker: asset.ticker,
+    synth: asset.type === AssetType.SYNTH,
+    trade: asset.type === AssetType.TRADE,
+  }
 }

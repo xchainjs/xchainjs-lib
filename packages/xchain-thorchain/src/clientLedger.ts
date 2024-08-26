@@ -4,17 +4,16 @@ import { encodePubkey, makeAuthInfoBytes } from '@cosmjs/proto-signing'
 import { AminoTypes } from '@cosmjs/stargate'
 import Transport from '@ledgerhq/hw-transport'
 import THORChainApp, { extractSignatureFromTLV } from '@xchainjs/ledger-thorchain'
-import { TxParams } from '@xchainjs/xchain-client'
-import { base64ToBech32, bech32ToBase64 } from '@xchainjs/xchain-cosmos-sdk'
-import { Asset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
+import { CompatibleAsset, base64ToBech32, bech32ToBase64 } from '@xchainjs/xchain-cosmos-sdk'
+import { assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 
 import { Client, ThorchainClientParams } from './client'
 import { AssetRuneNative, DEPOSIT_GAS_LIMIT_VALUE, defaultClientConfig } from './const'
-import { DepositParam } from './types'
-import { parseDerivationPath, sortAndStringifyJson, sortedObject } from './utils'
+import { DepositParam, TxParams } from './types'
+import { parseAssetToTHORNodeAsset, parseDerivationPath, sortAndStringifyJson, sortedObject } from './utils'
 
 /**
  * Thorchain Ledger client
@@ -265,7 +264,7 @@ export class ClientLedger extends Client {
         toAmino: (params) => ({
           signer: base64ToBech32(params.signer, prefix),
           memo: params.memo,
-          coins: params.coins.map((coin: { asset: Asset }) => {
+          coins: params.coins.map((coin: { asset: CompatibleAsset }) => {
             return {
               ...coin,
               asset: assetToString(coin.asset),
@@ -278,7 +277,7 @@ export class ClientLedger extends Client {
           coins: params.coins.map((coin: { asset: string; amount: string }) => {
             return {
               ...coin,
-              asset: assetFromStringEx(coin.asset),
+              asset: parseAssetToTHORNodeAsset(assetFromStringEx(coin.asset)),
             }
           }),
         }),

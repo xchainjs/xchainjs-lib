@@ -1,11 +1,16 @@
 import { Asset, CryptoAmount, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
+import { CompatibleAsset } from '../types'
+
 import { CacaoAsset } from './const'
 
 export const isCacaoAsset = (asset: Asset): boolean => assetToString(asset) === assetToString(CacaoAsset)
 
-export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
+export const getBaseAmountWithDiffDecimals = (
+  inputAmount: CryptoAmount<CompatibleAsset>,
+  outDecimals: number,
+): BigNumber => {
   const inDecimals = inputAmount.baseAmount.decimal
   let baseAmountOut = inputAmount.baseAmount.amount()
   const adjustDecimals = outDecimals - inDecimals
@@ -14,8 +19,11 @@ export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDeci
 }
 
 // TODO: Move this util functions to xchain-util to avoid replication between Thorchain and Mayachain
-export const getCryptoAmountWithNotation = (amount: CryptoAmount, notation: number): CryptoAmount => {
+export const getCryptoAmountWithNotation = <T extends CompatibleAsset>(
+  amount: CryptoAmount<T>,
+  notation: number,
+): CryptoAmount<CompatibleAsset> => {
   const inputAmountBaseNotation = amount.baseAmount.amount()
   const decimalsDiff = notation - amount.baseAmount.decimal
-  return new CryptoAmount(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
+  return new CryptoAmount<T>(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
 }

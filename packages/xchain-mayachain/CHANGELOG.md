@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-cosmos-sdk@1.0.1
+
+## 2.0.0
+
+### Major Changes
+
+- c74614f: Asset type refactor
+
+### Patch Changes
+
+- bece78b: Bug fix in deposit function. XChainJS asset parsed to Node nomenclature.
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-cosmos-sdk@1.0.0
+
 ## 1.0.11
 
 ### Patch Changes

@@ -8,10 +8,10 @@ import {
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
 import { DeliverTxResponse, GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
-import { AssetInfo, PreparedTx, TxParams } from '@xchainjs/xchain-client'
+import { AssetInfo, PreparedTx } from '@xchainjs/xchain-client'
 import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, Asset, eqAsset } from '@xchainjs/xchain-util'
+import { Address, AssetType, eqAsset } from '@xchainjs/xchain-util'
 import { encode, toWords } from 'bech32'
 import { fromSeed } from 'bip32'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
@@ -19,6 +19,7 @@ import { createHash } from 'crypto'
 import { publicKeyCreate } from 'secp256k1'
 
 import { AssetKUJI, AssetUSK, KUJI_DECIMAL, MSG_SEND_TYPE_URL, USK_ASSET_DENOM, USK_DECIMAL } from './const'
+import { CompatibleAsset, TxParams } from './types'
 import { defaultClientConfig, getDefaultExplorers } from './utils'
 
 export type KujiraClientParams = Partial<CosmosSdkClientParams>
@@ -112,20 +113,20 @@ export class Client extends CosmosSdkClient {
 
   /**
    * Retrieves the number of decimals for a given asset.
-   * @param {Asset} asset The asset for which to retrieve the number of decimals.
+   * @param {CompatibleAsset} asset The asset for which to retrieve the number of decimals.
    * @returns {number} The number of decimals.
    */
-  public getAssetDecimals(asset: Asset): number {
+  public getAssetDecimals(asset: CompatibleAsset): number {
     if (eqAsset(asset, AssetKUJI)) return KUJI_DECIMAL
     if (eqAsset(asset, AssetUSK)) return USK_DECIMAL
     return this.defaultDecimals
   }
   /**
    * Retrieves the denomination of the given asset.
-   * @param {Asset} asset The asset for which to retrieve the denomination.
+   * @param {CompatibleAsset} asset The asset for which to retrieve the denomination.
    * @returns {string | null} The denomination, or null if not found.
    */
-  getDenom(asset: Asset): string | null {
+  getDenom(asset: CompatibleAsset): string | null {
     if (eqAsset(asset, AssetKUJI)) return this.baseDenom
     if (eqAsset(asset, AssetUSK)) return USK_ASSET_DENOM
     return null
@@ -133,16 +134,16 @@ export class Client extends CosmosSdkClient {
   /**
    * Retrieves the asset from the given denomination.
    * @param {string} denom The denomination to retrieve the asset for.
-   * @returns {Asset | null} The corresponding asset, or null if not found.
+   * @returns {CompatibleAsset | null} The corresponding asset, or null if not found.
    */
-  assetFromDenom(denom: string): Asset | null {
+  assetFromDenom(denom: string): CompatibleAsset | null {
     if (denom === this.baseDenom) return AssetKUJI
     if (denom === USK_ASSET_DENOM) return AssetUSK
     return {
       chain: AssetKUJI.chain,
       symbol: denom,
       ticker: '',
-      synth: false,
+      type: AssetType.TOKEN,
     }
   }
   /**
@@ -228,10 +229,10 @@ export class Client extends CosmosSdkClient {
 
   /**
    * Retrieves the standard fee used by the client for a given asset.
-   * @param {Asset} asset The asset to retrieve the fee for.
+   * @param {CompatibleAsset} asset The asset to retrieve the fee for.
    * @returns {StdFee} The standard fee.
    */
-  protected getStandardFee(asset: Asset): StdFee {
+  protected getStandardFee(asset: CompatibleAsset): StdFee {
     const denom = this.getDenom(asset)
     const defaultGasPrice = GasPrice.fromString(`0.025${denom}`)
     return calculateFee(90_000, defaultGasPrice)

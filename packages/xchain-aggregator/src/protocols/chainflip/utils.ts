@@ -1,5 +1,5 @@
 import { Asset as CAsset, AssetData, Chain as CChain, Chains } from '@chainflip/sdk/swap'
-import { Asset as XAsset, Chain as XChain } from '@xchainjs/xchain-util'
+import { Asset as XAsset, AssetType, Chain as XChain, TokenAsset as XTokenAsset } from '@xchainjs/xchain-util'
 
 export const cChainToXChain = (chain: CChain): XChain => {
   switch (chain) {
@@ -27,17 +27,17 @@ export const xChainToCChain = (chain: XChain): CChain => {
   }
 }
 
-export const cAssetToXAsset = (asset: AssetData): XAsset => {
+export const cAssetToXAsset = (asset: AssetData): XAsset | XTokenAsset => {
   const chain = cChainToXChain(asset.chain)
   if (!chain) throw Error()
   return {
     chain,
     ticker: asset.contractAddress ? `${asset.symbol}-${asset.contractAddress}` : asset.symbol,
     symbol: asset.symbol,
-    synth: false,
+    type: asset.contractAddress ? AssetType.TOKEN : AssetType.NATIVE,
   }
 }
 
-export const xAssetToCAsset = (asset: XAsset): CAsset => {
+export const xAssetToCAsset = (asset: XAsset | XTokenAsset): CAsset => {
   return asset.ticker as CAsset
 }

@@ -1,7 +1,7 @@
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { assetFromStringEx, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/thorchain/midgard/api'
 import mockThornodeApi from '../__mocks__/thorchain/thornode/api'
@@ -34,6 +34,10 @@ describe('Thorchain protocol', () => {
 
   it('Should check asset is not supported', async () => {
     expect(await protocol.isAssetSupported(AssetCacao)).toBeFalsy()
+  })
+
+  it('Should check trade assets are supported', async () => {
+    expect(await protocol.isAssetSupported(assetFromStringEx('AVAX~AVAX'))).toBeTruthy()
   })
 
   it('Should get all swaps with correct protocol name', async () => {

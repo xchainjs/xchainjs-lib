@@ -1,9 +1,7 @@
-import { Network, PreparedTx } from '@xchainjs/xchain-client'
-import { UTXO } from '@xchainjs/xchain-utxo'
+import { Network } from '@xchainjs/xchain-client'
+import { PreparedTx } from '@xchainjs/xchain-utxo'
 
-export type DashPreparedTx = {
-  utxos: UTXO[]
-} & PreparedTx
+export type DashPreparedTx = PreparedTx
 
 /**
  * Node authentication object containing username and password.

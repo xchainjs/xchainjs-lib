@@ -5,12 +5,13 @@ import { DecodedTxRaw, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
 import CosmosApp from '@ledgerhq/hw-app-cosmos'
 import type Transport from '@ledgerhq/hw-transport'
-import { TxHash, TxParams } from '@xchainjs/xchain-client'
+import { TxHash } from '@xchainjs/xchain-client'
 import { MsgTypes } from '@xchainjs/xchain-cosmos-sdk'
 import { Address } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { Client, CosmosClientParams } from './client'
+import { TxParams } from './types'
 
 export class ClientLedger extends Client {
   private transport: Transport // TODO: Parametrize

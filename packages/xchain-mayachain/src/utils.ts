@@ -1,8 +1,9 @@
 import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, assetToString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { Address, AssetType, assetToString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import { AssetCacao, AssetMaya, CACAO_DENOM, MAYA_DENOM } from './const'
+import { CompatibleAsset } from './types'
 
 /**
  * Default explorer URL for the mainnet.
@@ -76,10 +77,10 @@ export const getExplorerTxUrl = (tx: TxHash): Record<Network, string> => ({
 /**
  * Get denomination from Asset.
  *
- * @param {Asset} asset The asset to get the denomination for.
+ * @param {CompatibleAsset} asset The asset to get the denomination for.
  * @returns {string} The denomination of the given asset.
  */
-export const getDenom = (asset: Asset) => {
+export const getDenom = (asset: CompatibleAsset) => {
   if (eqAsset(asset, AssetCacao)) return CACAO_DENOM
   if (eqAsset(asset, AssetMaya)) return MAYA_DENOM
   if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
@@ -113,5 +114,24 @@ export const getPrefix = (network: Network) => {
       return 'smaya'
     case Network.Testnet:
       return 'tmaya'
+  }
+}
+
+/**
+ * Parser XChainJS asset to Mayanode asset
+ */
+export const parseAssetToMayanodeAsset = (
+  asset: CompatibleAsset,
+): {
+  chain: string
+  symbol: string
+  ticker: string
+  synth: boolean
+} => {
+  return {
+    chain: asset.chain,
+    symbol: asset.symbol,
+    ticker: asset.ticker,
+    synth: asset.type === AssetType.SYNTH,
   }
 }

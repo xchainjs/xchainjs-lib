@@ -1,3 +1,3 @@
-import { TxOfflineParams } from './types'
+import { CompatibleAsset, TxOfflineParams, TxParams } from './types'
 
-export { TxOfflineParams }
+export { TxOfflineParams, CompatibleAsset, TxParams }

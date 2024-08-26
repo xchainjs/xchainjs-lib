@@ -1,16 +1,15 @@
-import { Network, TxParams } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Network } from '@xchainjs/xchain-client'
+import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
-import { Client as KujiraClient } from '../src/client'
-import { AssetKUJI, AssetUSK, KUJIChain } from '../src/const'
+import { AssetKUJI, AssetUSK, Client as KujiraClient, KUJIChain, TxParams } from '../src'
 
 let xchainClient: KujiraClient
 
-const AssetTokenKuji = {
+const AssetTokenKuji: TokenAsset = {
   chain: KUJIChain,
   symbol: 'factory/kujira1ltvwg69sw3c5z99c6rr08hal7v0kdzfxz07yj5/demo',
   ticker: '',
-  synth: false,
+  type: AssetType.TOKEN,
 }
 
 describe('Kujira client Integration Tests', () => {

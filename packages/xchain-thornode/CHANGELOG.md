@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.19
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+
+## 0.3.18
+
+### Patch Changes
+
+- 20a1f7c: Client aligned with Thornode v1.134.0
+
 ## 0.3.17
 
 ### Patch Changes

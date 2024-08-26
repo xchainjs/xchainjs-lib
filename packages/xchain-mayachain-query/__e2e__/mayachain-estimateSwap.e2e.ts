@@ -1,5 +1,9 @@
 import {
-  CryptoAmount,
+  Asset,
+  AssetCryptoAmount,
+  AssetType,
+  TokenAsset,
+  TokenCryptoAmount,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -13,8 +17,14 @@ import { CacaoAsset, EthAsset } from '../src/utils'
 
 const mayachainQuery = new MayachainQuery()
 
-const AssetBTC = assetFromStringEx('BTC.BTC')
-const AssetArb = assetFromStringEx('ARB.ETH')
+// const AssetBTC = assetFromStringEx('BTC.BTC') as Asset
+const AssetArb = assetFromStringEx('ARB.ETH') as Asset
+const MainnetUSDTAsset: TokenAsset = {
+  chain: 'ARB',
+  symbol: 'USDT-0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+  ticker: 'USDT',
+  type: AssetType.TOKEN,
+}
 
 const ethAddress = '0xf155e9cdD77A5d77073aB43d17F661507C08E23d'
 const mayaAddress = 'maya1tqpyn3athvuj8dj7nu5fp0xm76ut86sjcg0dkv'
@@ -63,8 +73,8 @@ describe('Estimate swap e2e tests', () => {
   // Test estimate swaps with mock pool data
   it('should estimate a swap of 10 BTC to RUNE', async () => {
     const swapParams: QuoteSwapParams = {
-      fromAsset: AssetBTC,
-      amount: new CryptoAmount(baseAmount(100000), AssetBTC),
+      fromAsset: MainnetUSDTAsset,
+      amount: new TokenCryptoAmount(baseAmount(100000), MainnetUSDTAsset),
       destinationAsset: EthAsset,
     }
     const estimate = await mayachainQuery.quoteSwap(swapParams)
@@ -74,7 +84,7 @@ describe('Estimate swap e2e tests', () => {
   it('should estimate a swap of 1 ARB.ETH to Cacao', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetArb,
-      amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetArb),
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(1, 18)), AssetArb),
       destinationAsset: CacaoAsset,
       destinationAddress: mayaAddress,
     }
@@ -84,7 +94,7 @@ describe('Estimate swap e2e tests', () => {
   it('should estimate a swap of 10 Cacao to Arb.eth', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: CacaoAsset,
-      amount: new CryptoAmount(assetToBase(assetAmount(10, 10)), CacaoAsset),
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(10, 10)), CacaoAsset),
       destinationAsset: AssetArb,
       destinationAddress: ethAddress,
     }

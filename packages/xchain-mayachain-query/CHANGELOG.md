@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-mayamidgard-query@0.1.17
+  - @xchainjs/xchain-mayamidgard@0.1.6
+  - @xchainjs/xchain-mayanode@0.1.9
+  - @xchainjs/xchain-client@1.0.1
+
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- c74614f: `QuoteSwap` type updated. `Fees` type with `liquidityFee` and `totalFee` parameters.
+- c74614f: Streaming swap parameters for `quoteSwap` method.
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-mayamidgard-query@0.1.16
+
+## 0.1.21
+
+### Patch Changes
+
+- f54dcd2: `QuoteSwap` type updated. `Fees` type with `liquidityFee` and `totalFee` parameters.
+- f54dcd2: Streaming swap parameters for `quoteSwap` method.
+
 ## 0.1.20
 
 ### Patch Changes

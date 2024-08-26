@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-evm",
-  "version": "0.6.4",
+  "version": "1.0.1",
   "description": "Genereic EVM client for XChainJS",
   "keywords": [
     "XChain",
@@ -38,13 +38,14 @@
   "dependencies": {
     "@ledgerhq/hw-app-eth": "6.36.0",
     "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "ethers": "5.7.2"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport": "6.30.6",
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
-    "axios": "1.3.6",
+    "axios": "1.7.4",
     "nock": "13.0.5"
   }
 }

@@ -1,5 +1,54 @@
 # Changelog
 
+## 3.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+- Updated dependencies [be1c45f]
+  - @xchainjs/xchain-mayachain-query@1.0.1
+  - @xchainjs/xchain-mayachain@2.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-bitcoin@1.0.1
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-dash@1.0.1
+  - @xchainjs/xchain-wallet@1.0.1
+  - @xchainjs/xchain-arbitrum@1.0.1
+  - @xchainjs/xchain-ethereum@1.0.1
+  - @xchainjs/xchain-kujira@1.0.1
+
+## 3.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- c74614f: Streaming swap parameters for `estimateSwap`, `validateSwap` and `doSwap` method.
+- Updated dependencies [c74614f]
+  - @xchainjs/xchain-mayachain@2.0.0
+  - @xchainjs/xchain-thorchain@2.0.0
+  - @xchainjs/xchain-wallet@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-arbitrum@1.0.0
+  - @xchainjs/xchain-ethereum@1.0.0
+  - @xchainjs/xchain-bitcoin@1.0.0
+  - @xchainjs/xchain-kujira@1.0.0
+  - @xchainjs/xchain-dash@1.0.0
+  - @xchainjs/xchain-mayachain-query@1.0.0
+
+## 2.0.14
+
+### Patch Changes
+
+- f54dcd2: Streaming swap parameters for `estimateSwap`, `validateSwap` and `doSwap` method.
+- Updated dependencies [f54dcd2]
+- Updated dependencies [f54dcd2]
+  - @xchainjs/xchain-mayachain-query@0.1.21
+
 ## 2.0.13
 
 ### Patch Changes

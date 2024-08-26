@@ -1,5 +1,14 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, CryptoAmount } from '@xchainjs/xchain-util'
+import {
+  Address,
+  AnyAsset,
+  Asset,
+  Chain,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  TradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 /**
@@ -14,9 +23,9 @@ type TxSubmitted = {
  * Fees
  */
 type Fees = {
-  asset: Asset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount // The affiliate fee amount
-  outboundFee: CryptoAmount // The outbound fee amount
+  asset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset for which fees are calculated
+  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The affiliate fee amount
+  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The outbound fee amount
 }
 
 /**
@@ -72,8 +81,8 @@ type QuoteSwap = {
   protocol: Protocol
   toAddress: Address // The destination address for the swap
   memo: string // The memo associated with the swap
-  expectedAmount: CryptoAmount // The expected amount to be received after the swap
-  dustThreshold: CryptoAmount // The dust threshold for the swap
+  expectedAmount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The expected amount to be received after the swap
+  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The dust threshold for the swap
   // TODO: Update type to return an array of the fees
   fees: Fees // The fees associated with the swap
   totalSwapSeconds: number // The total time for the swap operation
@@ -87,9 +96,9 @@ type QuoteSwap = {
  * Represents parameters for quoting a swap operation.
  */
 type QuoteSwapParams = {
-  fromAsset: Asset // The asset to swap from
-  destinationAsset: Asset // The asset to swap to
-  amount: CryptoAmount // The amount to swap
+  fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap from
+  destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap to
+  amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The amount to swap
   fromAddress?: string // The source address for the swap
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap
@@ -121,7 +130,7 @@ type SwapHistory = {
 
 interface IProtocol {
   name: Protocol
-  isAssetSupported(asset: Asset): Promise<boolean>
+  isAssetSupported(asset: AnyAsset): Promise<boolean>
   getSupportedChains(): Promise<Chain[]>
   estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>
   doSwap(params: QuoteSwapParams): Promise<TxSubmitted>

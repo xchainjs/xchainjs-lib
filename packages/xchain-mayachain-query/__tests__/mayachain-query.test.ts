@@ -1,5 +1,9 @@
 import {
+  Asset,
+  AssetCryptoAmount,
   CryptoAmount,
+  SynthAsset,
+  TokenAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -30,7 +34,7 @@ describe('Mayachain-query tests', () => {
 
   it('Should fetch BTC to ETH swap', async () => {
     const quoteSwap = await mayachainQuery.quoteSwap({
-      amount: new CryptoAmount(assetToBase(assetAmount(1)), BtcAsset),
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(1)), BtcAsset),
       fromAsset: BtcAsset,
       destinationAsset: EthAsset,
     })
@@ -64,7 +68,7 @@ describe('Mayachain-query tests', () => {
     const quoteSwap = await mayachainQuery.quoteSwap({
       fromAsset: RuneAsset,
       destinationAsset: BtcAsset,
-      amount: new CryptoAmount(baseAmount('688598892692', 8), BtcAsset),
+      amount: new AssetCryptoAmount(baseAmount('688598892692', 8), BtcAsset),
       fromAddress: 'thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55',
       destinationAddress: 'bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj',
       affiliateAddress: 'maya17hwqt302e5f2xm4h95ma8wuggqkvfzgvsyfc54',
@@ -98,26 +102,79 @@ describe('Mayachain-query tests', () => {
     expect(quoteSwap.warning).toBe('')
   })
 
+  it('Should fetch ETH to BTC streaming swap', async () => {
+    const quoteSwap = await mayachainQuery.quoteSwap({
+      fromAsset: EthAsset,
+      destinationAsset: BtcAsset,
+      amount: new CryptoAmount(baseAmount('688598892692', 8), BtcAsset),
+      fromAddress: '0xe3985E6b61b814F7Cdb188766562ba71b446B46d',
+      destinationAddress: 'bc1q07kx42qz758yhr7jn3pu9ffz2rwy0snlwztwf8',
+      streamingInterval: 100,
+      streamingQuantity: 10,
+    })
+
+    expect(quoteSwap.toAddress).toBe('0xb9ac6d689a18be4588f348301208e40f57a868d4')
+    expect(quoteSwap.memo).toBe('=:BTC.BTC:bc1q07kx42qz758yhr7jn3pu9ffz2rwy0snlwztwf8:5216435/100/2')
+    expect(assetToString(quoteSwap.expectedAmount.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.expectedAmount.baseAmount.amount().toString()).toBe('5248264')
+    expect(quoteSwap.expectedAmount.baseAmount.decimal).toBe(8)
+    expect(assetToString(quoteSwap.dustThreshold.asset)).toBe(assetToString(EthAsset))
+    expect(quoteSwap.dustThreshold.baseAmount.amount().toString()).toBe('0')
+    expect(quoteSwap.dustThreshold.baseAmount.decimal).toBe(18)
+    expect(assetToString(quoteSwap.fees.asset)).toBe(assetToString(BtcAsset))
+    expect(assetToString(quoteSwap.fees.affiliateFee.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.fees.affiliateFee.baseAmount.amount().toString()).toBe('0')
+    expect(quoteSwap.fees.affiliateFee.baseAmount.decimal).toBe(8)
+    expect(assetToString(quoteSwap.fees.outboundFee.asset)).toBe(assetToString(BtcAsset))
+    expect(quoteSwap.fees.outboundFee.baseAmount.amount().toString()).toBe('9110')
+    expect(quoteSwap.fees.outboundFee.baseAmount.decimal).toBe(8)
+    expect(quoteSwap.inboundConfirmationBlocks).toBe(undefined)
+    expect(quoteSwap.inboundConfirmationSeconds).toBe(undefined)
+    expect(quoteSwap.outboundDelayBlocks).toBe(14)
+    expect(quoteSwap.outboundDelaySeconds).toBe(84)
+    expect(quoteSwap.totalSwapSeconds).toBe(600)
+    expect(quoteSwap.slipBasisPoints).toBe(11)
+    expect(quoteSwap.streamingSwapBlocks).toBe(100)
+    expect(quoteSwap.streamingSwapSeconds).toBe(600)
+    expect(quoteSwap.maxStreamingQuantity).toBe(2)
+    expect(quoteSwap.expiry).toBe(1721775525)
+    expect(quoteSwap.router).toBe('0xe3985E6b61b814F7Cdb188766562ba71b446B46d')
+    expect(quoteSwap.gasRateUnits).toBe('gwei')
+    expect(quoteSwap.recommendedGasRate).toBe('1')
+    expect(assetToString(quoteSwap.recommendedMinAmountIn?.asset as Asset)).toBe('ETH.ETH')
+    expect(quoteSwap.canSwap).toBe(true)
+    expect(quoteSwap.errors.length).toBe(0)
+    expect(quoteSwap.warning).toBe('')
+  })
+
   it('Should return the number of decimals of Mayachain assets', async () => {
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC.BTC'))).toBe(8)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC/BTC'))).toBe(8)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.ETH'))).toBe(18)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('DASH.DASH'))).toBe(8)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.KUJI'))).toBe(6)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('THOR.RUNE'))).toBe(8)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('MAYA.CACAO'))).toBe(10)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC.BTC') as Asset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC/BTC') as SynthAsset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.ETH') as Asset)).toBe(18)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('DASH.DASH') as Asset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.KUJI') as Asset)).toBe(6)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('THOR.RUNE') as Asset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('MAYA.CACAO') as Asset)).toBe(10)
     expect(
-      await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')),
+      await mayachainQuery.getAssetDecimals(
+        assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7') as TokenAsset,
+      ),
     ).toBe(6)
     expect(
-      await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')),
+      await mayachainQuery.getAssetDecimals(
+        assetFromStringEx('ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48') as TokenAsset,
+      ),
     ).toBe(6)
     expect(
-      await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0')),
+      await mayachainQuery.getAssetDecimals(
+        assetFromStringEx('ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0') as TokenAsset,
+      ),
     ).toBe(18)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK'))).toBe(6)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK') as TokenAsset)).toBe(6)
     expect(
-      mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52')),
+      mayachainQuery.getAssetDecimals(
+        assetFromStringEx('ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52') as TokenAsset,
+      ),
     ).rejects.toThrowError('Can not get decimals for ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52')
   })
 

@@ -1,4 +1,4 @@
-import { Address, Asset, BaseAmount } from '@xchainjs/xchain-util'
+import { Address, AnyAsset, Asset, BaseAmount, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
 
 /**
  * Enumeration of network types.
@@ -18,10 +18,34 @@ export type AssetInfo = {
 }
 
 /**
+ * Type definition for token asset information.
+ */
+export type TokenAssetInfo = {
+  asset: TokenAsset // The asset
+  decimal: number // The decimal value
+}
+
+/**
+ * Type definition for synth asset information.
+ */
+export type SynthAssetInfo = {
+  asset: SynthAsset // The asset
+  decimal: number // The decimal value
+}
+
+/**
+ * Type definition for trade asset information.
+ */
+export type TradeAssetInfo = {
+  asset: TradeAsset // The asset
+  decimal: number // The decimal value
+}
+
+/**
  * Type definition for a balance.
  */
 export type Balance = {
-  asset: Asset // The asset
+  asset: AnyAsset // The asset
   amount: BaseAmount // The amount
 }
 
@@ -44,7 +68,7 @@ export type TxHash = string
 export type TxTo = {
   to: Address // The recipient address
   amount: BaseAmount // The amount
-  asset?: Asset // The asset (optional)
+  asset?: AnyAsset // The asset (optional)
 }
 
 /**
@@ -53,14 +77,14 @@ export type TxTo = {
 export type TxFrom = {
   from: Address | TxHash // The sender address or transaction hash
   amount: BaseAmount // The amount
-  asset?: Asset // The asset (optional)
+  asset?: AnyAsset // The asset (optional)
 }
 
 /**
  * Type definition for a transaction.
  */
 export type Tx = {
-  asset: Asset // The asset
+  asset: AnyAsset // The asset
   from: TxFrom[] // List of sender transactions
   to: TxTo[] // List of recipient transactions
   date: Date // Timestamp of the transaction
@@ -92,7 +116,7 @@ export type TxHistoryParams = {
  */
 export type TxParams = {
   walletIndex?: number // Send from this HD index
-  asset?: Asset // The asset
+  asset?: AnyAsset // The asset
   amount: BaseAmount // The amount
   recipient: Address // The recipient address
   memo?: string // Optional memo to pass
@@ -190,7 +214,7 @@ export interface XChainClient {
   getAddress(walletIndex?: number): Address // Get address
   getAddressAsync(walletIndex?: number): Promise<Address> // Get address asynchronously
   setPhrase(phrase: string, walletIndex: number): Address // Set phrase
-  getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> // Get balance
+  getBalance(address: Address, assets?: AnyAsset[]): Promise<Balance[]> // Get balance
   getTransactions(params?: TxHistoryParams): Promise<TxsPage> // Get transactions
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx> // Get transaction data
   getFees(options?: FeeEstimateOptions): Promise<Fees> // Get fees

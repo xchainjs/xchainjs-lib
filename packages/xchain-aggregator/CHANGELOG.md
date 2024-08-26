@@ -1,5 +1,51 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+- Updated dependencies [be1c45f]
+  - @xchainjs/xchain-mayachain-query@1.0.1
+  - @xchainjs/xchain-thorchain-query@1.0.1
+  - @xchainjs/xchain-mayachain-amm@3.0.1
+  - @xchainjs/xchain-thorchain-amm@2.0.1
+  - @xchainjs/xchain-mayachain@2.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-wallet@1.0.1
+
+## 1.0.0
+
+### Major Changes
+
+- c74614f: Methods and types updated with `Asset` type refactored.
+
+### Patch Changes
+
+- bece78b: Trade assets support for swaps. Currently supported by Thorchain.
+  - @xchainjs/xchain-util@1.0.0
+  - @xchainjs/xchain-thorchain-query@1.0.0
+  - @xchainjs/xchain-thorchain-amm@2.0.0
+  - @xchainjs/xchain-mayachain@2.0.0
+  - @xchainjs/xchain-thorchain@2.0.0
+  - @xchainjs/xchain-wallet@1.0.0
+  - @xchainjs/xchain-client@1.0.0
+  - @xchainjs/xchain-mayachain-amm@3.0.0
+  - @xchainjs/xchain-mayachain-query@1.0.0
+
+## 0.2.6
+
+### Patch Changes
+
+- Updated dependencies [f54dcd2]
+- Updated dependencies [f54dcd2]
+- Updated dependencies [f54dcd2]
+  - @xchainjs/xchain-mayachain-amm@2.0.14
+  - @xchainjs/xchain-mayachain-query@0.1.21
+
 ## 0.2.5
 
 ### Patch Changes

@@ -30,12 +30,17 @@ import {
 } from '@xchainjs/xchain-thorchain-query'
 import {
   Asset,
+  AssetType,
   CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  TradeAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
   assetToString,
   baseAmount,
+  isSynthAsset,
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { BigNumber } from 'bignumber.js'
@@ -181,7 +186,7 @@ export class TxJammer {
     const assets = await this.getAvailablePoolAssets()
     for (const asset of assets) {
       const synth = assetFromStringEx(asset)
-      synth.synth = true
+      synth.type = AssetType.SYNTH
       assetsIncludingSynths.push(asset)
       assetsIncludingSynths.push(assetToString(synth))
     }
@@ -321,7 +326,7 @@ export class TxJammer {
   private async executeSwap() {
     const [senderWallet, receiverWallet] = this.getRandomWallets()
     const [sourceAsset, destinationAsset] = this.getRandomSwapAssets()
-    const destinationAddress = destinationAsset.synth
+    const destinationAddress = isSynthAsset(destinationAsset)
       ? await receiverWallet.getAddress(THORChain)
       : await receiverWallet.getAddress(destinationAsset.chain)
     const swapParams: QuoteSwapParams = {
@@ -376,7 +381,9 @@ export class TxJammer {
     }
     this.txRecords.push(result)
   }
-  private async createCryptoAmount(asset: Asset): Promise<CryptoAmount> {
+  private async createCryptoAmount<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
+    asset: T,
+  ): Promise<CryptoAmount<T>> {
     const amount = this.getRandomFloat(this.minAmount, this.maxAmount)
     const usdPool = await this.getDeepestUSDPool()
     const usdAmount = new CryptoAmount(assetToBase(assetAmount(amount)), usdPool.asset)
@@ -384,16 +391,16 @@ export class TxJammer {
   }
 
   private async getDeepestUSDPool(): Promise<LiquidityPool> {
-    const USD_ASSETS: Record<Network, Asset[]> = {
+    const USD_ASSETS: Record<Network, TokenAsset[]> = {
       mainnet: [
-        assetFromStringEx('BNB.BUSD-BD1'),
-        assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48'),
-        assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7'),
+        assetFromStringEx('BNB.BUSD-BD1') as TokenAsset,
+        assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48') as TokenAsset,
+        assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset,
       ],
-      stagenet: [assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')],
+      stagenet: [assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset],
       testnet: [
-        assetFromStringEx('BNB.BUSD-74E'),
-        assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306'),
+        assetFromStringEx('BNB.BUSD-74E') as TokenAsset,
+        assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306') as TokenAsset,
       ],
     }
     const usdAssets = USD_ASSETS[this.thorchainCache.midgardQuery.midgardCache.midgard.network]
@@ -414,24 +421,27 @@ export class TxJammer {
     const rand = this.getRandomInt(0, 1)
     return rand == 0 ? [this.wallet1, this.wallet2] : [this.wallet2, this.wallet1]
   }
-  private getRandomSwapAssets(): [Asset, Asset] {
+  private getRandomSwapAssets(): [
+    Asset | TokenAsset | SynthAsset | TradeAsset,
+    Asset | TokenAsset | SynthAsset | TradeAsset,
+  ] {
     const sourceAndDestAssetString = weighted.select(this.weightedSwap) as string
     const assets = sourceAndDestAssetString.split(' ')
     const sourceAsset = assetFromStringEx(assets[0])
     const destinationAsset = assetFromStringEx(assets[1])
     return [sourceAsset, destinationAsset]
   }
-  private getRandomTransferAsset(): Asset {
+  private getRandomTransferAsset(): Asset | TokenAsset | SynthAsset {
     const randomAssetString = weighted.select(this.weightedTransfer) as string
-    return assetFromStringEx(randomAssetString)
+    return assetFromStringEx(randomAssetString) as Asset | TokenAsset | SynthAsset
   }
-  private getRandomAddLpAsset(): Asset {
+  private getRandomAddLpAsset(): Asset | TokenAsset {
     const randomAssetString = weighted.select(this.weightedAddLP) as string
-    return assetFromStringEx(randomAssetString)
+    return assetFromStringEx(randomAssetString) as Asset | TokenAsset
   }
-  private getRandomWithdrawLpAsset(): Asset {
+  private getRandomWithdrawLpAsset(): Asset | TokenAsset {
     const randomAssetString = weighted.select(this.weightedWithdrawLP) as string
-    return assetFromStringEx(randomAssetString)
+    return assetFromStringEx(randomAssetString) as Asset | TokenAsset
   }
 
   private getRandomInt(min: number, max: number) {
@@ -546,7 +556,11 @@ export class TxJammer {
     }
     this.txRecords.push(result)
   }
-  private async getLpPositions(asset: Asset, runeAddress: string, sourceAddress: string): Promise<[boolean, boolean]> {
+  private async getLpPositions(
+    asset: Asset | TokenAsset,
+    runeAddress: string,
+    sourceAddress: string,
+  ): Promise<[boolean, boolean]> {
     let runePosition = true
     try {
       await this.thorchainQuery.checkLiquidityPosition(asset, runeAddress)

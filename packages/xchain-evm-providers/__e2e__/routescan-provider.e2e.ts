@@ -1,5 +1,5 @@
 import { Balance } from '@xchainjs/xchain-client'
-import { Asset, assetToString } from '@xchainjs/xchain-util'
+import { Asset, AssetType, assetToString } from '@xchainjs/xchain-util'
 import { ethers } from 'ethers'
 
 import { RoutescanProvider } from '../src/providers'
@@ -12,7 +12,7 @@ describe('AVAX', () => {
   const rpcEndpint = 'https://api.avax.network/ext/bc/C/rpc'
   // Define here to avoid cyclic dependency
   const AVAXChain = 'AVAX'
-  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', synth: false }
+  const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
   const provider = new ethers.providers.JsonRpcProvider(rpcEndpint)
   const dataProvider = new RoutescanProvider(provider, 'https://api.routescan.io', 43114, AssetAVAX, 18)
@@ -57,7 +57,7 @@ describe('ETH', () => {
     chain: ETHChain,
     symbol: 'ETH',
     ticker: 'ETH',
-    synth: false,
+    type: AssetType.NATIVE,
   }
 
   const provider = new ethers.providers.JsonRpcProvider(rpcEndpint, 'homestead')
@@ -89,5 +89,4 @@ describe('ETH', () => {
     const tx = await dataProvider.getTransactionData(tokenTxHash, assetAddress)
     console.log(JSON.stringify(tx))
   })
-})
 })
