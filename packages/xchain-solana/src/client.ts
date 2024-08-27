@@ -6,7 +6,7 @@ import {
   TOKEN_PROGRAM_ID,
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError,
-  createAssociatedTokenAccountInstruction,
+  createTransferInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
 } from '@solana/spl-token'
@@ -196,9 +196,11 @@ export class Client extends BaseXChainClient {
   }
 
   /**
+   * Get transaction fees.
    *
-   * @param params
-   * @returns
+   * @param {TxParams} params - The transaction parameters.
+   * @returns {Fees} The average, fast, and fastest fees.
+   * @throws {"Params need to be passed"} Thrown if parameters are not provided.
    */
   public async getFees(params?: TxParams): Promise<Fees> {
     if (!params) throw new Error('Params need to be passed')
@@ -228,21 +230,30 @@ export class Client extends BaseXChainClient {
 
       try {
         await getAccount(this.connection, associatedTokenAddress, undefined, TOKEN_PROGRAM_ID)
-        // TODO: Add transfer instruction
+        transaction.add(
+          createTransferInstruction(
+            sender.publicKey, // Should be Token account, but as it new KeyPair for estimation, sender public key
+            associatedTokenAddress,
+            sender.publicKey,
+            params.amount.amount().toNumber(),
+          ),
+        )
       } catch (error: unknown) {
         if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
           // recipient token account has to be created
-          const createAccountTx = new Transaction()
-          createAccountTx.add(
-            createAssociatedTokenAccountInstruction(sender.publicKey, associatedTokenAddress, toPubkey, mintAddress),
+
+          const dataLength = 165 // Normally used for Token accounts
+          createAccountTxFee = await this.connection.getMinimumBalanceForRentExemption(dataLength)
+
+          transaction.add(
+            createTransferInstruction(
+              sender.publicKey, // Should be Token account, but as it new KeyPair for estimation, sender public key
+              toPubkey, // Should be Token account, but as recipient token account should be created, recipient public key
+              sender.publicKey,
+              params.amount.amount().toNumber(),
+            ),
           )
-          createAccountTx.recentBlockhash = await this.connection.getLatestBlockhash().then((block) => block.blockhash)
-          createAccountTx.feePayer = sender.publicKey
-
-          createAccountTxFee = (await createAccountTx.getEstimatedFee(this.connection)) || 0
         }
-
-        // TODO: Add transfer instruction
       }
     }
 
@@ -272,13 +283,13 @@ export class Client extends BaseXChainClient {
       )
     }
 
-    const fee = await transaction.getEstimatedFee(this.connection)
+    const fee = (await transaction.getEstimatedFee(this.connection)) || 0
 
     return {
       type: FeeType.FlatFee,
-      [FeeOption.Average]: baseAmount((fee || 0) + createAccountTxFee, SOL_DECIMALS),
-      [FeeOption.Fast]: baseAmount((fee || 0) + createAccountTxFee, SOL_DECIMALS),
-      [FeeOption.Fastest]: baseAmount((fee || 0) + createAccountTxFee, SOL_DECIMALS),
+      [FeeOption.Average]: baseAmount(fee + createAccountTxFee, SOL_DECIMALS),
+      [FeeOption.Fast]: baseAmount(fee + createAccountTxFee, SOL_DECIMALS),
+      [FeeOption.Fastest]: baseAmount(fee + createAccountTxFee, SOL_DECIMALS),
     }
   }
 
