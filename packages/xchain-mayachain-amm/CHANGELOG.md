@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.2
+
+### Patch Changes
+
+- @xchainjs/xchain-arbitrum@1.0.2
+- @xchainjs/xchain-ethereum@1.0.2
+- @xchainjs/xchain-wallet@1.0.2
+
 ## 3.0.1
 
 ### Patch Changes
