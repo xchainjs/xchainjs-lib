@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- 4d96d34: Fix LedgerSigner
+
 ## 1.0.1
 
 ### Patch Changes
