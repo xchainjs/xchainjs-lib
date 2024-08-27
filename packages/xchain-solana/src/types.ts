@@ -4,7 +4,7 @@ import {
   TxParams as BaseTxParams,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
-import { Asset, TokenAsset } from '@xchainjs/xchain-util'
+import { Asset, BaseAmount, TokenAsset } from '@xchainjs/xchain-util'
 
 /**
  * Solana client params
@@ -21,4 +21,6 @@ export type Balance = BaseBalance & {
 
 export type TxParams = BaseTxParams & {
   asset?: CompatibleAsset
+  priorityFee?: BaseAmount
+  limit?: number
 }

@@ -2,8 +2,16 @@ import { fetchAllDigitalAsset, mplTokenMetadata } from '@metaplex-foundation/mpl
 import { PublicKey as UmiPubliKey, Umi, publicKey } from '@metaplex-foundation/umi'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { isAddress } from '@solana/addresses'
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import {
+  TOKEN_PROGRAM_ID,
+  TokenAccountNotFoundError,
+  TokenInvalidAccountOwnerError,
+  createAssociatedTokenAccountInstruction,
+  getAccount,
+  getAssociatedTokenAddressSync,
+} from '@solana/spl-token'
+import {
+  ComputeBudgetProgram,
   Connection,
   Keypair,
   PublicKey,
@@ -25,7 +33,14 @@ import {
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, TokenAsset, assetFromStringEx, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  TokenAsset,
+  assetFromStringEx,
+  baseAmount,
+  eqAsset,
+  getContractAddressFromAsset,
+} from '@xchainjs/xchain-util'
 import { HDKey } from 'micro-ed25519-hdkey'
 
 import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
@@ -97,14 +112,7 @@ export class Client extends BaseXChainClient {
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
   public async getAddressAsync(index?: number): Promise<string> {
-    if (!this.phrase) throw new Error('Phrase must be provided')
-
-    const seed = getSeed(this.phrase)
-    const hd = HDKey.fromMasterSeed(seed.toString('hex'))
-
-    const keypair = Keypair.fromSeed(hd.derive(this.getFullDerivationPath(index || 0)).privateKey)
-
-    return keypair.publicKey.toBase58()
+    return this.getPrivateKeyPair(index || 0).publicKey.toBase58()
   }
 
   /**
@@ -196,22 +204,46 @@ export class Client extends BaseXChainClient {
     if (!params) throw new Error('Params need to be passed')
 
     const sender = Keypair.generate()
+    const toPubkey = new PublicKey(params.recipient)
 
     const transaction = new Transaction()
 
     transaction.recentBlockhash = await this.connection.getLatestBlockhash().then((block) => block.blockhash)
     transaction.feePayer = sender.publicKey
 
+    let createAccountTxFee = 0
     if (!params.asset || eqAsset(params.asset, this.getAssetInfo().asset)) {
+      // Native transfer
       transaction.add(
         SystemProgram.transfer({
           fromPubkey: sender.publicKey,
-          toPubkey: new PublicKey(params.recipient),
+          toPubkey,
           lamports: params.amount.amount().toNumber(),
         }),
       )
     } else {
-      // TODO: Add Token instruction
+      // Token transfer
+      const mintAddress = new PublicKey(getContractAddressFromAsset(params.asset as TokenAsset))
+      const associatedTokenAddress = getAssociatedTokenAddressSync(mintAddress, toPubkey)
+
+      try {
+        await getAccount(this.connection, associatedTokenAddress, undefined, TOKEN_PROGRAM_ID)
+        // TODO: Add transfer instruction
+      } catch (error: unknown) {
+        if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+          // recipient token account has to be created
+          const createAccountTx = new Transaction()
+          createAccountTx.add(
+            createAssociatedTokenAccountInstruction(sender.publicKey, associatedTokenAddress, toPubkey, mintAddress),
+          )
+          createAccountTx.recentBlockhash = await this.connection.getLatestBlockhash().then((block) => block.blockhash)
+          createAccountTx.feePayer = sender.publicKey
+
+          createAccountTxFee = (await createAccountTx.getEstimatedFee(this.connection)) || 0
+        }
+
+        // TODO: Add transfer instruction
+      }
     }
 
     if (params.memo) {
@@ -224,13 +256,29 @@ export class Client extends BaseXChainClient {
       )
     }
 
+    if (params.priorityFee) {
+      transaction.add(
+        ComputeBudgetProgram.setComputeUnitPrice({
+          microLamports: params.priorityFee.amount().toNumber() / 10 ** 3,
+        }),
+      )
+    }
+
+    if (params.limit) {
+      transaction.add(
+        ComputeBudgetProgram.setComputeUnitLimit({
+          units: params.limit,
+        }),
+      )
+    }
+
     const fee = await transaction.getEstimatedFee(this.connection)
 
     return {
       type: FeeType.FlatFee,
-      [FeeOption.Average]: baseAmount(fee || 0, SOL_DECIMALS),
-      [FeeOption.Fast]: baseAmount(fee || 0, SOL_DECIMALS),
-      [FeeOption.Fastest]: baseAmount(fee || 0, SOL_DECIMALS),
+      [FeeOption.Average]: baseAmount((fee || 0) + createAccountTxFee, SOL_DECIMALS),
+      [FeeOption.Fast]: baseAmount((fee || 0) + createAccountTxFee, SOL_DECIMALS),
+      [FeeOption.Fastest]: baseAmount((fee || 0) + createAccountTxFee, SOL_DECIMALS),
     }
   }
 
@@ -252,5 +300,14 @@ export class Client extends BaseXChainClient {
 
   prepareTx(): Promise<PreparedTx> {
     throw new Error('Method not implemented.')
+  }
+
+  private getPrivateKeyPair(index: number): Keypair {
+    if (!this.phrase) throw new Error('Phrase must be provided')
+
+    const seed = getSeed(this.phrase)
+    const hd = HDKey.fromMasterSeed(seed.toString('hex'))
+
+    return Keypair.fromSeed(hd.derive(this.getFullDerivationPath(index)).privateKey)
   }
 }
