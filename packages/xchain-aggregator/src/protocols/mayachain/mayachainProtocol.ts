@@ -10,6 +10,7 @@ import {
   isSynthAsset,
   isTradeAsset,
 } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
   IProtocol,
@@ -27,12 +28,14 @@ export class MayachainProtocol implements IProtocol {
   public readonly name = 'Mayachain'
   private mayachainQuery: MayachainQuery
   private mayachainAmm: MayachainAMM
-  private configuration: Omit<ProtocolConfig, 'wallet'> | undefined
+  private configuration: ProtocolConfig | undefined
+  private wallet?: Wallet
 
   constructor(configuration?: ProtocolConfig) {
     this.mayachainQuery = new MayachainQuery()
     this.mayachainAmm = new MayachainAMM(this.mayachainQuery, configuration?.wallet)
     this.configuration = configuration
+    this.wallet = configuration?.wallet
   }
   /**
    * Aprove tx for ERC-20
@@ -41,7 +44,9 @@ export class MayachainProtocol implements IProtocol {
    */
   async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
     const { asset, amount } = params
-    return await this.mayachainAmm.approveRouterToSpend({ asset, amount })
+    const txSubmitted = await this.mayachainAmm.approveRouterToSpend({ asset, amount })
+    await this.wallet?.awaitForTXConfirmed(asset.chain, txSubmitted.hash)
+    return txSubmitted
   }
 
   /**
