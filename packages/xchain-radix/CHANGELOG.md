@@ -1,5 +1,11 @@
 # @xchainjs/xchain-radix
 
+## 1.0.2
+
+### Patch Changes
+
+- 319ac1a: Release bug fix
+
 ## 1.0.1
 
 ### Patch Changes
