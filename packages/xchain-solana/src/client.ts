@@ -1,4 +1,4 @@
-import { fetchAllDigitalAsset, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
+import { fetchAllDigitalAsset, fetchDigitalAsset, mplTokenMetadata } from '@metaplex-foundation/mpl-token-metadata'
 import { PublicKey as UmiPubliKey, Umi, publicKey } from '@metaplex-foundation/umi'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { isAddress } from '@solana/addresses'
@@ -36,7 +36,9 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import {
   Address,
   TokenAsset,
+  assetAmount,
   assetFromStringEx,
+  assetToBase,
   baseAmount,
   eqAsset,
   getContractAddressFromAsset,
@@ -318,7 +320,7 @@ export class Client extends BaseXChainClient {
               asset: this.getAssetInfo().asset,
               to: accountKey.pubkey.toBase58(),
             })
-          } else {
+          } else if (preBalance > postBalance) {
             from.push({
               amount: baseAmount(preBalance - postBalance, this.getAssetInfo().decimal),
               asset: this.getAssetInfo().asset,
@@ -328,6 +330,46 @@ export class Client extends BaseXChainClient {
         }
       }
     })
+
+    // Tokens transfer
+    if (transaction.meta?.preTokenBalances && transaction.meta?.postTokenBalances) {
+      for (let i = 0; i < transaction.meta?.postTokenBalances.length; i++) {
+        const postBalance = transaction.meta.postTokenBalances[i]
+
+        const preBalance = transaction.meta.preTokenBalances.find(
+          (preTokenBalance) => preTokenBalance.accountIndex === postBalance.accountIndex,
+        )
+
+        const postBalanceAmount = postBalance.uiTokenAmount.uiAmount || 0
+        const preBalanceAmount = preBalance?.uiTokenAmount.uiAmount || 0
+
+        i < transaction.meta.preTokenBalances.length ? transaction.meta.preTokenBalances[i].uiTokenAmount.uiAmount : 0
+
+        if (preBalance !== null && postBalance !== null) {
+          const assetDecimals = transaction.meta.postTokenBalances[i].uiTokenAmount.decimals
+          const mintAddress = transaction.meta.postTokenBalances[i].mint
+          const owner = transaction.meta.postTokenBalances[i].owner
+
+          const tokenMetadata = await fetchDigitalAsset(this.umi, publicKey(mintAddress))
+
+          if (owner) {
+            if (postBalanceAmount > preBalanceAmount) {
+              to.push({
+                amount: assetToBase(assetAmount(postBalanceAmount - preBalanceAmount, assetDecimals)),
+                asset: assetFromStringEx(`SOL.${tokenMetadata.metadata.symbol.trim()}-${mintAddress}`) as TokenAsset,
+                to: owner,
+              })
+            } else if (preBalanceAmount > postBalanceAmount) {
+              from.push({
+                amount: assetToBase(assetAmount(preBalanceAmount - postBalanceAmount, assetDecimals)),
+                asset: assetFromStringEx(`SOL.${tokenMetadata.metadata.symbol.trim()}-${mintAddress}`) as TokenAsset,
+                from: owner,
+              })
+            }
+          }
+        }
+      }
+    }
 
     return {
       asset: this.getAssetInfo().asset,

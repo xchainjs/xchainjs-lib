@@ -168,4 +168,11 @@ describe('Solana client', () => {
     )
     printTx(tx)
   })
+
+  it('Should get token transaction data', async () => {
+    const tx = await client.getTransactionData(
+      '5gosCpsgg7tDx4d9yCYK4ngfRSPP2jbxe82fKGhUQPJPDjSKn93QjiqKUPWjF1LEbNaDL5RkkjGW7gV8M2PLBMoC',
+    )
+    printTx(tx)
+  })
 })
