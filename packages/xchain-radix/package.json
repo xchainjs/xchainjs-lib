@@ -34,7 +34,8 @@
     "fund": "ts-node src/utils.ts"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "directory": "release/package"
   },
   "dependencies": {
     "@radixdlt/babylon-gateway-api-sdk": "^1.4.1",
