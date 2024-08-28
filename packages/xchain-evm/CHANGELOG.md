@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- 0bf8f3e: Fix keystore approval for EVM
+
 ## 1.0.2
 
 ### Patch Changes

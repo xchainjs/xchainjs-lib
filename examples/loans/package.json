@@ -1,6 +1,6 @@
 {
   "name": "xchainjs-loans",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "private": true,
   "scripts": {
     "loanQuoteOpen": "npx ts-node loanQuoteOpen.ts",
