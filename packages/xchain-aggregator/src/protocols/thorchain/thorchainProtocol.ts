@@ -2,6 +2,7 @@ import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
   IProtocol,
@@ -17,22 +18,26 @@ export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
   private thorchainAmm: ThorchainAMM
-  private configuration: Omit<ProtocolConfig, 'wallet'> | undefined
+  private configuration: ProtocolConfig | undefined
+  private wallet?: Wallet
 
   constructor(configuration?: ProtocolConfig) {
     this.thorchainQuery = new ThorchainQuery()
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
+    this.wallet = configuration?.wallet
   }
 
   /**
-   * Aprove tx for ERC-20
+   * Aprove tx for ERC-20 and wait until tx is confirmed
    * @param {ApproveParams} approveParams params to approve tx
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
     const { asset, amount } = params
-    return await this.thorchainAmm.approveRouterToSpend({ asset, amount })
+    const txSubmitted = await this.thorchainAmm.approveRouterToSpend({ asset, amount })
+    await this.wallet?.awaitForTXConfirmed(asset.chain, txSubmitted.hash)
+    return txSubmitted
   }
 
   /**

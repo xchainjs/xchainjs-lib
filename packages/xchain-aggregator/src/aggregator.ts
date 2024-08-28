@@ -112,7 +112,6 @@ export class Aggregator {
         await protocol.approveRouterToSpend({ asset: params.fromAsset, amount: params.amount })
       }
     }
-    // TODO: Wait until tx is confirmed
     return protocol.doSwap(params)
   }
 
