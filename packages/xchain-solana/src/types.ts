@@ -5,6 +5,7 @@ import {
   TxFrom as BaseTxFrom,
   TxParams as BaseTxParams,
   TxTo as BaseTxTo,
+  TxsPage as BaseTxsPage,
   XChainClientParams,
 } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, TokenAsset } from '@xchainjs/xchain-util'
@@ -49,4 +50,8 @@ export type Tx = BaseTx & {
   asset: Asset | TokenAsset
   from: TxFrom[]
   to: TxTo[]
+}
+
+export type TxsPage = BaseTxsPage & {
+  txs: Tx[]
 }

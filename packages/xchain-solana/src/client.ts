@@ -14,6 +14,7 @@ import {
   ComputeBudgetProgram,
   Connection,
   Keypair,
+  ParsedTransactionWithMeta,
   PublicKey,
   SystemProgram,
   Transaction,
@@ -29,8 +30,8 @@ import {
   Fees,
   PreparedTx,
   TxHash,
+  TxHistoryParams,
   TxType,
-  TxsPage,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import {
@@ -47,7 +48,7 @@ import { HDKey } from 'micro-ed25519-hdkey'
 
 import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
 import { TokenAssetData } from './solana-types'
-import { Balance, SOLClientParams, Tx, TxFrom, TxParams, TxTo } from './types'
+import { Balance, SOLClientParams, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 import { getSolanaNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
@@ -305,13 +306,65 @@ export class Client extends BaseXChainClient {
     const transaction = await this.connection.getParsedTransaction(txId)
     if (!transaction) throw Error('Can not find transaction')
 
+    return this.parseTransaction(transaction)
+  }
+
+  public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const signatures = await this.connection.getSignaturesForAddress(
+      new PublicKey(params?.address || (await this.getAddressAsync())),
+    )
+
+    const transactions = await this.connection.getParsedTransactions(signatures.map(({ signature }) => signature))
+
+    const results = await Promise.allSettled(
+      transactions
+        .filter((transaction) => !!transaction)
+        .map((transaction) => this.parseTransaction(transaction as ParsedTransactionWithMeta)),
+    )
+
+    const txs: Tx[] = []
+
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        txs.push(result.value)
+      }
+    })
+
+    return {
+      txs,
+      total: txs.length,
+    }
+  }
+
+  transfer(): Promise<string> {
+    throw new Error('Method not implemented.')
+  }
+
+  broadcastTx(): Promise<TxHash> {
+    throw new Error('Method not implemented.')
+  }
+
+  prepareTx(): Promise<PreparedTx> {
+    throw new Error('Method not implemented.')
+  }
+
+  private getPrivateKeyPair(index: number): Keypair {
+    if (!this.phrase) throw new Error('Phrase must be provided')
+
+    const seed = getSeed(this.phrase)
+    const hd = HDKey.fromMasterSeed(seed.toString('hex'))
+
+    return Keypair.fromSeed(hd.derive(this.getFullDerivationPath(index)).privateKey)
+  }
+
+  private async parseTransaction(tx: ParsedTransactionWithMeta): Promise<Tx> {
     const from: TxFrom[] = []
     const to: TxTo[] = []
 
-    transaction.transaction.message.accountKeys.forEach((accountKey, index) => {
+    tx.transaction.message.accountKeys.forEach((accountKey, index) => {
       if (accountKey.writable) {
-        const preBalance = transaction.meta?.preBalances[index]
-        const postBalance = transaction.meta?.postBalances[index]
+        const preBalance = tx.meta?.preBalances[index]
+        const postBalance = tx.meta?.postBalances[index]
 
         if (preBalance !== undefined && postBalance !== undefined) {
           if (postBalance > preBalance) {
@@ -332,23 +385,21 @@ export class Client extends BaseXChainClient {
     })
 
     // Tokens transfer
-    if (transaction.meta?.preTokenBalances && transaction.meta?.postTokenBalances) {
-      for (let i = 0; i < transaction.meta?.postTokenBalances.length; i++) {
-        const postBalance = transaction.meta.postTokenBalances[i]
+    if (tx.meta?.preTokenBalances && tx.meta?.postTokenBalances) {
+      for (let i = 0; i < tx.meta?.postTokenBalances.length; i++) {
+        const postBalance = tx.meta.postTokenBalances[i]
 
-        const preBalance = transaction.meta.preTokenBalances.find(
+        const preBalance = tx.meta.preTokenBalances.find(
           (preTokenBalance) => preTokenBalance.accountIndex === postBalance.accountIndex,
         )
 
         const postBalanceAmount = postBalance.uiTokenAmount.uiAmount || 0
         const preBalanceAmount = preBalance?.uiTokenAmount.uiAmount || 0
 
-        i < transaction.meta.preTokenBalances.length ? transaction.meta.preTokenBalances[i].uiTokenAmount.uiAmount : 0
-
         if (preBalance !== null && postBalance !== null) {
-          const assetDecimals = transaction.meta.postTokenBalances[i].uiTokenAmount.decimals
-          const mintAddress = transaction.meta.postTokenBalances[i].mint
-          const owner = transaction.meta.postTokenBalances[i].owner
+          const assetDecimals = tx.meta.postTokenBalances[i].uiTokenAmount.decimals
+          const mintAddress = tx.meta.postTokenBalances[i].mint
+          const owner = tx.meta.postTokenBalances[i].owner
 
           const tokenMetadata = await fetchDigitalAsset(this.umi, publicKey(mintAddress))
 
@@ -373,36 +424,11 @@ export class Client extends BaseXChainClient {
 
     return {
       asset: this.getAssetInfo().asset,
-      date: new Date((transaction.blockTime || 0) * 1000),
+      date: new Date((tx.blockTime || 0) * 1000),
       type: TxType.Transfer,
-      hash: transaction.transaction.signatures[0],
+      hash: tx.transaction.signatures[0],
       from,
       to,
     }
-  }
-
-  public async getTransactions(): Promise<TxsPage> {
-    throw new Error('Method not implemented.')
-  }
-
-  transfer(): Promise<string> {
-    throw new Error('Method not implemented.')
-  }
-
-  broadcastTx(): Promise<TxHash> {
-    throw new Error('Method not implemented.')
-  }
-
-  prepareTx(): Promise<PreparedTx> {
-    throw new Error('Method not implemented.')
-  }
-
-  private getPrivateKeyPair(index: number): Keypair {
-    if (!this.phrase) throw new Error('Phrase must be provided')
-
-    const seed = getSeed(this.phrase)
-    const hd = HDKey.fromMasterSeed(seed.toString('hex'))
-
-    return Keypair.fromSeed(hd.derive(this.getFullDerivationPath(index)).privateKey)
   }
 }

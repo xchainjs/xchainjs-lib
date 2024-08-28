@@ -175,4 +175,9 @@ describe('Solana client', () => {
     )
     printTx(tx)
   })
+
+  it('Should get transaction history', async () => {
+    const { txs } = await client.getTransactions({ address: await client.getAddressAsync() })
+    txs.forEach((tx: Tx) => printTx(tx))
+  })
 })
