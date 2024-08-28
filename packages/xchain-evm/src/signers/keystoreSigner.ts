@@ -138,6 +138,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
       nonce: tx.nonce ? ethers.BigNumber.from(tx.nonce).toNumber() : undefined,
       gasPrice: tx.gasPrice,
       gasLimit: tx.gasLimit,
+      chainId: tx.chainId,
     })
   }
 }
