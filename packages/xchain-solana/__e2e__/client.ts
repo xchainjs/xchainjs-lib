@@ -8,7 +8,30 @@ import {
   baseToAsset,
 } from '@xchainjs/xchain-util'
 
-import { Client, defaultSolanaParams } from '../src'
+import { Client, Tx, defaultSolanaParams } from '../src'
+
+const printTx = (tx: Tx) => {
+  console.log({
+    type: tx.type,
+    hash: tx.hash,
+    date: tx.date.toDateString(),
+    asset: assetToString(tx.asset),
+    from: tx.from.map((i) => {
+      return {
+        from: i.from,
+        asset: i.asset ? assetToString(i.asset) : 'Unknown',
+        amount: baseToAsset(i.amount).amount().toString(),
+      }
+    }),
+    to: tx.to.map((o) => {
+      return {
+        from: o.to,
+        asset: o.asset ? assetToString(o.asset) : 'Unknown',
+        amount: baseToAsset(o.amount).amount().toString(),
+      }
+    }),
+  })
+}
 
 describe('Solana client', () => {
   let client: Client
@@ -137,5 +160,12 @@ describe('Solana client', () => {
       fast: fees.fast.amount().toString(),
       fastest: fees.fastest.amount().toString(),
     })
+  })
+
+  it('Should get native transaction data', async () => {
+    const tx = await client.getTransactionData(
+      '34JB9k8JKBvuV4WeePbGNfz8i935d9dSiZGG9zTXx1gVE3fbh8YesQxpUEMXKiTFM4bJtwN48DuNKHBsB51j3ukC',
+    )
+    printTx(tx)
   })
 })

@@ -28,8 +28,8 @@ import {
   FeeType,
   Fees,
   PreparedTx,
-  Tx,
   TxHash,
+  TxType,
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
@@ -45,7 +45,7 @@ import { HDKey } from 'micro-ed25519-hdkey'
 
 import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
 import { TokenAssetData } from './solana-types'
-import { Balance, SOLClientParams, TxParams } from './types'
+import { Balance, SOLClientParams, Tx, TxFrom, TxParams, TxTo } from './types'
 import { getSolanaNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
@@ -293,11 +293,53 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  getTransactions(): Promise<TxsPage> {
-    throw new Error('Method not implemented.')
+  /**
+   * Get the transaction details of a given transaction ID.
+   *
+   * @param {string} txId The transaction ID.
+   * @returns {Tx} The transaction details.
+   */
+  public async getTransactionData(txId: string): Promise<Tx> {
+    const transaction = await this.connection.getParsedTransaction(txId)
+    if (!transaction) throw Error('Can not find transaction')
+
+    const from: TxFrom[] = []
+    const to: TxTo[] = []
+
+    transaction.transaction.message.accountKeys.forEach((accountKey, index) => {
+      if (accountKey.writable) {
+        const preBalance = transaction.meta?.preBalances[index]
+        const postBalance = transaction.meta?.postBalances[index]
+
+        if (preBalance !== undefined && postBalance !== undefined) {
+          if (postBalance > preBalance) {
+            to.push({
+              amount: baseAmount(postBalance - preBalance, this.getAssetInfo().decimal),
+              asset: this.getAssetInfo().asset,
+              to: accountKey.pubkey.toBase58(),
+            })
+          } else {
+            from.push({
+              amount: baseAmount(preBalance - postBalance, this.getAssetInfo().decimal),
+              asset: this.getAssetInfo().asset,
+              from: accountKey.pubkey.toBase58(),
+            })
+          }
+        }
+      }
+    })
+
+    return {
+      asset: this.getAssetInfo().asset,
+      date: new Date((transaction.blockTime || 0) * 1000),
+      type: TxType.Transfer,
+      hash: transaction.transaction.signatures[0],
+      from,
+      to,
+    }
   }
 
-  getTransactionData(): Promise<Tx> {
+  public async getTransactions(): Promise<TxsPage> {
     throw new Error('Method not implemented.')
   }
 
