@@ -52,7 +52,7 @@ import {
 
 export interface EVMClient {
   approve(params: ApproveParams): Promise<string>
-  awaitForTXConfirmed(hash: string): Promise<void>
+  awaitTxConfirmed(hash: string): Promise<void>
 }
 
 /**
@@ -454,7 +454,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    * Wait until tx is confirmed
    * @param {string} hash - tx's hash
    */
-  public async awaitForTXConfirmed(hash: string): Promise<void> {
+  public async awaitTxConfirmed(hash: string): Promise<void> {
     await this.getProvider().waitForTransaction(hash)
   }
 

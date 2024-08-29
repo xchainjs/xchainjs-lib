@@ -36,7 +36,7 @@ export class ThorchainProtocol implements IProtocol {
   async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
     const { asset, amount } = params
     const txSubmitted = await this.thorchainAmm.approveRouterToSpend({ asset, amount })
-    await this.wallet?.awaitForTXConfirmed(asset.chain, txSubmitted.hash)
+    await this.wallet?.awaitTxConfirmed(asset.chain, txSubmitted.hash)
     return txSubmitted
   }
 

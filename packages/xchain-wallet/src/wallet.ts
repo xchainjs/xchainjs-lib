@@ -63,10 +63,10 @@ export class Wallet {
    * @param {Chain} chain - Chain for the tx
    * @param {string} hash - tx's hash
    */
-  public async awaitForTXConfirmed(chain: Chain, hash: string): Promise<void> {
+  public async awaitTxConfirmed(chain: Chain, hash: string): Promise<void> {
     const client = this.getClient(chain)
     if (!this.isEvmClient(client)) throw Error('Can not make approve over non EVM client')
-    await client.awaitForTXConfirmed(hash)
+    await client.awaitTxConfirmed(hash)
   }
 
   /**

@@ -45,7 +45,7 @@ export class MayachainProtocol implements IProtocol {
   async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
     const { asset, amount } = params
     const txSubmitted = await this.mayachainAmm.approveRouterToSpend({ asset, amount })
-    await this.wallet?.awaitForTXConfirmed(asset.chain, txSubmitted.hash)
+    await this.wallet?.awaitTxConfirmed(asset.chain, txSubmitted.hash)
     return txSubmitted
   }
 
