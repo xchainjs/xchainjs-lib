@@ -16,6 +16,7 @@ import {
   Keypair,
   ParsedTransactionWithMeta,
   PublicKey,
+  SendTransactionError,
   SystemProgram,
   Transaction,
   TransactionInstruction,
@@ -44,6 +45,7 @@ import {
   eqAsset,
   getContractAddressFromAsset,
 } from '@xchainjs/xchain-util'
+import bs58 from 'bs58'
 import { HDKey } from 'micro-ed25519-hdkey'
 
 import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
@@ -336,16 +338,119 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  transfer(): Promise<string> {
-    throw new Error('Method not implemented.')
+  /**
+   * Transfers SOL or Solana token
+   *
+   * @param {TxParams} params The transfer options.
+   * @returns {TxHash} The transaction hash.
+   */
+  public async transfer({
+    walletIndex,
+    recipient,
+    asset,
+    amount,
+    memo,
+    limit,
+    priorityFee,
+  }: TxParams): Promise<string> {
+    const senderKeyPair = this.getPrivateKeyPair(walletIndex || 0)
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender: senderKeyPair.publicKey.toBase58(),
+      recipient,
+      asset,
+      amount,
+      memo,
+      limit,
+      priorityFee,
+    })
+
+    const transaction = Transaction.from(bs58.decode(rawUnsignedTx))
+
+    transaction.sign(senderKeyPair)
+
+    return this.broadcastTx(bs58.encode(transaction.serialize()))
   }
 
-  broadcastTx(): Promise<TxHash> {
-    throw new Error('Method not implemented.')
+  /**
+   * Broadcast a transaction to the network
+   * @param {string} txHex Raw transaction to broadcast
+   * @returns {TxHash} The hash of the transaction broadcasted
+   */
+  public async broadcastTx(txHex: string): Promise<TxHash> {
+    try {
+      const transaction = Transaction.from(bs58.decode(txHex))
+      return await this.connection.sendRawTransaction(transaction.serialize())
+    } catch (e: unknown) {
+      if (e instanceof SendTransactionError) {
+        console.log(await e.getLogs(this.connection))
+      }
+      throw Error('Can not broadcast transaction. Unknown error')
+    }
   }
 
-  prepareTx(): Promise<PreparedTx> {
-    throw new Error('Method not implemented.')
+  /**
+   * Prepares a transaction for transfer.
+   *
+   * @param {TxParams&Address} params - The transfer options.
+   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
+   */
+  public async prepareTx({
+    sender,
+    recipient,
+    asset,
+    amount,
+    memo,
+    limit,
+    priorityFee,
+  }: TxParams & { sender: Address }): Promise<PreparedTx> {
+    const transaction = new Transaction()
+
+    const fromPubkey = new PublicKey(sender)
+    const toPubkey = new PublicKey(recipient)
+
+    transaction.recentBlockhash = await this.connection.getLatestBlockhash().then((block) => block.blockhash)
+    transaction.feePayer = new PublicKey(sender)
+
+    if (!asset || eqAsset(asset, this.getAssetInfo().asset)) {
+      // Native transfer
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey,
+          toPubkey,
+          lamports: amount.amount().toNumber(),
+        }),
+      )
+    } else {
+      // Token transfer
+    }
+
+    if (memo) {
+      transaction.add(
+        new TransactionInstruction({
+          keys: [{ pubkey: fromPubkey, isSigner: true, isWritable: true }],
+          data: Buffer.from(memo, 'utf-8'),
+          programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+        }),
+      )
+    }
+
+    if (priorityFee) {
+      transaction.add(
+        ComputeBudgetProgram.setComputeUnitPrice({
+          microLamports: priorityFee.amount().toNumber() / 10 ** 3,
+        }),
+      )
+    }
+
+    if (limit) {
+      transaction.add(
+        ComputeBudgetProgram.setComputeUnitLimit({
+          units: limit,
+        }),
+      )
+    }
+
+    return { rawUnsignedTx: bs58.encode(transaction.serialize({ verifySignatures: false })) }
   }
 
   private getPrivateKeyPair(index: number): Keypair {

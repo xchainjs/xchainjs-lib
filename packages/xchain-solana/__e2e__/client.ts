@@ -180,4 +180,23 @@ describe('Solana client', () => {
     const { txs } = await client.getTransactions({ address: await client.getAddressAsync() })
     txs.forEach((tx: Tx) => printTx(tx))
   })
+
+  it('Should prepare native transaction', async () => {
+    const { rawUnsignedTx } = await client.prepareTx({
+      sender: await client.getAddressAsync(0),
+      recipient: await client.getAddressAsync(1),
+      amount: assetToBase(assetAmount(0.005, 9)),
+    })
+
+    console.log(rawUnsignedTx)
+  })
+
+  it('Should send native transaction', async () => {
+    const hash = await client.transfer({
+      recipient: await client.getAddressAsync(1),
+      amount: assetToBase(assetAmount(0.005, 9)),
+    })
+
+    console.log(hash)
+  })
 })

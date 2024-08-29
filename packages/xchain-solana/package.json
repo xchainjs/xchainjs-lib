@@ -41,6 +41,7 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
+    "bs58": "6.0.0",
     "micro-ed25519-hdkey": "0.1.2"
   },
   "publishConfig": {
