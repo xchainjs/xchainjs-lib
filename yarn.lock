@@ -4714,7 +4714,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-solana@workspace:packages/xchain-solana":
+"@xchainjs/xchain-solana@workspace:*, @xchainjs/xchain-solana@workspace:packages/xchain-solana":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-solana@workspace:packages/xchain-solana"
   dependencies:
@@ -13809,6 +13809,18 @@ __metadata:
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
+"xchainjs-solana@workspace:examples/solana":
+  version: 0.0.0-use.local
+  resolution: "xchainjs-solana@workspace:examples/solana"
+  dependencies:
+    "@types/node": "npm:20.11.28"
+    "@xchainjs/xchain-solana": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"
