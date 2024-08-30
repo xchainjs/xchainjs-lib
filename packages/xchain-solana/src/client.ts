@@ -175,9 +175,11 @@ export class Client extends BaseXChainClient {
       ? tokenBalances.value
       : tokenBalances.value.filter((tokenBalance) => {
           const tokenData = tokenBalance.account.data.parsed as TokenAssetData
-          assets.findIndex((asset) => {
-            return asset.symbol.toLowerCase().includes(tokenData.info.mint.toLowerCase())
-          }) !== -1
+          return (
+            assets.findIndex((asset) => {
+              return asset.symbol.toLowerCase().includes(tokenData.info.mint.toLowerCase())
+            }) !== -1
+          )
         })
 
     const mintPublicKeys: UmiPubliKey[] = tokensToRequest.map((tokenBalance) => {
