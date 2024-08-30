@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.0.4
+
+### Patch Changes
+
+- b07b69a: ERC-20 check for `isRouterApprovedToSpend`
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-wallet@1.0.4
+  - @xchainjs/xchain-arbitrum@1.0.4
+  - @xchainjs/xchain-ethereum@1.0.4
+  - @xchainjs/xchain-bitcoin@1.0.2
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-dash@1.0.2
+  - @xchainjs/xchain-kujira@1.0.2
+  - @xchainjs/xchain-mayachain@2.0.2
+  - @xchainjs/xchain-mayachain-query@1.0.2
+  - @xchainjs/xchain-thorchain@2.0.2
+
 ## 3.0.3
 
 ### Patch Changes

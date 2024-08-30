@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- b07b69a: Add function `awaitTxConfirmed` which waits until the approval is confirmed
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-evm-providers@1.0.2
+
 ## 1.0.3
 
 ### Patch Changes

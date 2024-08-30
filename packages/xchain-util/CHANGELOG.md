@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- b07b69a: New `isTokenAssetFunction`
+
 ## 1.0.0
 
 ### Major Changes
