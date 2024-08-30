@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- b07b69a: Support auto-approval for ERC-20 tokens
+- Updated dependencies [b07b69a]
+- Updated dependencies [b07b69a]
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-wallet@1.0.4
+  - @xchainjs/xchain-mayachain-amm@3.0.4
+  - @xchainjs/xchain-thorchain-amm@2.0.4
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-mayachain@2.0.2
+  - @xchainjs/xchain-mayachain-query@1.0.2
+  - @xchainjs/xchain-thorchain@2.0.2
+  - @xchainjs/xchain-thorchain-query@1.0.2
+
 ## 1.0.3
 
 ### Patch Changes
