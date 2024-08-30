@@ -3,12 +3,14 @@ import { PublicKey as UmiPubliKey, Umi, publicKey } from '@metaplex-foundation/u
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 import { isAddress } from '@solana/addresses'
 import {
+  Account,
   TOKEN_PROGRAM_ID,
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError,
   createTransferInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
+  getOrCreateAssociatedTokenAccount,
 } from '@solana/spl-token'
 import {
   ComputeBudgetProgram,
@@ -354,6 +356,13 @@ export class Client extends BaseXChainClient {
     priorityFee,
   }: TxParams): Promise<string> {
     const senderKeyPair = this.getPrivateKeyPair(walletIndex || 0)
+
+    if (asset && !eqAsset(asset, this.getAssetInfo().asset)) {
+      // Check if receipt token account is created, otherwise, create it
+      const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
+      await getOrCreateAssociatedTokenAccount(this.connection, senderKeyPair, mintAddress, new PublicKey(recipient))
+    }
+
     const { rawUnsignedTx } = await this.prepareTx({
       sender: senderKeyPair.publicKey.toBase58(),
       recipient,
@@ -422,6 +431,38 @@ export class Client extends BaseXChainClient {
       )
     } else {
       // Token transfer
+      const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
+
+      const fromAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, fromPubkey)
+      let fromTokenAccount: Account
+      try {
+        fromTokenAccount = await getAccount(this.connection, fromAssociatedAccount)
+      } catch (error) {
+        if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+          throw Error('Can not find sender Token account')
+        }
+        throw error
+      }
+
+      const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey)
+      let toTokenAccount: Account
+      try {
+        toTokenAccount = await getAccount(this.connection, toAssociatedAccount)
+      } catch (error) {
+        if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+          throw Error('Can not find recipient Token account. Create it first')
+        }
+        throw error
+      }
+
+      transaction.add(
+        createTransferInstruction(
+          fromTokenAccount.address,
+          toTokenAccount.address,
+          fromPubkey,
+          amount.amount().toNumber(),
+        ),
+      )
     }
 
     if (memo) {

@@ -53,6 +53,11 @@ describe('Solana client', () => {
     console.log(address)
   })
 
+  it('Should get address with index 2', async () => {
+    const address = await client.getAddressAsync(2)
+    console.log(address)
+  })
+
   it('Should get all address balances', async () => {
     const balances = await client.getBalance(await client.getAddressAsync())
 
@@ -195,6 +200,48 @@ describe('Solana client', () => {
     const hash = await client.transfer({
       recipient: await client.getAddressAsync(1),
       amount: assetToBase(assetAmount(0.005, 9)),
+    })
+
+    console.log(hash)
+  })
+
+  it('Should prepare token transaction', async () => {
+    const { rawUnsignedTx } = await client.prepareTx({
+      sender: await client.getAddressAsync(0),
+      recipient: await client.getAddressAsync(0),
+      amount: assetToBase(assetAmount(1, 6)),
+      asset: assetFromStringEx('SOL.USDT-Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB') as TokenAsset,
+    })
+
+    console.log(rawUnsignedTx)
+  })
+
+  it('Should not prepare token transaction', async () => {
+    const { rawUnsignedTx } = await client.prepareTx({
+      sender: await client.getAddressAsync(0),
+      recipient: await client.getAddressAsync(2), // Or address with token account created
+      amount: assetToBase(assetAmount(1, 6)),
+      asset: assetFromStringEx('SOL.USDT-Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB') as TokenAsset,
+    })
+
+    console.log(rawUnsignedTx)
+  })
+
+  it('Should do token transaction with no Token account creation transfer', async () => {
+    const hash = await client.transfer({
+      recipient: await client.getAddressAsync(1),
+      amount: assetToBase(assetAmount(1, 6)),
+      asset: assetFromStringEx('SOL.USDT-Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB') as TokenAsset,
+    })
+
+    console.log(hash)
+  })
+
+  it('Should do token transaction with Token account creation transfer', async () => {
+    const hash = await client.transfer({
+      recipient: await client.getAddressAsync(2),
+      amount: assetToBase(assetAmount(1, 6)),
+      asset: assetFromStringEx('SOL.USDT-Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB') as TokenAsset,
     })
 
     console.log(hash)
