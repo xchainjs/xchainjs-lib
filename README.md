@@ -116,6 +116,7 @@ Blockchain clients with whom you can prepare, make and broadcast transactions, e
 | [@xchainjs/xchain-bsc](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bsc) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-bsc)](https://www.npmjs.com/package/@xchainjs/xchain-bsc) |
 | [@xchainjs/xchain-kujira](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-kujira) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-kujira)](https://www.npmjs.com/package/@xchainjs/xchain-kujira) |
 | [@xchainjs/xchain-cosmos](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cosmos)](https://www.npmjs.com/package/@xchainjs/xchain-cosmos) |
+| [@xchainjs/xchain-solana](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-solana) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-solana)](https://www.npmjs.com/package/@xchainjs/xchain-solana) |
 | [@xchainjs/xchain-binance](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-binance)](https://www.npmjs.com/package/@xchainjs/xchain-binance) |
 
 
