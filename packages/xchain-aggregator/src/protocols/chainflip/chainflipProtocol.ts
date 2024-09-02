@@ -37,6 +37,12 @@ export class ChainflipProtocol implements IProtocol {
       return this.sdk.getAssets()
     }, 24 * 60 * 60 * 1000)
   }
+  approveRouterToSpend(_params: { asset: TokenAsset; amount?: CryptoAmount }): Promise<TxSubmitted> {
+    throw new Error('Method not implemented.')
+  }
+  shouldBeApproved(_params: { asset: TokenAsset; amount: CryptoAmount; address: string }): Promise<boolean> {
+    throw new Error('Method not implemented.')
+  }
 
   /**
    * Check if an asset is supported in the protocol

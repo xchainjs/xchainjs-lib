@@ -8,4 +8,6 @@ export {
   SwapHistoryParams,
   SwapResume,
   Config,
+  ApproveParams,
+  IsApprovedParams,
 } from './types'

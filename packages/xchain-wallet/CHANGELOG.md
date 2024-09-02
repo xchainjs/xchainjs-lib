@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- b07b69a: Add function `awaitTxConfirmed` which waits until the approval is confirmed
+- Updated dependencies [b07b69a]
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-evm@1.0.4
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-mayachain@2.0.2
+  - @xchainjs/xchain-thorchain@2.0.2
+  - @xchainjs/xchain-utxo@1.0.2
+
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [0bf8f3e]
+  - @xchainjs/xchain-evm@1.0.3
+
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [4d96d34]
+  - @xchainjs/xchain-evm@1.0.2
+
+## 1.0.1
+
+### Patch Changes
+
+- be1c45f: Add CosmosTxParams to estimateTransferFees
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-mayachain@2.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-evm@1.0.1
+  - @xchainjs/xchain-utxo@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

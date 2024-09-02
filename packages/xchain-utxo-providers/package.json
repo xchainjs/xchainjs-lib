@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-utxo-providers",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -31,7 +31,7 @@
     "@supercharge/promise-pool": "2.4.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.3.6"
+    "axios": "1.7.4"
   },
   "devDependencies": {
     "axios-mock-adapter": "1.20.0"

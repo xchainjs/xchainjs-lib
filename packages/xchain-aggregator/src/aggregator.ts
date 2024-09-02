@@ -1,4 +1,4 @@
-import { assetToString } from '@xchainjs/xchain-util'
+import { assetToString, isTokenAsset } from '@xchainjs/xchain-util'
 
 import { DEFAULT_CONFIG } from './const'
 import { ProtocolFactory } from './protocols'
@@ -90,13 +90,28 @@ export class Aggregator {
    * Do swap
    * @param {QuoteSwapParams & { protocol?: Protocol }} params Swap parameters. If protocol is not set,
    * estimateSwap will be call and swap will be done in protocol with the greatest expected amount
+   * Approve the tx if needed
    * @returns the swap with the greatest expected amount estimated in the supported protocols
    */
   public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
     const protocolName = params.protocol ? params.protocol : (await this.estimateSwap(params)).protocol
     const protocol = this.protocols.find((protocol) => protocol.name === protocolName)
 
-    if (!protocol) throw Error(`${protocolName} protocol is not supported`)
+    if (!protocol) {
+      throw Error(`${protocolName} protocol is not supported`)
+    }
+
+    if (isTokenAsset(params.fromAsset)) {
+      if (
+        await protocol.shouldBeApproved({
+          asset: params.fromAsset,
+          amount: params.amount,
+          address: params.fromAddress || '',
+        })
+      ) {
+        await protocol.approveRouterToSpend({ asset: params.fromAsset, amount: params.amount })
+      }
+    }
     return protocol.doSwap(params)
   }
 

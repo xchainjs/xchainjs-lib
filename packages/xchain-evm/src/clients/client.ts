@@ -52,6 +52,7 @@ import {
 
 export interface EVMClient {
   approve(params: ApproveParams): Promise<string>
+  awaitTxConfirmed(hash: string): Promise<void>
 }
 
 /**
@@ -450,6 +451,14 @@ export class Client extends BaseXChainClient implements EVMClient {
   }
 
   /**
+   * Wait until tx is confirmed
+   * @param {string} hash - tx's hash
+   */
+  public async awaitTxConfirmed(hash: string): Promise<void> {
+    await this.getProvider().waitForTransaction(hash)
+  }
+
+  /**
    * Get transaction fees.
    *
    * @param {TxParams} params - The transaction parameters.
@@ -657,7 +666,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @returns {TxHash} The transaction hash.
    */
   public async transfer({
-    walletIndex,
+    walletIndex = 0,
     asset = this.getAssetInfo().asset,
     memo,
     amount,
@@ -737,7 +746,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     const tx = await ethers.utils.resolveProperties(transactionRequest)
 
     const signedTx = await this.getSigner().signTransfer({
-      sender,
+      walletIndex,
       tx: {
         type: feeData.gasPrice ? 1 : 2, // Type 2 for EIP-1559
         chainId: tx.chainId,
@@ -802,7 +811,7 @@ export class Client extends BaseXChainClient implements EVMClient {
 
     const tx = await ethers.utils.resolveProperties(transactionRequest)
     const signedTx = await this.getSigner().signApprove({
-      sender,
+      walletIndex,
       tx: {
         type: 1,
         chainId: tx.chainId,

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -43,7 +43,7 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.3.6",
+    "axios": "1.7.4",
     "bech32": "^1.1.3",
     "bignumber.js": "9.0.0",
     "bip32": "^2.0.6",

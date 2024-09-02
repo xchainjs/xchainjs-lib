@@ -4298,7 +4298,7 @@ __metadata:
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
   languageName: unknown
   linkType: soft
@@ -4337,7 +4337,7 @@ __metadata:
     "@types/big.js": "npm:^6.1.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     big.js: "npm:6.2.1"
     nock: "npm:13.0.5"
   languageName: unknown
@@ -4354,7 +4354,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     bitcoinjs-lib: "npm:5.2.0"
     coininfo: "npm:5.1.0"
@@ -4375,7 +4375,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     bchaddrjs: "npm:0.5.2"
     coinselect: "npm:3.1.12"
@@ -4401,7 +4401,7 @@ __metadata:
   dependencies:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
   languageName: unknown
   linkType: soft
 
@@ -4439,7 +4439,7 @@ __metadata:
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     bech32: "npm:^1.1.3"
     bignumber.js: "npm:9.0.0"
     bip32: "npm:^2.0.6"
@@ -4481,7 +4481,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     bitcoinjs-lib: "npm:5.2.0"
     coininfo: "npm:5.1.0"
@@ -4500,7 +4500,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     bitcoinjs-lib: "npm:5.2.0"
     coininfo: "npm:5.1.0"
@@ -4528,7 +4528,7 @@ __metadata:
     "@supercharge/promise-pool": "npm:2.4.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     ethers: "npm:5.7.2"
   languageName: unknown
   linkType: soft
@@ -4543,7 +4543,7 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     ethers: "npm:5.7.2"
     nock: "npm:13.0.5"
   languageName: unknown
@@ -4575,7 +4575,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     bitcoinjs-lib: "npm:5.2.0"
     coininfo: "npm:5.1.0"
@@ -4598,7 +4598,7 @@ __metadata:
     "@xchainjs/xchain-mayachain-query": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     ethers: "npm:5.7.2"
   languageName: unknown
@@ -4613,7 +4613,7 @@ __metadata:
     "@xchainjs/xchain-mayamidgard-query": "workspace:*"
     "@xchainjs/xchain-mayanode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     axios-retry: "npm:3.2.5"
     bignumber.js: "npm:9.0.0"
@@ -4631,7 +4631,7 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     bech32: "npm:^1.1.3"
     bignumber.js: "npm:9.0.0"
     bip32: "npm:^2.0.6"
@@ -4648,7 +4648,7 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-mayamidgard": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     axios-retry: "npm:3.2.5"
   languageName: unknown
@@ -4659,7 +4659,7 @@ __metadata:
   resolution: "@xchainjs/xchain-mayamidgard@workspace:packages/xchain-mayamidgard"
   dependencies:
     "@openapitools/openapi-generator-cli": "npm:2.6.0"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     rimraf: "npm:5.0.0"
   languageName: unknown
   linkType: soft
@@ -4669,7 +4669,7 @@ __metadata:
   resolution: "@xchainjs/xchain-mayanode@workspace:packages/xchain-mayanode"
   dependencies:
     "@openapitools/openapi-generator-cli": "npm:2.6.0"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     rimraf: "npm:5.0.0"
   languageName: unknown
   linkType: soft
@@ -4681,7 +4681,7 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-midgard": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     axios-retry: "npm:3.2.5"
     dotenv: "npm:16.0.0"
@@ -4693,7 +4693,7 @@ __metadata:
   resolution: "@xchainjs/xchain-midgard@workspace:packages/xchain-midgard"
   dependencies:
     "@openapitools/openapi-generator-cli": "npm:2.6.0"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     rimraf: "npm:5.0.0"
   languageName: unknown
   linkType: soft
@@ -4752,7 +4752,7 @@ __metadata:
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     ethers: "npm:5.7.2"
   languageName: unknown
@@ -4766,7 +4766,7 @@ __metadata:
     "@xchainjs/xchain-midgard-query": "workspace:*"
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
     axios-retry: "npm:3.2.5"
     bignumber.js: "npm:9.0.0"
@@ -4786,7 +4786,7 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     bech32: "npm:^1.1.3"
     bignumber.js: "npm:9.0.0"
     bip32: "npm:^2.0.6"
@@ -4801,7 +4801,7 @@ __metadata:
   resolution: "@xchainjs/xchain-thornode@workspace:packages/xchain-thornode"
   dependencies:
     "@openapitools/openapi-generator-cli": "npm:2.6.0"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     rimraf: "npm:5.0.0"
   languageName: unknown
   linkType: soft
@@ -4821,7 +4821,7 @@ __metadata:
     "@supercharge/promise-pool": "npm:2.4.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.3.6"
+    axios: "npm:1.7.4"
     axios-mock-adapter: "npm:1.20.0"
   languageName: unknown
   linkType: soft
@@ -5233,14 +5233,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.3.6, axios@npm:^1.3.6":
-  version: 1.3.6
-  resolution: "axios@npm:1.3.6"
+"axios@npm:1.7.4":
+  version: 1.7.4
+  resolution: "axios@npm:1.7.4"
   dependencies:
-    follow-redirects: "npm:^1.15.0"
+    follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/451d7ec576a74b2846978e193458466f17ab676f1976630290e717e96aff84c90f755612d268731f722d363e45993e1844ef4fe8cdd022fe5663fc8f6267a7e3
+  checksum: 10c0/5ea1a93140ca1d49db25ef8e1bd8cfc59da6f9220159a944168860ad15a2743ea21c5df2967795acb15cbe81362f5b157fdebbea39d53117ca27658bab9f7f17
   languageName: node
   linkType: hard
 
@@ -7760,16 +7760,6 @@ __metadata:
     debug:
       optional: true
   checksum: 10c0/9ff767f0d7be6aa6870c82ac79cf0368cd73e01bbc00e9eb1c2a16fbb198ec105e3c9b6628bb98e9f3ac66fe29a957b9645bcb9a490bb7aa0d35f908b6b85071
-  languageName: node
-  linkType: hard
-
-"follow-redirects@npm:^1.15.0":
-  version: 1.15.2
-  resolution: "follow-redirects@npm:1.15.2"
-  peerDependenciesMeta:
-    debug:
-      optional: true
-  checksum: 10c0/da5932b70e63944d38eecaa16954bac4347036f08303c913d166eda74809d8797d38386e3a0eb1d2fe37d2aaff2764cce8e9dbd99459d860cf2cdfa237923b5f
   languageName: node
   linkType: hard
 
@@ -13639,7 +13629,7 @@ __metadata:
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:^1.3.6"
+    axios: "npm:1.7.4"
     axios-retry: "npm:^3.2.5"
     bignumber.js: "npm:9.0.1"
     rimraf: "npm:~3.0.2"
@@ -13681,7 +13671,7 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    axios: "npm:^1.3.6"
+    axios: "npm:1.7.4"
     axios-retry: "npm:^3.3.1"
     bchaddrjs: "npm:^0.5.2"
     bech32-buffer: "npm:^0.2.0"
@@ -13705,7 +13695,7 @@ __metadata:
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:^1.3.6"
+    axios: "npm:1.7.4"
     axios-retry: "npm:^3.2.5"
     bignumber.js: "npm:9.0.1"
     rimraf: "npm:~3.0.2"
@@ -13728,7 +13718,7 @@ __metadata:
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:^1.3.6"
+    axios: "npm:1.7.4"
     axios-retry: "npm:^3.2.5"
     bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
@@ -13757,7 +13747,7 @@ __metadata:
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios: "npm:^1.3.6"
+    axios: "npm:1.7.4"
     axios-retry: "npm:^3.2.5"
     bchaddrjs: "npm:^0.5.2"
     bech32: "npm:^2.0.0"
@@ -13827,6 +13817,34 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"xchainjs-thorchain-amm@workspace:examples/thorchain-amm":
+  version: 0.0.0-use.local
+  resolution: "xchainjs-thorchain-amm@workspace:examples/thorchain-amm"
+  dependencies:
+    "@types/node": "npm:20.11.28"
+    "@xchainjs/xchain-avax": "workspace:*"
+    "@xchainjs/xchain-bitcoin": "workspace:*"
+    "@xchainjs/xchain-bitcoincash": "workspace:*"
+    "@xchainjs/xchain-bsc": "workspace:*"
+    "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-cosmos": "workspace:*"
+    "@xchainjs/xchain-cosmos-sdk": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
+    "@xchainjs/xchain-dash": "workspace:*"
+    "@xchainjs/xchain-doge": "workspace:*"
+    "@xchainjs/xchain-ethereum": "workspace:*"
+    "@xchainjs/xchain-litecoin": "workspace:*"
+    "@xchainjs/xchain-thorchain": "workspace:*"
+    "@xchainjs/xchain-thorchain-amm": "workspace:*"
+    "@xchainjs/xchain-thorchain-query": "workspace:*"
+    "@xchainjs/xchain-thornode": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    "@xchainjs/xchain-wallet": "workspace:*"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
 "xchainjs-wallet@workspace:examples/wallet":
   version: 0.0.0-use.local
   resolution: "xchainjs-wallet@workspace:examples/wallet"
@@ -13848,7 +13866,7 @@ __metadata:
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    axios: "npm:^1.3.6"
+    axios: "npm:1.7.4"
     axios-retry: "npm:^3.3.1"
     bech32-buffer: "npm:^0.2.0"
     bitcoinjs-lib: "npm:5.2.0"

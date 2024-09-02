@@ -59,6 +59,17 @@ export class Wallet {
   }
 
   /**
+   *
+   * @param {Chain} chain - Chain for the tx
+   * @param {string} hash - tx's hash
+   */
+  public async awaitTxConfirmed(chain: Chain, hash: string): Promise<void> {
+    const client = this.getClient(chain)
+    if (!this.isEvmClient(client)) throw Error('Can not make approve over non EVM client')
+    await client.awaitTxConfirmed(hash)
+  }
+
+  /**
    * Get the network that the clients are working in
    * @returns {Network} The network
    */
@@ -337,10 +348,10 @@ export class Wallet {
 
   /**
    * Estimate transfer fees
-   * @param {UtxoTxParams | EvmTxParams} params to make the transfer estimation
+   * @param {UtxoTxParams | EvmTxParams | CosmosTxParams} params to make the transfer estimation
    * @returns {Fees} Estimated fees
    */
-  public async estimateTransferFees(params: UtxoTxParams | EvmTxParams): Promise<Fees> {
+  public async estimateTransferFees(params: UtxoTxParams | EvmTxParams | CosmosTxParams): Promise<Fees> {
     const client = this.getClient(params.asset.chain)
     if (this.isEvmClient(client)) {
       if (!this.isEvmTxParams(params)) throw Error(`Invalid params for estimating ${params.asset.chain} transfer`)
@@ -361,7 +372,7 @@ export class Wallet {
 
   /**
    * Make a transaction
-   * @param {TxParams} txParams txParams - The parameters to make the transfer
+   * @param {UtxoTxParams | EvmTxParams | CosmosTxParams} params txParams - The parameters to make the transfer
    * @returns The transaction hash
    */
   public async transfer(params: UtxoTxParams | EvmTxParams | CosmosTxParams): Promise<string> {

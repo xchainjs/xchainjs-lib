@@ -1,5 +1,22 @@
 # Changelog
 
+## 6.0.2
+
+### Patch Changes
+
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-client@1.0.2
+
+## 6.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-client@1.0.1
+
 ## 6.0.0
 
 ### Major Changes

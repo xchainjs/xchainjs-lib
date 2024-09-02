@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-mayamidgard-query@0.1.18
+
+## 1.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-mayamidgard-query@0.1.17
+  - @xchainjs/xchain-mayamidgard@0.1.6
+  - @xchainjs/xchain-mayanode@0.1.9
+  - @xchainjs/xchain-client@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

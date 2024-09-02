@@ -1,5 +1,57 @@
 # Changelog
 
+## 3.0.4
+
+### Patch Changes
+
+- b07b69a: ERC-20 check for `isRouterApprovedToSpend`
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-wallet@1.0.4
+  - @xchainjs/xchain-arbitrum@1.0.4
+  - @xchainjs/xchain-ethereum@1.0.4
+  - @xchainjs/xchain-bitcoin@1.0.2
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-dash@1.0.2
+  - @xchainjs/xchain-kujira@1.0.2
+  - @xchainjs/xchain-mayachain@2.0.2
+  - @xchainjs/xchain-mayachain-query@1.0.2
+  - @xchainjs/xchain-thorchain@2.0.2
+
+## 3.0.3
+
+### Patch Changes
+
+- @xchainjs/xchain-arbitrum@1.0.3
+- @xchainjs/xchain-ethereum@1.0.3
+- @xchainjs/xchain-wallet@1.0.3
+
+## 3.0.2
+
+### Patch Changes
+
+- @xchainjs/xchain-arbitrum@1.0.2
+- @xchainjs/xchain-ethereum@1.0.2
+- @xchainjs/xchain-wallet@1.0.2
+
+## 3.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+- Updated dependencies [be1c45f]
+  - @xchainjs/xchain-mayachain-query@1.0.1
+  - @xchainjs/xchain-mayachain@2.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-bitcoin@1.0.1
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-dash@1.0.1
+  - @xchainjs/xchain-wallet@1.0.1
+  - @xchainjs/xchain-arbitrum@1.0.1
+  - @xchainjs/xchain-ethereum@1.0.1
+  - @xchainjs/xchain-kujira@1.0.1
+
 ## 3.0.0
 
 ### Major Changes

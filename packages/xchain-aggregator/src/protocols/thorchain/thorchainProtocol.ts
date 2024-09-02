@@ -1,7 +1,8 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
-import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
   IProtocol,
@@ -17,12 +18,37 @@ export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
   private thorchainAmm: ThorchainAMM
-  private configuration: Omit<ProtocolConfig, 'wallet'> | undefined
+  private configuration: ProtocolConfig | undefined
+  private wallet?: Wallet
 
   constructor(configuration?: ProtocolConfig) {
     this.thorchainQuery = new ThorchainQuery()
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
+    this.wallet = configuration?.wallet
+  }
+
+  /**
+   * Aprove tx for ERC-20 and wait until tx is confirmed
+   * @param {ApproveParams} approveParams params to approve tx
+   * @returns {TxSubmitted} Transaction hash and URL of the swap
+   */
+  async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
+    const { asset, amount } = params
+    const txSubmitted = await this.thorchainAmm.approveRouterToSpend({ asset, amount })
+    await this.wallet?.awaitTxConfirmed(asset.chain, txSubmitted.hash)
+    return txSubmitted
+  }
+
+  /**
+   * Check if tx should be approved for ERC-20
+   * @param {IsApprovedParams} isApprovedParams params to check if tx is approved
+   * @returns {boolean} array of errors
+   */
+  async shouldBeApproved(params: IsApprovedParams): Promise<boolean> {
+    const { asset, amount, address } = params
+    const errors = await this.thorchainAmm.isRouterApprovedToSpend({ asset, amount, address })
+    return errors.some((error) => error === 'Thorchain router has not been approved to spend this amount')
   }
 
   /**

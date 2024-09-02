@@ -58,13 +58,13 @@ export class LedgerSigner extends Signer {
    * @param {ethers.Transaction} SignTransferParams.tx Fee option (optional)
    * @returns {string} The raw signed transaction.
    */
-  public async signTransfer({ sender, tx }: SignTransferParams): Promise<string> {
+  public async signTransfer({ walletIndex, tx }: SignTransferParams): Promise<string> {
     const unsignedTx = ethers.utils.serializeTransaction(tx).substring(2)
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 
     const ethApp = await this.getApp()
 
-    const signatureData = await ethApp.signTransaction(sender, unsignedTx, resolution)
+    const signatureData = await ethApp.signTransaction(this.getFullDerivationPath(walletIndex), unsignedTx, resolution)
     const rawSignedTx = ethers.utils.serializeTransaction(tx, {
       v: Number(BigInt(signatureData.v)),
       r: `0x${signatureData.r}`,
@@ -81,7 +81,7 @@ export class LedgerSigner extends Signer {
    * @param {ethers.Transaction} SignTransferParams.tx Approve transaction to sign
    * @returns {string} The raw signed transaction.
    */
-  public async signApprove({ sender, tx }: SignApproveParams): Promise<string> {
+  public async signApprove({ walletIndex, tx }: SignApproveParams): Promise<string> {
     const txCompleted = await ethers.utils.resolveProperties(tx)
 
     const baseTx = {
@@ -101,7 +101,7 @@ export class LedgerSigner extends Signer {
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 
     const ethApp = await this.getApp()
-    const signatureData = await ethApp.signTransaction(sender, unsignedTx, resolution)
+    const signatureData = await ethApp.signTransaction(this.getFullDerivationPath(walletIndex), unsignedTx, resolution)
 
     const rawSignedTx = ethers.utils.serializeTransaction(baseTx, {
       v: Number(BigInt(signatureData.v)),

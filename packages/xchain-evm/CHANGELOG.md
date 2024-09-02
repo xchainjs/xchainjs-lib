@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- b07b69a: Add function `awaitTxConfirmed` which waits until the approval is confirmed
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-evm-providers@1.0.2
+
+## 1.0.3
+
+### Patch Changes
+
+- 0bf8f3e: Fix keystore approval for EVM
+
+## 1.0.2
+
+### Patch Changes
+
+- 4d96d34: Fix LedgerSigner
+
+## 1.0.1
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-evm-providers@1.0.1
+  - @xchainjs/xchain-client@1.0.1
+
 ## 1.0.0
 
 ### Major Changes

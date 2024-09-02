@@ -235,6 +235,13 @@ export const isSynthAsset = (asset: AnyAsset): asset is SynthAsset => asset.type
 export const isTradeAsset = (asset: AnyAsset): asset is TradeAsset => asset.type === AssetType.TRADE
 
 /**
+ *
+ * @param {AnyAsset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isTokenAsset = (asset: AnyAsset): asset is TokenAsset => asset.type === AssetType.TOKEN
+
+/**
  * Creates an `Asset` by a given string
  *
  * This helper function expects a string with following naming convention:

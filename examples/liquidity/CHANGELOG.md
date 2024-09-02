@@ -1,5 +1,43 @@
 # xchainjs-liquidity
 
+## 1.0.24
+
+### Patch Changes
+
+- Updated dependencies [b07b69a]
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-thorchain-amm@2.0.4
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-midgard-query@1.0.2
+  - @xchainjs/xchain-thorchain-query@1.0.2
+
+## 1.0.23
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@2.0.3
+
+## 1.0.22
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@2.0.2
+
+## 1.0.21
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+  - @xchainjs/xchain-thorchain-query@1.0.1
+  - @xchainjs/xchain-midgard-query@1.0.1
+  - @xchainjs/xchain-thorchain-amm@2.0.1
+  - @xchainjs/xchain-thornode@0.3.19
+  - @xchainjs/xchain-midgard@0.5.9
+  - @xchainjs/xchain-client@1.0.1
+
 ## 1.0.20
 
 ### Patch Changes

@@ -1,6 +1,17 @@
+/* eslint-disable ordered-imports/ordered-imports */
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
-import { assetFromStringEx, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
+jest.mock('@xchainjs/xchain-mayachain-amm')
+import {
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseToAsset,
+} from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/mayachain/midgard/api'
 import { MayachainProtocol } from '../src/protocols/mayachain'
@@ -18,6 +29,52 @@ describe('Mayachain protocol', () => {
 
   afterEach(() => {
     mockMidgardApi.restore()
+  })
+
+  const mockIsRouterApprovedToSpend = jest
+    .fn()
+    .mockReturnValue(['Maya router has not been approved to spend this amount'])
+  MayachainAMM.prototype.isRouterApprovedToSpend = mockIsRouterApprovedToSpend
+
+  const mockApproveRouterToSpend = jest.fn().mockResolvedValue({
+    hash: 'mockedHash',
+    url: 'http://mocked.url',
+  })
+  MayachainAMM.prototype.approveRouterToSpend = mockApproveRouterToSpend
+
+  it('Should approve router to spend', async () => {
+    const asset = assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306') as TokenAsset
+    const amount = new CryptoAmount(assetToBase(assetAmount('1', 6)), asset)
+
+    const result = await protocol.approveRouterToSpend({ asset, amount })
+
+    expect(mockApproveRouterToSpend).toHaveBeenCalledWith({
+      asset,
+      amount,
+    })
+
+    expect(result).toEqual({
+      hash: 'mockedHash',
+      url: 'http://mocked.url',
+    })
+  })
+
+  it('Should check if tx is approved', async () => {
+    const asset = assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306') as TokenAsset
+    const amount = new CryptoAmount(assetToBase(assetAmount('1', 6)), asset)
+    const errors = await protocol.shouldBeApproved({
+      asset,
+      amount,
+      address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
+    })
+
+    expect(mockIsRouterApprovedToSpend).toBeCalledWith({
+      asset,
+      amount,
+      address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
+    })
+
+    expect(errors).toEqual(true)
   })
 
   it('Should check asset is supported', async () => {

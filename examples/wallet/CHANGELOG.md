@@ -1,5 +1,58 @@
 # xchainjs-wallet
 
+## 1.0.19
+
+### Patch Changes
+
+- Updated dependencies [b07b69a]
+- Updated dependencies [b07b69a]
+  - @xchainjs/xchain-wallet@1.0.4
+  - @xchainjs/xchain-util@1.0.1
+  - @xchainjs/xchain-ethereum@1.0.4
+  - @xchainjs/xchain-bitcoin@1.0.2
+  - @xchainjs/xchain-client@1.0.2
+  - @xchainjs/xchain-cosmos@2.0.2
+  - @xchainjs/xchain-dash@1.0.2
+  - @xchainjs/xchain-kujira@1.0.2
+  - @xchainjs/xchain-mayachain@2.0.2
+  - @xchainjs/xchain-mayamidgard-query@0.1.18
+  - @xchainjs/xchain-thorchain@2.0.2
+
+## 1.0.18
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@1.0.3
+- @xchainjs/xchain-wallet@1.0.3
+
+## 1.0.17
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@1.0.2
+- @xchainjs/xchain-wallet@1.0.2
+
+## 1.0.16
+
+### Patch Changes
+
+- 837e3e7: Axios version update to v1.7.4
+- Updated dependencies [837e3e7]
+- Updated dependencies [323cbea]
+- Updated dependencies [be1c45f]
+  - @xchainjs/xchain-mayamidgard-query@0.1.17
+  - @xchainjs/xchain-mayamidgard@0.1.6
+  - @xchainjs/xchain-mayachain@2.0.1
+  - @xchainjs/xchain-thorchain@2.0.1
+  - @xchainjs/xchain-mayanode@0.1.9
+  - @xchainjs/xchain-bitcoin@1.0.1
+  - @xchainjs/xchain-client@1.0.1
+  - @xchainjs/xchain-cosmos@2.0.1
+  - @xchainjs/xchain-dash@1.0.1
+  - @xchainjs/xchain-wallet@1.0.1
+  - @xchainjs/xchain-ethereum@1.0.1
+  - @xchainjs/xchain-kujira@1.0.1
+
 ## 1.0.15
 
 ### Patch Changes

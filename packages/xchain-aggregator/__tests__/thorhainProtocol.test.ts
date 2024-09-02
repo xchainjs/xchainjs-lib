@@ -1,7 +1,18 @@
+/* eslint-disable ordered-imports/ordered-imports */
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { assetFromStringEx, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
+jest.mock('@xchainjs/xchain-thorchain-amm')
+import {
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseToAsset,
+} from '@xchainjs/xchain-util'
 
 import mockMidgardApi from '../__mocks__/thorchain/midgard/api'
 import mockThornodeApi from '../__mocks__/thorchain/thornode/api'
@@ -14,6 +25,10 @@ describe('Thorchain protocol', () => {
     protocol = new ThorchainProtocol()
   })
 
+  afterAll(() => {
+    jest.clearAllMocks()
+  })
+
   beforeEach(() => {
     mockMidgardApi.init()
     mockThornodeApi.init()
@@ -22,6 +37,52 @@ describe('Thorchain protocol', () => {
   afterEach(() => {
     mockMidgardApi.restore()
     mockThornodeApi.restore()
+  })
+
+  const mockIsRouterApprovedToSpend = jest
+    .fn()
+    .mockReturnValue(['Thorchain router has not been approved to spend this amount'])
+  ThorchainAMM.prototype.isRouterApprovedToSpend = mockIsRouterApprovedToSpend
+
+  const mockApproveRouterToSpend = jest.fn().mockResolvedValue({
+    hash: 'mockedHash',
+    url: 'http://mocked.url',
+  })
+  ThorchainAMM.prototype.approveRouterToSpend = mockApproveRouterToSpend
+
+  it('Should approve router to spend', async () => {
+    const asset = assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306') as TokenAsset
+    const amount = new CryptoAmount(assetToBase(assetAmount('1', 6)), asset)
+
+    const result = await protocol.approveRouterToSpend({ asset, amount })
+
+    expect(mockApproveRouterToSpend).toHaveBeenCalledWith({
+      asset,
+      amount,
+    })
+
+    expect(result).toEqual({
+      hash: 'mockedHash',
+      url: 'http://mocked.url',
+    })
+  })
+
+  it('Should check if tx is approved', async () => {
+    const asset = assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306') as TokenAsset
+    const amount = new CryptoAmount(assetToBase(assetAmount('1', 6)), asset)
+    const errors = await protocol.shouldBeApproved({
+      asset,
+      amount,
+      address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
+    })
+
+    expect(mockIsRouterApprovedToSpend).toBeCalledWith({
+      asset,
+      amount,
+      address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
+    })
+
+    expect(errors).toEqual(true)
   })
 
   it('Should check asset is supported', async () => {
