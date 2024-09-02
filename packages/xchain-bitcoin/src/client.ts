@@ -16,6 +16,7 @@ import {
   blockstreamExplorerProviders,
 } from './const'
 import * as Utils from './utils'
+
 // Default parameters for the Bitcoin UTXO client
 export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
@@ -36,12 +37,13 @@ export const defaultBTCParams: UtxoClientParams = {
  * Custom Bitcoin client
  */
 abstract class Client extends UTXOClient {
+  protected useTapRoot: boolean
   /**
    * Constructor
    * Initializes the client with network type and other parameters.
    * @param {UtxoClientParams} params
    */
-  constructor(params = defaultBTCParams) {
+  constructor(params: UtxoClientParams & { useTapRoot?: boolean } = { ...defaultBTCParams, useTapRoot: false }) {
     super(BTCChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,
@@ -50,6 +52,7 @@ abstract class Client extends UTXOClient {
       explorerProviders: params.explorerProviders,
       dataProviders: params.dataProviders,
     })
+    this.useTapRoot = params.useTapRoot || false
   }
 
   /**
@@ -125,11 +128,13 @@ abstract class Client extends UTXOClient {
     feeRate,
     sender,
     spendPendingUTXO = true,
+    tapInternalKey,
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
     spendPendingUTXO?: boolean
     withTxHex?: boolean
+    tapInternalKey?: Buffer
   }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
     // Check memo length
     if (memo && memo.length > 80) {
@@ -172,6 +177,7 @@ abstract class Client extends UTXOClient {
         hash: utxo.hash,
         index: utxo.index,
         witnessUtxo: utxo.witnessUtxo,
+        tapInternalKey,
       }),
     )
 
@@ -209,10 +215,12 @@ abstract class Client extends UTXOClient {
     recipient,
     spendPendingUTXO = true,
     feeRate,
+    tapInternalKey,
   }: TxParams & {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
+    tapInternalKey?: Buffer
   }): Promise<PreparedTx> {
     // Build the transaction using the provided parameters.
     const { psbt, utxos } = await this.buildTx({
@@ -222,6 +230,7 @@ abstract class Client extends UTXOClient {
       feeRate,
       memo,
       spendPendingUTXO,
+      tapInternalKey,
     })
     // Return the raw unsigned transaction (PSBT) and associated UTXOs.
     return { rawUnsignedTx: psbt.toBase64(), utxos }

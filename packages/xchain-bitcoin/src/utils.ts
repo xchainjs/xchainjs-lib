@@ -76,3 +76,10 @@ export const getPrefix = (network: Network): string => {
       return 'tb1' // Return the address prefix for Bitcoin testnet
   }
 }
+
+/**
+ * Converts a public key to an X-only public key.
+ * @param pubKey The public key to convert.
+ * @returns The X-only public key.
+ */
+export const toXOnly = (pubKey: Buffer): Buffer => (pubKey.length === 32 ? pubKey : pubKey.subarray(1, 33))

@@ -16,10 +16,8 @@ const ECPair = ECPairFactory(ecc)
  * Custom Bitcoin client extended to support keystore functionality
  */
 class ClientKeystore extends Client {
-  private useTapRoot: boolean
   constructor(params: UtxoClientParams & { useTapRoot?: boolean } = { ...defaultBTCParams, useTapRoot: false }) {
     super(params)
-    this.useTapRoot = params.useTapRoot || false
   }
   /**
    * @deprecated This function eventually will be removed. Use getAddressAsync instead.
@@ -51,7 +49,7 @@ class ClientKeystore extends Client {
         }).address
       } else {
         address = Bitcoin.payments.p2tr({
-          pubkey: btcKeys.publicKey.length === 32 ? btcKeys.publicKey : btcKeys.publicKey.subarray(1, 33),
+          pubkey: Utils.toXOnly(btcKeys.publicKey),
           network: btcNetwork,
         }).address
       }
@@ -116,17 +114,27 @@ class ClientKeystore extends Client {
     // Get the address index from the parameters or use the default value
     const fromAddressIndex = params?.walletIndex || 0
 
-    // Prepare the transaction
-    const { rawUnsignedTx } = await this.prepareTx({ ...params, sender: this.getAddress(fromAddressIndex), feeRate })
-
     // Get the Bitcoin keys
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
+
+    // Prepare the transaction
+    const { rawUnsignedTx } = await this.prepareTx({
+      ...params,
+      sender: this.getAddress(fromAddressIndex),
+      feeRate,
+      tapInternalKey: this.useTapRoot ? Utils.toXOnly(btcKeys.publicKey) : undefined,
+    })
 
     // Build the PSBT
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
 
     // Sign all inputs
-    psbt.signAllInputs(btcKeys)
+    if (!this.useTapRoot) {
+      psbt.signAllInputs(btcKeys)
+    } else {
+      const tweakedChildNode = btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey)))
+      psbt.signAllInputs(tweakedChildNode)
+    }
 
     // Finalize inputs
     psbt.finalizeAllInputs()
