@@ -112,9 +112,21 @@ export class Client extends BaseXChainClient {
   }
 
   /**
+   * Get the full derivation path based on the wallet index.
+   * @param {number} walletIndex The HD wallet index
+   * @returns {string} The full derivation path
+   */
+  public getFullDerivationPath(walletIndex: number): string {
+    if (!this.rootDerivationPaths) {
+      throw Error('Can not generate derivation path due to root derivation path is undefined')
+    }
+    return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
+  }
+
+  /**
    * Get the current address asynchronously.
    *
-   * @param {number} index The index of the address.
+   * @param {number} index The index of the address. Default 0
    * @returns {Address} The Solana address related to the index provided.
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
@@ -137,18 +149,6 @@ export class Client extends BaseXChainClient {
    */
   public validateAddress(address: Address): boolean {
     return isAddress(address)
-  }
-
-  /**
-   * Get the full derivation path based on the wallet index.
-   * @param {number} walletIndex The HD wallet index
-   * @returns {string} The full derivation path
-   */
-  public getFullDerivationPath(walletIndex: number): string {
-    if (!this.rootDerivationPaths) {
-      throw Error('Can not generate derivation path due to root derivation path is undefined')
-    }
-    return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
   }
 
   /**

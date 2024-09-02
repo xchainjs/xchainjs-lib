@@ -10,6 +10,8 @@ import {
 
 import { Client, Tx, defaultSolanaParams } from '../src'
 
+jest.deepUnmock('@solana/web3.js')
+
 const printTx = (tx: Tx) => {
   console.log({
     type: tx.type,
@@ -59,7 +61,7 @@ describe('Solana client', () => {
   })
 
   it('Should get all address balances', async () => {
-    const balances = await client.getBalance(await client.getAddressAsync())
+    const balances = await client.getBalance('94bPUbh8iazbg2UgUDrmMkgWoZz9Q1H813JZifZRB35v')
 
     balances.forEach((balance) => {
       console.log(`${assetToString(balance.asset)}: ${baseToAsset(balance.amount).amount().toString()}`)
