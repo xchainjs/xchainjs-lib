@@ -1,16 +1,26 @@
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { BIP32Factory } from 'bip32'
 import * as Bitcoin from 'bitcoinjs-lib'
+import { ECPairFactory, ECPairInterface } from 'ecpair'
+import * as ecc from 'tiny-secp256k1'
 
-import { Client } from './client' // Importing the base Bitcoin client
+import { Client, defaultBTCParams } from './client' // Importing the base Bitcoin client
 import * as Utils from './utils' // Importing utility functions
 
+Bitcoin.initEccLib(ecc)
+const ECPair = ECPairFactory(ecc)
 /**
  * Custom Bitcoin client extended to support keystore functionality
  */
 class ClientKeystore extends Client {
+  private useTapRoot: boolean
+  constructor(params: UtxoClientParams & { useTapRoot?: boolean } = { ...defaultBTCParams, useTapRoot: false }) {
+    super(params)
+    this.useTapRoot = params.useTapRoot || false
+  }
   /**
    * @deprecated This function eventually will be removed. Use getAddressAsync instead.
    * Get the address associated with the given index.
@@ -32,10 +42,19 @@ class ClientKeystore extends Client {
       const btcKeys = this.getBtcKeys(this.phrase, index)
 
       // Generate the address using the Bitcoinjs library
-      const { address } = Bitcoin.payments.p2wpkh({
-        pubkey: btcKeys.publicKey,
-        network: btcNetwork,
-      })
+
+      let address: string | undefined
+      if (!this.useTapRoot) {
+        address = Bitcoin.payments.p2wpkh({
+          pubkey: btcKeys.publicKey,
+          network: btcNetwork,
+        }).address
+      } else {
+        address = Bitcoin.payments.p2tr({
+          pubkey: btcKeys.publicKey.length === 32 ? btcKeys.publicKey : btcKeys.publicKey.subarray(1, 33),
+          network: btcNetwork,
+        }).address
+      }
 
       // Throw an error if the address is not defined
       if (!address) {
@@ -67,16 +86,17 @@ class ClientKeystore extends Client {
    * @returns {Bitcoin.ECPair.ECPairInterface} The Bitcoin key pair.
    * @throws {"Could not get private key from phrase"} Thrown if failed to create BTC keys from the given phrase.
    */
-  private getBtcKeys(phrase: string, index = 0): Bitcoin.ECPair.ECPairInterface {
+  private getBtcKeys(phrase: string, index = 0): ECPairInterface {
     const btcNetwork = Utils.btcNetwork(this.network)
     const seed = getSeed(phrase)
-    const master = Bitcoin.bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
+    const bip32 = BIP32Factory(ecc)
+    const master = bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
+    return ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
   }
 
   /**

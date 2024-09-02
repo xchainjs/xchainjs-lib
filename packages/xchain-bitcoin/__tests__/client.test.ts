@@ -61,6 +61,7 @@ describe('BitcoinClient Test', () => {
   const addyTwo = 'tb1qz8q2lwfmp965cszdd5raq9m7gljs57hkzpw56d'
 
   const phraseOneMainnet_path0 = 'bc1qvdux5606j2zh5f4724wvnywe6gcj2tcrzz7wdl'
+  const phraseOneTapRootMainnet_path0 = 'bc1pd9zfyr5qd0y8td0jf5htnahlqexe22w3xn3rl008k24w3yu47r2qjlgfvz'
   const phraseOneMainnet_path1 = 'bc1qnnkssp3sgfjjk2m0z9thjay0psp6ehlt6dzd97'
 
   // Third ones is used only for balance verification
@@ -450,5 +451,14 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseTwo)
     expect(await btcClient.getAddressAsync(0)).toEqual(addyThreePath0)
     expect(await btcClient.getAddressAsync(1)).toEqual(addyThreePath1)
+  })
+
+  it('Should get derivate TapRoot addresses correctly', async () => {
+    const tapRootClient = new Client({
+      ...defaultBTCParams,
+      useTapRoot: true,
+      phrase: phraseOne,
+    })
+    expect(await tapRootClient.getAddressAsync(0)).toBe(phraseOneTapRootMainnet_path0)
   })
 })

@@ -39,9 +39,12 @@
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
-    "bitcoinjs-lib": "5.2.0",
+    "bip32": "4.0.0",
+    "bitcoinjs-lib": "6.1.6",
     "coininfo": "5.1.0",
-    "coinselect": "3.1.12"
+    "coinselect": "3.1.12",
+    "ecpair": "2.1.0",
+    "tiny-secp256k1": "2.2.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
