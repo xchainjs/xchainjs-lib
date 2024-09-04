@@ -7,6 +7,12 @@ import { TxParams as BaseUtxoTxParams } from '@xchainjs/xchain-utxo'
  * UTXO transfer params
  */
 export type UtxoTxParams = BaseUtxoTxParams & { asset: Asset; feeRate?: BaseAmount }
+
+/**
+ * Radix transfer params
+ */
+export type RadixTxParams = BaseUtxoTxParams & { asset: Asset | TokenAsset }
+
 /**
  * EVM transfer params
  */

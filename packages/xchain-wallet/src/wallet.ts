@@ -26,7 +26,7 @@ import {
 } from '@xchainjs/xchain-util'
 import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
 
-import { ChainBalances, CosmosTxParams, EvmTxParams, UtxoTxParams } from './types'
+import { ChainBalances, CosmosTxParams, EvmTxParams, RadixTxParams, UtxoTxParams } from './types'
 
 // Record type to hold network URLs
 export type NodeUrls = Record<Network, string>
@@ -351,7 +351,9 @@ export class Wallet {
    * @param {UtxoTxParams | EvmTxParams | CosmosTxParams} params to make the transfer estimation
    * @returns {Fees} Estimated fees
    */
-  public async estimateTransferFees(params: UtxoTxParams | EvmTxParams | CosmosTxParams): Promise<Fees> {
+  public async estimateTransferFees(
+    params: UtxoTxParams | EvmTxParams | CosmosTxParams | RadixTxParams,
+  ): Promise<Fees> {
     const client = this.getClient(params.asset.chain)
     if (this.isEvmClient(client)) {
       if (!this.isEvmTxParams(params)) throw Error(`Invalid params for estimating ${params.asset.chain} transfer`)
