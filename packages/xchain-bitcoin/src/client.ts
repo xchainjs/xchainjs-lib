@@ -3,6 +3,7 @@ import { Address } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
+import * as ecc from 'tiny-secp256k1'
 
 import {
   AssetBTC,
@@ -53,6 +54,7 @@ abstract class Client extends UTXOClient {
       dataProviders: params.dataProviders,
     })
     this.useTapRoot = params.useTapRoot || false
+    Bitcoin.initEccLib(this.useTapRoot ? ecc : undefined)
   }
 
   /**

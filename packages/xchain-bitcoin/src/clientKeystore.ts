@@ -10,7 +10,6 @@ import * as ecc from 'tiny-secp256k1'
 import { Client, defaultBTCParams } from './client' // Importing the base Bitcoin client
 import * as Utils from './utils' // Importing utility functions
 
-Bitcoin.initEccLib(ecc)
 const ECPair = ECPairFactory(ecc)
 /**
  * Custom Bitcoin client extended to support keystore functionality
@@ -133,7 +132,9 @@ class ClientKeystore extends Client {
       psbt.signAllInputs(btcKeys)
     } else {
       const tweakedChildNode = btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey)))
-      psbt.signAllInputs(tweakedChildNode)
+      for (let i = 0; i < psbt.txInputs.length; i++) {
+        psbt.signTaprootInput(i, tweakedChildNode)
+      }
     }
 
     // Finalize inputs
