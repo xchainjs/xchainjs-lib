@@ -5,6 +5,7 @@ import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchai
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
+import { Client as RadixClient } from '@xchainjs/xchain-radix'
 import { AssetRuneNative, Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import { Asset, CryptoAmount, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
@@ -26,6 +27,7 @@ describe('MayachainAMM', () => {
         KUJI: new KujiraClient({ ...defaultKujiParams, network: Network.Mainnet }),
         THOR: new ThorClient({ network: Network.Mainnet }),
         MAYA: new MayaClient({ network: Network.Mainnet }),
+        XRD: new RadixClient({ network: Network.Mainnet }),
       })
       mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
     })

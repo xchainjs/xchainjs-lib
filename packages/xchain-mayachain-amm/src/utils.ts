@@ -6,6 +6,7 @@ import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xcha
 import { AssetKUJI, Client as KujiraClient, KUJIChain, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { CompatibleAsset } from '@xchainjs/xchain-mayachain-query'
+import { Client as RadixClient, RadixChain } from '@xchainjs/xchain-radix'
 import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   Address,
@@ -72,6 +73,8 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new ThorClient({ network }).validateAddress(address)
     case MAYAChain:
       return new MayaClient({ network }).validateAddress(address)
+    case RadixChain:
+      return new RadixClient({ network }).validateAddress(address)
     default:
       throw Error('Unsupported chain')
   }

@@ -7,8 +7,10 @@ import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchai
 import { AssetUSK, Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { AssetCacao, Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
+import { Client as RadixClient, XrdAssetMainnet as AssetRDX } from '@xchainjs/xchain-radix'
 import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
+  Asset,
   CryptoAmount,
   TokenAsset,
   assetAmount,
@@ -118,6 +120,7 @@ describe('MayachainAmm e2e tests', () => {
         THOR: new ThorClient({ phrase, network: Network.Mainnet }),
         MAYA: new MayaClient({ phrase, network: Network.Mainnet }),
         ARB: new ArbClient({ ...defaultArbParams, phrase, network: Network.Mainnet }),
+        XRD: new RadixClient({ phrase, network: Network.Mainnet }),
       })
       mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
     })
@@ -176,10 +179,10 @@ describe('MayachainAmm e2e tests', () => {
     })
 
     it(`Should estimate swap from USDT to ETH`, async () => {
-      const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+      const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
       const quoteSwap = await mayachainAmm.estimateSwap({
         fromAsset,
-        destinationAsset: assetFromStringEx('ETH.ETH'),
+        destinationAsset: assetFromStringEx('ETH.ETH') as Asset,
         amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), fromAsset),
       })
 
@@ -281,7 +284,7 @@ describe('MayachainAmm e2e tests', () => {
     })
 
     it('Should do ERC20 asset swap. USDT -> ETH', async () => {
-      const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7')
+      const fromAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
       const txSubmitted = await mayachainAmm.doSwap({
         fromAddress: await wallet.getAddress(fromAsset.chain),
@@ -329,6 +332,49 @@ describe('MayachainAmm e2e tests', () => {
       })
 
       printQuoteSwap(quoteSwap)
+    })
+
+    it('Should estimate swap from Rune to Radix', async () => {
+      const quoteSwap = await mayachainAmm.estimateSwap({
+        fromAsset: AssetRuneNative,
+        destinationAsset: AssetRDX,
+        amount: new CryptoAmount(assetToBase(assetAmount(2, 8)), AssetRuneNative),
+        destinationAddress: await wallet.getAddress(AssetRDX.chain),
+      })
+
+      printQuoteSwap(quoteSwap)
+    })
+
+    it('Should do swap from Rune to Radix', async () => {
+      const txSubmitted = await mayachainAmm.doSwap({
+        fromAsset: AssetRuneNative,
+        destinationAsset: AssetRDX,
+        amount: new CryptoAmount(assetToBase(assetAmount(2, 8)), AssetRuneNative),
+        destinationAddress: await wallet.getAddress(AssetRDX.chain),
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it('Should estimate swap from Radix to Rune', async () => {
+      const quoteSwap = await mayachainAmm.estimateSwap({
+        fromAsset: AssetRDX,
+        destinationAsset: AssetRuneNative,
+        amount: new CryptoAmount(assetToBase(assetAmount(200, 18)), AssetRDX),
+        destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
+      })
+
+      printQuoteSwap(quoteSwap)
+    })
+
+    it('Should do swap from Radix to Rune', async () => {
+      const txSubmitted = await mayachainAmm.doSwap({
+        fromAsset: AssetRDX,
+        destinationAsset: AssetRuneNative,
+        amount: new CryptoAmount(assetToBase(assetAmount(200, 18)), AssetRDX),
+        destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
+      })
+      console.log(txSubmitted)
     })
   })
 })

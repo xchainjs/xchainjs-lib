@@ -17,6 +17,7 @@ import {
   RegisterMAYAName,
   UpdateMAYAName,
 } from '@xchainjs/xchain-mayachain-query'
+import { Client as RadixClient } from '@xchainjs/xchain-radix'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import {
   Address,
@@ -59,6 +60,7 @@ export class MayachainAMM {
       ARB: new ArbClient({ ...defaultArbParams, network: Network.Mainnet }),
       THOR: new ThorClient({ network: Network.Mainnet }),
       MAYA: new MayaClient({ network: Network.Mainnet }),
+      XRD: new RadixClient({ network: Network.Mainnet }),
     }),
   ) {
     this.mayachainQuery = mayachainQuery

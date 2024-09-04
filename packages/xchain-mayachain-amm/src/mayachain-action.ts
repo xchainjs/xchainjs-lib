@@ -73,7 +73,12 @@ export class MayachainAction {
           url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
         }
       }
-      const feeRates = await wallet.getFeeRates(assetAmount.asset.chain)
+      const feeRates = await wallet.estimateTransferFees({
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        recipient,
+        memo,
+      })
       const hash = await wallet.transfer({
         asset: assetAmount.asset,
         amount: assetAmount.baseAmount,

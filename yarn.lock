@@ -3949,6 +3949,7 @@ __metadata:
     "@xchainjs/xchain-kujira": "workspace:*"
     "@xchainjs/xchain-mayachain": "workspace:*"
     "@xchainjs/xchain-mayachain-query": "workspace:*"
+    "@xchainjs/xchain-radix": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.7.4"
@@ -4051,7 +4052,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-radix@workspace:packages/xchain-radix":
+"@xchainjs/xchain-radix@workspace:*, @xchainjs/xchain-radix@workspace:packages/xchain-radix":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-radix@workspace:packages/xchain-radix"
   dependencies:
