@@ -7,7 +7,7 @@ import { FeeBounds, FeeOption, FeeRate, FeeRates } from './types'
  * @returns {FeeRates} The fee rates object with the provided rate for all fee options.
  */
 export function singleFeeRate(rate: FeeRate): FeeRates {
-  return Object.values(FeeOption).reduce<Partial<FeeRates>>((a, x) => ((a[x] = rate), a), {}) as FeeRates;
+  return Object.values(FeeOption).reduce<Partial<FeeRates>>((a, x) => ((a[x] = rate), a), {}) as FeeRates
 }
 
 /**
@@ -21,7 +21,7 @@ export function standardFeeRates(rate: FeeRate): FeeRates {
     ...singleFeeRate(rate), // Include single fee rate for all fee options
     [FeeOption.Average]: rate * 0.5, // Set fee rate for average option as half of the base rate
     [FeeOption.Fastest]: rate * 5.0, // Set fee rate for fastest option as five times the base rate
-  };
+  }
 }
 
 /**
@@ -34,6 +34,6 @@ export function standardFeeRates(rate: FeeRate): FeeRates {
  */
 export function checkFeeBounds(feeBounds: FeeBounds, feeRate: FeeRate): void {
   if (feeRate < feeBounds.lower || feeRate > feeBounds.upper) {
-    throw Error(`Fee outside of predetermined bounds: ${feeRate.toString()}`);
+    throw Error(`Fee outside of predetermined bounds: ${feeRate.toString()}`)
   }
 }
