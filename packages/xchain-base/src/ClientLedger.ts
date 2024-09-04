@@ -4,7 +4,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { ClientLedger as EVMClientLedger, EVMClientParams, LedgerSigner } from '@xchainjs/xchain-evm'
 
 // Create a class called Client that extends the EVMClientLedger class
-export class Client extends EVMClientLedger {
+export class ClientLedger extends EVMClientLedger {
   /**
    * Constructor for the Avalanche EVM client
    * @param {Object} config - configuration object for the client

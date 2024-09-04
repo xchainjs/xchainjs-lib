@@ -1,8 +1,8 @@
 import { Balance, FeeOption, Network, TxType } from '@xchainjs/xchain-client'
 import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client as BaseClient } from '../src/ClientKeystore'
 import { BASEChain, defaultBaseParams } from '../src/const'
+import { Client as BaseClient } from '../src/index'
 
 const mainnetClient = new BaseClient({
   ...defaultBaseParams,
