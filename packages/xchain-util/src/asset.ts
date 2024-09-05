@@ -259,6 +259,7 @@ export const isTokenAsset = (asset: AnyAsset): asset is TokenAsset => asset.type
  * @returns {Asset|null} The asset from the given string.
  */
 export const assetFromString = (s: string): AnyAsset | null => {
+  if (s === 'KUJI.USK') return { chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN } // TODO: Find a better way to avoid hardcoding
   const isSynth = s.includes(SYNTH_ASSET_DELIMITER)
   const isTrade = s.includes(TRADE_ASSET_DELIMITER)
   const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : isTrade ? TRADE_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
