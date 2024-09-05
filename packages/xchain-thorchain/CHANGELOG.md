@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3
+
+### Patch Changes
+
+- d78a201: RPC endpoint for mainnet network update
+
 ## 2.0.2
 
 ### Patch Changes
