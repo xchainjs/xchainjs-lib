@@ -16,7 +16,7 @@ export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
     [Network.Testnet]: ['deprecated'],
     [Network.Stagenet]: ['https://stagenet-rpc.ninerealms.com'],
-    [Network.Mainnet]: ['https://rpc-v1.ninerealms.com'],
+    [Network.Mainnet]: ['https://rpc.ninerealms.com'],
   }
 }
 /**
