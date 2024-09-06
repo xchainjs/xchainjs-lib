@@ -3682,6 +3682,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@xchainjs/xchain-base@workspace:packages/xchain-base":
+  version: 0.0.0-use.local
+  resolution: "@xchainjs/xchain-base@workspace:packages/xchain-base"
+  dependencies:
+    "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
+    "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-evm": "workspace:*"
+    "@xchainjs/xchain-evm-providers": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    ethers: "npm:5.7.2"
+  languageName: unknown
+  linkType: soft
+
 "@xchainjs/xchain-binance@workspace:*, @xchainjs/xchain-binance@workspace:packages/xchain-binance":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-binance@workspace:packages/xchain-binance"
