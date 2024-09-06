@@ -3686,6 +3686,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-base@workspace:packages/xchain-base"
   dependencies:
+    "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
