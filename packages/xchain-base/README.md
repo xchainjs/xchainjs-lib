@@ -1,46 +1,75 @@
-# `@xchainjs/xchain-base`
+<div align="center">
+  <h1 align="center">Base client</h1>
 
-## Modules
+  <p align="center">
+    <a href='https://www.npmjs.com/package/@xchainjs/xchain-base' target='_blank'>
+      <img alt="NPM Version" src="https://img.shields.io/npm/v/%40xchainjs%2Fxchain-base" />
+    </a>
+      <a href='https://www.npmjs.com/package/@xchainjs/xchain-base' target='_blank'>
+      <img alt="NPM Downloads" src="https://img.shields.io/npm/d18m/%40xchainjs%2Fxchain-base" />
+    </a>
+  </p>
+</div>
 
-- `client` - Custom client for communicating with Base by using [`ethers`](https://github.com/ethers-io/ethers.js)
+<br />
+
+Client that allows to perform operations on the Base blockchain abstracting developers from its particularities, thus allowing developers to focus on their projects. Base is a secure, low-cost, builder-friendly Ethereum L2.
+
+If you want to read more about Base blockchain, go to its official [web site](https://www.base.org/)
+
 
 ## Installation
 
 ```sh
 yarn add @xchainjs/xchain-base
 ```
-
-Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-base`.
+or 
 
 ```sh
-yarn add @xchainjs/xchain-evm @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios ethers
+npm install @xchainjs/xchain-base
 ```
+
+## Initialization
+
+Using the Base client you can initialize the main class of the module in consultation mode if you do not provide any parameters, this means you could retrieve information from the blockchain and prepare transactions to sign, but you will not be able to sign transactions, or generate addresses.
+
+```ts
+import { Client } from '@xchainjs/xchain-base'
+
+const client = new Client()
+
+// Make read operations with your client
+```
+
+Otherwise, if you want to sign transactions and get the addresses you own, you will need to initialize the main class of the protocol as follows
+
+```ts
+import { Client, defaultBaseParams } from '@xchainjs/xchain-base'
+
+const client = new Client({
+  phrase: 'your secret phrase',
+  ...defaultBaseParams
+})
+
+// Make read or write operations with your client
+```
+
+##  Features
+
+Thanks to the Base client you will be able to:
+- Get the Base and tokens balances that an address owns
+- Generate addresses given a secret phrase
+- Transfer Base and tokens to another address
+- Get details of a transaction
+- Get address transaction history
+
+
+
+## Examples
+
+You can find examples using the Base package in the [base](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/base) examples folder.
+
 
 ## Documentation
 
-### [`xchain base`](http://docs.xchainjs.org/xchain-client/xchain-base/)
-
-[`How xchain-base works`](http://docs.xchainjs.org/xchain-client/xchain-base/how-it-works.html)\
-[`How to use xchain-base`](http://docs.xchainjs.org/xchain-client/xchain-base/how-to-use.html)
-
-## Service Providers
-
-This package uses the following service providers:
-
-| Function                  | Service   | Notes                                                                              |
-| ------------------------- | --------- | ---------------------------------------------------------------------------------- |
-| ETH balances              | Basescan | https://api.basescan.org/apis#accounts (module=`account`, action=`balance`)        |
-| Token balances            | Basescan | https://api.basescan.org/apis#tokens (module=`account`, action=`tokenbalance`)     |
-| ETH transaction history   | Basescan | https://api.basescan.org/apis#accounts (module=`account`, action=`txlistinternal`) |
-| Token transaction history | Basescan | https://api.basescan.org/apis#accounts (module=`account`, action=`tokentx`)        |
-| Explorer                  | Basescan | https://basescan.org/                                                              |
-
-Etherscan API rate limits: https://docs.basescan.org/support/rate-limits
-
-- This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
-
-// set in env variables so default config can access.
-`BASESCAN_API_KEY={YOUR_BASESCAN_API_KEY}`
-
-//Default config can access.
-`process.env.BASESCAN_API_KEY`
+More information about how to use the Base client can be found on [documentation](https://xchainjs.gitbook.io/xchainjs/clients/xchain-base)

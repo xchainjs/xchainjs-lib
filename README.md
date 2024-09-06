@@ -117,7 +117,7 @@ Blockchain clients with whom you can prepare, make and broadcast transactions, e
 | [@xchainjs/xchain-kujira](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-kujira) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-kujira)](https://www.npmjs.com/package/@xchainjs/xchain-kujira) |
 | [@xchainjs/xchain-cosmos](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cosmos)](https://www.npmjs.com/package/@xchainjs/xchain-cosmos) |
 | [@xchainjs/xchain-binance](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-binance)](https://www.npmjs.com/package/@xchainjs/xchain-binance) |
-
+| [@xchainjs/xchain-base](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-base) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-base)](https://www.npmjs.com/package/@xchainjs/xchain-base) |
 
 ### Utility packages
 
