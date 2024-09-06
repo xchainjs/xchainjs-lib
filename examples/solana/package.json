@@ -1,0 +1,26 @@
+{
+  "name": "xchainjs-solana",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "allBalances": "npx ts-node balance-all.ts",
+    "tokenBalance": "npx ts-node balance-token.ts",
+    "address": "npx ts-node address.ts",
+    "prepareTx": "npx ts-node transaction-prepare.ts",
+    "transfer": "npx ts-node transaction-transfer.ts",
+    "transferToken": "npx ts-node transaction-transfer-token.ts",
+    "build": "tsc --noEmit"
+  },
+  "description": "Examples using Solana client",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@xchainjs/xchain-solana": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.28",
+    "ts-node": "10.9.2",
+    "typescript": "^5.0.4"
+  }
+}

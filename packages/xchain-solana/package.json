@@ -1,0 +1,51 @@
+{
+  "name": "@xchainjs/xchain-solana",
+  "version": "0.0.0",
+  "description": "Solana client for XChainJS",
+  "keywords": [
+    "Solana",
+    "XChain"
+  ],
+  "author": "THORChain",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo && rm -rf lib",
+    "build": "yarn clean && rollup -c",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
+    "test": "jest",
+    "e2e": "jest --config jest.config.e2e.js",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
+  },
+  "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "3.2.1",
+    "@metaplex-foundation/umi": "0.9.2",
+    "@metaplex-foundation/umi-bundle-defaults": "0.9.2",
+    "@solana/addresses": "2.0.0-rc.1",
+    "@solana/spl-token": "0.4.8",
+    "@solana/web3.js": "1.95.2",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "bs58": "6.0.0",
+    "micro-ed25519-hdkey": "0.1.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "release/package"
+  }
+}
