@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- dec3ba3: `assetFromString` bug fix with KUJI.USK asset
+
 ## 1.0.1
 
 ### Patch Changes
