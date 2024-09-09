@@ -222,7 +222,7 @@ export class RadixSpecificClient {
     const manifestWithHardcodedFee = RadixSpecificClient.simpleTransferManifest(from, to, resourceAddress, amount, 5)
     const intentWithHardcodedFee = await this.constructIntent(
       manifestWithHardcodedFee,
-      message === null
+      message === null || message === undefined
         ? { kind: 'None' }
         : {
             kind: 'PlainText',
@@ -263,7 +263,7 @@ export class RadixSpecificClient {
     )
     const intent = await this.constructIntent(
       manifest,
-      message === null
+      message === null || message === undefined
         ? { kind: 'None' }
         : {
             kind: 'PlainText',
