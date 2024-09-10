@@ -105,7 +105,7 @@ export default class Client extends BaseXChainClient {
         feesEstimationPublicKeys[this.getRadixNetwork()].from,
         feesEstimationPublicKeys[this.getRadixNetwork()].to,
         feesEstimationPublicKeys[this.getRadixNetwork()].resourceAddress,
-        1,
+        0,
         new PublicKey.Ed25519(
           Convert.HexString.toUint8Array(feesEstimationPublicKeys[this.getRadixNetwork()].publicKey),
         ),
