@@ -1,5 +1,24 @@
 # xchainjs-maya-do-swap
 
+## 1.0.25
+
+### Patch Changes
+
+- Updated dependencies [dec3ba3]
+  - @xchainjs/xchain-util@1.0.2
+  - @xchainjs/xchain-bitcoin@1.0.3
+  - @xchainjs/xchain-client@1.0.3
+  - @xchainjs/xchain-cosmos@2.0.3
+  - @xchainjs/xchain-dash@1.0.3
+  - @xchainjs/xchain-ethereum@1.0.5
+  - @xchainjs/xchain-kujira@1.0.3
+  - @xchainjs/xchain-mayachain@2.0.3
+  - @xchainjs/xchain-mayachain-query@1.0.3
+  - @xchainjs/xchain-mayamidgard-query@0.1.19
+  - @xchainjs/xchain-thorchain@2.0.4
+  - @xchainjs/xchain-wallet@1.0.6
+  - @xchainjs/xchain-mayachain-amm@3.0.6
+
 ## 1.0.24
 
 ### Patch Changes

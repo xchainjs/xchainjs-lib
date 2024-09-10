@@ -1,5 +1,15 @@
 # xchainjs-prepare-tx
 
+## 1.0.13
+
+### Patch Changes
+
+- Updated dependencies [dec3ba3]
+  - @xchainjs/xchain-util@1.0.2
+  - @xchainjs/xchain-bitcoin@1.0.3
+  - @xchainjs/xchain-client@1.0.3
+  - @xchainjs/xchain-ethereum@1.0.5
+
 ## 1.0.12
 
 ### Patch Changes

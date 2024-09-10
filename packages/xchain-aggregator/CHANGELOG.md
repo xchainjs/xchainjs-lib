@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [dec3ba3]
+  - @xchainjs/xchain-util@1.0.2
+  - @xchainjs/xchain-client@1.0.3
+  - @xchainjs/xchain-mayachain@2.0.3
+  - @xchainjs/xchain-mayachain-query@1.0.3
+  - @xchainjs/xchain-thorchain@2.0.4
+  - @xchainjs/xchain-thorchain-amm@2.0.6
+  - @xchainjs/xchain-thorchain-query@1.0.3
+  - @xchainjs/xchain-wallet@1.0.6
+  - @xchainjs/xchain-mayachain-amm@3.0.6
+
 ## 1.0.5
 
 ### Patch Changes
