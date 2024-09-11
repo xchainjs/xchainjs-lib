@@ -22,7 +22,6 @@ import {
   RadixEngineToolkit,
   TransactionHash,
   TransactionManifest,
-  ValueKind,
   address,
   bucket,
   decimal,
@@ -207,14 +206,14 @@ export class RadixSpecificClient {
     return fungibleResources
   }
 
-  public async constructSimpleTransferIntent(
+  public async constructTransferIntent(
     from: string,
     to: string,
     resourceAddress: string,
     amount: number,
     notaryPublicKey: PublicKey,
     message?: string,
-    methodsToCall?: MethodToCall[],
+    methodsToCall?: MethodToCall,
   ): Promise<{ intent: Intent; fees: number }> {
     // This nonce will be used for preview and also when constructing the final transaction
     const nonce = generateRandomNonce()
@@ -222,8 +221,8 @@ export class RadixSpecificClient {
     // Construct the intent with a random fee lock, say 5 XRD and then create a transaction intent
     // from it.
     const manifestWithHardcodedFee = methodsToCall
-      ? RadixSpecificClient.transferManifest(from, resourceAddress, amount, 5, methodsToCall)
-      : RadixSpecificClient.simpleTransferManifest(from, to, resourceAddress, amount, 5)
+      ? RadixSpecificClient.createCustomTransferManifest(from, resourceAddress, amount, 5, methodsToCall)
+      : RadixSpecificClient.createSimpleTransferManifest(from, to, resourceAddress, amount, 5)
     const intentWithHardcodedFee = await this.constructIntent(
       manifestWithHardcodedFee,
       message === null || message === undefined
@@ -259,8 +258,14 @@ export class RadixSpecificClient {
 
     // Construct a new intent with the calculated fees.
     const manifest = methodsToCall
-      ? RadixSpecificClient.transferManifest(from, resourceAddress, amount, totalFeesPlus10Percent, methodsToCall)
-      : RadixSpecificClient.simpleTransferManifest(from, to, resourceAddress, amount, totalFeesPlus10Percent)
+      ? RadixSpecificClient.createCustomTransferManifest(
+          from,
+          resourceAddress,
+          amount,
+          totalFeesPlus10Percent,
+          methodsToCall,
+        )
+      : RadixSpecificClient.createSimpleTransferManifest(from, to, resourceAddress, amount, totalFeesPlus10Percent)
     const intent = await this.constructIntent(
       manifest,
       message === null || message === undefined
@@ -303,7 +308,7 @@ export class RadixSpecificClient {
     })
   }
 
-  private static simpleTransferManifest(
+  private static createSimpleTransferManifest(
     from: string,
     to: string,
     resourceAddress: string,
@@ -319,26 +324,18 @@ export class RadixSpecificClient {
       .build()
   }
 
-  private static transferManifest(
+  private static createCustomTransferManifest(
     from: string,
     resourceAddress: string,
     amount: number,
     amountToLockForFees: number,
-    methodsToCall: MethodToCall[],
+    methodsToCall: MethodToCall,
   ): TransactionManifest {
     const simpletTx = new ManifestBuilder()
       .callMethod(from, 'lock_fee', [decimal(amountToLockForFees)])
       .callMethod(from, 'withdraw', [address(resourceAddress), decimal(amount)])
-      .takeFromWorktop(resourceAddress, decimal(amount).value, (builder, bucketId) => {
-        return builder.callMethod(methodsToCall[0].address, methodsToCall[0].methodName, [
-          address(methodsToCall[0].params[0]),
-          address(methodsToCall[0].params[1]),
-          bucket(bucketId),
-          {
-            kind: ValueKind.String,
-            value: methodsToCall[0].params[2],
-          },
-        ])
+      .takeFromWorktop(resourceAddress, decimal(amount).value, (builder) => {
+        return builder.callMethod(methodsToCall.address, methodsToCall.methodName, methodsToCall.params)
       })
 
     return simpletTx.build()

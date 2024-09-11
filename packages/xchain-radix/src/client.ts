@@ -33,9 +33,9 @@ import { derivePath } from 'ed25519-hd-key'
 import * as ecc from 'tiny-secp256k1'
 
 import {
+  AssetXRD,
   RadixChain,
   XRD_DECIMAL,
-  assets,
   bech32Lengths,
   bech32Networks,
   feesEstimationPublicKeys,
@@ -101,7 +101,7 @@ export default class Client extends BaseXChainClient {
     // TODO: This can fail if we use it on stokenet, we need to replace these with network aware
     // addresses.
     const feesInXrd = await this.radixSpecificClient
-      .constructSimpleTransferIntent(
+      .constructTransferIntent(
         feesEstimationPublicKeys[this.getRadixNetwork()].from,
         feesEstimationPublicKeys[this.getRadixNetwork()].to,
         feesEstimationPublicKeys[this.getRadixNetwork()].resourceAddress,
@@ -408,7 +408,7 @@ export default class Client extends BaseXChainClient {
       return {
         from: [],
         to: [],
-        asset: assets[this.getRadixNetwork()],
+        asset: AssetXRD,
         date: confirmed_at,
         type: TxType.Unknown,
         hash: intent_hash,
@@ -467,14 +467,14 @@ export default class Client extends BaseXChainClient {
 
     const transferAmmount = params.amount.amount().toNumber() / 10 ** XRD_DECIMAL
     const intent = await this.radixSpecificClient
-      .constructSimpleTransferIntent(
+      .constructTransferIntent(
         from,
         params.recipient,
         getAssetResource(params.asset || this.getAssetInfo().asset),
         transferAmmount,
         this.getRadixPrivateKey(walletIndex).publicKey(),
         params.memo,
-        params.methodsToCall,
+        params.methodToCall,
       )
       .then((response) => response.intent)
 
@@ -490,7 +490,7 @@ export default class Client extends BaseXChainClient {
    */
   getAssetInfo(): AssetInfo {
     return {
-      asset: assets[this.getRadixNetwork()],
+      asset: AssetXRD,
       decimal: XRD_DECIMAL,
     }
   }

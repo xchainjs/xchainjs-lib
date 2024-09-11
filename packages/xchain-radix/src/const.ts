@@ -15,14 +15,7 @@ export const XRD_DECIMAL = 18
 
 export const RADIX_ASSET_RESOURCE = 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc'
 
-export const XrdAssetMainnet: Asset = {
-  symbol: `XRD`,
-  ticker: 'XRD',
-  type: AssetType.NATIVE,
-  chain: RadixChain,
-}
-
-export const XrdAssetStokenet: Asset = {
+export const AssetXRD: Asset = {
   symbol: `XRD`,
   ticker: 'XRD',
   type: AssetType.NATIVE,
@@ -67,9 +60,4 @@ export const feesEstimationPublicKeys: { [networkId: number]: FeesEstimationPara
     resourceAddress: RADIX_ASSET_RESOURCE,
     publicKey: '3ce4d36fd8bf40fa6f9b0cf2ef8d11853d088589ebdc79055f5a0af55bf7e758',
   },
-}
-
-export const assets: { [networkId: number]: Asset } = {
-  [NetworkId.Mainnet]: XrdAssetMainnet,
-  [NetworkId.Stokenet]: XrdAssetStokenet,
 }

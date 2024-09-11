@@ -1,3 +1,4 @@
+import { Value } from '@radixdlt/radix-engine-toolkit'
 import {
   Balance as BaseBalance,
   Tx as BaseTx,
@@ -71,11 +72,10 @@ export type TxsPage = BaseTxsPage & {
 export type MethodToCall = {
   address: Address
   methodName: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params: any[]
+  params: Value[]
 }
 
 export type TxParams = BaseTxParams & {
   asset?: CompatibleAsset
-  methodsToCall?: MethodToCall[]
+  methodToCall?: MethodToCall
 }
