@@ -7,7 +7,7 @@ export const RuneAsset = assetFromStringEx('THOR.RUNE') as Asset
 export const DashAsset = assetFromStringEx('DASH.DASH') as Asset
 export const KujiraAsset = assetFromStringEx('KUJI.KUJI') as Asset
 export const ArbAsset = assetFromStringEx('ARB.ETH') as Asset
-export const RdxAsset = assetFromStringEx('XRD.XRD') as Asset
+export const XdrAsset = assetFromStringEx('XRD.XRD') as Asset
 
 export const BtcChain = 'BTC'
 export const EthChain = 'ETH'
@@ -16,6 +16,6 @@ export const ThorChain = 'THOR'
 export const DashChain = 'DASH'
 export const KujiraChain = 'KUJI'
 export const ArbChain = 'ARB'
-export const RdxChain = 'XRD'
+export const XdrChain = 'XRD'
 
 export const DEFAULT_MAYACHAIN_DECIMALS = 8

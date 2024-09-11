@@ -38,10 +38,10 @@ import {
   KujiraAsset,
   KujiraChain,
   MayaChain,
-  RdxAsset,
-  RdxChain,
   RuneAsset,
   ThorChain,
+  XdrAsset,
+  XdrChain,
   getBaseAmountWithDiffDecimals,
   getCryptoAmountWithNotation,
 } from './utils'
@@ -214,7 +214,7 @@ export class MayachainQuery {
       [ThorChain]: new AssetCryptoAmount(baseAmount(0, 8), RuneAsset),
       [MayaChain]: new AssetCryptoAmount(baseAmount(0, 10), CacaoAsset),
       [ArbChain]: new AssetCryptoAmount(baseAmount(0, 18), ArbAsset),
-      [RdxChain]: new AssetCryptoAmount(baseAmount(0, 18), RdxAsset),
+      [XdrChain]: new AssetCryptoAmount(baseAmount(0, 18), XdrAsset),
     }
   }
 
