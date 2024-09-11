@@ -412,7 +412,7 @@ export class Wallet {
         amount: params.amount,
         recipient: params.recipient,
         memo: params.memo,
-        methodsToCall: params.methodsToCall,
+        methodToCall: params.methodToCall,
       })
     }
     return client.transfer({
@@ -538,7 +538,7 @@ export class Wallet {
   private isRadixTxParams(
     params: EvmTxParams | UtxoTxParams | CosmosTxParams | RadixTxParams,
   ): params is RadixTxParams {
-    return !('radixClient' in params)
+    return !this.isEvmTxParams(params) && !this.isUtxoTxParams(params)
   }
 
   // TEMPORAL APPROACH UNTIL A NEW ONE
@@ -551,6 +551,7 @@ export class Wallet {
     return 'getFeeRates' in client
   }
 
+  // TEMPORAL APPROACH UNTIL A NEW ONE
   private isRadixClient(client: XChainClient): client is RadixClient {
     return 'radixClient' in client
   }

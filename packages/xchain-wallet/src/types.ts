@@ -1,6 +1,7 @@
 import { Balance, TxParams as BaseTxParams } from '@xchainjs/xchain-client'
 import { TxParams as BaseEvmTxParams } from '@xchainjs/xchain-evm'
-import { Address, Asset, BaseAmount, Chain, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
+import { TxParams as BaseRadixTxParams } from '@xchainjs/xchain-radix'
+import { Asset, BaseAmount, Chain, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
 import { TxParams as BaseUtxoTxParams } from '@xchainjs/xchain-utxo'
 
 /**
@@ -8,17 +9,10 @@ import { TxParams as BaseUtxoTxParams } from '@xchainjs/xchain-utxo'
  */
 export type UtxoTxParams = BaseUtxoTxParams & { asset: Asset; feeRate?: BaseAmount }
 
-type MethodToCall = {
-  address: Address
-  methodName: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  params: any[]
-}
-
 /**
  * Radix transfer params
  */
-export type RadixTxParams = BaseUtxoTxParams & { asset: Asset | TokenAsset; methodsToCall?: MethodToCall[] }
+export type RadixTxParams = BaseRadixTxParams & { asset: Asset | TokenAsset }
 
 /**
  * EVM transfer params
