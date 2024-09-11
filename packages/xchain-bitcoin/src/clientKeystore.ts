@@ -121,7 +121,7 @@ class ClientKeystore extends Client {
       ...params,
       sender: this.getAddress(fromAddressIndex),
       feeRate,
-      tapInternalKey: this.useTapRoot ? Utils.toXOnly(btcKeys.publicKey) : undefined,
+      publicKey: this.useTapRoot ? btcKeys.publicKey : undefined,
     })
 
     // Build the PSBT

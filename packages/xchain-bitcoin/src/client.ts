@@ -130,13 +130,13 @@ abstract class Client extends UTXOClient {
     feeRate,
     sender,
     spendPendingUTXO = true,
-    tapInternalKey,
+    publicKey,
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
     spendPendingUTXO?: boolean
     withTxHex?: boolean
-    tapInternalKey?: Buffer
+    publicKey?: Buffer
   }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
     // Check memo length
     if (memo && memo.length > 80) {
@@ -179,7 +179,7 @@ abstract class Client extends UTXOClient {
         hash: utxo.hash,
         index: utxo.index,
         witnessUtxo: utxo.witnessUtxo,
-        tapInternalKey,
+        tapInternalKey: publicKey ? Utils.toXOnly(publicKey) : undefined,
       }),
     )
 
@@ -187,7 +187,7 @@ abstract class Client extends UTXOClient {
     outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
       // If the output address is not specified, it's considered a change address and set to the sender's address.
       if (!output.address) {
-        //an empty address means this is the  change ddress
+        //an empty address means this is the change address
         output.address = sender
       }
       // Add the output to the PSBT.
@@ -217,12 +217,12 @@ abstract class Client extends UTXOClient {
     recipient,
     spendPendingUTXO = true,
     feeRate,
-    tapInternalKey,
+    publicKey,
   }: TxParams & {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-    tapInternalKey?: Buffer
+    publicKey?: Buffer
   }): Promise<PreparedTx> {
     // Build the transaction using the provided parameters.
     const { psbt, utxos } = await this.buildTx({
@@ -232,7 +232,7 @@ abstract class Client extends UTXOClient {
       feeRate,
       memo,
       spendPendingUTXO,
-      tapInternalKey,
+      publicKey,
     })
     // Return the raw unsigned transaction (PSBT) and associated UTXOs.
     return { rawUnsignedTx: psbt.toBase64(), utxos }
