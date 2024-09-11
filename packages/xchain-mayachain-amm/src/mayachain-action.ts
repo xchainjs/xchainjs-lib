@@ -1,12 +1,14 @@
 import { abi } from '@xchainjs/xchain-evm'
 import { MAYAChain } from '@xchainjs/xchain-mayachain'
 import { CompatibleAsset, MayachainQuery } from '@xchainjs/xchain-mayachain-query'
+import { XrdAssetMainnet } from '@xchainjs/xchain-radix'
 import {
   Address,
   Asset,
   CryptoAmount,
   TokenAsset,
   baseAmount,
+  eqAsset,
   getContractAddressFromAsset,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
@@ -60,7 +62,7 @@ export class MayachainAction {
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     // Non EVM actions
 
-    if (!isProtocolEVMChain(assetAmount.asset.chain)) {
+    if (!isProtocolEVMChain(assetAmount.asset.chain) && !eqAsset(assetAmount.asset, XrdAssetMainnet)) {
       if (isProtocolBFTChain(assetAmount.asset.chain)) {
         const hash = await wallet.transfer({
           asset: assetAmount.asset,
@@ -98,41 +100,61 @@ export class MayachainAction {
     const inboundDetails = await mayachainQuery.getChainInboundDetails(assetAmount.asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router for ${assetAmount.asset.chain} chain`)
 
-    const isERC20 = isProtocolERC20Asset(assetAmount.asset)
+    // TODO: Is Radix?
+    if (eqAsset(assetAmount.asset, XrdAssetMainnet)) {
+      const hash = await wallet.transfer({
+        asset: assetAmount.asset,
+        recipient: inboundDetails.router,
+        amount: assetAmount.baseAmount,
+        methodsToCall: [
+          {
+            address: inboundDetails.router,
+            methodName: 'user_deposit',
+            params: [await wallet.getAddress(XrdAssetMainnet.chain), recipient, memo],
+          },
+        ],
+      })
+      return {
+        hash,
+        url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
+      }
+    } else {
+      const isERC20 = isProtocolERC20Asset(assetAmount.asset)
 
-    const checkSummedContractAddress = isERC20
-      ? ethers.utils.getAddress(getContractAddressFromAsset(assetAmount.asset))
-      : ethers.constants.AddressZero
+      const checkSummedContractAddress = isERC20
+        ? ethers.utils.getAddress(getContractAddressFromAsset(assetAmount.asset))
+        : ethers.constants.AddressZero
 
-    const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
-    const depositParams = [
-      recipient,
-      checkSummedContractAddress,
-      assetAmount.baseAmount.amount().toFixed(),
-      memo,
-      expiration,
-    ]
+      const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
+      const depositParams = [
+        recipient,
+        checkSummedContractAddress,
+        assetAmount.baseAmount.amount().toFixed(),
+        memo,
+        expiration,
+      ]
 
-    const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
-    const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
+      const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
+      const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
 
-    const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
+      const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
 
-    const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
+      const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
 
-    const hash = await wallet.transfer({
-      asset: nativeAsset.asset,
-      amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : assetAmount.baseAmount,
-      memo: unsignedTx.data,
-      recipient: inboundDetails.router,
-      gasPrice: gasPrices.fast,
-      isMemoEncoded: true,
-      gasLimit: ethers.BigNumber.from(160000),
-    })
+      const hash = await wallet.transfer({
+        asset: nativeAsset.asset,
+        amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : assetAmount.baseAmount,
+        memo: unsignedTx.data,
+        recipient: inboundDetails.router,
+        gasPrice: gasPrices.fast,
+        isMemoEncoded: true,
+        gasLimit: ethers.BigNumber.from(160000),
+      })
 
-    return {
-      hash,
-      url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
+      return {
+        hash,
+        url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
+      }
     }
   }
 

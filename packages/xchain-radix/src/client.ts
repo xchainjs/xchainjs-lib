@@ -474,6 +474,7 @@ export default class Client extends BaseXChainClient {
         transferAmmount,
         this.getRadixPrivateKey(walletIndex).publicKey(),
         params.memo,
+        params.methodsToCall,
       )
       .then((response) => response.intent)
 

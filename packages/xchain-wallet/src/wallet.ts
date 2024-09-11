@@ -15,6 +15,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
+import { Client as RadixClient } from '@xchainjs/xchain-radix'
 import {
   Address,
   AnyAsset,
@@ -377,7 +378,7 @@ export class Wallet {
    * @param {UtxoTxParams | EvmTxParams | CosmosTxParams} params txParams - The parameters to make the transfer
    * @returns The transaction hash
    */
-  public async transfer(params: UtxoTxParams | EvmTxParams | CosmosTxParams): Promise<string> {
+  public async transfer(params: UtxoTxParams | EvmTxParams | CosmosTxParams | RadixTxParams): Promise<string> {
     const client = this.getClient(params.asset.chain)
     if (this.isEvmClient(client)) {
       if (!this.isEvmTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
@@ -401,6 +402,17 @@ export class Wallet {
         recipient: params.recipient,
         memo: params.memo,
         feeRate: params.feeRate ? params.feeRate.amount().toNumber() : undefined,
+      })
+    }
+    if (this.isRadixClient(client)) {
+      if (!this.isRadixTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
+      return client.transfer({
+        walletIndex: params.walletIndex,
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        memo: params.memo,
+        methodsToCall: params.methodsToCall,
       })
     }
     return client.transfer({
@@ -510,7 +522,7 @@ export class Wallet {
    * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
    * @returns {boolean} True if params is EvmTxParams
    */
-  private isEvmTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams): params is EvmTxParams {
+  private isEvmTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams | RadixTxParams): params is EvmTxParams {
     return !('feeRate' in params)
   }
 
@@ -519,8 +531,14 @@ export class Wallet {
    * @param {EvmTxParams | UtxoTxParams} params Params to validate the type of
    * @returns {boolean} True if params is UtxoTxParams
    */
-  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams): params is UtxoTxParams {
+  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams | RadixTxParams): params is UtxoTxParams {
     return !('gasPrice' in params)
+  }
+
+  private isRadixTxParams(
+    params: EvmTxParams | UtxoTxParams | CosmosTxParams | RadixTxParams,
+  ): params is RadixTxParams {
+    return !('radixClient' in params)
   }
 
   // TEMPORAL APPROACH UNTIL A NEW ONE
@@ -531,5 +549,9 @@ export class Wallet {
   // TEMPORAL APPROACH UNTIL A NEW ONE
   private isUtxoClient(client: XChainClient): client is UtxoClient {
     return 'getFeeRates' in client
+  }
+
+  private isRadixClient(client: XChainClient): client is RadixClient {
+    return 'radixClient' in client
   }
 }

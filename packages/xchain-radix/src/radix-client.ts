@@ -22,6 +22,7 @@ import {
   RadixEngineToolkit,
   TransactionHash,
   TransactionManifest,
+  ValueKind,
   address,
   bucket,
   decimal,
@@ -31,7 +32,7 @@ import {
 import { AssetType, TokenAsset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import { RadixChain } from './const'
-import { Balance } from './types/radix'
+import { Balance, MethodToCall } from './types/radix'
 
 type PartialTransactionPreviewResponse = {
   receipt: {
@@ -213,13 +214,16 @@ export class RadixSpecificClient {
     amount: number,
     notaryPublicKey: PublicKey,
     message?: string,
+    methodsToCall?: MethodToCall[],
   ): Promise<{ intent: Intent; fees: number }> {
     // This nonce will be used for preview and also when constructing the final transaction
     const nonce = generateRandomNonce()
 
     // Construct the intent with a random fee lock, say 5 XRD and then create a transaction intent
     // from it.
-    const manifestWithHardcodedFee = RadixSpecificClient.simpleTransferManifest(from, to, resourceAddress, amount, 5)
+    const manifestWithHardcodedFee = methodsToCall
+      ? RadixSpecificClient.transferManifest(from, resourceAddress, amount, 5, methodsToCall)
+      : RadixSpecificClient.simpleTransferManifest(from, to, resourceAddress, amount, 5)
     const intentWithHardcodedFee = await this.constructIntent(
       manifestWithHardcodedFee,
       message === null || message === undefined
@@ -254,13 +258,9 @@ export class RadixSpecificClient {
     const totalFeesPlus10Percent = totalFees * 1.1
 
     // Construct a new intent with the calculated fees.
-    const manifest = RadixSpecificClient.simpleTransferManifest(
-      from,
-      to,
-      resourceAddress,
-      amount,
-      totalFeesPlus10Percent,
-    )
+    const manifest = methodsToCall
+      ? RadixSpecificClient.transferManifest(from, resourceAddress, amount, totalFeesPlus10Percent, methodsToCall)
+      : RadixSpecificClient.simpleTransferManifest(from, to, resourceAddress, amount, totalFeesPlus10Percent)
     const intent = await this.constructIntent(
       manifest,
       message === null || message === undefined
@@ -317,6 +317,31 @@ export class RadixSpecificClient {
         return builder.callMethod(to, 'try_deposit_or_abort', [bucket(bucketId), enumeration(0)])
       })
       .build()
+  }
+
+  private static transferManifest(
+    from: string,
+    resourceAddress: string,
+    amount: number,
+    amountToLockForFees: number,
+    methodsToCall: MethodToCall[],
+  ): TransactionManifest {
+    const simpletTx = new ManifestBuilder()
+      .callMethod(from, 'lock_fee', [decimal(amountToLockForFees)])
+      .callMethod(from, 'withdraw', [address(resourceAddress), decimal(amount)])
+      .takeFromWorktop(resourceAddress, decimal(amount).value, (builder, bucketId) => {
+        return builder.callMethod(methodsToCall[0].address, methodsToCall[0].methodName, [
+          address(methodsToCall[0].params[0]),
+          address(methodsToCall[0].params[1]),
+          bucket(bucketId),
+          {
+            kind: ValueKind.String,
+            value: methodsToCall[0].params[2],
+          },
+        ])
+      })
+
+    return simpletTx.build()
   }
 
   private async constructIntent(
