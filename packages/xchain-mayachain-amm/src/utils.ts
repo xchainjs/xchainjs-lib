@@ -59,6 +59,15 @@ export const isProtocolBFTChain = (chain: Chain): boolean => {
   return [AssetKUJI.chain, AssetRuneNative.chain].includes(chain)
 }
 
+/**
+ * Check if a chain is Radix chain
+ * @param {Chain} chain to check
+ * @returns true if chain is Radix, otherwise, false
+ */
+export const isRadixChain = (chain: Chain): boolean => {
+  return chain === RadixChain
+}
+
 export const validateAddress = (network: Network, chain: Chain, address: Address): boolean => {
   switch (chain) {
     case BTCChain:

@@ -7,7 +7,7 @@ import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchai
 import { AssetUSK, Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { AssetCacao, Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery, QuoteSwap } from '@xchainjs/xchain-mayachain-query'
-import { Client as RadixClient, XrdAssetMainnet as AssetRDX } from '@xchainjs/xchain-radix'
+import { AssetXRD, Client as RadixClient } from '@xchainjs/xchain-radix'
 import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   Asset,
@@ -337,9 +337,9 @@ describe('MayachainAmm e2e tests', () => {
     it('Should estimate swap from Rune to Radix', async () => {
       const quoteSwap = await mayachainAmm.estimateSwap({
         fromAsset: AssetRuneNative,
-        destinationAsset: AssetRDX,
+        destinationAsset: AssetXRD,
         amount: new CryptoAmount(assetToBase(assetAmount(2, 8)), AssetRuneNative),
-        destinationAddress: await wallet.getAddress(AssetRDX.chain),
+        destinationAddress: await wallet.getAddress(AssetXRD.chain),
       })
 
       printQuoteSwap(quoteSwap)
@@ -348,9 +348,9 @@ describe('MayachainAmm e2e tests', () => {
     it('Should do swap from Rune to Radix', async () => {
       const txSubmitted = await mayachainAmm.doSwap({
         fromAsset: AssetRuneNative,
-        destinationAsset: AssetRDX,
+        destinationAsset: AssetXRD,
         amount: new CryptoAmount(assetToBase(assetAmount(2, 8)), AssetRuneNative),
-        destinationAddress: await wallet.getAddress(AssetRDX.chain),
+        destinationAddress: await wallet.getAddress(AssetXRD.chain),
       })
 
       console.log(txSubmitted)
@@ -358,9 +358,9 @@ describe('MayachainAmm e2e tests', () => {
 
     it('Should estimate swap from Radix to Rune', async () => {
       const quoteSwap = await mayachainAmm.estimateSwap({
-        fromAsset: AssetRDX,
+        fromAsset: AssetXRD,
         destinationAsset: AssetRuneNative,
-        amount: new CryptoAmount(assetToBase(assetAmount(200, 18)), AssetRDX),
+        amount: new CryptoAmount(assetToBase(assetAmount(200, 18)), AssetXRD),
         destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
       })
 
@@ -369,9 +369,9 @@ describe('MayachainAmm e2e tests', () => {
 
     it('Should do swap from Radix to Rune', async () => {
       const txSubmitted = await mayachainAmm.doSwap({
-        fromAsset: AssetRDX,
+        fromAsset: AssetXRD,
         destinationAsset: AssetRuneNative,
-        amount: new CryptoAmount(assetToBase(assetAmount(200, 18)), AssetRDX),
+        amount: new CryptoAmount(assetToBase(assetAmount(200, 18)), AssetXRD),
         destinationAddress: await wallet.getAddress(AssetRuneNative.chain),
       })
       console.log(txSubmitted)
