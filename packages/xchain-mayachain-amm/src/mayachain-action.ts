@@ -120,44 +120,43 @@ export class MayachainAction {
         hash,
         url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
       }
-    } else {
-      // Evm
-      const isERC20 = isProtocolERC20Asset(assetAmount.asset)
+    }
+    // Evm
+    const isERC20 = isProtocolERC20Asset(assetAmount.asset)
 
-      const checkSummedContractAddress = isERC20
-        ? ethers.utils.getAddress(getContractAddressFromAsset(assetAmount.asset))
-        : ethers.constants.AddressZero
+    const checkSummedContractAddress = isERC20
+      ? ethers.utils.getAddress(getContractAddressFromAsset(assetAmount.asset))
+      : ethers.constants.AddressZero
 
-      const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
-      const depositParams = [
-        recipient,
-        checkSummedContractAddress,
-        assetAmount.baseAmount.amount().toFixed(),
-        memo,
-        expiration,
-      ]
+    const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
+    const depositParams = [
+      recipient,
+      checkSummedContractAddress,
+      assetAmount.baseAmount.amount().toFixed(),
+      memo,
+      expiration,
+    ]
 
-      const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
-      const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
+    const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
+    const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
 
-      const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
+    const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
 
-      const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
+    const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
 
-      const hash = await wallet.transfer({
-        asset: nativeAsset.asset,
-        amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : assetAmount.baseAmount,
-        memo: unsignedTx.data,
-        recipient: inboundDetails.router,
-        gasPrice: gasPrices.fast,
-        isMemoEncoded: true,
-        gasLimit: ethers.BigNumber.from(160000),
-      })
+    const hash = await wallet.transfer({
+      asset: nativeAsset.asset,
+      amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : assetAmount.baseAmount,
+      memo: unsignedTx.data,
+      recipient: inboundDetails.router,
+      gasPrice: gasPrices.fast,
+      isMemoEncoded: true,
+      gasLimit: ethers.BigNumber.from(160000),
+    })
 
-      return {
-        hash,
-        url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
-      }
+    return {
+      hash,
+      url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
     }
   }
 
