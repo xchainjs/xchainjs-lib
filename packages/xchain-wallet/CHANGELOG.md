@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.7
+
+### Patch Changes
+
+- ccde096: The `transfer` method has been updated to work with `RadixTxParams` parameters.
+- ccde096: The `estimateTransferFees` method has been updated to work with `RadixTxParams` parameters.
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [b4327b9]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+  - @xchainjs/xchain-radix@1.1.0
+  - @xchainjs/xchain-evm@1.0.6
+  - @xchainjs/xchain-mayachain@2.0.4
+  - @xchainjs/xchain-thorchain@2.0.5
+
 ## 1.0.6
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # xchainjs-loans
 
+## 1.0.27
+
+### Patch Changes
+
+- Updated dependencies [b4327b9]
+- Updated dependencies [b4327b9]
+  - @xchainjs/xchain-evm-providers@1.0.4
+  - @xchainjs/xchain-evm@1.0.6
+  - @xchainjs/xchain-thorchain-amm@2.0.7
+  - @xchainjs/xchain-cosmos@2.0.4
+
 ## 1.0.26
 
 ### Patch Changes

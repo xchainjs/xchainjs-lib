@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- b4327b9: Change type in roundRobinGetBalance to TokenAsset
+- Updated dependencies [b4327b9]
+  - @xchainjs/xchain-evm-providers@1.0.4
+
 ## 1.0.5
 
 ### Patch Changes
