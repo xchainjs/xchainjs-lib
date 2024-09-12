@@ -1,5 +1,6 @@
 import { Balance, TxParams as BaseTxParams } from '@xchainjs/xchain-client'
 import { TxParams as BaseEvmTxParams } from '@xchainjs/xchain-evm'
+import { TxParams as BaseRadixTxParams } from '@xchainjs/xchain-radix'
 import { Asset, BaseAmount, Chain, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
 import { TxParams as BaseUtxoTxParams } from '@xchainjs/xchain-utxo'
 
@@ -7,6 +8,12 @@ import { TxParams as BaseUtxoTxParams } from '@xchainjs/xchain-utxo'
  * UTXO transfer params
  */
 export type UtxoTxParams = BaseUtxoTxParams & { asset: Asset; feeRate?: BaseAmount }
+
+/**
+ * Radix transfer params
+ */
+export type RadixTxParams = BaseRadixTxParams & { asset: Asset | TokenAsset }
+
 /**
  * EVM transfer params
  */

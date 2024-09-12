@@ -32,6 +32,7 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-mayachain": "workspace:*",
+    "@xchainjs/xchain-radix": "workspace:*",
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*"

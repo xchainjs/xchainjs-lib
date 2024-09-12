@@ -1,12 +1,14 @@
 import { abi } from '@xchainjs/xchain-evm'
 import { MAYAChain } from '@xchainjs/xchain-mayachain'
 import { CompatibleAsset, MayachainQuery } from '@xchainjs/xchain-mayachain-query'
+import { AssetXRD, generateAddressParam, generateBucketParam, generateStringParam } from '@xchainjs/xchain-radix'
 import {
   Address,
   Asset,
   CryptoAmount,
   TokenAsset,
   baseAmount,
+  eqAsset,
   getContractAddressFromAsset,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
@@ -14,7 +16,7 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
 import { TxSubmitted } from './types'
-import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
+import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain, isRadixChain } from './utils'
 
 export type NonProtocolActionParams = {
   wallet: Wallet
@@ -58,9 +60,8 @@ export class MayachainAction {
     recipient,
     memo,
   }: NonProtocolActionParams): Promise<TxSubmitted> {
-    // Non EVM actions
-
-    if (!isProtocolEVMChain(assetAmount.asset.chain)) {
+    // Non EVM actions and non Radix action
+    if (!isProtocolEVMChain(assetAmount.asset.chain) && !eqAsset(assetAmount.asset, AssetXRD)) {
       if (isProtocolBFTChain(assetAmount.asset.chain)) {
         const hash = await wallet.transfer({
           asset: assetAmount.asset,
@@ -73,7 +74,12 @@ export class MayachainAction {
           url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
         }
       }
-      const feeRates = await wallet.getFeeRates(assetAmount.asset.chain)
+      const feeRates = await wallet.estimateTransferFees({
+        asset: assetAmount.asset,
+        amount: assetAmount.baseAmount,
+        recipient,
+        memo,
+      })
       const hash = await wallet.transfer({
         asset: assetAmount.asset,
         amount: assetAmount.baseAmount,
@@ -87,12 +93,35 @@ export class MayachainAction {
       }
     }
 
-    // EVM actions
+    // EVM actions and Radix go through the router
     const mayachainQuery: MayachainQuery = new MayachainQuery()
 
     const inboundDetails = await mayachainQuery.getChainInboundDetails(assetAmount.asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router for ${assetAmount.asset.chain} chain`)
 
+    if (isRadixChain(assetAmount.asset.chain)) {
+      // Radix
+      const hash = await wallet.transfer({
+        asset: assetAmount.asset,
+        recipient: inboundDetails.router,
+        amount: assetAmount.baseAmount,
+        methodToCall: {
+          address: inboundDetails.router,
+          methodName: 'user_deposit',
+          params: [
+            generateAddressParam(await wallet.getAddress(AssetXRD.chain)),
+            generateAddressParam(recipient),
+            generateBucketParam(0),
+            generateStringParam(memo),
+          ],
+        },
+      })
+      return {
+        hash,
+        url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
+      }
+    }
+    // Evm
     const isERC20 = isProtocolERC20Asset(assetAmount.asset)
 
     const checkSummedContractAddress = isERC20

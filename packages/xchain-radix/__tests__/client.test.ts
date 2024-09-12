@@ -20,7 +20,7 @@ import {
   stateEntityFungiblesPageResponse,
   stateEntityNonFungiblesPageResponse,
 } from '../__mocks__/mocks'
-import { Client, Tx, TxParams, XRD_DECIMAL, XrdAssetStokenet, feesEstimationPublicKeys } from '../src'
+import { AssetXRD, Client, Tx, TxParams, XRD_DECIMAL, feesEstimationPublicKeys } from '../src'
 
 describe('RadixClient Test', () => {
   const createClient = (): Client => {
@@ -322,7 +322,7 @@ describe('RadixClient Test', () => {
     client.radixClient.gatewayClient.transaction.innerClient.transactionPreview = transactionPreviewResponseMock
 
     const txParams: TxParams = {
-      asset: XrdAssetStokenet,
+      asset: AssetXRD,
       amount: baseAmount(1),
       recipient: 'account_tdx_2_129wjagjzxltd0clr3q4z7hqpw5cc7weh9trs4e9k3zfwqpj636e5zf',
       memo: 'test',
@@ -360,7 +360,7 @@ describe('RadixClient Test', () => {
     client.radixClient.gatewayClient.transaction.innerClient.transactionPreview = transactionPreviewResponseMock
 
     const txParams: TxParams = {
-      asset: XrdAssetStokenet,
+      asset: AssetXRD,
       amount: baseAmount(1),
       recipient: 'account_tdx_2_129wjagjzxltd0clr3q4z7hqpw5cc7weh9trs4e9k3zfwqpj636e5zf',
       memo: 'test',
@@ -383,7 +383,7 @@ describe('RadixClient Test', () => {
     const client = createClient()
 
     const txParams: TxParams = {
-      asset: XrdAssetStokenet,
+      asset: AssetXRD,
       amount: baseAmount(1000000000000000000, XRD_DECIMAL),
       recipient: 'account_tdx_2_129wjagjzxltd0clr3q4z7hqpw5cc7weh9trs4e9k3zfwqpj636e5zf',
       memo: 'test',
@@ -434,7 +434,7 @@ describe('RadixClient Test', () => {
   it('client should be able transfer without mock', async () => {
     const client = createClient()
     const txParams: TxParams = {
-      asset: XrdAssetStokenet,
+      asset: AssetXRD,
       amount: baseAmount(10000000000000000, XRD_DECIMAL),
       recipient: feesEstimationPublicKeys[2].to,
       memo: 'test',

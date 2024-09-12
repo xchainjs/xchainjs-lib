@@ -1,55 +1,35 @@
-const {
-  Configuration,
-  StatusApi,
-  TransactionApi,
-  TransactionSubmitResponse,
-} = require('@radixdlt/babylon-gateway-api-sdk')
-const { Convert, SimpleTransactionBuilder } = require('@radixdlt/radix-engine-toolkit')
+import { address, bucket, str } from '@radixdlt/radix-engine-toolkit'
+import { Address, Asset, TokenAsset, eqAsset } from '@xchainjs/xchain-util'
 
-const getCurrentEpoch = async (statusApi: typeof StatusApi): Promise<number> =>
-  statusApi.gatewayStatus().then((output: { ledger_state: { epoch: number } }) => output.ledger_state.epoch)
+import { AssetXRD, RADIX_ASSET_RESOURCE } from './const'
 
-const submitTransaction = async (
-  transactionApi: typeof TransactionApi,
-  compiledTransaction: Uint8Array,
-): Promise<typeof TransactionSubmitResponse> =>
-  transactionApi.transactionSubmit({
-    transactionSubmitRequest: {
-      notarized_transaction_hex: Convert.Uint8Array.toHexString(compiledTransaction),
-    },
-  })
-
-const main = async () => {
-  const toAccount = process.argv[2] // Read the toAccount parameter from command-line arguments
-  if (!toAccount) {
-    console.error('Please provide a toAccount address as a command-line argument.')
-    process.exit(1)
-  }
-
-  const apiConfiguration = new Configuration({
-    basePath: 'https://stokenet.radixdlt.com',
-  })
-  const statusApi = new StatusApi(apiConfiguration)
-  const currentEpoch = await getCurrentEpoch(statusApi)
-  const freeXrdForAccountTransaction = await SimpleTransactionBuilder.freeXrdFromFaucet({
-    networkId: 2,
-    toAccount: toAccount,
-    validFromEpoch: currentEpoch,
-  })
-  const transactionApi = new TransactionApi(apiConfiguration)
-
-  // After the transaction has been built, we can get the transaction id (transaction hash) which is
-  // the identifier used to get information on this transaction through the gateway.
-  console.log('Transaction ID:', freeXrdForAccountTransaction.transactionId.id)
-
-  // To submit the transaction to the Gateway API, it must first be compiled or converted from its
-  // human readable format down to an array of bytes that can be consumed by the gateway. This can
-  // be done by calling the compile method on the transaction object.
-  const submissionResult = await submitTransaction(transactionApi, freeXrdForAccountTransaction.compiled)
-  console.log('Transaction submission result:', submissionResult)
+/**
+ * Returns the resource id of an asset
+ * @param {Asset | TokenAsset} asset asset
+ * @returns Resource id
+ */
+export const getAssetResource = (asset: Asset | TokenAsset): string => {
+  if (eqAsset(asset, AssetXRD)) return RADIX_ASSET_RESOURCE
+  return asset.symbol.slice(asset.ticker.length + 1)
 }
 
-main().catch((error) => {
-  console.error('Error executing main script:', error)
-  process.exit(1)
-})
+/**
+ * Generates a address param for a call method
+ * @param {Address} addr Address to transform to Radix Address parameter
+ * @returns the address in the Radix Address parameter format
+ */
+export const generateAddressParam = (addr: Address) => address(addr)
+
+/**
+ * Generates a string param for a call method
+ * @param {string} s Address to transform to Radix string parameter
+ * @returns the string in the Radix String parameter format
+ */
+export const generateStringParam = (s: string) => str(s)
+
+/**
+ * Generates a bucket param for a call method
+ * @param {number} value Value to transform to Radix Bucket parameter
+ * @returns the value in the Radix Bucket parameter format
+ */
+export const generateBucketParam = (value: number) => bucket(value)

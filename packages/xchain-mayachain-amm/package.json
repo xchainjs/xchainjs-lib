@@ -44,6 +44,7 @@
     "@xchainjs/xchain-kujira": "workspace:*",
     "@xchainjs/xchain-mayachain": "workspace:*",
     "@xchainjs/xchain-mayachain-query": "workspace:*",
+    "@xchainjs/xchain-radix": "workspace:*",
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
     "ethers": "5.7.2"

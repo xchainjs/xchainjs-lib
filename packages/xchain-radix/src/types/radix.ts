@@ -1,3 +1,4 @@
+import { Value } from '@radixdlt/radix-engine-toolkit'
 import {
   Balance as BaseBalance,
   Tx as BaseTx,
@@ -6,7 +7,7 @@ import {
   TxTo as BaseTxTo,
   TxsPage as BaseTxsPage,
 } from '@xchainjs/xchain-client'
-import { Asset, TokenAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, TokenAsset } from '@xchainjs/xchain-util'
 
 export type CompatibleAsset = Asset | TokenAsset
 
@@ -68,6 +69,13 @@ export type TxsPage = BaseTxsPage & {
   txs: Tx[]
 }
 
+export type MethodToCall = {
+  address: Address
+  methodName: string
+  params: Value[]
+}
+
 export type TxParams = BaseTxParams & {
   asset?: CompatibleAsset
+  methodToCall?: MethodToCall
 }
