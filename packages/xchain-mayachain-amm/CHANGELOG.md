@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.0.7
+
+### Patch Changes
+
+- ccde096: MAYAChainAMM compatible with Radix.
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+  - @xchainjs/xchain-radix@1.1.0
+  - @xchainjs/xchain-wallet@1.0.7
+  - @xchainjs/xchain-mayachain-query@1.0.4
+  - @xchainjs/xchain-kujira@1.0.4
+  - @xchainjs/xchain-mayachain@2.0.4
+  - @xchainjs/xchain-thorchain@2.0.5
+  - @xchainjs/xchain-arbitrum@1.0.6
+  - @xchainjs/xchain-ethereum@1.0.6
+
 ## 3.0.6
 
 ### Patch Changes

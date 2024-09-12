@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- Updated dependencies [ccde096]
+- Updated dependencies [ccde096]
+- Updated dependencies [b4327b9]
+  - @xchainjs/xchain-wallet@1.0.7
+  - @xchainjs/xchain-evm@1.0.6
+  - @xchainjs/xchain-cosmos@2.0.4
+  - @xchainjs/xchain-thorchain@2.0.5
+  - @xchainjs/xchain-avax@1.0.6
+  - @xchainjs/xchain-bsc@1.0.6
+  - @xchainjs/xchain-ethereum@1.0.6
+
 ## 2.0.6
 
 ### Patch Changes

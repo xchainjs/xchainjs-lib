@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- ccde096: Method `getDustValues` updated to be compatible with Radix.
+
 ## 1.0.3
 
 ### Patch Changes

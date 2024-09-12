@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- b4327b9: Return balances including native and those that are 0
+
 ## 1.0.3
 
 ### Patch Changes

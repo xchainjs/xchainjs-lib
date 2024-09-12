@@ -1,5 +1,20 @@
 # @xchainjs/xchain-radix
 
+## 1.1.0
+
+### Minor Changes
+
+- ccde096: New utility function `generateBucketParam` to generate the Bucket parameter type for when you need to provide for a component method call.
+- ccde096: New utility function `generateAddressParam` to generate the Address parameter type for when you need to provide for a component method call.
+- ccde096: New optional property for `TxParams` named `methodToCall` to provide the needed information to call a method in a component.
+- ccde096: New utility function `generateStringParam` to generate the String parameter type for when you need to provide for a component method call.
+
+### Patch Changes
+
+- ccde096: New utility function `getAssetResource` to get the resource of an Asset or TokenAsset.
+- ccde096: `XrdAssetMainnet` and `XrdAssetStokenet` renamed to `AssetXRD`.
+- ccde096: `RadixChain` updated to `XRD`.
+
 ## 1.0.4
 
 ### Patch Changes
