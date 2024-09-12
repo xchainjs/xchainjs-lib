@@ -74,7 +74,7 @@ export class CovalentProvider implements EvmOnlineDataProvider {
 
     if (assets) {
       finalBalances = balances.filter((balance) => {
-        return assets.some((asset) => asset.symbol === balance.asset.symbol)
+        return assets.some((asset) => asset.symbol === balance.asset.symbol || asset.type === AssetType.NATIVE)
       })
     }
 

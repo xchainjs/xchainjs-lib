@@ -273,18 +273,19 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * @param {Asset[] | undefined} _assets An array of assets. Ignored in this implementation.
    * @returns {Balance[]} A promise that resolves to an array of balances.
    */
-  public async getBalance(address: string, _assets?: CompatibleAsset[]): Promise<Balance[]> {
-    const result = await this.roundRobinGetBalance(address)
-    // TODO: Filter using assets
+  public async getBalance(address: string, assets?: CompatibleAsset[]): Promise<Balance[]> {
+    const results = await this.roundRobinGetBalance(address)
     const balances: Balance[] = []
-    result.forEach((balance) => {
-      const asset = this.assetFromDenom(balance.denom)
-      if (asset) {
-        balances.push({
-          asset,
-          amount: baseAmount(balance.amount, this.getAssetDecimals(asset)),
-        })
-      }
+    const nativeAssetInfo = this.getAssetInfo()
+
+    const allAssets = [nativeAssetInfo.asset, ...(assets || [])]
+
+    allAssets.forEach((asset) => {
+      const assetBalance = results.find((result) => result.denom === this.getDenom(asset))
+      balances.push({
+        asset,
+        amount: baseAmount(assetBalance?.amount || 0, this.getAssetDecimals(asset)),
+      })
     })
     return balances
   }
