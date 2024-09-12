@@ -1,5 +1,12 @@
 # xchainjs-wallet
 
+## 1.0.23
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@1.0.7
+- @xchainjs/xchain-wallet@1.0.8
+
 ## 1.0.22
 
 ### Patch Changes

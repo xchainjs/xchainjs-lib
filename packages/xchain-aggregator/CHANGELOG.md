@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.8
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@3.0.8
+- @xchainjs/xchain-thorchain-amm@2.0.8
+- @xchainjs/xchain-wallet@1.0.8
+
 ## 1.0.7
 
 ### Patch Changes
