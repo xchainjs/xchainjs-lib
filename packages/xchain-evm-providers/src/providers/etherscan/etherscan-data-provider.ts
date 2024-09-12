@@ -76,7 +76,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     return balances
   }
   private async getNativeAssetBalance(address: Address): Promise<{ asset: Asset; amount: BaseAmount }> {
-    const gasAssetBalance: BigNumber = await this.provider.getBalance(address)
+    const gasAssetBalance: BigNumber = await this.provider.getBalance(address.toLowerCase())
     const amount = baseAmount(gasAssetBalance.toString(), this.nativeAssetDecimals)
     return {
       asset: this.nativeAsset,
@@ -95,8 +95,8 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
       type: AssetType.TOKEN,
     }
 
-    const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, this.provider)
-    const balance = (await contract.balanceOf(address)).toString()
+    const contract: ethers.Contract = new ethers.Contract(contractAddress.toLowerCase(), erc20ABI, this.provider)
+    const balance = (await contract.balanceOf(address.toLowerCase())).toString()
 
     const decimals = (await contract.decimals()).toString()
     const amount = baseAmount(balance, Number.parseInt(decimals))
