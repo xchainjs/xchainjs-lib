@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.8
+
+### Patch Changes
+
+- @xchainjs/xchain-avax@1.0.7
+- @xchainjs/xchain-bsc@1.0.7
+- @xchainjs/xchain-ethereum@1.0.7
+- @xchainjs/xchain-evm@1.0.7
+- @xchainjs/xchain-wallet@1.0.8
+
 ## 2.0.7
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- c303f02: Bug fix with addresses in Etherscan provider when trying to retrieve balances and the addresses are in upper case
+
 ## 1.0.4
 
 ### Patch Changes

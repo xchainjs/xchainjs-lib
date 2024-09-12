@@ -1,5 +1,15 @@
 # xchainjs-thorchain-amm
 
+## 0.0.8
+
+### Patch Changes
+
+- @xchainjs/xchain-avax@1.0.7
+- @xchainjs/xchain-bsc@1.0.7
+- @xchainjs/xchain-ethereum@1.0.7
+- @xchainjs/xchain-thorchain-amm@2.0.8
+- @xchainjs/xchain-wallet@1.0.8
+
 ## 0.0.7
 
 ### Patch Changes
