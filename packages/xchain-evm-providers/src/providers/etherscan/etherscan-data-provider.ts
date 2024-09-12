@@ -44,28 +44,22 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     this.nativeAsset
     this.chain
   }
-
   async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
     //validate assets are for the correct chain
     assets?.forEach((i) => {
       if (i.chain !== this.chain) throw Error(`${assetToString(i)} is not an asset of ${this.chain}`)
     })
     const balances: Balance[] = []
+    balances.push(await this.getNativeAssetBalance(address))
 
     if (assets) {
       for (const asset of assets) {
-        if (asset.symbol === this.nativeAsset.symbol) {
-          balances.push(await this.getNativeAssetBalance(address))
-        } else {
-          const splitSymbol = asset.symbol.split('-')
-          const tokenSymbol = splitSymbol[0]
-          const contractAddress = splitSymbol[1]
-          balances.push(await this.getTokenBalance(address, contractAddress, tokenSymbol))
-        }
+        const splitSymbol = asset.symbol.split('-')
+        const tokenSymbol = splitSymbol[0]
+        const contractAddress = splitSymbol[1]
+        balances.push(await this.getTokenBalance(address, contractAddress, tokenSymbol))
       }
     } else {
-      //get nativeAsset
-      balances.push(await this.getNativeAssetBalance(address))
       // Get All Erc-20 txs
       const response = (
         await axios.get<GetERC20TxsResponse>(
@@ -112,6 +106,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
       amount,
     }
   }
+
   private getUniqueContractAddresses(array: ERC20Tx[]): ERC20Tx[] {
     const mySet = new Set<string>()
     return array.filter((x) => {

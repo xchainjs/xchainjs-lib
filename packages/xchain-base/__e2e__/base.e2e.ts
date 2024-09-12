@@ -1,5 +1,12 @@
 import { Balance, FeeOption, Network, TxType } from '@xchainjs/xchain-client'
-import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  AssetType,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 
 import { BASEChain, defaultBaseParams } from '../src/const'
 import { Client as BaseClient } from '../src/index'
@@ -33,7 +40,15 @@ describe('Base', () => {
   it('should fetch Base balances', async () => {
     const address = testnetClient.getAddress(0)
     console.log(address)
-    const balances = await testnetClient.getBalance(address)
+    const balances = await testnetClient.getBalance('0x585142ebBA458B681caea61Bb178E529EdAd23f4')
+    balances.forEach((bal: Balance) => {
+      console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
+    })
+  })
+  it('should fetch filter balances', async () => {
+    const balances = await testnetClient.getBalance('0x585142ebBA458B681caea61Bb178E529EdAd23f4', [
+      assetFromStringEx('BASE.WETH-0x4200000000000000000000000000000000000006') as TokenAsset,
+    ])
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })

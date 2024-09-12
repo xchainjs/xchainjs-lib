@@ -17,7 +17,16 @@ import {
   standardFeeRates,
 } from '@xchainjs/xchain-client'
 import { EvmOnlineDataProviders } from '@xchainjs/xchain-evm-providers'
-import { Address, Asset, CachedValue, Chain, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  CachedValue,
+  Chain,
+  TokenAsset,
+  assetToString,
+  baseAmount,
+  eqAsset,
+} from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 import { toUtf8Bytes } from 'ethers/lib/utils'
 
@@ -197,7 +206,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @returns {Promise<Balance[]>} An array containing the balance of the address.
    * @throws {"Invalid asset"} Thrown when the provided asset is invalid.
    */
-  async getBalance(address: Address, assets?: Asset[]): Promise<Balance[]> {
+  async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     return await this.roundRobinGetBalance(address, assets)
   }
 
@@ -481,7 +490,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @returns {Promise<Balance[]>} The balance information for the address.
    * @throws Error Thrown if no provider is able to retrieve the balance.
    */
-  protected async roundRobinGetBalance(address: Address, assets?: Asset[]) {
+  protected async roundRobinGetBalance(address: Address, assets?: TokenAsset[]) {
     for (const provider of this.config.dataProviders) {
       try {
         const prov = provider[this.network]
