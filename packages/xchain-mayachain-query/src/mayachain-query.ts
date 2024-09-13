@@ -116,29 +116,14 @@ export class MayachainQuery {
       return {
         toAddress: ``,
         memo: ``,
-        expectedAmount: new CryptoAmount(
-          baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
-          destinationAsset,
-        ),
+        expectedAmount: new CryptoAmount(baseAmount(0), destinationAsset),
         dustThreshold: this.getChainDustValue(fromAsset.chain),
         fees: {
           asset: destinationAsset,
-          affiliateFee: new CryptoAmount(
-            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
-            destinationAsset,
-          ),
-          outboundFee: new CryptoAmount(
-            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
-            destinationAsset,
-          ),
-          liquidityFee: new CryptoAmount(
-            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
-            destinationAsset,
-          ),
-          totalFee: new CryptoAmount(
-            baseAmount(0, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
-            destinationAsset,
-          ),
+          affiliateFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          outboundFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          liquidityFee: new CryptoAmount(baseAmount(0), destinationAsset),
+          totalFee: new CryptoAmount(baseAmount(0), destinationAsset),
         },
         outboundDelayBlocks: 0,
         outboundDelaySeconds: 0,
