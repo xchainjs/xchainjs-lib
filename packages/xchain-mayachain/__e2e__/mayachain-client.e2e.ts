@@ -1,7 +1,7 @@
 import { Tx } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import { assetAmount, assetFromStringEx, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { AssetCacao, CACAO_DECIMAL, Client, DepositTx } from '..'
+import { AssetCacao, CACAO_DECIMAL, Client, DepositTx } from '../lib'
 
 const getPrintableTx = (tx: Tx) => {
   return {
@@ -48,7 +48,7 @@ const getPrintableDepositTx = (depositTx: DepositTx) => {
   }
 }
 
-describe('Thorchain client e2e', () => {
+describe('Mayachain client e2e', () => {
   let client: Client
 
   beforeAll(() => {
