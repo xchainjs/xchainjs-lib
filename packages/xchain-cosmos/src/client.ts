@@ -251,7 +251,7 @@ export abstract class Client extends CosmosSDKClient {
   protected getStandardFee(asset: Asset): StdFee {
     const denom = this.getDenom(asset)
     const defaultGasPrice = GasPrice.fromString(`0.006${denom}`)
-    return calculateFee(90_000, defaultGasPrice)
+    return calculateFee(150_000, defaultGasPrice)
   }
 
   /**
