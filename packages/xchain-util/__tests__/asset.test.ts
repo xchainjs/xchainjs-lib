@@ -340,6 +340,11 @@ describe('asset', () => {
       expect(result).toEqual({ chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN })
     })
 
+    it('MAYA.MAYA', () => {
+      const result = assetFromString('MAYA.MAYA')
+      expect(result).toEqual({ chain: 'MAYA', symbol: 'MAYA', ticker: 'MAYA', type: AssetType.TOKEN })
+    })
+
     it('trade AVAX~USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E', () => {
       const result = assetFromString('AVAX~USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E')
       expect(result).toEqual({

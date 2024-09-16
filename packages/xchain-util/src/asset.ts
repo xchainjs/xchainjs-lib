@@ -258,31 +258,35 @@ export const isTokenAsset = (asset: AnyAsset): asset is TokenAsset => asset.type
  * @param {string} s The given string.
  * @returns {Asset|null} The asset from the given string.
  */
+const assetConfigs = new Map<string, AnyAsset>([
+  ['KUJI.USK', { chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN }],
+  ['MAYA.MAYA', { chain: 'MAYA', symbol: 'MAYA', ticker: 'MAYA', type: AssetType.TOKEN }],
+])
+
+const createAsset = (chain: string, symbol: string, ticker: string, type: AssetType) => {
+  return { chain, symbol, ticker, type }
+}
+
 export const assetFromString = (s: string): AnyAsset | null => {
-  if (s === 'KUJI.USK') return { chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN } // TODO: Find a better way to avoid hardcoding
+  const directAsset = assetConfigs.get(s)
+  if (directAsset) return directAsset
+
   const isSynth = s.includes(SYNTH_ASSET_DELIMITER)
   const isTrade = s.includes(TRADE_ASSET_DELIMITER)
   const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : isTrade ? TRADE_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
+
   const data = s.split(delimiter)
-  if (data.length <= 1 || data[1]?.length < 1) {
-    return null
-  }
+  if (data.length <= 1 || !data[1]) return null
 
-  const chain = data[0]
-  // filter out not supported string of chains
-  if (!chain) return null
-
-  const symbol = data[1]
+  const chain = data[0].trim()
+  const symbol = data[1].trim()
   const ticker = symbol.split('-')[0]
   const isToken = symbol.split('-')[1]?.length > 1
 
-  if (!symbol) return null
+  if (!symbol || !chain) return null
 
-  if (isSynth) return { chain, symbol, ticker, type: AssetType.SYNTH }
-  if (isTrade) return { chain, symbol, ticker, type: AssetType.TRADE }
-  if (isToken) return { chain, symbol, ticker, type: AssetType.TOKEN }
-
-  return { chain, symbol, ticker, type: AssetType.NATIVE }
+  const type = isSynth ? AssetType.SYNTH : isTrade ? AssetType.TRADE : isToken ? AssetType.TOKEN : AssetType.NATIVE
+  return createAsset(chain, symbol, ticker, type)
 }
 
 /**

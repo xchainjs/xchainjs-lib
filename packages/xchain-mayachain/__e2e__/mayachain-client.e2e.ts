@@ -48,7 +48,7 @@ const getPrintableDepositTx = (depositTx: DepositTx) => {
   }
 }
 
-describe('Thorchain client e2e', () => {
+describe('Mayachain client e2e', () => {
   let client: Client
 
   beforeAll(() => {
