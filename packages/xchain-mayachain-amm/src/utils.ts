@@ -1,4 +1,4 @@
-import { AssetAETH } from '@xchainjs/xchain-arbitrum'
+import { ARBChain, AssetAETH, Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
@@ -84,6 +84,8 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new MayaClient({ network }).validateAddress(address)
     case RadixChain:
       return new RadixClient({ network }).validateAddress(address)
+    case ARBChain:
+      return new ArbClient({ ...defaultArbParams, network: Network.Mainnet }).validateAddress(address)
     default:
       throw Error('Unsupported chain')
   }
