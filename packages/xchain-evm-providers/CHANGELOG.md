@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [f90c0d8]
+  - @xchainjs/xchain-util@1.0.3
+  - @xchainjs/xchain-client@1.0.4
+
 ## 1.0.5
 
 ### Patch Changes

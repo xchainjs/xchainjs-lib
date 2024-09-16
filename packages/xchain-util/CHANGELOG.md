@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- f90c0d8: Refactor assetFromString and correct chain MAYA.MAYA
+
 ## 1.0.2
 
 ### Patch Changes

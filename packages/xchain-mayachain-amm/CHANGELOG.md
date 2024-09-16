@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.0.9
+
+### Patch Changes
+
+- 04ed0d0: Arbitrum address validation
+- Updated dependencies [b9c2491]
+  - @xchainjs/xchain-mayachain@2.0.5
+  - @xchainjs/xchain-thorchain@2.0.6
+  - @xchainjs/xchain-kujira@1.0.5
+  - @xchainjs/xchain-arbitrum@1.0.8
+  - @xchainjs/xchain-bitcoin@1.0.4
+  - @xchainjs/xchain-client@1.0.4
+  - @xchainjs/xchain-dash@1.0.4
+  - @xchainjs/xchain-ethereum@1.0.8
+  - @xchainjs/xchain-mayachain-query@1.0.5
+  - @xchainjs/xchain-radix@1.1.1
+  - @xchainjs/xchain-wallet@1.0.9
+
 ## 3.0.8
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies [f90c0d8]
+  - @xchainjs/xchain-util@1.0.3
+  - @xchainjs/xchain-client@1.0.4
+  - @xchainjs/xchain-mayamidgard-query@0.1.20
+
 ## 1.0.4
 
 ### Patch Changes

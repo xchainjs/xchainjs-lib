@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [b9c2491]
+- Updated dependencies [f90c0d8]
+- Updated dependencies [b9c2491]
+  - @xchainjs/xchain-cosmos@2.0.5
+  - @xchainjs/xchain-util@1.0.3
+  - @xchainjs/xchain-thorchain@2.0.6
+  - @xchainjs/xchain-avax@1.0.8
+  - @xchainjs/xchain-binance@6.0.4
+  - @xchainjs/xchain-bitcoin@1.0.4
+  - @xchainjs/xchain-bitcoincash@1.0.4
+  - @xchainjs/xchain-bsc@1.0.8
+  - @xchainjs/xchain-client@1.0.4
+  - @xchainjs/xchain-doge@1.0.4
+  - @xchainjs/xchain-ethereum@1.0.8
+  - @xchainjs/xchain-evm@1.0.8
+  - @xchainjs/xchain-litecoin@1.0.4
+  - @xchainjs/xchain-thorchain-query@1.0.4
+  - @xchainjs/xchain-wallet@1.0.9
+
 ## 2.0.8
 
 ### Patch Changes
