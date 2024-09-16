@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.5
+
+### Patch Changes
+
+- b9c2491: Default transfer gas limit updated from 90_000 to 150_000
+- b9c2491: Cosmosjs dependencies updated to 0.32.4
+- Updated dependencies [f90c0d8]
+- Updated dependencies [b9c2491]
+  - @xchainjs/xchain-util@1.0.3
+  - @xchainjs/xchain-cosmos-sdk@1.0.5
+  - @xchainjs/xchain-client@1.0.4
+
 ## 2.0.4
 
 ### Patch Changes
