@@ -1,6 +1,7 @@
+import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { Client, defaultBTCParams } from '../src'
+import { Client, ClientLedger, defaultBTCParams } from '../src'
 
 describe('Bitcoin Taproot', () => {
   describe('Keystore', () => {
@@ -46,6 +47,27 @@ describe('Bitcoin Taproot', () => {
       })
 
       console.log({ hash })
+    })
+  })
+
+  describe('Ledger', () => {
+    let tapRootClient: ClientLedger
+    beforeAll(async () => {
+      const transport = await TransportNodeHid.create()
+      tapRootClient = new ClientLedger({
+        ...defaultBTCParams,
+        transport,
+        useTapRoot: true,
+      })
+    })
+
+    it('Should get taproot address', async () => {
+      console.log(await tapRootClient.getAddressAsync())
+    })
+
+    it('Should get balance of taproot address', async () => {
+      const balance = await tapRootClient.getBalance(await tapRootClient.getAddressAsync())
+      console.log(balance[0].amount.amount().toString())
     })
   })
 })

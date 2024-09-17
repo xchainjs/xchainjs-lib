@@ -8,7 +8,8 @@ import { ECPairFactory, ECPairInterface } from 'ecpair'
 import * as ecc from 'tiny-secp256k1'
 
 import { Client, defaultBTCParams } from './client' // Importing the base Bitcoin client
-import * as Utils from './utils' // Importing utility functions
+import { tapRootDerivationPaths } from './const' // Importing utility functions
+import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
 /**
@@ -16,7 +17,7 @@ const ECPair = ECPairFactory(ecc)
  */
 class ClientKeystore extends Client {
   constructor(params: UtxoClientParams & { useTapRoot?: boolean } = { ...defaultBTCParams, useTapRoot: false }) {
-    super(params)
+    super(params.useTapRoot ? { ...defaultBTCParams, rootDerivationPaths: tapRootDerivationPaths } : params)
   }
   /**
    * @deprecated This function eventually will be removed. Use getAddressAsync instead.

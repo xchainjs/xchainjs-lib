@@ -5,7 +5,8 @@ import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
-import { Client } from './client'
+import { Client, defaultBTCParams } from './client'
+import { tapRootDerivationPaths } from './const'
 
 /**
  * Custom Ledger Bitcoin client
@@ -18,8 +19,8 @@ class ClientLedger extends Client {
 
   // Constructor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(params: UtxoClientParams & { transport: any }) {
-    super(params)
+  constructor(params: UtxoClientParams & { transport: any; useTapRoot?: boolean }) {
+    super(params.useTapRoot ? { ...defaultBTCParams, rootDerivationPaths: tapRootDerivationPaths } : params)
     this.transport = params.transport
   }
 
@@ -41,7 +42,7 @@ class ClientLedger extends Client {
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const result = await app.getWalletPublicKey(this.getFullDerivationPath(index), {
-      format: 'bech32',
+      format: this.useTapRoot ? 'bech32m' : 'bech32',
       verify,
     })
     return result.bitcoinAddress
