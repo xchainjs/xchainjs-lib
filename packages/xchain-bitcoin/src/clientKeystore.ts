@@ -121,21 +121,13 @@ class ClientKeystore extends Client {
       ...params,
       sender: this.getAddress(fromAddressIndex),
       feeRate,
-      publicKey: this.useTapRoot ? btcKeys.publicKey : undefined,
     })
 
     // Build the PSBT
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
 
     // Sign all inputs
-    if (!this.useTapRoot) {
-      psbt.signAllInputs(btcKeys)
-    } else {
-      const tweakedChildNode = btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey)))
-      for (let i = 0; i < psbt.txInputs.length; i++) {
-        psbt.signTaprootInput(i, tweakedChildNode)
-      }
-    }
+    psbt.signAllInputs(btcKeys)
 
     // Finalize inputs
     psbt.finalizeAllInputs()
