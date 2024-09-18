@@ -43,7 +43,7 @@ describe('Bitcoin Taproot', () => {
 
     it('Should send amount from Taproot address', async () => {
       const hash = await tapRootClient.transfer({
-        recipient: 'bc1qp5uvv80k6h399fxd9pl7d4kxszcln7dst8hr77',
+        recipient: await tapRootClient.getAddressAsync(),
         amount: assetToBase(assetAmount(0.00004)),
         memo: 'test',
       })
@@ -73,7 +73,7 @@ describe('Bitcoin Taproot', () => {
 
     it('Should send amount to Taproot address', async () => {
       const hash = await tapRootClient.transfer({
-        recipient: 'bc1pkk9s0qup5l40hl55h34c8gneelyms3udrsw6vqws4a06htuym8dsrpam0r',
+        recipient: await tapRootClient.getAddressAsync(),
         amount: assetToBase(assetAmount(0.00002)),
       })
 
