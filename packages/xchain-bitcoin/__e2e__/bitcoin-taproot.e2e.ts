@@ -1,7 +1,7 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { Client, ClientLedger, defaultBTCParams } from '../src'
+import { AddressFormat, Client, ClientLedger, defaultBTCParams, tapRootDerivationPaths } from '../src'
 
 describe('Bitcoin Taproot', () => {
   describe('Keystore', () => {
@@ -15,33 +15,32 @@ describe('Bitcoin Taproot', () => {
       })
       tapRootClient = new Client({
         ...defaultBTCParams,
-        useTapRoot: true,
+        addressFormat: AddressFormat.P2TR,
         phrase: process.env.PHRASE_MAINNET,
       })
     })
 
-    it('Should get taproot address', async () => {
+    it('Should get Taproot address', async () => {
       console.log(await tapRootClient.getAddressAsync())
     })
 
-    it('Should get balance of taproot address', async () => {
+    it('Should get balance of Taproot address', async () => {
       const balance = await tapRootClient.getBalance(await tapRootClient.getAddressAsync())
       console.log(balance[0].amount.amount().toString())
     })
 
-    it('Should send amount to TapRoot address', async () => {
+    it('Should send amount to Taproot address', async () => {
       const hash = await client.transfer({
         recipient: await tapRootClient.getAddressAsync(),
-        amount: assetToBase(assetAmount(0.00002)),
-        memo: 'test',
+        amount: assetToBase(assetAmount(0.0005)),
       })
 
       console.log({ hash })
     })
 
-    it('Should send amount from TapRoot address', async () => {
+    it('Should send amount from Taproot address', async () => {
       const hash = await tapRootClient.transfer({
-        recipient: await client.getAddressAsync(),
+        recipient: await tapRootClient.getAddressAsync(),
         amount: assetToBase(assetAmount(0.00002)),
         memo: 'test',
       })
@@ -56,18 +55,39 @@ describe('Bitcoin Taproot', () => {
       const transport = await TransportNodeHid.create()
       tapRootClient = new ClientLedger({
         ...defaultBTCParams,
+        addressFormat: AddressFormat.P2TR,
+        rootDerivationPaths: tapRootDerivationPaths,
         transport,
-        useTapRoot: true,
       })
     })
 
-    it('Should get taproot address', async () => {
+    it('Should get Taproot address', async () => {
       console.log(await tapRootClient.getAddressAsync())
     })
 
-    it('Should get balance of taproot address', async () => {
+    it('Should get balance of Taproot address', async () => {
       const balance = await tapRootClient.getBalance(await tapRootClient.getAddressAsync())
       console.log(balance[0].amount.amount().toString())
+    })
+
+    it('Should send amount Taproot address', async () => {
+      const hash = await tapRootClient.transfer({
+        recipient: await tapRootClient.getAddressAsync(),
+        amount: assetToBase(assetAmount(0.00003)),
+        memo: 'test',
+      })
+
+      console.log({ hash })
+    })
+
+    it('Should send amount from Taproot address', async () => {
+      const hash = await tapRootClient.transfer({
+        recipient: await tapRootClient.getAddressAsync(),
+        amount: assetToBase(assetAmount(0.00002)),
+        memo: 'test',
+      })
+
+      console.log({ hash })
     })
   })
 })

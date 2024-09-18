@@ -16,6 +16,7 @@ import {
   UPPER_FEE_BOUND,
   blockstreamExplorerProviders,
 } from './const'
+import { AddressFormat } from './types'
 import * as Utils from './utils'
 
 // Default parameters for the Bitcoin UTXO client
@@ -38,13 +39,18 @@ export const defaultBTCParams: UtxoClientParams = {
  * Custom Bitcoin client
  */
 abstract class Client extends UTXOClient {
-  protected useTapRoot: boolean
+  protected addressFormat: AddressFormat
   /**
    * Constructor
    * Initializes the client with network type and other parameters.
    * @param {UtxoClientParams} params
    */
-  constructor(params: UtxoClientParams & { useTapRoot?: boolean } = { ...defaultBTCParams, useTapRoot: false }) {
+  constructor(
+    params: UtxoClientParams & { addressFormat?: AddressFormat } = {
+      ...defaultBTCParams,
+      addressFormat: AddressFormat.P2WPKH,
+    },
+  ) {
     super(BTCChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,
@@ -53,9 +59,9 @@ abstract class Client extends UTXOClient {
       explorerProviders: params.explorerProviders,
       dataProviders: params.dataProviders,
     })
-    this.useTapRoot = params.useTapRoot || false
+    this.addressFormat = params.addressFormat || AddressFormat.P2WPKH
 
-    if (this.useTapRoot) {
+    if (this.addressFormat === AddressFormat.P2TR) {
       if (
         !this.rootDerivationPaths?.mainnet.startsWith(`86'`) ||
         !this.rootDerivationPaths?.testnet.startsWith(`86'`) ||
@@ -181,7 +187,7 @@ abstract class Client extends UTXOClient {
     // Initialize a new Bitcoin PSBT object.
     const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) }) // Network-specific
 
-    if (!this.useTapRoot) {
+    if (this.addressFormat === AddressFormat.P2WPKH) {
       // Add inputs to the PSBT from the accumulated inputs.
       inputs.forEach((utxo: UTXO) =>
         psbt.addInput({

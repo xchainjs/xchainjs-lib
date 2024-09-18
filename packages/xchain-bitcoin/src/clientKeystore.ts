@@ -8,6 +8,7 @@ import { ECPairFactory, ECPairInterface } from 'ecpair'
 import * as ecc from 'tiny-secp256k1'
 
 import { Client, defaultBTCParams } from './client' // Importing the base Bitcoin client
+import { AddressFormat } from './types'
 import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
@@ -15,7 +16,12 @@ const ECPair = ECPairFactory(ecc)
  * Custom Bitcoin client extended to support keystore functionality
  */
 class ClientKeystore extends Client {
-  constructor(params: UtxoClientParams & { useTapRoot?: boolean } = { ...defaultBTCParams, useTapRoot: false }) {
+  constructor(
+    params: UtxoClientParams & { addressFormat?: AddressFormat } = {
+      ...defaultBTCParams,
+      addressFormat: AddressFormat.P2WPKH,
+    },
+  ) {
     super(params)
   }
   /**
@@ -41,7 +47,7 @@ class ClientKeystore extends Client {
       // Generate the address using the Bitcoinjs library
 
       let address: string | undefined
-      if (!this.useTapRoot) {
+      if (this.addressFormat === AddressFormat.P2WPKH) {
         address = Bitcoin.payments.p2wpkh({
           pubkey: btcKeys.publicKey,
           network: btcNetwork,
@@ -128,7 +134,7 @@ class ClientKeystore extends Client {
 
     // Sign all inputs
     psbt.signAllInputs(
-      !this.useTapRoot
+      this.addressFormat === AddressFormat.P2WPKH
         ? btcKeys
         : btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey))),
     )
