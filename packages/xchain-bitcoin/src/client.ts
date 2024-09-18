@@ -1,9 +1,9 @@
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative'
-import * as ecc from 'tiny-secp256k1'
 
 import {
   AssetBTC,

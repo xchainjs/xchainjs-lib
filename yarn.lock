@@ -651,6 +651,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@bitcoin-js/tiny-secp256k1-asmjs@npm:2.2.3":
+  version: 2.2.3
+  resolution: "@bitcoin-js/tiny-secp256k1-asmjs@npm:2.2.3"
+  dependencies:
+    uint8array-tools: "npm:0.0.7"
+  checksum: 10c0/45cb38271789a8268d5ccfa589d9548b8eeb16822a36e15658c49dee510d3de9ab4941571ea0c139409e3788826e923c759c99f2b6cf46d193776349e439a281
+  languageName: node
+  linkType: hard
+
 "@bnb-chain/javascript-sdk@npm:4.4.2":
   version: 4.4.2
   resolution: "@bnb-chain/javascript-sdk@npm:4.4.2"
@@ -3183,20 +3192,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-wasm@npm:6.2.2":
-  version: 6.2.2
-  resolution: "@rollup/plugin-wasm@npm:6.2.2"
-  dependencies:
-    "@rollup/pluginutils": "npm:^5.0.2"
-  peerDependencies:
-    rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
-  peerDependenciesMeta:
-    rollup:
-      optional: true
-  checksum: 10c0/2295cd6e950c9a2d721e18244822592704701bc2c9fb92456641f4f7069d5d66a43ee1692abe32912d3d5d21193009cabfa9e4c2e18185dfa11302b123c8eef6
-  languageName: node
-  linkType: hard
-
 "@rollup/pluginutils@npm:^4.1.2":
   version: 4.2.1
   resolution: "@rollup/pluginutils@npm:4.2.1"
@@ -3220,22 +3215,6 @@ __metadata:
     rollup:
       optional: true
   checksum: 10c0/b06f73c15bb59418aa6fbfead5675bab2d6922e15663525ffc2eb8429530bc5add516600adb251cfbf9b60f3d12fb821cde155cb5103415154a476bd0f163432
-  languageName: node
-  linkType: hard
-
-"@rollup/pluginutils@npm:^5.0.2":
-  version: 5.1.0
-  resolution: "@rollup/pluginutils@npm:5.1.0"
-  dependencies:
-    "@types/estree": "npm:^1.0.0"
-    estree-walker: "npm:^2.0.2"
-    picomatch: "npm:^2.3.1"
-  peerDependencies:
-    rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
-  peerDependenciesMeta:
-    rollup:
-      optional: true
-  checksum: 10c0/c7bed15711f942d6fdd3470fef4105b73991f99a478605e13d41888963330a6f9e32be37e6ddb13f012bc7673ff5e54f06f59fd47109436c1c513986a8a7612d
   languageName: node
   linkType: hard
 
@@ -4387,6 +4366,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-bitcoin@workspace:packages/xchain-bitcoin"
   dependencies:
+    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:2.2.3"
     "@ledgerhq/hw-app-btc": "npm:10.1.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
@@ -4401,7 +4381,6 @@ __metadata:
     coininfo: "npm:5.1.0"
     coinselect: "npm:3.1.12"
     ecpair: "npm:2.1.0"
-    tiny-secp256k1: "npm:2.2.3"
   languageName: unknown
   linkType: soft
 
@@ -11743,7 +11722,6 @@ __metadata:
     "@rollup/plugin-commonjs": "npm:^24.1.0"
     "@rollup/plugin-json": "npm:^6.0.0"
     "@rollup/plugin-node-resolve": "npm:^15.0.2"
-    "@rollup/plugin-wasm": "npm:6.2.2"
     "@types/jest": "npm:^29.2.5"
     "@typescript-eslint/eslint-plugin": "npm:^5.48.0"
     "@typescript-eslint/parser": "npm:^5.48.0"
@@ -12685,15 +12663,6 @@ __metadata:
     nan: "npm:^2.13.2"
     node-gyp: "npm:latest"
   checksum: 10c0/b47ceada38f6fa65190906e8a98b58d1584b0640383f04db8196a7098c726e926cfba6271a53e97d98d4c67e2b364618d7b3d7e402f63e44f0e07a4aca82ac8b
-  languageName: node
-  linkType: hard
-
-"tiny-secp256k1@npm:2.2.3":
-  version: 2.2.3
-  resolution: "tiny-secp256k1@npm:2.2.3"
-  dependencies:
-    uint8array-tools: "npm:0.0.7"
-  checksum: 10c0/84ca5b88e90fc2a89b90814cec2394716393a9325f318ffede0cb99ff79aa4a63d609c76fc596727fd53192d9163ccaf690dc6817d3e571c625e3668d01177aa
   languageName: node
   linkType: hard
 

@@ -33,6 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
+    "@bitcoin-js/tiny-secp256k1-asmjs": "2.2.3",
     "@ledgerhq/hw-app-btc": "10.1.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
@@ -43,8 +44,7 @@
     "bitcoinjs-lib": "6.1.6",
     "coininfo": "5.1.0",
     "coinselect": "3.1.12",
-    "ecpair": "2.1.0",
-    "tiny-secp256k1": "2.2.3"
+    "ecpair": "2.1.0"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6",

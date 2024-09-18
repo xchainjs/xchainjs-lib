@@ -1,3 +1,4 @@
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
@@ -5,7 +6,6 @@ import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import { BIP32Factory } from 'bip32'
 import * as Bitcoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
-import * as ecc from 'tiny-secp256k1'
 
 import { Client, defaultBTCParams } from './client' // Importing the base Bitcoin client
 import { AddressFormat } from './types'
