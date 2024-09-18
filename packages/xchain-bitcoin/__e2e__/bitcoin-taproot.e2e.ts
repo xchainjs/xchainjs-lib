@@ -3,6 +3,8 @@ import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import { AddressFormat, Client, ClientLedger, defaultBTCParams, tapRootDerivationPaths } from '../src'
 
+jest.setTimeout(60000)
+
 describe('Bitcoin Taproot', () => {
   describe('Keystore', () => {
     let client: Client
@@ -16,7 +18,10 @@ describe('Bitcoin Taproot', () => {
       tapRootClient = new Client({
         ...defaultBTCParams,
         addressFormat: AddressFormat.P2TR,
-        phrase: process.env.PHRASE_MAINNET,
+        rootDerivationPaths: tapRootDerivationPaths,
+        phrase:
+          process.env.PHRASE_MAINNET ||
+          'buddy suffer hint evolve hover jump cherry magic hawk easy vital label usual amazing network siege click grocery erosion language scissors crop crack chaos',
       })
     })
 
@@ -40,8 +45,8 @@ describe('Bitcoin Taproot', () => {
 
     it('Should send amount from Taproot address', async () => {
       const hash = await tapRootClient.transfer({
-        recipient: await tapRootClient.getAddressAsync(),
-        amount: assetToBase(assetAmount(0.00002)),
+        recipient: 'bc1qp5uvv80k6h399fxd9pl7d4kxszcln7dst8hr77',
+        amount: assetToBase(assetAmount(0.00004)),
         memo: 'test',
       })
 
@@ -55,8 +60,6 @@ describe('Bitcoin Taproot', () => {
       const transport = await TransportNodeHid.create()
       tapRootClient = new ClientLedger({
         ...defaultBTCParams,
-        addressFormat: AddressFormat.P2TR,
-        rootDerivationPaths: tapRootDerivationPaths,
         transport,
       })
     })
@@ -70,11 +73,10 @@ describe('Bitcoin Taproot', () => {
       console.log(balance[0].amount.amount().toString())
     })
 
-    it('Should send amount Taproot address', async () => {
+    it('Should send amount to Taproot address', async () => {
       const hash = await tapRootClient.transfer({
-        recipient: await tapRootClient.getAddressAsync(),
-        amount: assetToBase(assetAmount(0.00003)),
-        memo: 'test',
+        recipient: 'bc1pkk9s0qup5l40hl55h34c8gneelyms3udrsw6vqws4a06htuym8dsrpam0r',
+        amount: assetToBase(assetAmount(0.00002)),
       })
 
       console.log({ hash })
@@ -83,7 +85,7 @@ describe('Bitcoin Taproot', () => {
     it('Should send amount from Taproot address', async () => {
       const hash = await tapRootClient.transfer({
         recipient: await tapRootClient.getAddressAsync(),
-        amount: assetToBase(assetAmount(0.00002)),
+        amount: assetToBase(assetAmount(0.00003)),
         memo: 'test',
       })
 
