@@ -5,8 +5,7 @@ import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
-import { Client, defaultBTCParams } from './client'
-import { tapRootDerivationPaths } from './const'
+import { Client } from './client'
 
 /**
  * Custom Ledger Bitcoin client
@@ -20,7 +19,7 @@ class ClientLedger extends Client {
   // Constructor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(params: UtxoClientParams & { transport: any; useTapRoot?: boolean }) {
-    super(params.useTapRoot ? { ...defaultBTCParams, rootDerivationPaths: tapRootDerivationPaths } : params)
+    super(params)
     this.transport = params.transport
   }
 

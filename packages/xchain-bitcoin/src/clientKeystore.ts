@@ -8,7 +8,6 @@ import { ECPairFactory, ECPairInterface } from 'ecpair'
 import * as ecc from 'tiny-secp256k1'
 
 import { Client, defaultBTCParams } from './client' // Importing the base Bitcoin client
-import { tapRootDerivationPaths } from './const' // Importing utility functions
 import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
@@ -17,7 +16,7 @@ const ECPair = ECPairFactory(ecc)
  */
 class ClientKeystore extends Client {
   constructor(params: UtxoClientParams & { useTapRoot?: boolean } = { ...defaultBTCParams, useTapRoot: false }) {
-    super(params.useTapRoot ? { ...defaultBTCParams, rootDerivationPaths: tapRootDerivationPaths } : params)
+    super(params)
   }
   /**
    * @deprecated This function eventually will be removed. Use getAddressAsync instead.
@@ -49,7 +48,7 @@ class ClientKeystore extends Client {
         }).address
       } else {
         address = Bitcoin.payments.p2tr({
-          pubkey: Utils.toXOnly(btcKeys.publicKey),
+          internalPubkey: Utils.toXOnly(btcKeys.publicKey),
           network: btcNetwork,
         }).address
       }
@@ -128,7 +127,11 @@ class ClientKeystore extends Client {
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
 
     // Sign all inputs
-    psbt.signAllInputs(btcKeys)
+    psbt.signAllInputs(
+      !this.useTapRoot
+        ? btcKeys
+        : btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey))),
+    )
 
     // Finalize inputs
     psbt.finalizeAllInputs()

@@ -54,7 +54,17 @@ abstract class Client extends UTXOClient {
       dataProviders: params.dataProviders,
     })
     this.useTapRoot = params.useTapRoot || false
-    Bitcoin.initEccLib(this.useTapRoot ? ecc : undefined)
+
+    if (this.useTapRoot) {
+      if (
+        !this.rootDerivationPaths?.mainnet.startsWith(`86'`) ||
+        !this.rootDerivationPaths?.testnet.startsWith(`86'`) ||
+        !this.rootDerivationPaths?.stagenet.startsWith(`86'`)
+      ) {
+        throw Error(`Unsupported derivation paths for Taproot client. Use 86' paths`)
+      }
+    }
+    Bitcoin.initEccLib(ecc)
   }
 
   /**
