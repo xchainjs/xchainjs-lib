@@ -7,7 +7,7 @@ import {
 } from '@radixdlt/babylon-gateway-api-sdk'
 import { Convert, Instruction, RadixEngineToolkit } from '@radixdlt/radix-engine-toolkit'
 import { Balance, Fees, Network, XChainClientParams } from '@xchainjs/xchain-client'
-import { Asset, AssetType, baseAmount } from '@xchainjs/xchain-util'
+import { AssetType, baseAmount } from '@xchainjs/xchain-util'
 
 // eslint-disable-next-line ordered-imports/ordered-imports
 import { generateMnemonic } from 'bip39'
@@ -20,7 +20,7 @@ import {
   stateEntityFungiblesPageResponse,
   stateEntityNonFungiblesPageResponse,
 } from '../__mocks__/mocks'
-import { AssetXRD, Client, Tx, TxParams, XRD_DECIMAL, feesEstimationPublicKeys } from '../src'
+import { AssetXRD, Client, RadixChain, Tx, TxParams, XRD_DECIMAL, feesEstimationPublicKeys } from '../src'
 
 describe('RadixClient Test', () => {
   const createClient = (): Client => {
@@ -264,20 +264,20 @@ describe('RadixClient Test', () => {
     const stateEntityDetailsResponseMock = jest.fn().mockResolvedValue(mockEntityDeatilsResponse)
     client.radixClient.gatewayClient.state.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
 
-    const assets: Asset[] = [
-      {
-        symbol: 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd',
-        ticker: 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd',
-        chain: 'radix',
-        type: AssetType.NATIVE,
-      },
-    ]
     const balances: Balance[] = await client.getBalance(
       'account_rdx16x47guzq44lmplg0ykfn2eltwt5wweylpuupstsxnfm8lgva7tdg2w',
-      assets,
+      [
+        {
+          chain: RadixChain,
+          symbol: 'resource_rdx1th2hexq3yrz8sj0nn3033gajnj7ztl0erp4nn9mcl5rj9au75tum0u',
+          ticker: 'resource_rdx1th2hexq3yrz8sj0nn3033gajnj7ztl0erp4nn9mcl5rj9au75tum0u',
+          type: AssetType.TOKEN,
+        },
+      ],
     )
-    expect(balances.length).toBe(1)
-    expect(balances[0].asset.symbol).toBe('resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd')
+    expect(balances.length).toBe(2)
+    expect(balances[0].asset.symbol).toBe('XRD')
+    expect(balances[1].asset.symbol).toBe('resource_rdx1th2hexq3yrz8sj0nn3033gajnj7ztl0erp4nn9mcl5rj9au75tum0u')
   })
 
   it('client should be able to estimate the fee for a given transaction', async () => {

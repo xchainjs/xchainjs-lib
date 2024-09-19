@@ -28,10 +28,10 @@ import {
   enumeration,
   generateRandomNonce,
 } from '@radixdlt/radix-engine-toolkit'
-import { AssetType, TokenAsset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { AssetType, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { RadixChain } from './const'
-import { Balance, MethodToCall } from './types/radix'
+import { AssetXRD, RADIX_ASSET_RESOURCE, RadixChain } from './const'
+import { Balance, CompatibleAsset, MethodToCall } from './types/radix'
 
 type PartialTransactionPreviewResponse = {
   receipt: {
@@ -123,22 +123,24 @@ export class RadixSpecificClient {
       })
       batch.forEach((item) => {
         if (item.aggregation_level === 'Global') {
-          const asset: TokenAsset = {
-            chain: RadixChain,
-            symbol: item.resource_address,
-            ticker: item.resource_address,
-            type: AssetType.TOKEN,
-          }
+          const asset: CompatibleAsset =
+            item.resource_address === RADIX_ASSET_RESOURCE
+              ? AssetXRD
+              : {
+                  chain: RadixChain,
+                  symbol: item.resource_address,
+                  ticker: item.resource_address,
+                  type: AssetType.TOKEN,
+                }
           const divisibility = divisibilities.get(item.resource_address) || 0
           // We need to do this because item.amount can be either string or number
           // depending on the type of resource
           const amount = typeof item.amount === 'string' ? parseFloat(item.amount) : item.amount
 
-          const balance: Balance = {
-            asset: asset,
+          balances.push({
+            asset,
             amount: assetToBase(assetAmount(amount, divisibility)),
-          }
-          balances.push(balance)
+          })
         }
       })
     }

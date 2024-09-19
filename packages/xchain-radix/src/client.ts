@@ -26,7 +26,7 @@ import {
   singleFee,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, AssetType, baseAmount } from '@xchainjs/xchain-util'
+import { Address, AssetType, TokenAsset, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { bech32m } from 'bech32'
 import BIP32Factory, { BIP32Interface } from 'bip32'
 import { derivePath } from 'ed25519-hd-key'
@@ -42,7 +42,7 @@ import {
   xrdRootDerivationPaths,
 } from './const'
 import { RadixSpecificClient } from './radix-client'
-import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types/radix'
+import { Balance, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types/radix'
 import { getAssetResource } from './utils'
 
 const xChainJsNetworkToRadixNetworkId = (network: Network): number => {
@@ -252,14 +252,16 @@ export default class Client extends BaseXChainClient {
    * @param {Asset[]} assets - Assets to retrieve the balance for (optional).
    * @returns {Promise<Balance[]>} An array containing the balance of the address.
    */
-  async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
+  async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     const balances: Balance[] = await this.radixSpecificClient.fetchBalances(address)
     // If assets is undefined, return all balances
     if (!assets) {
       return balances
     }
-    const filteredBalances: Balance[] = balances.filter((balance) =>
-      assets.some((asset) => balance.asset.symbol === asset.symbol),
+    const filteredBalances: Balance[] = balances.filter(
+      (balance) =>
+        eqAsset(balance.asset, this.getAssetInfo().asset) ||
+        assets.some((asset) => balance.asset.symbol === asset.symbol),
     )
     return filteredBalances
   }

@@ -13,7 +13,7 @@ export const STOKENET_GATEWAY_URL = 'https://stokenet.radixdlt.com'
 
 export const XRD_DECIMAL = 18
 
-export const RADIX_ASSET_RESOURCE = 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc'
+export const RADIX_ASSET_RESOURCE = 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd'
 
 export const AssetXRD: Asset = {
   symbol: `XRD`,
