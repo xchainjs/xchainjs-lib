@@ -84,7 +84,7 @@ class ClientLedger extends Client {
       outputScriptHex,
       segwit: true,
       useTrustedInputForSegwit: true,
-      additionals: ['bech32', 'bech32m'],
+      additionals: [this.addressFormat === AddressFormat.P2TR ? 'bech32m' : 'bech32'],
     })
     // Broadcast transaction
     const txHash = await this.broadcastTx(txHex)
