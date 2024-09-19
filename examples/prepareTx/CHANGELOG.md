@@ -1,5 +1,12 @@
 # xchainjs-prepare-tx
 
+## 1.0.17
+
+### Patch Changes
+
+- Updated dependencies [0b96029]
+  - @xchainjs/xchain-bitcoin@1.1.0
+
 ## 1.0.16
 
 ### Patch Changes

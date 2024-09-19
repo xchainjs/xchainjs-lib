@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- 0b96029: Taproot support
+
 ## 1.0.4
 
 ### Patch Changes
