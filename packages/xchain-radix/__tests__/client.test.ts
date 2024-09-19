@@ -7,7 +7,7 @@ import {
 } from '@radixdlt/babylon-gateway-api-sdk'
 import { Convert, Instruction, RadixEngineToolkit } from '@radixdlt/radix-engine-toolkit'
 import { Balance, Fees, Network, XChainClientParams } from '@xchainjs/xchain-client'
-import { Asset, AssetType, baseAmount } from '@xchainjs/xchain-util'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 // eslint-disable-next-line ordered-imports/ordered-imports
 import { generateMnemonic } from 'bip39'
@@ -264,17 +264,8 @@ describe('RadixClient Test', () => {
     const stateEntityDetailsResponseMock = jest.fn().mockResolvedValue(mockEntityDeatilsResponse)
     client.radixClient.gatewayClient.state.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
 
-    const assets: Asset[] = [
-      {
-        symbol: 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd',
-        ticker: 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd',
-        chain: 'radix',
-        type: AssetType.NATIVE,
-      },
-    ]
     const balances: Balance[] = await client.getBalance(
       'account_rdx16x47guzq44lmplg0ykfn2eltwt5wweylpuupstsxnfm8lgva7tdg2w',
-      assets,
     )
     expect(balances.length).toBe(1)
     expect(balances[0].asset.symbol).toBe('resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd')
