@@ -23,6 +23,7 @@ import {
   QuoteSwapParams,
   SwapHistoryParams,
   SwapsHistory,
+  TransactionAction,
 } from './types'
 import {
   ArbAsset,
@@ -301,26 +302,49 @@ export class MayachainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions.map((action) => {
-        let transaction: Transaction | undefined = action.out.filter((out) => out.txID !== '')[0] // For non to protocol asset swap
-        if (!transaction) {
-          // For to protocol asset swap
-          transaction = action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+        const inboundTx: TransactionAction = {
+          hash: action.in[0].txID,
+          address: action.in[0].address,
+          amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
         }
+
+        const fromAsset: CompatibleAsset = inboundTx.amount.asset
+        const toAsset: CompatibleAsset =
+          action.pools.length === 2
+            ? (assetFromStringEx(action.pools[1]) as CompatibleAsset)
+            : eqAsset(inboundTx.amount.asset, CacaoAsset)
+            ? (assetFromStringEx(action.pools[0]) as CompatibleAsset)
+            : CacaoAsset
+
+        if (action.status === 'pending') {
+          return {
+            date: new Date(Number(action.date) / 10 ** 6),
+            status: 'pending',
+            fromAsset,
+            toAsset,
+            inboundTx,
+          }
+        }
+
+        const transaction: Transaction =
+          action.out.filter((out) => out.txID !== '')[0] ||
+          action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0] // For non to protocol asset swap
+
         return {
           date: new Date(Number(action.date) / 10 ** 6),
-          status: action.status,
+          status: 'success',
+          fromAsset,
+          toAsset,
           inboundTx: {
             hash: action.in[0].txID,
             address: action.in[0].address,
             amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
           },
-          outboundTx: transaction
-            ? {
-                hash: transaction.txID,
-                address: transaction.address,
-                amount: getCryptoAmount(assetDecimals, transaction.coins[0].asset, transaction.coins[0].amount),
-              }
-            : undefined,
+          outboundTx: {
+            hash: transaction.txID,
+            address: transaction.address,
+            amount: getCryptoAmount(assetDecimals, transaction.coins[0].asset, transaction.coins[0].amount),
+          },
         }
       }),
     }
