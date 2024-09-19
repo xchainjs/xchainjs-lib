@@ -6,6 +6,7 @@ import { TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { Client } from './client'
+import { AddressFormat } from './types'
 
 /**
  * Custom Ledger Bitcoin client
@@ -18,7 +19,7 @@ class ClientLedger extends Client {
 
   // Constructor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(params: UtxoClientParams & { transport: any }) {
+  constructor(params: UtxoClientParams & { transport: any; addressFormat?: AddressFormat }) {
     super(params)
     this.transport = params.transport
   }
@@ -41,7 +42,7 @@ class ClientLedger extends Client {
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const result = await app.getWalletPublicKey(this.getFullDerivationPath(index), {
-      format: 'bech32',
+      format: this.addressFormat === AddressFormat.P2TR ? 'bech32m' : 'bech32',
       verify,
     })
     return result.bitcoinAddress
@@ -83,7 +84,7 @@ class ClientLedger extends Client {
       outputScriptHex,
       segwit: true,
       useTrustedInputForSegwit: true,
-      additionals: ['bech32'],
+      additionals: [this.addressFormat === AddressFormat.P2TR ? 'bech32m' : 'bech32'],
     })
     // Broadcast transaction
     const txHash = await this.broadcastTx(txHex)

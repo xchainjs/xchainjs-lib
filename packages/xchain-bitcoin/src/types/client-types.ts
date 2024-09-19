@@ -12,3 +12,8 @@ export type GetChangeParams = {
 }
 
 export type ClientUrl = Record<Network, string>
+
+export enum AddressFormat {
+  P2WPKH,
+  P2TR,
+}

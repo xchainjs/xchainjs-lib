@@ -1,3 +1,4 @@
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
@@ -15,7 +16,9 @@ import {
   UPPER_FEE_BOUND,
   blockstreamExplorerProviders,
 } from './const'
+import { AddressFormat } from './types'
 import * as Utils from './utils'
+
 // Default parameters for the Bitcoin UTXO client
 export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
@@ -36,12 +39,18 @@ export const defaultBTCParams: UtxoClientParams = {
  * Custom Bitcoin client
  */
 abstract class Client extends UTXOClient {
+  protected addressFormat: AddressFormat
   /**
    * Constructor
    * Initializes the client with network type and other parameters.
    * @param {UtxoClientParams} params
    */
-  constructor(params = defaultBTCParams) {
+  constructor(
+    params: UtxoClientParams & { addressFormat?: AddressFormat } = {
+      ...defaultBTCParams,
+      addressFormat: AddressFormat.P2WPKH,
+    },
+  ) {
     super(BTCChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,
@@ -50,6 +59,18 @@ abstract class Client extends UTXOClient {
       explorerProviders: params.explorerProviders,
       dataProviders: params.dataProviders,
     })
+    this.addressFormat = params.addressFormat || AddressFormat.P2WPKH
+
+    if (this.addressFormat === AddressFormat.P2TR) {
+      if (
+        !this.rootDerivationPaths?.mainnet.startsWith(`86'`) ||
+        !this.rootDerivationPaths?.testnet.startsWith(`86'`) ||
+        !this.rootDerivationPaths?.stagenet.startsWith(`86'`)
+      ) {
+        throw Error(`Unsupported derivation paths for Taproot client. Use 86' paths`)
+      }
+    }
+    Bitcoin.initEccLib(ecc)
   }
 
   /**
@@ -166,20 +187,33 @@ abstract class Client extends UTXOClient {
     // Initialize a new Bitcoin PSBT object.
     const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) }) // Network-specific
 
-    // Add inputs to the PSBT from the accumulated inputs.
-    inputs.forEach((utxo: UTXO) =>
-      psbt.addInput({
-        hash: utxo.hash,
-        index: utxo.index,
-        witnessUtxo: utxo.witnessUtxo,
-      }),
-    )
-
+    if (this.addressFormat === AddressFormat.P2WPKH) {
+      // Add inputs to the PSBT from the accumulated inputs.
+      inputs.forEach((utxo: UTXO) =>
+        psbt.addInput({
+          hash: utxo.hash,
+          index: utxo.index,
+          witnessUtxo: utxo.witnessUtxo,
+        }),
+      )
+    } else {
+      const { pubkey, output } = Bitcoin.payments.p2tr({
+        address: sender,
+      })
+      inputs.forEach((utxo: UTXO) =>
+        psbt.addInput({
+          hash: utxo.hash,
+          index: utxo.index,
+          witnessUtxo: { value: utxo.value, script: output as Buffer },
+          tapInternalKey: pubkey,
+        }),
+      )
+    }
     // Add outputs to the PSBT from the accumulated outputs.
     outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
       // If the output address is not specified, it's considered a change address and set to the sender's address.
       if (!output.address) {
-        //an empty address means this is the  change ddress
+        //an empty address means this is the change address
         output.address = sender
       }
       // Add the output to the PSBT.
@@ -192,7 +226,7 @@ abstract class Client extends UTXOClient {
         }
       }
     })
-    // Return the prepared transaction data including the PSBT, UTXOs, and inputs.
+
     return { psbt, utxos, inputs }
   }
 
