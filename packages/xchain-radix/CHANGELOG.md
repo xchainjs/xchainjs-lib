@@ -1,5 +1,11 @@
 # @xchainjs/xchain-radix
 
+## 1.1.2
+
+### Patch Changes
+
+- c81e34d: Native balance always returned
+
 ## 1.1.1
 
 ### Patch Changes

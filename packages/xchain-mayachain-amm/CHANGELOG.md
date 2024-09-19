@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.10
+
+### Patch Changes
+
+- Updated dependencies [0b96029]
+- Updated dependencies [c81e34d]
+  - @xchainjs/xchain-bitcoin@1.1.0
+  - @xchainjs/xchain-radix@1.1.2
+  - @xchainjs/xchain-wallet@1.0.10
+
 ## 3.0.9
 
 ### Patch Changes

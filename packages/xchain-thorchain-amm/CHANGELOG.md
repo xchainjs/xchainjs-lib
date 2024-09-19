@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [0b96029]
+  - @xchainjs/xchain-bitcoin@1.1.0
+  - @xchainjs/xchain-wallet@1.0.10
+
 ## 2.0.9
 
 ### Patch Changes
