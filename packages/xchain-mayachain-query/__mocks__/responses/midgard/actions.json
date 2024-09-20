@@ -1,6 +1,59 @@
 {
   "actions": [
     {
+      "date": "1726832784224971813",
+      "height": "7861337",
+      "in": [
+        {
+          "address": "0xd1f7112354055160d58fa1b1e7cfd15c0bfee464",
+          "coins": [
+            {
+              "amount": "10434782608",
+              "asset": "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7"
+            }
+          ],
+          "txID": "4C8A83C316B0247AE293F3D5A0B07974DE4083F220BF5551ACF20E66D17BC252"
+        }
+      ],
+      "metadata": {
+        "swap": {
+          "affiliateAddress": "",
+          "affiliateFee": "0",
+          "isStreamingSwap": true,
+          "liquidityFee": "938799839",
+          "memo": "=:THOR.RUNE:thor1qvlul0ujfrq27ja7uxrp8r7my9juegz0ug3nsg:0/4/0",
+          "networkFees": [],
+          "streamingSwapMeta": {
+            "count": "4",
+            "depositedCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "inCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "interval": "0",
+            "lastHeight": "0",
+            "outCoin": {
+              "amount": "0",
+              "asset": ""
+            },
+            "quantity": "23"
+          },
+          "swapSlip": "10",
+          "swapTarget": "0"
+        }
+      },
+      "out": [],
+      "pools": [
+        "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
+        "THOR.RUNE"
+      ],
+      "status": "pending",
+      "type": "swap"
+    },
+    {
       "date": "1710210508760883749",
       "height": "5275978",
       "in": [
