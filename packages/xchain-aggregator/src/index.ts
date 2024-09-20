@@ -7,6 +7,8 @@ export {
   SwapHistory,
   SwapHistoryParams,
   SwapResume,
+  SuccessSwap,
+  PendingSwap,
   Config,
   ApproveParams,
   IsApprovedParams,

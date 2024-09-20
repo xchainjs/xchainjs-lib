@@ -166,6 +166,8 @@ export {
   TxSubmitted,
   Protocol,
   SwapHistory,
+  SuccessSwap,
+  PendingSwap,
   SwapResume,
   SwapHistoryParams,
   ApproveParams,
