@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { PoolDetail, SwapMetadata, Transaction } from '@xchainjs/xchain-mayamidgard'
+import { Action, PoolDetail, SwapMetadata, Transaction } from '@xchainjs/xchain-mayamidgard'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
   Address,
@@ -302,47 +302,59 @@ export class MayachainQuery {
 
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
-      swaps: actionsResume.actions.map((action) => {
-        const inboundTx: TransactionAction = {
-          hash: action.in[0].txID,
-          address: action.in[0].address,
-          amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
-        }
+      swaps: actionsResume.actions
+        .reduce((prev, current) => {
+          const index = prev.findIndex((action) => action.in[0].txID === current.in[0].txID)
+          if (index === -1) return [...prev, current]
 
-        const fromAsset: CompatibleAsset = inboundTx.amount.asset
-        const toAsset: CompatibleAsset = getAssetFromMemo((action.metadata.swap as SwapMetadata).memo)
-
-        if (action.status === 'pending') {
-          return {
-            date: new Date(Number(action.date) / 10 ** 6),
-            status: 'pending',
-            fromAsset,
-            toAsset,
-            inboundTx,
+          for (let i = 0; i < current.in.length; i++) {
+            prev[index].in[i].coins[0].amount = String(
+              Number(prev[index].in[i].coins[0].amount) + Number(current.in[i].coins[0].amount),
+            )
           }
-        }
-
-        const transaction: Transaction =
-          action.out.filter((out) => out.txID !== '')[0] ||
-          action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0] // For non to protocol asset swap
-
-        return {
-          date: new Date(Number(action.date) / 10 ** 6),
-          status: 'success',
-          fromAsset,
-          toAsset,
-          inboundTx: {
+          return prev
+        }, [] as Action[])
+        .map((action) => {
+          const inboundTx: TransactionAction = {
             hash: action.in[0].txID,
             address: action.in[0].address,
             amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
-          },
-          outboundTx: {
-            hash: transaction.txID,
-            address: transaction.address,
-            amount: getCryptoAmount(assetDecimals, transaction.coins[0].asset, transaction.coins[0].amount),
-          },
-        }
-      }),
+          }
+
+          const fromAsset: CompatibleAsset = inboundTx.amount.asset
+          const toAsset: CompatibleAsset = getAssetFromMemo((action.metadata.swap as SwapMetadata).memo)
+
+          if (action.status === 'pending') {
+            return {
+              date: new Date(Number(action.date) / 10 ** 6),
+              status: 'pending',
+              fromAsset,
+              toAsset,
+              inboundTx,
+            }
+          }
+
+          const transaction: Transaction =
+            action.out.filter((out) => out.txID !== '')[0] ||
+            action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0] // For non to protocol asset swap
+
+          return {
+            date: new Date(Number(action.date) / 10 ** 6),
+            status: 'success',
+            fromAsset,
+            toAsset,
+            inboundTx: {
+              hash: action.in[0].txID,
+              address: action.in[0].address,
+              amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
+            },
+            outboundTx: {
+              hash: transaction.txID,
+              address: transaction.address,
+              amount: getCryptoAmount(assetDecimals, transaction.coins[0].asset, transaction.coins[0].amount),
+            },
+          }
+        }),
     }
   }
 
