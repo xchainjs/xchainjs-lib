@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { PoolDetail, Transaction } from '@xchainjs/xchain-mayamidgard'
+import { PoolDetail, SwapMetadata, Transaction } from '@xchainjs/xchain-mayamidgard'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
   Address,
@@ -43,6 +43,7 @@ import {
   ThorChain,
   XdrAsset,
   XdrChain,
+  getAssetFromMemo,
   getBaseAmountWithDiffDecimals,
   getCryptoAmountWithNotation,
 } from './utils'
@@ -309,12 +310,7 @@ export class MayachainQuery {
         }
 
         const fromAsset: CompatibleAsset = inboundTx.amount.asset
-        const toAsset: CompatibleAsset =
-          action.pools.length === 2
-            ? (assetFromStringEx(action.pools[1]) as CompatibleAsset)
-            : eqAsset(inboundTx.amount.asset, CacaoAsset)
-            ? (assetFromStringEx(action.pools[0]) as CompatibleAsset)
-            : CacaoAsset
+        const toAsset: CompatibleAsset = getAssetFromMemo((action.metadata.swap as SwapMetadata).memo)
 
         if (action.status === 'pending') {
           return {
