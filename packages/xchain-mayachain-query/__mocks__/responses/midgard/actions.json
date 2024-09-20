@@ -61,7 +61,7 @@
           "address": "0xaa278b62225f6dbc4436de8fa3dd195e1542d159",
           "coins": [
             {
-              "amount": "99000000",
+              "amount": "1000000",
               "asset": "ETH.ETH"
             }
           ],
@@ -186,7 +186,7 @@
       "type": "swap"
     }
   ],
-  "count": "2",
+  "count": "3",
   "meta": {
     "nextPageToken": "52759789000000001",
     "prevPageToken": "52759789000000012"

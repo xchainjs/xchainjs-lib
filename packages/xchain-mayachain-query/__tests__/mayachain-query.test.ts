@@ -181,6 +181,7 @@ describe('Mayachain-query tests', () => {
   it('Should get swaps history', async () => {
     const swapResume = await mayachainQuery.getSwapHistory({ addresses: ['address'] })
     expect(swapResume.count === swapResume.swaps.length)
+    expect(swapResume.count === 2)
     const pendingSwap = swapResume.swaps[0] as PendingSwap
     expect({
       date: pendingSwap.date,
@@ -232,7 +233,7 @@ describe('Mayachain-query tests', () => {
         hash: '224CAF4D502A0A415F1312AFD16C0E7A2E3E79840AF593C2F875C806AA12E020',
         address: '0xaa278b62225f6dbc4436de8fa3dd195e1542d159',
         asset: 'ETH.ETH',
-        amount: '0.99',
+        amount: '1',
       },
       out: {
         hash: '',
