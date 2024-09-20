@@ -303,6 +303,7 @@ export class MayachainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions
+        // Merge duplicated swaps in just one
         .reduce((prev, current) => {
           const index = prev.findIndex((action) => action.in[0].txID === current.in[0].txID)
           if (index === -1) return [...prev, current]
@@ -343,11 +344,7 @@ export class MayachainQuery {
             status: 'success',
             fromAsset,
             toAsset,
-            inboundTx: {
-              hash: action.in[0].txID,
-              address: action.in[0].address,
-              amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
-            },
+            inboundTx,
             outboundTx: {
               hash: transaction.txID,
               address: transaction.address,
