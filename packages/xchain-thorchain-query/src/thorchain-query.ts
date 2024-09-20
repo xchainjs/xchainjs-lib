@@ -1,4 +1,4 @@
-import { Transaction } from '@xchainjs/xchain-midgard'
+import { SwapMetadata, Transaction } from '@xchainjs/xchain-midgard'
 import { LastBlock, TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
 import {
   Address,
@@ -14,7 +14,6 @@ import {
   assetToBase,
   assetToString,
   baseAmount,
-  eqAsset,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
@@ -80,7 +79,13 @@ import {
   isAssetRuneNative,
 } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/utils'
+import {
+  calcNetworkFee,
+  calcOutboundFee,
+  getAssetFromMemo,
+  getBaseAmountWithDiffDecimals,
+  getChainAsset,
+} from './utils/utils'
 
 const defaultCache = new ThorchainCache()
 
@@ -1410,12 +1415,7 @@ export class ThorchainQuery {
         }
 
         const fromAsset: CompatibleAsset = inboundTx.amount.asset
-        const toAsset: CompatibleAsset =
-          action.pools.length === 2
-            ? (assetFromStringEx(action.pools[1]) as CompatibleAsset)
-            : eqAsset(inboundTx.amount.asset, AssetRuneNative)
-            ? (assetFromStringEx(action.pools[0]) as CompatibleAsset)
-            : AssetRuneNative
+        const toAsset: CompatibleAsset = getAssetFromMemo((action.metadata.swap as SwapMetadata).memo)
 
         if (action.status === 'pending') {
           return {
