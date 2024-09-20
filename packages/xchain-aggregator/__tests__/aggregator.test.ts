@@ -14,7 +14,7 @@ import mockThornodeApi from '../__mocks__/mayachain/mayanode/api'
 import mockMayaMidgardApi from '../__mocks__/mayachain/midgard/api'
 import mockThorMidgardApi from '../__mocks__/thorchain/midgard/api'
 import mockMayanodeApi from '../__mocks__/thorchain/thornode/api'
-import { Aggregator } from '../src'
+import { Aggregator, SuccessSwap } from '../src'
 import { SupportedProtocols } from '../src/const'
 
 describe('Aggregator', () => {
@@ -87,27 +87,26 @@ describe('Aggregator', () => {
     expect(swapHistory.count).toEqual(swapHistory.swaps.length)
     const thorchainSwap = swapHistory.swaps.find((swap) => swap.protocol === 'Thorchain')
     expect(thorchainSwap).not.toBeUndefined()
+    const successThorchainSwap = thorchainSwap as SuccessSwap
     expect({
-      date: thorchainSwap?.date,
-      status: thorchainSwap?.status,
-      protocol: thorchainSwap?.protocol,
+      date: successThorchainSwap.date,
+      status: successThorchainSwap.status,
+      protocol: successThorchainSwap.protocol,
       in: {
-        hash: thorchainSwap?.inboundTx.hash,
-        address: thorchainSwap?.inboundTx.address,
-        asset: assetToString(thorchainSwap?.inboundTx.amount.asset as Asset),
-        amount: baseToAsset(thorchainSwap?.inboundTx.amount.baseAmount as BaseAmount)
+        hash: successThorchainSwap.inboundTx.hash,
+        address: successThorchainSwap.inboundTx.address,
+        asset: assetToString(successThorchainSwap.inboundTx.amount.asset as Asset),
+        amount: baseToAsset(successThorchainSwap.inboundTx.amount.baseAmount as BaseAmount)
           .amount()
           .toString(),
       },
       out: {
-        hash: thorchainSwap?.outboundTx?.hash,
-        address: thorchainSwap?.outboundTx?.address,
-        asset: thorchainSwap?.outboundTx ? assetToString(thorchainSwap?.outboundTx.amount.asset as Asset) : undefined,
-        amount: thorchainSwap?.outboundTx
-          ? baseToAsset(thorchainSwap?.outboundTx.amount.baseAmount as BaseAmount)
-              .amount()
-              .toString()
-          : undefined,
+        hash: successThorchainSwap.outboundTx.hash,
+        address: successThorchainSwap?.outboundTx?.address,
+        asset: assetToString(successThorchainSwap?.outboundTx.amount.asset as Asset),
+        amount: baseToAsset(successThorchainSwap?.outboundTx.amount.baseAmount as BaseAmount)
+          .amount()
+          .toString(),
       },
     }).toEqual({
       date: new Date('2024-03-17T14:29:09.029Z'),
@@ -128,27 +127,26 @@ describe('Aggregator', () => {
     })
     const mayachainSwap = swapHistory.swaps.find((swap) => swap.protocol === 'Mayachain')
     expect(mayachainSwap).not.toBeUndefined()
+    const successMayachainSwap = mayachainSwap as SuccessSwap
     expect({
-      date: mayachainSwap?.date,
-      status: mayachainSwap?.status,
-      protocol: mayachainSwap?.protocol,
+      date: successMayachainSwap.date,
+      status: successMayachainSwap.status,
+      protocol: successMayachainSwap.protocol,
       in: {
-        hash: mayachainSwap?.inboundTx.hash,
-        address: mayachainSwap?.inboundTx.address,
-        asset: assetToString(mayachainSwap?.inboundTx.amount.asset as Asset),
-        amount: baseToAsset(mayachainSwap?.inboundTx.amount.baseAmount as BaseAmount)
+        hash: successMayachainSwap.inboundTx.hash,
+        address: successMayachainSwap.inboundTx.address,
+        asset: assetToString(successMayachainSwap.inboundTx.amount.asset as Asset),
+        amount: baseToAsset(successMayachainSwap.inboundTx.amount.baseAmount as BaseAmount)
           .amount()
           .toString(),
       },
       out: {
-        hash: mayachainSwap?.outboundTx?.hash,
-        address: mayachainSwap?.outboundTx?.address,
-        asset: mayachainSwap?.outboundTx ? assetToString(mayachainSwap.outboundTx.amount.asset as Asset) : undefined,
-        amount: mayachainSwap?.outboundTx
-          ? baseToAsset(mayachainSwap.outboundTx.amount.baseAmount as BaseAmount)
-              .amount()
-              .toString()
-          : undefined,
+        hash: successMayachainSwap.outboundTx.hash,
+        address: successMayachainSwap.outboundTx.address,
+        asset: assetToString(successMayachainSwap.outboundTx.amount.asset as Asset),
+        amount: baseToAsset(successMayachainSwap.outboundTx.amount.baseAmount as BaseAmount)
+          .amount()
+          .toString(),
       },
     }).toEqual({
       date: new Date('2024-03-12T02:28:28.760Z'),
