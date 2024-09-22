@@ -4285,7 +4285,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator":
+"@xchainjs/xchain-aggregator@workspace:*, @xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
   dependencies:
@@ -13667,6 +13667,20 @@ __metadata:
   checksum: 10c0/25eb33aff17edcb90721ed6b0eb250976328533ad3cd1a28a274bd263682e7296a6591ff1436d6cbc50fa67463158b062f9d1122013b361cec99a05f84680e06
   languageName: node
   linkType: hard
+
+"xchainjs-aggregator@workspace:examples/aggregator":
+  version: 0.0.0-use.local
+  resolution: "xchainjs-aggregator@workspace:examples/aggregator"
+  dependencies:
+    "@types/node": "npm:20.11.28"
+    "@xchainjs/xchain-aggregator": "workspace:*"
+    "@xchainjs/xchain-bitcoin": "workspace:*"
+    "@xchainjs/xchain-ethereum": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
 
 "xchainjs-check-tx@workspace:examples/check-tx":
   version: 0.0.0-use.local
