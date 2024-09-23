@@ -119,15 +119,27 @@ export type TransactionAction = {
   amount: CryptoAmount<CompatibleAsset>
 }
 
+export type SuccessSwap = {
+  date: Date
+  fromAsset: CompatibleAsset
+  toAsset: CompatibleAsset
+  status: 'success'
+  inboundTx: TransactionAction
+  outboundTx: TransactionAction
+}
+
+export type PendingSwap = {
+  date: Date
+  fromAsset: CompatibleAsset
+  toAsset: CompatibleAsset
+  status: 'pending'
+  inboundTx: TransactionAction
+}
+
 /**
  * Swap resume
  */
-export type Swap = {
-  date: Date
-  status: 'success' | 'pending'
-  inboundTx: TransactionAction
-  outboundTx?: TransactionAction
-}
+export type Swap = SuccessSwap | PendingSwap
 
 /**
  * Swap history

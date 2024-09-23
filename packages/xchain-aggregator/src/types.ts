@@ -115,13 +115,22 @@ type TransactionAction = {
   amount: CryptoAmount
 }
 
-type SwapResume = {
+type SuccessSwap = {
   protocol: Protocol
   date: Date
-  status: 'success' | 'pending'
+  status: 'success'
   inboundTx: TransactionAction
-  outboundTx?: TransactionAction
+  outboundTx: TransactionAction
 }
+
+type PendingSwap = {
+  protocol: Protocol
+  date: Date
+  status: 'pending'
+  inboundTx: TransactionAction
+}
+
+type SwapResume = SuccessSwap | PendingSwap
 
 type SwapHistory = {
   count: number
@@ -157,6 +166,8 @@ export {
   TxSubmitted,
   Protocol,
   SwapHistory,
+  SuccessSwap,
+  PendingSwap,
   SwapResume,
   SwapHistoryParams,
   ApproveParams,

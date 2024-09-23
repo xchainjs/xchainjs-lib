@@ -1,4 +1,4 @@
-import { Transaction } from '@xchainjs/xchain-midgard'
+import { SwapMetadata, Transaction } from '@xchainjs/xchain-midgard'
 import { LastBlock, TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
 import {
   Address,
@@ -62,6 +62,7 @@ import {
   TradeAssetUnits,
   TradeAssetUnitsParams,
   TradeAssetsUnitsParams,
+  TransactionAction,
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
@@ -78,7 +79,13 @@ import {
   isAssetRuneNative,
 } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/utils'
+import {
+  calcNetworkFee,
+  calcOutboundFee,
+  getAssetFromMemo,
+  getBaseAmountWithDiffDecimals,
+  getChainAsset,
+} from './utils/utils'
 
 const defaultCache = new ThorchainCache()
 
@@ -1401,27 +1408,40 @@ export class ThorchainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions.map((action) => {
-        let transaction: Transaction | undefined = action.out.filter((out) => out.txID !== '')[0] // For non to protocol asset swap
-
-        if (!transaction) {
-          // For to protocol asset swap
-          transaction = action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+        const inboundTx: TransactionAction = {
+          hash: action.in[0].txID,
+          address: action.in[0].address,
+          amount: getInboundCryptoAmount(pools, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
         }
+
+        const fromAsset: CompatibleAsset = inboundTx.amount.asset
+        const toAsset: CompatibleAsset = getAssetFromMemo((action.metadata.swap as SwapMetadata).memo)
+
+        if (action.status === 'pending') {
+          return {
+            date: new Date(Number(action.date) / 10 ** 6),
+            status: 'pending',
+            fromAsset,
+            toAsset,
+            inboundTx,
+          }
+        }
+
+        const transaction: Transaction =
+          action.out.filter((out) => out.txID !== '')[0] || // For non to protocol asset swap
+          action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0] // For to protocol asset swap
+
         return {
           date: new Date(Number(action.date) / 10 ** 6),
-          status: action.status,
-          inboundTx: {
-            hash: action.in[0].txID,
-            address: action.in[0].address,
-            amount: getInboundCryptoAmount(pools, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
+          status: 'success',
+          fromAsset,
+          toAsset,
+          inboundTx,
+          outboundTx: {
+            hash: transaction.txID,
+            address: transaction.address,
+            amount: getInboundCryptoAmount(pools, transaction.coins[0].asset, transaction.coins[0].amount),
           },
-          outboundTx: transaction
-            ? {
-                hash: transaction.txID,
-                address: transaction.address,
-                amount: getInboundCryptoAmount(pools, transaction.coins[0].asset, transaction.coins[0].amount),
-              }
-            : undefined,
         }
       }),
     }

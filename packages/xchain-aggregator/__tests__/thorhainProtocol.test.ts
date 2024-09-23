@@ -17,6 +17,7 @@ import {
 import mockMidgardApi from '../__mocks__/thorchain/midgard/api'
 import mockThornodeApi from '../__mocks__/thorchain/thornode/api'
 import { ThorchainProtocol } from '../src/protocols/thorchain'
+import { SuccessSwap } from '../src'
 
 describe('Thorchain protocol', () => {
   let protocol: ThorchainProtocol
@@ -109,23 +110,22 @@ describe('Thorchain protocol', () => {
   it('Should get swaps history', async () => {
     const swapResume = await protocol.getSwapHistory({ chainAddresses: [{ chain: 'chain', address: 'address' }] })
     expect(swapResume.count === swapResume.swaps.length)
+    const sucessSwap = swapResume.swaps[0] as SuccessSwap
     expect({
-      date: swapResume.swaps[0].date,
-      protocol: swapResume.swaps[0].protocol,
-      status: swapResume.swaps[0].status,
+      date: sucessSwap.date,
+      protocol: sucessSwap.protocol,
+      status: sucessSwap.status,
       in: {
-        hash: swapResume.swaps[0].inboundTx.hash,
-        address: swapResume.swaps[0].inboundTx.address,
-        asset: assetToString(swapResume.swaps[0].inboundTx.amount.asset),
-        amount: baseToAsset(swapResume.swaps[0].inboundTx.amount.baseAmount).amount().toString(),
+        hash: sucessSwap.inboundTx.hash,
+        address: sucessSwap.inboundTx.address,
+        asset: assetToString(sucessSwap.inboundTx.amount.asset),
+        amount: baseToAsset(sucessSwap.inboundTx.amount.baseAmount).amount().toString(),
       },
       out: {
-        hash: swapResume.swaps[0].outboundTx?.hash,
-        address: swapResume.swaps[0].outboundTx?.address,
-        asset: swapResume.swaps[0].outboundTx ? assetToString(swapResume.swaps[0].outboundTx.amount.asset) : undefined,
-        amount: swapResume.swaps[0].outboundTx
-          ? baseToAsset(swapResume.swaps[0].outboundTx.amount.baseAmount).amount().toString()
-          : undefined,
+        hash: sucessSwap.outboundTx.hash,
+        address: sucessSwap.outboundTx.address,
+        asset: assetToString(sucessSwap.outboundTx.amount.asset),
+        amount: baseToAsset(sucessSwap.outboundTx.amount.baseAmount).amount().toString(),
       },
     }).toEqual({
       date: new Date('2024-03-17T14:29:09.029Z'),

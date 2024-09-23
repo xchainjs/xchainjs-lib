@@ -261,6 +261,7 @@ export const isTokenAsset = (asset: AnyAsset): asset is TokenAsset => asset.type
 const assetConfigs = new Map<string, AnyAsset>([
   ['KUJI.USK', { chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN }],
   ['MAYA.MAYA', { chain: 'MAYA', symbol: 'MAYA', ticker: 'MAYA', type: AssetType.TOKEN }],
+  ['RUNE', { chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', type: AssetType.NATIVE }],
 ])
 
 const createAsset = (chain: string, symbol: string, ticker: string, type: AssetType) => {

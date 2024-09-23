@@ -1,6 +1,42 @@
 {
   "actions": [
     {
+      "date": "1726829842493647576",
+      "height": "17788072",
+      "in": [
+        {
+          "address": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+          "coins": [
+            {
+              "amount": "417596871027",
+              "asset": "ETH~USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7"
+            }
+          ],
+          "txID": "4A60B30CBC1EDF2C9A761285EF301C84A6CC8015197E81F12B05B05AE5470AE8"
+        }
+      ],
+      "metadata": {
+        "swap": {
+          "affiliateAddress": "",
+          "affiliateFee": "0",
+          "isStreamingSwap": false,
+          "liquidityFee": "185464777",
+          "memo": "=:ETH~ETH:thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55:163442245",
+          "networkFees": [],
+          "swapSlip": "20",
+          "swapTarget": "163442245",
+          "txType": "swap"
+        }
+      },
+      "out": [],
+      "pools": [
+        "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
+        "ETH.ETH"
+      ],
+      "status": "pending",
+      "type": "swap"
+    },
+    {
       "date": "1710685749029840134",
       "height": "15151326",
       "in": [
