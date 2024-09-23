@@ -287,9 +287,17 @@ describe('asset', () => {
         type: AssetType.TOKEN,
       })
     })
-    it('RUNE', () => {
+    it('BNB.RUNE-67C', () => {
       const result = assetFromString('BNB.RUNE-67C')
       expect(result).toEqual({ chain: 'BNB', symbol: 'RUNE-67C', ticker: 'RUNE', type: AssetType.TOKEN })
+    })
+    it('RUNE', () => {
+      expect(assetFromString('RUNE')).toEqual({
+        chain: 'THOR',
+        symbol: 'RUNE',
+        ticker: 'RUNE',
+        type: AssetType.NATIVE,
+      })
     })
     it('BTCB', () => {
       const result = assetFromString('BNB.BTCB-123')
