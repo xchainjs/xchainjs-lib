@@ -227,6 +227,26 @@ export const getChain = (chain: string): Chain => {
   }
 }
 
+export const getAssetFromAliasIfNeeded = (alias: string): string => {
+  const nativeAlias = new Map<string, string>([
+    ['r', 'THOR.RUNE'],
+    ['rune', 'THOR.RUNE'],
+    ['b', 'BTC.BTC'],
+    ['e', 'ETH.ETH'],
+    ['g', 'GAIA.ATOM'],
+    ['d', 'DOGE.DOGE'],
+    ['l', 'LTC.LTC'],
+    ['c', 'BCH.BCH'],
+    ['a', 'AVAX.AVAX'],
+    ['s', 'BSC.BNB'],
+  ])
+
+  const nativeAsset = nativeAlias.get(alias.toLowerCase())
+  if (nativeAsset) return nativeAsset
+
+  return alias
+}
+
 export const getAssetFromMemo = (memo: string): CompatibleAsset => {
   const attributes = memo.split(':')
   if (!attributes[0]) throw Error(`Invalid memo: ${memo}`)
@@ -235,7 +255,7 @@ export const getAssetFromMemo = (memo: string): CompatibleAsset => {
     case 'SWAP':
     case '=':
       if (!attributes[1]) throw Error('Asset not defined')
-      return assetFromStringEx(attributes[1]) as CompatibleAsset
+      return assetFromStringEx(getAssetFromAliasIfNeeded(attributes[1])) as CompatibleAsset
     default:
       throw Error(`Get asset from memo unsupported for ${attributes[0]} operation`)
   }
