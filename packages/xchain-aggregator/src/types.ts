@@ -118,6 +118,8 @@ type TransactionAction = {
 type SuccessSwap = {
   protocol: Protocol
   date: Date
+  fromAsset: AnyAsset
+  toAsset: AnyAsset
   status: 'success'
   inboundTx: TransactionAction
   outboundTx: TransactionAction
@@ -126,6 +128,8 @@ type SuccessSwap = {
 type PendingSwap = {
   protocol: Protocol
   date: Date
+  fromAsset: AnyAsset
+  toAsset: AnyAsset
   status: 'pending'
   inboundTx: TransactionAction
 }
