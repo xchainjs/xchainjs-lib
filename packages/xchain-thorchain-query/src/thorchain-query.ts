@@ -1427,9 +1427,9 @@ export class ThorchainQuery {
           }
         }
 
-        const transaction: Transaction =
-          action.out.filter((out) => out.txID !== '')[0] || // For non to protocol asset swap
-          action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0] // For to protocol asset swap
+        const transaction: Transaction = action.out
+          .filter((out) => out.coins[0].asset === assetToString(toAsset))
+          .sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
 
         return {
           date: new Date(Number(action.date) / 10 ** 6),
