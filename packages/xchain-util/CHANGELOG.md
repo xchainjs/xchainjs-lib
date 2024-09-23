@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- 73b68ed: `assetFromString` can work with 'RUNE' alias
+
 ## 1.0.3
 
 ### Patch Changes

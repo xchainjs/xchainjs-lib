@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- 73b68ed: `SwapResume` type with new `fromAsset` and `toAsset` properties
+- Updated dependencies [73b68ed]
+  - @xchainjs/xchain-util@1.0.4
+  - @xchainjs/xchain-client@1.0.5
+  - @xchainjs/xchain-midgard-query@1.0.5
+
 ## 1.0.4
 
 ### Patch Changes
