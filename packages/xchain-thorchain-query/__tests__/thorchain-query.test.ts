@@ -107,7 +107,7 @@ describe('Thorchain-query tests', () => {
 
   it('Should get swaps history', async () => {
     const swapResume = await thorchainQuery.getSwapHistory({ addresses: ['address'] })
-    expect(swapResume.count === swapResume.swaps.length)
+    expect(swapResume.count).toBe(4)
     const pendingSwap = swapResume.swaps[0] as PendingSwap
     expect({
       date: pendingSwap.date,
@@ -132,7 +132,7 @@ describe('Thorchain-query tests', () => {
         amount: '4175.96871027',
       },
     })
-    const successSwap = swapResume.swaps[1] as SuccessSwap
+    let successSwap = swapResume.swaps[1] as SuccessSwap
     expect({
       date: successSwap.date,
       status: successSwap.status,
@@ -166,6 +166,42 @@ describe('Thorchain-query tests', () => {
         address: 'thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55',
         asset: 'ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
         amount: '1355.86901',
+      },
+    })
+    successSwap = swapResume.swaps[3] as SuccessSwap
+    expect({
+      date: successSwap.date,
+      status: successSwap.status,
+      fromAsset: assetToString(successSwap.fromAsset),
+      toAsset: assetToString(successSwap.toAsset),
+      in: {
+        hash: successSwap.inboundTx.hash,
+        address: successSwap.inboundTx.address,
+        asset: assetToString(successSwap.inboundTx.amount.asset),
+        amount: baseToAsset(successSwap.inboundTx.amount.baseAmount).amount().toString(),
+      },
+      out: {
+        hash: successSwap.outboundTx.hash,
+        address: successSwap.outboundTx.address,
+        asset: assetToString(successSwap.outboundTx.amount.asset),
+        amount: baseToAsset(successSwap.outboundTx?.amount.baseAmount).amount().toString(),
+      },
+    }).toEqual({
+      date: new Date('2024-09-13T14:00:32.211Z'),
+      status: 'success',
+      fromAsset: 'THOR.RUNE',
+      toAsset: 'ETH/USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7',
+      in: {
+        hash: 'B27909B53D73DB86753EDBDEBD5F6EE99498A25C57A8AD01F8F3217E232A7121',
+        address: 'thor1qpf7u5qzeuddram3eyrud2emm9expnu7fsyycm',
+        asset: 'THOR.RUNE',
+        amount: '1010',
+      },
+      out: {
+        hash: '',
+        address: 'thor1qpf7u5qzeuddram3eyrud2emm9expnu7fsyycm',
+        asset: 'ETH/USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7',
+        amount: '3996.492284',
       },
     })
   })
