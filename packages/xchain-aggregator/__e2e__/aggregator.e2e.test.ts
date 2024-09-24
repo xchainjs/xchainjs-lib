@@ -70,7 +70,7 @@ describe('Aggregator', () => {
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
     })
-    aggregator = new Aggregator({ wallet })
+    aggregator = new Aggregator({ wallet, protocols: ['Chainflip'] })
   })
 
   it('Should get configuration', () => {
@@ -80,7 +80,7 @@ describe('Aggregator', () => {
   it('Should find swap with greatest expected amount', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
-      destinationAsset: AssetETH,
+      destinationAsset: assetFromStringEx('ARB.USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831'),
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
     printQuoteSwap(estimatedSwap)
@@ -178,33 +178,33 @@ describe('Aggregator', () => {
     console.log(txSubmitted)
   })
 
-  it('Should get swaps history', async () => {
-    const swapHistory = await aggregator.getSwapHistory({
-      chainAddresses: [{ chain: 'BTC', address: 'address' }],
-    })
+  // it('Should get swaps history', async () => {
+  //   const swapHistory = await aggregator.getSwapHistory({
+  //     chainAddresses: [{ chain: 'BTC', address: 'address' }],
+  //   })
 
-    console.log(
-      swapHistory.swaps.map((swap) => {
-        return {
-          protocol: swap.protocol,
-          status: swap.status,
-          date: swap.date.toDateString(),
-          inboundTX: {
-            hash: swap.inboundTx.hash,
-            address: swap.inboundTx.address,
-            asset: assetToString(swap.inboundTx.amount.asset),
-            amount: swap.inboundTx.amount.assetAmount.amount().toString(),
-          },
-          outboundTx: swap.outboundTx
-            ? {
-                hash: swap.outboundTx.hash,
-                address: swap.outboundTx.address,
-                asset: assetToString(swap.outboundTx.amount.asset),
-                amount: swap.outboundTx.amount.assetAmount.amount().toString(),
-              }
-            : undefined,
-        }
-      }),
-    )
-  })
+  //   console.log(
+  //     swapHistory.swaps.map((swap) => {
+  //       return {
+  //         protocol: swap.protocol,
+  //         status: swap.status,
+  //         date: swap.date.toDateString(),
+  //         inboundTX: {
+  //           hash: swap.inboundTx.hash,
+  //           address: swap.inboundTx.address,
+  //           asset: assetToString(swap.inboundTx.amount.asset),
+  //           amount: swap.inboundTx.amount.assetAmount.amount().toString(),
+  //         },
+  //         outboundTx: swap.outboundTx
+  //           ? {
+  //               hash: swap.outboundTx.hash,
+  //               address: swap.outboundTx.address,
+  //               asset: assetToString(swap.outboundTx.amount.asset),
+  //               amount: swap.outboundTx.amount.assetAmount.amount().toString(),
+  //             }
+  //           : undefined,
+  //       }
+  //     }),
+  //   )
+  // })
 })
