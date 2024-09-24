@@ -1635,7 +1635,7 @@ export class ThorchainQuery {
       const splitedAlias = alias.split(delimiter)
       const poolId = Object.keys(pools).find((pool) => pool === `${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`)
 
-      if (poolId) return pools[poolId].assetString
+      if (poolId) return pools[poolId].assetString.replace('.', delimiter)
 
       return alias
     }

@@ -374,7 +374,7 @@ export class MayachainQuery {
       const splitedAlias = alias.split(delimiter)
       const pool = pools.find((pool) => pool.asset.includes(`${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`))
 
-      if (pool) return pool.asset
+      if (pool) return pool.asset.replace('.', delimiter)
 
       return alias
     }
