@@ -4,7 +4,6 @@ import {
   AssetCryptoAmount,
   Chain,
   CryptoAmount,
-  assetFromStringEx,
   baseAmount,
   eqAsset,
   isSynthAsset,
@@ -224,39 +223,5 @@ export const getChain = (chain: string): Chain => {
       return MAYAChain
     default:
       throw Error('Unknown chain')
-  }
-}
-
-export const getAssetFromAliasIfNeeded = (alias: string): string => {
-  const nativeAlias = new Map<string, string>([
-    ['r', 'THOR.RUNE'],
-    ['rune', 'THOR.RUNE'],
-    ['b', 'BTC.BTC'],
-    ['e', 'ETH.ETH'],
-    ['g', 'GAIA.ATOM'],
-    ['d', 'DOGE.DOGE'],
-    ['l', 'LTC.LTC'],
-    ['c', 'BCH.BCH'],
-    ['a', 'AVAX.AVAX'],
-    ['s', 'BSC.BNB'],
-  ])
-
-  const nativeAsset = nativeAlias.get(alias.toLowerCase())
-  if (nativeAsset) return nativeAsset
-
-  return alias
-}
-
-export const getAssetFromMemo = (memo: string): CompatibleAsset => {
-  const attributes = memo.split(':')
-  if (!attributes[0]) throw Error(`Invalid memo: ${memo}`)
-
-  switch (attributes[0]) {
-    case 'SWAP':
-    case '=':
-      if (!attributes[1]) throw Error('Asset not defined')
-      return assetFromStringEx(getAssetFromAliasIfNeeded(attributes[1])) as CompatibleAsset
-    default:
-      throw Error(`Get asset from memo unsupported for ${attributes[0]} operation`)
   }
 }
