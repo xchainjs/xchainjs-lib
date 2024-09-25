@@ -254,6 +254,15 @@ export default class Client extends BaseXChainClient {
    */
   async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     const balances: Balance[] = await this.radixSpecificClient.fetchBalances(address)
+
+    // Return native asset even if there is no balance
+    if (balances.findIndex((balance) => eqAsset(balance.asset, this.getAssetInfo().asset)) === -1) {
+      balances.push({
+        asset: this.getAssetInfo().asset,
+        amount: baseAmount(0, this.getAssetInfo().decimal),
+      })
+    }
+
     // If assets is undefined, return all balances
     if (!assets) {
       return balances
