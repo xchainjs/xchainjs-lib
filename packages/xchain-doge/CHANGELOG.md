@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-utxo-providers@1.0.6
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-crypto@0.3.5
+  - @xchainjs/xchain-util@1.0.5
+  - @xchainjs/xchain-utxo@1.0.6
+
 ## 1.0.5
 
 ### Patch Changes

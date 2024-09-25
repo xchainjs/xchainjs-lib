@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-solana",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "allBalances": "npx ts-node balance-all.ts",
     "tokenBalance": "npx ts-node balance-token.ts",

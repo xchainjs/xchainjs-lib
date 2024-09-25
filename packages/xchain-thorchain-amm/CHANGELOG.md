@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0.12
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [cf78958]
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-thorchain-query@1.0.6
+  - @xchainjs/xchain-bitcoincash@1.0.6
+  - @xchainjs/xchain-thorchain@2.0.8
+  - @xchainjs/xchain-ethereum@1.0.10
+  - @xchainjs/xchain-litecoin@1.0.6
+  - @xchainjs/xchain-binance@6.0.6
+  - @xchainjs/xchain-bitcoin@1.1.2
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-cosmos@2.0.7
+  - @xchainjs/xchain-wallet@1.0.12
+  - @xchainjs/xchain-avax@1.0.10
+  - @xchainjs/xchain-doge@1.0.6
+  - @xchainjs/xchain-util@1.0.5
+  - @xchainjs/xchain-bsc@1.0.10
+  - @xchainjs/xchain-evm@1.0.10
+
 ## 2.0.11
 
 ### Patch Changes

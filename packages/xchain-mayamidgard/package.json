@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayamidgard",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "license": "MIT",
   "description": "Midgard module that exposes all midgard functions used by Mayachain using openapi-generator-cli",
   "keywords": [

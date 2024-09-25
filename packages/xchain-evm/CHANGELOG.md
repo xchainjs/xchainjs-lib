@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.10
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-evm-providers@1.0.8
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-util@1.0.5
+
 ## 1.0.9
 
 ### Patch Changes

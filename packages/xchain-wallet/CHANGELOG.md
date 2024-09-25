@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.12
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [3e16734]
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-radix@1.1.4
+  - @xchainjs/xchain-mayachain@2.0.7
+  - @xchainjs/xchain-thorchain@2.0.8
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-util@1.0.5
+  - @xchainjs/xchain-utxo@1.0.6
+  - @xchainjs/xchain-evm@1.0.10
+
 ## 1.0.11
 
 ### Patch Changes

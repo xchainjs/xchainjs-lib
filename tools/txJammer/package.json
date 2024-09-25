@@ -1,6 +1,6 @@
 {
   "name": "txJammer",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "private": true,
   "description": "A simple script to test all types of transactions broadcasted to a thornode but on stagenet",
   "main": "index.js",
