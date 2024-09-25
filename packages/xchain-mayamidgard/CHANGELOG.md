@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+
 ## 0.1.6
 
 ### Patch Changes

@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.0.12
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [3e16734]
+- Updated dependencies [cf78958]
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-radix@1.1.4
+  - @xchainjs/xchain-mayachain-query@1.0.7
+  - @xchainjs/xchain-mayachain@2.0.7
+  - @xchainjs/xchain-thorchain@2.0.8
+  - @xchainjs/xchain-arbitrum@1.0.10
+  - @xchainjs/xchain-ethereum@1.0.10
+  - @xchainjs/xchain-bitcoin@1.1.2
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-kujira@1.0.7
+  - @xchainjs/xchain-wallet@1.0.12
+  - @xchainjs/xchain-dash@1.0.6
+
 ## 3.0.11
 
 ### Patch Changes

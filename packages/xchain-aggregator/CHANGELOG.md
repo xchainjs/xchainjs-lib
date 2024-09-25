@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.12
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [cf78958]
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-mayachain-query@1.0.7
+  - @xchainjs/xchain-thorchain-query@1.0.6
+  - @xchainjs/xchain-mayachain-amm@3.0.12
+  - @xchainjs/xchain-thorchain-amm@2.0.12
+  - @xchainjs/xchain-mayachain@2.0.7
+  - @xchainjs/xchain-thorchain@2.0.8
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-wallet@1.0.12
+  - @xchainjs/xchain-util@1.0.5
+
 ## 1.0.11
 
 ### Patch Changes

@@ -1,5 +1,19 @@
 # xchainjs-estimate-swap
 
+## 1.0.17
+
+### Patch Changes
+
+- Updated dependencies [cf78958]
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-thorchain-query@1.0.6
+  - @xchainjs/xchain-midgard-query@1.0.6
+  - @xchainjs/xchain-thornode@0.3.20
+  - @xchainjs/xchain-midgard@0.5.10
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-crypto@0.3.5
+  - @xchainjs/xchain-util@1.0.5
+
 ## 1.0.16
 
 ### Patch Changes
