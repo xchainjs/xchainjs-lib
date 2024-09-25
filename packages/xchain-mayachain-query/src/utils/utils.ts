@@ -1,4 +1,4 @@
-import { Asset, CryptoAmount, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, CryptoAmount, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { CompatibleAsset } from '../types'
@@ -26,18 +26,4 @@ export const getCryptoAmountWithNotation = <T extends CompatibleAsset>(
   const inputAmountBaseNotation = amount.baseAmount.amount()
   const decimalsDiff = notation - amount.baseAmount.decimal
   return new CryptoAmount<T>(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
-}
-
-export const getAssetFromMemo = (memo: string): CompatibleAsset => {
-  const attributes = memo.split(':')
-  if (!attributes[0]) throw Error(`Invalid memo: ${memo}`)
-
-  switch (attributes[0]) {
-    case 'SWAP':
-    case '=':
-      if (!attributes[1]) throw Error('Asset not defined')
-      return assetFromStringEx(attributes[1]) as CompatibleAsset
-    default:
-      throw Error(`Get asset from memo unsupported for ${attributes[0]} operation`)
-  }
 }

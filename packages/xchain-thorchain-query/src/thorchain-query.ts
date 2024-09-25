@@ -6,7 +6,10 @@ import {
   AssetCryptoAmount,
   Chain,
   CryptoAmount,
+  SYNTH_ASSET_DELIMITER,
   SynthAsset,
+  TOKEN_ASSET_DELIMITER,
+  TRADE_ASSET_DELIMITER,
   TokenAsset,
   TradeAsset,
   assetAmount,
@@ -79,13 +82,7 @@ import {
   isAssetRuneNative,
 } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import {
-  calcNetworkFee,
-  calcOutboundFee,
-  getAssetFromMemo,
-  getBaseAmountWithDiffDecimals,
-  getChainAsset,
-} from './utils/utils'
+import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/utils'
 
 const defaultCache = new ThorchainCache()
 
@@ -1415,7 +1412,7 @@ export class ThorchainQuery {
         }
 
         const fromAsset: CompatibleAsset = inboundTx.amount.asset
-        const toAsset: CompatibleAsset = getAssetFromMemo((action.metadata.swap as SwapMetadata).memo)
+        const toAsset: CompatibleAsset = this.getAssetFromMemo((action.metadata.swap as SwapMetadata).memo, pools)
 
         if (action.status === 'pending') {
           return {
@@ -1427,9 +1424,9 @@ export class ThorchainQuery {
           }
         }
 
-        const transaction: Transaction =
-          action.out.filter((out) => out.txID !== '')[0] || // For non to protocol asset swap
-          action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0] // For to protocol asset swap
+        const transaction: Transaction = action.out
+          .filter((out) => out.coins[0].asset === assetToString(toAsset))
+          .sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
 
         return {
           date: new Date(Number(action.date) / 10 ** 6),
@@ -1607,5 +1604,52 @@ export class ThorchainQuery {
         lastWithdrawHeight: position.last_withdraw_height,
       }
     })
+  }
+
+  private getAssetFromMemo(memo: string, pools: Record<string, LiquidityPool>): CompatibleAsset {
+    const getAssetFromAliasIfNeeded = (alias: string, pools: Record<string, LiquidityPool>): string => {
+      const nativeAlias = new Map<string, string>([
+        ['r', 'THOR.RUNE'],
+        ['rune', 'THOR.RUNE'],
+        ['b', 'BTC.BTC'],
+        ['e', 'ETH.ETH'],
+        ['g', 'GAIA.ATOM'],
+        ['d', 'DOGE.DOGE'],
+        ['l', 'LTC.LTC'],
+        ['c', 'BCH.BCH'],
+        ['a', 'AVAX.AVAX'],
+        ['s', 'BSC.BNB'],
+      ])
+
+      const nativeAsset = nativeAlias.get(alias.toLowerCase())
+      if (nativeAsset) return nativeAsset
+
+      let delimiter: string = TOKEN_ASSET_DELIMITER
+
+      if (alias.includes(TRADE_ASSET_DELIMITER)) {
+        delimiter = TRADE_ASSET_DELIMITER
+      } else if (alias.includes(SYNTH_ASSET_DELIMITER)) {
+        delimiter = SYNTH_ASSET_DELIMITER
+      }
+
+      const splitedAlias = alias.split(delimiter)
+      const poolId = Object.keys(pools).find((pool) => pool === `${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`)
+
+      if (poolId) return pools[poolId].assetString.replace('.', delimiter)
+
+      return alias
+    }
+
+    const attributes = memo.split(':')
+    if (!attributes[0]) throw Error(`Invalid memo: ${memo}`)
+
+    switch (attributes[0]) {
+      case 'SWAP':
+      case '=':
+        if (!attributes[1]) throw Error('Asset not defined')
+        return assetFromStringEx(getAssetFromAliasIfNeeded(attributes[1], pools)) as CompatibleAsset
+      default:
+        throw Error(`Get asset from memo unsupported for ${attributes[0]} operation`)
+    }
   }
 }

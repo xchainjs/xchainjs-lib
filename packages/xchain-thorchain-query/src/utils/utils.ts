@@ -4,7 +4,6 @@ import {
   AssetCryptoAmount,
   Chain,
   CryptoAmount,
-  assetFromStringEx,
   baseAmount,
   eqAsset,
   isSynthAsset,
@@ -224,19 +223,5 @@ export const getChain = (chain: string): Chain => {
       return MAYAChain
     default:
       throw Error('Unknown chain')
-  }
-}
-
-export const getAssetFromMemo = (memo: string): CompatibleAsset => {
-  const attributes = memo.split(':')
-  if (!attributes[0]) throw Error(`Invalid memo: ${memo}`)
-
-  switch (attributes[0]) {
-    case 'SWAP':
-    case '=':
-      if (!attributes[1]) throw Error('Asset not defined')
-      return assetFromStringEx(attributes[1]) as CompatibleAsset
-    default:
-      throw Error(`Get asset from memo unsupported for ${attributes[0]} operation`)
   }
 }

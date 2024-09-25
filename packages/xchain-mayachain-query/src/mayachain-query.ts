@@ -5,6 +5,9 @@ import {
   Address,
   AssetCryptoAmount,
   CryptoAmount,
+  SYNTH_ASSET_DELIMITER,
+  TOKEN_ASSET_DELIMITER,
+  TRADE_ASSET_DELIMITER,
   assetFromStringEx,
   assetToString,
   baseAmount,
@@ -43,7 +46,6 @@ import {
   ThorChain,
   XdrAsset,
   XdrChain,
-  getAssetFromMemo,
   getBaseAmountWithDiffDecimals,
   getCryptoAmountWithNotation,
 } from './utils'
@@ -287,6 +289,7 @@ export class MayachainQuery {
       type: 'swap',
     })
     const assetDecimals = await this.mayachainCache.getAssetDecimals()
+    const poolDetails = await this.mayachainCache.getPools()
 
     const getCryptoAmount = (
       assetDecimals: Record<string, number>,
@@ -323,7 +326,10 @@ export class MayachainQuery {
           }
 
           const fromAsset: CompatibleAsset = inboundTx.amount.asset
-          const toAsset: CompatibleAsset = getAssetFromMemo((action.metadata.swap as SwapMetadata).memo)
+          const toAsset: CompatibleAsset = this.getAssetFromMemo(
+            (action.metadata.swap as SwapMetadata).memo,
+            poolDetails,
+          )
 
           if (action.status === 'pending') {
             return {
@@ -335,9 +341,9 @@ export class MayachainQuery {
             }
           }
 
-          const transaction: Transaction =
-            action.out.filter((out) => out.txID !== '')[0] ||
-            action.out.sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0] // For non to protocol asset swap
+          const transaction: Transaction = action.out
+            .filter((out) => out.coins[0].asset === assetToString(toAsset))
+            .sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
 
           return {
             date: new Date(Number(action.date) / 10 ** 6),
@@ -355,6 +361,36 @@ export class MayachainQuery {
     }
   }
 
+  private getAssetFromMemo(memo: string, pools: PoolDetail[]): CompatibleAsset {
+    const getAssetFromAliasIfNeeded = (alias: string, pools: PoolDetail[]): string => {
+      let delimiter: string = TOKEN_ASSET_DELIMITER
+
+      if (alias.includes(TRADE_ASSET_DELIMITER)) {
+        delimiter = TRADE_ASSET_DELIMITER
+      } else if (alias.includes(SYNTH_ASSET_DELIMITER)) {
+        delimiter = SYNTH_ASSET_DELIMITER
+      }
+
+      const splitedAlias = alias.split(delimiter)
+      const pool = pools.find((pool) => pool.asset.includes(`${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`))
+
+      if (pool) return pool.asset.replace('.', delimiter)
+
+      return alias
+    }
+
+    const attributes = memo.split(':')
+    if (!attributes[0]) throw Error(`Invalid memo: ${memo}`)
+
+    switch (attributes[0]) {
+      case 'SWAP':
+      case '=':
+        if (!attributes[1]) throw Error('Asset not defined')
+        return assetFromStringEx(getAssetFromAliasIfNeeded(attributes[1], pools)) as CompatibleAsset
+      default:
+        throw Error(`Get asset from memo unsupported for ${attributes[0]} operation`)
+    }
+  }
   /**
    * Get the MAYANames owned by an address
    * @param {Address} owner - Thorchain address

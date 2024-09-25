@@ -181,7 +181,7 @@ describe('Mayachain-query tests', () => {
   it('Should get swaps history', async () => {
     const swapResume = await mayachainQuery.getSwapHistory({ addresses: ['address'] })
     expect(swapResume.count === swapResume.swaps.length)
-    expect(swapResume.count === 2)
+    expect(swapResume.count).toBe(4)
     const pendingSwap = swapResume.swaps[0] as PendingSwap
     expect({
       date: pendingSwap.date,
@@ -206,7 +206,7 @@ describe('Mayachain-query tests', () => {
         amount: '104.34782608',
       },
     })
-    const successSwap = swapResume.swaps[1] as SuccessSwap
+    let successSwap = swapResume.swaps[1] as SuccessSwap
     expect({
       date: successSwap.date,
       status: successSwap.status,
@@ -240,6 +240,42 @@ describe('Mayachain-query tests', () => {
         address: 'maya17xu9ej4rkxsmnl3wkp0kph6k4jk70gzay56p0l',
         asset: 'MAYA.CACAO',
         amount: '3329.7336036086',
+      },
+    })
+    successSwap = swapResume.swaps[2] as SuccessSwap
+    expect({
+      date: successSwap.date,
+      status: successSwap.status,
+      fromAsset: assetToString(successSwap.fromAsset),
+      toAsset: assetToString(successSwap.toAsset),
+      in: {
+        hash: successSwap.inboundTx.hash,
+        address: successSwap.inboundTx.address,
+        asset: assetToString(successSwap.inboundTx.amount.asset),
+        amount: baseToAsset(successSwap.inboundTx.amount.baseAmount).amount().toString(),
+      },
+      out: {
+        hash: successSwap.outboundTx.hash,
+        address: successSwap.outboundTx.address,
+        asset: assetToString(successSwap.outboundTx.amount.asset),
+        amount: baseToAsset(successSwap.outboundTx.amount.baseAmount).amount().toString(),
+      },
+    }).toEqual({
+      date: new Date('2024-05-08T10:14:19.088Z'),
+      status: 'success',
+      fromAsset: 'ETH.ETH',
+      toAsset: 'ARB.TGT-0X429FED88F10285E61B12BDF00848315FBDFCC341',
+      in: {
+        hash: '4CC77E1FC51E9F99F0EE2AAC42FA2FD38A149796E9AD0B8368A1B3EB80AA4C85',
+        address: '0xaa278b62225f6dbc4436de8fa3dd195e1542d159',
+        asset: 'ETH.ETH',
+        amount: '0.99',
+      },
+      out: {
+        hash: '1E9F450E6174407FE846929BD16D057547DFB3BD1918176E12AACDAF6C753A8B',
+        address: '0xAA278b62225f6dbc4436De8Fa3dD195e1542d159',
+        asset: 'ARB.TGT-0X429FED88F10285E61B12BDF00848315FBDFCC341',
+        amount: '77208.44802738',
       },
     })
   })
