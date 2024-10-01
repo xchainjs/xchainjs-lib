@@ -103,6 +103,8 @@ type QuoteSwapParams = {
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap
   toleranceBps?: number // The tolerance basis points for the swap
+  streamingQuantity?: number // The streaming quantity for the swap
+  streamingInterval?: number // The streaming interval for the swap
 }
 
 type SwapHistoryParams = {
