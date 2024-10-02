@@ -29,16 +29,16 @@ describe('Cosmos client', () => {
         client = new Client()
       })
       it('Should get explorer url', () => {
-        expect(client.getExplorerUrl()).toBe('https://atomscan.com')
+        expect(client.getExplorerUrl()).toBe('https://www.mintscan.io/cosmos')
       })
       it('Should get address url', () => {
         expect(client.getExplorerAddressUrl('cosmos1p9axwnsmnzhn0haaerzae9y2adv8q2nslnyzz3')).toBe(
-          'https://atomscan.com/accounts/cosmos1p9axwnsmnzhn0haaerzae9y2adv8q2nslnyzz3',
+          'https://www.mintscan.io/cosmos/accounts/cosmos1p9axwnsmnzhn0haaerzae9y2adv8q2nslnyzz3',
         )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('D31925DD10D19AE2FEA4E8C88273238198B3503032540DBDB43080730B971DE4')).toBe(
-          'https://atomscan.com/transactions/D31925DD10D19AE2FEA4E8C88273238198B3503032540DBDB43080730B971DE4',
+          'https://www.mintscan.io/cosmos/transactions/D31925DD10D19AE2FEA4E8C88273238198B3503032540DBDB43080730B971DE4',
         )
       })
     })
@@ -71,16 +71,16 @@ describe('Cosmos client', () => {
         })
       })
       it('Should get explorer url', () => {
-        expect(client.getExplorerUrl()).toBe('https://atomscan.com')
+        expect(client.getExplorerUrl()).toBe('https://www.mintscan.io/cosmos')
       })
       it('Should get address url', () => {
         expect(client.getExplorerAddressUrl('cosmos1p9axwnsmnzhn0haaerzae9y2adv8q2nslnyzz3')).toBe(
-          'https://atomscan.com/accounts/cosmos1p9axwnsmnzhn0haaerzae9y2adv8q2nslnyzz3',
+          'https://www.mintscan.io/cosmos/accounts/cosmos1p9axwnsmnzhn0haaerzae9y2adv8q2nslnyzz3',
         )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('D31925DD10D19AE2FEA4E8C88273238198B3503032540DBDB43080730B971DE4')).toBe(
-          'https://atomscan.com/transactions/D31925DD10D19AE2FEA4E8C88273238198B3503032540DBDB43080730B971DE4',
+          'https://www.mintscan.io/cosmos/transactions/D31925DD10D19AE2FEA4E8C88273238198B3503032540DBDB43080730B971DE4',
         )
       })
     })

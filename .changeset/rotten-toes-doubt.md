@@ -2,4 +2,4 @@
 '@xchainjs/xchain-cosmos': patch
 ---
 
-Atomscan as explorer.
+Mintscan as explorer.
