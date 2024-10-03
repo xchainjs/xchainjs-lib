@@ -70,7 +70,7 @@ describe('Aggregator', () => {
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
     })
-    aggregator = new Aggregator({ wallet, protocols: ['Chainflip'] })
+    aggregator = new Aggregator({ wallet })
   })
 
   it('Should get configuration', () => {
@@ -80,7 +80,7 @@ describe('Aggregator', () => {
   it('Should find swap with greatest expected amount', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
-      destinationAsset: assetFromStringEx('ARB.USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831'),
+      destinationAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
     printQuoteSwap(estimatedSwap)
