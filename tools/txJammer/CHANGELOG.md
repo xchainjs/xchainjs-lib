@@ -1,5 +1,13 @@
 # txJammer
 
+## 1.0.27
+
+### Patch Changes
+
+- Updated dependencies [5206f8f]
+  - @xchainjs/xchain-cosmos@2.0.8
+  - @xchainjs/xchain-thorchain-amm@2.0.13
+
 ## 1.0.26
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11
+
+### Patch Changes
+
+- 62eae5e: Lower fee bound updated to 10000000.
+
 ## 1.0.10
 
 ### Patch Changes
