@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-do-swap",
   "private": true,
-  "version": "1.0.32",
+  "version": "1.0.33",
   "scripts": {
     "doSwap": "npx ts-node doSwap.ts",
     "doStreamingSwap": "npx ts-node doStreamingSwap.ts",

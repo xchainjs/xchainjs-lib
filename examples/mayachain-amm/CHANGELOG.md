@@ -1,5 +1,13 @@
 # xchainjs-maya-do-swap
 
+## 1.0.32
+
+### Patch Changes
+
+- Updated dependencies [5206f8f]
+  - @xchainjs/xchain-cosmos@2.0.8
+  - @xchainjs/xchain-mayachain-amm@3.0.13
+
 ## 1.0.31
 
 ### Patch Changes

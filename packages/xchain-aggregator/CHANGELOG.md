@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.13
+
+### Patch Changes
+
+- 176c84a: Add `streamingQuantity` and `streamingInterval` to allow streaming swaps
+- 62eae5e: Add arbitrum to chainflip protocol
+  - @xchainjs/xchain-mayachain-amm@3.0.13
+  - @xchainjs/xchain-thorchain-amm@2.0.13
+
 ## 1.0.12
 
 ### Patch Changes

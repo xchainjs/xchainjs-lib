@@ -1,5 +1,12 @@
 # xchainjs-wallet
 
+## 1.0.28
+
+### Patch Changes
+
+- Updated dependencies [5206f8f]
+  - @xchainjs/xchain-cosmos@2.0.8
+
 ## 1.0.27
 
 ### Patch Changes
