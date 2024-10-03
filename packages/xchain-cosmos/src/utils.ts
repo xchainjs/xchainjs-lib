@@ -6,7 +6,7 @@ import { ATOM_DENOM, AssetATOM } from './const'
 import { CompatibleAsset } from './types'
 
 // Explorer URLs for Mainnet and Testnet
-const MAINNET_EXPLORER_URL = 'https://bigdipper.live/cosmos'
+const MAINNET_EXPLORER_URL = 'https://www.mintscan.io/cosmos'
 const TESTNET_EXPLORER_URL = 'https://explorer.theta-testnet.polypore.xyz'
 
 /**

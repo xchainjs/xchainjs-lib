@@ -1,6 +1,6 @@
 # Solana
 
-Solana examples to show different use cases using the its client
+Solana examples to show different use cases using its client
 
 ## Examples
 
@@ -36,7 +36,7 @@ yarn address phrase index
 
 #### Prepare transaction
 
-Check out how you should prepare a transaction to be signed in this [example](https://github.com/xchainjs/xchainjs-lib/blob/master/examples/solana/address.ts) or run it as
+Check out how you should prepare a transaction to be signed in this [example](https://github.com/xchainjs/xchainjs-lib/blob/master/examples/solana/transaction-prepare.ts) or run it as
 
 ```sh
 yarn prepareTx sender recipient asset assetDecimals amount
@@ -44,7 +44,7 @@ yarn prepareTx sender recipient asset assetDecimals amount
 
 #### Make transaction
 
-Check out how you should make a Solana native asset transaction in this [example](https://github.com/xchainjs/xchainjs-lib/blob/master/examples/solana/address.ts) or run it as
+Check out how you should make a Solana native asset transaction in this [example](https://github.com/xchainjs/xchainjs-lib/blob/master/examples/solana/transaction-transfer.ts) or run it as
 
 ```sh
 yarn transfer phrase recipient amount
@@ -52,7 +52,7 @@ yarn transfer phrase recipient amount
 
 #### Make token transaction
 
-Check out how you should make a Solana token transaction in this [example](https://github.com/xchainjs/xchainjs-lib/blob/master/examples/solana/address.ts) or run it as
+Check out how you should make a Solana token transaction in this [example](https://github.com/xchainjs/xchainjs-lib/blob/master/examples/solana/transaction-transfer-token.ts) or run it as
 
 ```sh
 yarn transferToken phrase recipient asset assetDecimals amount

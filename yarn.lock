@@ -4248,7 +4248,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator":
+"@xchainjs/xchain-aggregator@workspace:*, @xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
   dependencies:
@@ -13670,6 +13670,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"xchainjs-aggregator@workspace:examples/aggregator":
+  version: 0.0.0-use.local
+  resolution: "xchainjs-aggregator@workspace:examples/aggregator"
+  dependencies:
+    "@types/node": "npm:20.11.28"
+    "@xchainjs/xchain-aggregator": "workspace:*"
+    "@xchainjs/xchain-bitcoin": "workspace:*"
+    "@xchainjs/xchain-ethereum": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    "@xchainjs/xchain-wallet": "workspace:*"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
 "xchainjs-check-tx@workspace:examples/check-tx":
   version: 0.0.0-use.local
   resolution: "xchainjs-check-tx@workspace:examples/check-tx"
@@ -13893,6 +13908,18 @@ __metadata:
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:^5.0.4"
+  languageName: unknown
+  linkType: soft
+
+"xchainjs-thorchain@workspace:examples/thorchain":
+  version: 0.0.0-use.local
+  resolution: "xchainjs-thorchain@workspace:examples/thorchain"
+  dependencies:
+    "@types/node": "npm:20.11.28"
+    "@xchainjs/xchain-thorchain": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"
   languageName: unknown
