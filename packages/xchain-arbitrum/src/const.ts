@@ -7,7 +7,7 @@ import { BigNumber, ethers } from 'ethers'
 
 // Define constants related to Arbitrum
 export const ARB_DECIMAL = 18
-export const LOWER_FEE_BOUND = 100_000_000
+export const LOWER_FEE_BOUND = 100_000_00
 export const UPPER_FEE_BOUND = 1_000_000_000
 export const ARB_GAS_ASSET_DECIMAL = 18
 export const ARBChain = 'ARB' as const

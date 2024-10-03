@@ -37,11 +37,15 @@ export class ChainflipProtocol implements IProtocol {
       return this.sdk.getAssets()
     }, 24 * 60 * 60 * 1000)
   }
-  approveRouterToSpend(_params: { asset: TokenAsset; amount?: CryptoAmount }): Promise<TxSubmitted> {
-    throw new Error('Method not implemented.')
+  public approveRouterToSpend(_params: { asset: TokenAsset; amount?: CryptoAmount }): Promise<TxSubmitted> {
+    throw new Error('Not implemented')
   }
-  shouldBeApproved(_params: { asset: TokenAsset; amount: CryptoAmount; address: string }): Promise<boolean> {
-    throw new Error('Method not implemented.')
+  public async shouldBeApproved(_params: {
+    asset: TokenAsset
+    amount: CryptoAmount
+    address: string
+  }): Promise<boolean> {
+    return Promise.resolve(false)
   }
 
   /**
@@ -209,11 +213,7 @@ export class ChainflipProtocol implements IProtocol {
     }
     const chainAssets = await this.assetsData.getValue()
     const assetData = chainAssets.find((chainAsset) => {
-      const contractAddress = asset.symbol.split('-').length > 1 ? asset.symbol.split('-')[1] : undefined
-      return (
-        chainAsset.asset === xAssetToCAsset(asset) &&
-        chainAsset.contractAddress?.toLowerCase() === contractAddress?.toLowerCase()
-      )
+      return chainAsset.asset === xAssetToCAsset(asset) && asset.chain === cChainToXChain(chainAsset.chain)
     })
     if (!assetData) throw Error(`${asset.ticker} asset not supported in ${asset.chain} chain`)
     return assetData

@@ -9,6 +9,10 @@ export const cChainToXChain = (chain: CChain): XChain => {
       return 'ETH'
     case 'Polkadot':
       return 'POL'
+    case 'Arbitrum':
+      return 'ARB'
+    case 'Solana':
+      return 'SOL'
     default:
       throw Error('Unsupported chain in XChainJS')
   }
@@ -22,6 +26,10 @@ export const xChainToCChain = (chain: XChain): CChain => {
       return Chains.Ethereum
     case 'POL':
       return Chains.Polkadot
+    case 'ARB':
+      return Chains.Arbitrum
+    case 'SOL':
+      return Chains.Solana
     default:
       throw Error('Unsupported chain in Chainflip')
   }

@@ -18,6 +18,7 @@ class SwapSDK {
         evmChainId: 11155111,
         isMainnet: false,
         requiredBlockConfirmations: 7,
+        maxRetryDurationBlocks: undefined,
       },
       {
         chain: 'Polkadot',
@@ -25,6 +26,7 @@ class SwapSDK {
         evmChainId: undefined,
         isMainnet: false,
         requiredBlockConfirmations: undefined,
+        maxRetryDurationBlocks: undefined,
       },
       {
         chain: 'Bitcoin',
@@ -32,6 +34,7 @@ class SwapSDK {
         evmChainId: undefined,
         isMainnet: false,
         requiredBlockConfirmations: 6,
+        maxRetryDurationBlocks: undefined,
       },
     ]
   }
@@ -126,6 +129,7 @@ class SwapSDK {
         depositAddress: 'BITCOINfakeaddress',
         depositChannelId: 'bitcoin-channel-id',
         brokerCommissionBps: 0,
+        affiliateBrokers: [],
         depositChannelExpiryBlock: BigInt(10000),
         estimatedDepositChannelExpiryTime: 1716889354,
         channelOpeningFee: BigInt(100),
@@ -136,6 +140,7 @@ class SwapSDK {
         depositAddress: 'ETHEREUMfakeaddress',
         depositChannelId: 'ethereum-channel-id',
         brokerCommissionBps: 0,
+        affiliateBrokers: [],
         depositChannelExpiryBlock: BigInt(20000),
         estimatedDepositChannelExpiryTime: 1716889354,
         channelOpeningFee: BigInt(100),
@@ -146,6 +151,7 @@ class SwapSDK {
         depositAddress: 'POLKADOTfakeaddress',
         depositChannelId: 'polkadot-channel-id',
         brokerCommissionBps: 0,
+        affiliateBrokers: [],
         depositChannelExpiryBlock: BigInt(30000),
         estimatedDepositChannelExpiryTime: 1716889354,
         channelOpeningFee: BigInt(100),
@@ -168,6 +174,7 @@ class SwapSDK {
         destChain,
         amount,
         quote: {
+          type: 'REGULAR',
           intermediateAmount: '36115119',
           egressAmount: '51193',
           includedFees: [
@@ -184,13 +191,13 @@ class SwapSDK {
               amount: '36115',
             },
             {
-              type: 'LIQUIDITY',
+              type: 'NETWORK',
               chain: 'Ethereum',
               asset: 'ETH',
               amount: '4655411871275',
             },
             {
-              type: 'LIQUIDITY',
+              type: 'NETWORK',
               chain: 'Ethereum',
               asset: 'USDC',
               amount: '18057',
@@ -204,6 +211,8 @@ class SwapSDK {
           ],
           lowLiquidityWarning: false,
           estimatedDurationSeconds: 702,
+          poolInfo: [],
+          estimatedPrice: '2300',
         },
       }
     }
@@ -222,6 +231,7 @@ class SwapSDK {
         destChain,
         amount,
         quote: {
+          type: 'REGULAR',
           intermediateAmount: '13560635',
           egressAmount: '2063188201000691',
           includedFees: [
@@ -238,18 +248,6 @@ class SwapSDK {
               amount: '13560',
             },
             {
-              type: 'LIQUIDITY',
-              chain: 'Ethereum',
-              asset: 'USDT',
-              amount: '6783',
-            },
-            {
-              type: 'LIQUIDITY',
-              chain: 'Ethereum',
-              asset: 'USDC',
-              amount: '6780',
-            },
-            {
               type: 'EGRESS',
               chain: 'Ethereum',
               asset: 'ETH',
@@ -258,6 +256,8 @@ class SwapSDK {
           ],
           lowLiquidityWarning: false,
           estimatedDurationSeconds: 114,
+          poolInfo: [],
+          estimatedPrice: '1',
         },
       }
     }
@@ -276,6 +276,7 @@ class SwapSDK {
         destChain,
         amount,
         quote: {
+          type: 'REGULAR',
           intermediateAmount: '33919877',
           egressAmount: '24884030',
           includedFees: [
@@ -292,18 +293,6 @@ class SwapSDK {
               amount: '33919',
             },
             {
-              type: 'LIQUIDITY',
-              chain: 'Ethereum',
-              asset: 'ETH',
-              amount: '4357594332450',
-            },
-            {
-              type: 'LIQUIDITY',
-              chain: 'Ethereum',
-              asset: 'USDC',
-              amount: '16959',
-            },
-            {
               type: 'EGRESS',
               chain: 'Ethereum',
               asset: 'USDT',
@@ -312,6 +301,8 @@ class SwapSDK {
           ],
           lowLiquidityWarning: false,
           estimatedDurationSeconds: 114,
+          poolInfo: [],
+          estimatedPrice: '2300',
         },
       }
     }

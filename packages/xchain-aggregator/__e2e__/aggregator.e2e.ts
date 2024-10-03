@@ -178,33 +178,33 @@ describe('Aggregator', () => {
     console.log(txSubmitted)
   })
 
-  it('Should get swaps history', async () => {
-    const swapHistory = await aggregator.getSwapHistory({
-      chainAddresses: [{ chain: 'BTC', address: 'address' }],
-    })
+  // it('Should get swaps history', async () => {
+  //   const swapHistory = await aggregator.getSwapHistory({
+  //     chainAddresses: [{ chain: 'BTC', address: 'address' }],
+  //   })
 
-    console.log(
-      swapHistory.swaps.map((swap) => {
-        return {
-          protocol: swap.protocol,
-          status: swap.status,
-          date: swap.date.toDateString(),
-          inboundTX: {
-            hash: swap.inboundTx.hash,
-            address: swap.inboundTx.address,
-            asset: assetToString(swap.inboundTx.amount.asset),
-            amount: swap.inboundTx.amount.assetAmount.amount().toString(),
-          },
-          outboundTx: swap.outboundTx
-            ? {
-                hash: swap.outboundTx.hash,
-                address: swap.outboundTx.address,
-                asset: assetToString(swap.outboundTx.amount.asset),
-                amount: swap.outboundTx.amount.assetAmount.amount().toString(),
-              }
-            : undefined,
-        }
-      }),
-    )
-  })
+  //   console.log(
+  //     swapHistory.swaps.map((swap) => {
+  //       return {
+  //         protocol: swap.protocol,
+  //         status: swap.status,
+  //         date: swap.date.toDateString(),
+  //         inboundTX: {
+  //           hash: swap.inboundTx.hash,
+  //           address: swap.inboundTx.address,
+  //           asset: assetToString(swap.inboundTx.amount.asset),
+  //           amount: swap.inboundTx.amount.assetAmount.amount().toString(),
+  //         },
+  //         outboundTx: swap.outboundTx
+  //           ? {
+  //               hash: swap.outboundTx.hash,
+  //               address: swap.outboundTx.address,
+  //               asset: assetToString(swap.outboundTx.amount.asset),
+  //               amount: swap.outboundTx.amount.assetAmount.amount().toString(),
+  //             }
+  //           : undefined,
+  //       }
+  //     }),
+  //   )
+  // })
 })

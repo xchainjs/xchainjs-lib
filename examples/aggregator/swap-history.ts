@@ -25,10 +25,10 @@ const main = async () => {
       return {
         protocol: swap.protocol,
         fromAsset: assetToString(swap.inboundTx.amount.asset),
-        toAsset: swap.outboundTx ? assetToString(swap.outboundTx.amount.asset) : undefined,
+        toAsset: swap.status === 'success' ? assetToString(swap.outboundTx.amount.asset) : undefined,
         hash: swap.inboundTx.hash,
         fromAmount: swap.inboundTx.amount.assetAmount.amount().toString(),
-        toAmount: swap.outboundTx ? swap.outboundTx.amount.assetAmount.amount().toString() : undefined,
+        toAmount: swap.status === 'success' ? swap.outboundTx.amount.assetAmount.amount().toString() : undefined,
       }
     }),
   )
