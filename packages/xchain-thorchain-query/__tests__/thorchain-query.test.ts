@@ -13,7 +13,7 @@ import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
-import { QuoteSwapParams, TxDetails } from '../src/types'
+import { PendingSwap, QuoteSwapParams, SuccessSwap, TxDetails } from '../src/types'
 
 //import { AssetRuneNative } from '../src/utils'
 const thorchainCache = new ThorchainCache()
@@ -107,27 +107,54 @@ describe('Thorchain-query tests', () => {
 
   it('Should get swaps history', async () => {
     const swapResume = await thorchainQuery.getSwapHistory({ addresses: ['address'] })
-    expect(swapResume.count === swapResume.swaps.length)
+    expect(swapResume.count).toBe(4)
+    const pendingSwap = swapResume.swaps[0] as PendingSwap
     expect({
-      date: swapResume.swaps[0].date,
-      status: swapResume.swaps[0].status,
+      date: pendingSwap.date,
+      status: pendingSwap.status,
+      fromAsset: assetToString(pendingSwap.fromAsset),
+      toAsset: assetToString(pendingSwap.toAsset),
       in: {
-        hash: swapResume.swaps[0].inboundTx.hash,
-        address: swapResume.swaps[0].inboundTx.address,
-        asset: assetToString(swapResume.swaps[0].inboundTx.amount.asset),
-        amount: baseToAsset(swapResume.swaps[0].inboundTx.amount.baseAmount).amount().toString(),
+        hash: pendingSwap.inboundTx.hash,
+        address: pendingSwap.inboundTx.address,
+        asset: assetToString(pendingSwap.inboundTx.amount.asset),
+        amount: baseToAsset(pendingSwap.inboundTx.amount.baseAmount).amount().toString(),
+      },
+    }).toEqual({
+      date: new Date('2024-09-20T10:57:22.493Z'),
+      status: 'pending',
+      fromAsset: 'ETH~USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7',
+      toAsset: 'ETH~ETH',
+      in: {
+        hash: '4A60B30CBC1EDF2C9A761285EF301C84A6CC8015197E81F12B05B05AE5470AE8',
+        address: 'thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55',
+        asset: 'ETH~USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7',
+        amount: '4175.96871027',
+      },
+    })
+    let successSwap = swapResume.swaps[1] as SuccessSwap
+    expect({
+      date: successSwap.date,
+      status: successSwap.status,
+      fromAsset: assetToString(successSwap.fromAsset),
+      toAsset: assetToString(successSwap.toAsset),
+      in: {
+        hash: successSwap.inboundTx.hash,
+        address: successSwap.inboundTx.address,
+        asset: assetToString(successSwap.inboundTx.amount.asset),
+        amount: baseToAsset(successSwap.inboundTx.amount.baseAmount).amount().toString(),
       },
       out: {
-        hash: swapResume.swaps[0].outboundTx?.hash,
-        address: swapResume.swaps[0].outboundTx?.address,
-        asset: swapResume.swaps[0].outboundTx ? assetToString(swapResume.swaps[0].outboundTx.amount.asset) : undefined,
-        amount: swapResume.swaps[0].outboundTx
-          ? baseToAsset(swapResume.swaps[0].outboundTx?.amount.baseAmount).amount().toString()
-          : undefined,
+        hash: successSwap.outboundTx.hash,
+        address: successSwap.outboundTx.address,
+        asset: assetToString(successSwap.outboundTx.amount.asset),
+        amount: baseToAsset(successSwap.outboundTx?.amount.baseAmount).amount().toString(),
       },
     }).toEqual({
       date: new Date('2024-03-17T14:29:09.029Z'),
       status: 'success',
+      fromAsset: 'DOGE/DOGE',
+      toAsset: 'ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
       in: {
         hash: 'EA7F60B6EB355A40FA7DAA030A0F09F27B7C3AE18E8AE8AB55A7C87DA80F0446',
         address: 'thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55',
@@ -139,6 +166,42 @@ describe('Thorchain-query tests', () => {
         address: 'thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55',
         asset: 'ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
         amount: '1355.86901',
+      },
+    })
+    successSwap = swapResume.swaps[3] as SuccessSwap
+    expect({
+      date: successSwap.date,
+      status: successSwap.status,
+      fromAsset: assetToString(successSwap.fromAsset),
+      toAsset: assetToString(successSwap.toAsset),
+      in: {
+        hash: successSwap.inboundTx.hash,
+        address: successSwap.inboundTx.address,
+        asset: assetToString(successSwap.inboundTx.amount.asset),
+        amount: baseToAsset(successSwap.inboundTx.amount.baseAmount).amount().toString(),
+      },
+      out: {
+        hash: successSwap.outboundTx.hash,
+        address: successSwap.outboundTx.address,
+        asset: assetToString(successSwap.outboundTx.amount.asset),
+        amount: baseToAsset(successSwap.outboundTx?.amount.baseAmount).amount().toString(),
+      },
+    }).toEqual({
+      date: new Date('2024-09-13T14:00:32.211Z'),
+      status: 'success',
+      fromAsset: 'THOR.RUNE',
+      toAsset: 'ETH/USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7',
+      in: {
+        hash: 'B27909B53D73DB86753EDBDEBD5F6EE99498A25C57A8AD01F8F3217E232A7121',
+        address: 'thor1qpf7u5qzeuddram3eyrud2emm9expnu7fsyycm',
+        asset: 'THOR.RUNE',
+        amount: '1010',
+      },
+      out: {
+        hash: '',
+        address: 'thor1qpf7u5qzeuddram3eyrud2emm9expnu7fsyycm',
+        asset: 'ETH/USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7',
+        amount: '3996.492284',
       },
     })
   })

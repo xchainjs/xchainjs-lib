@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-midgard@0.5.10
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-util@1.0.5
+
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies [73b68ed]
+  - @xchainjs/xchain-util@1.0.4
+  - @xchainjs/xchain-client@1.0.5
+
 ## 1.0.4
 
 ### Patch Changes

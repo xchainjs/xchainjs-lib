@@ -103,6 +103,8 @@ type QuoteSwapParams = {
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap
   toleranceBps?: number // The tolerance basis points for the swap
+  streamingQuantity?: number // The streaming quantity for the swap
+  streamingInterval?: number // The streaming interval for the swap
 }
 
 type SwapHistoryParams = {
@@ -115,13 +117,26 @@ type TransactionAction = {
   amount: CryptoAmount
 }
 
-type SwapResume = {
+type SuccessSwap = {
   protocol: Protocol
   date: Date
-  status: 'success' | 'pending'
+  fromAsset: AnyAsset
+  toAsset: AnyAsset
+  status: 'success'
   inboundTx: TransactionAction
-  outboundTx?: TransactionAction
+  outboundTx: TransactionAction
 }
+
+type PendingSwap = {
+  protocol: Protocol
+  date: Date
+  fromAsset: AnyAsset
+  toAsset: AnyAsset
+  status: 'pending'
+  inboundTx: TransactionAction
+}
+
+type SwapResume = SuccessSwap | PendingSwap
 
 type SwapHistory = {
   count: number
@@ -157,6 +172,8 @@ export {
   TxSubmitted,
   Protocol,
   SwapHistory,
+  SuccessSwap,
+  PendingSwap,
   SwapResume,
   SwapHistoryParams,
   ApproveParams,

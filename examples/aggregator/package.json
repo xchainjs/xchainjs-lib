@@ -1,0 +1,26 @@
+{
+  "name": "xchainjs-aggregator",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "swapHistory": "npx ts-node swap-history.ts",
+    "estimateSwap": "npx ts-node swap-estimate.ts",
+    "doSwap": "npx ts-node swap-do.ts",
+    "build": "tsc --noEmit"
+  },
+  "description": "Examples using the Aggregator",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@xchainjs/xchain-aggregator": "workspace:*",
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/xchain-wallet": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.28",
+    "ts-node": "10.9.2",
+    "typescript": "^5.0.4"
+  }
+}

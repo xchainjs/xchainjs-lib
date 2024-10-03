@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-solana",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Solana client for XChainJS",
   "keywords": [
     "Solana",
@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
-    "build": "yarn clean && rollup -c",
+    "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",

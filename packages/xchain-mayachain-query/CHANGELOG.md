@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.7
+
+### Patch Changes
+
+- cf78958: Swap history bug fix.
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-mayamidgard-query@0.1.22
+  - @xchainjs/xchain-mayamidgard@0.1.7
+  - @xchainjs/xchain-mayanode@0.1.10
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-util@1.0.5
+
+## 1.0.6
+
+### Patch Changes
+
+- 73b68ed: Bug fix with duplicated swaps from Midgard
+- 73b68ed: `SwapResume` type with new `fromAsset` and `toAsset` properties
+- Updated dependencies [73b68ed]
+  - @xchainjs/xchain-util@1.0.4
+  - @xchainjs/xchain-client@1.0.5
+  - @xchainjs/xchain-mayamidgard-query@0.1.21
+
 ## 1.0.5
 
 ### Patch Changes

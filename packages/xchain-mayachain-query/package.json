@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-query",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "license": "MIT",
   "description": "Mayachain query module that is responsible for estimating swap calculations and add/remove liquidity for thorchain",
   "keywords": [
@@ -25,7 +25,7 @@
   },
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
-    "build": "yarn clean && rollup -c",
+    "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.js",

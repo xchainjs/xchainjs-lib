@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-cosmos-sdk@1.0.7
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-util@1.0.5
+
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [73b68ed]
+  - @xchainjs/xchain-util@1.0.4
+  - @xchainjs/xchain-client@1.0.5
+  - @xchainjs/xchain-cosmos-sdk@1.0.6
+
 ## 2.0.5
 
 ### Patch Changes

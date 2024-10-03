@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- 33bfa40: Rollup update to latest version.
+
+## 1.0.4
+
+### Patch Changes
+
+- 73b68ed: `assetFromString` can work with 'RUNE' alias
+
 ## 1.0.3
 
 ### Patch Changes

@@ -1,6 +1,42 @@
 {
   "actions": [
     {
+      "date": "1726829842493647576",
+      "height": "17788072",
+      "in": [
+        {
+          "address": "thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55",
+          "coins": [
+            {
+              "amount": "417596871027",
+              "asset": "ETH~USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7"
+            }
+          ],
+          "txID": "4A60B30CBC1EDF2C9A761285EF301C84A6CC8015197E81F12B05B05AE5470AE8"
+        }
+      ],
+      "metadata": {
+        "swap": {
+          "affiliateAddress": "",
+          "affiliateFee": "0",
+          "isStreamingSwap": false,
+          "liquidityFee": "185464777",
+          "memo": "=:ETH~ETH:thor14mh37ua4vkyur0l5ra297a4la6tmf95mt96a55:163442245",
+          "networkFees": [],
+          "swapSlip": "20",
+          "swapTarget": "163442245",
+          "txType": "swap"
+        }
+      },
+      "out": [],
+      "pools": [
+        "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7",
+        "ETH.ETH"
+      ],
+      "status": "pending",
+      "type": "swap"
+    },
+    {
       "date": "1710685749029840134",
       "height": "15151326",
       "in": [
@@ -138,9 +174,61 @@
       ],
       "status": "success",
       "type": "swap"
+    },
+    {
+      "date": "1726236032211273578",
+      "height": "17688300",
+      "in": [
+        {
+          "address": "thor1qpf7u5qzeuddram3eyrud2emm9expnu7fsyycm",
+          "coins": [
+            {
+              "amount": "101000000000",
+              "asset": "THOR.RUNE"
+            }
+          ],
+          "txID": "B27909B53D73DB86753EDBDEBD5F6EE99498A25C57A8AD01F8F3217E232A7121"
+        }
+      ],
+      "metadata": {
+        "swap": {
+          "affiliateAddress": "",
+          "affiliateFee": "0",
+          "isStreamingSwap": false,
+          "liquidityFee": "151418460",
+          "memo": "=:ETH/USDT:thor1qpf7u5qzeuddram3eyrud2emm9expnu7fsyycm:0/1/0",
+          "networkFees": [
+            {
+              "amount": "7925800",
+              "asset": "ETH/USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7"
+            }
+          ],
+          "swapSlip": "15",
+          "swapTarget": "0",
+          "txType": "swap"
+        }
+      },
+      "out": [
+        {
+          "address": "thor1qpf7u5qzeuddram3eyrud2emm9expnu7fsyycm",
+          "coins": [
+            {
+              "amount": "399649228400",
+              "asset": "ETH/USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7"
+            }
+          ],
+          "height": "17688300",
+          "txID": ""
+        }
+      ],
+      "pools": [
+        "ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7"
+      ],
+      "status": "success",
+      "type": "swap"
     }
   ],
-  "count": "2",
+  "count": "4",
   "meta": {
     "nextPageToken": "151512749000000078",
     "prevPageToken": "151513269000000082"

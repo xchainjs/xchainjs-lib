@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- cf78958: Swap history bug fix.
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-midgard-query@1.0.6
+  - @xchainjs/xchain-thornode@0.3.20
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-util@1.0.5
+
+## 1.0.5
+
+### Patch Changes
+
+- 73b68ed: `SwapResume` type with new `fromAsset` and `toAsset` properties
+- Updated dependencies [73b68ed]
+  - @xchainjs/xchain-util@1.0.4
+  - @xchainjs/xchain-client@1.0.5
+  - @xchainjs/xchain-midgard-query@1.0.5
+
 ## 1.0.4
 
 ### Patch Changes

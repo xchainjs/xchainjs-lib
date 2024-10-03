@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-client",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "clean": "rm -rf .turbo && rm -rf lib",
-    "build": "yarn clean && rollup -c",
+    "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "compile": "tsc -p tsconfig.build.json",
     "test": "jest --passWithNoTests"

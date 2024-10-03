@@ -1,5 +1,24 @@
 # @xchainjs/xchain-radix
 
+## 1.1.4
+
+### Patch Changes
+
+- 3e16734: Native asset balance always returned for empty addresses.
+- 33bfa40: Rollup update to latest version.
+- Updated dependencies [33bfa40]
+  - @xchainjs/xchain-client@1.0.6
+  - @xchainjs/xchain-crypto@0.3.5
+  - @xchainjs/xchain-util@1.0.5
+
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies [73b68ed]
+  - @xchainjs/xchain-util@1.0.4
+  - @xchainjs/xchain-client@1.0.5
+
 ## 1.1.2
 
 ### Patch Changes

@@ -8,6 +8,10 @@ export default {
       const resp = require(`./responses/midgard/actions.json`)
       return [200, resp]
     })
+    mock.onGet(/\/v2\/pools/).reply(function () {
+      const resp = require(`./responses/midgard/pools.json`)
+      return [200, resp]
+    })
     mock.onGet(/\/v2\/mayaname\/lookup\/eld/).reply(function () {
       const resp = require(`./responses/midgard/mayaname.json`)
       return [200, resp]
