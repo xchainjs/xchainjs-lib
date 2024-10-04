@@ -1,0 +1,21 @@
+{
+  "name": "xchainjs-bitcoin",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "taprootAddress": "npx ts-node address-taproot.ts",
+    "build": "tsc --noEmit"
+  },
+  "description": "Examples using Bitcoin client",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.28",
+    "ts-node": "10.9.2",
+    "typescript": "^5.0.4"
+  }
+}
