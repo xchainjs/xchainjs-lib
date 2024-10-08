@@ -26,6 +26,7 @@ import {
   getContractAddressFromAsset,
 } from '@xchainjs/xchain-util'
 import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
+import { BigNumber } from 'ethers'
 
 import { ChainBalances, CosmosTxParams, EvmTxParams, RadixTxParams, UtxoTxParams } from './types'
 
@@ -371,6 +372,34 @@ export class Wallet {
       return client.getFees({ sender, memo: params.memo })
     }
     return client.getFees()
+  }
+
+  /**
+   * Estimates gas limit for a transaction.
+   *
+   * @param {TxParams} params The transaction and fees options.
+   * @returns {BigNumber} The estimated gas limit.
+   */
+  public async estimateGasLimit({
+    asset,
+    recipient,
+    amount,
+    memo,
+    from,
+    isMemoEncoded,
+  }: EvmTxParams & { from?: Address }): Promise<BigNumber> {
+    const client = this.getClient(asset.chain)
+    if (!this.isEvmClient(client)) {
+      throw Error(`estimateGasLimit method not supported in ${asset.chain} chain`)
+    }
+    return client.estimateGasLimit({
+      asset,
+      recipient,
+      amount,
+      memo,
+      from,
+      isMemoEncoded,
+    })
   }
 
   /**
