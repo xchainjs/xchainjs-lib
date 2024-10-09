@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.14
+
+### Patch Changes
+
+- 1aab796: doSwap streaming parameters bug fix
+- 5a23369: Estimate gas limit before calling Router contract in MayachainAction
+- Updated dependencies [d2877b3]
+  - @xchainjs/xchain-wallet@1.1.0
+
 ## 3.0.13
 
 ### Patch Changes

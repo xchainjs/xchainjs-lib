@@ -1,5 +1,15 @@
 # xchainjs-maya-do-swap
 
+## 1.0.33
+
+### Patch Changes
+
+- Updated dependencies [d2877b3]
+- Updated dependencies [1aab796]
+- Updated dependencies [5a23369]
+  - @xchainjs/xchain-wallet@1.1.0
+  - @xchainjs/xchain-mayachain-amm@3.0.14
+
 ## 1.0.32
 
 ### Patch Changes

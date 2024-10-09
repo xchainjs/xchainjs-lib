@@ -1,5 +1,13 @@
 # xchainjs-thorchain-amm
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies [d2877b3]
+  - @xchainjs/xchain-wallet@1.1.0
+  - @xchainjs/xchain-thorchain-amm@2.0.14
+
 ## 0.0.13
 
 ### Patch Changes

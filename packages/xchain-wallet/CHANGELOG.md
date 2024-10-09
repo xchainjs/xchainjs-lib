@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- d2877b3: Estimate gas limit for EVM clients
+
 ## 1.0.12
 
 ### Patch Changes
