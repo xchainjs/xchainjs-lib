@@ -217,6 +217,8 @@ export class MayachainAMM {
     affiliateAddress,
     affiliateBps,
     toleranceBps,
+    streamingInterval,
+    streamingQuantity,
   }: QuoteSwapParams): Promise<TxSubmitted> {
     const quoteSwap = await this.estimateSwap({
       fromAsset,
@@ -227,6 +229,8 @@ export class MayachainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      streamingInterval,
+      streamingQuantity,
     })
     // Check if the swap can be performed
     if (!quoteSwap.canSwap) throw Error(`Can not swap. ${quoteSwap.errors.join(' ')}`)
