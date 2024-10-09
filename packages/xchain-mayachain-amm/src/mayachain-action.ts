@@ -12,7 +12,7 @@ import {
   getContractAddressFromAsset,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
-import { Wallet } from '@xchainjs/xchain-wallet'
+import { EvmTxParams, Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
 import { TxSubmitted } from './types'
@@ -144,14 +144,20 @@ export class MayachainAction {
 
     const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
 
-    const hash = await wallet.transfer({
+    const tx: EvmTxParams = {
       asset: nativeAsset.asset,
       amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : assetAmount.baseAmount,
       memo: unsignedTx.data,
       recipient: inboundDetails.router,
       gasPrice: gasPrices.fast,
       isMemoEncoded: true,
-      gasLimit: ethers.BigNumber.from(160000),
+    }
+
+    const gasLimit = await wallet.estimateGasLimit(tx)
+
+    const hash = await wallet.transfer({
+      ...tx,
+      gasLimit,
     })
 
     return {
