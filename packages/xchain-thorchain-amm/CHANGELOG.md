@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.15
+
+### Patch Changes
+
+- @xchainjs/xchain-cosmos@2.0.9
+- @xchainjs/xchain-thorchain@2.0.9
+- @xchainjs/xchain-wallet@1.1.1
+
 ## 2.0.14
 
 ### Patch Changes

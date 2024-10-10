@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8
+
+### Patch Changes
+
+- 54fbdf2: Bug fix with getBalance
+
 ## 1.0.7
 
 ### Patch Changes

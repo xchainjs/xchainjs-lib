@@ -1,5 +1,15 @@
 # xchainjs-wallet
 
+## 1.0.30
+
+### Patch Changes
+
+- @xchainjs/xchain-cosmos@2.0.9
+- @xchainjs/xchain-kujira@1.0.8
+- @xchainjs/xchain-mayachain@2.0.8
+- @xchainjs/xchain-thorchain@2.0.9
+- @xchainjs/xchain-wallet@1.1.1
+
 ## 1.0.29
 
 ### Patch Changes

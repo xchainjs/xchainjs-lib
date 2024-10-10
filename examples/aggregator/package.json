@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-aggregator",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "swapHistory": "npx ts-node swap-history.ts",
     "estimateSwap": "npx ts-node swap-estimate.ts",
