@@ -1,5 +1,16 @@
 # xchainjs-thorchain-amm
 
+## 0.0.15
+
+### Patch Changes
+
+- Updated dependencies [54fbdf2]
+  - @xchainjs/xchain-cosmos-sdk@1.0.8
+  - @xchainjs/xchain-cosmos@2.0.9
+  - @xchainjs/xchain-thorchain@2.0.9
+  - @xchainjs/xchain-thorchain-amm@2.0.15
+  - @xchainjs/xchain-wallet@1.1.1
+
 ## 0.0.14
 
 ### Patch Changes

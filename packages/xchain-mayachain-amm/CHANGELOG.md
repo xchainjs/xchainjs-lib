@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.15
+
+### Patch Changes
+
+- @xchainjs/xchain-kujira@1.0.8
+- @xchainjs/xchain-mayachain@2.0.8
+- @xchainjs/xchain-thorchain@2.0.9
+- @xchainjs/xchain-wallet@1.1.1
+
 ## 3.0.14
 
 ### Patch Changes
