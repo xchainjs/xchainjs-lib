@@ -22,7 +22,16 @@ import {
   XChainClientParams,
   singleFee,
 } from '@xchainjs/xchain-client'
-import { Address, Asset, BaseAmount, CachedValue, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  BaseAmount,
+  CachedValue,
+  Chain,
+  assetToString,
+  baseAmount,
+  eqAsset,
+} from '@xchainjs/xchain-util'
 
 import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 
@@ -270,24 +279,49 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   /**
    * Obtains the balances of the specified address for all assets on the network.
    * @param {string} address The address for which balances are to be retrieved.
-   * @param {Asset[] | undefined} _assets An array of assets. Ignored in this implementation.
+   * @param {Asset[] | undefined} assets An array of assets. Ignored in this implementation.
    * @returns {Balance[]} A promise that resolves to an array of balances.
    */
   public async getBalance(address: string, assets?: CompatibleAsset[]): Promise<Balance[]> {
     const results = await this.roundRobinGetBalance(address)
-    const balances: Balance[] = []
     const nativeAssetInfo = this.getAssetInfo()
+    const balancesMap = new Map<string, Balance>()
 
-    const allAssets = [nativeAssetInfo.asset, ...(assets || [])]
-
-    allAssets.forEach((asset) => {
-      const assetBalance = results.find((result) => result.denom === this.getDenom(asset))
-      balances.push({
-        asset,
-        amount: baseAmount(assetBalance?.amount || 0, this.getAssetDecimals(asset)),
-      })
+    results.forEach((coin) => {
+      const asset = this.assetFromDenom(coin.denom)
+      if (asset) {
+        balancesMap.set(assetToString(asset), {
+          asset,
+          amount: baseAmount(coin.amount, this.getAssetDecimals(asset)),
+        })
+      }
     })
-    return balances
+
+    if (!balancesMap.has(assetToString(nativeAssetInfo.asset))) {
+      balancesMap.set(assetToString(nativeAssetInfo.asset), {
+        asset: nativeAssetInfo.asset,
+        amount: baseAmount(0, nativeAssetInfo.decimal),
+      })
+    }
+
+    if (!assets) return Array.from(balancesMap.values())
+
+    const requestedAssets = new Set(assets.map((asset) => assetToString(asset)))
+
+    const requestedBalances: Balance[] = Array.from(balancesMap.values()).filter(
+      (balance) => eqAsset(balance.asset, nativeAssetInfo.asset) || requestedAssets.has(assetToString(balance.asset)),
+    )
+
+    assets.forEach((asset) => {
+      if (!balancesMap.has(assetToString(asset))) {
+        requestedBalances.push({
+          asset,
+          amount: baseAmount(0, this.getAssetDecimals(asset)),
+        })
+      }
+    })
+
+    return requestedBalances
   }
 
   /**
