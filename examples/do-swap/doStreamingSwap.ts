@@ -20,6 +20,7 @@ import {
   assetToString,
   delay,
   isSynthAsset,
+  isTradeAsset,
   register9Rheader,
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
@@ -81,7 +82,7 @@ const doStreamingSwap = async (tcAmm: ThorchainAMM, wallet: Wallet) => {
     const streamingInterval = Number(process.argv[8])
     const streamingQuantity = Number(process.argv[9])
 
-    const toChain = isSynthAsset(toAsset) ? THORChain : toAsset.chain
+    const toChain = isSynthAsset(toAsset) || isTradeAsset(toAsset) ? THORChain : toAsset.chain
 
     const swapParams: QuoteSwapParams = {
       fromAddress: await wallet.getAddress(fromAsset.chain),
