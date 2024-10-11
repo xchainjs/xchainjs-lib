@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.23
+
+### Patch Changes
+
+- 0cf33cf: Rollup configuration. Interop option set to 'auto' for CommoJS output
+- Updated dependencies [0cf33cf]
+  - @xchainjs/xchain-mayamidgard@0.1.8
+  - @xchainjs/xchain-client@1.0.7
+  - @xchainjs/xchain-util@1.0.6
+
 ## 0.1.22
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.7
+
+### Patch Changes
+
+- 0cf33cf: Rollup configuration. Interop option set to 'auto' for CommoJS output
+- Updated dependencies [0cf33cf]
+  - @xchainjs/xchain-crypto@0.3.6
+  - @xchainjs/xchain-util@1.0.6
+
 ## 1.0.6
 
 ### Patch Changes
