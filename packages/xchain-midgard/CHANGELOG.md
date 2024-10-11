@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.11
+
+### Patch Changes
+
+- 0cf33cf: Rollup configuration. Interop option set to 'auto' for CommoJS output
+
 ## 0.5.10
 
 ### Patch Changes

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.16
+
+### Patch Changes
+
+- 0cf33cf: Rollup configuration. Interop option set to 'auto' for CommoJS output
+- Updated dependencies [0cf33cf]
+  - @xchainjs/xchain-thorchain-query@1.0.7
+  - @xchainjs/xchain-bitcoincash@1.0.7
+  - @xchainjs/xchain-thorchain@2.0.10
+  - @xchainjs/xchain-ethereum@1.0.11
+  - @xchainjs/xchain-litecoin@1.0.7
+  - @xchainjs/xchain-binance@6.0.7
+  - @xchainjs/xchain-bitcoin@1.1.3
+  - @xchainjs/xchain-client@1.0.7
+  - @xchainjs/xchain-cosmos@2.0.10
+  - @xchainjs/xchain-wallet@1.1.2
+  - @xchainjs/xchain-avax@1.0.11
+  - @xchainjs/xchain-doge@1.0.7
+  - @xchainjs/xchain-util@1.0.6
+  - @xchainjs/xchain-bsc@1.0.11
+  - @xchainjs/xchain-evm@1.0.11
+
 ## 2.0.15
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.12
+
+### Patch Changes
+
+- 0cf33cf: Rollup configuration. Interop option set to 'auto' for CommoJS output
+- Updated dependencies [0cf33cf]
+  - @xchainjs/xchain-evm-providers@1.0.9
+  - @xchainjs/xchain-client@1.0.7
+  - @xchainjs/xchain-util@1.0.6
+  - @xchainjs/xchain-evm@1.0.11
+
 ## 1.0.11
 
 ### Patch Changes
