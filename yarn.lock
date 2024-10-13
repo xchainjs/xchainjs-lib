@@ -4724,7 +4724,6 @@ __metadata:
   dependencies:
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-avax": "workspace:*"
-    "@xchainjs/xchain-binance": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-bitcoincash": "workspace:*"
     "@xchainjs/xchain-bsc": "workspace:*"

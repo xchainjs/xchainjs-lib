@@ -34,10 +34,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0, // No block reward for Gaia
     avgBlockTimeInSecs: 6, // Average block time for Gaia in seconds
   },
-  BNB: {
-    blockReward: 0, // No block reward for Binance Coin
-    avgBlockTimeInSecs: 6, // Average block time for Binance Coin in seconds
-  },
   THOR: {
     blockReward: 0, // No block reward for THORChain
     avgBlockTimeInSecs: 6, // Average block time for THORChain in seconds
