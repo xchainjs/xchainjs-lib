@@ -1,4 +1,9 @@
-import { BaseAddress, Bip32PrivateKey, Credential } from '@emurgo/cardano-serialization-lib-nodejs'
+import {
+  Address as CardanoAddress,
+  BaseAddress,
+  Bip32PrivateKey,
+  Credential,
+} from '@emurgo/cardano-serialization-lib-nodejs'
 import {
   AssetInfo,
   Balance,
@@ -122,12 +127,17 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Validate the given Solana address.
-   * @param {string} address Solana address to validate.
+   * Validate the given Cardano address.
+   * @param {string} address Cardano address to validate.
    * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
-  public validateAddress(): boolean {
-    throw Error('Not implemented')
+  public validateAddress(address: string): boolean {
+    try {
+      const addr = CardanoAddress.from_bech32(address)
+      return !addr.is_malformed() && addr.network_id() === getCardanoNetwork(this.getNetwork()).network_id()
+    } catch {
+      return false
+    }
   }
 
   /**

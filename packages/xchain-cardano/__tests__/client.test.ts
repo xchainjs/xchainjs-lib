@@ -95,4 +95,71 @@ describe('Cardano client', () => {
       })
     })
   })
+
+  describe('Address', () => {
+    describe('Mainnet', () => {
+      beforeAll(() => {
+        client = new Client({
+          ...defaultAdaParams,
+        })
+      })
+
+      it('Should get address is valid', async () => {
+        const address = await client.validateAddress(
+          'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv',
+        )
+        expect(address).toBeTruthy()
+      })
+      it('Should get address is not valid', async () => {
+        const address = await client.validateAddress(
+          'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhf',
+        )
+        expect(address).toBeFalsy()
+      })
+    })
+
+    describe('Stagenet', () => {
+      beforeAll(() => {
+        client = new Client({
+          ...defaultAdaParams,
+          network: Network.Stagenet,
+        })
+      })
+
+      it('Should get address is valid', async () => {
+        const address = await client.validateAddress(
+          'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv',
+        )
+        expect(address).toBeTruthy()
+      })
+      it('Should get address is not valid', async () => {
+        const address = await client.validateAddress(
+          'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhf',
+        )
+        expect(address).toBeFalsy()
+      })
+    })
+
+    describe('Testnet', () => {
+      beforeAll(() => {
+        client = new Client({
+          ...defaultAdaParams,
+          network: Network.Testnet,
+        })
+      })
+
+      it('Should get address is valid', async () => {
+        const address = await client.validateAddress(
+          'addr_test1qpkjqjg3yfql7uspafzanp0xq4fvuqzgyewhqhcqnk94w4gk9jlajcx98yc9g8rxgw0zrdsprlkkjl4l2s9ls6hvxlsq3n089y',
+        )
+        expect(address).toBeTruthy()
+      })
+      it('Should get address is not valid', async () => {
+        const address = await client.validateAddress(
+          'addr_test1qpkjqjg3yfql7uspafzanp0xq4fvuqzgyewhqhcqnk94w4gk9jlajcx98yc9g8rxgw0zrdsprlkkjl4l2s9ls6hvxlsq3n089s',
+        )
+        expect(address).toBeFalsy()
+      })
+    })
+  })
 })
