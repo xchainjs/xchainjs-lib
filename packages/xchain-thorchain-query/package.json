@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-query",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "license": "MIT",
   "description": "Thorchain query module that is responsible for estimating swap calculations and add/remove liquidity for thorchain ",
   "keywords": [

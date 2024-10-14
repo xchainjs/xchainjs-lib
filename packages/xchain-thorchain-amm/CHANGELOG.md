@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.17
+
+### Patch Changes
+
+- bdf0764: BNB Beacon chain support removed
+- Updated dependencies [bdf0764]
+  - @xchainjs/xchain-thorchain-query@1.0.8
+
 ## 2.0.16
 
 ### Patch Changes
