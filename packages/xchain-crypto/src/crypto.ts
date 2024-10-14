@@ -87,6 +87,15 @@ export const getSeed = (phrase: string): Buffer => {
 }
 
 /**
+ * Convert a mnemonic phrase back into the entropy
+ * @param {string} phrase - Phrase
+ * @returns the entropy phrase
+ */
+export const phraseToEntropy = (phrase: string): string => {
+  return bip39.mnemonicToEntropy(phrase)
+}
+
+/**
  * Encrypts the given phrase to a keystore object using the provided password.
  * @param {string} phrase The mnemonic phrase to encrypt.
  * @param {string} password The password used for encryption.
