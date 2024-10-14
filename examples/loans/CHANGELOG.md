@@ -1,5 +1,13 @@
 # xchainjs-loans
 
+## 1.0.37
+
+### Patch Changes
+
+- Updated dependencies [bdf0764]
+  - @xchainjs/xchain-thorchain-query@1.0.8
+  - @xchainjs/xchain-thorchain-amm@2.0.17
+
 ## 1.0.36
 
 ### Patch Changes
