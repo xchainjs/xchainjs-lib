@@ -1,6 +1,5 @@
 import { AnyAsset, Asset, TokenAsset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 
-export const AssetBNB = assetFromStringEx('BNB.BNB') as Asset
 export const AssetAVAX = assetFromStringEx('AVAX.AVAX') as Asset
 export const AssetBTC = assetFromStringEx('BTC.BTC') as Asset
 export const AssetBCH = assetFromStringEx('BCH.BCH') as Asset

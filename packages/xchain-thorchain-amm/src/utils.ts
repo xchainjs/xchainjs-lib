@@ -1,5 +1,4 @@
 import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { AssetBNB, BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { BCHChain, Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { AssetBSC, BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
@@ -59,7 +58,7 @@ export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCrypto
  * @returns true if chain is EVM, otherwise, false
  */
 export const isProtocolBFTChain = (chain: Chain): boolean => {
-  return [AssetBNB.chain, AssetATOM.chain].includes(chain)
+  return [AssetATOM.chain].includes(chain)
 }
 
 export const validateAddress = (network: Network, chain: Chain, address: Address): boolean => {
@@ -80,8 +79,6 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new BscClient({ ...defaultBscParams, network }).validateAddress(address)
     case GAIAChain:
       return new GaiaClient({ network }).validateAddress(address)
-    case BNBChain:
-      return new BnbClient({ network }).validateAddress(address)
     case THORChain:
       return new ThorClient({ ...defaultThorParams, network }).validateAddress(address)
     default:

@@ -17,7 +17,6 @@ import {
   AssetATOM,
   AssetAVAX,
   AssetBCH,
-  AssetBNB,
   AssetBSC,
   AssetBTC,
   AssetDOGE,
@@ -61,8 +60,6 @@ export const getCryptoAmountWithNotation = <T extends CompatibleAsset>(
  */
 export const getChainAsset = (chain: Chain): Asset => {
   switch (chain) {
-    case BNBChain:
-      return AssetBNB
     case BTCChain:
       return AssetBTC
     case ETHChain:
@@ -122,8 +119,6 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
     case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)
-    case BNBChain:
-      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBNB)
     case ETHChain:
       const gasRateinETHGwei = inbound.gasRate
       const gasRateinETHWei = baseAmount(gasRateinETHGwei.multipliedBy(10 ** 9), 18)
@@ -173,9 +168,6 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
     case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
-    case BNBChain:
-      //flat fee
-      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBNB)
     case ETHChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee.multipliedBy(10 ** 9), 18), AssetETH)
     case AVAXChain:

@@ -1,5 +1,4 @@
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
@@ -95,7 +94,6 @@ export class ThorchainAMM {
       AVAX: new AvaxClient({ ...defaultAvaxParams, network: Network.Mainnet }),
       BSC: new BscClient({ ...defaultBscParams, network: Network.Mainnet }),
       GAIA: new GaiaClient({ network: Network.Mainnet }),
-      BNB: new BnbClient({ network: Network.Mainnet }),
       THOR: new ThorClient({ ...defaultThorParams, network: Network.Mainnet }),
     }),
   ) {

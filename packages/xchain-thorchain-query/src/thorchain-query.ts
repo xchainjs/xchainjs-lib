@@ -72,7 +72,6 @@ import {
   getSaver,
 } from './types'
 import {
-  AssetBNB,
   AssetRuneNative,
   BNBChain,
   GAIAChain,
@@ -624,11 +623,6 @@ export class ThorchainQuery {
     const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
     // Determine the dust values based on the asset's chain
     switch (asset.chain) {
-      case 'BNB':
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0.000001, assetDecimals)), AssetBNB),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
       case 'BTC':
       case `BCH`:
       case `LTC`:

@@ -37,7 +37,6 @@
   },
   "dependencies": {
     "@xchainjs/xchain-avax": "workspace:*",
-    "@xchainjs/xchain-binance": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-bitcoincash": "workspace:*",
     "@xchainjs/xchain-bsc": "workspace:*",
