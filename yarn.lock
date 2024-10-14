@@ -1194,6 +1194,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@emurgo/cardano-serialization-lib-nodejs@npm:13.0.0":
+  version: 13.0.0
+  resolution: "@emurgo/cardano-serialization-lib-nodejs@npm:13.0.0"
+  checksum: 10c0/f86faece6c00e6d4ffc9f6858500e564c91e95873e369ee9c1fde0e01c8b8de626e9f7600d9fa0d6c069cbb1c1547fbe510682be290cb0734516d1cde9bbc1d6
+  languageName: node
+  linkType: hard
+
 "@eslint-community/eslint-utils@npm:^4.2.0":
   version: 4.4.0
   resolution: "@eslint-community/eslint-utils@npm:4.4.0"
@@ -4377,6 +4384,17 @@ __metadata:
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ethers: "npm:5.7.2"
+  languageName: unknown
+  linkType: soft
+
+"@xchainjs/xchain-cardano@workspace:packages/xchain-cardano":
+  version: 0.0.0-use.local
+  resolution: "@xchainjs/xchain-cardano@workspace:packages/xchain-cardano"
+  dependencies:
+    "@emurgo/cardano-serialization-lib-nodejs": "npm:13.0.0"
+    "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
   languageName: unknown
   linkType: soft
 

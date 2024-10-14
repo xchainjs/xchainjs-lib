@@ -1,3 +1,4 @@
+import { BaseAddress, Bip32PrivateKey, Credential } from '@emurgo/cardano-serialization-lib-nodejs'
 import {
   AssetInfo,
   Balance,
@@ -9,10 +10,12 @@ import {
   TxHash,
   TxsPage,
 } from '@xchainjs/xchain-client'
+import { phraseToEntropy } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 
 import { ADAAsset, ADAChain, ADA_DECIMALS, defaultAdaParams } from './const'
 import { ADAClientParams } from './types'
+import { getCardanoNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
@@ -82,11 +85,32 @@ export class Client extends BaseXChainClient {
    * Get the current address asynchronously.
    *
    * @param {number} index The index of the address. Default 0
-   * @returns {Address} The Solana address related to the index provided.
+   * @returns {Address} The Cardano address related to the index provided.
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
-  public async getAddressAsync(): Promise<string> {
-    throw Error('Not implemented')
+  public async getAddressAsync(walletIndex = 0): Promise<string> {
+    if (!this.phrase) throw new Error('Phrase must be provided')
+
+    const rootKey = Bip32PrivateKey.from_bip39_entropy(
+      Buffer.from(phraseToEntropy(this.phrase), 'hex'),
+      Buffer.from(''),
+    )
+
+    const accountKey = rootKey
+      .derive(1852 | 0x80000000) // 0x80000000 means hardened
+      .derive(1815 | 0x80000000) // 0x80000000 means hardened
+      .derive(walletIndex | 0x80000000) // 0x80000000 means hardened
+
+    const paymentKeyPub = accountKey.derive(0).derive(0)
+    const stakeKeyPub = accountKey.derive(2).derive(0)
+
+    const baseAddress = BaseAddress.new(
+      getCardanoNetwork(this.getNetwork()).network_id(),
+      Credential.from_keyhash(paymentKeyPub.to_raw_key().to_public().hash()),
+      Credential.from_keyhash(stakeKeyPub.to_raw_key().to_public().hash()),
+    )
+
+    return baseAddress.to_address().to_bech32()
   }
 
   /**
