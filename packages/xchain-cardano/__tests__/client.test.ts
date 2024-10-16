@@ -1,14 +1,16 @@
-import { Network } from '@xchainjs/xchain-client'
-import { assetToString } from '@xchainjs/xchain-util'
+import { Balance, Network } from '@xchainjs/xchain-client'
+import { assetToString, eqAsset } from '@xchainjs/xchain-util'
 
-import { Client, defaultAdaParams } from '../src'
+import { ADAAsset, Client, defaultAdaParams } from '../src'
 
 describe('Cardano client', () => {
   let client: Client
 
   beforeAll(() => {
     client = new Client({
-      ...defaultAdaParams,
+      apiKeys: {
+        blockfrostApiKeys: [],
+      },
     })
   })
 
@@ -24,7 +26,11 @@ describe('Cardano client', () => {
     describe('Mainnet', () => {
       let client: Client
       beforeAll(() => {
-        client = new Client()
+        client = new Client({
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
+        })
       })
       it('Should get explorer url', () => {
         expect(client.getExplorerUrl()).toBe('https://adastat.net/')
@@ -49,8 +55,10 @@ describe('Cardano client', () => {
       let client: Client
       beforeAll(() => {
         client = new Client({
-          ...defaultAdaParams,
           network: Network.Testnet,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
         })
       })
       it('Should get explorer url', () => {
@@ -72,8 +80,10 @@ describe('Cardano client', () => {
       let client: Client
       beforeAll(() => {
         client = new Client({
-          ...defaultAdaParams,
           network: Network.Stagenet,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
         })
       })
       it('Should get explorer url', () => {
@@ -101,6 +111,9 @@ describe('Cardano client', () => {
       beforeAll(() => {
         client = new Client({
           ...defaultAdaParams,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
         })
       })
 
@@ -121,7 +134,9 @@ describe('Cardano client', () => {
     describe('Stagenet', () => {
       beforeAll(() => {
         client = new Client({
-          ...defaultAdaParams,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
           network: Network.Stagenet,
         })
       })
@@ -143,7 +158,9 @@ describe('Cardano client', () => {
     describe('Testnet', () => {
       beforeAll(() => {
         client = new Client({
-          ...defaultAdaParams,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
           network: Network.Testnet,
         })
       })
@@ -160,6 +177,49 @@ describe('Cardano client', () => {
         )
         expect(address).toBeFalsy()
       })
+    })
+  })
+
+  describe('Balance', () => {
+    beforeAll(() => {
+      client = new Client({
+        ...defaultAdaParams,
+        apiKeys: {
+          blockfrostApiKeys: [
+            {
+              mainnet: 'fakeApiKey',
+              testnet: '',
+              stagenet: '',
+            },
+          ],
+        },
+      })
+    })
+
+    it('Should get native balance for address with balance', async () => {
+      const balances = await client.getBalance(
+        'addr1zyq0kyrml023kwjk8zr86d5gaxrt5w8lxnah8r6m6s4jp4g3r6dxnzml343sx8jweqn4vn3fz2kj8kgu9czghx0jrsyqqktyhv',
+      )
+      expect(balances.some((balance) => eqAsset(balance.asset, ADAAsset))).toBeTruthy()
+    })
+
+    it('Should get native balance for address with no balance', async () => {
+      const balances = await client.getBalance(
+        'addr1q9kjqjg3yfql7uspafzanp0xq4fvuqzgyewhqhcqnk94w4gk9jlajcx98yc9g8rxgw0zrdsprlkkjl4l2s9ls6hvxlsqj9j8fm',
+      )
+      expect(balances.some((balance) => eqAsset(balance.asset, ADAAsset))).toBeTruthy()
+    })
+
+    it('Should get native balance in correct format', async () => {
+      const balances = await client.getBalance(
+        'addr1zyq0kyrml023kwjk8zr86d5gaxrt5w8lxnah8r6m6s4jp4g3r6dxnzml343sx8jweqn4vn3fz2kj8kgu9czghx0jrsyqqktyhv',
+      )
+      const balance = balances.find((balance) => eqAsset(balance.asset, ADAAsset))
+      expect(balance).toBeDefined()
+      const adaBalance = balance as Balance
+      expect(assetToString(adaBalance.asset)).toEqual('ADA.ADA')
+      expect(adaBalance.amount.decimal).toEqual(6)
+      expect(adaBalance.amount.amount().toString()).toEqual('133884551384')
     })
   })
 })

@@ -1,7 +1,7 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 
-import { ADAClientParams } from './types'
+import { DefaultADAClientParams } from './types'
 
 /**
  * Cardano chain symbol
@@ -29,7 +29,7 @@ const mainnetExplorer = new ExplorerProvider(
   'https://adastat.net/transactions/%%TX_ID%%',
 )
 
-export const defaultAdaParams: ADAClientParams = {
+export const defaultAdaParams: DefaultADAClientParams = {
   network: Network.Mainnet,
   rootDerivationPaths: {
     [Network.Mainnet]: "m/1852'/1815'/",

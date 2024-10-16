@@ -12,28 +12,54 @@ describe('Cardano client', () => {
   describe('Instantiation', () => {
     it('Should throw error with invalid phrase', async () => {
       expect(() => {
-        new Client({ ...defaultAdaParams, phrase: 'invalid phrase', network: Network.Mainnet })
+        new Client({
+          phrase: 'invalid phrase',
+          network: Network.Mainnet,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
+        })
       }).toThrow()
 
       expect(() => {
-        new Client({ ...defaultAdaParams, phrase: 'invalid phrase', network: Network.Testnet })
+        new Client({
+          ...defaultAdaParams,
+          phrase: 'invalid phrase',
+          network: Network.Testnet,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
+        })
       }).toThrow()
 
       expect(() => {
-        new Client({ ...defaultAdaParams, phrase: 'invalid phrase', network: Network.Stagenet })
+        new Client({
+          ...defaultAdaParams,
+          phrase: 'invalid phrase',
+          network: Network.Stagenet,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
+        })
       }).toThrow()
     })
 
     it('Should not throw error on a client without a phrase', () => {
       expect(() => {
-        new Client()
+        new Client({
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
+        })
       }).not.toThrow()
     })
 
     it('Should instantiate client with valid phrase', () => {
       expect(() => {
         new Client({
-          ...defaultAdaParams,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
           phrase: knownPhrase,
         })
       }).not.toThrow()
@@ -46,7 +72,9 @@ describe('Cardano client', () => {
     describe('Mainnet', () => {
       beforeAll(() => {
         client = new Client({
-          ...defaultAdaParams,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
           phrase: knownPhrase,
         })
       })
@@ -69,7 +97,9 @@ describe('Cardano client', () => {
     describe('Stagenet', () => {
       beforeAll(() => {
         client = new Client({
-          ...defaultAdaParams,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
           network: Network.Stagenet,
           phrase: knownPhrase,
         })
@@ -93,7 +123,9 @@ describe('Cardano client', () => {
     describe('Testnet', () => {
       beforeAll(() => {
         client = new Client({
-          ...defaultAdaParams,
+          apiKeys: {
+            blockfrostApiKeys: [],
+          },
           network: Network.Testnet,
           phrase: knownPhrase,
         })

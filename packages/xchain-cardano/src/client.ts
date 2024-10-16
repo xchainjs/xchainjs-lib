@@ -1,3 +1,4 @@
+import { BlockFrostAPI } from '@blockfrost/blockfrost-js'
 import {
   Address as CardanoAddress,
   BaseAddress,
@@ -6,31 +7,44 @@ import {
 } from '@emurgo/cardano-serialization-lib-nodejs'
 import {
   AssetInfo,
-  Balance,
   BaseXChainClient,
   ExplorerProviders,
   Fees,
+  Network,
   PreparedTx,
   Tx,
   TxHash,
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { phraseToEntropy } from '@xchainjs/xchain-crypto'
-import { Address } from '@xchainjs/xchain-util'
+import { Address, baseAmount } from '@xchainjs/xchain-util'
 
 import { ADAAsset, ADAChain, ADA_DECIMALS, defaultAdaParams } from './const'
-import { ADAClientParams } from './types'
+import { ADAClientParams, Balance } from './types'
 import { getCardanoNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
+  private blockfrostApis: Record<Network, BlockFrostAPI[]>
 
-  constructor(params: ADAClientParams = defaultAdaParams) {
-    super(ADAChain, {
+  constructor(params: ADAClientParams) {
+    const allParams = {
       ...defaultAdaParams,
       ...params,
-    })
-    this.explorerProviders = params.explorerProviders
+    }
+    super(ADAChain, allParams)
+    this.explorerProviders = allParams.explorerProviders
+    this.blockfrostApis = {
+      [Network.Mainnet]: allParams.apiKeys.blockfrostApiKeys
+        .filter((apiKey) => apiKey.mainnet.trim() !== '')
+        .map((apiKey) => new BlockFrostAPI({ projectId: apiKey.mainnet })),
+      [Network.Testnet]: allParams.apiKeys.blockfrostApiKeys
+        .filter((apiKey) => apiKey.testnet.trim() !== '')
+        .map((apiKey) => new BlockFrostAPI({ projectId: apiKey.testnet })),
+      [Network.Stagenet]: allParams.apiKeys.blockfrostApiKeys
+        .filter((apiKey) => apiKey.stagenet.trim() !== '')
+        .map((apiKey) => new BlockFrostAPI({ projectId: apiKey.stagenet })),
+    }
   }
 
   /**
@@ -146,8 +160,8 @@ export class Client extends BaseXChainClient {
    * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
    * @returns {Promise<Balance[]>} An array containing the balance of the address.
    */
-  public async getBalance(): Promise<Balance[]> {
-    throw Error('Not implemented')
+  public async getBalance(address: Address): Promise<Balance[]> {
+    return this.roundRobinGetBalance(address)
   }
 
   /**
@@ -202,5 +216,36 @@ export class Client extends BaseXChainClient {
    */
   public async prepareTx(): Promise<PreparedTx> {
     throw Error('Not implemented')
+  }
+
+  private async roundRobinGetBalance(address: Address): Promise<Balance[]> {
+    try {
+      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+        try {
+          const { amount } = await blockFrostApi.addresses(address)
+          const adaBalance = amount.find((balance) => balance.unit === 'lovelace')
+
+          return [
+            {
+              asset: ADAAsset,
+              amount: baseAmount(adaBalance?.quantity || 0, this.getAssetInfo().decimal),
+            },
+          ]
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (e: any) {
+          if ('status_code' in e && e.status_code === 404) {
+            return [
+              {
+                asset: ADAAsset,
+                amount: baseAmount(0, ADA_DECIMALS),
+              },
+            ]
+          }
+          throw e
+        }
+      }
+    } catch {}
+
+    throw Error('Can not get balance')
   }
 }
