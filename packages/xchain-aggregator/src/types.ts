@@ -154,6 +154,13 @@ type IsApprovedParams = {
   address: string
 }
 
+type EarnProduct = {
+  protocol: Protocol
+  isEnabled: boolean
+  asset: Asset | TokenAsset
+  apr: number
+}
+
 interface IProtocol {
   name: Protocol
   isAssetSupported(asset: AnyAsset): Promise<boolean>
@@ -163,6 +170,7 @@ interface IProtocol {
   getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory>
   approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted>
   shouldBeApproved(params: IsApprovedParams): Promise<boolean>
+  listEarnProducts(): Promise<EarnProduct[]>
 }
 
 export {
@@ -178,4 +186,5 @@ export {
   SwapHistoryParams,
   ApproveParams,
   IsApprovedParams,
+  EarnProduct,
 }

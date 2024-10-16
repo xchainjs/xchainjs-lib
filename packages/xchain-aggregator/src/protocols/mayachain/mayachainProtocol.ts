@@ -13,6 +13,7 @@ import {
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
+  EarnProduct,
   IProtocol,
   ProtocolConfig,
   QuoteSwap,
@@ -144,5 +145,14 @@ export class MayachainProtocol implements IProtocol {
         return { protocol: this.name, ...swap }
       }),
     }
+  }
+
+  /**
+   * List supported earn products
+   * @throws {Error} - Method not implemented.
+   * @returns the earn products the protocol supports
+   */
+  public async listEarnProducts(): Promise<EarnProduct[]> {
+    throw new Error('Method not implemented.')
   }
 }

@@ -14,7 +14,15 @@ import {
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
+import {
+  EarnProduct,
+  IProtocol,
+  ProtocolConfig,
+  QuoteSwap,
+  QuoteSwapParams,
+  SwapHistory,
+  TxSubmitted,
+} from '../../types'
 
 import { CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
@@ -37,9 +45,11 @@ export class ChainflipProtocol implements IProtocol {
       return this.sdk.getAssets()
     }, 24 * 60 * 60 * 1000)
   }
+
   public approveRouterToSpend(_params: { asset: TokenAsset; amount?: CryptoAmount }): Promise<TxSubmitted> {
     throw new Error('Not implemented')
   }
+
   public async shouldBeApproved(_params: {
     asset: TokenAsset
     amount: CryptoAmount
@@ -195,6 +205,15 @@ export class ChainflipProtocol implements IProtocol {
    * @returns the swap history
    */
   public async getSwapHistory(): Promise<SwapHistory> {
+    throw new Error('Method not implemented.')
+  }
+
+  /**
+   * List supported earn products
+   * @throws {Error} - Method not implemented.
+   * @returns the earn products the protocol supports
+   */
+  public async listEarnProducts(): Promise<EarnProduct[]> {
     throw new Error('Method not implemented.')
   }
 

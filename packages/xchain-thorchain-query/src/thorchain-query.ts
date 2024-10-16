@@ -53,6 +53,7 @@ import {
   RunePoolProviderParams,
   RunePoolProvidersParams,
   SaverFees,
+  SaverVault,
   SaversPosition,
   SaversWithdraw,
   SwapHistoryParams,
@@ -676,6 +677,23 @@ export class ThorchainQuery {
       default:
         throw Error('Unknown chain') // Throw error for unknown chain
     }
+  }
+
+  public async listSaverVaults(): Promise<SaverVault[]> {
+    const pools = await this.thorchainCache.getPools()
+    const poolsData = await this.thorchainCache.midgardQuery.midgardCache.getPools()
+    return Object.values(pools)
+      .filter((pool) => {
+        return pool.thornodeDetails.savers_depth !== '0' && pool.thornodeDetails.savers_units !== '0'
+      })
+      .map((pool) => {
+        const poolData = poolsData.find((poolData) => poolData.asset === assetToString(pool.asset))
+        return {
+          asset: pool.asset,
+          isEnabled: true,
+          apr: Number(poolData?.saversAPR || 0),
+        }
+      })
   }
 
   // Savers Queries

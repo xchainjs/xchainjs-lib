@@ -4,6 +4,7 @@ import { DEFAULT_CONFIG } from './const'
 import { ProtocolFactory } from './protocols'
 import {
   Config,
+  EarnProduct,
   IProtocol,
   Protocol,
   QuoteSwap,
@@ -154,6 +155,32 @@ export class Aggregator {
       count: swaps.length,
       swaps: swaps.sort((swapA, swapB) => swapB.date.getTime() - swapA.date.getTime()),
     }
+  }
+
+  /**
+   *
+   * @returns
+   */
+  public async listEarnProducts(): Promise<Record<Protocol, EarnProduct[]>> {
+    const listTask = async (protocol: IProtocol) => {
+      return protocol.listEarnProducts()
+    }
+
+    const products: Record<Protocol, EarnProduct[]> = {
+      Thorchain: [],
+      Mayachain: [],
+      Chainflip: [],
+    }
+
+    const results = await Promise.allSettled(this.protocols.map((protocol) => listTask(protocol)))
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        products[this.protocols[index].name] = result.value
+      }
+    })
+
+    return products
   }
 
   private verifyConfig(config: Config & { protocols: Protocol[] }) {
