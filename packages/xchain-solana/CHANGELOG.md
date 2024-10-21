@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.6
+
+### Patch Changes
+
+- ab460a3: Solana client can work with multiple RPC endpoints.
+
 ## 0.0.5
 
 ### Patch Changes
