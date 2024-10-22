@@ -25,5 +25,8 @@ export default {
     mock.onGet(/\/thorchain\/mimir/).reply(function () {
       return [200, require('./responses/mimir.json')]
     })
+    mock.onGet(/\/thorchain\/constants/).reply(function () {
+      return [200, require('./responses/constants.json')]
+    })
   },
 }

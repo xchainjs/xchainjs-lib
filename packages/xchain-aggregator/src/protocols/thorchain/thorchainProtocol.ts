@@ -1,17 +1,7 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import {
-  AnyAsset,
-  Asset,
-  Chain,
-  TokenAsset,
-  assetFromStringEx,
-  assetToString,
-  eqAsset,
-  isSynthAsset,
-  isTradeAsset,
-} from '@xchainjs/xchain-util'
+import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
@@ -144,17 +134,17 @@ export class ThorchainProtocol implements IProtocol {
 
   /**
    * List supported earn products
-   * @throws {Error} - Method not implemented.
    * @returns the earn products the protocol supports
    */
   public async listEarnProducts(): Promise<EarnProduct[]> {
-    return [
-      {
+    const vaults = await this.thorchainAmm.listSaverVaults()
+    return vaults.map((vault) => {
+      return {
         protocol: this.name,
-        isEnabled: true,
-        asset: assetFromStringEx('') as Asset | TokenAsset,
-        apr: -0.1,
-      },
-    ]
+        isEnabled: vault.isEnabled,
+        asset: vault.asset,
+        apr: vault.apr,
+      }
+    })
   }
 }

@@ -158,8 +158,8 @@ export class Aggregator {
   }
 
   /**
-   *
-   * @returns
+   * List supported earn products by each protocol
+   * @returns the earn products the protocol supports
    */
   public async listEarnProducts(): Promise<Record<Protocol, EarnProduct[]>> {
     const listTask = async (protocol: IProtocol) => {

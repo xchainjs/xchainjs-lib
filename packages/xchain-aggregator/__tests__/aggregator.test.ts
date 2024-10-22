@@ -166,4 +166,15 @@ describe('Aggregator', () => {
       },
     })
   })
+
+  it('Should list earn products', async () => {
+    const earnProducts = await aggregator.listEarnProducts()
+    expect(earnProducts['Chainflip'].length).toBe(0)
+    expect(earnProducts['Mayachain'].length).toBe(0)
+    expect(earnProducts['Thorchain'].length).toBe(11)
+    expect(earnProducts['Thorchain'][0].protocol).toBe('Thorchain')
+    expect(assetToString(earnProducts['Thorchain'][0].asset)).toBe('AVAX.AVAX')
+    expect(earnProducts['Thorchain'][0].isEnabled).toBeTruthy()
+    expect(earnProducts['Thorchain'][0].apr).toBe(0.048445694045141235)
+  })
 })

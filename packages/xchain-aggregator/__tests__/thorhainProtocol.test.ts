@@ -3,7 +3,6 @@ import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
-jest.mock('@xchainjs/xchain-thorchain-amm')
 import {
   CryptoAmount,
   TokenAsset,
@@ -21,8 +20,20 @@ import { SuccessSwap } from '../src'
 
 describe('Thorchain protocol', () => {
   let protocol: ThorchainProtocol
+  let mockApproveRouterToSpend: jest.Mock
+  let mockIsRouterApprovedToSpend: jest.Mock
 
   beforeAll(() => {
+    mockIsRouterApprovedToSpend = jest
+      .fn()
+      .mockReturnValue(['Thorchain router has not been approved to spend this amount'])
+    ThorchainAMM.prototype.isRouterApprovedToSpend = mockIsRouterApprovedToSpend
+
+    mockApproveRouterToSpend = jest.fn().mockResolvedValue({
+      hash: 'mockedHash',
+      url: 'http://mocked.url',
+    })
+    ThorchainAMM.prototype.approveRouterToSpend = mockApproveRouterToSpend
     protocol = new ThorchainProtocol()
   })
 
@@ -39,17 +50,6 @@ describe('Thorchain protocol', () => {
     mockMidgardApi.restore()
     mockThornodeApi.restore()
   })
-
-  const mockIsRouterApprovedToSpend = jest
-    .fn()
-    .mockReturnValue(['Thorchain router has not been approved to spend this amount'])
-  ThorchainAMM.prototype.isRouterApprovedToSpend = mockIsRouterApprovedToSpend
-
-  const mockApproveRouterToSpend = jest.fn().mockResolvedValue({
-    hash: 'mockedHash',
-    url: 'http://mocked.url',
-  })
-  ThorchainAMM.prototype.approveRouterToSpend = mockApproveRouterToSpend
 
   it('Should approve router to spend', async () => {
     const asset = assetFromStringEx('ETH.USDT-0XA3910454BF2CB59B8B3A401589A3BACC5CA42306') as TokenAsset
@@ -144,5 +144,13 @@ describe('Thorchain protocol', () => {
         amount: '1355.86901',
       },
     })
+  })
+  it('List earn products', async () => {
+    const vaults = await protocol.listEarnProducts()
+    expect(vaults.length).toBe(11)
+    expect(vaults.every((vault) => vault.protocol === 'Thorchain')).toBeTruthy()
+    expect(assetToString(vaults[0].asset)).toBe('AVAX.AVAX')
+    expect(vaults[0].isEnabled).toBeTruthy()
+    expect(vaults[0].apr).toBe(0.048445694045141235)
   })
 })
