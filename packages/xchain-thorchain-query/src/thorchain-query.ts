@@ -53,8 +53,8 @@ import {
   RunePoolProviderParams,
   RunePoolProvidersParams,
   SaverFees,
-  SaverVault,
   SaversPosition,
+  SaversVault,
   SaversWithdraw,
   SwapHistoryParams,
   SwapsHistory,
@@ -679,9 +679,15 @@ export class ThorchainQuery {
     }
   }
 
-  public async listSaverVaults(): Promise<SaverVault[]> {
+  /**
+   * List the Saver vaults
+   * @returns the protocol savers vaults
+   */
+  public async listSaverVaults(): Promise<SaversVault[]> {
     const pools = await this.thorchainCache.getPools()
     const poolsData = await this.thorchainCache.midgardQuery.midgardCache.getPools()
+    const networkValues: Record<string, number> = await this.thorchainCache.getNetworkValues()
+
     return Object.values(pools)
       .filter((pool) => {
         return pool.thornodeDetails.savers_depth !== '0' && pool.thornodeDetails.savers_units !== '0'
@@ -690,8 +696,12 @@ export class ThorchainQuery {
         const poolData = poolsData.find((poolData) => poolData.asset === assetToString(pool.asset))
         return {
           asset: pool.asset,
-          isEnabled: true,
+          isEnabled:
+            !networkValues.HALTCHAINGLOBAL &&
+            !!networkValues.ENABLESAVINGSVAULTS &&
+            !networkValues[`HALT${pool.asset.chain}CHAIN`],
           apr: Number(poolData?.saversAPR || 0),
+          fillBps: Number(pool.thornodeDetails.savers_fill_bps),
         }
       })
   }

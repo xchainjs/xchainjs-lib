@@ -285,10 +285,26 @@ export type PoolRatios = {
   runeToAsset: BigNumber // The ratio of RUNE to assets
 }
 
-export type SaverVault = {
+/**
+ * Savers vault
+ */
+export type SaversVault = {
+  /**
+   * Savers vault asset
+   */
   asset: Asset | TokenAsset
+  /**
+   * Whether an user can deposit into a Savers vault
+   */
   isEnabled: boolean
+  /**
+   * Savers vault APR
+   */
   apr: number
+  /**
+   * Percentage filled in basis points
+   */
+  fillBps: number
 }
 
 /**

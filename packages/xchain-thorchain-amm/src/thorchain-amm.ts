@@ -29,6 +29,7 @@ import {
   QuoteSwapParams,
   RegisterTHORName,
   SaversPosition,
+  SaversVault,
   SaversWithdraw,
   ThorchainQuery,
   TxDetails,
@@ -493,6 +494,14 @@ export class ThorchainAMM {
    */
   public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
     return await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
+  }
+
+  /**
+   * List the Saver vaults
+   * @returns the protocol savers vaults
+   */
+  public async listSaverVaults(): Promise<SaversVault[]> {
+    return this.thorchainQuery.listSaverVaults()
   }
 
   /**
