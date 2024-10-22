@@ -1,6 +1,7 @@
 import {
   Balance as BaseBalance,
   ExplorerProviders,
+  Network,
   Tx as BaseTx,
   TxFrom as BaseTxFrom,
   TxParams as BaseTxParams,
@@ -15,6 +16,7 @@ import { Asset, BaseAmount, TokenAsset } from '@xchainjs/xchain-util'
  */
 export type SOLClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
+  clientUrls?: Record<Network, string[]>
 }
 
 export type CompatibleAsset = Asset | TokenAsset
