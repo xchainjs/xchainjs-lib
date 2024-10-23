@@ -11,5 +11,8 @@ export default {
       const resp = require(`./responses/actions.json`)
       return [200, resp]
     })
+    mock.onGet(/\/v2\/saver/).reply(function () {
+      return [200, require('./responses/saver.json')]
+    })
   },
 }

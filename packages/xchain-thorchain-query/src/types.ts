@@ -385,6 +385,7 @@ export type SaversPosition = {
   ageInYears: number // The age in years
   ageInDays: number // The age in days
   asset: Asset | TokenAsset // The asset
+  address: Address
   errors: string[] // Any errors encountered
 }
 

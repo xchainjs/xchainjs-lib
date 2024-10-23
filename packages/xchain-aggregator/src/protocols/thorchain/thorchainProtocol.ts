@@ -5,8 +5,10 @@ import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } f
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
+  EarnPosition,
   EarnProduct,
   IProtocol,
+  ListEarnPositionParams,
   ProtocolConfig,
   QuoteSwap,
   QuoteSwapParams,
@@ -144,6 +146,27 @@ export class ThorchainProtocol implements IProtocol {
         isEnabled: vault.isEnabled,
         asset: vault.asset,
         apr: vault.apr,
+      }
+    })
+  }
+
+  /**
+   * List earn positions
+   * @param {ListEarnPositionParams} - List earn position params.
+   * @returns the earn positions of the addresses in the earn products
+   */
+  public async listEarnPositions(params: ListEarnPositionParams): Promise<EarnPosition[]> {
+    const positions = await this.thorchainQuery.getBatchSaversPosition(params.assetAddresses)
+    return positions.map((position) => {
+      return {
+        protocol: this.name,
+        asset: position.asset,
+        address: position.address,
+        depositAmount: position.depositValue,
+        redeemableAmount: position.redeemableValue,
+        percentageGrowth: position.percentageGrowth,
+        errors: position.errors,
+        ageInDays: position.ageInDays,
       }
     })
   }

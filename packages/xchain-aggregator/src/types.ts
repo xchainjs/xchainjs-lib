@@ -161,6 +161,48 @@ type EarnProduct = {
   apr: number
 }
 
+/**
+ * Represents the position of an address in an Earn product.
+ */
+type EarnPosition = {
+  /**
+   * Protocol
+   */
+  protocol: Protocol
+  /**
+   * Asset linked to the position
+   */
+  asset: Asset | TokenAsset
+  /**
+   * Address linked to the position
+   */
+  address: Address
+  /**
+   * The value of the deposit made by the owner of address.
+   */
+  depositAmount: CryptoAmount<Asset | TokenAsset>
+  /**
+   * The value that the owner of the address can redeem
+   */
+  redeemableAmount: CryptoAmount<Asset | TokenAsset>
+  /**
+   * The percentage growth of the earn's position.
+   */
+  percentageGrowth: number
+  /**
+   * The age of the earn's position in days
+   */
+  ageInDays: number
+  /**
+   * Any errors encountered during processing
+   */
+  errors: string[]
+}
+
+type ListEarnPositionParams = {
+  assetAddresses: { address: Address; asset: Asset | TokenAsset }[]
+}
+
 interface IProtocol {
   name: Protocol
   isAssetSupported(asset: AnyAsset): Promise<boolean>
@@ -171,6 +213,7 @@ interface IProtocol {
   approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted>
   shouldBeApproved(params: IsApprovedParams): Promise<boolean>
   listEarnProducts(): Promise<EarnProduct[]>
+  listEarnPositions(params: ListEarnPositionParams): Promise<EarnPosition[]>
 }
 
 export {
@@ -187,4 +230,6 @@ export {
   ApproveParams,
   IsApprovedParams,
   EarnProduct,
+  ListEarnPositionParams,
+  EarnPosition,
 }

@@ -85,6 +85,7 @@ export class MidgardQuery {
         const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
 
         saversPositions.push({
+          address: saver.assetAddress,
           depositValue: depositAmount,
           redeemableValue: redeemableAssetAmount,
           lastAddHeight: -1,

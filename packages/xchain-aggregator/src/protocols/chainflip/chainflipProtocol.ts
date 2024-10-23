@@ -15,6 +15,7 @@ import {
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
+  EarnPosition,
   EarnProduct,
   IProtocol,
   ProtocolConfig,
@@ -214,6 +215,15 @@ export class ChainflipProtocol implements IProtocol {
    * @returns the earn products the protocol supports
    */
   public async listEarnProducts(): Promise<EarnProduct[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  /**
+   * List earn positions
+   * @throws {Error} - Method not implemented.
+   * @returns the earn positions of the addresses in the earn products
+   */
+  public async listEarnPositions(): Promise<EarnPosition[]> {
     throw new Error('Method not implemented.')
   }
 

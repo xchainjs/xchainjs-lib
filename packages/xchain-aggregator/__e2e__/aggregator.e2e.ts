@@ -10,10 +10,11 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import { Asset, CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { Aggregator, QuoteSwap } from '../src'
+import { EarnPosition } from '../src/types'
 
 function printQuoteSwap(quoteSwap: QuoteSwap) {
   console.log({
@@ -48,6 +49,19 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
     canSwap: quoteSwap.canSwap,
     errors: quoteSwap.errors,
     warning: quoteSwap.warning,
+  })
+}
+
+function printEarnPosition(position: EarnPosition) {
+  console.log({
+    protocol: position.protocol,
+    address: position.address,
+    asset: assetToString(position.asset),
+    depositAmount: position.depositAmount.assetAmount.amount().toString(),
+    redeemableAmount: position.redeemableAmount.assetAmount.amount().toString(),
+    ageInDays: position.ageInDays,
+    percentageGrowth: position.percentageGrowth,
+    errors: position.errors,
   })
 }
 
@@ -176,6 +190,31 @@ describe('Aggregator', () => {
     })
 
     console.log(txSubmitted)
+  })
+
+  it('Should list earn positions', async () => {
+    const positions = await aggregator.listEarnPositions({
+      assetAddresses: [
+        {
+          address: '0x3db0f3c5713f4248dcad61052c0590c538755eb8',
+          asset: assetFromStringEx('BSC.BNB') as Asset,
+        },
+        {
+          address: '0x3db0f3c5713f4248dcad61052c0590c538755eb8',
+          asset: assetFromStringEx('ETH.ETH') as Asset,
+        },
+        {
+          address: 'bc1qqduzvppjz2v0mccuel5d94qy2k43xhyr6amnp2',
+          asset: assetFromStringEx('BTC.BTC') as Asset,
+        },
+      ],
+    })
+
+    for (const protocolPositions of Object.values(positions)) {
+      for (const position of protocolPositions) {
+        printEarnPosition(position)
+      }
+    }
   })
 
   // it('Should get swaps history', async () => {

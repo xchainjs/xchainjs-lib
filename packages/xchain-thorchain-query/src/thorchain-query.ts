@@ -1035,6 +1035,7 @@ export class ThorchainQuery {
 
     // Create and populate a SaversPosition object with the calculated values
     const saversPos: SaversPosition = {
+      address: params.address,
       depositValue: depositAmount, // Current deposit value of the saver
       redeemableValue: redeemableAssetAmount, // Redeemable value of the saver's position
       lastAddHeight: Number(savers?.last_add_height), // Height at which the last addition was made to the pool
@@ -1047,6 +1048,15 @@ export class ThorchainQuery {
 
     // Return the SaversPosition object representing the saver's position
     return saversPos
+  }
+
+  /**
+   * Retrieve the positions of a saver given the assets
+   * @param params - Object containing a list of the asset
+   * @returns - Object representing the saver's position.
+   */
+  public async getBatchSaversPosition(params: getSaver[]): Promise<SaversPosition[]> {
+    return this.thorchainCache.midgardQuery.getSaverPositions(params)
   }
 
   /**

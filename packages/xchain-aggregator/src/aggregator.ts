@@ -4,8 +4,10 @@ import { DEFAULT_CONFIG } from './const'
 import { ProtocolFactory } from './protocols'
 import {
   Config,
+  EarnPosition,
   EarnProduct,
   IProtocol,
+  ListEarnPositionParams,
   Protocol,
   QuoteSwap,
   QuoteSwapParams,
@@ -167,6 +169,32 @@ export class Aggregator {
     }
 
     const products: Record<Protocol, EarnProduct[]> = {
+      Thorchain: [],
+      Mayachain: [],
+      Chainflip: [],
+    }
+
+    const results = await Promise.allSettled(this.protocols.map((protocol) => listTask(protocol)))
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        products[this.protocols[index].name] = result.value
+      }
+    })
+
+    return products
+  }
+
+  /**
+   * List supported earn products by each protocol
+   * @returns the earn products the protocol supports
+   */
+  public async listEarnPositions(params: ListEarnPositionParams): Promise<Record<Protocol, EarnPosition[]>> {
+    const listTask = async (protocol: IProtocol) => {
+      return protocol.listEarnPositions(params)
+    }
+
+    const products: Record<Protocol, EarnPosition[]> = {
       Thorchain: [],
       Mayachain: [],
       Chainflip: [],

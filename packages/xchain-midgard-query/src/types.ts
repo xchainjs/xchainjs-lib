@@ -22,6 +22,7 @@ export type SaversPosition = {
   percentageGrowth: number // The percentage growth of the saver's position.
   ageInYears: number // The age of the saver's position in years.
   ageInDays: number // The age of the saver's position in days.
+  address: Address // The address
   asset: Asset | TokenAsset // The asset associated with the saver position.
   errors: string[] // Any errors encountered during processing.
 }

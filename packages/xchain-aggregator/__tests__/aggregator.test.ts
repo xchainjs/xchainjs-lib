@@ -5,6 +5,7 @@ import {
   BaseAmount,
   CryptoAmount,
   assetAmount,
+  assetFromStringEx,
   assetToBase,
   assetToString,
   baseToAsset,
@@ -176,5 +177,35 @@ describe('Aggregator', () => {
     expect(assetToString(earnProducts['Thorchain'][0].asset)).toBe('AVAX.AVAX')
     expect(earnProducts['Thorchain'][0].isEnabled).toBeTruthy()
     expect(earnProducts['Thorchain'][0].apr).toBe(0.048445694045141235)
+  })
+
+  it('Should list earn positions', async () => {
+    const positions = await aggregator.listEarnPositions({
+      assetAddresses: [
+        {
+          address: '0x3db0f3c5713f4248dcad61052c0590c538755eb8',
+          asset: assetFromStringEx('BSC.BNB') as Asset,
+        },
+        {
+          address: '0x3db0f3c5713f4248dcad61052c0590c538755eb8',
+          asset: assetFromStringEx('ETH.ETH') as Asset,
+        },
+        {
+          address: 'bc1qqduzvppjz2v0mccuel5d94qy2k43xhyr6amnp2',
+          asset: assetFromStringEx('BTC.BTC') as Asset,
+        },
+      ],
+    })
+
+    expect(positions['Chainflip'].length).toBe(0)
+    expect(positions['Mayachain'].length).toBe(0)
+    expect(positions['Thorchain'].length).toBe(3)
+    expect(positions['Thorchain'][0].protocol).toBe('Thorchain')
+    expect(positions['Thorchain'][0].address).toBe('0x3db0f3c5713f4248dcad61052c0590c538755eb8')
+    expect(assetToString(positions['Thorchain'][0].asset)).toBe('BSC.BNB')
+    expect(positions['Thorchain'][0].depositAmount.assetAmount.amount().toString()).toBe('9.08535385')
+    expect(positions['Thorchain'][0].redeemableAmount.assetAmount.amount().toString()).toBe('9.36515444')
+    expect(positions['Thorchain'][0].percentageGrowth).toBe(3.079688)
+    expect(positions['Thorchain'][0].errors.length).toBe(0)
   })
 })

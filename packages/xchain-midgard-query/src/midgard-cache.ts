@@ -28,7 +28,10 @@ export class MidgardCache {
   constructor(midgard = defaultMidgard) {
     this.midgard = midgard
     this.cachedPools = new CachedValue<PoolDetail[]>(() => this.midgard.getPools(), MILLISECOND_CACHE_POOLS)
-    this.cachedSavers = new CachedValue<SaverDetails>(() => this.midgard.getSavers(''), MILLISECOND_CACHE_SAVERS)
+    this.cachedSavers = new CachedValue<SaverDetails>(
+      (addresses: string) => this.midgard.getSavers(addresses),
+      MILLISECOND_CACHE_SAVERS,
+    )
   }
 
   /**
