@@ -6,7 +6,7 @@ import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
 import { Address, AssetType, assetToString, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
 import axios from 'axios'
 //Import necessary constants for default client URLs
-import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL, RUNE_DENOM } from './const'
+import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL, DEFAULT_STAGENET_EXPLORER_URL, RUNE_DENOM } from './const'
 import { CompatibleAsset } from './types'
 
 /**
@@ -33,7 +33,7 @@ export const getDefaultRootDerivationPaths = (): RootDerivationPaths => ({
 export const getDefaultExplorers = (): Record<Network, string> => ({
   [Network.Mainnet]: DEFAULT_EXPLORER_URL,
   [Network.Testnet]: 'deprecated',
-  [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}/?network=stagenet`,
+  [Network.Stagenet]: DEFAULT_STAGENET_EXPLORER_URL,
 })
 /**
  * Function to generate explorer URLs for addresses based on the network.
@@ -41,7 +41,7 @@ export const getDefaultExplorers = (): Record<Network, string> => ({
 export const getExplorerAddressUrl = (address: Address): Record<Network, string> => ({
   [Network.Mainnet]: `${DEFAULT_EXPLORER_URL}/address/${address}`,
   [Network.Testnet]: 'deprecated',
-  [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}/address/${address}?network=stagenet`,
+  [Network.Stagenet]: `${DEFAULT_STAGENET_EXPLORER_URL}/address/${address}`,
 })
 /**
  * Function to generate explorer URLs for transactions based on the network.
@@ -49,7 +49,7 @@ export const getExplorerAddressUrl = (address: Address): Record<Network, string>
 export const getExplorerTxUrl = (tx: TxHash): Record<Network, string> => ({
   [Network.Mainnet]: `${DEFAULT_EXPLORER_URL}/tx/${tx}`,
   [Network.Testnet]: 'deprecated',
-  [Network.Stagenet]: `${DEFAULT_EXPLORER_URL}/tx/${tx}?network=stagenet`,
+  [Network.Stagenet]: `${DEFAULT_STAGENET_EXPLORER_URL}/tx/${tx}`,
 })
 
 /**
