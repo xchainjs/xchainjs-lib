@@ -1,4 +1,4 @@
-import { Balance, Network } from '@xchainjs/xchain-client'
+import { Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
 
 import { ADAAsset, Client, defaultAdaParams } from '../src'
@@ -240,6 +240,34 @@ describe('Cardano client', () => {
         },
       })
     })
+
+    it('Should get native transaction data', async () => {
+      const tx = await client.getTransactionData('6b8cf522fd97792bbe0cb03a1c057ac41c5e26338a31515c2c022cb0bee9f2a2')
+      expect(tx.type).toBe(TxType.Transfer)
+      expect(tx.hash).toBe('6b8cf522fd97792bbe0cb03a1c057ac41c5e26338a31515c2c022cb0bee9f2a2')
+      expect(tx.date.getTime()).toBe(1720535411000)
+      expect(assetToString(tx.asset)).toBe('ADA.ADA')
+      expect(tx.from.length).toBe(1)
+      expect(tx.from[0].from).toBe(
+        'addr1q88p8j5jgpujpf33l5ja2rreearp3x9x59ju65hxkhu29jvctwav0g4zrrmq388yc7h22qehlyt4y556atrty5sfdq5q7plfz5',
+      )
+      expect(tx.from[0].amount.amount().toString()).toBe('69382438882275')
+      expect(tx.from[0].asset ? assetToString(tx.from[0].asset) : undefined).toBe('ADA.ADA')
+
+      expect(tx.to.length).toBe(2)
+      expect(tx.to[0].to).toBe(
+        'addr1q8h6u88370nw2va448ukdj9spujm5an7nce8j0qg6hzg0kw5xxq3r3rcel85zeezwm5w9e3l449j0gudvge3c9tht68s2uw5gk',
+      )
+      expect(tx.to[0].amount.amount().toString()).toBe('49999788000000')
+      expect(tx.to[0].asset ? assetToString(tx.to[0].asset) : undefined).toBe('ADA.ADA')
+
+      expect(tx.to[1].to).toBe(
+        'addr1q88p8j5jgpujpf33l5ja2rreearp3x9x59ju65hxkhu29jvctwav0g4zrrmq388yc7h22qehlyt4y556atrty5sfdq5q7plfz5',
+      )
+      expect(tx.to[1].amount.amount().toString()).toBe('19382650711776')
+      expect(tx.to[1].asset ? assetToString(tx.to[1].asset) : undefined).toBe('ADA.ADA')
+    })
+
     it('Should get fees without memo', async () => {
       const fees = await client.getFees({
         sender:

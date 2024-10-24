@@ -1,5 +1,5 @@
-import { Balance as BaseBalance, ExplorerProviders, XChainClientParams } from '@xchainjs/xchain-client'
-import { Asset, TokenAsset } from '@xchainjs/xchain-util'
+import { Balance as BaseBalance, ExplorerProviders, Tx as BaseTx, XChainClientParams } from '@xchainjs/xchain-client'
+import { Asset } from '@xchainjs/xchain-util'
 
 export type BlockfrostApiKey = {
   mainnet: string
@@ -20,6 +20,10 @@ export type DefaultADAClientParams = XChainClientParams & {
  */
 export type ADAClientParams = Partial<DefaultADAClientParams> & { apiKeys: APIKeys }
 
-export type CompatibleAsset = Asset | TokenAsset
+export type CompatibleAsset = Asset
 
 export type Balance = BaseBalance & { asset: CompatibleAsset }
+
+export type Tx = BaseTx & {
+  asset: Asset
+}

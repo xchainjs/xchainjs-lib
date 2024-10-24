@@ -26,16 +26,16 @@ import {
   Fees,
   Network,
   PreparedTx,
-  Tx,
   TxHash,
   TxParams,
+  TxType,
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { phraseToEntropy } from '@xchainjs/xchain-crypto'
 import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 
 import { ADAAsset, ADAChain, ADA_DECIMALS, defaultAdaParams } from './const'
-import { ADAClientParams, Balance } from './types'
+import { ADAClientParams, Balance, Tx } from './types'
 import { getCardanoNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
@@ -211,8 +211,32 @@ export class Client extends BaseXChainClient {
    * @param {string} txId The transaction ID.
    * @returns {Tx} The transaction details.
    */
-  public async getTransactionData(): Promise<Tx> {
-    throw Error('Not implemented')
+  public async getTransactionData(txId: string): Promise<Tx> {
+    const txData = await this.roundRobinGetTransactionData(txId)
+    const txUtxos = await this.roundRobinGetTransactionUtxos(txId)
+
+    const nativeAsset = this.getAssetInfo()
+
+    return {
+      type: TxType.Transfer,
+      hash: txData.hash,
+      date: new Date(txData.block_time * 1000),
+      asset: nativeAsset.asset,
+      from: txUtxos.inputs.map((input) => {
+        return {
+          from: input.address,
+          amount: baseAmount(input.amount[0].quantity, nativeAsset.decimal),
+          asset: nativeAsset.asset,
+        }
+      }),
+      to: txUtxos.outputs.map((output) => {
+        return {
+          to: output.address,
+          amount: baseAmount(output.amount[0].quantity, nativeAsset.decimal),
+          asset: nativeAsset.asset,
+        }
+      }),
+    }
   }
 
   public async getTransactions(): Promise<TxsPage> {
@@ -367,5 +391,23 @@ export class Client extends BaseXChainClient {
       }
     } catch {}
     throw Error('Can not get address UTXOs')
+  }
+
+  private async roundRobinGetTransactionData(txId: string) {
+    try {
+      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+        return await blockFrostApi.txs(txId)
+      }
+    } catch {}
+    throw Error('Can not get transaction')
+  }
+
+  private async roundRobinGetTransactionUtxos(txId: string) {
+    try {
+      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+        return await blockFrostApi.txsUtxos(txId)
+      }
+    } catch {}
+    throw Error('Can not get transaction UTXOs')
   }
 }

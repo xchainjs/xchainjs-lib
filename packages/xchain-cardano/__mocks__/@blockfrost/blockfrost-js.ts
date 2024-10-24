@@ -105,4 +105,101 @@ export class BlockFrostAPI {
     }
     return []
   }
+
+  txs(hash: string) {
+    if (hash === '6b8cf522fd97792bbe0cb03a1c057ac41c5e26338a31515c2c022cb0bee9f2a2') {
+      return {
+        hash: '6b8cf522fd97792bbe0cb03a1c057ac41c5e26338a31515c2c022cb0bee9f2a2',
+        block: '7ce8585cfdaaef4a0bb3892c8cda396fe057d8ea82a9ccfa412cc392cce35a61',
+        block_height: 10550920,
+        block_time: 1720535411,
+        slot: 128969120,
+        index: 6,
+        output_amount: [
+          {
+            unit: 'lovelace',
+            quantity: '69382438711776',
+          },
+        ],
+        fees: '170499',
+        deposit: '0',
+        size: 297,
+        invalid_before: null,
+        invalid_hereafter: '128972632',
+        utxo_count: 3,
+        withdrawal_count: 0,
+        mir_cert_count: 0,
+        delegation_count: 0,
+        stake_cert_count: 0,
+        pool_update_count: 0,
+        pool_retire_count: 0,
+        asset_mint_or_burn_count: 0,
+        redeemer_count: 0,
+        valid_contract: true,
+      }
+    }
+    throw Error('Can not get transaction')
+  }
+
+  txsUtxos(hash: string) {
+    if (hash === '6b8cf522fd97792bbe0cb03a1c057ac41c5e26338a31515c2c022cb0bee9f2a2') {
+      return {
+        hash: '6b8cf522fd97792bbe0cb03a1c057ac41c5e26338a31515c2c022cb0bee9f2a2',
+        inputs: [
+          {
+            address:
+              'addr1q88p8j5jgpujpf33l5ja2rreearp3x9x59ju65hxkhu29jvctwav0g4zrrmq388yc7h22qehlyt4y556atrty5sfdq5q7plfz5',
+            amount: [
+              {
+                unit: 'lovelace',
+                quantity: '69382438882275',
+              },
+            ],
+            tx_hash: 'ae2865207c23488bb6433a96df149d5297f0da53807b3c259c6ab11b77b78384',
+            output_index: 1,
+            data_hash: null,
+            inline_datum: null,
+            reference_script_hash: null,
+            collateral: false,
+            reference: false,
+          },
+        ],
+        outputs: [
+          {
+            address:
+              'addr1q8h6u88370nw2va448ukdj9spujm5an7nce8j0qg6hzg0kw5xxq3r3rcel85zeezwm5w9e3l449j0gudvge3c9tht68s2uw5gk',
+            amount: [
+              {
+                unit: 'lovelace',
+                quantity: '49999788000000',
+              },
+            ],
+            output_index: 0,
+            data_hash: null,
+            inline_datum: null,
+            collateral: false,
+            reference_script_hash: null,
+            consumed_by_tx: null,
+          },
+          {
+            address:
+              'addr1q88p8j5jgpujpf33l5ja2rreearp3x9x59ju65hxkhu29jvctwav0g4zrrmq388yc7h22qehlyt4y556atrty5sfdq5q7plfz5',
+            amount: [
+              {
+                unit: 'lovelace',
+                quantity: '19382650711776',
+              },
+            ],
+            output_index: 1,
+            data_hash: null,
+            inline_datum: null,
+            collateral: false,
+            reference_script_hash: null,
+            consumed_by_tx: '4310f1833be7a524683d55fe0751663bd816b4bae504686ce062fa0a017fe07c',
+          },
+        ],
+      }
+    }
+    throw Error('Can not get transaction utxos')
+  }
 }
