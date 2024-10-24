@@ -2,22 +2,37 @@ import { BlockFrostAPI } from '@blockfrost/blockfrost-js'
 import {
   Address as CardanoAddress,
   BaseAddress,
+  BigNum,
   Bip32PrivateKey,
+  CoinSelectionStrategyCIP2,
   Credential,
+  LinearFee,
+  TransactionBody,
+  TransactionBuilder,
+  TransactionBuilderConfigBuilder,
+  TransactionHash,
+  TransactionInput,
+  TransactionOutput,
+  TransactionUnspentOutput,
+  TransactionUnspentOutputs,
+  Value,
 } from '@emurgo/cardano-serialization-lib-nodejs'
 import {
   AssetInfo,
   BaseXChainClient,
   ExplorerProviders,
+  FeeEstimateOptions,
+  FeeType,
   Fees,
   Network,
   PreparedTx,
   Tx,
   TxHash,
+  TxParams,
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { phraseToEntropy } from '@xchainjs/xchain-crypto'
-import { Address, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 
 import { ADAAsset, ADAChain, ADA_DECIMALS, defaultAdaParams } from './const'
 import { ADAClientParams, Balance } from './types'
@@ -171,8 +186,23 @@ export class Client extends BaseXChainClient {
    * @returns {Fees} The average, fast, and fastest fees.
    * @throws {"Params need to be passed"} Thrown if parameters are not provided.
    */
-  public async getFees(): Promise<Fees> {
-    throw Error('Not implemented')
+  public async getFees(params?: FeeEstimateOptions & { amount: BaseAmount; sender: Address }): Promise<Fees> {
+    if (!params) {
+      throw Error('Params not provided')
+    }
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender: params.sender,
+      recipient: params.sender,
+      memo: params.memo,
+      amount: params.amount,
+    })
+    const fee: number = TransactionBody.from_hex(rawUnsignedTx).fee().to_js_value()
+    return {
+      average: baseAmount(fee, ADA_DECIMALS),
+      fast: baseAmount(fee * 1.25, ADA_DECIMALS),
+      fastest: baseAmount(fee * 1.5, ADA_DECIMALS),
+      type: FeeType.PerByte,
+    }
   }
 
   /**
@@ -214,8 +244,71 @@ export class Client extends BaseXChainClient {
    * @param {TxParams&Address} params - The transfer options.
    * @returns {Promise<PreparedTx>} The raw unsigned transaction.
    */
-  public async prepareTx(): Promise<PreparedTx> {
-    throw Error('Not implemented')
+  public async prepareTx({ sender, recipient, amount, memo }: TxParams & { sender: Address }): Promise<PreparedTx> {
+    const protocolParams = await this.roundRobinGetEpochParameters()
+    const currentSlot = await this.roundRobinGetLatestBlock()
+    const utxos = await this.roundRobinGetAllAddressUTXOs(sender)
+
+    if (!currentSlot.slot) {
+      throw Error('Fail to fetch slot number')
+    }
+
+    const txBuilder = TransactionBuilder.new(
+      TransactionBuilderConfigBuilder.new()
+        .fee_algo(
+          LinearFee.new(
+            BigNum.from_str(protocolParams.min_fee_a.toString()),
+            BigNum.from_str(protocolParams.min_fee_b.toString()),
+          ),
+        )
+        .pool_deposit(BigNum.from_str(protocolParams.pool_deposit))
+        .key_deposit(BigNum.from_str(protocolParams.key_deposit))
+        // coins_per_utxo_size is already introduced in current Cardano fork
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .coins_per_utxo_byte(BigNum.from_str(protocolParams.coins_per_utxo_size!))
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .max_value_size(parseInt(protocolParams.max_val_size!))
+        .max_tx_size(protocolParams.max_tx_size)
+        .build(),
+    )
+
+    // Set TTL to +2h from currentSlot
+    // If the transaction is not included in a block before that slot it will be cancelled.
+    txBuilder.set_ttl(currentSlot.slot + 7200)
+
+    const outputAddr = CardanoAddress.from_bech32(recipient)
+    const changeAddr = CardanoAddress.from_bech32(sender)
+
+    txBuilder.add_output(TransactionOutput.new(outputAddr, Value.new(BigNum.from_str(amount.amount().toString()))))
+
+    const lovelaceUtxos = utxos.filter((u) => u.amount.some((a) => a.unit === 'lovelace'))
+
+    const unspentOutputs = TransactionUnspentOutputs.new()
+    for (const utxo of lovelaceUtxos) {
+      const amount = utxo.amount.find((a) => a.unit === 'lovelace')?.quantity
+
+      if (!amount) continue
+
+      const inputValue = Value.new(BigNum.from_str(amount.toString()))
+
+      const input = TransactionInput.new(
+        TransactionHash.from_bytes(Buffer.from(utxo.tx_hash, 'hex')),
+        utxo.output_index,
+      )
+      const output = TransactionOutput.new(changeAddr, inputValue)
+      unspentOutputs.add(TransactionUnspentOutput.new(input, output))
+    }
+    txBuilder.add_inputs_from(unspentOutputs, CoinSelectionStrategyCIP2.LargestFirst)
+
+    if (memo) {
+      // TODO: Add memo data to transaction
+    }
+
+    txBuilder.add_change_if_needed(changeAddr)
+
+    return {
+      rawUnsignedTx: txBuilder.build().to_hex(),
+    }
   }
 
   private async roundRobinGetBalance(address: Address): Promise<Balance[]> {
@@ -247,5 +340,32 @@ export class Client extends BaseXChainClient {
     } catch {}
 
     throw Error('Can not get balance')
+  }
+
+  private async roundRobinGetEpochParameters() {
+    try {
+      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+        return await blockFrostApi.epochsLatestParameters()
+      }
+    } catch {}
+    throw Error('Can not get epoch parameters')
+  }
+
+  private async roundRobinGetLatestBlock() {
+    try {
+      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+        return await blockFrostApi.blocksLatest()
+      }
+    } catch {}
+    throw Error('Can not get epoch parameters')
+  }
+
+  private async roundRobinGetAllAddressUTXOs(address: Address) {
+    try {
+      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+        return await blockFrostApi.addressesUtxosAll(address)
+      }
+    } catch {}
+    throw Error('Can not get address UTXOs')
   }
 }
