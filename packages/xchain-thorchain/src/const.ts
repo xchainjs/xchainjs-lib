@@ -11,7 +11,12 @@ import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
 /**
  * Explorer Url for THORChain
  */
-export const DEFAULT_EXPLORER_URL = 'https://runescan.io'
+export const DEFAULT_EXPLORER_URL = 'https://thorchain.net'
+
+/**
+ * Explorer Url for THORChain
+ */
+export const DEFAULT_STAGENET_EXPLORER_URL = 'https://stagenet.thorchain.net'
 
 /**
  * Number of decimals for the RUNE asset

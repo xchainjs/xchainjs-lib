@@ -29,16 +29,16 @@ describe('Thorchain client', () => {
         client = new Client()
       })
       it('Should get explorer url', () => {
-        expect(client.getExplorerUrl()).toBe('https://runescan.io')
+        expect(client.getExplorerUrl()).toBe('https://thorchain.net')
       })
       it('Should get address url', () => {
         expect(client.getExplorerAddressUrl('thor17gw75axcnr8747pkanye45pnrwk7p9c3cqncsv')).toBe(
-          'https://runescan.io/address/thor17gw75axcnr8747pkanye45pnrwk7p9c3cqncsv',
+          'https://thorchain.net/address/thor17gw75axcnr8747pkanye45pnrwk7p9c3cqncsv',
         )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('19CB7A460869BE9EF7711BE82980A384816F58B5B1B16D67F55443B8470865E7')).toBe(
-          'https://runescan.io/tx/19CB7A460869BE9EF7711BE82980A384816F58B5B1B16D67F55443B8470865E7',
+          'https://thorchain.net/tx/19CB7A460869BE9EF7711BE82980A384816F58B5B1B16D67F55443B8470865E7',
         )
       })
     })
@@ -69,16 +69,16 @@ describe('Thorchain client', () => {
         })
       })
       it('Should get explorer url', () => {
-        expect(client.getExplorerUrl()).toBe('https://runescan.io/?network=stagenet')
+        expect(client.getExplorerUrl()).toBe('https://stagenet.thorchain.net')
       })
       it('Should get address url', () => {
         expect(client.getExplorerAddressUrl('sthor1g6pnmnyeg48yc3lg796plt0uw50qpp7humfggz')).toBe(
-          'https://runescan.io/address/sthor1g6pnmnyeg48yc3lg796plt0uw50qpp7humfggz?network=stagenet',
+          'https://stagenet.thorchain.net/address/sthor1g6pnmnyeg48yc3lg796plt0uw50qpp7humfggz',
         )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('852D04CA5944611DB4F71002CAAD4F2E480742143BB5FA75FFADB0D41429BE28')).toBe(
-          'https://runescan.io/tx/852D04CA5944611DB4F71002CAAD4F2E480742143BB5FA75FFADB0D41429BE28?network=stagenet',
+          'https://stagenet.thorchain.net/tx/852D04CA5944611DB4F71002CAAD4F2E480742143BB5FA75FFADB0D41429BE28',
         )
       })
     })
