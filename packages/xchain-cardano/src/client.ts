@@ -6,12 +6,14 @@ import {
   Bip32PrivateKey,
   CoinSelectionStrategyCIP2,
   Credential,
+  GeneralTransactionMetadata,
   LinearFee,
   TransactionBody,
   TransactionBuilder,
   TransactionBuilderConfigBuilder,
   TransactionHash,
   TransactionInput,
+  TransactionMetadatum,
   TransactionOutput,
   TransactionUnspentOutput,
   TransactionUnspentOutputs,
@@ -325,7 +327,9 @@ export class Client extends BaseXChainClient {
     txBuilder.add_inputs_from(unspentOutputs, CoinSelectionStrategyCIP2.LargestFirst)
 
     if (memo) {
-      // TODO: Add memo data to transaction
+      const metadata = GeneralTransactionMetadata.new()
+      metadata.insert(BigNum.from_str('0'), TransactionMetadatum.new_text(memo))
+      txBuilder.set_metadata(metadata)
     }
 
     txBuilder.add_change_if_needed(changeAddr)

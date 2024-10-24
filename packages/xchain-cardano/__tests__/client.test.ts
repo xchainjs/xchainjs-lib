@@ -279,5 +279,18 @@ describe('Cardano client', () => {
       expect(fees.fast.amount().toString()).toBe('210726')
       expect(fees.fastest.amount().toString()).toBe('252872')
     })
+
+    it('Should get fees with memo', async () => {
+      const fees = await client.getFees({
+        sender:
+          'addr1q8h6u88370nw2va448ukdj9spujm5an7nce8j0qg6hzg0kw5xxq3r3rcel85zeezwm5w9e3l449j0gudvge3c9tht68s2uw5gk',
+        amount: assetToBase(assetAmount(1, 6)),
+        memo: 'test',
+      })
+
+      expect(fees.average.amount().toString()).toBe('170385')
+      expect(fees.fast.amount().toString()).toBe('212981')
+      expect(fees.fastest.amount().toString()).toBe('255578')
+    })
   })
 })
