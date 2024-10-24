@@ -1,5 +1,5 @@
 import { Balance, Network } from '@xchainjs/xchain-client'
-import { assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
 
 import { ADAAsset, Client, defaultAdaParams } from '../src'
 
@@ -181,6 +181,7 @@ describe('Cardano client', () => {
   })
 
   describe('Balance', () => {
+    let client: Client
     beforeAll(() => {
       client = new Client({
         ...defaultAdaParams,
@@ -220,6 +221,35 @@ describe('Cardano client', () => {
       expect(assetToString(adaBalance.asset)).toEqual('ADA.ADA')
       expect(adaBalance.amount.decimal).toEqual(6)
       expect(adaBalance.amount.amount().toString()).toEqual('133884551384')
+    })
+  })
+
+  describe('Transaction', () => {
+    let client: Client
+    beforeAll(() => {
+      client = new Client({
+        ...defaultAdaParams,
+        apiKeys: {
+          blockfrostApiKeys: [
+            {
+              mainnet: 'fakeApiKey',
+              testnet: '',
+              stagenet: '',
+            },
+          ],
+        },
+      })
+    })
+    it('Should get fees without memo', async () => {
+      const fees = await client.getFees({
+        sender:
+          'addr1q8h6u88370nw2va448ukdj9spujm5an7nce8j0qg6hzg0kw5xxq3r3rcel85zeezwm5w9e3l449j0gudvge3c9tht68s2uw5gk',
+        amount: assetToBase(assetAmount(1, 6)),
+      })
+
+      expect(fees.average.amount().toString()).toBe('168581')
+      expect(fees.fast.amount().toString()).toBe('210726')
+      expect(fees.fastest.amount().toString()).toBe('252872')
     })
   })
 })

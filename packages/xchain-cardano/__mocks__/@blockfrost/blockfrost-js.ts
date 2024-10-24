@@ -27,4 +27,82 @@ export class BlockFrostAPI {
       amount: [],
     }
   }
+
+  epochsLatestParameters() {
+    return {
+      min_fee_a: 44,
+      min_fee_b: 155381,
+      pool_deposit: '500000000',
+      key_deposit: '2000000',
+      coins_per_utxo_size: '4310',
+      max_val_size: '5000',
+      max_tx_size: 16384,
+    }
+  }
+
+  blocksLatest() {
+    return {
+      time: 1729772353,
+      height: 11004101,
+      hash: '257910842d76c0bfe4f75af50021f1327a5556b125de020ad0b4df216e06ada3',
+      slot: 138206062,
+      epoch: 517,
+      epoch_slot: 225262,
+      slot_leader: 'pool1qvudfuw9ar47up5fugs53s2g84q3c4v86z4es6uwsfzzs89rwha',
+      size: 791,
+      tx_count: 1,
+      output: '10094545172',
+      fees: '190317',
+      block_vrf: 'vrf_vk1kwuaxe3d34my778e4fwyewhtuj7s3rnenvyny4pa0qjdf382tycq8dqdm8',
+      op_cert: '5fab63c90a2820b7ba94f3fd1f1f113a38078357a1476dad543b8ba7335c7803',
+      op_cert_counter: '8',
+      previous_block: '874a6e5a50cb95b8cc806aa64273fb60950f2330b00bd5d4412fdc28f0ea02be',
+      next_block: null,
+      confirmations: 0,
+    }
+  }
+
+  addressesUtxosAll(address: string) {
+    if (
+      address ===
+      'addr1q8h6u88370nw2va448ukdj9spujm5an7nce8j0qg6hzg0kw5xxq3r3rcel85zeezwm5w9e3l449j0gudvge3c9tht68s2uw5gk'
+    ) {
+      return [
+        {
+          address:
+            'addr1q8h6u88370nw2va448ukdj9spujm5an7nce8j0qg6hzg0kw5xxq3r3rcel85zeezwm5w9e3l449j0gudvge3c9tht68s2uw5gk',
+          tx_hash: 'ae2865207c23488bb6433a96df149d5297f0da53807b3c259c6ab11b77b78384',
+          tx_index: 0,
+          output_index: 0,
+          amount: [
+            {
+              quantity: 212000000,
+              unit: 'lovelace',
+            },
+            {
+              quantity: 49999788000000,
+              unit: 'lovelace',
+            },
+          ],
+          block: 'd25f5841505a9c610d97d0356bb06afaff0e9d2fbb79e39f55f6babd6cab206a',
+          data_hash: null,
+          inline_datum: null,
+          reference_script_hash: null,
+        },
+        {
+          address:
+            'addr1q8h6u88370nw2va448ukdj9spujm5an7nce8j0qg6hzg0kw5xxq3r3rcel85zeezwm5w9e3l449j0gudvge3c9tht68s2uw5gk',
+          tx_hash: '6b8cf522fd97792bbe0cb03a1c057ac41c5e26338a31515c2c022cb0bee9f2a2',
+          tx_index: 0,
+          output_index: 0,
+          amount: [[Object]],
+          block: '7ce8585cfdaaef4a0bb3892c8cda396fe057d8ea82a9ccfa412cc392cce35a61',
+          data_hash: null,
+          inline_datum: null,
+          reference_script_hash: null,
+        },
+      ]
+    }
+    return []
+  }
 }
