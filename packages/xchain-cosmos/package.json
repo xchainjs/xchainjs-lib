@@ -48,7 +48,7 @@
     "bip32": "^2.0.6",
     "cosmjs-types": "0.9.0",
     "protobufjs": "6.11.4",
-    "secp256k1": "^5.0.0"
+    "secp256k1": "5.0.1"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6"
