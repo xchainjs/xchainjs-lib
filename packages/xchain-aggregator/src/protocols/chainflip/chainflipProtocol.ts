@@ -19,6 +19,7 @@ import {
   EarnProduct,
   IProtocol,
   ProtocolConfig,
+  QuoteAddToEarn,
   QuoteSwap,
   QuoteSwapParams,
   SwapHistory,
@@ -246,5 +247,13 @@ export class ChainflipProtocol implements IProtocol {
     })
     if (!assetData) throw Error(`${asset.ticker} asset not supported in ${asset.chain} chain`)
     return assetData
+  }
+
+  public async estimateAddToEarnProduct(): Promise<QuoteAddToEarn> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async addToEarnProduct(): Promise<TxSubmitted> {
+    throw new Error('Method not implemented.')
   }
 }

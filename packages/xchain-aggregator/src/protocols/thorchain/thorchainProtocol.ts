@@ -1,7 +1,16 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
+import {
+  AnyAsset,
+  Chain,
+  CryptoAmount,
+  assetToString,
+  baseAmount,
+  eqAsset,
+  isSynthAsset,
+  isTradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
@@ -10,6 +19,8 @@ import {
   IProtocol,
   ListEarnPositionParams,
   ProtocolConfig,
+  QuoteAddToEarn,
+  QuoteAddToEarnParams,
   QuoteSwap,
   QuoteSwapParams,
   SwapHistory,
@@ -169,5 +180,31 @@ export class ThorchainProtocol implements IProtocol {
         ageInDays: position.ageInDays,
       }
     })
+  }
+
+  public async estimateAddToEarnProduct(params: QuoteAddToEarnParams): Promise<QuoteAddToEarn> {
+    const quote = await this.thorchainAmm.estimateAddSaver(params.amount)
+    return {
+      protocol: this.name,
+      canAdd: quote.canAddSaver,
+      amount: quote.assetAmount,
+      depositedAmount: quote.estimatedDepositValue,
+      recommendedMinAmount: quote.recommendedMinAmountIn
+        ? new CryptoAmount(baseAmount(quote.recommendedMinAmountIn, 8), params.amount.asset)
+        : undefined,
+      memo: quote.memo,
+      errors: quote.errors,
+      toAddress: quote.toAddress,
+      fees: {
+        asset: quote.fee.asset,
+        affiliateFee: quote.fee.affiliate,
+        outboundFee: quote.fee.outbound,
+        liquidityFee: quote.fee.liquidity,
+      },
+    }
+  }
+
+  public async addToEarnProduct(params: QuoteAddToEarnParams): Promise<TxSubmitted> {
+    return this.thorchainAmm.addSaver(params.amount)
   }
 }

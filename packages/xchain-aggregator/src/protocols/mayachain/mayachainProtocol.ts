@@ -17,6 +17,7 @@ import {
   EarnProduct,
   IProtocol,
   ProtocolConfig,
+  QuoteAddToEarn,
   QuoteSwap,
   QuoteSwapParams,
   SwapHistory,
@@ -164,6 +165,14 @@ export class MayachainProtocol implements IProtocol {
    * @returns the earn positions of the addresses in the earn products
    */
   public async listEarnPositions(): Promise<EarnPosition[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async estimateAddToEarnProduct(): Promise<QuoteAddToEarn> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async addToEarnProduct(): Promise<TxSubmitted> {
     throw new Error('Method not implemented.')
   }
 }

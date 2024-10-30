@@ -1,4 +1,4 @@
-import { assetToString, isTokenAsset } from '@xchainjs/xchain-util'
+import { assetToString, eqAsset, isTokenAsset } from '@xchainjs/xchain-util'
 
 import { DEFAULT_CONFIG } from './const'
 import { ProtocolFactory } from './protocols'
@@ -9,6 +9,8 @@ import {
   IProtocol,
   ListEarnPositionParams,
   Protocol,
+  QuoteAddToEarn,
+  QuoteAddToEarnParams,
   QuoteSwap,
   QuoteSwapParams,
   SwapHistory,
@@ -98,11 +100,7 @@ export class Aggregator {
    */
   public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
     const protocolName = params.protocol ? params.protocol : (await this.estimateSwap(params)).protocol
-    const protocol = this.protocols.find((protocol) => protocol.name === protocolName)
-
-    if (!protocol) {
-      throw Error(`${protocolName} protocol is not supported`)
-    }
+    const protocol = this.getProtocol(protocolName)
 
     if (isTokenAsset(params.fromAsset)) {
       if (
@@ -211,10 +209,68 @@ export class Aggregator {
     return products
   }
 
+  /**
+   *
+   * @param config
+   */
+  public async estimateAddToEarnProduct(params: QuoteAddToEarnParams): Promise<QuoteAddToEarn> {
+    const estimateTask = async (protocol: IProtocol, params: QuoteAddToEarnParams): Promise<EarnProduct> => {
+      const isAssetSupported = await protocol.isAssetSupported(params.amount.asset)
+      if (!isAssetSupported) throw Error(`${assetToString(params.amount.asset)} not supported in ${protocol.name}`)
+
+      const products = await protocol.listEarnProducts()
+
+      const product = products.find((product) => eqAsset(product.asset, params.amount.asset))
+
+      if (!product) throw Error(`${assetToString(params.amount.asset)} product not supported in ${protocol.name}`)
+
+      return product
+    }
+
+    const results = await Promise.allSettled(this.protocols.map((protocol) => estimateTask(protocol, params)))
+
+    let optimalProduct: EarnProduct | undefined
+
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        if (!optimalProduct || result.value.apr > optimalProduct.apr) optimalProduct = result.value
+      }
+    })
+
+    if (!optimalProduct) throw Error(`Can not find earn product from ${assetToString(params.amount.asset)}`)
+
+    return this.getProtocol(optimalProduct.protocol).estimateAddToEarnProduct(params)
+  }
+
+  public async addToEarnProduct(params: QuoteAddToEarnParams & { protocol?: Protocol }): Promise<TxSubmitted> {
+    const protocolName = params.protocol ? params.protocol : (await this.estimateAddToEarnProduct(params)).protocol
+    const protocol = this.getProtocol(protocolName)
+
+    if (isTokenAsset(params.amount.asset)) {
+      if (
+        await protocol.shouldBeApproved({
+          asset: params.amount.asset,
+          amount: params.amount,
+          address: params.fromAddress || '',
+        })
+      ) {
+        await protocol.approveRouterToSpend({ asset: params.amount.asset, amount: params.amount })
+      }
+    }
+
+    return protocol.addToEarnProduct({ amount: params.amount })
+  }
+
   private verifyConfig(config: Config & { protocols: Protocol[] }) {
     if (config.affiliate && (config.affiliate.basisPoints < 0 || config.affiliate.basisPoints > 10_000))
       throw Error('Invalid affiliate basis point due to it is out of bound. It must be between [0 - 10000]')
 
     if (config.protocols.length === 0) throw Error('No protocols enabled')
+  }
+
+  private getProtocol(name: Protocol): IProtocol {
+    const protocol = this.protocols.find((protocol) => protocol.name === name)
+    if (!protocol) throw Error('Protocol not found')
+    return protocol
   }
 }

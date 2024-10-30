@@ -23,6 +23,7 @@ type TxSubmitted = {
  * Fees
  */
 type Fees = {
+  // TODO: Add liquidity fee
   asset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset for which fees are calculated
   affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The affiliate fee amount
   outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The outbound fee amount
@@ -203,6 +204,25 @@ type ListEarnPositionParams = {
   assetAddresses: { address: Address; asset: Asset | TokenAsset }[]
 }
 
+type QuoteAddToEarnParams = {
+  amount: CryptoAmount<Asset | TokenAsset>
+  fromAddress?: Address
+}
+
+type QuoteAddToEarn = {
+  protocol: Protocol
+  canAdd: boolean
+  amount: CryptoAmount<Asset | TokenAsset>
+  depositedAmount: CryptoAmount<Asset | TokenAsset>
+  recommendedMinAmount?: CryptoAmount<Asset | TokenAsset>
+  toAddress: Address
+  memo: string
+  fees: Fees & {
+    liquidityFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The outbound fee amount
+  }
+  errors: string[]
+}
+
 interface IProtocol {
   name: Protocol
   isAssetSupported(asset: AnyAsset): Promise<boolean>
@@ -214,6 +234,8 @@ interface IProtocol {
   shouldBeApproved(params: IsApprovedParams): Promise<boolean>
   listEarnProducts(): Promise<EarnProduct[]>
   listEarnPositions(params: ListEarnPositionParams): Promise<EarnPosition[]>
+  estimateAddToEarnProduct(params: QuoteAddToEarnParams): Promise<QuoteAddToEarn>
+  addToEarnProduct(params: QuoteAddToEarnParams): Promise<TxSubmitted>
 }
 
 export {
@@ -232,4 +254,6 @@ export {
   EarnProduct,
   ListEarnPositionParams,
   EarnPosition,
+  QuoteAddToEarnParams,
+  QuoteAddToEarn,
 }

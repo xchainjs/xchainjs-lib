@@ -10,11 +10,19 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
-import { Asset, CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { Aggregator, QuoteSwap } from '../src'
-import { EarnPosition } from '../src/types'
+import { EarnPosition, QuoteAddToEarn } from '../src/types'
 
 function printQuoteSwap(quoteSwap: QuoteSwap) {
   console.log({
@@ -62,6 +70,37 @@ function printEarnPosition(position: EarnPosition) {
     ageInDays: position.ageInDays,
     percentageGrowth: position.percentageGrowth,
     errors: position.errors,
+  })
+}
+
+function printAddToEarnProduct(quote: QuoteAddToEarn) {
+  console.log({
+    protocol: quote.protocol,
+    canAdd: quote.canAdd,
+    toAddress: quote.toAddress,
+    asset: assetToString(quote.amount.asset),
+    assetAmount: quote.amount.assetAmount.amount().toString(),
+    depositedAmount: quote.depositedAmount.assetAmount.amount().toString(),
+    memo: quote.memo,
+    errors: quote.errors,
+    totalFees: {
+      asset: assetToString(quote.fees.asset),
+      affiliateFee: {
+        asset: assetToString(quote.fees.affiliateFee.asset),
+        amount: quote.fees.affiliateFee.baseAmount.amount().toString(),
+        decimals: quote.fees.affiliateFee.baseAmount.decimal,
+      },
+      outboundFee: {
+        asset: assetToString(quote.fees.outboundFee.asset),
+        amount: quote.fees.outboundFee.baseAmount.amount().toString(),
+        decimals: quote.fees.outboundFee.baseAmount.decimal,
+      },
+      liquidityFee: {
+        asset: assetToString(quote.fees.liquidityFee.asset),
+        amount: quote.fees.liquidityFee.baseAmount.amount().toString(),
+        decimals: quote.fees.liquidityFee.baseAmount.decimal,
+      },
+    },
   })
 }
 
@@ -215,6 +254,14 @@ describe('Aggregator', () => {
         printEarnPosition(position)
       }
     }
+  })
+
+  it('Should estimate add to earn products', async () => {
+    const quote = await aggregator.estimateAddToEarnProduct({
+      amount: new CryptoAmount<Asset>(baseAmount(1 * 10 ** 8, 8), AssetBTC),
+    })
+
+    printAddToEarnProduct(quote)
   })
 
   // it('Should get swaps history', async () => {
