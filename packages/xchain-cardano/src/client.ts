@@ -6,8 +6,10 @@ import {
   Bip32PrivateKey,
   CoinSelectionStrategyCIP2,
   Credential,
+  FixedTransaction,
   GeneralTransactionMetadata,
   LinearFee,
+  Transaction,
   TransactionBody,
   TransactionBuilder,
   TransactionBuilderConfigBuilder,
@@ -17,7 +19,10 @@ import {
   TransactionOutput,
   TransactionUnspentOutput,
   TransactionUnspentOutputs,
+  TransactionWitnessSet,
   Value,
+  Vkeywitnesses,
+  make_vkey_witness,
 } from '@emurgo/cardano-serialization-lib-nodejs'
 import {
   AssetInfo,
@@ -29,15 +34,14 @@ import {
   Network,
   PreparedTx,
   TxHash,
-  TxParams,
   TxType,
   TxsPage,
 } from '@xchainjs/xchain-client'
 import { phraseToEntropy } from '@xchainjs/xchain-crypto'
-import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
+import { Address, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import { ADAAsset, ADAChain, ADA_DECIMALS, defaultAdaParams } from './const'
-import { ADAClientParams, Balance, Tx } from './types'
+import { ADAClientParams, Balance, Tx, TxParams } from './types'
 import { getCardanoNetwork } from './utils'
 
 export class Client extends BaseXChainClient {
@@ -125,17 +129,7 @@ export class Client extends BaseXChainClient {
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
   public async getAddressAsync(walletIndex = 0): Promise<string> {
-    if (!this.phrase) throw new Error('Phrase must be provided')
-
-    const rootKey = Bip32PrivateKey.from_bip39_entropy(
-      Buffer.from(phraseToEntropy(this.phrase), 'hex'),
-      Buffer.from(''),
-    )
-
-    const accountKey = rootKey
-      .derive(1852 | 0x80000000) // 0x80000000 means hardened
-      .derive(1815 | 0x80000000) // 0x80000000 means hardened
-      .derive(walletIndex | 0x80000000) // 0x80000000 means hardened
+    const accountKey = this.generatePrivateKey(walletIndex)
 
     const paymentKeyPub = accountKey.derive(0).derive(0)
     const stakeKeyPub = accountKey.derive(2).derive(0)
@@ -246,13 +240,44 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Transfers SOL or Solana token
+   * Transfers ADA
    *
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  public async transfer(): Promise<string> {
-    throw Error('Not implemented')
+  public async transfer(params: TxParams): Promise<string> {
+    if (!eqAsset(params.asset || ADAAsset, ADAAsset)) {
+      throw Error(`Asset not supported`)
+    }
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender: await this.getAddressAsync(params.walletIndex),
+      recipient: params.recipient,
+      amount: params.amount,
+      memo: params.memo,
+      asset: ADAAsset,
+    })
+
+    const accountKey = this.generatePrivateKey(params.walletIndex)
+
+    const txBody = TransactionBody.from_hex(rawUnsignedTx)
+
+    const fixedTx = FixedTransaction.new_from_body_bytes(txBody.to_bytes())
+
+    const txHash = fixedTx.transaction_hash()
+
+    const witnesses = TransactionWitnessSet.new()
+    const vKeyWitnesses = Vkeywitnesses.new()
+
+    const vKeyWitness = make_vkey_witness(txHash, accountKey.to_raw_key())
+
+    vKeyWitnesses.add(vKeyWitness)
+    witnesses.set_vkeys(vKeyWitnesses)
+
+    const tx = Transaction.new(txBody, witnesses)
+
+    const hash = await this.broadcastTx(tx.to_hex())
+
+    return hash
   }
 
   /**
@@ -260,8 +285,8 @@ export class Client extends BaseXChainClient {
    * @param {string} txHex Raw transaction to broadcast
    * @returns {TxHash} The hash of the transaction broadcasted
    */
-  public async broadcastTx(): Promise<TxHash> {
-    throw Error('Not implemented')
+  public async broadcastTx(txHex: string): Promise<TxHash> {
+    return this.roundRobinBroadcastTx(txHex)
   }
 
   /**
@@ -271,7 +296,6 @@ export class Client extends BaseXChainClient {
    * @returns {Promise<PreparedTx>} The raw unsigned transaction.
    */
   public async prepareTx({ sender, recipient, amount, memo }: TxParams & { sender: Address }): Promise<PreparedTx> {
-    const protocolParams = await this.roundRobinGetEpochParameters()
     const currentSlot = await this.roundRobinGetLatestBlock()
     const utxos = await this.roundRobinGetAllAddressUTXOs(sender)
 
@@ -279,33 +303,16 @@ export class Client extends BaseXChainClient {
       throw Error('Fail to fetch slot number')
     }
 
-    const txBuilder = TransactionBuilder.new(
-      TransactionBuilderConfigBuilder.new()
-        .fee_algo(
-          LinearFee.new(
-            BigNum.from_str(protocolParams.min_fee_a.toString()),
-            BigNum.from_str(protocolParams.min_fee_b.toString()),
-          ),
-        )
-        .pool_deposit(BigNum.from_str(protocolParams.pool_deposit))
-        .key_deposit(BigNum.from_str(protocolParams.key_deposit))
-        // coins_per_utxo_size is already introduced in current Cardano fork
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .coins_per_utxo_byte(BigNum.from_str(protocolParams.coins_per_utxo_size!))
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .max_value_size(parseInt(protocolParams.max_val_size!))
-        .max_tx_size(protocolParams.max_tx_size)
-        .build(),
-    )
+    const txBuilder = await this.getTransactionBuilder()
 
     // Set TTL to +2h from currentSlot
     // If the transaction is not included in a block before that slot it will be cancelled.
     txBuilder.set_ttl(currentSlot.slot + 7200)
 
-    const outputAddr = CardanoAddress.from_bech32(recipient)
-    const changeAddr = CardanoAddress.from_bech32(sender)
+    const recipientAddr = CardanoAddress.from_bech32(recipient)
+    const senderAddr = CardanoAddress.from_bech32(sender)
 
-    txBuilder.add_output(TransactionOutput.new(outputAddr, Value.new(BigNum.from_str(amount.amount().toString()))))
+    txBuilder.add_output(TransactionOutput.new(recipientAddr, Value.new(BigNum.from_str(amount.amount().toString()))))
 
     const lovelaceUtxos = utxos.filter((u) => u.amount.some((a) => a.unit === 'lovelace'))
 
@@ -321,9 +328,10 @@ export class Client extends BaseXChainClient {
         TransactionHash.from_bytes(Buffer.from(utxo.tx_hash, 'hex')),
         utxo.output_index,
       )
-      const output = TransactionOutput.new(changeAddr, inputValue)
+      const output = TransactionOutput.new(senderAddr, inputValue)
       unspentOutputs.add(TransactionUnspentOutput.new(input, output))
     }
+    console.log(unspentOutputs.to_js_value())
     txBuilder.add_inputs_from(unspentOutputs, CoinSelectionStrategyCIP2.LargestFirst)
 
     if (memo) {
@@ -332,7 +340,7 @@ export class Client extends BaseXChainClient {
       txBuilder.set_metadata(metadata)
     }
 
-    txBuilder.add_change_if_needed(changeAddr)
+    txBuilder.add_change_if_needed(senderAddr)
 
     return {
       rawUnsignedTx: txBuilder.build().to_hex(),
@@ -340,8 +348,8 @@ export class Client extends BaseXChainClient {
   }
 
   private async roundRobinGetBalance(address: Address): Promise<Balance[]> {
-    try {
-      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+    for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+      try {
         try {
           const { amount } = await blockFrostApi.addresses(address)
           const adaBalance = amount.find((balance) => balance.unit === 'lovelace')
@@ -364,54 +372,101 @@ export class Client extends BaseXChainClient {
           }
           throw e
         }
-      }
-    } catch {}
+      } catch {}
+    }
 
     throw Error('Can not get balance')
   }
 
   private async roundRobinGetEpochParameters() {
-    try {
-      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+    for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+      try {
         return await blockFrostApi.epochsLatestParameters()
-      }
-    } catch {}
+      } catch {}
+    }
     throw Error('Can not get epoch parameters')
   }
 
   private async roundRobinGetLatestBlock() {
-    try {
-      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+    for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+      try {
         return await blockFrostApi.blocksLatest()
-      }
-    } catch {}
+      } catch {}
+    }
     throw Error('Can not get epoch parameters')
   }
 
   private async roundRobinGetAllAddressUTXOs(address: Address) {
-    try {
-      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+    for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+      try {
         return await blockFrostApi.addressesUtxosAll(address)
-      }
-    } catch {}
+      } catch {}
+    }
     throw Error('Can not get address UTXOs')
   }
 
   private async roundRobinGetTransactionData(txId: string) {
-    try {
-      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+    for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+      try {
         return await blockFrostApi.txs(txId)
-      }
-    } catch {}
+      } catch {}
+    }
     throw Error('Can not get transaction')
   }
 
   private async roundRobinGetTransactionUtxos(txId: string) {
-    try {
-      for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+    for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+      try {
         return await blockFrostApi.txsUtxos(txId)
-      }
-    } catch {}
+      } catch {}
+    }
     throw Error('Can not get transaction UTXOs')
+  }
+
+  private async roundRobinBroadcastTx(txHex: string): Promise<TxHash> {
+    for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
+      try {
+        return await blockFrostApi.txSubmit(txHex)
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    throw Error('Can not broadcast transaction')
+  }
+
+  private generatePrivateKey(walletIndex = 0): Bip32PrivateKey {
+    if (!this.phrase) throw new Error('Phrase must be provided')
+
+    const rootKey = Bip32PrivateKey.from_bip39_entropy(
+      Buffer.from(phraseToEntropy(this.phrase), 'hex'),
+      Buffer.from(''),
+    )
+
+    return rootKey
+      .derive(1852 | 0x80000000) // 0x80000000 means hardened
+      .derive(1815 | 0x80000000) // 0x80000000 means hardened
+      .derive(walletIndex | 0x80000000) // 0x80000000 means hardened
+  }
+
+  private async getTransactionBuilder(): Promise<TransactionBuilder> {
+    const protocolParams = await this.roundRobinGetEpochParameters()
+    return TransactionBuilder.new(
+      TransactionBuilderConfigBuilder.new()
+        .fee_algo(
+          LinearFee.new(
+            BigNum.from_str(protocolParams.min_fee_a.toString()),
+            BigNum.from_str(protocolParams.min_fee_b.toString()),
+          ),
+        )
+        .pool_deposit(BigNum.from_str(protocolParams.pool_deposit))
+        .key_deposit(BigNum.from_str(protocolParams.key_deposit))
+        // coins_per_utxo_size is already introduced in current Cardano fork
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .coins_per_utxo_byte(BigNum.from_str(protocolParams.coins_per_utxo_size!))
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        .max_value_size(parseInt(protocolParams.max_val_size!))
+        .max_tx_size(protocolParams.max_tx_size)
+        .build(),
+    )
   }
 }

@@ -1,4 +1,10 @@
-import { Balance as BaseBalance, ExplorerProviders, Tx as BaseTx, XChainClientParams } from '@xchainjs/xchain-client'
+import {
+  Balance as BaseBalance,
+  ExplorerProviders,
+  Tx as BaseTx,
+  TxParams as BaseTxParams,
+  XChainClientParams,
+} from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 
 export type BlockfrostApiKey = {
@@ -26,4 +32,8 @@ export type Balance = BaseBalance & { asset: CompatibleAsset }
 
 export type Tx = BaseTx & {
   asset: Asset
+}
+
+export type TxParams = BaseTxParams & {
+  asset?: Asset
 }
