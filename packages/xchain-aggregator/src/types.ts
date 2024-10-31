@@ -223,6 +223,24 @@ type QuoteAddToEarn = {
   errors: string[]
 }
 
+type WithdrawFromEarnParams = {
+  withdrawBps: number
+  asset: Asset | TokenAsset
+  address: Address
+}
+
+type QuoteWithdrawFromEarn = {
+  protocol: Protocol
+  toAddress: Address
+  dustAmount: CryptoAmount<Asset | TokenAsset>
+  expectedAmount: CryptoAmount<Asset | TokenAsset>
+  memo: string
+  fees: Fees & {
+    liquidityFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The outbound fee amount
+  }
+  errors: string[]
+}
+
 interface IProtocol {
   name: Protocol
   isAssetSupported(asset: AnyAsset): Promise<boolean>
@@ -236,6 +254,8 @@ interface IProtocol {
   listEarnPositions(params: ListEarnPositionParams): Promise<EarnPosition[]>
   estimateAddToEarnProduct(params: QuoteAddToEarnParams): Promise<QuoteAddToEarn>
   addToEarnProduct(params: QuoteAddToEarnParams): Promise<TxSubmitted>
+  estimateWithdrawFromEarnProduct(params: WithdrawFromEarnParams): Promise<QuoteWithdrawFromEarn>
+  withdrawFromEarnProduct(params: WithdrawFromEarnParams): Promise<TxSubmitted>
 }
 
 export {
@@ -256,4 +276,6 @@ export {
   EarnPosition,
   QuoteAddToEarnParams,
   QuoteAddToEarn,
+  WithdrawFromEarnParams,
+  QuoteWithdrawFromEarn,
 }

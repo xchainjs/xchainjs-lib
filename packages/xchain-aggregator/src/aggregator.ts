@@ -13,10 +13,12 @@ import {
   QuoteAddToEarnParams,
   QuoteSwap,
   QuoteSwapParams,
+  QuoteWithdrawFromEarn,
   SwapHistory,
   SwapHistoryParams,
   SwapResume,
   TxSubmitted,
+  WithdrawFromEarnParams,
 } from './types'
 
 // Class definition for an Aggregator
@@ -259,6 +261,21 @@ export class Aggregator {
     }
 
     return protocol.addToEarnProduct({ amount: params.amount })
+  }
+
+  public async estimateWithdrawFromEarnProduct(
+    params: WithdrawFromEarnParams & { protocol: Protocol },
+  ): Promise<QuoteWithdrawFromEarn> {
+    const protocol = this.getProtocol(params.protocol)
+    if (params.withdrawBps <= 0 || params.withdrawBps > 10000) {
+      throw Error('Withdraw bps out of range')
+    }
+    return protocol.estimateWithdrawFromEarnProduct(params)
+  }
+
+  public async withdrawFromEarnProduct(params: WithdrawFromEarnParams & { protocol: Protocol }): Promise<TxSubmitted> {
+    const protocol = this.getProtocol(params.protocol)
+    return protocol.withdrawFromEarnProduct(params)
   }
 
   private verifyConfig(config: Config & { protocols: Protocol[] }) {

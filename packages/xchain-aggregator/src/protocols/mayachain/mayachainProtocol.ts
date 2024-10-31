@@ -20,6 +20,7 @@ import {
   QuoteAddToEarn,
   QuoteSwap,
   QuoteSwapParams,
+  QuoteWithdrawFromEarn,
   SwapHistory,
   SwapHistoryParams,
   TxSubmitted,
@@ -173,6 +174,14 @@ export class MayachainProtocol implements IProtocol {
   }
 
   public async addToEarnProduct(): Promise<TxSubmitted> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async estimateWithdrawFromEarnProduct(): Promise<QuoteWithdrawFromEarn> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async withdrawFromEarnProduct(): Promise<TxSubmitted> {
     throw new Error('Method not implemented.')
   }
 }

@@ -23,9 +23,11 @@ import {
   QuoteAddToEarnParams,
   QuoteSwap,
   QuoteSwapParams,
+  QuoteWithdrawFromEarn,
   SwapHistory,
   SwapHistoryParams,
   TxSubmitted,
+  WithdrawFromEarnParams,
 } from '../../types'
 
 export class ThorchainProtocol implements IProtocol {
@@ -206,5 +208,27 @@ export class ThorchainProtocol implements IProtocol {
 
   public async addToEarnProduct(params: QuoteAddToEarnParams): Promise<TxSubmitted> {
     return this.thorchainAmm.addSaver(params.amount)
+  }
+
+  public async estimateWithdrawFromEarnProduct(params: WithdrawFromEarnParams): Promise<QuoteWithdrawFromEarn> {
+    const quote = await this.thorchainAmm.estimateWithdrawSaver(params)
+    return {
+      protocol: this.name,
+      toAddress: quote.toAddress,
+      dustAmount: quote.dustAmount,
+      expectedAmount: quote.expectedAssetAmount,
+      memo: quote.memo,
+      fees: {
+        asset: quote.fee.asset,
+        affiliateFee: quote.fee.affiliate,
+        outboundFee: quote.fee.outbound,
+        liquidityFee: quote.fee.liquidity,
+      },
+      errors: quote.errors,
+    }
+  }
+
+  public async withdrawFromEarnProduct(params: WithdrawFromEarnParams): Promise<TxSubmitted> {
+    return this.thorchainAmm.withdrawSaver(params)
   }
 }
