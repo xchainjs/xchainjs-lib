@@ -156,6 +156,7 @@ type IsApprovedParams = {
 
 interface IProtocol {
   name: Protocol
+  calculateStreamingFees(swapParams: QuoteSwapParams): Promise<number>
   isAssetSupported(asset: AnyAsset): Promise<boolean>
   getSupportedChains(): Promise<Chain[]>
   estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap>

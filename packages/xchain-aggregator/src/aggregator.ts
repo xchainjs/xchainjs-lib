@@ -64,6 +64,8 @@ export class Aggregator {
       if (!isDestinationAssetSupported)
         throw Error(`${assetToString(params.destinationAsset)} not supported in ${protocol.name}`)
 
+      console.log(await protocol.calculateStreamingFees(params))
+
       return protocol.estimateSwap(params)
     }
 

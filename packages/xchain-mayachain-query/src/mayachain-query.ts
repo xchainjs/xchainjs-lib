@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Action, PoolDetail, SwapMetadata, Transaction } from '@xchainjs/xchain-mayamidgard'
-import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
+import { MimirResponse, QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
   Address,
   AssetCryptoAmount,
@@ -67,6 +67,14 @@ export class MayachainQuery {
   constructor(mayachainCache = new MayachainCache()) {
     // Initialize MayachainCache instance
     this.mayachainCache = mayachainCache
+  }
+
+  /**
+   * Get Mimir
+   * @returns {Promise<MimirResponse>}
+   */
+  public async getMimir(): Promise<MimirResponse> {
+    return this.mayachainCache.mayanode.getMimir()
   }
 
   /**

@@ -37,6 +37,14 @@ export class MayachainProtocol implements IProtocol {
     this.configuration = configuration
     this.wallet = configuration?.wallet
   }
+
+  async calculateStreamingFees(swapParams: QuoteSwapParams): Promise<number> {
+    const pools = await this.mayachainQuery.getPools()
+    console.log(`swapParams: ${JSON.stringify(swapParams)}`)
+    console.log(`pool: ${JSON.stringify(pools)}`)
+    return 0
+  }
+
   /**
    * Aprove tx for ERC-20
    * @param {ApproveParams} approveParams params to approve tx

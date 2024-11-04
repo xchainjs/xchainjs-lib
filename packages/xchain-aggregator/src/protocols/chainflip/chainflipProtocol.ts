@@ -37,6 +37,11 @@ export class ChainflipProtocol implements IProtocol {
       return this.sdk.getAssets()
     }, 24 * 60 * 60 * 1000)
   }
+  public calculateStreamingFees(swapParams: QuoteSwapParams): Promise<number> {
+    console.log(`swapParams: ${JSON.stringify(swapParams)}`)
+
+    throw new Error('Not implemented')
+  }
   public approveRouterToSpend(_params: { asset: TokenAsset; amount?: CryptoAmount }): Promise<TxSubmitted> {
     throw new Error('Not implemented')
   }

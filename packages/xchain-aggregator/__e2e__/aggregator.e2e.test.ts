@@ -9,7 +9,7 @@ import {
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
-import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
+import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
@@ -70,7 +70,7 @@ describe('Aggregator', () => {
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
     })
-    aggregator = new Aggregator({ wallet })
+    aggregator = new Aggregator({ wallet, protocols: ['Thorchain'] }) // apuntar esto
   })
 
   it('Should get configuration', () => {
@@ -80,8 +80,8 @@ describe('Aggregator', () => {
   it('Should find swap with greatest expected amount', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
-      destinationAsset: AssetETH,
-      amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
+      destinationAsset: AssetRuneNative,
+      amount: new CryptoAmount(assetToBase(assetAmount(2, BTC_DECIMAL)), AssetBTC),
     })
     printQuoteSwap(estimatedSwap)
   })

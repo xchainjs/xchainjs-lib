@@ -1,7 +1,16 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
+import {
+  AnyAsset,
+  Chain,
+  assetToString,
+  baseAmount,
+  baseToAsset,
+  eqAsset,
+  isSynthAsset,
+  isTradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
@@ -26,6 +35,42 @@ export class ThorchainProtocol implements IProtocol {
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
     this.wallet = configuration?.wallet
+  }
+
+  /**
+   * Calculate streaming swap fees
+   * @param {SwapParams} swapParams Swap parameters
+   * @returns {boolean} Swap fees
+   */
+  async calculateStreamingFees(swapParams: QuoteSwapParams): Promise<number> {
+    const { fromAsset, destinationAsset, amount } = swapParams
+    let minimumSwapSize = 0
+
+    const isSingleSwap = fromAsset.symbol === 'RUNE' || destinationAsset.symbol === 'RUNE'
+
+    // const pools = await this.thorchainQuery.thorchainCache.getPools()
+    // const mimir = (await this.thorchainQuery.thorchainCache.thornode.getMimir()).STREAMINGSWAPMINBPFEE
+
+    const mimir = 5
+    const minBPStreamingSwapFee = +mimir / 10000
+
+    if (isSingleSwap) {
+      // const differentRuneAsset = fromAsset.symbol !== 'RUNE' ? fromAsset : destinationAsset
+
+      // const pool = pools[`${differentRuneAsset.chain}.${differentRuneAsset.ticker}`]
+
+      minimumSwapSize = baseToAsset(baseAmount(1424360745043, 8)).amount().toNumber() * minBPStreamingSwapFee
+    } else {
+      // const fromAssetPool = pools[`${fromAsset.chain}.${fromAsset.ticker}`]
+      // const destinationAssetPool = pools[`${destinationAsset.chain}.${destinationAsset.ticker}`]
+      // const virtualRuneDepth =
+      //   (2 * +fromAssetPool.thornodeDetails.balance_rune * +destinationAssetPool.thornodeDetails.balance_rune) /
+      //   (+fromAssetPool.thornodeDetails.balance_rune + +destinationAssetPool.thornodeDetails.balance_rune)
+      // minimumSwapSize = (minBPStreamingSwapFee / 2) * virtualRuneDepth
+    }
+
+    const swapCount = amount.assetAmount.amount().toNumber() / minimumSwapSize * 10
+    return +swapCount.toFixed(0)
   }
 
   /**
