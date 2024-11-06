@@ -7,13 +7,23 @@ import {
   defaultBTCParams as defaultBtcParams,
 } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
+import { AssetATOM, Client as CosmosClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { Aggregator, QuoteSwap } from '../src'
+import { EarnPosition, QuoteAddToEarn, QuoteWithdrawFromEarn } from '../src/types'
 
 function printQuoteSwap(quoteSwap: QuoteSwap) {
   console.log({
@@ -51,6 +61,80 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
   })
 }
 
+function printEarnPosition(position: EarnPosition) {
+  console.log({
+    protocol: position.protocol,
+    address: position.address,
+    asset: assetToString(position.asset),
+    depositAmount: position.depositAmount.assetAmount.amount().toString(),
+    redeemableAmount: position.redeemableAmount.assetAmount.amount().toString(),
+    ageInDays: position.ageInDays,
+    percentageGrowth: position.percentageGrowth,
+    errors: position.errors,
+  })
+}
+
+function printAddToEarnProduct(quote: QuoteAddToEarn) {
+  console.log({
+    protocol: quote.protocol,
+    canAdd: quote.canAdd,
+    toAddress: quote.toAddress,
+    asset: assetToString(quote.amount.asset),
+    assetAmount: quote.amount.assetAmount.amount().toString(),
+    depositedAmount: quote.depositedAmount.assetAmount.amount().toString(),
+    memo: quote.memo,
+    errors: quote.errors,
+    totalFees: {
+      asset: assetToString(quote.fees.asset),
+      affiliateFee: {
+        asset: assetToString(quote.fees.affiliateFee.asset),
+        amount: quote.fees.affiliateFee.baseAmount.amount().toString(),
+        decimals: quote.fees.affiliateFee.baseAmount.decimal,
+      },
+      outboundFee: {
+        asset: assetToString(quote.fees.outboundFee.asset),
+        amount: quote.fees.outboundFee.baseAmount.amount().toString(),
+        decimals: quote.fees.outboundFee.baseAmount.decimal,
+      },
+      liquidityFee: {
+        asset: assetToString(quote.fees.liquidityFee.asset),
+        amount: quote.fees.liquidityFee.baseAmount.amount().toString(),
+        decimals: quote.fees.liquidityFee.baseAmount.decimal,
+      },
+    },
+  })
+}
+
+function printWithdrawFromEarnProduct(quote: QuoteWithdrawFromEarn) {
+  console.log({
+    protocol: quote.protocol,
+    toAddress: quote.toAddress,
+    asset: assetToString(quote.expectedAmount.asset),
+    expectedAmount: quote.expectedAmount.assetAmount.amount().toString(),
+    dustAmount: quote.dustAmount.assetAmount.amount().toString(),
+    memo: quote.memo,
+    errors: quote.errors,
+    totalFees: {
+      asset: assetToString(quote.fees.asset),
+      affiliateFee: {
+        asset: assetToString(quote.fees.affiliateFee.asset),
+        amount: quote.fees.affiliateFee.baseAmount.amount().toString(),
+        decimals: quote.fees.affiliateFee.baseAmount.decimal,
+      },
+      outboundFee: {
+        asset: assetToString(quote.fees.outboundFee.asset),
+        amount: quote.fees.outboundFee.baseAmount.amount().toString(),
+        decimals: quote.fees.outboundFee.baseAmount.decimal,
+      },
+      liquidityFee: {
+        asset: assetToString(quote.fees.liquidityFee.asset),
+        amount: quote.fees.liquidityFee.baseAmount.amount().toString(),
+        decimals: quote.fees.liquidityFee.baseAmount.decimal,
+      },
+    },
+  })
+}
+
 jest.deepUnmock('@chainflip/sdk/swap')
 
 describe('Aggregator', () => {
@@ -69,6 +153,7 @@ describe('Aggregator', () => {
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
+      GAIA: new CosmosClient({ phrase, network: Network.Mainnet }),
     })
     aggregator = new Aggregator({ wallet })
   })
@@ -173,6 +258,53 @@ describe('Aggregator', () => {
       destinationAsset: AssetAVAX,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
       destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+    })
+
+    console.log(txSubmitted)
+  })
+
+  it('Should list earn positions', async () => {
+    const positions = await aggregator.listEarnPositions({
+      assetAddresses: [
+        {
+          address: 'cosmos104d8cnxgs4kuwfrgjlv9407ywafw0shm7t72fu',
+          asset: assetFromStringEx('GAIA.ATOM') as Asset,
+        },
+      ],
+    })
+
+    for (const protocolPositions of Object.values(positions)) {
+      for (const position of protocolPositions) {
+        printEarnPosition(position)
+      }
+    }
+  })
+
+  it('Should estimate add to earn products', async () => {
+    const quote = await aggregator.estimateAddToEarnProduct({
+      amount: new CryptoAmount<Asset>(baseAmount(1 * 10 ** 8, 8), AssetBTC),
+    })
+
+    printAddToEarnProduct(quote)
+  })
+
+  it('Should estimate withdraw from earn products', async () => {
+    const quote = await aggregator.estimateWithdrawFromEarnProduct({
+      protocol: 'Thorchain',
+      asset: AssetATOM,
+      address: await wallet.getAddress(GAIAChain),
+      withdrawBps: 5000,
+    })
+
+    printWithdrawFromEarnProduct(quote)
+  })
+
+  it('Should withdraw from earn products', async () => {
+    const txSubmitted = await aggregator.withdrawFromEarnProduct({
+      protocol: 'Thorchain',
+      asset: AssetATOM,
+      address: await wallet.getAddress(GAIAChain),
+      withdrawBps: 5000,
     })
 
     console.log(txSubmitted)

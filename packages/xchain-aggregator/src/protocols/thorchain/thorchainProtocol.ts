@@ -1,17 +1,33 @@
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { AnyAsset, Chain, assetToString, eqAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
+import {
+  AnyAsset,
+  Chain,
+  CryptoAmount,
+  assetToString,
+  baseAmount,
+  eqAsset,
+  isSynthAsset,
+  isTradeAsset,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
+  EarnPosition,
+  EarnProduct,
   IProtocol,
+  ListEarnPositionParams,
   ProtocolConfig,
+  QuoteAddToEarn,
+  QuoteAddToEarnParams,
   QuoteSwap,
   QuoteSwapParams,
+  QuoteWithdrawFromEarn,
   SwapHistory,
   SwapHistoryParams,
   TxSubmitted,
+  WithdrawFromEarnParams,
 } from '../../types'
 
 export class ThorchainProtocol implements IProtocol {
@@ -129,5 +145,90 @@ export class ThorchainProtocol implements IProtocol {
         return { protocol: this.name, ...swap }
       }),
     }
+  }
+
+  /**
+   * List supported earn products
+   * @returns the earn products the protocol supports
+   */
+  public async listEarnProducts(): Promise<EarnProduct[]> {
+    const vaults = await this.thorchainAmm.listSaverVaults()
+    return vaults.map((vault) => {
+      return {
+        protocol: this.name,
+        isEnabled: vault.isEnabled,
+        asset: vault.asset,
+        apr: vault.apr,
+      }
+    })
+  }
+
+  /**
+   * List earn positions
+   * @param {ListEarnPositionParams} - List earn position params.
+   * @returns the earn positions of the addresses in the earn products
+   */
+  public async listEarnPositions(params: ListEarnPositionParams): Promise<EarnPosition[]> {
+    const positions = await this.thorchainQuery.getBatchSaversPosition(params.assetAddresses)
+    return positions.map((position) => {
+      return {
+        protocol: this.name,
+        asset: position.asset,
+        address: position.address,
+        depositAmount: position.depositValue,
+        redeemableAmount: position.redeemableValue,
+        percentageGrowth: position.percentageGrowth,
+        errors: position.errors,
+        ageInDays: position.ageInDays,
+      }
+    })
+  }
+
+  public async estimateAddToEarnProduct(params: QuoteAddToEarnParams): Promise<QuoteAddToEarn> {
+    const quote = await this.thorchainAmm.estimateAddSaver(params.amount)
+    return {
+      protocol: this.name,
+      canAdd: quote.canAddSaver,
+      amount: quote.assetAmount,
+      depositedAmount: quote.estimatedDepositValue,
+      recommendedMinAmount: quote.recommendedMinAmountIn
+        ? new CryptoAmount(baseAmount(quote.recommendedMinAmountIn, 8), params.amount.asset)
+        : undefined,
+      memo: quote.memo,
+      errors: quote.errors,
+      toAddress: quote.toAddress,
+      fees: {
+        asset: quote.fee.asset,
+        affiliateFee: quote.fee.affiliate,
+        outboundFee: quote.fee.outbound,
+        liquidityFee: quote.fee.liquidity,
+      },
+    }
+  }
+
+  public async addToEarnProduct(params: QuoteAddToEarnParams): Promise<TxSubmitted> {
+    return this.thorchainAmm.addSaver(params.amount)
+  }
+
+  public async estimateWithdrawFromEarnProduct(params: WithdrawFromEarnParams): Promise<QuoteWithdrawFromEarn> {
+    const quote = await this.thorchainAmm.estimateWithdrawSaver(params)
+    return {
+      protocol: this.name,
+      toAddress: quote.toAddress,
+      dustAmount: quote.dustAmount,
+      expectedAmount: quote.expectedAssetAmount,
+      memo: quote.memo,
+      fees: {
+        asset: quote.fee.asset,
+        affiliateFee: quote.fee.affiliate,
+        outboundFee: quote.fee.outbound,
+        liquidityFee: quote.fee.liquidity,
+      },
+      errors: quote.errors,
+    }
+  }
+
+  public async withdrawFromEarnProduct(params: WithdrawFromEarnParams): Promise<TxSubmitted> {
+    return this.thorchainAmm.withdrawSaver(params)
   }
 }

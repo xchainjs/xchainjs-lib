@@ -4257,6 +4257,7 @@ __metadata:
     "@xchainjs/xchain-binance": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-cosmos": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
     "@xchainjs/xchain-kujira": "workspace:*"
     "@xchainjs/xchain-mayachain": "workspace:*"

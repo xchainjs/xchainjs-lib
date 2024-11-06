@@ -286,6 +286,28 @@ export type PoolRatios = {
 }
 
 /**
+ * Savers vault
+ */
+export type SaversVault = {
+  /**
+   * Savers vault asset
+   */
+  asset: Asset | TokenAsset
+  /**
+   * Whether an user can deposit into a Savers vault
+   */
+  isEnabled: boolean
+  /**
+   * Savers vault APR
+   */
+  apr: number
+  /**
+   * Percentage filled in basis points
+   */
+  fillBps: number
+}
+
+/**
  * Represents parameters for getting a saver.
  */
 export type getSaver = {
@@ -363,6 +385,7 @@ export type SaversPosition = {
   ageInYears: number // The age in years
   ageInDays: number // The age in days
   asset: Asset | TokenAsset // The asset
+  address: Address
   errors: string[] // Any errors encountered
 }
 

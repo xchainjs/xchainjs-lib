@@ -13,10 +13,14 @@ import {
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import {
+  EarnPosition,
+  EarnProduct,
   IProtocol,
   ProtocolConfig,
+  QuoteAddToEarn,
   QuoteSwap,
   QuoteSwapParams,
+  QuoteWithdrawFromEarn,
   SwapHistory,
   SwapHistoryParams,
   TxSubmitted,
@@ -37,6 +41,7 @@ export class MayachainProtocol implements IProtocol {
     this.configuration = configuration
     this.wallet = configuration?.wallet
   }
+
   /**
    * Aprove tx for ERC-20
    * @param {ApproveParams} approveParams params to approve tx
@@ -144,5 +149,39 @@ export class MayachainProtocol implements IProtocol {
         return { protocol: this.name, ...swap }
       }),
     }
+  }
+
+  /**
+   * List supported earn products
+   * @throws {Error} - Method not implemented.
+   * @returns the earn products the protocol supports
+   */
+  public async listEarnProducts(): Promise<EarnProduct[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  /**
+   * List earn positions
+   * @throws {Error} - Method not implemented.
+   * @returns the earn positions of the addresses in the earn products
+   */
+  public async listEarnPositions(): Promise<EarnPosition[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async estimateAddToEarnProduct(): Promise<QuoteAddToEarn> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async addToEarnProduct(): Promise<TxSubmitted> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async estimateWithdrawFromEarnProduct(): Promise<QuoteWithdrawFromEarn> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async withdrawFromEarnProduct(): Promise<TxSubmitted> {
+    throw new Error('Method not implemented.')
   }
 }

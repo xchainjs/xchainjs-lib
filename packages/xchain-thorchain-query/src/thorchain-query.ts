@@ -54,6 +54,7 @@ import {
   RunePoolProvidersParams,
   SaverFees,
   SaversPosition,
+  SaversVault,
   SaversWithdraw,
   SwapHistoryParams,
   SwapsHistory,
@@ -678,6 +679,33 @@ export class ThorchainQuery {
     }
   }
 
+  /**
+   * List the Saver vaults
+   * @returns the protocol savers vaults
+   */
+  public async listSaverVaults(): Promise<SaversVault[]> {
+    const pools = await this.thorchainCache.getPools()
+    const poolsData = await this.thorchainCache.midgardQuery.midgardCache.getPools()
+    const networkValues: Record<string, number> = await this.thorchainCache.getNetworkValues()
+
+    return Object.values(pools)
+      .filter((pool) => {
+        return pool.thornodeDetails.savers_depth !== '0' && pool.thornodeDetails.savers_units !== '0'
+      })
+      .map((pool) => {
+        const poolData = poolsData.find((poolData) => poolData.asset === assetToString(pool.asset))
+        return {
+          asset: pool.asset,
+          isEnabled:
+            !networkValues.HALTCHAINGLOBAL &&
+            !!networkValues.ENABLESAVINGSVAULTS &&
+            !networkValues[`HALT${pool.asset.chain}CHAIN`],
+          apr: Number(poolData?.saversAPR || 0),
+          fillBps: Number(pool.thornodeDetails.savers_fill_bps),
+        }
+      })
+  }
+
   // Savers Queries
   // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
   /**
@@ -1007,6 +1035,7 @@ export class ThorchainQuery {
 
     // Create and populate a SaversPosition object with the calculated values
     const saversPos: SaversPosition = {
+      address: params.address,
       depositValue: depositAmount, // Current deposit value of the saver
       redeemableValue: redeemableAssetAmount, // Redeemable value of the saver's position
       lastAddHeight: Number(savers?.last_add_height), // Height at which the last addition was made to the pool
@@ -1019,6 +1048,15 @@ export class ThorchainQuery {
 
     // Return the SaversPosition object representing the saver's position
     return saversPos
+  }
+
+  /**
+   * Retrieve the positions of a saver given the assets
+   * @param params - Object containing a list of the asset
+   * @returns - Object representing the saver's position.
+   */
+  public async getBatchSaversPosition(params: getSaver[]): Promise<SaversPosition[]> {
+    return this.thorchainCache.midgardQuery.getSaverPositions(params)
   }
 
   /**

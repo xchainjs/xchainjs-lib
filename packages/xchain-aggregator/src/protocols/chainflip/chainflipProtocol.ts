@@ -14,7 +14,18 @@ import {
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
+import {
+  EarnPosition,
+  EarnProduct,
+  IProtocol,
+  ProtocolConfig,
+  QuoteAddToEarn,
+  QuoteSwap,
+  QuoteSwapParams,
+  QuoteWithdrawFromEarn,
+  SwapHistory,
+  TxSubmitted,
+} from '../../types'
 
 import { CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
@@ -37,9 +48,11 @@ export class ChainflipProtocol implements IProtocol {
       return this.sdk.getAssets()
     }, 24 * 60 * 60 * 1000)
   }
+
   public approveRouterToSpend(_params: { asset: TokenAsset; amount?: CryptoAmount }): Promise<TxSubmitted> {
     throw new Error('Not implemented')
   }
+
   public async shouldBeApproved(_params: {
     asset: TokenAsset
     amount: CryptoAmount
@@ -199,6 +212,24 @@ export class ChainflipProtocol implements IProtocol {
   }
 
   /**
+   * List supported earn products
+   * @throws {Error} - Method not implemented.
+   * @returns the earn products the protocol supports
+   */
+  public async listEarnProducts(): Promise<EarnProduct[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  /**
+   * List earn positions
+   * @throws {Error} - Method not implemented.
+   * @returns the earn positions of the addresses in the earn products
+   */
+  public async listEarnPositions(): Promise<EarnPosition[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  /**
    * Get asset data
    * @param {Asset} asset - Asset of which return data
    * @throws {Error} - If asset is not supported in Chainflip
@@ -217,5 +248,21 @@ export class ChainflipProtocol implements IProtocol {
     })
     if (!assetData) throw Error(`${asset.ticker} asset not supported in ${asset.chain} chain`)
     return assetData
+  }
+
+  public async estimateAddToEarnProduct(): Promise<QuoteAddToEarn> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async addToEarnProduct(): Promise<TxSubmitted> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async estimateWithdrawFromEarnProduct(): Promise<QuoteWithdrawFromEarn> {
+    throw new Error('Method not implemented.')
+  }
+
+  public async withdrawFromEarnProduct(): Promise<TxSubmitted> {
+    throw new Error('Method not implemented.')
   }
 }

@@ -1,0 +1,37 @@
+{
+  "pools": [
+    {
+      "assetAdded": "908535385",
+      "assetAddress": "0x3db0f3c5713f4248dcad61052c0590c538755eb8",
+      "assetDeposit": "908535385",
+      "assetRedeem": "936594362",
+      "assetWithdrawn": "0",
+      "dateFirstAdded": "1707172968",
+      "dateLastAdded": "1707172968",
+      "pool": "BSC.BNB",
+      "saverUnits": "839453191"
+    },
+    {
+      "assetAdded": "27749248037",
+      "assetAddress": "0x3db0f3c5713f4248dcad61052c0590c538755eb8",
+      "assetDeposit": "27749248037",
+      "assetRedeem": "28180223290",
+      "assetWithdrawn": "0",
+      "dateFirstAdded": "1707174615",
+      "dateLastAdded": "1710789481",
+      "pool": "ETH.ETH",
+      "saverUnits": "25711556729"
+    },
+    {
+      "assetAdded": "4697256640",
+      "assetAddress": "bc1qqduzvppjz2v0mccuel5d94qy2k43xhyr6amnp2",
+      "assetDeposit": "4697256640",
+      "assetRedeem": "4876450228",
+      "assetWithdrawn": "0",
+      "dateFirstAdded": "1671144976",
+      "dateLastAdded": "1677271578",
+      "pool": "BTC.BTC",
+      "saverUnits": "4664115643"
+    }
+  ]
+}
