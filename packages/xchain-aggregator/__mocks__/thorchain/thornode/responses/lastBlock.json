@@ -1,0 +1,50 @@
+[
+  {
+    "chain": "AVAX",
+    "last_observed_in": 52642371,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  },
+  {
+    "chain": "BCH",
+    "last_observed_in": 870723,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  },
+  {
+    "chain": "BSC",
+    "last_observed_in": 43712286,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  },
+  {
+    "chain": "BTC",
+    "last_observed_in": 868819,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  },
+  {
+    "chain": "DOGE",
+    "last_observed_in": 5447711,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  },
+  {
+    "chain": "ETH",
+    "last_observed_in": 21113769,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  },
+  {
+    "chain": "GAIA",
+    "last_observed_in": 22921748,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  },
+  {
+    "chain": "LTC",
+    "last_observed_in": 2785477,
+    "last_signed_out": 18431200,
+    "thorchain": 18431205
+  }
+]

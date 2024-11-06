@@ -7,6 +7,12 @@ export default {
     mock.onGet(/\/pools/).reply(function () {
       return [200, require('./responses/pools.json')]
     })
+    mock.onGet(/\/lastblock/).reply(function () {
+      return [200, require('./responses/lastBlock.json')]
+    })
+    mock.onGet(/\/thorchain\/pool\/BTC.BTC\/savers/).reply(function () {
+      return [200, require('./responses/btcSavers.json')]
+    })
     mock.onGet(/\/thorchain\/quote\/swap/).reply(function (config) {
       const parsedUrl = new URL(`${config.url}`)
       const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''
@@ -27,6 +33,12 @@ export default {
     })
     mock.onGet(/\/thorchain\/constants/).reply(function () {
       return [200, require('./responses/constants.json')]
+    })
+    mock.onGet(/\/thorchain\/quote\/saver\/withdraw/).reply(function () {
+      return [200, require('./responses/quoteWithdrawSavers.json')]
+    })
+    mock.onGet(/\/thorchain\/quote\/saver\/deposit/).reply(function () {
+      return [200, require('./responses/quoteAddSavers.json')]
     })
   },
 }

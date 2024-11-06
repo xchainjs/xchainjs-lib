@@ -1,0 +1,23 @@
+{
+  "inbound_address": "bc1qsrfhgcmj09086rjkk22d5pq27ldphpm5r0jaa7",
+  "outbound_delay_blocks": 720,
+  "outbound_delay_seconds": 4320,
+  "fees": {
+    "asset": "BTC.BTC",
+    "affiliate": "0",
+    "outbound": "2232",
+    "liquidity": "5607546",
+    "total": "5609778",
+    "slippage_bps": 23,
+    "total_bps": 23
+  },
+  "expiry": 1730377336,
+  "warning": "Do not cache this response. Do not send funds after the expiry.",
+  "notes": "First output should be to inbound_address, second output should be change back to self, third output should be OP_RETURN, limited to 80 bytes. Do not send below the dust threshold. Do not use exotic spend scripts, locks or address formats.",
+  "dust_threshold": "10000",
+  "recommended_gas_rate": "7",
+  "gas_rate_units": "satsperbyte",
+  "memo": "-:BTC/BTC:5000",
+  "dust_amount": "15000",
+  "expected_amount_out": "2431783828"
+}

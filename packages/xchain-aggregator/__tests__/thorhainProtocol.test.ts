@@ -4,12 +4,14 @@ import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
 import {
+  Asset,
   CryptoAmount,
   TokenAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
   assetToString,
+  baseAmount,
   baseToAsset,
 } from '@xchainjs/xchain-util'
 
@@ -145,12 +147,62 @@ describe('Thorchain protocol', () => {
       },
     })
   })
-  it('List earn products', async () => {
+  it('Should list earn products', async () => {
     const vaults = await protocol.listEarnProducts()
     expect(vaults.length).toBe(11)
     expect(vaults.every((vault) => vault.protocol === 'Thorchain')).toBeTruthy()
     expect(assetToString(vaults[0].asset)).toBe('AVAX.AVAX')
     expect(vaults[0].isEnabled).toBeTruthy()
     expect(vaults[0].apr).toBe(0.048445694045141235)
+  })
+
+  it('Should estimate add to earn product', async () => {
+    const quote = await protocol.estimateAddToEarnProduct({
+      amount: new CryptoAmount<Asset>(baseAmount(1 * 10 ** 8, 8), AssetBTC),
+    })
+    expect(quote.protocol).toBe('Thorchain')
+    expect(quote.canAdd).toBeTruthy()
+    expect(quote.memo).toBe('+:BTC/BTC')
+    expect(quote.toAddress).toBe('bc1qsjppu8lmy3ketcck6vm7jpsm0wpnfz4nfayuze')
+    expect(assetToString(quote.amount.asset)).toBe('BTC.BTC')
+    expect(quote.amount.assetAmount.amount().toString()).toBe('0.99725019')
+    expect(assetToString(quote.depositedAmount.asset)).toBe('BTC.BTC')
+    expect(quote.depositedAmount.assetAmount.amount().toString()).toBe('0.99725019')
+    expect(quote.recommendedMinAmount ? assetToString(quote.recommendedMinAmount.asset) : undefined).toBe('BTC.BTC')
+    expect(quote.recommendedMinAmount ? quote.recommendedMinAmount?.assetAmount.amount().toString() : undefined).toBe(
+      '0.0001',
+    )
+    expect(quote.amount.assetAmount.amount().toString()).toBe('0.99725019')
+    expect(quote.errors.length).toBe(0)
+    expect(assetToString(quote.fees.asset)).toBe('BTC/BTC')
+    expect(quote.fees.affiliateFee.assetAmount.amount().toString()).toBe('0')
+    expect(assetToString(quote.fees.affiliateFee.asset)).toBe('BTC.BTC')
+    expect(quote.fees.outboundFee.assetAmount.amount().toString()).toBe('0.00000161')
+    expect(assetToString(quote.fees.outboundFee.asset)).toBe('BTC/BTC')
+    expect(quote.fees.liquidityFee.assetAmount.amount().toString()).toBe('0.00274449')
+    expect(assetToString(quote.fees.liquidityFee.asset)).toBe('BTC/BTC')
+  })
+
+  it('Should estimate withdraw from earn product', async () => {
+    const quote = await protocol.estimateWithdrawFromEarnProduct({
+      asset: AssetBTC,
+      address: 'bc1qqduzvppjz2v0mccuel5d94qy2k43xhyr6amnp2',
+      withdrawBps: 5000,
+    })
+    expect(quote.protocol).toBe('Thorchain')
+    expect(quote.memo).toBe('-:BTC/BTC:5000')
+    expect(quote.toAddress).toBe('bc1qsrfhgcmj09086rjkk22d5pq27ldphpm5r0jaa7')
+    expect(quote.dustAmount.assetAmount.amount().toString()).toBe('0.00015')
+    expect(assetToString(quote.dustAmount.asset)).toBe('BTC.BTC')
+    expect(assetToString(quote.expectedAmount.asset)).toBe('BTC.BTC')
+    expect(quote.expectedAmount.assetAmount.amount().toString()).toBe('24.31783828')
+    expect(quote.errors.length).toBe(0)
+    expect(assetToString(quote.fees.asset)).toBe('BTC.BTC')
+    expect(quote.fees.affiliateFee.assetAmount.amount().toString()).toBe('0')
+    expect(assetToString(quote.fees.affiliateFee.asset)).toBe('BTC.BTC')
+    expect(quote.fees.outboundFee.assetAmount.amount().toString()).toBe('0.00002232')
+    expect(assetToString(quote.fees.outboundFee.asset)).toBe('BTC.BTC')
+    expect(quote.fees.liquidityFee.assetAmount.amount().toString()).toBe('0.05607546')
+    expect(assetToString(quote.fees.liquidityFee.asset)).toBe('BTC.BTC')
   })
 })

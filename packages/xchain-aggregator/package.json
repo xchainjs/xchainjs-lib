@@ -44,6 +44,7 @@
     "@xchainjs/xchain-avax": "workspace:*",
     "@xchainjs/xchain-binance": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-cosmos": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",
     "@xchainjs/xchain-kujira": "workspace:*",
     "axios": "1.7.4",
