@@ -10,7 +10,6 @@ import {
   GeneralTransactionMetadata,
   LinearFee,
   Transaction,
-  TransactionBody,
   TransactionBuilder,
   TransactionBuilderConfigBuilder,
   TransactionHash,
@@ -192,7 +191,7 @@ export class Client extends BaseXChainClient {
       memo: params.memo,
       amount: params.amount,
     })
-    const fee: number = TransactionBody.from_hex(rawUnsignedTx).fee().to_js_value()
+    const fee: number = Transaction.from_hex(rawUnsignedTx).body().fee().to_js_value()
     return {
       average: baseAmount(fee, ADA_DECIMALS),
       fast: baseAmount(fee * 1.25, ADA_DECIMALS),
@@ -259,7 +258,9 @@ export class Client extends BaseXChainClient {
 
     const accountKey = this.generatePrivateKey(params.walletIndex)
 
-    const txBody = TransactionBody.from_hex(rawUnsignedTx)
+    const privKey = accountKey.derive(0).derive(0)
+
+    const txBody = Transaction.from_hex(rawUnsignedTx).body()
 
     const fixedTx = FixedTransaction.new_from_body_bytes(txBody.to_bytes())
 
@@ -268,12 +269,12 @@ export class Client extends BaseXChainClient {
     const witnesses = TransactionWitnessSet.new()
     const vKeyWitnesses = Vkeywitnesses.new()
 
-    const vKeyWitness = make_vkey_witness(txHash, accountKey.to_raw_key())
+    const vKeyWitness = make_vkey_witness(txHash, privKey.to_raw_key())
 
     vKeyWitnesses.add(vKeyWitness)
     witnesses.set_vkeys(vKeyWitnesses)
 
-    const tx = Transaction.new(txBody, witnesses)
+    const tx = Transaction.new(txBody, witnesses, undefined)
 
     const hash = await this.broadcastTx(tx.to_hex())
 
@@ -298,6 +299,8 @@ export class Client extends BaseXChainClient {
   public async prepareTx({ sender, recipient, amount, memo }: TxParams & { sender: Address }): Promise<PreparedTx> {
     const currentSlot = await this.roundRobinGetLatestBlock()
     const utxos = await this.roundRobinGetAllAddressUTXOs(sender)
+
+    console.log('utxos', utxos)
 
     if (!currentSlot.slot) {
       throw Error('Fail to fetch slot number')
@@ -331,7 +334,6 @@ export class Client extends BaseXChainClient {
       const output = TransactionOutput.new(senderAddr, inputValue)
       unspentOutputs.add(TransactionUnspentOutput.new(input, output))
     }
-    console.log(unspentOutputs.to_js_value())
     txBuilder.add_inputs_from(unspentOutputs, CoinSelectionStrategyCIP2.LargestFirst)
 
     if (memo) {
@@ -343,7 +345,7 @@ export class Client extends BaseXChainClient {
     txBuilder.add_change_if_needed(senderAddr)
 
     return {
-      rawUnsignedTx: txBuilder.build().to_hex(),
+      rawUnsignedTx: txBuilder.build_tx().to_hex(),
     }
   }
 
