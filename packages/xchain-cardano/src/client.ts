@@ -300,8 +300,6 @@ export class Client extends BaseXChainClient {
     const currentSlot = await this.roundRobinGetLatestBlock()
     const utxos = await this.roundRobinGetAllAddressUTXOs(sender)
 
-    console.log('utxos', utxos)
-
     if (!currentSlot.slot) {
       throw Error('Fail to fetch slot number')
     }
