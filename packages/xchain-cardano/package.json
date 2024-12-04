@@ -1,0 +1,45 @@
+{
+  "name": "@xchainjs/xchain-cardano",
+  "version": "0.0.0",
+  "description": "Cardano client for XChainJS",
+  "keywords": [
+    "Cardano",
+    "XChain"
+  ],
+  "author": "THORChain",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo && rm -rf lib",
+    "build": "yarn clean && rollup -c --bundleConfigAsCjs",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
+    "test": "jest",
+    "e2e": "jest --config jest.config.e2e.js",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
+  },
+  "dependencies": {
+    "@blockfrost/blockfrost-js": "5.5.0",
+    "@emurgo/cardano-serialization-lib-nodejs": "13.0.0",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "release/package"
+  }
+}
