@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.7
+
+### Patch Changes
+
+- 6ad44a3: New method `mnemonicToEntropy`
+
 ## 0.3.6
 
 ### Patch Changes

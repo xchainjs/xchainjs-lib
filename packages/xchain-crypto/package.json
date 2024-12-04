@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-crypto",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",
   "module": "lib/index.es.js",
