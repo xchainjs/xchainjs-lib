@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.4
+
+### Patch Changes
+
+- Updated dependencies [6ad44a3]
+  - @xchainjs/xchain-crypto@0.3.7
+  - @xchainjs/xchain-client@1.0.8
+  - @xchainjs/xchain-utxo@1.0.8
+  - @xchainjs/xchain-utxo-providers@1.0.8
+
 ## 1.1.3
 
 ### Patch Changes

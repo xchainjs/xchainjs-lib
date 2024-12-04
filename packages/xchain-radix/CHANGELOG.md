@@ -1,5 +1,13 @@
 # @xchainjs/xchain-radix
 
+## 1.1.6
+
+### Patch Changes
+
+- Updated dependencies [6ad44a3]
+  - @xchainjs/xchain-crypto@0.3.7
+  - @xchainjs/xchain-client@1.0.8
+
 ## 1.1.5
 
 ### Patch Changes

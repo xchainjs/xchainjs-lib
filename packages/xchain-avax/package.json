@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-avax",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Avax EVM client for XChainJS",
   "keywords": [
     "XChain",
