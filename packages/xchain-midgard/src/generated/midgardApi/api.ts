@@ -1027,7 +1027,7 @@ export interface MemberPool {
      */
     'dateLastAdded': string;
     /**
-     * Int64, pool liquidity units that belong the the member
+     * Int64, pool liquidity units that belong the member
      * @type {string}
      * @memberof MemberPool
      */
@@ -1742,7 +1742,7 @@ export interface SaverPool {
      */
     'pool': string;
     /**
-     * Int64, saver liquidity units that belong the the member
+     * Int64, saver liquidity units that belong the member
      * @type {string}
      * @memberof SaverPool
      */
