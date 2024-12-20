@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.0.17
+
+### Patch Changes
+
+- Updated dependencies [f258497]
+- Updated dependencies [98eec32]
+- Updated dependencies [af49c34]
+  - @xchainjs/xchain-mayachain@2.0.10
+  - @xchainjs/xchain-thorchain@2.0.11
+  - @xchainjs/xchain-bitcoin@1.2.0
+  - @xchainjs/xchain-dash@1.0.8
+  - @xchainjs/xchain-kujira@1.0.10
+  - @xchainjs/xchain-wallet@1.1.3
+  - @xchainjs/xchain-client@1.0.8
+  - @xchainjs/xchain-radix@1.1.6
+  - @xchainjs/xchain-arbitrum@1.0.13
+  - @xchainjs/xchain-ethereum@1.0.12
+  - @xchainjs/xchain-mayachain-query@1.0.9
+
 ## 3.0.16
 
 ### Patch Changes
