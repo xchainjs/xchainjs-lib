@@ -24,6 +24,7 @@ export type UtxoClientParams = XChainClientParams & {
 
 export type PreparedTx = BasePreparedTx & {
   utxos: UTXO[]
+  inputs: UTXO[]
 }
 
 export type TxParams = BaseTxParams & {

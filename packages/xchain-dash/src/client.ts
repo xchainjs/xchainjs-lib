@@ -212,7 +212,7 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
   }): Promise<DashPreparedTx> {
     // Build the transaction using provided parameters
-    const { tx, utxos } = await Utils.buildTx({
+    const { tx, utxos, inputs } = await Utils.buildTx({
       sender,
       recipient,
       memo,
@@ -221,7 +221,7 @@ abstract class Client extends UTXOClient {
       network: this.network,
     })
     // Return the raw unsigned transaction and UTXOs
-    return { rawUnsignedTx: tx.toString(), utxos }
+    return { rawUnsignedTx: tx.toString(), utxos, inputs }
   }
   /**
    * Compiles a memo into a buffer.

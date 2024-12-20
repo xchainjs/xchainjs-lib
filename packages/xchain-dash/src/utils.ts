@@ -89,7 +89,7 @@ export const buildTx = async ({
   sender: Address
   network: Network
   withTxHex?: boolean
-}): Promise<{ tx: Transaction; utxos: UTXO[] }> => {
+}): Promise<{ tx: Transaction; utxos: UTXO[]; inputs: UTXO[] }> => {
   // Validate recipient address
   if (!validateAddress(recipient, network)) throw new Error('Invalid address')
 
@@ -152,7 +152,7 @@ export const buildTx = async ({
     tx.addData(memo)
   }
 
-  return { tx, utxos } // Return the built transaction and its UTXOs
+  return { tx, utxos, inputs } // Return the built transaction and its UTXOs
 }
 
 /**

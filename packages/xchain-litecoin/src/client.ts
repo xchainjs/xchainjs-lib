@@ -111,7 +111,7 @@ abstract class Client extends UTXOClient {
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
-  }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[] }> {
+  }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
     if (!this.validateAddress(recipient)) throw new Error('Invalid address')
 
     const utxos = await this.scanUTXOs(sender, false)
@@ -163,7 +163,7 @@ abstract class Client extends UTXOClient {
       }
     })
 
-    return { psbt, utxos }
+    return { psbt, utxos, inputs }
   }
 
   /**
@@ -182,8 +182,8 @@ abstract class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-  }): Promise<PreparedTx & { utxos: UTXO[] }> {
-    const { psbt, utxos } = await this.buildTx({
+  }): Promise<PreparedTx & { utxos: UTXO[]; inputs: UTXO[] }> {
+    const { psbt, utxos, inputs } = await this.buildTx({
       sender,
       recipient,
       amount,
@@ -191,7 +191,7 @@ abstract class Client extends UTXOClient {
       memo,
     })
 
-    return { rawUnsignedTx: psbt.toBase64(), utxos }
+    return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
   }
   /**
    * Compile memo.

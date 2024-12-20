@@ -175,7 +175,7 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
   }): Promise<BchPreparedTx> {
     // Build the transaction using provided options
-    const { builder, utxos } = await this.buildTx({
+    const { builder, utxos, inputs } = await this.buildTx({
       sender,
       recipient,
       amount,
@@ -183,7 +183,7 @@ abstract class Client extends UTXOClient {
       feeRate,
     })
     // Return the raw unsigned transaction and UTXOs
-    return { rawUnsignedTx: builder.buildIncomplete().toHex(), utxos }
+    return { rawUnsignedTx: builder.buildIncomplete().toHex(), utxos, inputs }
   }
   /**
    * Compile a memo.
