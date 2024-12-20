@@ -54,6 +54,7 @@ class ClientLedger extends Client {
     const fromAddressIndex = params?.walletIndex || 0
     // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    // Check if the fee rate is within the fee bounds
     checkFeeBounds(this.feeBounds, feeRate)
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
