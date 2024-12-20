@@ -1,5 +1,11 @@
 # xchainjs-solana
 
+## 0.0.8
+
+### Patch Changes
+
+- @xchainjs/xchain-solana@0.0.7
+
 ## 0.0.7
 
 ### Patch Changes

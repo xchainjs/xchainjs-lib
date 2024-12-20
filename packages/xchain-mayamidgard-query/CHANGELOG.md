@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.24
+
+### Patch Changes
+
+- @xchainjs/xchain-client@1.0.8
+
 ## 0.1.23
 
 ### Patch Changes

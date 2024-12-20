@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.10
+
+### Patch Changes
+
+- f258497: secp256k1 dependency updated to 5.0.1
+- Updated dependencies [6ad44a3]
+  - @xchainjs/xchain-crypto@0.3.7
+  - @xchainjs/xchain-client@1.0.8
+
 ## 1.0.9
 
 ### Patch Changes

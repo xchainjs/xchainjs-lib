@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.8
+
+### Patch Changes
+
+- af49c34: Fix Ledger integration
+- Updated dependencies [6ad44a3]
+- Updated dependencies [af49c34]
+  - @xchainjs/xchain-crypto@0.3.7
+  - @xchainjs/xchain-utxo@1.0.8
+  - @xchainjs/xchain-client@1.0.8
+  - @xchainjs/xchain-utxo-providers@1.0.8
+
 ## 1.0.7
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- f258497: secp256k1 dependency updated to 5.0.1
+- Updated dependencies [f258497]
+- Updated dependencies [6ad44a3]
+  - @xchainjs/xchain-cosmos-sdk@1.0.10
+  - @xchainjs/xchain-crypto@0.3.7
+  - @xchainjs/xchain-client@1.0.8
+
 ## 2.0.10
 
 ### Patch Changes
