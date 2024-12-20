@@ -59,10 +59,10 @@ class ClientLedger extends Client {
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
     // Prepare transaction
-    const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
+    const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
     // Prepare Ledger inputs
-    const ledgerInputs: [Transaction, number, string | null, number | null][] = (utxos as UTXO[]).map(
+    const ledgerInputs: [Transaction, number, string | null, number | null][] = (inputs as UTXO[]).map(
       ({ txHex, hash, index }) => {
         if (!txHex) {
           throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)

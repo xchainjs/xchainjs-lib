@@ -1,7 +1,7 @@
 import AppBtc from '@ledgerhq/hw-app-btc'
 import { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
 import * as bitcash from '@psf/bitcoincashjs-lib'
-import { FeeOption, FeeRate, TxHash } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
@@ -53,12 +53,13 @@ class ClientLedger extends Client {
     const fromAddressIndex = params?.walletIndex || 0
     // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
     // Prepare transaction
-    const { rawUnsignedTx, utxos: txInputs } = await this.prepareTx({ ...params, sender, feeRate })
+    const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
 
-    const ledgerInputs: Array<[Transaction, number, string | null, number | null]> = txInputs.map(
+    const ledgerInputs: Array<[Transaction, number, string | null, number | null]> = inputs.map(
       ({ txHex, hash, index }) => {
         if (!txHex) {
           throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)

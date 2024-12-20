@@ -35,4 +35,5 @@ export type GetChangeParams = {
 
 export type BchPreparedTx = {
   utxos: BaseUTXO[]
+  inputs: BaseUTXO[]
 } & PreparedTx

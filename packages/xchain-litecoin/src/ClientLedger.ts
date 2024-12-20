@@ -1,6 +1,6 @@
 import AppBtc from '@ledgerhq/hw-app-btc'
 import { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
-import { FeeOption, FeeRate, TxHash } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import * as Litecoin from 'bitcoinjs-lib'
@@ -54,13 +54,14 @@ class ClientLedger extends Client {
     const fromAddressIndex = params?.walletIndex || 0
     // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
     // Prepare transaction
-    const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
+    const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
     const psbt = Litecoin.Psbt.fromBase64(rawUnsignedTx)
     // Prepare Ledger inputs
-    const ledgerInputs: [Transaction, number, string | null, number | null][] = utxos.map(({ txHex, hash, index }) => {
+    const ledgerInputs: [Transaction, number, string | null, number | null][] = inputs.map(({ txHex, hash, index }) => {
       if (!txHex) {
         throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)
       }

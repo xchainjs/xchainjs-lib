@@ -99,7 +99,7 @@ abstract class Client extends UTXOClient {
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
-  }): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[] }> => {
+  }): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> => {
     // Validate the recipient address
     if (!this.validateAddress(recipient)) throw new Error('Invalid address')
 
@@ -159,7 +159,7 @@ abstract class Client extends UTXOClient {
       }
     })
 
-    return { psbt, utxos }
+    return { psbt, utxos, inputs }
   }
 
   /**
@@ -198,9 +198,9 @@ abstract class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
-  }): Promise<PreparedTx & { utxos: UTXO[] }> {
+  }): Promise<PreparedTx & { utxos: UTXO[]; inputs: UTXO[] }> {
     // Build the transaction (PSBT) with the specified transfer options
-    const { psbt, utxos } = await this.buildTx({
+    const { psbt, utxos, inputs } = await this.buildTx({
       sender,
       recipient,
       amount,
@@ -209,7 +209,7 @@ abstract class Client extends UTXOClient {
     })
 
     // Return the raw unsigned transaction (PSBT)
-    return { rawUnsignedTx: psbt.toBase64(), utxos }
+    return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
   }
 
   /**

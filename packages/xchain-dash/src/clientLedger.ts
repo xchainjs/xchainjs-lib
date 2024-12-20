@@ -1,7 +1,7 @@
 import * as dashcore from '@dashevo/dashcore-lib'
 import AppBtc from '@ledgerhq/hw-app-btc'
 import { Transaction as LedgerTransaction } from '@ledgerhq/hw-app-btc/lib/types'
-import { FeeOption, FeeRate, TxHash } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
@@ -56,10 +56,11 @@ class ClientLedger extends Client {
     const fromAddressIndex = params?.walletIndex || 0
     // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
     // Prepare transaction
-    const { rawUnsignedTx, utxos } = await this.prepareTx({ ...params, sender, feeRate })
+    const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
 
     const tx = new dashcore.Transaction(rawUnsignedTx)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,7 +69,7 @@ class ClientLedger extends Client {
 
     for (const input of tx.inputs) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const insightUtxo = utxos.find((utxo) => {
+      const insightUtxo = inputs.find((utxo) => {
         return utxo.hash === input.prevTxId.toString('hex') && utxo.index == input.outputIndex
       })
       if (!insightUtxo) {
