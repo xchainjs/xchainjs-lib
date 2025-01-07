@@ -343,6 +343,15 @@ describe('asset', () => {
       expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.TRADE })
     })
 
+    it('trade BTC-BTC', () => {
+      const result = assetFromString('BTC-BTC')
+      expect(result).toEqual({ chain: 'BTC', symbol: 'BTC', ticker: 'BTC', type: AssetType.SECURED })
+    })
+    it('trade ETH-ETH', () => {
+      const result = assetFromString('ETH-ETH')
+      expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.SECURED })
+    })
+
     it('KUJI.USK', () => {
       const result = assetFromString('KUJI.USK')
       expect(result).toEqual({ chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN })

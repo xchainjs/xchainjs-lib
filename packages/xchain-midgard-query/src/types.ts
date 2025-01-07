@@ -1,7 +1,7 @@
 import { GetActions200Response } from '@xchainjs/xchain-midgard'
-import { Address, Asset, CryptoAmount, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
+import { Address, Asset, CryptoAmount, SecuredAsset, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
 
-export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
 
 /**
  * Search parameters to search for positions within the THORChain SAVER investment product trunks.

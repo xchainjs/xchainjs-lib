@@ -7,6 +7,7 @@ import {
   Chain,
   CryptoAmount,
   SYNTH_ASSET_DELIMITER,
+  SecuredAsset,
   SynthAsset,
   TOKEN_ASSET_DELIMITER,
   TRADE_ASSET_DELIMITER,
@@ -337,8 +338,8 @@ export class ThorchainQuery {
    * @param ouAsset - the Asset you want to convert to
    * @returns CryptoAmount of input
    */
-  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
-    input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset>,
+  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>(
+    input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>,
     outAsset: T,
   ): Promise<CryptoAmount<T>> {
     // Convert the input amount to the specified asset

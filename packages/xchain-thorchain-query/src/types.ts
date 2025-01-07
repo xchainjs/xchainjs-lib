@@ -7,6 +7,7 @@ import {
   BaseAmount,
   Chain,
   CryptoAmount,
+  SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
@@ -14,23 +15,23 @@ import {
 } from '@xchainjs/xchain-util'
 import { BigNumber } from 'bignumber.js'
 
-export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
 
 /**
  * Represents the total fees associated with a swap.
  */
 export type TotalFees = {
-  asset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The affiliate fee
-  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The outbound fee
+  asset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset for which fees are calculated
+  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The affiliate fee
+  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The outbound fee
 }
 /**
  * Represents an estimate for a swap transaction.
  */
 export type SwapEstimate = {
-  netOutput: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The net output amount after fees
+  netOutput: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The net output amount after fees
   totalFees: TotalFees // The total fees associated with the swap
-  netOutputStreaming: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The net output amount for streaming
+  netOutputStreaming: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The net output amount for streaming
   maxStreamingQuantity: number // The maximum streaming quantity
   inboundConfirmationSeconds?: number // The inbound confirmation time in seconds
   outboundDelaySeconds: number // The outbound delay time in seconds
@@ -50,9 +51,9 @@ export type SwapEstimate = {
  */
 export type QuoteSwapParams = {
   fromAddress?: Address // The address to swap from
-  fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap from
-  destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset // The asset to swap to
-  amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The amount to swap
+  fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset to swap from
+  destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset to swap to
+  amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The amount to swap
   destinationAddress?: string // The destination address (optional)
   streamingInterval?: number // The streaming interval (optional)
   streamingQuantity?: number // The streaming quantity (optional)
@@ -145,7 +146,7 @@ export type ConstructMemo = {
  */
 export type TxDetails = {
   memo: string // The memo for the transaction
-  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset> // The dust threshold for the transaction
+  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The dust threshold for the transaction
   toAddress: Address // The recipient address for the transaction
   expiry: Date // The expiry date for the transaction
   txEstimate: SwapEstimate // The swap estimate for the transaction

@@ -10,6 +10,7 @@ import {
   AssetType,
   BaseAmount,
   Denomination,
+  SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
@@ -57,6 +58,11 @@ export const SYNTH_ASSET_DELIMITER = '/'
  * Trade asset delimiter
  */
 export const TRADE_ASSET_DELIMITER = '~'
+
+/**
+ * Secured asset delimiter
+ */
+export const SECURED_ASSET_DELIMITER = '-'
 
 /**
  * Factory to create values of assets (e.g. RUNE)
@@ -235,6 +241,14 @@ export const isSynthAsset = (asset: AnyAsset): asset is SynthAsset => asset.type
 export const isTradeAsset = (asset: AnyAsset): asset is TradeAsset => asset.type === AssetType.TRADE
 
 /**
+ * Helper to check whether an asset is secured asset
+ *
+ * @param {AnyAsset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isSecuredAsset = (asset: AnyAsset): asset is SecuredAsset => asset.type === AssetType.SECURED
+
+/**
  *
  * @param {AnyAsset} asset
  * @returns {boolean} `true` or `false`
@@ -272,22 +286,34 @@ export const assetFromString = (s: string): AnyAsset | null => {
   const directAsset = assetConfigs.get(s)
   if (directAsset) return directAsset
 
-  const isSynth = s.includes(SYNTH_ASSET_DELIMITER)
-  const isTrade = s.includes(TRADE_ASSET_DELIMITER)
-  const delimiter = isSynth ? SYNTH_ASSET_DELIMITER : isTrade ? TRADE_ASSET_DELIMITER : NATIVE_ASSET_DELIMITER
+  // Define possible delimiters and their associated asset types
+  const delimiters: Record<'.' | '/' | '~' | '-', AssetType> = {
+    '.': AssetType.NATIVE,
+    '/': AssetType.SYNTH,
+    '~': AssetType.TRADE,
+    '-': AssetType.SECURED,
+  }
 
-  const data = s.split(delimiter)
-  if (data.length <= 1 || !data[1]) return null
+  // Identify the first delimiter
+  const delimiter = Object.keys(delimiters).find((delim) => s.includes(delim)) as '.' | '/' | '~' | '-' | undefined
+  if (!delimiter) return null
 
-  const chain = data[0].trim()
-  const symbol = data[1].trim()
+  // Split the string by the first delimiter
+  const [chain, symbol] = s.split(delimiter)
+  if (!chain || !symbol) return null
+
+  // Determine initial type based on delimiter
+  let type = delimiters[delimiter]
+
+  // Additional checks for token classification
+  if (delimiter === '.' && symbol.includes('-')) {
+    type = AssetType.TOKEN
+  }
+
+  // Extract the ticker from the symbol (first part before `-` if it exists)
   const ticker = symbol.split('-')[0]
-  const isToken = symbol.split('-')[1]?.length > 1
 
-  if (!symbol || !chain) return null
-
-  const type = isSynth ? AssetType.SYNTH : isTrade ? AssetType.TRADE : isToken ? AssetType.TOKEN : AssetType.NATIVE
-  return createAsset(chain, symbol, ticker, type)
+  return createAsset(chain.trim(), symbol.trim(), ticker.trim(), type)
 }
 
 /**
@@ -322,6 +348,8 @@ export const assetToString = ({ chain, symbol, type }: AnyAsset) => {
       return `${chain}${TOKEN_ASSET_DELIMITER}${symbol}`
     case AssetType.TRADE:
       return `${chain}${TRADE_ASSET_DELIMITER}${symbol}`
+    case AssetType.SECURED:
+      return `${chain}${SECURED_ASSET_DELIMITER}${symbol}`
     default:
       return `${chain}${NATIVE_ASSET_DELIMITER}${symbol}`
   }

@@ -6,11 +6,11 @@ import {
   TxTo as BaseTxTo,
   TxsPage as BaseTxsPage,
 } from '@xchainjs/xchain-client'
-import { Asset, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
+import { Asset, SecuredAsset, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
 /**
  * Compatible tokens with Cosmos providers
  */
-export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
 
 /**
  * Type definition for Cosmos balance.
