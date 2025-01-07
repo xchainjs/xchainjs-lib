@@ -338,7 +338,7 @@ export class ThorchainQuery {
    * @param ouAsset - the Asset you want to convert to
    * @returns CryptoAmount of input
    */
-  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>(
+  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
     input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>,
     outAsset: T,
   ): Promise<CryptoAmount<T>> {
