@@ -68,8 +68,8 @@ export type QuoteSwapParams = {
  * Represents the output of a swap transaction.
  */
 export type SwapOutput = {
-  output: CryptoAmount<Asset | TokenAsset | SynthAsset> // The output amount
-  swapFee: CryptoAmount<Asset | TokenAsset | SynthAsset> // The swap fee
+  output: CryptoAmount<CompatibleAsset> // The output amount
+  swapFee: CryptoAmount<CompatibleAsset> // The swap fee
   slip: BigNumber // The slip
 }
 /**

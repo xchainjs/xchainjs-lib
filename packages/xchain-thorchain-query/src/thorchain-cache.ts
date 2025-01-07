@@ -233,7 +233,7 @@ export class ThorchainCache {
    * @param outAsset - The asset you want to convert to.
    * @returns Promise<CryptoAmount> - The converted amount.
    */
-  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
+  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>(
     input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>,
     outAsset: T,
   ): Promise<CryptoAmount<T>> {
