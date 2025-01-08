@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.9
+
+### Patch Changes
+
+- f45246f: added secured asset types
+- Updated dependencies [a7f6ac3]
+- Updated dependencies [f45246f]
+  - @xchainjs/xchain-midgard@0.5.12
+  - @xchainjs/xchain-util@1.0.7
+  - @xchainjs/xchain-client@1.0.9
+
 ## 1.0.8
 
 ### Patch Changes

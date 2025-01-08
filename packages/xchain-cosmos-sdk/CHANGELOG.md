@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.11
+
+### Patch Changes
+
+- f45246f: added secured asset types
+- Updated dependencies [f45246f]
+  - @xchainjs/xchain-util@1.0.7
+  - @xchainjs/xchain-client@1.0.9
+
 ## 1.0.10
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.7
+
+### Patch Changes
+
+- f45246f: added secured asset types
+
 ## 1.0.6
 
 ### Patch Changes

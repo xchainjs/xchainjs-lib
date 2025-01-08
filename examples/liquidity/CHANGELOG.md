@@ -1,5 +1,20 @@
 # xchainjs-liquidity
 
+## 1.0.39
+
+### Patch Changes
+
+- Updated dependencies [6ceedf7]
+- Updated dependencies [a7f6ac3]
+- Updated dependencies [f45246f]
+  - @xchainjs/xchain-thornode@0.3.22
+  - @xchainjs/xchain-midgard@0.5.12
+  - @xchainjs/xchain-thorchain-query@1.0.10
+  - @xchainjs/xchain-midgard-query@1.0.9
+  - @xchainjs/xchain-util@1.0.7
+  - @xchainjs/xchain-thorchain-amm@2.0.19
+  - @xchainjs/xchain-client@1.0.9
+
 ## 1.0.38
 
 ### Patch Changes

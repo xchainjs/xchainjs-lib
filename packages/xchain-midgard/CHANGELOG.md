@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.12
+
+### Patch Changes
+
+- a7f6ac3: Update to the latest api spec
+
 ## 0.5.11
 
 ### Patch Changes
