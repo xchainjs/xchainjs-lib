@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cardano",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Cardano client for XChainJS",
   "keywords": [
     "Cardano",

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.22
+
+### Patch Changes
+
+- 6ceedf7: Updated to the latest api spec
+
 ## 0.3.21
 
 ### Patch Changes
