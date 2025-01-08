@@ -5,6 +5,7 @@ import {
   Asset,
   AssetAmount,
   BaseAmount,
+  SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
@@ -128,3 +129,4 @@ export class AssetCryptoAmount extends BaseCryptoAmount<Asset> {}
 export class TokenCryptoAmount extends BaseCryptoAmount<TokenAsset> {}
 export class SynthCryptoAmount extends BaseCryptoAmount<SynthAsset> {}
 export class TradeCryptoAmount extends BaseCryptoAmount<TradeAsset> {}
+export class SecuredCryptoAmount extends BaseCryptoAmount<SecuredAsset> {}

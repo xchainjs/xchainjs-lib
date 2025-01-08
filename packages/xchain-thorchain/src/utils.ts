@@ -168,6 +168,7 @@ export const parseAssetToTHORNodeAsset = (
   ticker: string
   synth: boolean
   trade: boolean
+  secured: boolean
 } => {
   return {
     chain: asset.chain,
@@ -175,5 +176,6 @@ export const parseAssetToTHORNodeAsset = (
     ticker: asset.ticker,
     synth: asset.type === AssetType.SYNTH,
     trade: asset.type === AssetType.TRADE,
+    secured: asset.type === AssetType.SECURED,
   }
 }

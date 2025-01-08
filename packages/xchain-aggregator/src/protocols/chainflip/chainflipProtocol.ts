@@ -5,10 +5,12 @@ import {
   CachedValue,
   Chain,
   CryptoAmount,
+  SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
   baseAmount,
+  isSecuredAsset,
   isSynthAsset,
   isTradeAsset,
 } from '@xchainjs/xchain-util'
@@ -204,12 +206,15 @@ export class ChainflipProtocol implements IProtocol {
    * @throws {Error} - If asset is not supported in Chainflip
    * @returns the asset data
    */
-  private async getAssetData(asset: Asset | TokenAsset | SynthAsset | TradeAsset): Promise<AssetData> {
+  private async getAssetData(asset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset): Promise<AssetData> {
     if (isSynthAsset(asset)) {
       throw Error('Synth asset not supported in Chainflip protocol')
     }
     if (isTradeAsset(asset)) {
       throw Error('Trade asset not supported in Chainflip protocol')
+    }
+    if (isSecuredAsset(asset)) {
+      throw Error('Secured asset not supported in Chainflip protocol')
     }
     const chainAssets = await this.assetsData.getValue()
     const assetData = chainAssets.find((chainAsset) => {

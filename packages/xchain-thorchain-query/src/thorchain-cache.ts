@@ -5,12 +5,14 @@ import {
   CachedValue,
   Chain,
   CryptoAmount,
+  SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
   assetToString,
   baseAmount,
   eqAsset,
+  isSecuredAsset,
   isSynthAsset,
   isTradeAsset,
 } from '@xchainjs/xchain-util'
@@ -76,26 +78,30 @@ export class ThorchainCache {
    * @returns Promise<BigNumber> - The exchange rate.
    */
   async getExchangeRate(
-    from: Asset | TokenAsset | SynthAsset | TradeAsset,
-    to: Asset | TokenAsset | SynthAsset | TradeAsset,
+    from: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset,
+    to: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset,
   ): Promise<BigNumber> {
     let exchangeRate: BigNumber
     if (eqAsset(from, to)) {
       exchangeRate = SAME_ASSET_EXCHANGE_RATE
     } else if (isAssetRuneNative(from)) {
       //  Runes per Asset
-      const poolToAsset = isSynthAsset(to) || isTradeAsset(to) ? await this.getAnalogAsset(to) : to
+      const poolToAsset =
+        isSynthAsset(to) || isTradeAsset(to) || isSecuredAsset(to) ? await this.getAnalogAsset(to) : to
       const lpTo = await this.getPoolForAsset(poolToAsset)
       exchangeRate = lpTo.assetToRuneRatio
     } else if (isAssetRuneNative(to)) {
       //  Asset per rune
-      const poolFromAsset = isSynthAsset(from) || isTradeAsset(from) ? await this.getAnalogAsset(from) : from
+      const poolFromAsset =
+        isSynthAsset(from) || isTradeAsset(from) || isSecuredAsset(from) ? await this.getAnalogAsset(from) : from
       const lpFrom = await this.getPoolForAsset(poolFromAsset)
       exchangeRate = lpFrom.runeToAssetRatio
     } else {
       //  AssetA per AssetB
-      const poolFromAsset = isSynthAsset(from) || isTradeAsset(from) ? await this.getAnalogAsset(from) : from
-      const poolToAsset = isSynthAsset(to) || isTradeAsset(to) ? await this.getAnalogAsset(to) : to
+      const poolFromAsset =
+        isSynthAsset(from) || isTradeAsset(from) || isSecuredAsset(from) ? await this.getAnalogAsset(from) : from
+      const poolToAsset =
+        isSynthAsset(to) || isTradeAsset(to) || isSecuredAsset(to) ? await this.getAnalogAsset(to) : to
       const lpFrom = await this.getPoolForAsset(poolFromAsset)
       const lpTo = await this.getPoolForAsset(poolToAsset)
       // from/R * R/to = from/to
@@ -227,8 +233,8 @@ export class ThorchainCache {
    * @param outAsset - The asset you want to convert to.
    * @returns Promise<CryptoAmount> - The converted amount.
    */
-  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset>(
-    input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset>,
+  async convert<T extends Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>(
+    input: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>,
     outAsset: T,
   ): Promise<CryptoAmount<T>> {
     const exchangeRate = await this.getExchangeRate(input.asset, outAsset)
@@ -281,7 +287,7 @@ export class ThorchainCache {
     }
   }
 
-  private async getAnalogAsset(asset: SynthAsset | TradeAsset): Promise<Asset | TokenAsset> {
+  private async getAnalogAsset(asset: SynthAsset | TradeAsset | SecuredAsset): Promise<Asset | TokenAsset> {
     const pools = await this.getPools()
     const analogAssetPool = Object.values(pools).find((pool) => {
       return (

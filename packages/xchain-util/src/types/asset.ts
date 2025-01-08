@@ -8,6 +8,7 @@ export enum AssetType {
   TOKEN,
   SYNTH,
   TRADE,
+  SECURED,
 }
 
 /**
@@ -51,11 +52,21 @@ export type SynthAsset = {
 }
 
 /**
- * Asset type for synthetic assets which lives in networks like Thorchain or Mayachain
+ * Asset type for trade assets which lives in networks like Thorchain or Mayachain
  */
 export type TradeAsset = {
   chain: Chain
   symbol: string
   ticker: string
   type: AssetType.TRADE
+}
+
+/**
+ * Asset type for secured assets which lives in networks like Thorchain or Mayachain
+ */
+export type SecuredAsset = {
+  chain: Chain
+  symbol: string
+  ticker: string
+  type: AssetType.SECURED
 }
