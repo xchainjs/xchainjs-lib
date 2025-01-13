@@ -88,6 +88,7 @@ type QuoteSwap = {
   fees: Fees // The fees associated with the swap
   totalSwapSeconds: number // The total time for the swap operation
   slipBasisPoints: number // The slip basis points for the swap
+  maxStreamingQuantity: number | undefined
   canSwap: boolean // Indicates whether the swap can be performed
   errors: string[] // Any errors encountered during the swap operation
   warning: string // Any warning messages associated with the swap
