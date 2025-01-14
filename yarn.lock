@@ -3725,6 +3725,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@trpc/server@npm:^10.45.2":
+  version: 10.45.2
+  resolution: "@trpc/server@npm:10.45.2"
+  checksum: 10c0/c6bff389f7c4e273101834d55c917c2fe271189ee17985b79e4a925920afc39d45da3f247611cd7f8aeca3a461739118c621679bd183e9ad8765676e85c95712
+  languageName: node
+  linkType: hard
+
 "@tsconfig/node10@npm:^1.0.7":
   version: 1.0.9
   resolution: "@tsconfig/node10@npm:1.0.9"
@@ -4409,6 +4416,7 @@ __metadata:
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
   dependencies:
     "@chainflip/sdk": "npm:1.7.0"
+    "@trpc/server": "npm:^10.45.2"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-binance": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"

@@ -33,6 +33,9 @@ export class ChainflipProtocol implements IProtocol {
   constructor(configuration?: ProtocolConfig) {
     this.sdk = new SwapSDK({
       network: 'mainnet',
+      enabledFeatures: {
+        dca: true,
+      },
     })
     this.wallet = configuration?.wallet
     this.assetsData = new CachedValue(() => {
@@ -93,40 +96,45 @@ export class ChainflipProtocol implements IProtocol {
         destAsset: destAssetData.asset,
         amount: params.amount.baseAmount.amount().toString(),
       })
-      const quote = quotes.find((quote) => quote.type === 'DCA')
-      if (params.destinationAddress && quote) {
-        const { depositAddress } = await this.sdk.requestDepositAddressV2({
-          quote: quote,
+      // Find either DCA or REGULAR quote, prioritizing DCA
+      const selectedQuote =
+        quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
+
+      if (params.destinationAddress && selectedQuote) {
+        const resp = await this.sdk.requestDepositAddressV2({
+          quote: selectedQuote,
           destAddress: params.destinationAddress,
+          srcAddress: params.fromAddress,
           fillOrKillParams: {
-            slippageTolerancePercent: quote.recommendedSlippageTolerancePercent,
+            slippageTolerancePercent: selectedQuote.recommendedSlippageTolerancePercent,
             refundAddress: params.fromAddress ? params.fromAddress : '',
             retryDurationBlocks: 100,
           },
         })
-
-        toAddress = depositAddress
+        toAddress = resp.depositAddress
+      } else {
+        console.error('No suitable quote found or destination address missing')
       }
 
-      const outboundFee = quote?.includedFees.find((fee) => fee.type === 'EGRESS')
-      const brokerFee = quote?.includedFees.find((fee) => fee.type === 'BROKER')
+      const outboundFee = selectedQuote?.includedFees.find((fee) => fee.type === 'EGRESS')
+      const brokerFee = selectedQuote?.includedFees.find((fee) => fee.type === 'BROKER')
 
       return {
         protocol: this.name,
         toAddress,
         memo: '',
         expectedAmount: new CryptoAmount(
-          baseAmount(quote?.egressAmount, destAssetData.decimals),
+          baseAmount(selectedQuote?.egressAmount, destAssetData.decimals),
           params.destinationAsset,
         ),
         dustThreshold: new CryptoAmount(
           baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
           params.fromAsset,
         ),
-        totalSwapSeconds: quote?.estimatedDurationSeconds ? quote.estimatedDurationSeconds : 0,
+        totalSwapSeconds: selectedQuote?.estimatedDurationSeconds ? selectedQuote.estimatedDurationSeconds : 0,
         maxStreamingQuantity: undefined,
         canSwap: toAddress !== '',
-        warning: quote?.lowLiquidityWarning
+        warning: selectedQuote?.lowLiquidityWarning
           ? 'Do not cache this response. Do not send funds after the expiry. The difference in the chainflip swap rate (excluding fees) is lower than the global index rate of the swap by more than a certain threshold (currently set to 5%)'
           : 'Do not cache this response. Do not send funds after the expiry.',
         errors: [],

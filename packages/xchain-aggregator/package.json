@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@chainflip/sdk": "1.7.0",
+    "@trpc/server": "^10.45.2",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-mayachain": "workspace:*",
     "@xchainjs/xchain-mayachain-amm": "workspace:*",
@@ -44,6 +45,7 @@
     "@xchainjs/xchain-avax": "workspace:*",
     "@xchainjs/xchain-binance": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
+    "@xchainjs/xchain-solana": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",
     "@xchainjs/xchain-kujira": "workspace:*",
     "axios": "1.7.4",
