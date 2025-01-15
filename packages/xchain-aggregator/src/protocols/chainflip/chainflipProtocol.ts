@@ -100,20 +100,27 @@ export class ChainflipProtocol implements IProtocol {
       const selectedQuote =
         quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
 
-      if (params.destinationAddress && selectedQuote) {
+      if (params.destinationAddress && selectedQuote?.type === 'DCA' && params.fromAddress) {
         const resp = await this.sdk.requestDepositAddressV2({
           quote: selectedQuote,
           destAddress: params.destinationAddress,
           srcAddress: params.fromAddress,
           fillOrKillParams: {
             slippageTolerancePercent: selectedQuote.recommendedSlippageTolerancePercent,
-            refundAddress: params.fromAddress ? params.fromAddress : '',
+            refundAddress: params.fromAddress,
             retryDurationBlocks: 100,
           },
         })
         toAddress = resp.depositAddress
+      } else if (params.destinationAddress && selectedQuote?.type === 'REGULAR') {
+        const resp = await this.sdk.requestDepositAddressV2({
+          quote: selectedQuote,
+          destAddress: params.destinationAddress,
+          srcAddress: params.fromAddress,
+        })
+        toAddress = resp.depositAddress
       } else {
-        console.error('No suitable quote found or destination address missing')
+        console.error('No suitable quote found or destination/refund address missing')
       }
 
       const outboundFee = selectedQuote?.includedFees.find((fee) => fee.type === 'EGRESS')
