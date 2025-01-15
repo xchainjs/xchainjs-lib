@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-check-tx",
   "private": true,
-  "version": "1.0.21",
+  "version": "1.0.22",
   "scripts": {
     "checktx": "npx ts-node check-tx.ts",
     "build": "tsc --noEmit"
