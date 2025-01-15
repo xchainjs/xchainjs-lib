@@ -43,10 +43,10 @@
   },
   "devDependencies": {
     "@xchainjs/xchain-avax": "workspace:*",
+    "@xchainjs/xchain-base": "workspace:*",
     "@xchainjs/xchain-binance": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",
-    "@xchainjs/xchain-base": "workspace:*",
     "@xchainjs/xchain-kujira": "workspace:*",
     "axios": "1.7.4",
     "axios-mock-adapter": "1.20.0"
