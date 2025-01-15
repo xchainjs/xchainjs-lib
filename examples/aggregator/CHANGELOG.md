@@ -1,5 +1,13 @@
 # xchainjs-aggregator
 
+## 0.0.9
+
+### Patch Changes
+
+- 253848d: Updated chainflip version to 1.7.0 & added DCA
+- Updated dependencies [d206838]
+  - @xchainjs/xchain-aggregator@1.0.20
+
 ## 0.0.8
 
 ### Patch Changes

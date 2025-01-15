@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11
+
+### Patch Changes
+
+- d206838: Updated Query & Amm to support BaseChain
+
 ## 1.0.10
 
 ### Patch Changes

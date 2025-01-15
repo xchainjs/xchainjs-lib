@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.20
+
+### Patch Changes
+
+- d206838: Updated Query & Amm to support BaseChain
+- Updated dependencies [d206838]
+  - @xchainjs/xchain-thorchain-query@1.0.11
+  - @xchainjs/xchain-thorchain-amm@2.0.20
+
 ## 1.0.19
 
 ### Patch Changes
