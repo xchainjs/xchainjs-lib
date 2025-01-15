@@ -320,7 +320,7 @@ export class ThorchainQuery {
    * @param asset: Asset - the asset you want the fees converted to
    * @returns TotalFees in asset
    */
-  async getFeesIn(fees: TotalFees, asset: Asset | TokenAsset | SynthAsset): Promise<TotalFees> {
+  async getFeesIn(fees: TotalFees, asset: CompatibleAsset): Promise<TotalFees> {
     // Return the fees converted to the specified asset
     return {
       asset: fees.asset, // Shouldn't be asset?
@@ -519,7 +519,7 @@ export class ThorchainQuery {
    * @param asset - asset required to find the pool
    * @returns - object type ratios
    */
-  public async getPoolRatios(asset: Asset): Promise<PoolRatios> {
+  public async getPoolRatios(asset: Asset | TokenAsset): Promise<PoolRatios> {
     // Get pool data for the asset
     const assetPool = await this.thorchainCache.getPoolForAsset(asset)
     // Create pool ratios object

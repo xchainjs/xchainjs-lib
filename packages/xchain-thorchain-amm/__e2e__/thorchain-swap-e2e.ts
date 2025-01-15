@@ -6,6 +6,7 @@ import {
   ClientLedger as AvaxClientLedger,
   defaultAvaxParams,
 } from '@xchainjs/xchain-avax'
+import { AssetBETH, Client as BaseClient, defaultBaseParams } from '@xchainjs/xchain-base'
 import { AssetBNB, BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import {
   AssetBTC,
@@ -107,6 +108,7 @@ describe('ThorchainAmm e2e tests', () => {
         GAIA: new GaiaClient({ phrase, network: Network.Mainnet }),
         BNB: new BnbClient({ phrase, network: Network.Mainnet }),
         THOR: new THORKeystoreClient({ ...defaultThorParams, phrase, network: Network.Mainnet }),
+        BASE: new BaseClient({ ...defaultBaseParams, phrase, network: Network.Mainnet }),
       })
       thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)
     })
@@ -201,10 +203,10 @@ describe('ThorchainAmm e2e tests', () => {
       console.log(errors)
     })
 
-    it(`Should estimate swap from BTC to ETH`, async () => {
+    it(`Should estimate swap from BTC to BETH`, async () => {
       const quoteSwap = await thorchainAmm.estimateSwap({
         fromAsset: AssetBTC,
-        destinationAsset: AssetETH,
+        destinationAsset: AssetBETH,
         amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
       })
 

@@ -16,6 +16,7 @@ import {
   AVAXChain,
   AssetATOM,
   AssetAVAX,
+  AssetBASE,
   AssetBCH,
   AssetBSC,
   AssetBTC,
@@ -24,6 +25,7 @@ import {
   AssetLTC,
   AssetMAYA,
   AssetRuneNative,
+  BASEChain,
   BCHChain,
   BNBChain,
   BSCChain,
@@ -80,6 +82,8 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetBSC
     case MAYAChain:
       return AssetMAYA
+    case BASEChain:
+      return AssetBASE
     default:
       throw Error('Unknown chain')
   }
@@ -143,6 +147,8 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBSC)
     case MAYAChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetMAYA)
+    case BASEChain:
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBASE)
   }
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
@@ -180,6 +186,8 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
       return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
     case MAYAChain:
       return new AssetCryptoAmount(baseAmount(2000000), AssetMAYA)
+    case BASEChain:
+      return new AssetCryptoAmount(baseAmount(2000000), AssetBASE)
   }
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
 }
@@ -213,6 +221,8 @@ export const getChain = (chain: string): Chain => {
       return BSCChain
     case 'MAYA':
       return MAYAChain
+    case 'BASE':
+      return BASEChain
     default:
       throw Error('Unknown chain')
   }

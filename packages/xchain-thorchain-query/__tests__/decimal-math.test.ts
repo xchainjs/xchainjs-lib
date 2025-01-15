@@ -10,7 +10,6 @@ const AssetBTC = assetFromStringEx('BTC.BTC')
 const AssetETH = assetFromStringEx('ETH.ETH')
 
 const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
-// const BUSD = assetFromString('BNB.BUSD-BD1')
 
 describe('decimal math tests', () => {
   beforeAll(() => {
