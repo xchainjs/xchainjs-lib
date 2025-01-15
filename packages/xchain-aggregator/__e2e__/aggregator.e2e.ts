@@ -2,6 +2,7 @@ import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xc
 import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
 import {
   AssetBTC,
+  BTCChain,
   BTC_DECIMAL,
   Client as BtcClient,
   defaultBTCParams as defaultBtcParams,
@@ -10,7 +11,15 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetType,
+  CryptoAmount,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { Aggregator, QuoteSwap } from '../src'
@@ -50,6 +59,12 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
     warning: quoteSwap.warning,
   })
 }
+const SOLAsset: Asset = {
+  chain: 'SOL',
+  ticker: 'SOL',
+  symbol: 'SOL',
+  type: AssetType.NATIVE,
+}
 
 jest.deepUnmock('@chainflip/sdk/swap')
 
@@ -80,7 +95,9 @@ describe('Aggregator', () => {
   it('Should find swap with greatest expected amount', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
-      destinationAsset: AssetETH,
+      destinationAsset: SOLAsset,
+      fromAddress: await wallet.getAddress(BTCChain),
+      destinationAddress: 'FakeSolAddress',
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
     printQuoteSwap(estimatedSwap)

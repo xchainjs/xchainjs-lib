@@ -3,10 +3,10 @@ import {
   AssetData,
   ChainData,
   Chains,
-  DepositAddressRequest,
+  DepositAddressRequestV2,
   DepositAddressResponse,
   QuoteRequest,
-  QuoteResponse,
+  QuoteResponseV2,
 } from '@chainflip/sdk/swap'
 
 class SwapSDK {
@@ -122,10 +122,15 @@ class SwapSDK {
     ]
   }
 
-  async requestDepositAddress(params: DepositAddressRequest): Promise<DepositAddressResponse> {
-    if (params.srcChain === 'Bitcoin')
+  async requestDepositAddressV2(params: DepositAddressRequestV2): Promise<DepositAddressResponse> {
+    if (params.quote.srcAsset.chain === 'Bitcoin')
       return {
-        ...params,
+        amount: params.quote.depositAmount,
+        srcAsset: params.quote.srcAsset.asset,
+        srcChain: params.quote.srcAsset.chain,
+        destAddress: params.destAddress,
+        destAsset: params.quote.destAsset.asset,
+        destChain: params.quote.destAsset.chain,
         depositAddress: 'BITCOINfakeaddress',
         depositChannelId: 'bitcoin-channel-id',
         brokerCommissionBps: 0,
@@ -134,9 +139,14 @@ class SwapSDK {
         estimatedDepositChannelExpiryTime: 1716889354,
         channelOpeningFee: BigInt(100),
       }
-    if (params.srcChain === 'Ethereum' || params.srcChain === 'Arbitrum')
+    if (params.quote.srcAsset.chain === 'Ethereum' || params.quote.srcAsset.chain === 'Arbitrum')
       return {
-        ...params,
+        amount: params.quote.depositAmount,
+        srcAsset: params.quote.srcAsset.asset,
+        srcChain: params.quote.srcAsset.chain,
+        destAddress: params.destAddress,
+        destAsset: params.quote.destAsset.asset,
+        destChain: params.quote.destAsset.chain,
         depositAddress: 'ETHEREUMfakeaddress',
         depositChannelId: 'ethereum-channel-id',
         brokerCommissionBps: 0,
@@ -145,9 +155,14 @@ class SwapSDK {
         estimatedDepositChannelExpiryTime: 1716889354,
         channelOpeningFee: BigInt(100),
       }
-    if (params.srcChain === 'Polkadot')
+    if (params.quote.srcAsset.chain === 'Polkadot')
       return {
-        ...params,
+        amount: params.quote.depositAmount,
+        srcAsset: params.quote.srcAsset.asset,
+        srcChain: params.quote.srcAsset.chain,
+        destAddress: params.destAddress,
+        destAsset: params.quote.destAsset.asset,
+        destChain: params.quote.destAsset.chain,
         depositAddress: 'POLKADOTfakeaddress',
         depositChannelId: 'polkadot-channel-id',
         brokerCommissionBps: 0,
@@ -159,7 +174,7 @@ class SwapSDK {
     throw Error('Can not get deposit address')
   }
 
-  async getQuote({ srcAsset, srcChain, destAsset, destChain, amount }: QuoteRequest): Promise<QuoteResponse> {
+  async getQuoteV2({ srcAsset, srcChain, destAsset, destChain, amount }: QuoteRequest): Promise<QuoteResponseV2> {
     if (
       srcChain === 'Ethereum' &&
       srcAsset === 'ETH' &&
@@ -168,52 +183,59 @@ class SwapSDK {
       amount === '10000000000000000'
     ) {
       return {
-        srcAsset,
-        srcChain,
-        destAsset,
-        destChain,
         amount,
-        quote: {
-          type: 'REGULAR',
-          intermediateAmount: '36115119',
-          egressAmount: '51193',
-          includedFees: [
-            {
-              type: 'INGRESS',
-              chain: 'Ethereum',
-              asset: 'ETH',
-              amount: '689176257450000',
-            },
-            {
-              type: 'NETWORK',
-              chain: 'Ethereum',
-              asset: 'USDC',
-              amount: '36115',
-            },
-            {
-              type: 'NETWORK',
-              chain: 'Ethereum',
-              asset: 'ETH',
-              amount: '4655411871275',
-            },
-            {
-              type: 'NETWORK',
-              chain: 'Ethereum',
-              asset: 'USDC',
-              amount: '18057',
-            },
-            {
-              type: 'EGRESS',
-              chain: 'Bitcoin',
-              asset: 'BTC',
-              amount: '1599',
-            },
-          ],
-          lowLiquidityWarning: false,
-          estimatedDurationSeconds: 702,
-          poolInfo: [],
-          estimatedPrice: '2300',
-        },
+        srcChain,
+        srcAsset,
+        destChain,
+        destAsset,
+        quotes: [
+          {
+            srcAsset: { chain: 'Ethereum', asset: 'ETH' },
+            destAsset: { chain: 'Bitcoin', asset: 'BTC' },
+            depositAmount: '1000000',
+            type: 'REGULAR',
+            intermediateAmount: '36115119',
+            estimatedDurationsSeconds: { deposit: 1800, swap: 264, egress: 12 },
+            egressAmount: '51193',
+            includedFees: [
+              {
+                type: 'INGRESS',
+                chain: 'Ethereum',
+                asset: 'ETH',
+                amount: '689176257450000',
+              },
+              {
+                type: 'NETWORK',
+                chain: 'Ethereum',
+                asset: 'USDC',
+                amount: '36115',
+              },
+              {
+                type: 'NETWORK',
+                chain: 'Ethereum',
+                asset: 'ETH',
+                amount: '4655411871275',
+              },
+              {
+                type: 'NETWORK',
+                chain: 'Ethereum',
+                asset: 'USDC',
+                amount: '18057',
+              },
+              {
+                type: 'EGRESS',
+                chain: 'Bitcoin',
+                asset: 'BTC',
+                amount: '1599',
+              },
+            ],
+            lowLiquidityWarning: false,
+            estimatedDurationSeconds: 702,
+            recommendedSlippageTolerancePercent: 1,
+            poolInfo: [],
+            estimatedPrice: '2300',
+          },
+        ],
       }
     }
 
@@ -225,40 +247,47 @@ class SwapSDK {
       amount === '20000000'
     ) {
       return {
-        srcAsset,
-        srcChain,
-        destAsset,
-        destChain,
         amount,
-        quote: {
-          type: 'REGULAR',
-          intermediateAmount: '13560635',
-          egressAmount: '2063188201000691',
-          includedFees: [
-            {
-              type: 'INGRESS',
-              chain: 'Ethereum',
-              asset: 'USDT',
-              amount: '6433935',
-            },
-            {
-              type: 'NETWORK',
-              chain: 'Ethereum',
-              asset: 'USDC',
-              amount: '13560',
-            },
-            {
-              type: 'EGRESS',
-              chain: 'Ethereum',
-              asset: 'ETH',
-              amount: '1447621978320000',
-            },
-          ],
-          lowLiquidityWarning: false,
-          estimatedDurationSeconds: 114,
-          poolInfo: [],
-          estimatedPrice: '1',
-        },
+        srcChain,
+        srcAsset,
+        destChain,
+        destAsset,
+        quotes: [
+          {
+            srcAsset: { chain: 'Ethereum', asset: 'USDT' },
+            destAsset: { chain: 'Ethereum', asset: 'ETH' },
+            depositAmount: '2000000',
+            type: 'REGULAR',
+            intermediateAmount: '36115119',
+            estimatedDurationsSeconds: { deposit: 1800, swap: 264, egress: 12 },
+            egressAmount: '2063188201000691',
+            includedFees: [
+              {
+                type: 'INGRESS',
+                chain: 'Ethereum',
+                asset: 'USDT',
+                amount: '6433935',
+              },
+              {
+                type: 'NETWORK',
+                chain: 'Ethereum',
+                asset: 'USDC',
+                amount: '13560',
+              },
+              {
+                type: 'EGRESS',
+                chain: 'Ethereum',
+                asset: 'ETH',
+                amount: '1447621978320000',
+              },
+            ],
+            lowLiquidityWarning: false,
+            estimatedDurationSeconds: 114,
+            recommendedSlippageTolerancePercent: 1,
+            poolInfo: [],
+            estimatedPrice: '2300',
+          },
+        ],
       }
     }
 
@@ -270,44 +299,51 @@ class SwapSDK {
       amount === '10000000000000000'
     ) {
       return {
-        srcAsset,
-        srcChain,
-        destAsset,
-        destChain,
         amount,
-        quote: {
-          type: 'REGULAR',
-          intermediateAmount: '33919877',
-          egressAmount: '24884030',
-          includedFees: [
-            {
-              type: 'INGRESS',
-              chain: 'Ethereum',
-              asset: 'ETH',
-              amount: '1284811335100000',
-            },
-            {
-              type: 'NETWORK',
-              chain: 'Ethereum',
-              asset: 'USDC',
-              amount: '33919',
-            },
-            {
-              type: 'EGRESS',
-              chain: 'Ethereum',
-              asset: 'USDT',
-              amount: '8988369',
-            },
-          ],
-          lowLiquidityWarning: false,
-          estimatedDurationSeconds: 114,
-          poolInfo: [],
-          estimatedPrice: '2300',
-        },
+        srcChain,
+        srcAsset,
+        destChain,
+        destAsset,
+        quotes: [
+          {
+            srcAsset: { chain: 'Ethereum', asset: 'ETH' },
+            destAsset: { chain: 'Ethereum', asset: 'USDT' },
+            depositAmount: '1000000',
+            type: 'REGULAR',
+            intermediateAmount: '33919877',
+            estimatedDurationsSeconds: { deposit: 1800, swap: 114, egress: 12 },
+            egressAmount: '24884030',
+            includedFees: [
+              {
+                type: 'INGRESS',
+                chain: 'Ethereum',
+                asset: 'ETH',
+                amount: '1284811335100000',
+              },
+              {
+                type: 'NETWORK',
+                chain: 'Ethereum',
+                asset: 'USDC',
+                amount: '33919',
+              },
+              {
+                type: 'EGRESS',
+                chain: 'Ethereum',
+                asset: 'USDT',
+                amount: '8988369',
+              },
+            ],
+            lowLiquidityWarning: false,
+            estimatedDurationSeconds: 114,
+            recommendedSlippageTolerancePercent: 1,
+            poolInfo: [],
+            estimatedPrice: '2300',
+          },
+        ],
       }
     }
+
     throw Error('Quote not mocked')
   }
 }
-
 export { SwapSDK, Asset, AssetData, Chains }

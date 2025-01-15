@@ -33,6 +33,9 @@ export class ChainflipProtocol implements IProtocol {
   constructor(configuration?: ProtocolConfig) {
     this.sdk = new SwapSDK({
       network: 'mainnet',
+      enabledFeatures: {
+        dca: true,
+      },
     })
     this.wallet = configuration?.wallet
     this.assetsData = new CachedValue(() => {
@@ -86,45 +89,59 @@ export class ChainflipProtocol implements IProtocol {
 
     try {
       let toAddress = ''
-      if (params.destinationAddress) {
-        const { depositAddress } = await this.sdk.requestDepositAddress({
-          srcChain: srcAssetData.chain,
-          srcAsset: srcAssetData.asset,
-          destChain: destAssetData.chain,
-          destAsset: destAssetData.asset,
-          destAddress: params.destinationAddress,
-          amount: params.amount.baseAmount.amount().toString(),
-        })
-
-        toAddress = depositAddress
-      }
-
-      const { quote } = await this.sdk.getQuote({
+      const { quotes } = await this.sdk.getQuoteV2({
         srcChain: srcAssetData.chain,
         srcAsset: srcAssetData.asset,
         destChain: destAssetData.chain,
         destAsset: destAssetData.asset,
         amount: params.amount.baseAmount.amount().toString(),
       })
+      // Find either DCA or REGULAR quote, prioritizing DCA
+      const selectedQuote =
+        quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
 
-      const outboundFee = quote.includedFees.find((fee) => fee.type === 'EGRESS')
-      const brokerFee = quote.includedFees.find((fee) => fee.type === 'BROKER')
+      if (params.destinationAddress && selectedQuote?.type === 'DCA' && params.fromAddress) {
+        const resp = await this.sdk.requestDepositAddressV2({
+          quote: selectedQuote,
+          destAddress: params.destinationAddress,
+          srcAddress: params.fromAddress,
+          fillOrKillParams: {
+            slippageTolerancePercent: selectedQuote.recommendedSlippageTolerancePercent,
+            refundAddress: params.fromAddress,
+            retryDurationBlocks: 100,
+          },
+        })
+        toAddress = resp.depositAddress
+      } else if (params.destinationAddress && selectedQuote?.type === 'REGULAR') {
+        const resp = await this.sdk.requestDepositAddressV2({
+          quote: selectedQuote,
+          destAddress: params.destinationAddress,
+          srcAddress: params.fromAddress,
+        })
+        toAddress = resp.depositAddress
+      } else {
+        console.error('No suitable quote found or destination/refund address missing')
+      }
+
+      const outboundFee = selectedQuote?.includedFees.find((fee) => fee.type === 'EGRESS')
+      const brokerFee = selectedQuote?.includedFees.find((fee) => fee.type === 'BROKER')
 
       return {
         protocol: this.name,
         toAddress,
         memo: '',
         expectedAmount: new CryptoAmount(
-          baseAmount(quote.egressAmount, destAssetData.decimals),
+          baseAmount(selectedQuote?.egressAmount, destAssetData.decimals),
           params.destinationAsset,
         ),
         dustThreshold: new CryptoAmount(
           baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
           params.fromAsset,
         ),
-        totalSwapSeconds: quote.estimatedDurationSeconds,
+        totalSwapSeconds: selectedQuote?.estimatedDurationSeconds ? selectedQuote.estimatedDurationSeconds : 0,
+        maxStreamingQuantity: undefined,
         canSwap: toAddress !== '',
-        warning: quote.lowLiquidityWarning
+        warning: selectedQuote?.lowLiquidityWarning
           ? 'Do not cache this response. Do not send funds after the expiry. The difference in the chainflip swap rate (excluding fees) is lower than the global index rate of the swap by more than a certain threshold (currently set to 5%)'
           : 'Do not cache this response. Do not send funds after the expiry.',
         errors: [],
@@ -152,6 +169,7 @@ export class ChainflipProtocol implements IProtocol {
           params.fromAsset,
         ),
         totalSwapSeconds: 0,
+        maxStreamingQuantity: 0,
         canSwap: false,
         warning: '',
         errors: [e instanceof Error ? e.message : 'Unknown error'],

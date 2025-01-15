@@ -104,6 +104,7 @@ export class ThorchainProtocol implements IProtocol {
       totalSwapSeconds:
         estimatedSwap.txEstimate.inboundConfirmationSeconds || 0 + estimatedSwap.txEstimate.outboundDelaySeconds,
       slipBasisPoints: estimatedSwap.txEstimate.slipBasisPoints,
+      maxStreamingQuantity: estimatedSwap.txEstimate.maxStreamingQuantity,
       canSwap: estimatedSwap.txEstimate.canSwap,
       errors: estimatedSwap.txEstimate.errors,
       warning: estimatedSwap.txEstimate.warning,
