@@ -3,7 +3,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
-import { assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
+import { Asset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { ethers } from 'ethers'
 
@@ -95,7 +95,7 @@ describe('ThorchainAmm e2e tests', () => {
     it('Should estimate THORName update with new preferred asset', async () => {
       const estimated = await thorchainAmm.estimateTHORNameUpdate({
         name: 'thorname',
-        preferredAsset: assetFromStringEx('ETH.ETH'),
+        preferredAsset: assetFromStringEx('ETH.ETH') as Asset,
         chain: 'ETH',
         chainAddress: await wallet.getAddress('ETH'),
       })
@@ -110,7 +110,7 @@ describe('ThorchainAmm e2e tests', () => {
     it('Should update THORName with new preferred asset', async () => {
       const txSubmitted = await thorchainAmm.updateTHORName({
         name: 'thorname',
-        preferredAsset: assetFromStringEx('ETH.ETH'),
+        preferredAsset: assetFromStringEx('ETH.ETH') as Asset,
         chain: 'ETH',
         chainAddress: await wallet.getAddress('ETH'),
       })

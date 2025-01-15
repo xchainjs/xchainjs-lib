@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@xchainjs/xchain-avax": "workspace:*",
+    "@xchainjs/xchain-base": "workspace:*",
     "@xchainjs/xchain-binance": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",

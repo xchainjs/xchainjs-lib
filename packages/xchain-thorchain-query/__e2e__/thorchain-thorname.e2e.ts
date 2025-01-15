@@ -17,20 +17,20 @@ describe('Thorchain-query thorname Integration Tests', () => {
   })
   it('Estimate update thorname with expirity', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'hippo',
+      name: 'hippo',
       isUpdate: true,
       chain: BTCChain,
       chainAddress: btcAddress,
       owner: owner,
       preferredAsset: AssetBTC,
-      expirity: new Date(2024, 9, 11, 14, 30, 0, 0),
+      expiry: new Date(2024, 9, 11, 14, 30, 0, 0),
     })
     console.log(thorname.value.baseAmount.amount().toString())
     console.log(thorname.memo)
   })
   it('Estimate update thorname without expirity', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'dx',
+      name: 'dx',
       isUpdate: true,
       chain: BTCChain,
       chainAddress: btcAddress,
@@ -41,7 +41,7 @@ describe('Thorchain-query thorname Integration Tests', () => {
   })
   it('Estimate not registered thorname without expirity', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'asgardex',
+      name: 'asgardex',
       chain: BTCChain,
       chainAddress: btcAddress,
       owner: owner,
@@ -52,23 +52,23 @@ describe('Thorchain-query thorname Integration Tests', () => {
   })
   it('Estimate register not prefered assets with expirity', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'hippo-2',
+      name: 'hippo-2',
       chain: BTCChain,
       chainAddress: btcAddress,
       owner: owner,
-      expirity: new Date(2024, 8, 11, 14, 30, 0, 0),
+      expiry: new Date(2024, 8, 11, 14, 30, 0, 0),
     })
     console.log(thorname.value.baseAmount.amount().toString())
     console.log(thorname.memo)
   })
   it('Try to estimate already registered thorname', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'hippo',
+      name: 'hippo',
       chain: BTCChain,
       chainAddress: btcAddress,
       owner: owner2,
       preferredAsset: AssetBTC,
-      expirity: new Date(2025, 8, 11, 14, 30, 0, 0),
+      expiry: new Date(2025, 8, 11, 14, 30, 0, 0),
       isUpdate: true,
     })
     console.log(thorname.value.baseAmount.amount().toString())
@@ -76,7 +76,7 @@ describe('Thorchain-query thorname Integration Tests', () => {
   })
   it('Remove uneccessary : at the end and start of MEMO', async () => {
     const thorname = await thorchainQuery.estimateThorname({
-      thorname: 'hippo',
+      name: 'hippo',
       chain: BTCChain,
       chainAddress: btcAddress,
       owner: owner2,

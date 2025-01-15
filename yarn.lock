@@ -4418,6 +4418,7 @@ __metadata:
     "@chainflip/sdk": "npm:1.7.0"
     "@trpc/server": "npm:^10.45.2"
     "@xchainjs/xchain-avax": "workspace:*"
+    "@xchainjs/xchain-base": "workspace:*"
     "@xchainjs/xchain-binance": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
@@ -4462,7 +4463,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-base@workspace:packages/xchain-base":
+"@xchainjs/xchain-base@workspace:*, @xchainjs/xchain-base@workspace:packages/xchain-base":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-base@workspace:packages/xchain-base"
   dependencies:

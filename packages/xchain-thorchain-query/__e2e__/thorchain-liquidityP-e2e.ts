@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, TokenAsset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 
 import { ThorchainCache } from '../src/thorchain-cache'
 import { ThorchainQuery } from '../src/thorchain-query'
@@ -34,9 +34,9 @@ const thorchainCache = new ThorchainCache(new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
 // mainnet asset
-const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const BUSDC = assetFromStringEx('BSC.USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D') as TokenAsset
 //const synthBTC = assetFromStringEx('BTC/BTC')
-const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48') as TokenAsset
 
 function printAdd(estimate: EstimateAddLP) {
   const expanded = {
@@ -168,7 +168,7 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
   // Estimate Liquidity Positions
   it(`Should estimate ADD BUSD liquidity postion for given amount`, async () => {
     const addlp: AddliquidityPosition = {
-      asset: new CryptoAmount(assetToBase(assetAmount(100)), BUSD),
+      asset: new CryptoAmount(assetToBase(assetAmount(100)), BUSDC),
       rune: new CryptoAmount(assetToBase(assetAmount(50)), AssetRuneNative),
     }
     const estimateADDLP = await thorchainQuery.estimateAddLP(addlp)
@@ -257,7 +257,7 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
   it(`Should estimate withdraw RUNE from address's position`, async () => {
     const percentage = 100 // gets converted to basis points later
     const removeLp: WithdrawLiquidityPosition = {
-      asset: BUSD,
+      asset: BUSDC,
       percentage: percentage,
       runeAddress: 'thor1cf4dsll8rema8y3xvvsn2t786xrkhp3d679qxh',
     }

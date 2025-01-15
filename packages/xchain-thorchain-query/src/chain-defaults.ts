@@ -46,6 +46,10 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0, // No block reward for MAYAChain
     avgBlockTimeInSecs: 6, // Average block time for MAYAChain in seconds
   },
+  BASE: {
+    blockReward: 0, // No block reward for base
+    avgBlockTimeInSecs: 2, // Average block time for Base in seconds
+  },
 }
 
 // Export the DefaultChainAttributes object

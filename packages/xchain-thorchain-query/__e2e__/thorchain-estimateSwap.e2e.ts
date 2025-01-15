@@ -13,6 +13,7 @@ const thorchainQuery = new ThorchainQuery(thorchainCache)
 const AssetAVAX = assetFromStringEx('AVAX.AVAX')
 const AssetBTC = assetFromStringEx('BTC.BTC')
 const AssetETH = assetFromStringEx('ETH.ETH')
+const AssetBASE = assetFromStringEx('BASE.ETH')
 
 // const ETHChain = 'ETH'
 
@@ -58,8 +59,8 @@ function printTx(txDetails: TxDetails, amount: CryptoAmount) {
   }
   console.log(expanded)
 }
-const BUSD = assetFromStringEx('BNB.BUSD-BD1')
-const BTCB = assetFromStringEx('BNB.BTCB-1DE')
+
+const BTCB = assetFromStringEx('BSC.BTCB-1DE')
 //const USDCETH = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
 // Test User Functions - single and double swap using mock pool data
@@ -69,16 +70,18 @@ describe('Thorchain-query estimate Integration Tests', () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('10')), AssetBTC),
-      destinationAsset: AssetRuneNative,
-      destinationAddress: 'xxx',
-      toleranceBps: 300,
-      affiliateAddress: affiliateAddress,
-      affiliateBps: 300, //optional
+      destinationAsset: AssetBASE,
+      destinationAddress: '0x12d16087e9402d51d7166d0cfd8be06c43d79726',
+      streamingInterval: 1,
+      streamingQuantity: 0,
+      affiliateAddress: 'dx',
+      affiliateBps: 30, //optional
     }
 
     const estimate = await thorchainQuery.quoteSwap(swapParams)
-    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
-    estimate.txEstimate.totalFees = estimateInBusd
+    console.log(estimate)
+    const estimateInUsdc = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, assetUSDC)
+    estimate.txEstimate.totalFees = estimateInUsdc
     printTx(estimate, swapParams.amount)
   })
   it('should estimate a swap of 0.5 BTC to BUSD', async () => {
@@ -86,16 +89,19 @@ describe('Thorchain-query estimate Integration Tests', () => {
       fromAsset: AssetBTC,
       amount: new CryptoAmount(assetToBase(assetAmount('0.5')), AssetBTC),
       // toleranceBps: 200,
-      destinationAsset: BUSD,
+      destinationAsset: assetUSDC,
       destinationAddress: bnbAddress,
     }
 
     const estimate = await thorchainQuery.quoteSwap(swapParams)
-    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
+    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, assetUSDC)
     estimate.txEstimate.totalFees = estimateInBusd
     printTx(estimate, swapParams.amount)
-    const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
-    const minFee = new CryptoAmount(baseAmount(10000000), BUSD)
+    const exchangeRate = await thorchainQuery.convert(
+      new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC),
+      assetUSDC,
+    )
+    const minFee = new CryptoAmount(baseAmount(10000000), assetUSDC)
     console.log(`1 ${swapParams.amount.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
@@ -103,21 +109,24 @@ describe('Thorchain-query estimate Integration Tests', () => {
       minFee.baseAmount.amount().toNumber(),
     )
   })
-  it('should quote only swap of 0.5 BTCB to BUSD', async () => {
+  it('should quote only swap of 0.5 BTCB to assetUSDC', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: BTCB,
       amount: new CryptoAmount(assetToBase(assetAmount('0.5')), BTCB),
-      destinationAsset: BUSD,
+      destinationAsset: assetUSDC,
       //destinationAddress: bnbAddress,
       // toleranceBps: 400,
     }
 
     const estimate = await thorchainQuery.quoteSwap(swapParams)
-    const estimateInBusd = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, BUSD)
-    estimate.txEstimate.totalFees = estimateInBusd
+    const estimateInassetUSDC = await thorchainQuery.getFeesIn(estimate.txEstimate.totalFees, assetUSDC)
+    estimate.txEstimate.totalFees = estimateInassetUSDC
     printTx(estimate, swapParams.amount)
-    const exchangeRate = await thorchainQuery.convert(new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC), BUSD)
-    const minFee = new CryptoAmount(baseAmount(10000000), BUSD)
+    const exchangeRate = await thorchainQuery.convert(
+      new CryptoAmount(assetToBase(assetAmount('1')), AssetBTC),
+      assetUSDC,
+    )
+    const minFee = new CryptoAmount(baseAmount(10000000), assetUSDC)
     console.log(`1 ${swapParams.amount.asset.ticker} = ${exchangeRate.formatedAssetString()}`)
     expect(estimate.txEstimate.canSwap).toBe(true)
     expect(estimate).toBeTruthy()
@@ -213,8 +222,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
   })
   it(`Should estimate single swap of 1000 busd To BTC `, async () => {
     const swapParams: QuoteSwapParams = {
-      fromAsset: BUSD,
-      amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), BUSD),
+      fromAsset: assetUSDC,
+      amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), assetUSDC),
       destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
     }

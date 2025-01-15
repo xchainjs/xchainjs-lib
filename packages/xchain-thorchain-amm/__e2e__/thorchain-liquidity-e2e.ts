@@ -26,13 +26,13 @@ import {
   ThorchainQuery,
   WithdrawLiquidityPosition,
 } from '@xchainjs/xchain-thorchain-query'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, TokenAsset, assetAmount, assetFromStringEx, assetToBase } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
 
 // mainnet asset
-const BUSD = assetFromStringEx('BNB.BUSD-BD1')
+const BUSDC = assetFromStringEx('BSC.USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D') as TokenAsset
 
 function printLiquidityPosition(liquidityPosition: LiquidityPosition) {
   const expanded = {
@@ -73,14 +73,17 @@ describe('ThorchainAmm e2e tests', () => {
 
     // Check liquidity position
     it(`Should check liquidity position`, async () => {
-      const lpPosition = await thorchainQuery.checkLiquidityPosition(BUSD, 'bnb1s6zsj373mpufaj4vvmpp47runlr2mk55htzlyy')
+      const lpPosition = await thorchainQuery.checkLiquidityPosition(
+        BUSDC,
+        'bnb1s6zsj373mpufaj4vvmpp47runlr2mk55htzlyy',
+      )
       printLiquidityPosition(lpPosition)
     })
 
     // Add liquidity positions
-    it(`Should add BUSD liquidity asymmetrically to BUSD pool`, async () => {
+    it(`Should add BUSDC liquidity asymmetrically to BUSDC pool`, async () => {
       const hash = await thorchainAmm.addLiquidityPosition({
-        asset: new CryptoAmount(assetToBase(assetAmount(2)), BUSD),
+        asset: new CryptoAmount(assetToBase(assetAmount(2)), BUSDC),
         rune: new CryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
       })
 
@@ -123,7 +126,7 @@ describe('ThorchainAmm e2e tests', () => {
 
     it(`Should add RUNE liquidity asymmetrically to BUSD pool`, async () => {
       const addLPparams: AddliquidityPosition = {
-        asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSD),
+        asset: new CryptoAmount(assetToBase(assetAmount(0)), BUSDC),
         rune: new CryptoAmount(assetToBase(assetAmount(1.19997)), AssetRuneNative),
       }
       const hash = await thorchainAmm.addLiquidityPosition(addLPparams)
@@ -131,13 +134,13 @@ describe('ThorchainAmm e2e tests', () => {
       expect(hash).toBeTruthy()
     })
 
-    it(`Should add BUSD & RUNE liquidity symmetrically to BUSD pool`, async () => {
-      const poolRatio = await thorchainQuery.getPoolRatios(BUSD)
+    it(`Should add BUSDC & RUNE liquidity symmetrically to BUSDC pool`, async () => {
+      const poolRatio = await thorchainQuery.getPoolRatios(BUSDC)
       // get ratios for pool and retrieve rune amount
       const busdtAmount = poolRatio.assetToRune.times(3)
       const runeAmount = poolRatio.runeToAsset.times(busdtAmount)
       const hash = await thorchainAmm.addLiquidityPosition({
-        asset: new CryptoAmount(assetToBase(assetAmount(busdtAmount)), BUSD),
+        asset: new CryptoAmount(assetToBase(assetAmount(busdtAmount)), BUSDC),
         rune: new CryptoAmount(assetToBase(assetAmount(runeAmount)), AssetRuneNative),
       })
 
@@ -150,7 +153,7 @@ describe('ThorchainAmm e2e tests', () => {
       const percentage = 100 // gets converted to basis points later
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
-        asset: BUSD,
+        asset: BUSDC,
         assetAddress: await wallet.getAddress(BNBChain),
       }
       const hash = await thorchainAmm.withdrawLiquidityPosition(removeLp)
@@ -162,7 +165,7 @@ describe('ThorchainAmm e2e tests', () => {
       const percentage = 100 // gets converted to basis points later
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
-        asset: BUSD,
+        asset: BUSDC,
         runeAddress: await wallet.getAddress(THORChain),
       }
       const hash = await thorchainAmm.withdrawLiquidityPosition(removeLp)
@@ -174,8 +177,8 @@ describe('ThorchainAmm e2e tests', () => {
       const percentage = 100 // gets converted to basis points later
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
-        asset: BUSD,
-        assetAddress: await wallet.getAddress(BUSD.chain),
+        asset: BUSDC,
+        assetAddress: await wallet.getAddress(BUSDC.chain),
         runeAddress: await wallet.getAddress(THORChain),
       }
       const hash = await thorchainAmm.withdrawLiquidityPosition(removeLp)

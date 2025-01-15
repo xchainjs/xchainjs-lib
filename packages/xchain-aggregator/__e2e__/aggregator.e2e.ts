@@ -1,4 +1,5 @@
 import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
+import { AssetBETH, BASEChain, Client as BaseClient, defaultBaseParams } from '@xchainjs/xchain-base'
 import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
 import {
   AssetBTC,
@@ -82,6 +83,7 @@ describe('Aggregator', () => {
         network: Network.Mainnet,
       }),
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
+      BASE: new BaseClient({ ...defaultBaseParams, phrase, network: Network.Mainnet }),
       BNB: new BnbClient({ phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
     })
@@ -98,6 +100,18 @@ describe('Aggregator', () => {
       destinationAsset: SOLAsset,
       fromAddress: await wallet.getAddress(BTCChain),
       destinationAddress: 'FakeSolAddress',
+      amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
+    })
+    printQuoteSwap(estimatedSwap)
+  })
+  it('Should find swap with greatest expected amount for base', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: AssetBTC,
+      destinationAsset: AssetBETH,
+      fromAddress: await wallet.getAddress(BTCChain),
+      streamingInterval: 1,
+      streamingQuantity: 0,
+      destinationAddress: await wallet.getAddress(BASEChain),
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
     printQuoteSwap(estimatedSwap)
