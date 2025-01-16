@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.12
+
+### Patch Changes
+
+- @xchainjs/xchain-midgard-query@1.0.10
+
 ## 1.0.11
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # xchainjs-estimate-swap
 
+## 1.0.23
+
+### Patch Changes
+
+- Updated dependencies [8c2cf70]
+  - @xchainjs/xchain-midgard@0.5.13
+  - @xchainjs/xchain-midgard-query@1.0.10
+  - @xchainjs/xchain-thorchain-query@1.0.12
+
 ## 1.0.22
 
 ### Patch Changes

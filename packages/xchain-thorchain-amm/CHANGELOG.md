@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.21
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-query@1.0.12
+
 ## 2.0.20
 
 ### Patch Changes
