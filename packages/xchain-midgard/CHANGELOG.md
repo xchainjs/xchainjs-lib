@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.13
+
+### Patch Changes
+
+- 8c2cf70: Update Midgard to the latest api spec
+
 ## 0.5.12
 
 ### Patch Changes
