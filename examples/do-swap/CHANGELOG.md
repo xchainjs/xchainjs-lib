@@ -1,5 +1,12 @@
 # xchainjs-do-swap
 
+## 1.0.42
+
+### Patch Changes
+
+- Updated dependencies [d831efc]
+  - @xchainjs/xchain-thorchain-amm@2.0.22
+
 ## 1.0.41
 
 ### Patch Changes
