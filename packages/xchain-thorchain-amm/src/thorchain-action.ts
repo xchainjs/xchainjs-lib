@@ -9,6 +9,7 @@ import {
   TokenAsset,
   baseAmount,
   getContractAddressFromAsset,
+  isSecuredAsset,
   isSynthAsset,
   isTradeAsset,
 } from '@xchainjs/xchain-util'
@@ -136,7 +137,8 @@ export class ThorchainAction {
     if (
       (params.assetAmount.asset.chain === THORChain ||
         isSynthAsset(params.assetAmount.asset) ||
-        isTradeAsset(params.assetAmount.asset)) &&
+        isTradeAsset(params.assetAmount.asset) ||
+        isSecuredAsset(params.assetAmount.asset)) &&
       'address' in params &&
       !!params.address
     ) {
@@ -145,7 +147,8 @@ export class ThorchainAction {
     return (
       params.assetAmount.asset.chain !== THORChain &&
       !isSynthAsset(params.assetAmount.asset) &&
-      !isTradeAsset(params.assetAmount.asset)
+      !isTradeAsset(params.assetAmount.asset) &&
+      !isSecuredAsset(params.assetAmount.asset)
     )
   }
 }
