@@ -45,6 +45,7 @@ import {
   assetToString,
   baseAmount,
   eqAsset,
+  isSecuredAsset,
   isSynthAsset,
   isTradeAsset,
 } from '@xchainjs/xchain-util'
@@ -170,7 +171,9 @@ export class ThorchainAMM {
       destinationAddress &&
       !validateAddress(
         this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
-        isSynthAsset(destinationAsset) || isTradeAsset(destinationAsset) ? THORChain : destinationAsset.chain,
+        isSynthAsset(destinationAsset) || isTradeAsset(destinationAsset) || isSecuredAsset(destinationAsset)
+          ? THORChain
+          : destinationAsset.chain,
         destinationAddress,
       )
     ) {
