@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.22
+
+### Patch Changes
+
+- d831efc: Update to support securedAssets
+
 ## 2.0.21
 
 ### Patch Changes
