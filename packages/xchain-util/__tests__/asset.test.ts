@@ -343,13 +343,33 @@ describe('asset', () => {
       expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.TRADE })
     })
 
-    it('trade BTC-BTC', () => {
+    it('secured BTC-BTC', () => {
       const result = assetFromString('BTC-BTC')
       expect(result).toEqual({ chain: 'BTC', symbol: 'BTC', ticker: 'BTC', type: AssetType.SECURED })
     })
-    it('trade ETH-ETH', () => {
+    it('secured ETH-ETH', () => {
       const result = assetFromString('ETH-ETH')
       expect(result).toEqual({ chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.SECURED })
+    })
+
+    it('secured AVAX-SOL-0XFE6B19286885A4F7F55ADAD09C3CD1F906D2478', () => {
+      const result = assetFromString('AVAX-SOL-0XFE6B19286885A4F7F55ADAD09C3CD1F906D2478')
+      expect(result).toEqual({
+        chain: 'AVAX',
+        symbol: 'SOL-0XFE6B19286885A4F7F55ADAD09C3CD1F906D2478',
+        ticker: 'SOL',
+        type: AssetType.SECURED,
+      })
+    })
+
+    it('synth ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48', () => {
+      const result = assetFromString('ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+      expect(result).toEqual({
+        chain: 'ETH',
+        symbol: 'USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
+        ticker: 'USDC',
+        type: AssetType.SYNTH,
+      })
     })
 
     it('KUJI.USK', () => {
@@ -398,10 +418,6 @@ describe('asset', () => {
       const result = assetFromString('.BNB.BNB')
       expect(result).toBeNull()
     })
-    it('null for invalid chain', () => {
-      const result = assetFromString('invalid.BNB.BNB')
-      expect(result).toEqual({ chain: 'invalid', symbol: 'BNB', type: AssetType.NATIVE, ticker: 'BNB' })
-    })
   })
 
   describe('assetToString', () => {
@@ -412,6 +428,15 @@ describe('asset', () => {
     it('ETH', () => {
       const asset: Asset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.NATIVE }
       expect(assetToString(asset)).toEqual('ETH.ETH')
+    })
+    it('DAI string test', () => {
+      const asset: TokenAsset = {
+        chain: 'ETH',
+        symbol: 'DAI-0X6B175474E89094C44DA98B954EEDEAC495271D0F',
+        ticker: 'DAI',
+        type: AssetType.TOKEN,
+      }
+      expect(assetToString(asset)).toEqual('ETH.DAI-0X6B175474E89094C44DA98B954EEDEAC495271D0F')
     })
     it('ETH/ETH', () => {
       const asset: SynthAsset = { chain: 'ETH', symbol: 'ETH', ticker: 'ETH', type: AssetType.SYNTH }

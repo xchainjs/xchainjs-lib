@@ -278,41 +278,59 @@ const assetConfigs = new Map<string, AnyAsset>([
   ['RUNE', { chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', type: AssetType.NATIVE }],
 ])
 
-const createAsset = (chain: string, symbol: string, ticker: string, type: AssetType) => {
+// Helper function to create an asset from its components
+const createAsset = (chain: string, symbol: string, ticker: string, type: AssetType): AnyAsset => {
   return { chain, symbol, ticker, type }
 }
 
 export const assetFromString = (s: string): AnyAsset | null => {
+  if (!s || s.trim() === '') return null // Handle empty strings
+
+  // Check if the asset is directly in the assetConfigs
   const directAsset = assetConfigs.get(s)
   if (directAsset) return directAsset
 
-  // Define possible delimiters and their associated asset types
-  const delimiters: Record<'.' | '/' | '~' | '-', AssetType> = {
+  // Define asset delimiters for the first delimiter
+  const assetDelimiters: Record<string, AssetType> = {
     '.': AssetType.NATIVE,
     '/': AssetType.SYNTH,
     '~': AssetType.TRADE,
     '-': AssetType.SECURED,
   }
 
-  // Identify the first delimiter
-  const delimiter = Object.keys(delimiters).find((delim) => s.includes(delim)) as '.' | '/' | '~' | '-' | undefined
-  if (!delimiter) return null
+  // Identify the first delimiter in the string
+  const firstDelimiter = Object.keys(assetDelimiters).find((delim) => s.includes(delim)) as
+    | keyof typeof assetDelimiters
+    | undefined
+  if (!firstDelimiter) return null
 
-  // Split the string by the first delimiter
-  const [chain, symbol] = s.split(delimiter)
-  if (!chain || !symbol) return null
+  // Split the string into chain and symbol part based on the first delimiter
+  const [chain, ...restParts] = s.split(firstDelimiter)
 
-  // Determine initial type based on delimiter
-  let type = delimiters[delimiter]
+  if (!chain || restParts.length === 0) return null // Invalid format or empty parts
 
-  // Additional checks for token classification
-  if (delimiter === '.' && symbol.includes('-')) {
-    type = AssetType.TOKEN
+  // Handle secured and trade assets which may have further splits
+  const symbol = restParts.join(firstDelimiter)
+  let ticker = symbol.split('-')[0]
+
+  // For secured and trade assets, handle contract address as part of the symbol
+  const type = assetDelimiters[firstDelimiter]
+
+  // Check if symbol is empty (e.g., BNB. or AVAX~ cases)
+  if (symbol === '') return null
+  // Handle trade and secured assets
+  if (firstDelimiter === '~' || firstDelimiter === '-' || firstDelimiter === '/') {
+    return createAsset(chain.trim(), symbol.trim(), ticker.trim(), type)
   }
+  // Handle token assets: if the symbol has more than one part (split by `-`)
+  if (symbol.includes('-')) {
+    const [primaryTicker] = symbol.split('-')
+    ticker = primaryTicker
 
-  // Extract the ticker from the symbol (first part before `-` if it exists)
-  const ticker = symbol.split('-')[0]
-
+    // For token assets, use the contract address
+    return createAsset(chain.trim(), symbol.trim(), ticker.trim(), AssetType.TOKEN)
+  }
+  // For native, synth, or other types of assets
   return createAsset(chain.trim(), symbol.trim(), ticker.trim(), type)
 }
 
