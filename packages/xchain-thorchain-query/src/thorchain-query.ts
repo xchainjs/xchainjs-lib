@@ -6,6 +6,7 @@ import {
   AssetCryptoAmount,
   Chain,
   CryptoAmount,
+  SECURED_ASSET_DELIMITER,
   SYNTH_ASSET_DELIMITER,
   SecuredAsset,
   SynthAsset,
@@ -1614,6 +1615,7 @@ export class ThorchainQuery {
         ['c', 'BCH.BCH'],
         ['a', 'AVAX.AVAX'],
         ['s', 'BSC.BNB'],
+        ['f', 'BASE.ETH'],
       ])
 
       const nativeAsset = nativeAlias.get(alias.toLowerCase())
@@ -1625,6 +1627,8 @@ export class ThorchainQuery {
         delimiter = TRADE_ASSET_DELIMITER
       } else if (alias.includes(SYNTH_ASSET_DELIMITER)) {
         delimiter = SYNTH_ASSET_DELIMITER
+      } else if (alias.includes(SECURED_ASSET_DELIMITER)) {
+        delimiter = SECURED_ASSET_DELIMITER
       }
 
       const splitedAlias = alias.split(delimiter)

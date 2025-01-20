@@ -100,6 +100,10 @@ describe('Solana client', () => {
   })
 
   describe('Addresses', () => {
+    let client: Client
+    beforeAll(() => {
+      client = new Client()
+    })
     it('Should not get address without phrase', () => {
       expect(async () => await client.getAddressAsync()).rejects.toThrowError('Phrase must be provided')
     })

@@ -362,6 +362,16 @@ describe('asset', () => {
       })
     })
 
+    it('synth ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48', () => {
+      const result = assetFromString('ETH/USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+      expect(result).toEqual({
+        chain: 'ETH',
+        symbol: 'USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
+        ticker: 'USDC',
+        type: AssetType.SYNTH,
+      })
+    })
+
     it('KUJI.USK', () => {
       const result = assetFromString('KUJI.USK')
       expect(result).toEqual({ chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN })

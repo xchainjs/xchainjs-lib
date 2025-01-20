@@ -1,5 +1,13 @@
 import { Tx } from '@xchainjs/xchain-client'
-import { assetAmount, assetFromStringEx, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import {
+  AssetType,
+  SecuredAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseToAsset,
+} from '@xchainjs/xchain-util'
 
 import { AssetRuneNative as AssetRune, Client, DepositTx } from '../src'
 
@@ -46,6 +54,12 @@ const getPrintableDepositTx = (depositTx: DepositTx) => {
       }
     }),
   }
+}
+const BTCSECURED: SecuredAsset = {
+  chain: 'BTC',
+  ticker: 'BTC',
+  symbol: 'BTC',
+  type: AssetType.SECURED,
 }
 
 describe('Thorchain Keystore', () => {
@@ -134,6 +148,28 @@ describe('Thorchain Keystore', () => {
         walletIndex: 0,
         amount: assetToBase(assetAmount(1, 8)),
         asset: AssetRune,
+        memo,
+      })
+      console.log(hash)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  })
+
+  it('Should make secured Asset swap', async () => {
+    try {
+      /**
+       * MAKE SURE TO TEST THIS FUNCTION WITH YOUR ADDRESS BNB, OTHERWISE, YOU COULD LOSE FUNDS
+       */
+      const address: string = 'thor1rkpukrhljr72sxww2t0nwvng84zegp59805e03' || 'TO_BE_DEFINED'
+      if (address === 'TO_BE_DEFINED') throw Error('Set an address to try the deposit e2e function')
+      const memo = `=:AVAX-AVAX:${address}`
+
+      const hash = await client.deposit({
+        walletIndex: 0,
+        amount: assetToBase(assetAmount(0.00024005, 8)),
+        asset: BTCSECURED,
         memo,
       })
       console.log(hash)

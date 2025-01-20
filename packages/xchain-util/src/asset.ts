@@ -319,7 +319,7 @@ export const assetFromString = (s: string): AnyAsset | null => {
   // Check if symbol is empty (e.g., BNB. or AVAX~ cases)
   if (symbol === '') return null
   // Handle trade and secured assets
-  if (firstDelimiter === '~' || firstDelimiter === '-') {
+  if (firstDelimiter === '~' || firstDelimiter === '-' || firstDelimiter === '/') {
     return createAsset(chain.trim(), symbol.trim(), ticker.trim(), type)
   }
   // Handle token assets: if the symbol has more than one part (split by `-`)
