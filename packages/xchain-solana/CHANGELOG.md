@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.9
+
+### Patch Changes
+
+- 590c8eb: fix assetFromString util function
+- Updated dependencies [590c8eb]
+- Updated dependencies [590c8eb]
+  - @xchainjs/xchain-util@1.0.8
+  - @xchainjs/xchain-client@1.0.10
+
 ## 0.0.8
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-mayachain-amm",
   "private": true,
-  "version": "1.0.37",
+  "version": "1.0.38",
   "scripts": {
     "approveRouter": "npx ts-node approve-router.ts",
     "doSwap": "npx ts-node do-swap.ts",

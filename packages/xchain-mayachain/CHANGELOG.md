@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [590c8eb]
+- Updated dependencies [590c8eb]
+  - @xchainjs/xchain-util@1.0.8
+  - @xchainjs/xchain-client@1.0.10
+  - @xchainjs/xchain-cosmos-sdk@1.0.12
+
 ## 2.0.11
 
 ### Patch Changes
