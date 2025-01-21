@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-bitcoin",
   "private": true,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "scripts": {
     "taprootAddress": "npx ts-node address-taproot.ts",
     "build": "tsc --noEmit"

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.8
+
+### Patch Changes
+
+- 590c8eb: fix assetFromString util function
+- 590c8eb: Fix broken assetFromString()
+
 ## 1.0.7
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [590c8eb]
+- Updated dependencies [590c8eb]
+  - @xchainjs/xchain-util@1.0.8
+  - @xchainjs/xchain-client@1.0.10
+  - @xchainjs/xchain-evm@1.0.14
+  - @xchainjs/xchain-evm-providers@1.0.12
+
 ## 0.0.9
 
 ### Patch Changes

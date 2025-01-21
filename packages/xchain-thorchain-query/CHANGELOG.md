@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.13
+
+### Patch Changes
+
+- 590c8eb: fix assetFromString util function
+- Updated dependencies [590c8eb]
+- Updated dependencies [590c8eb]
+  - @xchainjs/xchain-util@1.0.8
+  - @xchainjs/xchain-client@1.0.10
+  - @xchainjs/xchain-midgard-query@1.0.11
+
 ## 1.0.12
 
 ### Patch Changes

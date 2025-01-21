@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.0.19
+
+### Patch Changes
+
+- @xchainjs/xchain-arbitrum@1.0.15
+- @xchainjs/xchain-bitcoin@1.2.2
+- @xchainjs/xchain-client@1.0.10
+- @xchainjs/xchain-dash@1.0.10
+- @xchainjs/xchain-ethereum@1.0.14
+- @xchainjs/xchain-kujira@1.0.12
+- @xchainjs/xchain-mayachain@2.0.12
+- @xchainjs/xchain-mayachain-query@1.0.11
+- @xchainjs/xchain-radix@1.1.8
+- @xchainjs/xchain-thorchain@2.0.13
+- @xchainjs/xchain-wallet@1.1.5
+
 ## 3.0.18
 
 ### Patch Changes
