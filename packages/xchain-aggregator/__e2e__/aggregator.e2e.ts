@@ -9,13 +9,14 @@ import {
   defaultBTCParams as defaultBtcParams,
 } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
-import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   Asset,
   AssetType,
   CryptoAmount,
+  TokenAsset,
   assetAmount,
   assetFromStringEx,
   assetToBase,
@@ -67,6 +68,13 @@ const SOLAsset: Asset = {
   type: AssetType.NATIVE,
 }
 
+const AssetUSDT: TokenAsset = {
+  chain: ETHChain,
+  symbol: 'USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  ticker: 'USDT',
+  type: AssetType.TOKEN,
+}
+
 jest.deepUnmock('@chainflip/sdk/swap')
 
 describe('Aggregator', () => {
@@ -103,6 +111,26 @@ describe('Aggregator', () => {
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
     printQuoteSwap(estimatedSwap)
+  })
+  it('Should find swap on CF with usdt', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: AssetUSDT,
+      destinationAsset: SOLAsset,
+      fromAddress: await wallet.getAddress(ETHChain),
+      destinationAddress: 'fakeSOlAddress',
+      amount: new CryptoAmount(assetToBase(assetAmount(20, 6)), AssetUSDT),
+    })
+    printQuoteSwap(estimatedSwap)
+
+    const hash = await aggregator.doSwap({
+      protocol: estimatedSwap.protocol,
+      fromAsset: AssetUSDT,
+      fromAddress: await wallet.getAddress(ETHChain),
+      destinationAsset: SOLAsset,
+      amount: new CryptoAmount(assetToBase(assetAmount(20, 6)), AssetUSDT),
+      destinationAddress: 'fakeSOlAddress',
+    })
+    console.log(hash)
   })
   it('Should find swap with greatest expected amount for base', async () => {
     const estimatedSwap = await aggregator.estimateSwap({

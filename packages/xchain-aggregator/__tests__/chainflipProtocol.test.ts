@@ -87,6 +87,7 @@ describe('Chainflip protocol', () => {
     const estimatedSwap = await protocol.estimateSwap({
       fromAsset: AssetETH,
       destinationAsset: AssetBTC,
+      fromAddress: 'ETHEREUMfakeaddress',
       amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
       destinationAddress: 'BITCOINFakeAddress',
     })
@@ -121,6 +122,7 @@ describe('Chainflip protocol', () => {
     const estimatedSwap = await protocol.estimateSwap({
       fromAsset: USDT,
       destinationAsset: AssetETH,
+      fromAddress: 'ETHEREUMfakeaddress',
       amount: new CryptoAmount(assetToBase(assetAmount(20, 6)), USDT),
       destinationAddress: 'ETHEREUMfakeaddress',
     })
@@ -155,6 +157,7 @@ describe('Chainflip protocol', () => {
     const estimatedSwap = await protocol.estimateSwap({
       fromAsset: AssetETH,
       destinationAsset: USDT,
+      fromAddress: 'ETHEREUMfakeaddress',
       amount: new CryptoAmount(assetToBase(assetAmount(0.01, 18)), AssetETH),
       destinationAddress: 'ETHEREUMfakeaddress',
     })
