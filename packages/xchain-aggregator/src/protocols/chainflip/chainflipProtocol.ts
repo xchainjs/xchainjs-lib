@@ -112,11 +112,16 @@ export class ChainflipProtocol implements IProtocol {
           },
         })
         toAddress = resp.depositAddress
-      } else if (params.destinationAddress && selectedQuote?.type === 'REGULAR') {
+      } else if (params.destinationAddress && selectedQuote?.type === 'REGULAR' && params.fromAddress) {
         const resp = await this.sdk.requestDepositAddressV2({
           quote: selectedQuote,
           destAddress: params.destinationAddress,
           srcAddress: params.fromAddress,
+          fillOrKillParams: {
+            slippageTolerancePercent: selectedQuote.recommendedSlippageTolerancePercent,
+            refundAddress: params.fromAddress,
+            retryDurationBlocks: 100,
+          },
         })
         toAddress = resp.depositAddress
       } else {
