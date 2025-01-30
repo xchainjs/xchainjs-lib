@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.24
+
+### Patch Changes
+
+- 8bc3d5c: Update chainflip quote logic
+
 ## 1.0.23
 
 ### Patch Changes
