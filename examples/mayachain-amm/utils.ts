@@ -1,5 +1,7 @@
-import { QuoteSwap } from '@xchainjs/xchain-mayachain-query'
-import { assetToString } from '@xchainjs/xchain-util'
+import { QuoteSwap, CompatibleAsset } from '@xchainjs/xchain-mayachain-query'
+import { assetToString, Chain, TokenAsset, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
+import { AssetAETH } from '@xchainjs/xchain-arbitrum'
+import { AssetETH } from '@xchainjs/xchain-ethereum'
 
 export const printQuoteSwap = (quoteSwap: QuoteSwap) => {
   console.log({
@@ -38,4 +40,24 @@ export const printQuoteSwap = (quoteSwap: QuoteSwap) => {
     errors: quoteSwap.errors,
     warning: quoteSwap.warning,
   })
+}
+
+/**
+ * Check if a chain is EVM and supported by the protocol
+ * @param {Chain} chain to check
+ * @returns true if chain is EVM, otherwise, false
+ */
+export const isProtocolEVMChain = (chain: Chain): boolean => {
+  return [AssetETH.chain, AssetAETH.chain].includes(chain)
+}
+
+/**
+ * Check if asset is ERC20
+ * @param {Asset} asset to check
+ * @returns true if asset is ERC20, otherwise, false
+ */
+export const isProtocolERC20Asset = (asset: CompatibleAsset): asset is TokenAsset => {
+  return isProtocolEVMChain(asset.chain)
+    ? [AssetETH, AssetAETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 && !isSynthAsset(asset)
+    : false
 }

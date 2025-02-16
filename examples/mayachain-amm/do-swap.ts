@@ -20,7 +20,7 @@ import {
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { printQuoteSwap } from './utils'
+import { isProtocolERC20Asset, printQuoteSwap } from './utils'
 
 const doSwap = async (mayachainAmm: MayachainAMM, quoteSwapParams: QuoteSwapParams) => {
   try {
@@ -34,6 +34,13 @@ const doSwap = async (mayachainAmm: MayachainAMM, quoteSwapParams: QuoteSwapPara
           quoteSwapParams.destinationAsset,
         )}`,
       )
+      if (isProtocolERC20Asset(quoteSwapParams.fromAsset)) {
+        const txApprove = await mayachainAmm.approveRouterToSpend({
+          asset: quoteSwapParams.fromAsset,
+          amount: quoteSwapParams.amount,
+        })
+        console.log('txApprove:', txApprove)
+      }
       const txSubmitted = await mayachainAmm.doSwap(quoteSwapParams)
       console.log(`Tx hash: ${txSubmitted.hash},\n Tx url: ${txSubmitted.url}\n`)
     }
