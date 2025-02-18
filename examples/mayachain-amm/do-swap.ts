@@ -4,7 +4,7 @@ import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
-import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
+import { MayachainAMM, isProtocolERC20Asset } from '@xchainjs/xchain-mayachain-amm'
 import { MayaChain, MayachainQuery, QuoteSwapParams } from '@xchainjs/xchain-mayachain-query'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import {
@@ -12,6 +12,7 @@ import {
   CryptoAmount,
   SynthAsset,
   TokenAsset,
+  TokenCryptoAmount,
   assetAmount,
   assetFromString,
   assetToBase,
@@ -34,6 +35,36 @@ const doSwap = async (mayachainAmm: MayachainAMM, quoteSwapParams: QuoteSwapPara
           quoteSwapParams.destinationAsset,
         )}`,
       )
+      if (isProtocolERC20Asset(quoteSwapParams.fromAsset)) {
+        try {
+          // Check if the router is approved to spend the asset
+          const errors = await mayachainAmm.isRouterApprovedToSpend({
+            asset: quoteSwapParams.fromAsset,
+            amount: quoteSwapParams.amount as TokenCryptoAmount,
+            address: quoteSwapParams.fromAddress,
+          })
+
+          // If there are errors, the router is NOT approved
+          if (errors.length > 0) {
+            console.log('Router is not approved. Approving now...')
+
+            // Call the approve function
+            const txApprove = await mayachainAmm.approveRouterToSpend({
+              asset: quoteSwapParams.fromAsset,
+              amount: quoteSwapParams.amount as TokenCryptoAmount,
+            })
+
+            console.log('Approval transaction:', txApprove)
+          } else {
+            console.log('Router is already approved.')
+          }
+        } catch (error) {
+          console.error('Error checking or approving router:', error)
+        }
+      } else {
+        console.error('Router approval not needed for this asset')
+      }
+      // continue with do swap.
       const txSubmitted = await mayachainAmm.doSwap(quoteSwapParams)
       console.log(`Tx hash: ${txSubmitted.hash},\n Tx url: ${txSubmitted.url}\n`)
     }
