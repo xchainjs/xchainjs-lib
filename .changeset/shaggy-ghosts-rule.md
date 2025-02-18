@@ -2,4 +2,4 @@
 '@xchainjs/xchain-mayachain-amm': patch
 ---
 
-export \* in /utils
+export * in /utils
