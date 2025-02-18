@@ -60,6 +60,11 @@ describe('Solana client', () => {
     console.log(address)
   })
 
+  it('Should validate address', async () => {
+    const res = await client.validateAddress('GHityuQumkHn8JPpHYt9oxR5xi9X8R2kWsprdH9nPvT7')
+    console.log(res)
+  })
+
   it('Should get all address balances', async () => {
     const balances = await client.getBalance('94bPUbh8iazbg2UgUDrmMkgWoZz9Q1H813JZifZRB35v')
 
