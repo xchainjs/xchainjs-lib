@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.20
+
+### Patch Changes
+
+- 5458003: export \* in /utils
+
 ## 3.0.19
 
 ### Patch Changes
