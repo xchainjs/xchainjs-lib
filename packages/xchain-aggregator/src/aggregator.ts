@@ -54,7 +54,7 @@ export class Aggregator {
    * @param {QuoteSwapParams} params Swap parameters
    * @returns the swap with the greatest expected amount estimated in the supported protocols
    */
-  public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
+  public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap[]> {
     const estimateTask = async (protocol: IProtocol, params: QuoteSwapParams) => {
       const [isFromAssetSupported, isDestinationAssetSupported] = await Promise.all([
         protocol.isAssetSupported(params.fromAsset),
@@ -69,20 +69,20 @@ export class Aggregator {
 
     const results = await Promise.allSettled(this.protocols.map((protocol) => estimateTask(protocol, params)))
 
-    let optimalSwap: QuoteSwap | undefined
+    const successfulQuotes: QuoteSwap[] = []
 
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
-        optimalSwap = result.value
+        successfulQuotes.push(result.value)
       }
     })
 
-    if (!optimalSwap)
+    if (!successfulQuotes)
       throw Error(
         `Can not estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
       )
 
-    return optimalSwap
+    return successfulQuotes
   }
 
   /**
