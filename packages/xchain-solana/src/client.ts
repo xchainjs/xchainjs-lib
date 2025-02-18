@@ -498,7 +498,7 @@ export class Client extends BaseXChainClient {
         } else {
           // Token transfer
           const mintAddress = new PublicKey(getContractAddressFromAsset(params.asset as TokenAsset))
-          const associatedTokenAddress = getAssociatedTokenAddressSync(mintAddress, toPubkey, true) // allow off curve owners
+          const associatedTokenAddress = getAssociatedTokenAddressSync(mintAddress, toPubkey, params.allowOwnerOffCurve)
 
           try {
             await getAccount(provider.solanaProvider, associatedTokenAddress, undefined, TOKEN_PROGRAM_ID)
