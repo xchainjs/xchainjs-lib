@@ -14,8 +14,15 @@ import mockThornodeApi from '../__mocks__/mayachain/mayanode/api'
 import mockMayaMidgardApi from '../__mocks__/mayachain/midgard/api'
 import mockThorMidgardApi from '../__mocks__/thorchain/midgard/api'
 import mockMayanodeApi from '../__mocks__/thorchain/thornode/api'
-import { Aggregator, SuccessSwap } from '../src'
+import { Aggregator, QuoteSwap, SuccessSwap } from '../src'
 import { SupportedProtocols } from '../src/const'
+
+function bestSwap(allQuotes: QuoteSwap[]) {
+  const bestQuote = allQuotes.reduce((best, current) =>
+    current.expectedAmount.gt(best.expectedAmount) ? current : best,
+  )
+  return bestQuote
+}
 
 describe('Aggregator', () => {
   let aggregator: Aggregator
@@ -74,7 +81,7 @@ describe('Aggregator', () => {
       destinationAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetBTC),
     })
-    expect(txEstimated[0].expectedAmount.assetAmount.amount().toString()).toBe('17.70607901')
+    expect(bestSwap(txEstimated).expectedAmount.assetAmount.amount().toString()).toBe('17.70607901')
   })
 
   it('Should get swap history', async () => {
