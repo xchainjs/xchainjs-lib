@@ -496,7 +496,7 @@ export class Client extends BaseXChainClient {
         } else {
           // Token transfer
           const mintAddress = new PublicKey(getContractAddressFromAsset(params.asset as TokenAsset))
-          const associatedTokenAddress = getAssociatedTokenAddressSync(mintAddress, toPubkey)
+          const associatedTokenAddress = getAssociatedTokenAddressSync(mintAddress, toPubkey, true) // allow off curve owners
 
           try {
             await getAccount(provider.solanaProvider, associatedTokenAddress, undefined, TOKEN_PROGRAM_ID)
@@ -647,11 +647,13 @@ export class Client extends BaseXChainClient {
         if (asset && !eqAsset(asset, this.getAssetInfo().asset)) {
           // Check if receipt token account is created, otherwise, create it
           const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
+
           await getOrCreateAssociatedTokenAccount(
             provider.solanaProvider,
             senderKeyPair,
             mintAddress,
             new PublicKey(recipient),
+            true,
           )
         }
 
@@ -720,7 +722,6 @@ export class Client extends BaseXChainClient {
     try {
       for (const provider of this.providers) {
         const transaction = new Transaction()
-
         const fromPubkey = new PublicKey(sender)
         const toPubkey = new PublicKey(recipient)
 
@@ -741,7 +742,6 @@ export class Client extends BaseXChainClient {
         } else {
           // Token transfer
           const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
-
           const fromAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, fromPubkey)
           let fromTokenAccount: Account
           try {
@@ -753,7 +753,7 @@ export class Client extends BaseXChainClient {
             throw error
           }
 
-          const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey)
+          const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey, true)
           let toTokenAccount: Account
           try {
             toTokenAccount = await getAccount(provider.solanaProvider, toAssociatedAccount)
