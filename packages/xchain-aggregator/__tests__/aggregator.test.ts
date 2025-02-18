@@ -74,7 +74,7 @@ describe('Aggregator', () => {
       destinationAsset: AssetETH,
       amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), AssetBTC),
     })
-    expect(txEstimated.expectedAmount.assetAmount.amount().toString()).toBe('17.70607901')
+    expect(txEstimated[0].expectedAmount.assetAmount.amount().toString()).toBe('17.70607901')
   })
 
   it('Should get swap history', async () => {
