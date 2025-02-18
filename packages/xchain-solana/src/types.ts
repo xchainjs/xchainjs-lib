@@ -29,6 +29,7 @@ export type TxParams = BaseTxParams & {
   asset?: CompatibleAsset
   priorityFee?: BaseAmount
   limit?: number
+  allowOwnerOffCurve?: boolean
 }
 
 /**

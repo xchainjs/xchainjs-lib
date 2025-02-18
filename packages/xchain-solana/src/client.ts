@@ -298,6 +298,7 @@ export class Client extends BaseXChainClient {
     memo,
     limit,
     priorityFee,
+    allowOwnerOffCurve,
   }: TxParams & { sender: Address }): Promise<PreparedTx> {
     return this.roundRobinPrepareTx({
       sender,
@@ -307,6 +308,7 @@ export class Client extends BaseXChainClient {
       memo,
       limit,
       priorityFee,
+      allowOwnerOffCurve,
     })
   }
 
@@ -640,6 +642,7 @@ export class Client extends BaseXChainClient {
     memo,
     limit,
     priorityFee,
+    allowOwnerOffCurve,
   }: TxParams): Promise<string> {
     try {
       const senderKeyPair = this.getPrivateKeyPair(walletIndex || 0)
@@ -653,7 +656,7 @@ export class Client extends BaseXChainClient {
             senderKeyPair,
             mintAddress,
             new PublicKey(recipient),
-            true,
+            allowOwnerOffCurve,
           )
         }
 
@@ -718,6 +721,7 @@ export class Client extends BaseXChainClient {
     memo,
     limit,
     priorityFee,
+    allowOwnerOffCurve,
   }: TxParams & { sender: Address }): Promise<PreparedTx> {
     try {
       for (const provider of this.providers) {
@@ -753,7 +757,7 @@ export class Client extends BaseXChainClient {
             throw error
           }
 
-          const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey, true)
+          const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey, allowOwnerOffCurve)
           let toTokenAccount: Account
           try {
             toTokenAccount = await getAccount(provider.solanaProvider, toAssociatedAccount)
