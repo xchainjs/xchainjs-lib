@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.14
+
+### Patch Changes
+
+- f757e0b: Add getAccountDetails() async to keystore client
+
 ## 2.0.13
 
 ### Patch Changes

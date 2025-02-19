@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.25
+
+### Patch Changes
+
+- c137cbf: Updated estimateSwap to return all quotes
+- Updated dependencies [f757e0b]
+- Updated dependencies [5458003]
+  - @xchainjs/xchain-thorchain@2.0.14
+  - @xchainjs/xchain-mayachain-amm@3.0.20
+  - @xchainjs/xchain-thorchain-amm@2.0.24
+  - @xchainjs/xchain-wallet@1.1.6
+
 ## 1.0.24
 
 ### Patch Changes

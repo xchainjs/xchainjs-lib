@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.20
+
+### Patch Changes
+
+- 5458003: export \* in /utils
+- Updated dependencies [f757e0b]
+  - @xchainjs/xchain-thorchain@2.0.14
+  - @xchainjs/xchain-wallet@1.1.6
+
 ## 3.0.19
 
 ### Patch Changes
