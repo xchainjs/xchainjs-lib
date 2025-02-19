@@ -54,7 +54,7 @@ export class Aggregator {
    * @param {QuoteSwapParams} params Swap parameters
    * @returns the swap with the greatest expected amount estimated in the supported protocols
    */
-  public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
+  public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap[]> {
     const estimateTask = async (protocol: IProtocol, params: QuoteSwapParams) => {
       const [isFromAssetSupported, isDestinationAssetSupported] = await Promise.all([
         protocol.isAssetSupported(params.fromAsset),
@@ -69,21 +69,20 @@ export class Aggregator {
 
     const results = await Promise.allSettled(this.protocols.map((protocol) => estimateTask(protocol, params)))
 
-    let optimalSwap: QuoteSwap | undefined
+    const successfulQuotes: QuoteSwap[] = []
 
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
-        if (!optimalSwap || result.value.expectedAmount.assetAmount.gte(optimalSwap.expectedAmount.assetAmount))
-          optimalSwap = result.value
+        successfulQuotes.push(result.value)
       }
     })
 
-    if (!optimalSwap)
+    if (!successfulQuotes)
       throw Error(
         `Can not estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
       )
 
-    return optimalSwap
+    return successfulQuotes
   }
 
   /**
@@ -94,24 +93,52 @@ export class Aggregator {
    * @returns the swap with the greatest expected amount estimated in the supported protocols
    */
   public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
-    const protocolName = params.protocol ? params.protocol : (await this.estimateSwap(params)).protocol
-    const protocol = this.protocols.find((protocol) => protocol.name === protocolName)
+    let successfulQuotes: QuoteSwap[] = []
 
+    if (params.protocol) {
+      // Use the specified protocol
+      const protocol = this.protocols.find((protocol) => protocol.name === params.protocol)
+      if (!protocol) {
+        throw Error(`${params.protocol} protocol is not supported`)
+      }
+      successfulQuotes = [await protocol.estimateSwap(params)]
+    } else {
+      // Fetch quotes from all protocols
+      const results = await Promise.allSettled(this.protocols.map((protocol) => protocol.estimateSwap(params)))
+
+      successfulQuotes = results
+        .filter((result): result is PromiseFulfilledResult<QuoteSwap> => result.status === 'fulfilled')
+        .map((result) => result.value)
+    }
+
+    if (successfulQuotes.length === 0) {
+      throw Error(
+        `Cannot estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
+      )
+    }
+
+    // Select the quote with the highest expected amount
+    const bestQuote = successfulQuotes.reduce((best, current) =>
+      current.expectedAmount.gt(best.expectedAmount) ? current : best,
+    )
+
+    const protocol = this.protocols.find((protocol) => protocol.name === bestQuote.protocol)
     if (!protocol) {
-      throw Error(`${protocolName} protocol is not supported`)
+      throw Error(`${bestQuote.protocol} protocol is not supported`)
     }
 
     if (isTokenAsset(params.fromAsset)) {
-      if (
-        await protocol.shouldBeApproved({
-          asset: params.fromAsset,
-          amount: params.amount,
-          address: params.fromAddress || '',
-        })
-      ) {
+      const approvalNeeded = await protocol.shouldBeApproved({
+        asset: params.fromAsset,
+        amount: params.amount,
+        address: params.fromAddress || '',
+      })
+
+      if (approvalNeeded) {
         await protocol.approveRouterToSpend({ asset: params.fromAsset, amount: params.amount })
       }
     }
+
     return protocol.doSwap(params)
   }
 

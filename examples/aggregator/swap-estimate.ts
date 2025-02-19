@@ -14,12 +14,14 @@ const main = async () => {
     amount: new CryptoAmount(amount, fromAsset),
   })
 
+  const bestQuote = quote.reduce((best, current) => (current.expectedAmount.gt(best.expectedAmount) ? current : best))
+
   console.log({
-    canSwap: quote.canSwap,
-    protocol: quote.protocol,
-    expectedAmount: quote.expectedAmount.assetAmount.amount().toString(),
-    memo: quote.memo,
-    toAddress: quote.toAddress,
+    canSwap: bestQuote.canSwap,
+    protocol: bestQuote.protocol,
+    expectedAmount: bestQuote.expectedAmount.assetAmount.amount().toString(),
+    memo: bestQuote.memo,
+    toAddress: bestQuote.toAddress,
   })
 }
 

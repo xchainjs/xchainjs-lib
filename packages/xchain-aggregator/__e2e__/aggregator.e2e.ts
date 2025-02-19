@@ -61,6 +61,13 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
     warning: quoteSwap.warning,
   })
 }
+
+function bestSwap(allQuotes: QuoteSwap[]) {
+  const bestQuote = allQuotes.reduce((best, current) =>
+    current.expectedAmount.gt(best.expectedAmount) ? current : best,
+  )
+  return bestQuote
+}
 const SOLAsset: Asset = {
   chain: 'SOL',
   ticker: 'SOL',
@@ -110,7 +117,7 @@ describe('Aggregator', () => {
       destinationAddress: 'FakeSolAddress',
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
-    printQuoteSwap(estimatedSwap)
+    printQuoteSwap(bestSwap(estimatedSwap))
   })
   it('Should find swap on CF with usdt', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
@@ -120,10 +127,10 @@ describe('Aggregator', () => {
       destinationAddress: 'fakeSOlAddress',
       amount: new CryptoAmount(assetToBase(assetAmount(20, 6)), AssetUSDT),
     })
-    printQuoteSwap(estimatedSwap)
+    printQuoteSwap(bestSwap(estimatedSwap))
 
     const hash = await aggregator.doSwap({
-      protocol: estimatedSwap.protocol,
+      protocol: estimatedSwap[0].protocol,
       fromAsset: AssetUSDT,
       fromAddress: await wallet.getAddress(ETHChain),
       destinationAsset: SOLAsset,
@@ -142,7 +149,7 @@ describe('Aggregator', () => {
       destinationAddress: await wallet.getAddress(BASEChain),
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
-    printQuoteSwap(estimatedSwap)
+    printQuoteSwap(bestSwap(estimatedSwap))
   })
 
   it('Should find estimated swap with one protocol not supporting one asset', async () => {
@@ -151,7 +158,7 @@ describe('Aggregator', () => {
       destinationAsset: AssetKUJI,
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
-    printQuoteSwap(estimatedSwap)
+    printQuoteSwap(bestSwap(estimatedSwap))
   })
 
   it('Should find estimated swap with trade assets', async () => {
@@ -161,7 +168,7 @@ describe('Aggregator', () => {
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), assetFromStringEx('BTC~BTC')),
       destinationAddress: await wallet.getAddress(THORChain),
     })
-    printQuoteSwap(estimatedSwap)
+    printQuoteSwap(bestSwap(estimatedSwap))
   })
 
   it('Should not estimate swap', async () => {
@@ -186,10 +193,10 @@ describe('Aggregator', () => {
       destinationAddress: await wallet.getAddress(AssetAVAX.chain),
     })
 
-    printQuoteSwap(txEstimatedSwap)
+    printQuoteSwap(txEstimatedSwap[0])
 
     const txSubmitted = await aggregator.doSwap({
-      protocol: txEstimatedSwap.protocol,
+      protocol: txEstimatedSwap[0].protocol,
       fromAsset: AssetBNB,
       destinationAsset: AssetAVAX,
       amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
@@ -210,10 +217,10 @@ describe('Aggregator', () => {
       destinationAddress: await wallet.getAddress(AssetETH.chain),
     })
 
-    printQuoteSwap(txEstimatedSwap)
+    printQuoteSwap(bestSwap(txEstimatedSwap))
 
     const txSubmitted = await aggregator.doSwap({
-      protocol: txEstimatedSwap.protocol,
+      protocol: bestSwap(txEstimatedSwap).protocol,
       fromAsset: assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7'),
       destinationAsset: AssetETH,
       amount: new CryptoAmount(

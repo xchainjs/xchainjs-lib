@@ -92,6 +92,7 @@ type QuoteSwap = {
   canSwap: boolean // Indicates whether the swap can be performed
   errors: string[] // Any errors encountered during the swap operation
   warning: string // Any warning messages associated with the swap
+  depositChannelId?: string
 }
 
 /**
