@@ -89,6 +89,7 @@ export class ChainflipProtocol implements IProtocol {
 
     try {
       let toAddress = ''
+      let depositChannelId = ''
       const { quotes } = await this.sdk.getQuoteV2({
         srcChain: srcAssetData.chain,
         srcAsset: srcAssetData.asset,
@@ -112,6 +113,7 @@ export class ChainflipProtocol implements IProtocol {
           },
         })
         toAddress = resp.depositAddress
+        depositChannelId = resp.depositChannelId
       } else if (params.destinationAddress && selectedQuote?.type === 'REGULAR' && params.fromAddress) {
         const resp = await this.sdk.requestDepositAddressV2({
           quote: selectedQuote,
@@ -124,6 +126,7 @@ export class ChainflipProtocol implements IProtocol {
           },
         })
         toAddress = resp.depositAddress
+        depositChannelId = resp.depositChannelId
       } else {
         console.error('No suitable quote found or destination/refund address missing')
       }
@@ -162,6 +165,7 @@ export class ChainflipProtocol implements IProtocol {
             params.destinationAsset,
           ),
         },
+        depositChannelId,
       }
     } catch (e) {
       return {
@@ -184,6 +188,7 @@ export class ChainflipProtocol implements IProtocol {
           outboundFee: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
           affiliateFee: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
         },
+        depositChannelId: undefined,
       }
     }
   }
