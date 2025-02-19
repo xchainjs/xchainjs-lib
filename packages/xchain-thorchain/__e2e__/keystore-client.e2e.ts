@@ -85,6 +85,10 @@ describe('Thorchain Keystore', () => {
     const address = await client.getAddressAsync()
     console.log(address)
   })
+  it('Should get wallet address Account', async () => {
+    const acc = await client.getAccountDetails()
+    console.log(acc)
+  })
 
   it('Should get address balances', async () => {
     const balances = await client.getBalance(await client.getAddressAsync())

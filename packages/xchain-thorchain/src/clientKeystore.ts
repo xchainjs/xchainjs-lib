@@ -1,7 +1,7 @@
 import { Bip39, EnglishMnemonic, Secp256k1, Slip10, Slip10Curve } from '@cosmjs/crypto'
 import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import { DecodedTxRaw, DirectSecp256k1HdWallet, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
-import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
+import { Account, DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
 import {
   // Import client-related types and functions from @xchainjs/xchain-cosmos-sdk for Cosmos SDK client configuration.
   MsgTypes,
@@ -58,6 +58,16 @@ export class ClientKeystore extends Client {
     const words = toWords(Buffer.from(rawAddress))
     const address = encode(this.prefix, words)
     return address
+  }
+
+  /**
+   * Get the Account frmom Address.
+   * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
+   * @returns {Account} The Account holder details or error if account does not exist
+   */
+  async getAccountDetails(walletIndex?: number): Promise<Account> {
+    const account = await this.getAccount(this.getAddress(walletIndex))
+    return account
   }
 
   /**
@@ -140,7 +150,6 @@ export class ClientKeystore extends Client {
   }: DepositParam): Promise<string> {
     // Get sender address
     const sender = await this.getAddressAsync(walletIndex)
-
     // Create signer
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
       prefix: this.prefix,
