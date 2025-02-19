@@ -1,5 +1,13 @@
 # xchainjs-wallet
 
+## 1.0.35
+
+### Patch Changes
+
+- Updated dependencies [f757e0b]
+  - @xchainjs/xchain-thorchain@2.0.14
+  - @xchainjs/xchain-wallet@1.1.6
+
 ## 1.0.34
 
 ### Patch Changes

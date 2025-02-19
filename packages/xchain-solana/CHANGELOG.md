@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.10
+
+### Patch Changes
+
+- 24d5535: Allows tranfers to off-curve-addresses
+
 ## 0.0.9
 
 ### Patch Changes

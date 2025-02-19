@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.24
+
+### Patch Changes
+
+- Updated dependencies [f757e0b]
+  - @xchainjs/xchain-thorchain@2.0.14
+  - @xchainjs/xchain-wallet@1.1.6
+
 ## 2.0.23
 
 ### Patch Changes
