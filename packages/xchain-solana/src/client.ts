@@ -670,6 +670,7 @@ export class Client extends BaseXChainClient {
           memo,
           limit,
           priorityFee,
+          allowOwnerOffCurve,
         })
 
         const transaction = Transaction.from(bs58.decode(rawUnsignedTx))
