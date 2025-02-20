@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.12
+
+### Patch Changes
+
+- 7a04f51: add allOwnerOffCurve to prepareTx
+
 ## 0.0.11
 
 ### Patch Changes
