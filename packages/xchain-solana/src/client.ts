@@ -263,7 +263,6 @@ export class Client extends BaseXChainClient {
     memo,
     limit,
     priorityFee,
-    allowOwnerOffCurve,
   }: TxParams): Promise<string> {
     return this.roundRobinTransfer({
       walletIndex,
@@ -273,7 +272,6 @@ export class Client extends BaseXChainClient {
       memo,
       limit,
       priorityFee,
-      allowOwnerOffCurve,
     })
   }
 
