@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.11
+
+### Patch Changes
+
+- 38df28a: allowOwnerOffCureve to transfer public function
+
 ## 0.0.10
 
 ### Patch Changes
