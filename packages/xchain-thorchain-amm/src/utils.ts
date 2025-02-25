@@ -1,5 +1,5 @@
 import { AVAXChain, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { BASEChain, Client as BaseClient, defaultBaseParams } from '@xchainjs/xchain-base'
+import { AssetBETH, BASEChain, Client as BaseClient, defaultBaseParams } from '@xchainjs/xchain-base'
 import { BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { BCHChain, Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { AssetBSC, BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
@@ -26,7 +26,7 @@ import {
  * @returns true if chain is EVM, otherwise, false
  */
 export const isProtocolEVMChain = (chain: Chain): boolean => {
-  return [AssetETH.chain, AssetBSC.chain, AssetAVAX.chain].includes(chain)
+  return [AssetETH.chain, AssetBSC.chain, AssetAVAX.chain, AssetBETH.chain].includes(chain)
 }
 
 /**
@@ -36,7 +36,7 @@ export const isProtocolEVMChain = (chain: Chain): boolean => {
  */
 export const isProtocolERC20Asset = (asset: CompatibleAsset): asset is TokenAsset => {
   return isProtocolEVMChain(asset.chain)
-    ? [AssetETH, AssetAVAX, AssetBSC].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 &&
+    ? [AssetETH, AssetAVAX, AssetBSC, AssetBETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 &&
         !isSynthAsset(asset)
     : false
 }
@@ -48,8 +48,9 @@ export const isProtocolERC20Asset = (asset: CompatibleAsset): asset is TokenAsse
  */
 export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCryptoAmount => {
   return isProtocolEVMChain(amount.asset.chain)
-    ? [AssetETH, AssetAVAX, AssetBSC].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, amount.asset)) === -1 &&
-        !isSynthAsset(amount.asset)
+    ? [AssetETH, AssetAVAX, AssetBSC, AssetBETH].findIndex((nativeEVMAsset) =>
+        eqAsset(nativeEVMAsset, amount.asset),
+      ) === -1 && !isSynthAsset(amount.asset)
     : false
 }
 

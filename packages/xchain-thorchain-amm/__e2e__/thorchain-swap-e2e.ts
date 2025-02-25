@@ -238,6 +238,19 @@ describe('ThorchainAmm e2e tests', () => {
       printQuoteSwap(quoteSwap)
     })
 
+    it(`Should estimate swap from BASE.USDC to ETH`, async () => {
+      const fromAsset = assetFromStringEx('BASE.USDC-0X833589FCD6EDB6E08F4C7C32D4F71B54BDA02913')
+      const quoteSwap = await thorchainAmm.estimateSwap({
+        fromAsset,
+        fromAddress: 'fake-address',
+        destinationAsset: assetFromStringEx('ETH.ETH'),
+        destinationAddress: 'fake-address',
+        amount: new CryptoAmount(assetToBase(assetAmount(40, 6)), fromAsset),
+      })
+
+      printQuoteSwap(quoteSwap)
+    })
+
     it(`Should estimate swap from AVAX.USDC to ETH.USDT`, async () => {
       const fromAsset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E')
       const quoteSwap = await thorchainAmm.estimateSwap({
