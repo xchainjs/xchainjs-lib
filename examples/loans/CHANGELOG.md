@@ -1,5 +1,12 @@
 # xchainjs-loans
 
+## 1.0.45
+
+### Patch Changes
+
+- Updated dependencies [bd38911]
+  - @xchainjs/xchain-thorchain-amm@2.0.25
+
 ## 1.0.44
 
 ### Patch Changes
