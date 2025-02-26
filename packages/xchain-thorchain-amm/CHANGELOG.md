@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.25
+
+### Patch Changes
+
+- bd38911: Added Basechain to the approval checks
+
 ## 2.0.24
 
 ### Patch Changes
