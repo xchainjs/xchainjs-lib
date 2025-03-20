@@ -24,7 +24,7 @@
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
-    "axios": "1.7.4",
+    "axios": "1.8.4",
     "axios-retry": "^3.3.1",
     "bech32-buffer": "^0.2.0",
     "bitcoinjs-lib": "5.2.0",

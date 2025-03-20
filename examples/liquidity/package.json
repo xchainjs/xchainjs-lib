@@ -28,7 +28,7 @@
     "@xchainjs/xchain-thorchain-query": "workspace:*",
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.7.4",
+    "axios": "1.8.4",
     "axios-retry": "^3.2.5",
     "bignumber.js": "^9.0.0",
     "rimraf": "~3.0.2"
