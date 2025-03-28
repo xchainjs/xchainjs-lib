@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.4
+
+### Patch Changes
+
+- c9ec6a0: Browser compatibility
+
 ## 0.0.3
 
 ### Patch Changes
