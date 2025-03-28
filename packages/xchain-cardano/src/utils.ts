@@ -1,4 +1,4 @@
-import { NetworkInfo } from '@emurgo/cardano-serialization-lib-nodejs'
+import { NetworkInfo } from '@hippocampus-web3/cardano-serialization-lib-asmjs'
 import { Network } from '@xchainjs/xchain-client'
 
 export const getCardanoNetwork = (network: Network): NetworkInfo => {

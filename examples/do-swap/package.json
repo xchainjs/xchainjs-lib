@@ -38,7 +38,7 @@
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
-    "axios": "1.7.4",
+    "axios": "1.8.4",
     "axios-retry": "^3.3.1",
     "bchaddrjs": "^0.5.2",
     "bech32-buffer": "^0.2.0",

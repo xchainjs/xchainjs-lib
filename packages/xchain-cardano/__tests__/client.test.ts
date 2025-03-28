@@ -288,9 +288,9 @@ describe('Cardano client', () => {
         memo: 'test',
       })
 
-      expect(fees.average.amount().toString()).toBe('170385')
-      expect(fees.fast.amount().toString()).toBe('212981')
-      expect(fees.fastest.amount().toString()).toBe('255578')
+      expect(fees.average.amount().toString()).toBe('170473')
+      expect(fees.fast.amount().toString()).toBe('213091')
+      expect(fees.fastest.amount().toString()).toBe('255710')
     })
   })
 })

@@ -1,4 +1,4 @@
-import { BlockFrostAPI } from '@blockfrost/blockfrost-js'
+import { BlockFrostAPI } from '@hippocampus-web3/blockfrost-js'
 import {
   Address as CardanoAddress,
   BaseAddress,
@@ -22,7 +22,7 @@ import {
   Value,
   Vkeywitnesses,
   make_vkey_witness,
-} from '@emurgo/cardano-serialization-lib-nodejs'
+} from '@hippocampus-web3/cardano-serialization-lib-asmjs'
 import {
   AssetInfo,
   BaseXChainClient,
@@ -191,11 +191,11 @@ export class Client extends BaseXChainClient {
       memo: params.memo,
       amount: params.amount,
     })
-    const fee: number = Transaction.from_hex(rawUnsignedTx).body().fee().to_js_value()
+    const fee: string = Transaction.from_hex(rawUnsignedTx).body().fee().to_js_value()
     return {
       average: baseAmount(fee, ADA_DECIMALS),
-      fast: baseAmount(fee * 1.25, ADA_DECIMALS),
-      fastest: baseAmount(fee * 1.5, ADA_DECIMALS),
+      fast: baseAmount(Number(fee) * 1.25, ADA_DECIMALS),
+      fastest: baseAmount(Number(fee) * 1.5, ADA_DECIMALS),
       type: FeeType.PerByte,
     }
   }
@@ -260,7 +260,9 @@ export class Client extends BaseXChainClient {
 
     const privKey = accountKey.derive(0).derive(0)
 
-    const txBody = Transaction.from_hex(rawUnsignedTx).body()
+    const usignedTx = Transaction.from_hex(rawUnsignedTx)
+    const txBody = usignedTx.body()
+    const auxData = usignedTx.auxiliary_data()
 
     const fixedTx = FixedTransaction.new_from_body_bytes(txBody.to_bytes())
 
@@ -274,7 +276,7 @@ export class Client extends BaseXChainClient {
     vKeyWitnesses.add(vKeyWitness)
     witnesses.set_vkeys(vKeyWitnesses)
 
-    const tx = Transaction.new(txBody, witnesses, undefined)
+    const tx = Transaction.new(txBody, witnesses, auxData)
 
     const hash = await this.broadcastTx(tx.to_hex())
 
@@ -336,7 +338,7 @@ export class Client extends BaseXChainClient {
 
     if (memo) {
       const metadata = GeneralTransactionMetadata.new()
-      metadata.insert(BigNum.from_str('0'), TransactionMetadatum.new_text(memo))
+      metadata.insert(BigNum.from_str('674'), TransactionMetadatum.new_text(memo))
       txBuilder.set_metadata(metadata)
     }
 
