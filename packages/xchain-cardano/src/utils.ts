@@ -9,3 +9,12 @@ export const getCardanoNetwork = (network: Network): NetworkInfo => {
   }
   return networkMap[network]
 }
+export const getCardanoPrefix = (network: Network): string => {
+  switch (network) {
+    case Network.Mainnet:
+      return 'addr'
+    case Network.Testnet:
+    case Network.Stagenet:
+      return 'addr_test'
+  }
+}
