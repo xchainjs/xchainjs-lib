@@ -36,7 +36,7 @@ export const AssetBSC: Asset = {
   type: AssetType.NATIVE,
 }
 // Ankr api key
-const ankrApiKey = process.env.REACT_APP_ANKR_API_KEY
+const ankrApiKey = process.env.ANKR_API_KEY
 
 // Ethers providers
 const BSC_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(`https://rpc.ankr.com/bsc/${ankrApiKey}`)

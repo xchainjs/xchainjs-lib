@@ -14,7 +14,7 @@ export const AVAXChain = 'AVAX' as const
 export const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
 // Ankr api key
-const ankrApiKey = process.env.REACT_APP_ANKR_API_KEY
+const ankrApiKey = process.env.ANKR_API_KEY
 
 // Define JSON-RPC providers for mainnet and testnet
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
