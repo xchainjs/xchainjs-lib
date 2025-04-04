@@ -13,8 +13,13 @@ export const AVAX_GAS_ASSET_DECIMAL = 18
 export const AVAXChain = 'AVAX' as const
 export const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
+// Ankr api key
+const ankrApiKey = process.env.ANKR_API_KEY
+
 // Define JSON-RPC providers for mainnet and testnet
-const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/avalanche')
+const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
+  `https://rpc.ankr.com/avalanche/${ankrApiKey}`,
+)
 const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/avalanche_fuji')
 
 // Define ethers providers for different networks
