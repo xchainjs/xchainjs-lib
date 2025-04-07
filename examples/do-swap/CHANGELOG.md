@@ -1,5 +1,14 @@
 # xchainjs-do-swap
 
+## 1.0.46
+
+### Patch Changes
+
+- Updated dependencies [cac8322]
+  - @xchainjs/xchain-avax@1.0.15
+  - @xchainjs/xchain-bsc@1.0.15
+  - @xchainjs/xchain-thorchain-amm@2.0.26
+
 ## 1.0.45
 
 ### Patch Changes

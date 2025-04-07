@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.15
+
+### Patch Changes
+
+- cac8322: Add ankr api key param to provider
+
 ## 1.0.14
 
 ### Patch Changes
