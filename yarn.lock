@@ -3844,6 +3844,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bip39@npm:^3.0.0":
+  version: 3.0.4
+  resolution: "@types/bip39@npm:3.0.4"
+  dependencies:
+    bip39: "npm:*"
+  checksum: 10c0/d0fbb4e72161f03bba993bebb4b234ecdd1a05189f2d09df566ad69178637d93633bcf8aa6b3ac2724902d7a477c53a24593d7e388b92322076819fac98d738c
+  languageName: node
+  linkType: hard
+
 "@types/bitcoinjs-lib@npm:5.0.0":
   version: 5.0.0
   resolution: "@types/bitcoinjs-lib@npm:5.0.0"
@@ -4614,6 +4623,7 @@ __metadata:
   resolution: "@xchainjs/xchain-crypto@workspace:packages/xchain-crypto"
   dependencies:
     "@types/bech32": "npm:^1.1.2"
+    "@types/bip39": "npm:^3.0.0"
     "@types/crypto-js": "npm:^4.1.1"
     "@types/hdkey": "npm:^2.0.1"
     "@types/node": "npm:^18.15.12"
@@ -5830,7 +5840,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip39@npm:^3.0.2, bip39@npm:^3.0.4, bip39@npm:^3.1.0":
+"bip39@npm:*, bip39@npm:^3.0.2, bip39@npm:^3.0.4, bip39@npm:^3.1.0":
   version: 3.1.0
   resolution: "bip39@npm:3.1.0"
   dependencies:
