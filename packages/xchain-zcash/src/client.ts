@@ -8,6 +8,7 @@ import {
   FeesWithRates,
   Network,
 } from '@xchainjs/xchain-client'
+import { baseAmount } from '@xchainjs/xchain-util'
 import { Client as UTXOClient, PreparedTx, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import {
