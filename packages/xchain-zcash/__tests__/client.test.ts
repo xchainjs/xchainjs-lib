@@ -114,6 +114,11 @@ describe('Zcash client', () => {
   it('Should getFeeRates', async () => {
     await expect(client.getFeeRates()).rejects.toThrow('Error Zcash has flat fee. Fee rates not supported')
   })
+
+  it('Should broadcast tx', async () => {
+    const hash = await client.broadcastTx('fakeTxHex')
+    expect(hash).toBe('601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789')
+  })
   
   it('Should get fees without memo and without sender', async () => {
     const fees = await client.getFees()

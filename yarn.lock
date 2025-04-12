@@ -4071,13 +4071,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:11.11.6":
-  version: 11.11.6
-  resolution: "@types/node@npm:11.11.6"
-  checksum: 10c0/8a04d16475dc8b88031b8d9d97cbf11612802940c0514ea661c41ae02190e30fb3c69a870a523b9918477169f8c7e0d01df85d4648b9fe873d087d502fd7ba7e
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:20.11.28":
   version: 20.11.28
   resolution: "@types/node@npm:20.11.28"
@@ -4626,7 +4619,7 @@ __metadata:
     "@types/node": "npm:^18.15.12"
     "@types/uuid": "npm:^9.0.1"
     bech32: "npm:^2.0.0"
-    bip39: "npm:3.0.4"
+    bip39: "npm:^3.1.0"
     crypto-js: "npm:4.2.0"
     foundry-primitives-xchainjs: "github:xchainjs/foundry-primitives-js#master"
     hdkey: "npm:^2.1.0"
@@ -5834,18 +5827,6 @@ __metadata:
     valibot: "npm:^0.37.0"
     wif: "npm:^5.0.0"
   checksum: 10c0/9d95e1e3a3d276f60122dc6722388aa3a84981f9eed0e2d4e7bc4631bee175f4f8865fc7eee2b7ac5449a1cde4e81069c1811fc2c5f52aae3737ea0127a2b6a9
-  languageName: node
-  linkType: hard
-
-"bip39@npm:3.0.4":
-  version: 3.0.4
-  resolution: "bip39@npm:3.0.4"
-  dependencies:
-    "@types/node": "npm:11.11.6"
-    create-hash: "npm:^1.1.0"
-    pbkdf2: "npm:^3.0.9"
-    randombytes: "npm:^2.0.1"
-  checksum: 10c0/f95f40613474b64c82e2db046a6245e9dd6011e09d12b90c1cd0455e92830d7f0b92b9d7e120f583974047d2da7b5eb18afa6645647d841c11ff5cca5aaeb67d
   languageName: node
   linkType: hard
 
@@ -11456,7 +11437,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pbkdf2@npm:^3.0.3, pbkdf2@npm:^3.0.9, pbkdf2@npm:^3.1.2":
+"pbkdf2@npm:^3.0.3, pbkdf2@npm:^3.1.2":
   version: 3.1.2
   resolution: "pbkdf2@npm:3.1.2"
   dependencies:

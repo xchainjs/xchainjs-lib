@@ -20,8 +20,7 @@ export default {
       return [200, resp]
     })
     mock.onGet(/\/api\/v2\/sendtx\/[^/]+/).reply(() => {
-      // TODO: Mock response
-      const resp = require('./response/nownodes/get-balance.json')
+      const resp = require('./response/nownodes/broadcast.json')
       return [200, resp]
     })
   },
