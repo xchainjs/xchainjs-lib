@@ -1,9 +1,11 @@
-import { AssetZEC, Client, defaultZECParams, ZEC_DECIMAL } from '../src'
-import MockNowNodes from '../__mocks__/nownodes'
-import * as bip39 from 'bip39'
 import { FeeType } from '@xchainjs/xchain-client/lib'
 import { baseAmount } from '@xchainjs/xchain-util/lib'
+import * as bip39 from 'bip39'
 
+import MockNowNodes from '../__mocks__/nownodes'
+import { AssetZEC, Client, ZEC_DECIMAL, defaultZECParams } from '../src'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function deepSerialize(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(deepSerialize)
@@ -22,6 +24,7 @@ export function deepSerialize(obj: any): any {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const serialized: any = {}
     for (const key in obj) {
       serialized[key] = deepSerialize(obj[key])
@@ -36,7 +39,7 @@ describe('Zcash client', () => {
   let client: Client
 
   beforeAll(() => {
-    const mnemonic = bip39.entropyToMnemonic('00000000000000000000000000000000');
+    const mnemonic = bip39.entropyToMnemonic('00000000000000000000000000000000')
     client = new Client({
       ...defaultZECParams,
       phrase: mnemonic,
@@ -53,7 +56,7 @@ describe('Zcash client', () => {
 
   it('Should get asset info', async () => {
     const asset = await client.getAssetInfo()
-    expect(asset).toStrictEqual({asset: AssetZEC, decimal: ZEC_DECIMAL})
+    expect(asset).toStrictEqual({ asset: AssetZEC, decimal: ZEC_DECIMAL })
   })
 
   it('Should generate address', async () => {
@@ -62,7 +65,9 @@ describe('Zcash client', () => {
   })
 
   it('Should prepareTx TX without memo', async () => {
-    await expect(client.prepareTx()).rejects.toThrow('Prepare unsiged TX not supported for Zcash. Request functionality if you need it.')
+    await expect(client.prepareTx()).rejects.toThrow(
+      'Prepare unsiged TX not supported for Zcash. Request functionality if you need it.',
+    )
   })
 
   it('Should generate explorer URL', async () => {
@@ -77,7 +82,9 @@ describe('Zcash client', () => {
 
   it('Should generate explorer tx URL', async () => {
     const url = await client.getExplorerTxUrl('601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789')
-    expect(url).toBe('https://mainnet.zcashexplorer.app/transactions/601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789')
+    expect(url).toBe(
+      'https://mainnet.zcashexplorer.app/transactions/601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789',
+    )
   })
 
   it('Should validate address', async () => {
@@ -95,7 +102,7 @@ describe('Zcash client', () => {
 
   it('Should get all txs', async () => {
     const txs = await client.getTransactions({
-      address: 't1eiZYPXWurGMxFwoTu62531s8fAiExFh88'
+      address: 't1eiZYPXWurGMxFwoTu62531s8fAiExFh88',
     })
     const txsDeserialize = deepSerialize(txs)
     expect(txsDeserialize).toMatchSnapshot('zcash-get-txs')
@@ -103,8 +110,8 @@ describe('Zcash client', () => {
 
   it('Should get balance', async () => {
     const balance = await client.getBalance('t1eiZYPXWurGMxFwoTu62531s8fAiExFh88')
-    expect(balance[0].amount.amount().toString()).toBe("268682490")
-    expect(balance[0].asset).toStrictEqual({ "chain": "ZEC", "symbol": "ZEC", "ticker": "ZEC", "type": 0 })
+    expect(balance[0].amount.amount().toString()).toBe('268682490')
+    expect(balance[0].asset).toStrictEqual({ chain: 'ZEC', symbol: 'ZEC', ticker: 'ZEC', type: 0 })
   })
 
   it('Should getFeesWithRates', async () => {
@@ -119,7 +126,7 @@ describe('Zcash client', () => {
     const hash = await client.broadcastTx('fakeTxHex')
     expect(hash).toBe('601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789')
   })
-  
+
   it('Should get fees without memo and without sender', async () => {
     const fees = await client.getFees()
     const expected = {

@@ -1,18 +1,25 @@
-import { AssetInfo, FeeEstimateOptions, FeeRate, FeeRates, FeesWithRates, FeeType, Network } from '@xchainjs/xchain-client'
+import { getFee, memoToScript } from '@hippocampus-web3/zcash-wallet-js'
+import {
+  AssetInfo,
+  FeeEstimateOptions,
+  FeeRate,
+  FeeRates,
+  FeeType,
+  FeesWithRates,
+  Network,
+} from '@xchainjs/xchain-client'
 import { Client as UTXOClient, PreparedTx, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import {
   AssetZEC,
+  LOWER_FEE_BOUND,
+  NownodesProviders,
+  UPPER_FEE_BOUND,
   ZECChain,
   ZEC_DECIMAL,
-  NownodesProviders,
-  LOWER_FEE_BOUND,
-  UPPER_FEE_BOUND,
   zcashExplorerProviders,
 } from './const'
 import * as Utils from './utils'
-import { getFee, memoToScript } from '@hippocampus-web3/zcash-wallet-js'
-import { baseAmount } from '@xchainjs/xchain-util'
 
 // Default parameters for the Zcash client
 export const defaultZECParams: UtxoClientParams = {
@@ -80,10 +87,10 @@ abstract class Client extends UTXOClient {
    * @param {string} memo Memo to compile.
    * @returns {Buffer} Compiled memo.
    */
-    protected compileMemo(memo: string): Buffer {
-      return memoToScript(memo)
-    }
-  
+  protected compileMemo(memo: string): Buffer {
+    return memoToScript(memo)
+  }
+
   /**
    * Get transaction fee from UTXOs.
    * @param {UTXO[]} inputs UTXOs to calculate fee from.
@@ -93,7 +100,7 @@ abstract class Client extends UTXOClient {
    */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, _data: Buffer | null = null): number {
     if (feeRate) {
-      throw ('No feerate supported for thsi clienet')
+      throw 'No feerate supported for thsi clienet'
     }
     return getFee(inputs.length, !!_data)
   }
@@ -105,15 +112,15 @@ abstract class Client extends UTXOClient {
    * @returns {PreparedTx} The raw unsigned transaction.
    */
   async prepareTx(): Promise<PreparedTx> {
-    throw Error ('Prepare unsiged TX not supported for Zcash. Request functionality if you need it.')
+    throw Error('Prepare unsiged TX not supported for Zcash. Request functionality if you need it.')
   }
 
   async getFeesWithRates(): Promise<FeesWithRates> {
-    throw Error ('Error Zcash has flat fee. Fee rates not supported')
+    throw Error('Error Zcash has flat fee. Fee rates not supported')
   }
 
   async getFeeRates(): Promise<FeeRates> {
-    throw Error ('Error Zcash has flat fee. Fee rates not supported')
+    throw Error('Error Zcash has flat fee. Fee rates not supported')
   }
 
   async getFees(options?: FeeEstimateOptions) {
@@ -127,11 +134,9 @@ abstract class Client extends UTXOClient {
       average: baseAmount(flatFee, ZEC_DECIMAL),
       fast: baseAmount(flatFee, ZEC_DECIMAL),
       fastest: baseAmount(flatFee, ZEC_DECIMAL),
-      type: FeeType.FlatFee
-    } 
+      type: FeeType.FlatFee,
+    }
   }
 }
 
 export { Client }
-
-

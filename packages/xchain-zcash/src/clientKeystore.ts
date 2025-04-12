@@ -1,14 +1,14 @@
-import { checkFeeBounds, Network, TxHash } from '@xchainjs/xchain-client'
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
+import { buildTx, signAndFinalize, skToAddr } from '@hippocampus-web3/zcash-wallet-js'
+import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import { BIP32Factory } from 'bip32'
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
-import * as Utils from './utils'
 
 import { Client, defaultZECParams } from './client'
-import { buildTx, signAndFinalize, skToAddr } from '@hippocampus-web3/zcash-wallet-js'
+import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
 /**
@@ -70,7 +70,6 @@ class ClientKeystore extends Client {
    * @throws {"Could not get private key from phrase"} Thrown if failed to create BTC keys from the given phrase.
    */
   private getZecKeys(phrase: string, index = 0): ECPairInterface {
-
     const seed = getSeed(phrase)
 
     const bip32 = BIP32Factory(ecc)
@@ -80,7 +79,7 @@ class ClientKeystore extends Client {
       throw new Error('Could not get private key from phrase')
     }
 
-    return ECPair.fromPrivateKey(Buffer.from(master.privateKey)) // Be carefull missing zcash network due to this error: https://github.com/iancoleman/bip39/issues/94 
+    return ECPair.fromPrivateKey(Buffer.from(master.privateKey)) // Be carefull missing zcash network due to this error: https://github.com/iancoleman/bip39/issues/94
   }
 
   /**
@@ -91,7 +90,6 @@ class ClientKeystore extends Client {
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
   async transfer(params: TxParams): Promise<TxHash> {
-
     // Get the address index from the parameters or use the default value
     const fromAddressIndex = params?.walletIndex || 0
 
@@ -100,15 +98,23 @@ class ClientKeystore extends Client {
 
     const utxos = await this.scanUTXOs(sender, true)
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
-      
-    const zcashUtxos = utxos.map(utxo => ({
+
+    const zcashUtxos = utxos.map((utxo) => ({
       address: sender,
       txid: utxo.hash,
       outputIndex: utxo.index,
-      satoshis: utxo.value
+      satoshis: utxo.value,
     }))
 
-    const tx = await buildTx(0, sender, params.recipient, params.amount.amount().toNumber(), zcashUtxos, this.network === Network.Testnet ? false : true, params.memo )
+    const tx = await buildTx(
+      0,
+      sender,
+      params.recipient,
+      params.amount.amount().toNumber(),
+      zcashUtxos,
+      this.network === Network.Testnet ? false : true,
+      params.memo,
+    )
 
     checkFeeBounds(this.feeBounds, tx.fee)
 
@@ -117,7 +123,7 @@ class ClientKeystore extends Client {
     }
 
     const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
-    
+
     const txId = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
 
     return txId
@@ -125,5 +131,3 @@ class ClientKeystore extends Client {
 }
 
 export { ClientKeystore }
-
-

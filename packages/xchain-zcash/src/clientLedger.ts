@@ -5,13 +5,12 @@ import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 import { Client } from './client'
 
 class ClientLedger extends Client {
-
   constructor(params: UtxoClientParams) {
     super(params)
     throw Error('Ledger client not supported for Zcash.')
   }
 
-  public async getApp(): Promise<any> {
+  public async getApp() {
     throw Error('Not implemented.')
   }
 

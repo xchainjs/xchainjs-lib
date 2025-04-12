@@ -1,6 +1,6 @@
-import { Network } from '@xchainjs/xchain-client' // Importing the Network type from xchain-client module
-import { Address } from '@xchainjs/xchain-util' // Importing the Address type from xchain-util module
-import { isValidAddr, getPrefix as getLowLevelPrefix } from '@hippocampus-web3/zcash-wallet-js'
+import { getPrefix as getLowLevelPrefix, isValidAddr } from '@hippocampus-web3/zcash-wallet-js' // Importing the Network type from xchain-client module
+import { Network } from '@xchainjs/xchain-client' // Importing the Address type from xchain-util module
+import { Address } from '@xchainjs/xchain-util'
 
 /**
  * Function to get the Zcash prefix depending on network
@@ -12,7 +12,7 @@ export const zecNetworkPrefix = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return getLowLevelPrefix('mainnet') 
+      return getLowLevelPrefix('mainnet')
     case Network.Testnet:
       return getLowLevelPrefix('testnet')
   }

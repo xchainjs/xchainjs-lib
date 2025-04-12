@@ -1,9 +1,6 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
-import {
-  NownodesProvider,
-  UtxoOnlineDataProviders,
-} from '@xchainjs/xchain-utxo-providers'
+import { NownodesProvider, UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
 export const MIN_TX_FEE = 10000
 
@@ -44,7 +41,7 @@ const mainnetNownodesProvider = new NownodesProvider(
   ZECChain,
   AssetZEC,
   ZEC_DECIMAL,
-  process.env.NOWNODES_API_KEY || ''
+  process.env.NOWNODES_API_KEY || '',
 )
 
 export const NownodesProviders: UtxoOnlineDataProviders = {
@@ -52,4 +49,3 @@ export const NownodesProviders: UtxoOnlineDataProviders = {
   [Network.Stagenet]: mainnetNownodesProvider,
   [Network.Mainnet]: mainnetNownodesProvider,
 }
-
