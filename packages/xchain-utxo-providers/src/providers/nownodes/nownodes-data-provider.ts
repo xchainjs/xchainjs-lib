@@ -1,4 +1,4 @@
-import { FeeOption, FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
+import { FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 
 import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '../../types'
@@ -49,11 +49,11 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
       address: address,
       isConfirmed: true
     })
-    return this.populateUTXOs(
-      allUnspent,
-      address
+    return this.mapUTXOs(
+      allUnspent
     )
   }
+
   async getUnspentTxs(address: string): Promise<UTXO[]> {
     const allUnspent = await nownodes.getUTXOs({
       apiKey: this._apiKey,
@@ -61,9 +61,8 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
       address: address,
       isConfirmed: false
     })
-    return this.populateUTXOs(
-      allUnspent,
-      address
+    return this.mapUTXOs(
+      allUnspent
     )
   }
 
@@ -77,7 +76,6 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
     })
     return [{ amount, asset: this.asset }]
   }
-
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const rawTxs = await this.getRawTransactions(params)
@@ -103,23 +101,8 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  async getCurrentHeight(): Promise<number> {
-    const chainResponse = await nownodes.getBlockchainData({
-      baseUrl: `${this.baseUrl}`,
-      apiKey: this._apiKey,
-    })
-    return chainResponse.backend.blocks
-  }
-
-  // TODO: REIMPLEMENT
   async getFeeRates(): Promise<FeeRates> {
-
-
-    return {
-      [FeeOption.Average]: 1/ 1000,
-      [FeeOption.Fast]: 1 / 1000,
-      [FeeOption.Fastest]: 1 / 1000,
-    }
+    throw Error('Zcash has flat fees. Fee rates not apply')
   }
 
   private mapTransactionToTx(rawTx: Transaction): Tx {
@@ -138,27 +121,12 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  private async populateUTXOs(utxos: AddressUTXO[], address: string): Promise<UTXO[]> {
-    const transactionsResponse = await this.getRawTransactions({
-      address
-    }) // Max 1000
+  private async mapUTXOs(utxos: AddressUTXO[]): Promise<UTXO[]> {
     return utxos.flatMap((currentUtxo) => {
-      const utxoExtendedInfo = transactionsResponse.find(rawTx => rawTx.txid === currentUtxo.txid)
-      if (!utxoExtendedInfo) {
-        console.warn(`Cannot find info about hash ${currentUtxo.txid}`)
-        return []
-      }
-      const utxoHex = utxoExtendedInfo.vout[currentUtxo.vout]
-      if (!utxoHex) {
-        console.warn(`Cannot find utxo with index ${currentUtxo.vout} in hash ${currentUtxo.txid}`)
-        return []
-      }
       return [{
         hash: currentUtxo.txid,
         index: currentUtxo.vout,
-        value: Number(currentUtxo.value),
-        txHex: utxoExtendedInfo.hex,
-        scriptPubKey: utxoHex.hex
+        value: Number(currentUtxo.value)
       }]
     })
   }
@@ -171,7 +139,7 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
 
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
-    if (offset + limit > 1000) throw Error('cannot fetch more than last 1000 txs') // TODO: Is possible increase the number if necessary
+    if (offset + limit > 1000) throw Error('cannot fetch more than last 1000 txs') // note: Is possible increase the number if necessary
     if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
 
     try {

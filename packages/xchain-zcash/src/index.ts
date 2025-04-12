@@ -1,6 +1,3 @@
-// Export all types from the 'types' file
-export * from './types'
-
 // Export the 'ClientKeystore' class as 'Client'
 export { ClientKeystore as Client } from './clientKeystore'
 

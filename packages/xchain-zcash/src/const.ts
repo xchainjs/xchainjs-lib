@@ -9,11 +9,8 @@ export const MIN_TX_FEE = 10000
 
 export const ZEC_DECIMAL = 8
 
-export const LOWER_FEE_BOUND = 1
-export const UPPER_FEE_BOUND = 1_000
-
-// export const ZEC_SYMBOL = '₿'
-// export const ZEC_SATOSHI_SYMBOL = '⚡'
+export const LOWER_FEE_BOUND = 10000
+export const UPPER_FEE_BOUND = 100000
 
 /**
  * Chain identifier for Zcash mainnet
@@ -36,23 +33,11 @@ const ZEC_TESTNET_EXPLORER = new ExplorerProvider(
   'https://testnet.zcashexplorer.app/address/%%ADDRESS%%',
   'https://testnet.zcashexplorer.app/transactions/%%TX_ID%%',
 )
-export const blockstreamExplorerProviders = {
+export const zcashExplorerProviders = {
   [Network.Testnet]: ZEC_TESTNET_EXPLORER,
   [Network.Stagenet]: ZEC_MAINNET_EXPLORER,
   [Network.Mainnet]: ZEC_MAINNET_EXPLORER,
 }
-
-// Bitgo data providers for Zcash
-// const mainnetBitgoProvider = new BitgoProvider({
-//   baseUrl: 'https://app.bitgo.com',
-//   chain: ZECChain,
-// })
-
-// export const BitgoProviders: UtxoOnlineDataProviders = {
-//   [Network.Testnet]: undefined,
-//   [Network.Stagenet]: mainnetBitgoProvider,
-//   [Network.Mainnet]: mainnetBitgoProvider,
-// }
 
 const mainnetNownodesProvider = new NownodesProvider(
   'https://zecbook.nownodes.io/api/v2',

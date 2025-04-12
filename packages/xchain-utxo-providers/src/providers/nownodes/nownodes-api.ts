@@ -9,7 +9,6 @@ import {
   Transaction,
   TxHashParams,
   AddressUTXO,
-  RawTransaction,
 } from './nownodes-api-types'
 
 /**
@@ -28,25 +27,6 @@ export const getTx = async ({ apiKey, baseUrl, hash }: TxHashParams): Promise<Tr
     }
   })
   const tx: Transaction = response.data
-  return tx
-} 
-
-/**
- * Get raw transaction data by hash (without standarize).
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} hash The transaction hash.
- * @returns {RawTransaction}
- */
-export const getRawTx = async ({ apiKey, baseUrl, hash }: TxHashParams): Promise<RawTransaction> => {
-  const url = `${baseUrl}/tx-specific/${hash}`
-  const response = await axios.get(url, { 
-    headers: {
-      'api-key': apiKey,
-    }
-  })
-  const tx: RawTransaction = response.data
   return tx
 } 
 
@@ -112,7 +92,6 @@ export const getUTXOs = async ({
     }
   })
   const utxos: AddressUTXO[] = response.data
-  console.log('utxos', utxos)
   return utxos
 }
 
@@ -159,27 +138,4 @@ export const broadcastTx = async ({
     }
   })
   return (response.data as BroadcastDTO).result
-}
-
-/**
- * Get general information about a blockchain
- * @param {string} baseUrl The base url for the chain to interact with.
- * @param {string} apiKey API key provided by Blockcypher.
- * @returns {ChainResponse}
- */
-// TODO: REIMPLEMENT
-export const getBlockchainData = async ({
-  baseUrl,
-  apiKey,
-}: {
-  baseUrl: string
-  apiKey: string
-}): Promise<any> => {
-  const url = baseUrl
-  const response = await axios.get(url, { 
-    headers: {
-      'api-key': apiKey,
-    }
-  })
-  return response.data
 }

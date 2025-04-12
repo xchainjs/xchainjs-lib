@@ -34,14 +34,13 @@
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@bitgo/utxo-lib": "11.1.0",
+    "@hippocampus-web3/zcash-wallet-js": "^0.0.4",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
     "bip32": "^5.0.0-rc.0",
-    "bs58check": "^4.0.0",
     "ecpair": "^3.0.0"
   },
   "publishConfig": {
@@ -49,6 +48,9 @@
     "directory": "release/package"
   },
   "devDependencies": {
+    "@types/blake2b-wasm": "^2.4.3",
+    "@types/js-yaml": "^4.0.9",
+    "@types/lodash": "^4.17.13",
     "axios-mock-adapter": "^2.1.0"
   }
 }

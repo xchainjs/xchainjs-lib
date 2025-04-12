@@ -1,16 +1,16 @@
-import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
+import { checkFeeBounds, Network, TxHash } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
-import * as utxolib from '@bitgo/utxo-lib'
-import { createHash } from 'crypto'
-import * as bs58check from 'bs58check'
 import { BIP32Factory } from 'bip32'
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-
-import { Client, defaultZECParams } from './client' // Importing the base Bitcoin client
+import { ECPairFactory, ECPairInterface } from 'ecpair'
 import * as Utils from './utils'
 
+import { Client, defaultZECParams } from './client'
+import { buildTx, signAndFinalize, skToAddr } from '@hippocampus-web3/zcash-wallet-js'
+
+const ECPair = ECPairFactory(ecc)
 /**
  * Custom Bitcoin client extended to support keystore functionality
  */
@@ -29,7 +29,6 @@ class ClientKeystore extends Client {
    * @returns {Address} The Bitcoin address.
    * @throws {"index must be greater than zero"} Thrown if the index is less than zero.
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed to create the address from the phrase.
    */
   getAddress(index = 0): Address {
     // Check if the index is valid
@@ -39,29 +38,13 @@ class ClientKeystore extends Client {
 
     // Check if the phrase has been set
     if (this.phrase) {
-      // const zecNetwork = Utils.zecNetwork(this.network)
       const zecKeys = this.getZecKeys(this.phrase, index)
-
-      // let address: string | undefined
-      // address = utxolib.payments.p2wpkh({
-      //   pubkey: zecKeys.publicKey,
-      //   network: zecNetwork,
-      // }).address
-      // // Throw an error if the address is not defined
-      // if (!address) {
-      //   throw new Error('Address not defined')
-      // }
-
-      // return address
-
-      // const keyPair = utxolib.ECPair.fromPrivateKey(node.privateKey)
-
-      const sha256 = createHash('sha256').update(zecKeys.publicKey).digest()
-      const ripemd160 = createHash('ripemd160').update(sha256).digest()
-      const prefix = Buffer.from([0x1c, 0xb8]) // ZEC P2PKH
-      const payload = Buffer.concat([prefix, ripemd160])
-
-      return bs58check.default.encode(payload)
+      if (!zecKeys.privateKey) {
+        throw Error('Error getting private key')
+      }
+      const prefix = Utils.zecNetworkPrefix(this.network)
+      const bufferPrefix = Buffer.from(prefix)
+      return skToAddr(zecKeys.privateKey, bufferPrefix)
     }
 
     throw new Error('Phrase must be provided')
@@ -86,8 +69,8 @@ class ClientKeystore extends Client {
    * @returns {Bitcoin.ECPair.ECPairInterface} The Bitcoin key pair.
    * @throws {"Could not get private key from phrase"} Thrown if failed to create BTC keys from the given phrase.
    */
-  private getZecKeys(phrase: string, index = 0): utxolib.ECPairInterface {
-    // const zecNetwork = Utils.zecNetwork(this.network)
+  private getZecKeys(phrase: string, index = 0): ECPairInterface {
+
     const seed = getSeed(phrase)
 
     const bip32 = BIP32Factory(ecc)
@@ -97,7 +80,7 @@ class ClientKeystore extends Client {
       throw new Error('Could not get private key from phrase')
     }
 
-    return utxolib.ECPair.fromPrivateKey(Buffer.from(master.privateKey)) // Be carefull missing zcash network due to this error: https://github.com/iancoleman/bip39/issues/94 
+    return ECPair.fromPrivateKey(Buffer.from(master.privateKey)) // Be carefull missing zcash network due to this error: https://github.com/iancoleman/bip39/issues/94 
   }
 
   /**
@@ -107,55 +90,40 @@ class ClientKeystore extends Client {
    * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    // Set the default fee rate to `fast`
-    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
-
-    // Check if the fee rate is within the fee bounds
-    checkFeeBounds(this.feeBounds, feeRate)
+  async transfer(params: TxParams): Promise<TxHash> {
 
     // Get the address index from the parameters or use the default value
     const fromAddressIndex = params?.walletIndex || 0
 
-    // Get the Bitcoin keys
     const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
     const sender = await this.getAddressAsync(fromAddressIndex)
-    // zecKeys.network = Utils.zecNetwork(this.network)
 
-    // Prepare the transaction
-    const { rawUnsignedTx, inputs } = await this.prepareTx({
-      ...params,
-      sender,
-      feeRate,
-    })
+    const utxos = await this.scanUTXOs(sender, true)
+    if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
+      
+    const zcashUtxos = utxos.map(utxo => ({
+      address: sender,
+      txid: utxo.hash,
+      outputIndex: utxo.index,
+      satoshis: utxo.value
+    }))
 
-    // Build the PSBT
-    const buffer = Buffer.from(rawUnsignedTx, 'hex')
-    const unsignedTx = utxolib.bitgo.ZcashTransaction.fromBuffer(buffer, false, 'number', Utils.zecNetwork(this.network))
-    const txb = utxolib.bitgo.ZcashTransactionBuilder.fromTransaction(unsignedTx, Utils.zecNetwork(this.network))
+    const tx = await buildTx(0, sender, params.recipient, params.amount.amount().toNumber(), zcashUtxos, this.network === Network.Testnet ? false : true, params.memo )
 
-    // Sign all inputs
-    for (let i = 0; i < inputs.length; i++) {
-      // txb.tx.ins[i] = { ...txb.tx.ins[i], value: inputs[i].value } as any
-      txb.sign(
-        inputs[i].index,
-        zecKeys,
-        undefined,
-        utxolib.Transaction.SIGHASH_ALL,
-        inputs[i].value,
-        // value: inputs[i].value
-      )
+    checkFeeBounds(this.feeBounds, tx.fee)
+
+    if (!zecKeys.privateKey) {
+      throw Error('Error getting private key')
     }
 
-    // Extract the transaction hex
-    const txBuilded = txb.build()
-    const txHex = txBuilded.toHex()
-    // Extract the transaction hash
-    // const txHash = psbt.extractTransaction().getId()
+    const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
+    
+    const txId = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
 
-    const txId = await this.roundRobinBroadcastTx(txHex)
     return txId
   }
 }
 
 export { ClientKeystore }
+
+

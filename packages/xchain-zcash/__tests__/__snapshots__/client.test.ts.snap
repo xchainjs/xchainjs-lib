@@ -1,98 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Zcash client Should get UTXO confirmed: zcash-get-utxo-confirmed 1`] = `
-[
-  {
-    "hash": "601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789",
-    "index": 0,
-    "value": 268682490,
-  },
-]
-`;
-
-exports[`Zcash client Should get tx: zcash-get-tx 1`] = `
-{
-  "asset": {
-    "chain": "ZEC",
-    "symbol": "ZEC",
-    "ticker": "ZEC",
-    "type": 0,
-  },
-  "date": "2025-04-08T17:20:05.000Z",
-  "from": [
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "95766509",
-      },
-      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
-    },
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "39081200",
-      },
-      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
-    },
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "35494039",
-      },
-      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
-    },
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "15804625",
-      },
-      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
-    },
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "12839186",
-      },
-      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
-    },
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "1031041542",
-      },
-      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
-    },
-  ],
-  "hash": "601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789",
-  "to": [
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "268682490",
-      },
-      "to": "t1eiZYPXWurGMxFwoTu62531s8fAiExFh88",
-    },
-    {
-      "amount": {
-        "decimal": 8,
-        "type": "BASE",
-        "value": "961303931",
-      },
-      "to": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
-    },
-  ],
-  "type": "transfer",
-}
-`;
-
-exports[`Zcash client Should get txs: zcash-get-txs 1`] = `
+exports[`Zcash client Should get all txs: zcash-get-txs 1`] = `
 {
   "total": 1,
   "txs": [
@@ -176,5 +84,87 @@ exports[`Zcash client Should get txs: zcash-get-txs 1`] = `
       "type": "transfer",
     },
   ],
+}
+`;
+
+exports[`Zcash client Should get data tx: zcash-get-tx 1`] = `
+{
+  "asset": {
+    "chain": "ZEC",
+    "symbol": "ZEC",
+    "ticker": "ZEC",
+    "type": 0,
+  },
+  "date": "2025-04-08T17:20:05.000Z",
+  "from": [
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "95766509",
+      },
+      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
+    },
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "39081200",
+      },
+      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
+    },
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "35494039",
+      },
+      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
+    },
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "15804625",
+      },
+      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
+    },
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "12839186",
+      },
+      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
+    },
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "1031041542",
+      },
+      "from": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
+    },
+  ],
+  "hash": "601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789",
+  "to": [
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "268682490",
+      },
+      "to": "t1eiZYPXWurGMxFwoTu62531s8fAiExFh88",
+    },
+    {
+      "amount": {
+        "decimal": 8,
+        "type": "BASE",
+        "value": "961303931",
+      },
+      "to": "t1Qfn52D2TGCAC75aBEKiWkozeJgaQsR638",
+    },
+  ],
+  "type": "transfer",
 }
 `;
