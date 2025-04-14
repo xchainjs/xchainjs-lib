@@ -19,6 +19,9 @@ export namespace common {
 
         /** Asset trade */
         trade?: (boolean|null);
+
+        /** Asset secured */
+        secured?: (boolean|null);
     }
 
     /** Represents an Asset. */
@@ -44,6 +47,9 @@ export namespace common {
 
         /** Asset trade. */
         public trade: boolean;
+
+        /** Asset secured. */
+        public secured: boolean;
 
         /**
          * Creates a new Asset instance using the specified properties.
@@ -630,591 +636,591 @@ export namespace common {
 /** Namespace types. */
 export namespace types {
 
-    /** Properties of a MsgDeposit. */
-    interface IMsgDeposit {
+  /** Properties of a MsgDeposit. */
+  interface IMsgDeposit {
 
-        /** MsgDeposit coins */
-        coins?: (common.ICoin[]|null);
+      /** MsgDeposit coins */
+      coins?: (common.ICoin[]|null);
 
-        /** MsgDeposit memo */
-        memo?: (string|null);
+      /** MsgDeposit memo */
+      memo?: (string|null);
 
-        /** MsgDeposit signer */
-        signer?: (Uint8Array|null);
-    }
+      /** MsgDeposit signer */
+      signer?: (Uint8Array|null);
+  }
 
-    /** Represents a MsgDeposit. */
-    class MsgDeposit implements IMsgDeposit {
+  /** Represents a MsgDeposit. */
+  class MsgDeposit implements IMsgDeposit {
 
-        /**
-         * Constructs a new MsgDeposit.
-         * @param [properties] Properties to set
-         */
-        constructor(properties?: types.IMsgDeposit);
+      /**
+       * Constructs a new MsgDeposit.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: types.IMsgDeposit);
 
-        /** MsgDeposit coins. */
-        public coins: common.ICoin[];
+      /** MsgDeposit coins. */
+      public coins: common.ICoin[];
 
-        /** MsgDeposit memo. */
-        public memo: string;
+      /** MsgDeposit memo. */
+      public memo: string;
 
-        /** MsgDeposit signer. */
-        public signer: Uint8Array;
+      /** MsgDeposit signer. */
+      public signer: Uint8Array;
 
-        /**
-         * Creates a new MsgDeposit instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns MsgDeposit instance
-         */
-        public static create(properties?: types.IMsgDeposit): types.MsgDeposit;
+      /**
+       * Creates a new MsgDeposit instance using the specified properties.
+       * @param [properties] Properties to set
+       * @returns MsgDeposit instance
+       */
+      public static create(properties?: types.IMsgDeposit): types.MsgDeposit;
 
-        /**
-         * Encodes the specified MsgDeposit message. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
-         * @param message MsgDeposit message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encode(message: types.IMsgDeposit, writer?: $protobuf.Writer): $protobuf.Writer;
+      /**
+       * Encodes the specified MsgDeposit message. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
+       * @param message MsgDeposit message or plain object to encode
+       * @param [writer] Writer to encode to
+       * @returns Writer
+       */
+      public static encode(message: types.IMsgDeposit, writer?: $protobuf.Writer): $protobuf.Writer;
 
-        /**
-         * Encodes the specified MsgDeposit message, length delimited. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
-         * @param message MsgDeposit message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encodeDelimited(message: types.IMsgDeposit, writer?: $protobuf.Writer): $protobuf.Writer;
+      /**
+       * Encodes the specified MsgDeposit message, length delimited. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
+       * @param message MsgDeposit message or plain object to encode
+       * @param [writer] Writer to encode to
+       * @returns Writer
+       */
+      public static encodeDelimited(message: types.IMsgDeposit, writer?: $protobuf.Writer): $protobuf.Writer;
 
-        /**
-         * Decodes a MsgDeposit message from the specified reader or buffer.
-         * @param reader Reader or buffer to decode from
-         * @param [length] Message length if known beforehand
-         * @returns MsgDeposit
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): types.MsgDeposit;
+      /**
+       * Decodes a MsgDeposit message from the specified reader or buffer.
+       * @param reader Reader or buffer to decode from
+       * @param [length] Message length if known beforehand
+       * @returns MsgDeposit
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): types.MsgDeposit;
 
-        /**
-         * Decodes a MsgDeposit message from the specified reader or buffer, length delimited.
-         * @param reader Reader or buffer to decode from
-         * @returns MsgDeposit
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): types.MsgDeposit;
+      /**
+       * Decodes a MsgDeposit message from the specified reader or buffer, length delimited.
+       * @param reader Reader or buffer to decode from
+       * @returns MsgDeposit
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): types.MsgDeposit;
 
-        /**
-         * Verifies a MsgDeposit message.
-         * @param message Plain object to verify
-         * @returns `null` if valid, otherwise the reason why it is not
-         */
-        public static verify(message: { [k: string]: any }): (string|null);
+      /**
+       * Verifies a MsgDeposit message.
+       * @param message Plain object to verify
+       * @returns `null` if valid, otherwise the reason why it is not
+       */
+      public static verify(message: { [k: string]: any }): (string|null);
 
-        /**
-         * Creates a MsgDeposit message from a plain object. Also converts values to their respective internal types.
-         * @param object Plain object
-         * @returns MsgDeposit
-         */
-        public static fromObject(object: { [k: string]: any }): types.MsgDeposit;
+      /**
+       * Creates a MsgDeposit message from a plain object. Also converts values to their respective internal types.
+       * @param object Plain object
+       * @returns MsgDeposit
+       */
+      public static fromObject(object: { [k: string]: any }): types.MsgDeposit;
 
-        /**
-         * Creates a plain object from a MsgDeposit message. Also converts values to other types if specified.
-         * @param message MsgDeposit
-         * @param [options] Conversion options
-         * @returns Plain object
-         */
-        public static toObject(message: types.MsgDeposit, options?: $protobuf.IConversionOptions): { [k: string]: any };
+      /**
+       * Creates a plain object from a MsgDeposit message. Also converts values to other types if specified.
+       * @param message MsgDeposit
+       * @param [options] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(message: types.MsgDeposit, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
-        /**
-         * Converts this MsgDeposit to JSON.
-         * @returns JSON object
-         */
-        public toJSON(): { [k: string]: any };
-    }
+      /**
+       * Converts this MsgDeposit to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
+  }
 
-    /** Properties of a MsgSend. */
-    interface IMsgSend {
+  /** Properties of a MsgSend. */
+  interface IMsgSend {
 
-        /** MsgSend fromAddress */
-        fromAddress?: (Uint8Array|null);
+      /** MsgSend fromAddress */
+      fromAddress?: (Uint8Array|null);
 
-        /** MsgSend toAddress */
-        toAddress?: (Uint8Array|null);
+      /** MsgSend toAddress */
+      toAddress?: (Uint8Array|null);
 
-        /** MsgSend amount */
-        amount?: (cosmos.base.v1beta1.ICoin[]|null);
-    }
+      /** MsgSend amount */
+      amount?: (cosmos.base.v1beta1.ICoin[]|null);
+  }
 
-    /** Represents a MsgSend. */
-    class MsgSend implements IMsgSend {
+  /** Represents a MsgSend. */
+  class MsgSend implements IMsgSend {
 
-        /**
-         * Constructs a new MsgSend.
-         * @param [properties] Properties to set
-         */
-        constructor(properties?: types.IMsgSend);
+      /**
+       * Constructs a new MsgSend.
+       * @param [properties] Properties to set
+       */
+      constructor(properties?: types.IMsgSend);
 
-        /** MsgSend fromAddress. */
-        public fromAddress: Uint8Array;
+      /** MsgSend fromAddress. */
+      public fromAddress: Uint8Array;
 
-        /** MsgSend toAddress. */
-        public toAddress: Uint8Array;
+      /** MsgSend toAddress. */
+      public toAddress: Uint8Array;
 
-        /** MsgSend amount. */
-        public amount: cosmos.base.v1beta1.ICoin[];
+      /** MsgSend amount. */
+      public amount: cosmos.base.v1beta1.ICoin[];
 
-        /**
-         * Creates a new MsgSend instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns MsgSend instance
-         */
-        public static create(properties?: types.IMsgSend): types.MsgSend;
+      /**
+       * Creates a new MsgSend instance using the specified properties.
+       * @param [properties] Properties to set
+       * @returns MsgSend instance
+       */
+      public static create(properties?: types.IMsgSend): types.MsgSend;
 
-        /**
-         * Encodes the specified MsgSend message. Does not implicitly {@link types.MsgSend.verify|verify} messages.
-         * @param message MsgSend message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encode(message: types.IMsgSend, writer?: $protobuf.Writer): $protobuf.Writer;
+      /**
+       * Encodes the specified MsgSend message. Does not implicitly {@link types.MsgSend.verify|verify} messages.
+       * @param message MsgSend message or plain object to encode
+       * @param [writer] Writer to encode to
+       * @returns Writer
+       */
+      public static encode(message: types.IMsgSend, writer?: $protobuf.Writer): $protobuf.Writer;
 
-        /**
-         * Encodes the specified MsgSend message, length delimited. Does not implicitly {@link types.MsgSend.verify|verify} messages.
-         * @param message MsgSend message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encodeDelimited(message: types.IMsgSend, writer?: $protobuf.Writer): $protobuf.Writer;
+      /**
+       * Encodes the specified MsgSend message, length delimited. Does not implicitly {@link types.MsgSend.verify|verify} messages.
+       * @param message MsgSend message or plain object to encode
+       * @param [writer] Writer to encode to
+       * @returns Writer
+       */
+      public static encodeDelimited(message: types.IMsgSend, writer?: $protobuf.Writer): $protobuf.Writer;
 
-        /**
-         * Decodes a MsgSend message from the specified reader or buffer.
-         * @param reader Reader or buffer to decode from
-         * @param [length] Message length if known beforehand
-         * @returns MsgSend
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): types.MsgSend;
+      /**
+       * Decodes a MsgSend message from the specified reader or buffer.
+       * @param reader Reader or buffer to decode from
+       * @param [length] Message length if known beforehand
+       * @returns MsgSend
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): types.MsgSend;
 
-        /**
-         * Decodes a MsgSend message from the specified reader or buffer, length delimited.
-         * @param reader Reader or buffer to decode from
-         * @returns MsgSend
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): types.MsgSend;
+      /**
+       * Decodes a MsgSend message from the specified reader or buffer, length delimited.
+       * @param reader Reader or buffer to decode from
+       * @returns MsgSend
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): types.MsgSend;
 
-        /**
-         * Verifies a MsgSend message.
-         * @param message Plain object to verify
-         * @returns `null` if valid, otherwise the reason why it is not
-         */
-        public static verify(message: { [k: string]: any }): (string|null);
+      /**
+       * Verifies a MsgSend message.
+       * @param message Plain object to verify
+       * @returns `null` if valid, otherwise the reason why it is not
+       */
+      public static verify(message: { [k: string]: any }): (string|null);
 
-        /**
-         * Creates a MsgSend message from a plain object. Also converts values to their respective internal types.
-         * @param object Plain object
-         * @returns MsgSend
-         */
-        public static fromObject(object: { [k: string]: any }): types.MsgSend;
+      /**
+       * Creates a MsgSend message from a plain object. Also converts values to their respective internal types.
+       * @param object Plain object
+       * @returns MsgSend
+       */
+      public static fromObject(object: { [k: string]: any }): types.MsgSend;
 
-        /**
-         * Creates a plain object from a MsgSend message. Also converts values to other types if specified.
-         * @param message MsgSend
-         * @param [options] Conversion options
-         * @returns Plain object
-         */
-        public static toObject(message: types.MsgSend, options?: $protobuf.IConversionOptions): { [k: string]: any };
+      /**
+       * Creates a plain object from a MsgSend message. Also converts values to other types if specified.
+       * @param message MsgSend
+       * @param [options] Conversion options
+       * @returns Plain object
+       */
+      public static toObject(message: types.MsgSend, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
-        /**
-         * Converts this MsgSend to JSON.
-         * @returns JSON object
-         */
-        public toJSON(): { [k: string]: any };
-    }
+      /**
+       * Converts this MsgSend to JSON.
+       * @returns JSON object
+       */
+      public toJSON(): { [k: string]: any };
+  }
 }
 
 /** Namespace cosmos. */
 export namespace cosmos {
 
-    /** Namespace base. */
-    namespace base {
+  /** Namespace base. */
+  namespace base {
 
-        /** Namespace v1beta1. */
-        namespace v1beta1 {
+      /** Namespace v1beta1. */
+      namespace v1beta1 {
 
-            /** Properties of a Coin. */
-            interface ICoin {
+          /** Properties of a Coin. */
+          interface ICoin {
 
-                /** Coin denom */
-                denom?: (string|null);
+              /** Coin denom */
+              denom?: (string|null);
 
-                /** Coin amount */
-                amount?: (string|null);
-            }
+              /** Coin amount */
+              amount?: (string|null);
+          }
 
-            /** Represents a Coin. */
-            class Coin implements ICoin {
+          /** Represents a Coin. */
+          class Coin implements ICoin {
 
-                /**
-                 * Constructs a new Coin.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: cosmos.base.v1beta1.ICoin);
+              /**
+               * Constructs a new Coin.
+               * @param [properties] Properties to set
+               */
+              constructor(properties?: cosmos.base.v1beta1.ICoin);
 
-                /** Coin denom. */
-                public denom: string;
+              /** Coin denom. */
+              public denom: string;
 
-                /** Coin amount. */
-                public amount: string;
+              /** Coin amount. */
+              public amount: string;
 
-                /**
-                 * Creates a new Coin instance using the specified properties.
-                 * @param [properties] Properties to set
-                 * @returns Coin instance
-                 */
-                public static create(properties?: cosmos.base.v1beta1.ICoin): cosmos.base.v1beta1.Coin;
+              /**
+               * Creates a new Coin instance using the specified properties.
+               * @param [properties] Properties to set
+               * @returns Coin instance
+               */
+              public static create(properties?: cosmos.base.v1beta1.ICoin): cosmos.base.v1beta1.Coin;
 
-                /**
-                 * Encodes the specified Coin message. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
-                 * @param message Coin message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encode(message: cosmos.base.v1beta1.ICoin, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified Coin message. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
+               * @param message Coin message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encode(message: cosmos.base.v1beta1.ICoin, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Encodes the specified Coin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
-                 * @param message Coin message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encodeDelimited(message: cosmos.base.v1beta1.ICoin, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified Coin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
+               * @param message Coin message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encodeDelimited(message: cosmos.base.v1beta1.ICoin, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Decodes a Coin message from the specified reader or buffer.
-                 * @param reader Reader or buffer to decode from
-                 * @param [length] Message length if known beforehand
-                 * @returns Coin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.Coin;
+              /**
+               * Decodes a Coin message from the specified reader or buffer.
+               * @param reader Reader or buffer to decode from
+               * @param [length] Message length if known beforehand
+               * @returns Coin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.Coin;
 
-                /**
-                 * Decodes a Coin message from the specified reader or buffer, length delimited.
-                 * @param reader Reader or buffer to decode from
-                 * @returns Coin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.Coin;
+              /**
+               * Decodes a Coin message from the specified reader or buffer, length delimited.
+               * @param reader Reader or buffer to decode from
+               * @returns Coin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.Coin;
 
-                /**
-                 * Verifies a Coin message.
-                 * @param message Plain object to verify
-                 * @returns `null` if valid, otherwise the reason why it is not
-                 */
-                public static verify(message: { [k: string]: any }): (string|null);
+              /**
+               * Verifies a Coin message.
+               * @param message Plain object to verify
+               * @returns `null` if valid, otherwise the reason why it is not
+               */
+              public static verify(message: { [k: string]: any }): (string|null);
 
-                /**
-                 * Creates a Coin message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns Coin
-                 */
-                public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.Coin;
+              /**
+               * Creates a Coin message from a plain object. Also converts values to their respective internal types.
+               * @param object Plain object
+               * @returns Coin
+               */
+              public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.Coin;
 
-                /**
-                 * Creates a plain object from a Coin message. Also converts values to other types if specified.
-                 * @param message Coin
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: cosmos.base.v1beta1.Coin, options?: $protobuf.IConversionOptions): { [k: string]: any };
+              /**
+               * Creates a plain object from a Coin message. Also converts values to other types if specified.
+               * @param message Coin
+               * @param [options] Conversion options
+               * @returns Plain object
+               */
+              public static toObject(message: cosmos.base.v1beta1.Coin, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
-                /**
-                 * Converts this Coin to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
+              /**
+               * Converts this Coin to JSON.
+               * @returns JSON object
+               */
+              public toJSON(): { [k: string]: any };
+          }
 
-            /** Properties of a DecCoin. */
-            interface IDecCoin {
+          /** Properties of a DecCoin. */
+          interface IDecCoin {
 
-                /** DecCoin denom */
-                denom?: (string|null);
+              /** DecCoin denom */
+              denom?: (string|null);
 
-                /** DecCoin amount */
-                amount?: (string|null);
-            }
+              /** DecCoin amount */
+              amount?: (string|null);
+          }
 
-            /** Represents a DecCoin. */
-            class DecCoin implements IDecCoin {
+          /** Represents a DecCoin. */
+          class DecCoin implements IDecCoin {
 
-                /**
-                 * Constructs a new DecCoin.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: cosmos.base.v1beta1.IDecCoin);
+              /**
+               * Constructs a new DecCoin.
+               * @param [properties] Properties to set
+               */
+              constructor(properties?: cosmos.base.v1beta1.IDecCoin);
 
-                /** DecCoin denom. */
-                public denom: string;
+              /** DecCoin denom. */
+              public denom: string;
 
-                /** DecCoin amount. */
-                public amount: string;
+              /** DecCoin amount. */
+              public amount: string;
 
-                /**
-                 * Creates a new DecCoin instance using the specified properties.
-                 * @param [properties] Properties to set
-                 * @returns DecCoin instance
-                 */
-                public static create(properties?: cosmos.base.v1beta1.IDecCoin): cosmos.base.v1beta1.DecCoin;
+              /**
+               * Creates a new DecCoin instance using the specified properties.
+               * @param [properties] Properties to set
+               * @returns DecCoin instance
+               */
+              public static create(properties?: cosmos.base.v1beta1.IDecCoin): cosmos.base.v1beta1.DecCoin;
 
-                /**
-                 * Encodes the specified DecCoin message. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
-                 * @param message DecCoin message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encode(message: cosmos.base.v1beta1.IDecCoin, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified DecCoin message. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
+               * @param message DecCoin message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encode(message: cosmos.base.v1beta1.IDecCoin, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Encodes the specified DecCoin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
-                 * @param message DecCoin message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encodeDelimited(message: cosmos.base.v1beta1.IDecCoin, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified DecCoin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
+               * @param message DecCoin message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encodeDelimited(message: cosmos.base.v1beta1.IDecCoin, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Decodes a DecCoin message from the specified reader or buffer.
-                 * @param reader Reader or buffer to decode from
-                 * @param [length] Message length if known beforehand
-                 * @returns DecCoin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.DecCoin;
+              /**
+               * Decodes a DecCoin message from the specified reader or buffer.
+               * @param reader Reader or buffer to decode from
+               * @param [length] Message length if known beforehand
+               * @returns DecCoin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.DecCoin;
 
-                /**
-                 * Decodes a DecCoin message from the specified reader or buffer, length delimited.
-                 * @param reader Reader or buffer to decode from
-                 * @returns DecCoin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.DecCoin;
+              /**
+               * Decodes a DecCoin message from the specified reader or buffer, length delimited.
+               * @param reader Reader or buffer to decode from
+               * @returns DecCoin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.DecCoin;
 
-                /**
-                 * Verifies a DecCoin message.
-                 * @param message Plain object to verify
-                 * @returns `null` if valid, otherwise the reason why it is not
-                 */
-                public static verify(message: { [k: string]: any }): (string|null);
+              /**
+               * Verifies a DecCoin message.
+               * @param message Plain object to verify
+               * @returns `null` if valid, otherwise the reason why it is not
+               */
+              public static verify(message: { [k: string]: any }): (string|null);
 
-                /**
-                 * Creates a DecCoin message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns DecCoin
-                 */
-                public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.DecCoin;
+              /**
+               * Creates a DecCoin message from a plain object. Also converts values to their respective internal types.
+               * @param object Plain object
+               * @returns DecCoin
+               */
+              public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.DecCoin;
 
-                /**
-                 * Creates a plain object from a DecCoin message. Also converts values to other types if specified.
-                 * @param message DecCoin
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: cosmos.base.v1beta1.DecCoin, options?: $protobuf.IConversionOptions): { [k: string]: any };
+              /**
+               * Creates a plain object from a DecCoin message. Also converts values to other types if specified.
+               * @param message DecCoin
+               * @param [options] Conversion options
+               * @returns Plain object
+               */
+              public static toObject(message: cosmos.base.v1beta1.DecCoin, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
-                /**
-                 * Converts this DecCoin to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
+              /**
+               * Converts this DecCoin to JSON.
+               * @returns JSON object
+               */
+              public toJSON(): { [k: string]: any };
+          }
 
-            /** Properties of an IntProto. */
-            interface IIntProto {
+          /** Properties of an IntProto. */
+          interface IIntProto {
 
-                /** IntProto int */
-                int?: (string|null);
-            }
+              /** IntProto int */
+              int?: (string|null);
+          }
 
-            /** Represents an IntProto. */
-            class IntProto implements IIntProto {
+          /** Represents an IntProto. */
+          class IntProto implements IIntProto {
 
-                /**
-                 * Constructs a new IntProto.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: cosmos.base.v1beta1.IIntProto);
+              /**
+               * Constructs a new IntProto.
+               * @param [properties] Properties to set
+               */
+              constructor(properties?: cosmos.base.v1beta1.IIntProto);
 
-                /** IntProto int. */
-                public int: string;
+              /** IntProto int. */
+              public int: string;
 
-                /**
-                 * Creates a new IntProto instance using the specified properties.
-                 * @param [properties] Properties to set
-                 * @returns IntProto instance
-                 */
-                public static create(properties?: cosmos.base.v1beta1.IIntProto): cosmos.base.v1beta1.IntProto;
+              /**
+               * Creates a new IntProto instance using the specified properties.
+               * @param [properties] Properties to set
+               * @returns IntProto instance
+               */
+              public static create(properties?: cosmos.base.v1beta1.IIntProto): cosmos.base.v1beta1.IntProto;
 
-                /**
-                 * Encodes the specified IntProto message. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
-                 * @param message IntProto message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encode(message: cosmos.base.v1beta1.IIntProto, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified IntProto message. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
+               * @param message IntProto message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encode(message: cosmos.base.v1beta1.IIntProto, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Encodes the specified IntProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
-                 * @param message IntProto message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encodeDelimited(message: cosmos.base.v1beta1.IIntProto, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified IntProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
+               * @param message IntProto message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encodeDelimited(message: cosmos.base.v1beta1.IIntProto, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Decodes an IntProto message from the specified reader or buffer.
-                 * @param reader Reader or buffer to decode from
-                 * @param [length] Message length if known beforehand
-                 * @returns IntProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.IntProto;
+              /**
+               * Decodes an IntProto message from the specified reader or buffer.
+               * @param reader Reader or buffer to decode from
+               * @param [length] Message length if known beforehand
+               * @returns IntProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.IntProto;
 
-                /**
-                 * Decodes an IntProto message from the specified reader or buffer, length delimited.
-                 * @param reader Reader or buffer to decode from
-                 * @returns IntProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.IntProto;
+              /**
+               * Decodes an IntProto message from the specified reader or buffer, length delimited.
+               * @param reader Reader or buffer to decode from
+               * @returns IntProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.IntProto;
 
-                /**
-                 * Verifies an IntProto message.
-                 * @param message Plain object to verify
-                 * @returns `null` if valid, otherwise the reason why it is not
-                 */
-                public static verify(message: { [k: string]: any }): (string|null);
+              /**
+               * Verifies an IntProto message.
+               * @param message Plain object to verify
+               * @returns `null` if valid, otherwise the reason why it is not
+               */
+              public static verify(message: { [k: string]: any }): (string|null);
 
-                /**
-                 * Creates an IntProto message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns IntProto
-                 */
-                public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.IntProto;
+              /**
+               * Creates an IntProto message from a plain object. Also converts values to their respective internal types.
+               * @param object Plain object
+               * @returns IntProto
+               */
+              public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.IntProto;
 
-                /**
-                 * Creates a plain object from an IntProto message. Also converts values to other types if specified.
-                 * @param message IntProto
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: cosmos.base.v1beta1.IntProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+              /**
+               * Creates a plain object from an IntProto message. Also converts values to other types if specified.
+               * @param message IntProto
+               * @param [options] Conversion options
+               * @returns Plain object
+               */
+              public static toObject(message: cosmos.base.v1beta1.IntProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
-                /**
-                 * Converts this IntProto to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
+              /**
+               * Converts this IntProto to JSON.
+               * @returns JSON object
+               */
+              public toJSON(): { [k: string]: any };
+          }
 
-            /** Properties of a DecProto. */
-            interface IDecProto {
+          /** Properties of a DecProto. */
+          interface IDecProto {
 
-                /** DecProto dec */
-                dec?: (string|null);
-            }
+              /** DecProto dec */
+              dec?: (string|null);
+          }
 
-            /** Represents a DecProto. */
-            class DecProto implements IDecProto {
+          /** Represents a DecProto. */
+          class DecProto implements IDecProto {
 
-                /**
-                 * Constructs a new DecProto.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: cosmos.base.v1beta1.IDecProto);
+              /**
+               * Constructs a new DecProto.
+               * @param [properties] Properties to set
+               */
+              constructor(properties?: cosmos.base.v1beta1.IDecProto);
 
-                /** DecProto dec. */
-                public dec: string;
+              /** DecProto dec. */
+              public dec: string;
 
-                /**
-                 * Creates a new DecProto instance using the specified properties.
-                 * @param [properties] Properties to set
-                 * @returns DecProto instance
-                 */
-                public static create(properties?: cosmos.base.v1beta1.IDecProto): cosmos.base.v1beta1.DecProto;
+              /**
+               * Creates a new DecProto instance using the specified properties.
+               * @param [properties] Properties to set
+               * @returns DecProto instance
+               */
+              public static create(properties?: cosmos.base.v1beta1.IDecProto): cosmos.base.v1beta1.DecProto;
 
-                /**
-                 * Encodes the specified DecProto message. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
-                 * @param message DecProto message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encode(message: cosmos.base.v1beta1.IDecProto, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified DecProto message. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
+               * @param message DecProto message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encode(message: cosmos.base.v1beta1.IDecProto, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Encodes the specified DecProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
-                 * @param message DecProto message or plain object to encode
-                 * @param [writer] Writer to encode to
-                 * @returns Writer
-                 */
-                public static encodeDelimited(message: cosmos.base.v1beta1.IDecProto, writer?: $protobuf.Writer): $protobuf.Writer;
+              /**
+               * Encodes the specified DecProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
+               * @param message DecProto message or plain object to encode
+               * @param [writer] Writer to encode to
+               * @returns Writer
+               */
+              public static encodeDelimited(message: cosmos.base.v1beta1.IDecProto, writer?: $protobuf.Writer): $protobuf.Writer;
 
-                /**
-                 * Decodes a DecProto message from the specified reader or buffer.
-                 * @param reader Reader or buffer to decode from
-                 * @param [length] Message length if known beforehand
-                 * @returns DecProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.DecProto;
+              /**
+               * Decodes a DecProto message from the specified reader or buffer.
+               * @param reader Reader or buffer to decode from
+               * @param [length] Message length if known beforehand
+               * @returns DecProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): cosmos.base.v1beta1.DecProto;
 
-                /**
-                 * Decodes a DecProto message from the specified reader or buffer, length delimited.
-                 * @param reader Reader or buffer to decode from
-                 * @returns DecProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.DecProto;
+              /**
+               * Decodes a DecProto message from the specified reader or buffer, length delimited.
+               * @param reader Reader or buffer to decode from
+               * @returns DecProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): cosmos.base.v1beta1.DecProto;
 
-                /**
-                 * Verifies a DecProto message.
-                 * @param message Plain object to verify
-                 * @returns `null` if valid, otherwise the reason why it is not
-                 */
-                public static verify(message: { [k: string]: any }): (string|null);
+              /**
+               * Verifies a DecProto message.
+               * @param message Plain object to verify
+               * @returns `null` if valid, otherwise the reason why it is not
+               */
+              public static verify(message: { [k: string]: any }): (string|null);
 
-                /**
-                 * Creates a DecProto message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns DecProto
-                 */
-                public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.DecProto;
+              /**
+               * Creates a DecProto message from a plain object. Also converts values to their respective internal types.
+               * @param object Plain object
+               * @returns DecProto
+               */
+              public static fromObject(object: { [k: string]: any }): cosmos.base.v1beta1.DecProto;
 
-                /**
-                 * Creates a plain object from a DecProto message. Also converts values to other types if specified.
-                 * @param message DecProto
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: cosmos.base.v1beta1.DecProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+              /**
+               * Creates a plain object from a DecProto message. Also converts values to other types if specified.
+               * @param message DecProto
+               * @param [options] Conversion options
+               * @returns Plain object
+               */
+              public static toObject(message: cosmos.base.v1beta1.DecProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
-                /**
-                 * Converts this DecProto to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-        }
-    }
+              /**
+               * Converts this DecProto to JSON.
+               * @returns JSON object
+               */
+              public toJSON(): { [k: string]: any };
+          }
+      }
+  }
 }

@@ -29,6 +29,7 @@ $root.common = (function() {
          * @property {string|null} [ticker] Asset ticker
          * @property {boolean|null} [synth] Asset synth
          * @property {boolean|null} [trade] Asset trade
+         * @property {boolean|null} [secured] Asset secured
          */
 
         /**
@@ -87,6 +88,14 @@ $root.common = (function() {
         Asset.prototype.trade = false;
 
         /**
+         * Asset secured.
+         * @member {boolean} secured
+         * @memberof common.Asset
+         * @instance
+         */
+        Asset.prototype.secured = false;
+
+        /**
          * Creates a new Asset instance using the specified properties.
          * @function create
          * @memberof common.Asset
@@ -120,6 +129,8 @@ $root.common = (function() {
                 writer.uint32(/* id 4, wireType 0 =*/32).bool(message.synth);
             if (message.trade != null && Object.hasOwnProperty.call(message, "trade"))
                 writer.uint32(/* id 5, wireType 0 =*/40).bool(message.trade);
+            if (message.secured != null && Object.hasOwnProperty.call(message, "secured"))
+                writer.uint32(/* id 6, wireType 0 =*/48).bool(message.secured);
             return writer;
         };
 
@@ -168,6 +179,9 @@ $root.common = (function() {
                     break;
                 case 5:
                     message.trade = reader.bool();
+                    break;
+                case 6:
+                    message.secured = reader.bool();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -219,6 +233,9 @@ $root.common = (function() {
             if (message.trade != null && message.hasOwnProperty("trade"))
                 if (typeof message.trade !== "boolean")
                     return "trade: boolean expected";
+            if (message.secured != null && message.hasOwnProperty("secured"))
+                if (typeof message.secured !== "boolean")
+                    return "secured: boolean expected";
             return null;
         };
 
@@ -244,6 +261,8 @@ $root.common = (function() {
                 message.synth = Boolean(object.synth);
             if (object.trade != null)
                 message.trade = Boolean(object.trade);
+            if (object.secured != null)
+                message.secured = Boolean(object.secured);
             return message;
         };
 
@@ -266,6 +285,7 @@ $root.common = (function() {
                 object.ticker = "";
                 object.synth = false;
                 object.trade = false;
+                object.secured = false;
             }
             if (message.chain != null && message.hasOwnProperty("chain"))
                 object.chain = message.chain;
@@ -277,6 +297,8 @@ $root.common = (function() {
                 object.synth = message.synth;
             if (message.trade != null && message.hasOwnProperty("trade"))
                 object.trade = message.trade;
+            if (message.secured != null && message.hasOwnProperty("secured"))
+                object.secured = message.secured;
             return object;
         };
 
@@ -1542,1379 +1564,1379 @@ $root.common = (function() {
 
 $root.types = (function() {
 
-    /**
-     * Namespace types.
-     * @exports types
-     * @namespace
-     */
-    var types = {};
+  /**
+   * Namespace types.
+   * @exports types
+   * @namespace
+   */
+  var types = {};
 
-    types.MsgDeposit = (function() {
+  types.MsgDeposit = (function() {
 
-        /**
-         * Properties of a MsgDeposit.
-         * @memberof types
-         * @interface IMsgDeposit
-         * @property {Array.<common.ICoin>|null} [coins] MsgDeposit coins
-         * @property {string|null} [memo] MsgDeposit memo
-         * @property {Uint8Array|null} [signer] MsgDeposit signer
-         */
+      /**
+       * Properties of a MsgDeposit.
+       * @memberof types
+       * @interface IMsgDeposit
+       * @property {Array.<common.ICoin>|null} [coins] MsgDeposit coins
+       * @property {string|null} [memo] MsgDeposit memo
+       * @property {Uint8Array|null} [signer] MsgDeposit signer
+       */
 
-        /**
-         * Constructs a new MsgDeposit.
-         * @memberof types
-         * @classdesc Represents a MsgDeposit.
-         * @implements IMsgDeposit
-         * @constructor
-         * @param {types.IMsgDeposit=} [properties] Properties to set
-         */
-        function MsgDeposit(properties) {
-            this.coins = [];
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
+      /**
+       * Constructs a new MsgDeposit.
+       * @memberof types
+       * @classdesc Represents a MsgDeposit.
+       * @implements IMsgDeposit
+       * @constructor
+       * @param {types.IMsgDeposit=} [properties] Properties to set
+       */
+      function MsgDeposit(properties) {
+          this.coins = [];
+          if (properties)
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                      this[keys[i]] = properties[keys[i]];
+      }
 
-        /**
-         * MsgDeposit coins.
-         * @member {Array.<common.ICoin>} coins
-         * @memberof types.MsgDeposit
-         * @instance
-         */
-        MsgDeposit.prototype.coins = $util.emptyArray;
+      /**
+       * MsgDeposit coins.
+       * @member {Array.<common.ICoin>} coins
+       * @memberof types.MsgDeposit
+       * @instance
+       */
+      MsgDeposit.prototype.coins = $util.emptyArray;
 
-        /**
-         * MsgDeposit memo.
-         * @member {string} memo
-         * @memberof types.MsgDeposit
-         * @instance
-         */
-        MsgDeposit.prototype.memo = "";
+      /**
+       * MsgDeposit memo.
+       * @member {string} memo
+       * @memberof types.MsgDeposit
+       * @instance
+       */
+      MsgDeposit.prototype.memo = "";
 
-        /**
-         * MsgDeposit signer.
-         * @member {Uint8Array} signer
-         * @memberof types.MsgDeposit
-         * @instance
-         */
-        MsgDeposit.prototype.signer = $util.newBuffer([]);
+      /**
+       * MsgDeposit signer.
+       * @member {Uint8Array} signer
+       * @memberof types.MsgDeposit
+       * @instance
+       */
+      MsgDeposit.prototype.signer = $util.newBuffer([]);
 
-        /**
-         * Creates a new MsgDeposit instance using the specified properties.
-         * @function create
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {types.IMsgDeposit=} [properties] Properties to set
-         * @returns {types.MsgDeposit} MsgDeposit instance
-         */
-        MsgDeposit.create = function create(properties) {
-            return new MsgDeposit(properties);
-        };
+      /**
+       * Creates a new MsgDeposit instance using the specified properties.
+       * @function create
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {types.IMsgDeposit=} [properties] Properties to set
+       * @returns {types.MsgDeposit} MsgDeposit instance
+       */
+      MsgDeposit.create = function create(properties) {
+          return new MsgDeposit(properties);
+      };
 
-        /**
-         * Encodes the specified MsgDeposit message. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
-         * @function encode
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {types.IMsgDeposit} message MsgDeposit message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        MsgDeposit.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.coins != null && message.coins.length)
-                for (var i = 0; i < message.coins.length; ++i)
-                    $root.common.Coin.encode(message.coins[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
-            if (message.memo != null && Object.hasOwnProperty.call(message, "memo"))
-                writer.uint32(/* id 2, wireType 2 =*/18).string(message.memo);
-            if (message.signer != null && Object.hasOwnProperty.call(message, "signer"))
-                writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.signer);
-            return writer;
-        };
+      /**
+       * Encodes the specified MsgDeposit message. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
+       * @function encode
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {types.IMsgDeposit} message MsgDeposit message or plain object to encode
+       * @param {$protobuf.Writer} [writer] Writer to encode to
+       * @returns {$protobuf.Writer} Writer
+       */
+      MsgDeposit.encode = function encode(message, writer) {
+          if (!writer)
+              writer = $Writer.create();
+          if (message.coins != null && message.coins.length)
+              for (var i = 0; i < message.coins.length; ++i)
+                  $root.common.Coin.encode(message.coins[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+          if (message.memo != null && Object.hasOwnProperty.call(message, "memo"))
+              writer.uint32(/* id 2, wireType 2 =*/18).string(message.memo);
+          if (message.signer != null && Object.hasOwnProperty.call(message, "signer"))
+              writer.uint32(/* id 3, wireType 2 =*/26).bytes(message.signer);
+          return writer;
+      };
 
-        /**
-         * Encodes the specified MsgDeposit message, length delimited. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {types.IMsgDeposit} message MsgDeposit message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        MsgDeposit.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
+      /**
+       * Encodes the specified MsgDeposit message, length delimited. Does not implicitly {@link types.MsgDeposit.verify|verify} messages.
+       * @function encodeDelimited
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {types.IMsgDeposit} message MsgDeposit message or plain object to encode
+       * @param {$protobuf.Writer} [writer] Writer to encode to
+       * @returns {$protobuf.Writer} Writer
+       */
+      MsgDeposit.encodeDelimited = function encodeDelimited(message, writer) {
+          return this.encode(message, writer).ldelim();
+      };
 
-        /**
-         * Decodes a MsgDeposit message from the specified reader or buffer.
-         * @function decode
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {types.MsgDeposit} MsgDeposit
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        MsgDeposit.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.types.MsgDeposit();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1:
-                    if (!(message.coins && message.coins.length))
-                        message.coins = [];
-                    message.coins.push($root.common.Coin.decode(reader, reader.uint32()));
-                    break;
-                case 2:
-                    message.memo = reader.string();
-                    break;
-                case 3:
-                    message.signer = reader.bytes();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
+      /**
+       * Decodes a MsgDeposit message from the specified reader or buffer.
+       * @function decode
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+       * @param {number} [length] Message length if known beforehand
+       * @returns {types.MsgDeposit} MsgDeposit
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      MsgDeposit.decode = function decode(reader, length) {
+          if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+          var end = length === undefined ? reader.len : reader.pos + length, message = new $root.types.MsgDeposit();
+          while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+              case 1:
+                  if (!(message.coins && message.coins.length))
+                      message.coins = [];
+                  message.coins.push($root.common.Coin.decode(reader, reader.uint32()));
+                  break;
+              case 2:
+                  message.memo = reader.string();
+                  break;
+              case 3:
+                  message.signer = reader.bytes();
+                  break;
+              default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+          }
+          return message;
+      };
 
-        /**
-         * Decodes a MsgDeposit message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {types.MsgDeposit} MsgDeposit
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        MsgDeposit.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
+      /**
+       * Decodes a MsgDeposit message from the specified reader or buffer, length delimited.
+       * @function decodeDelimited
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+       * @returns {types.MsgDeposit} MsgDeposit
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      MsgDeposit.decodeDelimited = function decodeDelimited(reader) {
+          if (!(reader instanceof $Reader))
+              reader = new $Reader(reader);
+          return this.decode(reader, reader.uint32());
+      };
 
-        /**
-         * Verifies a MsgDeposit message.
-         * @function verify
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        MsgDeposit.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            if (message.coins != null && message.hasOwnProperty("coins")) {
-                if (!Array.isArray(message.coins))
-                    return "coins: array expected";
-                for (var i = 0; i < message.coins.length; ++i) {
-                    var error = $root.common.Coin.verify(message.coins[i]);
-                    if (error)
-                        return "coins." + error;
-                }
-            }
-            if (message.memo != null && message.hasOwnProperty("memo"))
-                if (!$util.isString(message.memo))
-                    return "memo: string expected";
-            if (message.signer != null && message.hasOwnProperty("signer"))
-                if (!(message.signer && typeof message.signer.length === "number" || $util.isString(message.signer)))
-                    return "signer: buffer expected";
-            return null;
-        };
+      /**
+       * Verifies a MsgDeposit message.
+       * @function verify
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {Object.<string,*>} message Plain object to verify
+       * @returns {string|null} `null` if valid, otherwise the reason why it is not
+       */
+      MsgDeposit.verify = function verify(message) {
+          if (typeof message !== "object" || message === null)
+              return "object expected";
+          if (message.coins != null && message.hasOwnProperty("coins")) {
+              if (!Array.isArray(message.coins))
+                  return "coins: array expected";
+              for (var i = 0; i < message.coins.length; ++i) {
+                  var error = $root.common.Coin.verify(message.coins[i]);
+                  if (error)
+                      return "coins." + error;
+              }
+          }
+          if (message.memo != null && message.hasOwnProperty("memo"))
+              if (!$util.isString(message.memo))
+                  return "memo: string expected";
+          if (message.signer != null && message.hasOwnProperty("signer"))
+              if (!(message.signer && typeof message.signer.length === "number" || $util.isString(message.signer)))
+                  return "signer: buffer expected";
+          return null;
+      };
 
-        /**
-         * Creates a MsgDeposit message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {types.MsgDeposit} MsgDeposit
-         */
-        MsgDeposit.fromObject = function fromObject(object) {
-            if (object instanceof $root.types.MsgDeposit)
-                return object;
-            var message = new $root.types.MsgDeposit();
-            if (object.coins) {
-                if (!Array.isArray(object.coins))
-                    throw TypeError(".types.MsgDeposit.coins: array expected");
-                message.coins = [];
-                for (var i = 0; i < object.coins.length; ++i) {
-                    if (typeof object.coins[i] !== "object")
-                        throw TypeError(".types.MsgDeposit.coins: object expected");
-                    message.coins[i] = $root.common.Coin.fromObject(object.coins[i]);
-                }
-            }
-            if (object.memo != null)
-                message.memo = String(object.memo);
-            if (object.signer != null)
-                if (typeof object.signer === "string")
-                    $util.base64.decode(object.signer, message.signer = $util.newBuffer($util.base64.length(object.signer)), 0);
-                else if (object.signer.length)
-                    message.signer = object.signer;
-            return message;
-        };
+      /**
+       * Creates a MsgDeposit message from a plain object. Also converts values to their respective internal types.
+       * @function fromObject
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {Object.<string,*>} object Plain object
+       * @returns {types.MsgDeposit} MsgDeposit
+       */
+      MsgDeposit.fromObject = function fromObject(object) {
+          if (object instanceof $root.types.MsgDeposit)
+              return object;
+          var message = new $root.types.MsgDeposit();
+          if (object.coins) {
+              if (!Array.isArray(object.coins))
+                  throw TypeError(".types.MsgDeposit.coins: array expected");
+              message.coins = [];
+              for (var i = 0; i < object.coins.length; ++i) {
+                  if (typeof object.coins[i] !== "object")
+                      throw TypeError(".types.MsgDeposit.coins: object expected");
+                  message.coins[i] = $root.common.Coin.fromObject(object.coins[i]);
+              }
+          }
+          if (object.memo != null)
+              message.memo = String(object.memo);
+          if (object.signer != null)
+              if (typeof object.signer === "string")
+                  $util.base64.decode(object.signer, message.signer = $util.newBuffer($util.base64.length(object.signer)), 0);
+              else if (object.signer.length)
+                  message.signer = object.signer;
+          return message;
+      };
 
-        /**
-         * Creates a plain object from a MsgDeposit message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof types.MsgDeposit
-         * @static
-         * @param {types.MsgDeposit} message MsgDeposit
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        MsgDeposit.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.arrays || options.defaults)
-                object.coins = [];
-            if (options.defaults) {
-                object.memo = "";
-                if (options.bytes === String)
-                    object.signer = "";
-                else {
-                    object.signer = [];
-                    if (options.bytes !== Array)
-                        object.signer = $util.newBuffer(object.signer);
-                }
-            }
-            if (message.coins && message.coins.length) {
-                object.coins = [];
-                for (var j = 0; j < message.coins.length; ++j)
-                    object.coins[j] = $root.common.Coin.toObject(message.coins[j], options);
-            }
-            if (message.memo != null && message.hasOwnProperty("memo"))
-                object.memo = message.memo;
-            if (message.signer != null && message.hasOwnProperty("signer"))
-                object.signer = options.bytes === String ? $util.base64.encode(message.signer, 0, message.signer.length) : options.bytes === Array ? Array.prototype.slice.call(message.signer) : message.signer;
-            return object;
-        };
+      /**
+       * Creates a plain object from a MsgDeposit message. Also converts values to other types if specified.
+       * @function toObject
+       * @memberof types.MsgDeposit
+       * @static
+       * @param {types.MsgDeposit} message MsgDeposit
+       * @param {$protobuf.IConversionOptions} [options] Conversion options
+       * @returns {Object.<string,*>} Plain object
+       */
+      MsgDeposit.toObject = function toObject(message, options) {
+          if (!options)
+              options = {};
+          var object = {};
+          if (options.arrays || options.defaults)
+              object.coins = [];
+          if (options.defaults) {
+              object.memo = "";
+              if (options.bytes === String)
+                  object.signer = "";
+              else {
+                  object.signer = [];
+                  if (options.bytes !== Array)
+                      object.signer = $util.newBuffer(object.signer);
+              }
+          }
+          if (message.coins && message.coins.length) {
+              object.coins = [];
+              for (var j = 0; j < message.coins.length; ++j)
+                  object.coins[j] = $root.common.Coin.toObject(message.coins[j], options);
+          }
+          if (message.memo != null && message.hasOwnProperty("memo"))
+              object.memo = message.memo;
+          if (message.signer != null && message.hasOwnProperty("signer"))
+              object.signer = options.bytes === String ? $util.base64.encode(message.signer, 0, message.signer.length) : options.bytes === Array ? Array.prototype.slice.call(message.signer) : message.signer;
+          return object;
+      };
 
-        /**
-         * Converts this MsgDeposit to JSON.
-         * @function toJSON
-         * @memberof types.MsgDeposit
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        MsgDeposit.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
+      /**
+       * Converts this MsgDeposit to JSON.
+       * @function toJSON
+       * @memberof types.MsgDeposit
+       * @instance
+       * @returns {Object.<string,*>} JSON object
+       */
+      MsgDeposit.prototype.toJSON = function toJSON() {
+          return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+      };
 
-        return MsgDeposit;
-    })();
+      return MsgDeposit;
+  })();
 
-    types.MsgSend = (function() {
+  types.MsgSend = (function() {
 
-        /**
-         * Properties of a MsgSend.
-         * @memberof types
-         * @interface IMsgSend
-         * @property {Uint8Array|null} [fromAddress] MsgSend fromAddress
-         * @property {Uint8Array|null} [toAddress] MsgSend toAddress
-         * @property {Array.<cosmos.base.v1beta1.ICoin>|null} [amount] MsgSend amount
-         */
+      /**
+       * Properties of a MsgSend.
+       * @memberof types
+       * @interface IMsgSend
+       * @property {Uint8Array|null} [fromAddress] MsgSend fromAddress
+       * @property {Uint8Array|null} [toAddress] MsgSend toAddress
+       * @property {Array.<cosmos.base.v1beta1.ICoin>|null} [amount] MsgSend amount
+       */
 
-        /**
-         * Constructs a new MsgSend.
-         * @memberof types
-         * @classdesc Represents a MsgSend.
-         * @implements IMsgSend
-         * @constructor
-         * @param {types.IMsgSend=} [properties] Properties to set
-         */
-        function MsgSend(properties) {
-            this.amount = [];
-            if (properties)
-                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                    if (properties[keys[i]] != null)
-                        this[keys[i]] = properties[keys[i]];
-        }
+      /**
+       * Constructs a new MsgSend.
+       * @memberof types
+       * @classdesc Represents a MsgSend.
+       * @implements IMsgSend
+       * @constructor
+       * @param {types.IMsgSend=} [properties] Properties to set
+       */
+      function MsgSend(properties) {
+          this.amount = [];
+          if (properties)
+              for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                  if (properties[keys[i]] != null)
+                      this[keys[i]] = properties[keys[i]];
+      }
 
-        /**
-         * MsgSend fromAddress.
-         * @member {Uint8Array} fromAddress
-         * @memberof types.MsgSend
-         * @instance
-         */
-        MsgSend.prototype.fromAddress = $util.newBuffer([]);
+      /**
+       * MsgSend fromAddress.
+       * @member {Uint8Array} fromAddress
+       * @memberof types.MsgSend
+       * @instance
+       */
+      MsgSend.prototype.fromAddress = $util.newBuffer([]);
 
-        /**
-         * MsgSend toAddress.
-         * @member {Uint8Array} toAddress
-         * @memberof types.MsgSend
-         * @instance
-         */
-        MsgSend.prototype.toAddress = $util.newBuffer([]);
+      /**
+       * MsgSend toAddress.
+       * @member {Uint8Array} toAddress
+       * @memberof types.MsgSend
+       * @instance
+       */
+      MsgSend.prototype.toAddress = $util.newBuffer([]);
 
-        /**
-         * MsgSend amount.
-         * @member {Array.<cosmos.base.v1beta1.ICoin>} amount
-         * @memberof types.MsgSend
-         * @instance
-         */
-        MsgSend.prototype.amount = $util.emptyArray;
+      /**
+       * MsgSend amount.
+       * @member {Array.<cosmos.base.v1beta1.ICoin>} amount
+       * @memberof types.MsgSend
+       * @instance
+       */
+      MsgSend.prototype.amount = $util.emptyArray;
 
-        /**
-         * Creates a new MsgSend instance using the specified properties.
-         * @function create
-         * @memberof types.MsgSend
-         * @static
-         * @param {types.IMsgSend=} [properties] Properties to set
-         * @returns {types.MsgSend} MsgSend instance
-         */
-        MsgSend.create = function create(properties) {
-            return new MsgSend(properties);
-        };
+      /**
+       * Creates a new MsgSend instance using the specified properties.
+       * @function create
+       * @memberof types.MsgSend
+       * @static
+       * @param {types.IMsgSend=} [properties] Properties to set
+       * @returns {types.MsgSend} MsgSend instance
+       */
+      MsgSend.create = function create(properties) {
+          return new MsgSend(properties);
+      };
 
-        /**
-         * Encodes the specified MsgSend message. Does not implicitly {@link types.MsgSend.verify|verify} messages.
-         * @function encode
-         * @memberof types.MsgSend
-         * @static
-         * @param {types.IMsgSend} message MsgSend message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        MsgSend.encode = function encode(message, writer) {
-            if (!writer)
-                writer = $Writer.create();
-            if (message.fromAddress != null && Object.hasOwnProperty.call(message, "fromAddress"))
-                writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.fromAddress);
-            if (message.toAddress != null && Object.hasOwnProperty.call(message, "toAddress"))
-                writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.toAddress);
-            if (message.amount != null && message.amount.length)
-                for (var i = 0; i < message.amount.length; ++i)
-                    $root.cosmos.base.v1beta1.Coin.encode(message.amount[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
-            return writer;
-        };
+      /**
+       * Encodes the specified MsgSend message. Does not implicitly {@link types.MsgSend.verify|verify} messages.
+       * @function encode
+       * @memberof types.MsgSend
+       * @static
+       * @param {types.IMsgSend} message MsgSend message or plain object to encode
+       * @param {$protobuf.Writer} [writer] Writer to encode to
+       * @returns {$protobuf.Writer} Writer
+       */
+      MsgSend.encode = function encode(message, writer) {
+          if (!writer)
+              writer = $Writer.create();
+          if (message.fromAddress != null && Object.hasOwnProperty.call(message, "fromAddress"))
+              writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.fromAddress);
+          if (message.toAddress != null && Object.hasOwnProperty.call(message, "toAddress"))
+              writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.toAddress);
+          if (message.amount != null && message.amount.length)
+              for (var i = 0; i < message.amount.length; ++i)
+                  $root.cosmos.base.v1beta1.Coin.encode(message.amount[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+          return writer;
+      };
 
-        /**
-         * Encodes the specified MsgSend message, length delimited. Does not implicitly {@link types.MsgSend.verify|verify} messages.
-         * @function encodeDelimited
-         * @memberof types.MsgSend
-         * @static
-         * @param {types.IMsgSend} message MsgSend message or plain object to encode
-         * @param {$protobuf.Writer} [writer] Writer to encode to
-         * @returns {$protobuf.Writer} Writer
-         */
-        MsgSend.encodeDelimited = function encodeDelimited(message, writer) {
-            return this.encode(message, writer).ldelim();
-        };
+      /**
+       * Encodes the specified MsgSend message, length delimited. Does not implicitly {@link types.MsgSend.verify|verify} messages.
+       * @function encodeDelimited
+       * @memberof types.MsgSend
+       * @static
+       * @param {types.IMsgSend} message MsgSend message or plain object to encode
+       * @param {$protobuf.Writer} [writer] Writer to encode to
+       * @returns {$protobuf.Writer} Writer
+       */
+      MsgSend.encodeDelimited = function encodeDelimited(message, writer) {
+          return this.encode(message, writer).ldelim();
+      };
 
-        /**
-         * Decodes a MsgSend message from the specified reader or buffer.
-         * @function decode
-         * @memberof types.MsgSend
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @param {number} [length] Message length if known beforehand
-         * @returns {types.MsgSend} MsgSend
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        MsgSend.decode = function decode(reader, length) {
-            if (!(reader instanceof $Reader))
-                reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.types.MsgSend();
-            while (reader.pos < end) {
-                var tag = reader.uint32();
-                switch (tag >>> 3) {
-                case 1:
-                    message.fromAddress = reader.bytes();
-                    break;
-                case 2:
-                    message.toAddress = reader.bytes();
-                    break;
-                case 3:
-                    if (!(message.amount && message.amount.length))
-                        message.amount = [];
-                    message.amount.push($root.cosmos.base.v1beta1.Coin.decode(reader, reader.uint32()));
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-                }
-            }
-            return message;
-        };
+      /**
+       * Decodes a MsgSend message from the specified reader or buffer.
+       * @function decode
+       * @memberof types.MsgSend
+       * @static
+       * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+       * @param {number} [length] Message length if known beforehand
+       * @returns {types.MsgSend} MsgSend
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      MsgSend.decode = function decode(reader, length) {
+          if (!(reader instanceof $Reader))
+              reader = $Reader.create(reader);
+          var end = length === undefined ? reader.len : reader.pos + length, message = new $root.types.MsgSend();
+          while (reader.pos < end) {
+              var tag = reader.uint32();
+              switch (tag >>> 3) {
+              case 1:
+                  message.fromAddress = reader.bytes();
+                  break;
+              case 2:
+                  message.toAddress = reader.bytes();
+                  break;
+              case 3:
+                  if (!(message.amount && message.amount.length))
+                      message.amount = [];
+                  message.amount.push($root.cosmos.base.v1beta1.Coin.decode(reader, reader.uint32()));
+                  break;
+              default:
+                  reader.skipType(tag & 7);
+                  break;
+              }
+          }
+          return message;
+      };
 
-        /**
-         * Decodes a MsgSend message from the specified reader or buffer, length delimited.
-         * @function decodeDelimited
-         * @memberof types.MsgSend
-         * @static
-         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {types.MsgSend} MsgSend
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        MsgSend.decodeDelimited = function decodeDelimited(reader) {
-            if (!(reader instanceof $Reader))
-                reader = new $Reader(reader);
-            return this.decode(reader, reader.uint32());
-        };
+      /**
+       * Decodes a MsgSend message from the specified reader or buffer, length delimited.
+       * @function decodeDelimited
+       * @memberof types.MsgSend
+       * @static
+       * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+       * @returns {types.MsgSend} MsgSend
+       * @throws {Error} If the payload is not a reader or valid buffer
+       * @throws {$protobuf.util.ProtocolError} If required fields are missing
+       */
+      MsgSend.decodeDelimited = function decodeDelimited(reader) {
+          if (!(reader instanceof $Reader))
+              reader = new $Reader(reader);
+          return this.decode(reader, reader.uint32());
+      };
 
-        /**
-         * Verifies a MsgSend message.
-         * @function verify
-         * @memberof types.MsgSend
-         * @static
-         * @param {Object.<string,*>} message Plain object to verify
-         * @returns {string|null} `null` if valid, otherwise the reason why it is not
-         */
-        MsgSend.verify = function verify(message) {
-            if (typeof message !== "object" || message === null)
-                return "object expected";
-            if (message.fromAddress != null && message.hasOwnProperty("fromAddress"))
-                if (!(message.fromAddress && typeof message.fromAddress.length === "number" || $util.isString(message.fromAddress)))
-                    return "fromAddress: buffer expected";
-            if (message.toAddress != null && message.hasOwnProperty("toAddress"))
-                if (!(message.toAddress && typeof message.toAddress.length === "number" || $util.isString(message.toAddress)))
-                    return "toAddress: buffer expected";
-            if (message.amount != null && message.hasOwnProperty("amount")) {
-                if (!Array.isArray(message.amount))
-                    return "amount: array expected";
-                for (var i = 0; i < message.amount.length; ++i) {
-                    var error = $root.cosmos.base.v1beta1.Coin.verify(message.amount[i]);
-                    if (error)
-                        return "amount." + error;
-                }
-            }
-            return null;
-        };
+      /**
+       * Verifies a MsgSend message.
+       * @function verify
+       * @memberof types.MsgSend
+       * @static
+       * @param {Object.<string,*>} message Plain object to verify
+       * @returns {string|null} `null` if valid, otherwise the reason why it is not
+       */
+      MsgSend.verify = function verify(message) {
+          if (typeof message !== "object" || message === null)
+              return "object expected";
+          if (message.fromAddress != null && message.hasOwnProperty("fromAddress"))
+              if (!(message.fromAddress && typeof message.fromAddress.length === "number" || $util.isString(message.fromAddress)))
+                  return "fromAddress: buffer expected";
+          if (message.toAddress != null && message.hasOwnProperty("toAddress"))
+              if (!(message.toAddress && typeof message.toAddress.length === "number" || $util.isString(message.toAddress)))
+                  return "toAddress: buffer expected";
+          if (message.amount != null && message.hasOwnProperty("amount")) {
+              if (!Array.isArray(message.amount))
+                  return "amount: array expected";
+              for (var i = 0; i < message.amount.length; ++i) {
+                  var error = $root.cosmos.base.v1beta1.Coin.verify(message.amount[i]);
+                  if (error)
+                      return "amount." + error;
+              }
+          }
+          return null;
+      };
 
-        /**
-         * Creates a MsgSend message from a plain object. Also converts values to their respective internal types.
-         * @function fromObject
-         * @memberof types.MsgSend
-         * @static
-         * @param {Object.<string,*>} object Plain object
-         * @returns {types.MsgSend} MsgSend
-         */
-        MsgSend.fromObject = function fromObject(object) {
-            if (object instanceof $root.types.MsgSend)
-                return object;
-            var message = new $root.types.MsgSend();
-            if (object.fromAddress != null)
-                if (typeof object.fromAddress === "string")
-                    $util.base64.decode(object.fromAddress, message.fromAddress = $util.newBuffer($util.base64.length(object.fromAddress)), 0);
-                else if (object.fromAddress.length)
-                    message.fromAddress = object.fromAddress;
-            if (object.toAddress != null)
-                if (typeof object.toAddress === "string")
-                    $util.base64.decode(object.toAddress, message.toAddress = $util.newBuffer($util.base64.length(object.toAddress)), 0);
-                else if (object.toAddress.length)
-                    message.toAddress = object.toAddress;
-            if (object.amount) {
-                if (!Array.isArray(object.amount))
-                    throw TypeError(".types.MsgSend.amount: array expected");
-                message.amount = [];
-                for (var i = 0; i < object.amount.length; ++i) {
-                    if (typeof object.amount[i] !== "object")
-                        throw TypeError(".types.MsgSend.amount: object expected");
-                    message.amount[i] = $root.cosmos.base.v1beta1.Coin.fromObject(object.amount[i]);
-                }
-            }
-            return message;
-        };
+      /**
+       * Creates a MsgSend message from a plain object. Also converts values to their respective internal types.
+       * @function fromObject
+       * @memberof types.MsgSend
+       * @static
+       * @param {Object.<string,*>} object Plain object
+       * @returns {types.MsgSend} MsgSend
+       */
+      MsgSend.fromObject = function fromObject(object) {
+          if (object instanceof $root.types.MsgSend)
+              return object;
+          var message = new $root.types.MsgSend();
+          if (object.fromAddress != null)
+              if (typeof object.fromAddress === "string")
+                  $util.base64.decode(object.fromAddress, message.fromAddress = $util.newBuffer($util.base64.length(object.fromAddress)), 0);
+              else if (object.fromAddress.length)
+                  message.fromAddress = object.fromAddress;
+          if (object.toAddress != null)
+              if (typeof object.toAddress === "string")
+                  $util.base64.decode(object.toAddress, message.toAddress = $util.newBuffer($util.base64.length(object.toAddress)), 0);
+              else if (object.toAddress.length)
+                  message.toAddress = object.toAddress;
+          if (object.amount) {
+              if (!Array.isArray(object.amount))
+                  throw TypeError(".types.MsgSend.amount: array expected");
+              message.amount = [];
+              for (var i = 0; i < object.amount.length; ++i) {
+                  if (typeof object.amount[i] !== "object")
+                      throw TypeError(".types.MsgSend.amount: object expected");
+                  message.amount[i] = $root.cosmos.base.v1beta1.Coin.fromObject(object.amount[i]);
+              }
+          }
+          return message;
+      };
 
-        /**
-         * Creates a plain object from a MsgSend message. Also converts values to other types if specified.
-         * @function toObject
-         * @memberof types.MsgSend
-         * @static
-         * @param {types.MsgSend} message MsgSend
-         * @param {$protobuf.IConversionOptions} [options] Conversion options
-         * @returns {Object.<string,*>} Plain object
-         */
-        MsgSend.toObject = function toObject(message, options) {
-            if (!options)
-                options = {};
-            var object = {};
-            if (options.arrays || options.defaults)
-                object.amount = [];
-            if (options.defaults) {
-                if (options.bytes === String)
-                    object.fromAddress = "";
-                else {
-                    object.fromAddress = [];
-                    if (options.bytes !== Array)
-                        object.fromAddress = $util.newBuffer(object.fromAddress);
-                }
-                if (options.bytes === String)
-                    object.toAddress = "";
-                else {
-                    object.toAddress = [];
-                    if (options.bytes !== Array)
-                        object.toAddress = $util.newBuffer(object.toAddress);
-                }
-            }
-            if (message.fromAddress != null && message.hasOwnProperty("fromAddress"))
-                object.fromAddress = options.bytes === String ? $util.base64.encode(message.fromAddress, 0, message.fromAddress.length) : options.bytes === Array ? Array.prototype.slice.call(message.fromAddress) : message.fromAddress;
-            if (message.toAddress != null && message.hasOwnProperty("toAddress"))
-                object.toAddress = options.bytes === String ? $util.base64.encode(message.toAddress, 0, message.toAddress.length) : options.bytes === Array ? Array.prototype.slice.call(message.toAddress) : message.toAddress;
-            if (message.amount && message.amount.length) {
-                object.amount = [];
-                for (var j = 0; j < message.amount.length; ++j)
-                    object.amount[j] = $root.cosmos.base.v1beta1.Coin.toObject(message.amount[j], options);
-            }
-            return object;
-        };
+      /**
+       * Creates a plain object from a MsgSend message. Also converts values to other types if specified.
+       * @function toObject
+       * @memberof types.MsgSend
+       * @static
+       * @param {types.MsgSend} message MsgSend
+       * @param {$protobuf.IConversionOptions} [options] Conversion options
+       * @returns {Object.<string,*>} Plain object
+       */
+      MsgSend.toObject = function toObject(message, options) {
+          if (!options)
+              options = {};
+          var object = {};
+          if (options.arrays || options.defaults)
+              object.amount = [];
+          if (options.defaults) {
+              if (options.bytes === String)
+                  object.fromAddress = "";
+              else {
+                  object.fromAddress = [];
+                  if (options.bytes !== Array)
+                      object.fromAddress = $util.newBuffer(object.fromAddress);
+              }
+              if (options.bytes === String)
+                  object.toAddress = "";
+              else {
+                  object.toAddress = [];
+                  if (options.bytes !== Array)
+                      object.toAddress = $util.newBuffer(object.toAddress);
+              }
+          }
+          if (message.fromAddress != null && message.hasOwnProperty("fromAddress"))
+              object.fromAddress = options.bytes === String ? $util.base64.encode(message.fromAddress, 0, message.fromAddress.length) : options.bytes === Array ? Array.prototype.slice.call(message.fromAddress) : message.fromAddress;
+          if (message.toAddress != null && message.hasOwnProperty("toAddress"))
+              object.toAddress = options.bytes === String ? $util.base64.encode(message.toAddress, 0, message.toAddress.length) : options.bytes === Array ? Array.prototype.slice.call(message.toAddress) : message.toAddress;
+          if (message.amount && message.amount.length) {
+              object.amount = [];
+              for (var j = 0; j < message.amount.length; ++j)
+                  object.amount[j] = $root.cosmos.base.v1beta1.Coin.toObject(message.amount[j], options);
+          }
+          return object;
+      };
 
-        /**
-         * Converts this MsgSend to JSON.
-         * @function toJSON
-         * @memberof types.MsgSend
-         * @instance
-         * @returns {Object.<string,*>} JSON object
-         */
-        MsgSend.prototype.toJSON = function toJSON() {
-            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-        };
+      /**
+       * Converts this MsgSend to JSON.
+       * @function toJSON
+       * @memberof types.MsgSend
+       * @instance
+       * @returns {Object.<string,*>} JSON object
+       */
+      MsgSend.prototype.toJSON = function toJSON() {
+          return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+      };
 
-        return MsgSend;
-    })();
+      return MsgSend;
+  })();
 
-    return types;
+  return types;
 })();
 
 $root.cosmos = (function() {
 
-    /**
-     * Namespace cosmos.
-     * @exports cosmos
-     * @namespace
-     */
-    var cosmos = {};
-
-    cosmos.base = (function() {
-
-        /**
-         * Namespace base.
-         * @memberof cosmos
-         * @namespace
-         */
-        var base = {};
-
-        base.v1beta1 = (function() {
-
-            /**
-             * Namespace v1beta1.
-             * @memberof cosmos.base
-             * @namespace
-             */
-            var v1beta1 = {};
-
-            v1beta1.Coin = (function() {
-
-                /**
-                 * Properties of a Coin.
-                 * @memberof cosmos.base.v1beta1
-                 * @interface ICoin
-                 * @property {string|null} [denom] Coin denom
-                 * @property {string|null} [amount] Coin amount
-                 */
-
-                /**
-                 * Constructs a new Coin.
-                 * @memberof cosmos.base.v1beta1
-                 * @classdesc Represents a Coin.
-                 * @implements ICoin
-                 * @constructor
-                 * @param {cosmos.base.v1beta1.ICoin=} [properties] Properties to set
-                 */
-                function Coin(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * Coin denom.
-                 * @member {string} denom
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @instance
-                 */
-                Coin.prototype.denom = "";
-
-                /**
-                 * Coin amount.
-                 * @member {string} amount
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @instance
-                 */
-                Coin.prototype.amount = "";
-
-                /**
-                 * Creates a new Coin instance using the specified properties.
-                 * @function create
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {cosmos.base.v1beta1.ICoin=} [properties] Properties to set
-                 * @returns {cosmos.base.v1beta1.Coin} Coin instance
-                 */
-                Coin.create = function create(properties) {
-                    return new Coin(properties);
-                };
-
-                /**
-                 * Encodes the specified Coin message. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
-                 * @function encode
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {cosmos.base.v1beta1.ICoin} message Coin message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                Coin.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.denom != null && Object.hasOwnProperty.call(message, "denom"))
-                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.denom);
-                    if (message.amount != null && Object.hasOwnProperty.call(message, "amount"))
-                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.amount);
-                    return writer;
-                };
-
-                /**
-                 * Encodes the specified Coin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
-                 * @function encodeDelimited
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {cosmos.base.v1beta1.ICoin} message Coin message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                Coin.encodeDelimited = function encodeDelimited(message, writer) {
-                    return this.encode(message, writer).ldelim();
-                };
-
-                /**
-                 * Decodes a Coin message from the specified reader or buffer.
-                 * @function decode
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @param {number} [length] Message length if known beforehand
-                 * @returns {cosmos.base.v1beta1.Coin} Coin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                Coin.decode = function decode(reader, length) {
-                    if (!(reader instanceof $Reader))
-                        reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.Coin();
-                    while (reader.pos < end) {
-                        var tag = reader.uint32();
-                        switch (tag >>> 3) {
-                        case 1:
-                            message.denom = reader.string();
-                            break;
-                        case 2:
-                            message.amount = reader.string();
-                            break;
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
-                        }
-                    }
-                    return message;
-                };
-
-                /**
-                 * Decodes a Coin message from the specified reader or buffer, length delimited.
-                 * @function decodeDelimited
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @returns {cosmos.base.v1beta1.Coin} Coin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                Coin.decodeDelimited = function decodeDelimited(reader) {
-                    if (!(reader instanceof $Reader))
-                        reader = new $Reader(reader);
-                    return this.decode(reader, reader.uint32());
-                };
-
-                /**
-                 * Verifies a Coin message.
-                 * @function verify
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {Object.<string,*>} message Plain object to verify
-                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                 */
-                Coin.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.denom != null && message.hasOwnProperty("denom"))
-                        if (!$util.isString(message.denom))
-                            return "denom: string expected";
-                    if (message.amount != null && message.hasOwnProperty("amount"))
-                        if (!$util.isString(message.amount))
-                            return "amount: string expected";
-                    return null;
-                };
-
-                /**
-                 * Creates a Coin message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {cosmos.base.v1beta1.Coin} Coin
-                 */
-                Coin.fromObject = function fromObject(object) {
-                    if (object instanceof $root.cosmos.base.v1beta1.Coin)
-                        return object;
-                    var message = new $root.cosmos.base.v1beta1.Coin();
-                    if (object.denom != null)
-                        message.denom = String(object.denom);
-                    if (object.amount != null)
-                        message.amount = String(object.amount);
-                    return message;
-                };
-
-                /**
-                 * Creates a plain object from a Coin message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @static
-                 * @param {cosmos.base.v1beta1.Coin} message Coin
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Coin.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.denom = "";
-                        object.amount = "";
-                    }
-                    if (message.denom != null && message.hasOwnProperty("denom"))
-                        object.denom = message.denom;
-                    if (message.amount != null && message.hasOwnProperty("amount"))
-                        object.amount = message.amount;
-                    return object;
-                };
-
-                /**
-                 * Converts this Coin to JSON.
-                 * @function toJSON
-                 * @memberof cosmos.base.v1beta1.Coin
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Coin.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-
-                return Coin;
-            })();
-
-            v1beta1.DecCoin = (function() {
-
-                /**
-                 * Properties of a DecCoin.
-                 * @memberof cosmos.base.v1beta1
-                 * @interface IDecCoin
-                 * @property {string|null} [denom] DecCoin denom
-                 * @property {string|null} [amount] DecCoin amount
-                 */
-
-                /**
-                 * Constructs a new DecCoin.
-                 * @memberof cosmos.base.v1beta1
-                 * @classdesc Represents a DecCoin.
-                 * @implements IDecCoin
-                 * @constructor
-                 * @param {cosmos.base.v1beta1.IDecCoin=} [properties] Properties to set
-                 */
-                function DecCoin(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * DecCoin denom.
-                 * @member {string} denom
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @instance
-                 */
-                DecCoin.prototype.denom = "";
-
-                /**
-                 * DecCoin amount.
-                 * @member {string} amount
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @instance
-                 */
-                DecCoin.prototype.amount = "";
-
-                /**
-                 * Creates a new DecCoin instance using the specified properties.
-                 * @function create
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {cosmos.base.v1beta1.IDecCoin=} [properties] Properties to set
-                 * @returns {cosmos.base.v1beta1.DecCoin} DecCoin instance
-                 */
-                DecCoin.create = function create(properties) {
-                    return new DecCoin(properties);
-                };
-
-                /**
-                 * Encodes the specified DecCoin message. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
-                 * @function encode
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {cosmos.base.v1beta1.IDecCoin} message DecCoin message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                DecCoin.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.denom != null && Object.hasOwnProperty.call(message, "denom"))
-                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.denom);
-                    if (message.amount != null && Object.hasOwnProperty.call(message, "amount"))
-                        writer.uint32(/* id 2, wireType 2 =*/18).string(message.amount);
-                    return writer;
-                };
-
-                /**
-                 * Encodes the specified DecCoin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
-                 * @function encodeDelimited
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {cosmos.base.v1beta1.IDecCoin} message DecCoin message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                DecCoin.encodeDelimited = function encodeDelimited(message, writer) {
-                    return this.encode(message, writer).ldelim();
-                };
-
-                /**
-                 * Decodes a DecCoin message from the specified reader or buffer.
-                 * @function decode
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @param {number} [length] Message length if known beforehand
-                 * @returns {cosmos.base.v1beta1.DecCoin} DecCoin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                DecCoin.decode = function decode(reader, length) {
-                    if (!(reader instanceof $Reader))
-                        reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.DecCoin();
-                    while (reader.pos < end) {
-                        var tag = reader.uint32();
-                        switch (tag >>> 3) {
-                        case 1:
-                            message.denom = reader.string();
-                            break;
-                        case 2:
-                            message.amount = reader.string();
-                            break;
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
-                        }
-                    }
-                    return message;
-                };
-
-                /**
-                 * Decodes a DecCoin message from the specified reader or buffer, length delimited.
-                 * @function decodeDelimited
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @returns {cosmos.base.v1beta1.DecCoin} DecCoin
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                DecCoin.decodeDelimited = function decodeDelimited(reader) {
-                    if (!(reader instanceof $Reader))
-                        reader = new $Reader(reader);
-                    return this.decode(reader, reader.uint32());
-                };
-
-                /**
-                 * Verifies a DecCoin message.
-                 * @function verify
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {Object.<string,*>} message Plain object to verify
-                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                 */
-                DecCoin.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.denom != null && message.hasOwnProperty("denom"))
-                        if (!$util.isString(message.denom))
-                            return "denom: string expected";
-                    if (message.amount != null && message.hasOwnProperty("amount"))
-                        if (!$util.isString(message.amount))
-                            return "amount: string expected";
-                    return null;
-                };
-
-                /**
-                 * Creates a DecCoin message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {cosmos.base.v1beta1.DecCoin} DecCoin
-                 */
-                DecCoin.fromObject = function fromObject(object) {
-                    if (object instanceof $root.cosmos.base.v1beta1.DecCoin)
-                        return object;
-                    var message = new $root.cosmos.base.v1beta1.DecCoin();
-                    if (object.denom != null)
-                        message.denom = String(object.denom);
-                    if (object.amount != null)
-                        message.amount = String(object.amount);
-                    return message;
-                };
-
-                /**
-                 * Creates a plain object from a DecCoin message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @static
-                 * @param {cosmos.base.v1beta1.DecCoin} message DecCoin
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                DecCoin.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.denom = "";
-                        object.amount = "";
-                    }
-                    if (message.denom != null && message.hasOwnProperty("denom"))
-                        object.denom = message.denom;
-                    if (message.amount != null && message.hasOwnProperty("amount"))
-                        object.amount = message.amount;
-                    return object;
-                };
-
-                /**
-                 * Converts this DecCoin to JSON.
-                 * @function toJSON
-                 * @memberof cosmos.base.v1beta1.DecCoin
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                DecCoin.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-
-                return DecCoin;
-            })();
-
-            v1beta1.IntProto = (function() {
-
-                /**
-                 * Properties of an IntProto.
-                 * @memberof cosmos.base.v1beta1
-                 * @interface IIntProto
-                 * @property {string|null} [int] IntProto int
-                 */
-
-                /**
-                 * Constructs a new IntProto.
-                 * @memberof cosmos.base.v1beta1
-                 * @classdesc Represents an IntProto.
-                 * @implements IIntProto
-                 * @constructor
-                 * @param {cosmos.base.v1beta1.IIntProto=} [properties] Properties to set
-                 */
-                function IntProto(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * IntProto int.
-                 * @member {string} int
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @instance
-                 */
-                IntProto.prototype.int = "";
-
-                /**
-                 * Creates a new IntProto instance using the specified properties.
-                 * @function create
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.IIntProto=} [properties] Properties to set
-                 * @returns {cosmos.base.v1beta1.IntProto} IntProto instance
-                 */
-                IntProto.create = function create(properties) {
-                    return new IntProto(properties);
-                };
-
-                /**
-                 * Encodes the specified IntProto message. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
-                 * @function encode
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.IIntProto} message IntProto message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                IntProto.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.int != null && Object.hasOwnProperty.call(message, "int"))
-                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.int);
-                    return writer;
-                };
-
-                /**
-                 * Encodes the specified IntProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
-                 * @function encodeDelimited
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.IIntProto} message IntProto message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                IntProto.encodeDelimited = function encodeDelimited(message, writer) {
-                    return this.encode(message, writer).ldelim();
-                };
-
-                /**
-                 * Decodes an IntProto message from the specified reader or buffer.
-                 * @function decode
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @param {number} [length] Message length if known beforehand
-                 * @returns {cosmos.base.v1beta1.IntProto} IntProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                IntProto.decode = function decode(reader, length) {
-                    if (!(reader instanceof $Reader))
-                        reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.IntProto();
-                    while (reader.pos < end) {
-                        var tag = reader.uint32();
-                        switch (tag >>> 3) {
-                        case 1:
-                            message.int = reader.string();
-                            break;
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
-                        }
-                    }
-                    return message;
-                };
-
-                /**
-                 * Decodes an IntProto message from the specified reader or buffer, length delimited.
-                 * @function decodeDelimited
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @returns {cosmos.base.v1beta1.IntProto} IntProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                IntProto.decodeDelimited = function decodeDelimited(reader) {
-                    if (!(reader instanceof $Reader))
-                        reader = new $Reader(reader);
-                    return this.decode(reader, reader.uint32());
-                };
-
-                /**
-                 * Verifies an IntProto message.
-                 * @function verify
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {Object.<string,*>} message Plain object to verify
-                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                 */
-                IntProto.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.int != null && message.hasOwnProperty("int"))
-                        if (!$util.isString(message.int))
-                            return "int: string expected";
-                    return null;
-                };
-
-                /**
-                 * Creates an IntProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {cosmos.base.v1beta1.IntProto} IntProto
-                 */
-                IntProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.cosmos.base.v1beta1.IntProto)
-                        return object;
-                    var message = new $root.cosmos.base.v1beta1.IntProto();
-                    if (object.int != null)
-                        message.int = String(object.int);
-                    return message;
-                };
-
-                /**
-                 * Creates a plain object from an IntProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.IntProto} message IntProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                IntProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.int = "";
-                    if (message.int != null && message.hasOwnProperty("int"))
-                        object.int = message.int;
-                    return object;
-                };
-
-                /**
-                 * Converts this IntProto to JSON.
-                 * @function toJSON
-                 * @memberof cosmos.base.v1beta1.IntProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                IntProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-
-                return IntProto;
-            })();
-
-            v1beta1.DecProto = (function() {
-
-                /**
-                 * Properties of a DecProto.
-                 * @memberof cosmos.base.v1beta1
-                 * @interface IDecProto
-                 * @property {string|null} [dec] DecProto dec
-                 */
-
-                /**
-                 * Constructs a new DecProto.
-                 * @memberof cosmos.base.v1beta1
-                 * @classdesc Represents a DecProto.
-                 * @implements IDecProto
-                 * @constructor
-                 * @param {cosmos.base.v1beta1.IDecProto=} [properties] Properties to set
-                 */
-                function DecProto(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-
-                /**
-                 * DecProto dec.
-                 * @member {string} dec
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @instance
-                 */
-                DecProto.prototype.dec = "";
-
-                /**
-                 * Creates a new DecProto instance using the specified properties.
-                 * @function create
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.IDecProto=} [properties] Properties to set
-                 * @returns {cosmos.base.v1beta1.DecProto} DecProto instance
-                 */
-                DecProto.create = function create(properties) {
-                    return new DecProto(properties);
-                };
-
-                /**
-                 * Encodes the specified DecProto message. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
-                 * @function encode
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.IDecProto} message DecProto message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                DecProto.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.dec != null && Object.hasOwnProperty.call(message, "dec"))
-                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.dec);
-                    return writer;
-                };
-
-                /**
-                 * Encodes the specified DecProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
-                 * @function encodeDelimited
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.IDecProto} message DecProto message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                DecProto.encodeDelimited = function encodeDelimited(message, writer) {
-                    return this.encode(message, writer).ldelim();
-                };
-
-                /**
-                 * Decodes a DecProto message from the specified reader or buffer.
-                 * @function decode
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @param {number} [length] Message length if known beforehand
-                 * @returns {cosmos.base.v1beta1.DecProto} DecProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                DecProto.decode = function decode(reader, length) {
-                    if (!(reader instanceof $Reader))
-                        reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.DecProto();
-                    while (reader.pos < end) {
-                        var tag = reader.uint32();
-                        switch (tag >>> 3) {
-                        case 1:
-                            message.dec = reader.string();
-                            break;
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
-                        }
-                    }
-                    return message;
-                };
-
-                /**
-                 * Decodes a DecProto message from the specified reader or buffer, length delimited.
-                 * @function decodeDelimited
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @returns {cosmos.base.v1beta1.DecProto} DecProto
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                DecProto.decodeDelimited = function decodeDelimited(reader) {
-                    if (!(reader instanceof $Reader))
-                        reader = new $Reader(reader);
-                    return this.decode(reader, reader.uint32());
-                };
-
-                /**
-                 * Verifies a DecProto message.
-                 * @function verify
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {Object.<string,*>} message Plain object to verify
-                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                 */
-                DecProto.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.dec != null && message.hasOwnProperty("dec"))
-                        if (!$util.isString(message.dec))
-                            return "dec: string expected";
-                    return null;
-                };
-
-                /**
-                 * Creates a DecProto message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {cosmos.base.v1beta1.DecProto} DecProto
-                 */
-                DecProto.fromObject = function fromObject(object) {
-                    if (object instanceof $root.cosmos.base.v1beta1.DecProto)
-                        return object;
-                    var message = new $root.cosmos.base.v1beta1.DecProto();
-                    if (object.dec != null)
-                        message.dec = String(object.dec);
-                    return message;
-                };
-
-                /**
-                 * Creates a plain object from a DecProto message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @static
-                 * @param {cosmos.base.v1beta1.DecProto} message DecProto
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                DecProto.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults)
-                        object.dec = "";
-                    if (message.dec != null && message.hasOwnProperty("dec"))
-                        object.dec = message.dec;
-                    return object;
-                };
-
-                /**
-                 * Converts this DecProto to JSON.
-                 * @function toJSON
-                 * @memberof cosmos.base.v1beta1.DecProto
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                DecProto.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-
-                return DecProto;
-            })();
-
-            return v1beta1;
-        })();
-
-        return base;
-    })();
-
-    return cosmos;
+  /**
+   * Namespace cosmos.
+   * @exports cosmos
+   * @namespace
+   */
+  var cosmos = {};
+
+  cosmos.base = (function() {
+
+      /**
+       * Namespace base.
+       * @memberof cosmos
+       * @namespace
+       */
+      var base = {};
+
+      base.v1beta1 = (function() {
+
+          /**
+           * Namespace v1beta1.
+           * @memberof cosmos.base
+           * @namespace
+           */
+          var v1beta1 = {};
+
+          v1beta1.Coin = (function() {
+
+              /**
+               * Properties of a Coin.
+               * @memberof cosmos.base.v1beta1
+               * @interface ICoin
+               * @property {string|null} [denom] Coin denom
+               * @property {string|null} [amount] Coin amount
+               */
+
+              /**
+               * Constructs a new Coin.
+               * @memberof cosmos.base.v1beta1
+               * @classdesc Represents a Coin.
+               * @implements ICoin
+               * @constructor
+               * @param {cosmos.base.v1beta1.ICoin=} [properties] Properties to set
+               */
+              function Coin(properties) {
+                  if (properties)
+                      for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                          if (properties[keys[i]] != null)
+                              this[keys[i]] = properties[keys[i]];
+              }
+
+              /**
+               * Coin denom.
+               * @member {string} denom
+               * @memberof cosmos.base.v1beta1.Coin
+               * @instance
+               */
+              Coin.prototype.denom = "";
+
+              /**
+               * Coin amount.
+               * @member {string} amount
+               * @memberof cosmos.base.v1beta1.Coin
+               * @instance
+               */
+              Coin.prototype.amount = "";
+
+              /**
+               * Creates a new Coin instance using the specified properties.
+               * @function create
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {cosmos.base.v1beta1.ICoin=} [properties] Properties to set
+               * @returns {cosmos.base.v1beta1.Coin} Coin instance
+               */
+              Coin.create = function create(properties) {
+                  return new Coin(properties);
+              };
+
+              /**
+               * Encodes the specified Coin message. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
+               * @function encode
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {cosmos.base.v1beta1.ICoin} message Coin message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              Coin.encode = function encode(message, writer) {
+                  if (!writer)
+                      writer = $Writer.create();
+                  if (message.denom != null && Object.hasOwnProperty.call(message, "denom"))
+                      writer.uint32(/* id 1, wireType 2 =*/10).string(message.denom);
+                  if (message.amount != null && Object.hasOwnProperty.call(message, "amount"))
+                      writer.uint32(/* id 2, wireType 2 =*/18).string(message.amount);
+                  return writer;
+              };
+
+              /**
+               * Encodes the specified Coin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.Coin.verify|verify} messages.
+               * @function encodeDelimited
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {cosmos.base.v1beta1.ICoin} message Coin message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              Coin.encodeDelimited = function encodeDelimited(message, writer) {
+                  return this.encode(message, writer).ldelim();
+              };
+
+              /**
+               * Decodes a Coin message from the specified reader or buffer.
+               * @function decode
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @param {number} [length] Message length if known beforehand
+               * @returns {cosmos.base.v1beta1.Coin} Coin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              Coin.decode = function decode(reader, length) {
+                  if (!(reader instanceof $Reader))
+                      reader = $Reader.create(reader);
+                  var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.Coin();
+                  while (reader.pos < end) {
+                      var tag = reader.uint32();
+                      switch (tag >>> 3) {
+                      case 1:
+                          message.denom = reader.string();
+                          break;
+                      case 2:
+                          message.amount = reader.string();
+                          break;
+                      default:
+                          reader.skipType(tag & 7);
+                          break;
+                      }
+                  }
+                  return message;
+              };
+
+              /**
+               * Decodes a Coin message from the specified reader or buffer, length delimited.
+               * @function decodeDelimited
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @returns {cosmos.base.v1beta1.Coin} Coin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              Coin.decodeDelimited = function decodeDelimited(reader) {
+                  if (!(reader instanceof $Reader))
+                      reader = new $Reader(reader);
+                  return this.decode(reader, reader.uint32());
+              };
+
+              /**
+               * Verifies a Coin message.
+               * @function verify
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {Object.<string,*>} message Plain object to verify
+               * @returns {string|null} `null` if valid, otherwise the reason why it is not
+               */
+              Coin.verify = function verify(message) {
+                  if (typeof message !== "object" || message === null)
+                      return "object expected";
+                  if (message.denom != null && message.hasOwnProperty("denom"))
+                      if (!$util.isString(message.denom))
+                          return "denom: string expected";
+                  if (message.amount != null && message.hasOwnProperty("amount"))
+                      if (!$util.isString(message.amount))
+                          return "amount: string expected";
+                  return null;
+              };
+
+              /**
+               * Creates a Coin message from a plain object. Also converts values to their respective internal types.
+               * @function fromObject
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {Object.<string,*>} object Plain object
+               * @returns {cosmos.base.v1beta1.Coin} Coin
+               */
+              Coin.fromObject = function fromObject(object) {
+                  if (object instanceof $root.cosmos.base.v1beta1.Coin)
+                      return object;
+                  var message = new $root.cosmos.base.v1beta1.Coin();
+                  if (object.denom != null)
+                      message.denom = String(object.denom);
+                  if (object.amount != null)
+                      message.amount = String(object.amount);
+                  return message;
+              };
+
+              /**
+               * Creates a plain object from a Coin message. Also converts values to other types if specified.
+               * @function toObject
+               * @memberof cosmos.base.v1beta1.Coin
+               * @static
+               * @param {cosmos.base.v1beta1.Coin} message Coin
+               * @param {$protobuf.IConversionOptions} [options] Conversion options
+               * @returns {Object.<string,*>} Plain object
+               */
+              Coin.toObject = function toObject(message, options) {
+                  if (!options)
+                      options = {};
+                  var object = {};
+                  if (options.defaults) {
+                      object.denom = "";
+                      object.amount = "";
+                  }
+                  if (message.denom != null && message.hasOwnProperty("denom"))
+                      object.denom = message.denom;
+                  if (message.amount != null && message.hasOwnProperty("amount"))
+                      object.amount = message.amount;
+                  return object;
+              };
+
+              /**
+               * Converts this Coin to JSON.
+               * @function toJSON
+               * @memberof cosmos.base.v1beta1.Coin
+               * @instance
+               * @returns {Object.<string,*>} JSON object
+               */
+              Coin.prototype.toJSON = function toJSON() {
+                  return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+
+              return Coin;
+          })();
+
+          v1beta1.DecCoin = (function() {
+
+              /**
+               * Properties of a DecCoin.
+               * @memberof cosmos.base.v1beta1
+               * @interface IDecCoin
+               * @property {string|null} [denom] DecCoin denom
+               * @property {string|null} [amount] DecCoin amount
+               */
+
+              /**
+               * Constructs a new DecCoin.
+               * @memberof cosmos.base.v1beta1
+               * @classdesc Represents a DecCoin.
+               * @implements IDecCoin
+               * @constructor
+               * @param {cosmos.base.v1beta1.IDecCoin=} [properties] Properties to set
+               */
+              function DecCoin(properties) {
+                  if (properties)
+                      for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                          if (properties[keys[i]] != null)
+                              this[keys[i]] = properties[keys[i]];
+              }
+
+              /**
+               * DecCoin denom.
+               * @member {string} denom
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @instance
+               */
+              DecCoin.prototype.denom = "";
+
+              /**
+               * DecCoin amount.
+               * @member {string} amount
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @instance
+               */
+              DecCoin.prototype.amount = "";
+
+              /**
+               * Creates a new DecCoin instance using the specified properties.
+               * @function create
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {cosmos.base.v1beta1.IDecCoin=} [properties] Properties to set
+               * @returns {cosmos.base.v1beta1.DecCoin} DecCoin instance
+               */
+              DecCoin.create = function create(properties) {
+                  return new DecCoin(properties);
+              };
+
+              /**
+               * Encodes the specified DecCoin message. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
+               * @function encode
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {cosmos.base.v1beta1.IDecCoin} message DecCoin message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              DecCoin.encode = function encode(message, writer) {
+                  if (!writer)
+                      writer = $Writer.create();
+                  if (message.denom != null && Object.hasOwnProperty.call(message, "denom"))
+                      writer.uint32(/* id 1, wireType 2 =*/10).string(message.denom);
+                  if (message.amount != null && Object.hasOwnProperty.call(message, "amount"))
+                      writer.uint32(/* id 2, wireType 2 =*/18).string(message.amount);
+                  return writer;
+              };
+
+              /**
+               * Encodes the specified DecCoin message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecCoin.verify|verify} messages.
+               * @function encodeDelimited
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {cosmos.base.v1beta1.IDecCoin} message DecCoin message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              DecCoin.encodeDelimited = function encodeDelimited(message, writer) {
+                  return this.encode(message, writer).ldelim();
+              };
+
+              /**
+               * Decodes a DecCoin message from the specified reader or buffer.
+               * @function decode
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @param {number} [length] Message length if known beforehand
+               * @returns {cosmos.base.v1beta1.DecCoin} DecCoin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              DecCoin.decode = function decode(reader, length) {
+                  if (!(reader instanceof $Reader))
+                      reader = $Reader.create(reader);
+                  var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.DecCoin();
+                  while (reader.pos < end) {
+                      var tag = reader.uint32();
+                      switch (tag >>> 3) {
+                      case 1:
+                          message.denom = reader.string();
+                          break;
+                      case 2:
+                          message.amount = reader.string();
+                          break;
+                      default:
+                          reader.skipType(tag & 7);
+                          break;
+                      }
+                  }
+                  return message;
+              };
+
+              /**
+               * Decodes a DecCoin message from the specified reader or buffer, length delimited.
+               * @function decodeDelimited
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @returns {cosmos.base.v1beta1.DecCoin} DecCoin
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              DecCoin.decodeDelimited = function decodeDelimited(reader) {
+                  if (!(reader instanceof $Reader))
+                      reader = new $Reader(reader);
+                  return this.decode(reader, reader.uint32());
+              };
+
+              /**
+               * Verifies a DecCoin message.
+               * @function verify
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {Object.<string,*>} message Plain object to verify
+               * @returns {string|null} `null` if valid, otherwise the reason why it is not
+               */
+              DecCoin.verify = function verify(message) {
+                  if (typeof message !== "object" || message === null)
+                      return "object expected";
+                  if (message.denom != null && message.hasOwnProperty("denom"))
+                      if (!$util.isString(message.denom))
+                          return "denom: string expected";
+                  if (message.amount != null && message.hasOwnProperty("amount"))
+                      if (!$util.isString(message.amount))
+                          return "amount: string expected";
+                  return null;
+              };
+
+              /**
+               * Creates a DecCoin message from a plain object. Also converts values to their respective internal types.
+               * @function fromObject
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {Object.<string,*>} object Plain object
+               * @returns {cosmos.base.v1beta1.DecCoin} DecCoin
+               */
+              DecCoin.fromObject = function fromObject(object) {
+                  if (object instanceof $root.cosmos.base.v1beta1.DecCoin)
+                      return object;
+                  var message = new $root.cosmos.base.v1beta1.DecCoin();
+                  if (object.denom != null)
+                      message.denom = String(object.denom);
+                  if (object.amount != null)
+                      message.amount = String(object.amount);
+                  return message;
+              };
+
+              /**
+               * Creates a plain object from a DecCoin message. Also converts values to other types if specified.
+               * @function toObject
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @static
+               * @param {cosmos.base.v1beta1.DecCoin} message DecCoin
+               * @param {$protobuf.IConversionOptions} [options] Conversion options
+               * @returns {Object.<string,*>} Plain object
+               */
+              DecCoin.toObject = function toObject(message, options) {
+                  if (!options)
+                      options = {};
+                  var object = {};
+                  if (options.defaults) {
+                      object.denom = "";
+                      object.amount = "";
+                  }
+                  if (message.denom != null && message.hasOwnProperty("denom"))
+                      object.denom = message.denom;
+                  if (message.amount != null && message.hasOwnProperty("amount"))
+                      object.amount = message.amount;
+                  return object;
+              };
+
+              /**
+               * Converts this DecCoin to JSON.
+               * @function toJSON
+               * @memberof cosmos.base.v1beta1.DecCoin
+               * @instance
+               * @returns {Object.<string,*>} JSON object
+               */
+              DecCoin.prototype.toJSON = function toJSON() {
+                  return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+
+              return DecCoin;
+          })();
+
+          v1beta1.IntProto = (function() {
+
+              /**
+               * Properties of an IntProto.
+               * @memberof cosmos.base.v1beta1
+               * @interface IIntProto
+               * @property {string|null} [int] IntProto int
+               */
+
+              /**
+               * Constructs a new IntProto.
+               * @memberof cosmos.base.v1beta1
+               * @classdesc Represents an IntProto.
+               * @implements IIntProto
+               * @constructor
+               * @param {cosmos.base.v1beta1.IIntProto=} [properties] Properties to set
+               */
+              function IntProto(properties) {
+                  if (properties)
+                      for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                          if (properties[keys[i]] != null)
+                              this[keys[i]] = properties[keys[i]];
+              }
+
+              /**
+               * IntProto int.
+               * @member {string} int
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @instance
+               */
+              IntProto.prototype.int = "";
+
+              /**
+               * Creates a new IntProto instance using the specified properties.
+               * @function create
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {cosmos.base.v1beta1.IIntProto=} [properties] Properties to set
+               * @returns {cosmos.base.v1beta1.IntProto} IntProto instance
+               */
+              IntProto.create = function create(properties) {
+                  return new IntProto(properties);
+              };
+
+              /**
+               * Encodes the specified IntProto message. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
+               * @function encode
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {cosmos.base.v1beta1.IIntProto} message IntProto message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              IntProto.encode = function encode(message, writer) {
+                  if (!writer)
+                      writer = $Writer.create();
+                  if (message.int != null && Object.hasOwnProperty.call(message, "int"))
+                      writer.uint32(/* id 1, wireType 2 =*/10).string(message.int);
+                  return writer;
+              };
+
+              /**
+               * Encodes the specified IntProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.IntProto.verify|verify} messages.
+               * @function encodeDelimited
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {cosmos.base.v1beta1.IIntProto} message IntProto message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              IntProto.encodeDelimited = function encodeDelimited(message, writer) {
+                  return this.encode(message, writer).ldelim();
+              };
+
+              /**
+               * Decodes an IntProto message from the specified reader or buffer.
+               * @function decode
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @param {number} [length] Message length if known beforehand
+               * @returns {cosmos.base.v1beta1.IntProto} IntProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              IntProto.decode = function decode(reader, length) {
+                  if (!(reader instanceof $Reader))
+                      reader = $Reader.create(reader);
+                  var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.IntProto();
+                  while (reader.pos < end) {
+                      var tag = reader.uint32();
+                      switch (tag >>> 3) {
+                      case 1:
+                          message.int = reader.string();
+                          break;
+                      default:
+                          reader.skipType(tag & 7);
+                          break;
+                      }
+                  }
+                  return message;
+              };
+
+              /**
+               * Decodes an IntProto message from the specified reader or buffer, length delimited.
+               * @function decodeDelimited
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @returns {cosmos.base.v1beta1.IntProto} IntProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              IntProto.decodeDelimited = function decodeDelimited(reader) {
+                  if (!(reader instanceof $Reader))
+                      reader = new $Reader(reader);
+                  return this.decode(reader, reader.uint32());
+              };
+
+              /**
+               * Verifies an IntProto message.
+               * @function verify
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {Object.<string,*>} message Plain object to verify
+               * @returns {string|null} `null` if valid, otherwise the reason why it is not
+               */
+              IntProto.verify = function verify(message) {
+                  if (typeof message !== "object" || message === null)
+                      return "object expected";
+                  if (message.int != null && message.hasOwnProperty("int"))
+                      if (!$util.isString(message.int))
+                          return "int: string expected";
+                  return null;
+              };
+
+              /**
+               * Creates an IntProto message from a plain object. Also converts values to their respective internal types.
+               * @function fromObject
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {Object.<string,*>} object Plain object
+               * @returns {cosmos.base.v1beta1.IntProto} IntProto
+               */
+              IntProto.fromObject = function fromObject(object) {
+                  if (object instanceof $root.cosmos.base.v1beta1.IntProto)
+                      return object;
+                  var message = new $root.cosmos.base.v1beta1.IntProto();
+                  if (object.int != null)
+                      message.int = String(object.int);
+                  return message;
+              };
+
+              /**
+               * Creates a plain object from an IntProto message. Also converts values to other types if specified.
+               * @function toObject
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @static
+               * @param {cosmos.base.v1beta1.IntProto} message IntProto
+               * @param {$protobuf.IConversionOptions} [options] Conversion options
+               * @returns {Object.<string,*>} Plain object
+               */
+              IntProto.toObject = function toObject(message, options) {
+                  if (!options)
+                      options = {};
+                  var object = {};
+                  if (options.defaults)
+                      object.int = "";
+                  if (message.int != null && message.hasOwnProperty("int"))
+                      object.int = message.int;
+                  return object;
+              };
+
+              /**
+               * Converts this IntProto to JSON.
+               * @function toJSON
+               * @memberof cosmos.base.v1beta1.IntProto
+               * @instance
+               * @returns {Object.<string,*>} JSON object
+               */
+              IntProto.prototype.toJSON = function toJSON() {
+                  return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+
+              return IntProto;
+          })();
+
+          v1beta1.DecProto = (function() {
+
+              /**
+               * Properties of a DecProto.
+               * @memberof cosmos.base.v1beta1
+               * @interface IDecProto
+               * @property {string|null} [dec] DecProto dec
+               */
+
+              /**
+               * Constructs a new DecProto.
+               * @memberof cosmos.base.v1beta1
+               * @classdesc Represents a DecProto.
+               * @implements IDecProto
+               * @constructor
+               * @param {cosmos.base.v1beta1.IDecProto=} [properties] Properties to set
+               */
+              function DecProto(properties) {
+                  if (properties)
+                      for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                          if (properties[keys[i]] != null)
+                              this[keys[i]] = properties[keys[i]];
+              }
+
+              /**
+               * DecProto dec.
+               * @member {string} dec
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @instance
+               */
+              DecProto.prototype.dec = "";
+
+              /**
+               * Creates a new DecProto instance using the specified properties.
+               * @function create
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {cosmos.base.v1beta1.IDecProto=} [properties] Properties to set
+               * @returns {cosmos.base.v1beta1.DecProto} DecProto instance
+               */
+              DecProto.create = function create(properties) {
+                  return new DecProto(properties);
+              };
+
+              /**
+               * Encodes the specified DecProto message. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
+               * @function encode
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {cosmos.base.v1beta1.IDecProto} message DecProto message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              DecProto.encode = function encode(message, writer) {
+                  if (!writer)
+                      writer = $Writer.create();
+                  if (message.dec != null && Object.hasOwnProperty.call(message, "dec"))
+                      writer.uint32(/* id 1, wireType 2 =*/10).string(message.dec);
+                  return writer;
+              };
+
+              /**
+               * Encodes the specified DecProto message, length delimited. Does not implicitly {@link cosmos.base.v1beta1.DecProto.verify|verify} messages.
+               * @function encodeDelimited
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {cosmos.base.v1beta1.IDecProto} message DecProto message or plain object to encode
+               * @param {$protobuf.Writer} [writer] Writer to encode to
+               * @returns {$protobuf.Writer} Writer
+               */
+              DecProto.encodeDelimited = function encodeDelimited(message, writer) {
+                  return this.encode(message, writer).ldelim();
+              };
+
+              /**
+               * Decodes a DecProto message from the specified reader or buffer.
+               * @function decode
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @param {number} [length] Message length if known beforehand
+               * @returns {cosmos.base.v1beta1.DecProto} DecProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              DecProto.decode = function decode(reader, length) {
+                  if (!(reader instanceof $Reader))
+                      reader = $Reader.create(reader);
+                  var end = length === undefined ? reader.len : reader.pos + length, message = new $root.cosmos.base.v1beta1.DecProto();
+                  while (reader.pos < end) {
+                      var tag = reader.uint32();
+                      switch (tag >>> 3) {
+                      case 1:
+                          message.dec = reader.string();
+                          break;
+                      default:
+                          reader.skipType(tag & 7);
+                          break;
+                      }
+                  }
+                  return message;
+              };
+
+              /**
+               * Decodes a DecProto message from the specified reader or buffer, length delimited.
+               * @function decodeDelimited
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+               * @returns {cosmos.base.v1beta1.DecProto} DecProto
+               * @throws {Error} If the payload is not a reader or valid buffer
+               * @throws {$protobuf.util.ProtocolError} If required fields are missing
+               */
+              DecProto.decodeDelimited = function decodeDelimited(reader) {
+                  if (!(reader instanceof $Reader))
+                      reader = new $Reader(reader);
+                  return this.decode(reader, reader.uint32());
+              };
+
+              /**
+               * Verifies a DecProto message.
+               * @function verify
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {Object.<string,*>} message Plain object to verify
+               * @returns {string|null} `null` if valid, otherwise the reason why it is not
+               */
+              DecProto.verify = function verify(message) {
+                  if (typeof message !== "object" || message === null)
+                      return "object expected";
+                  if (message.dec != null && message.hasOwnProperty("dec"))
+                      if (!$util.isString(message.dec))
+                          return "dec: string expected";
+                  return null;
+              };
+
+              /**
+               * Creates a DecProto message from a plain object. Also converts values to their respective internal types.
+               * @function fromObject
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {Object.<string,*>} object Plain object
+               * @returns {cosmos.base.v1beta1.DecProto} DecProto
+               */
+              DecProto.fromObject = function fromObject(object) {
+                  if (object instanceof $root.cosmos.base.v1beta1.DecProto)
+                      return object;
+                  var message = new $root.cosmos.base.v1beta1.DecProto();
+                  if (object.dec != null)
+                      message.dec = String(object.dec);
+                  return message;
+              };
+
+              /**
+               * Creates a plain object from a DecProto message. Also converts values to other types if specified.
+               * @function toObject
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @static
+               * @param {cosmos.base.v1beta1.DecProto} message DecProto
+               * @param {$protobuf.IConversionOptions} [options] Conversion options
+               * @returns {Object.<string,*>} Plain object
+               */
+              DecProto.toObject = function toObject(message, options) {
+                  if (!options)
+                      options = {};
+                  var object = {};
+                  if (options.defaults)
+                      object.dec = "";
+                  if (message.dec != null && message.hasOwnProperty("dec"))
+                      object.dec = message.dec;
+                  return object;
+              };
+
+              /**
+               * Converts this DecProto to JSON.
+               * @function toJSON
+               * @memberof cosmos.base.v1beta1.DecProto
+               * @instance
+               * @returns {Object.<string,*>} JSON object
+               */
+              DecProto.prototype.toJSON = function toJSON() {
+                  return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+              };
+
+              return DecProto;
+          })();
+
+          return v1beta1;
+      })();
+
+      return base;
+  })();
+
+  return cosmos;
 })();
 
 module.exports = $root;
