@@ -9,7 +9,7 @@ import {
   baseToAsset,
 } from '@xchainjs/xchain-util'
 
-import { AssetRuneNative as AssetRune, Client, DepositTx } from '../src'
+import { AssetRuneNative as AssetRune, Client, DepositTx, defaultClientConfig } from '../src'
 
 const getPrintableTx = (tx: Tx) => {
   return {
@@ -67,6 +67,7 @@ describe('Thorchain Keystore', () => {
 
   beforeAll(() => {
     client = new Client({
+      ...defaultClientConfig,
       phrase: process.env.PHRASE_MAINNET,
     })
   })
@@ -142,7 +143,7 @@ describe('Thorchain Keystore', () => {
   it('Should make deposit', async () => {
     try {
       /**
-       * MAKE SURE TO TEST THIS FUNCTION WITH YOUR ADDRESS BNB, OTHERWISE, YOU COULD LOSE FUNDS
+       * MAKE SURE TO TEST THIS FUNCTION WITH YOUR ADDRESS, OTHERWISE, YOU COULD LOSE FUNDS
        */
       const address: string = '' || 'TO_BE_DEFINED'
       if (address === 'TO_BE_DEFINED') throw Error('Set an address to try the deposit e2e function')
@@ -164,7 +165,7 @@ describe('Thorchain Keystore', () => {
   it('Should make secured Asset swap', async () => {
     try {
       /**
-       * MAKE SURE TO TEST THIS FUNCTION WITH YOUR ADDRESS BNB, OTHERWISE, YOU COULD LOSE FUNDS
+       * MAKE SURE TO TEST THIS FUNCTION WITH YOUR ADDRESS, OTHERWISE, YOU COULD LOSE FUNDS
        */
       const address: string = 'thor1rkpukrhljr72sxww2t0nwvng84zegp59805e03' || 'TO_BE_DEFINED'
       if (address === 'TO_BE_DEFINED') throw Error('Set an address to try the deposit e2e function')
