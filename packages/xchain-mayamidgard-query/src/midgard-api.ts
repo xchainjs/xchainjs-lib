@@ -17,7 +17,7 @@ import { ActionHistory, GetActionsParams, MAYANameDetails, MidgardConfig, Revers
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://midgard.mayachain.info', 'https://midgard-maya.liquify.com'],
+    midgardBaseUrls: ['https://midgard-maya.liquify.com', 'https://midgard.mayachain.info'],
   },
   stagenet: {
     apiRetries: 3,
