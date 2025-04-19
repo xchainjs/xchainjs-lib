@@ -36,6 +36,7 @@
     "@cosmjs/encoding": "0.32.4",
     "@cosmjs/ledger-amino": "0.32.4",
     "@cosmjs/proto-signing": "0.32.4",
+    "@cosmjs/stargate": "0.32.4",
     "@ledgerhq/hw-app-cosmos": "6.29.6",
     "@ledgerhq/hw-transport": "6.30.6",
     "@xchainjs/xchain-client": "workspace:*",
