@@ -1,5 +1,13 @@
 # xchainjs-loans
 
+## 1.0.46
+
+### Patch Changes
+
+- Updated dependencies [153dead]
+  - @xchainjs/xchain-utxo-providers@1.0.11
+  - @xchainjs/xchain-thorchain-amm@2.0.26
+
 ## 1.0.45
 
 ### Patch Changes

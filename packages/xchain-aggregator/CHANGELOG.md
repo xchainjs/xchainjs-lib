@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.27
+
+### Patch Changes
+
+- Updated dependencies [0e432f2]
+  - @xchainjs/xchain-thorchain@2.0.15
+  - @xchainjs/xchain-thorchain-amm@2.0.26
+  - @xchainjs/xchain-mayachain-query@1.0.12
+  - @xchainjs/xchain-mayachain-amm@3.0.21
+  - @xchainjs/xchain-wallet@1.1.7
+
 ## 1.0.26
 
 ### Patch Changes

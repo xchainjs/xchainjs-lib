@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.5
+
+### Patch Changes
+
+- 556be30: Add getCardanoPrefix in utils
+
 ## 0.0.4
 
 ### Patch Changes
