@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.7
+
+### Patch Changes
+
+- Updated dependencies [0e432f2]
+  - @xchainjs/xchain-thorchain@2.0.15
+  - @xchainjs/xchain-utxo@1.0.11
+
 ## 1.1.6
 
 ### Patch Changes

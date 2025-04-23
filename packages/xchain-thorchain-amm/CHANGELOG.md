@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.26
+
+### Patch Changes
+
+- Updated dependencies [cac8322]
+- Updated dependencies [0e432f2]
+  - @xchainjs/xchain-avax@1.0.15
+  - @xchainjs/xchain-bsc@1.0.15
+  - @xchainjs/xchain-thorchain@2.0.15
+  - @xchainjs/xchain-bitcoin@1.2.3
+  - @xchainjs/xchain-bitcoincash@1.0.11
+  - @xchainjs/xchain-doge@1.0.11
+  - @xchainjs/xchain-litecoin@1.0.11
+  - @xchainjs/xchain-wallet@1.1.7
+
 ## 2.0.25
 
 ### Patch Changes
