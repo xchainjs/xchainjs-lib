@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.15
+
+### Patch Changes
+
+- 0e432f2: Update MsgCompiled for new TC types
+
 ## 2.0.14
 
 ### Patch Changes

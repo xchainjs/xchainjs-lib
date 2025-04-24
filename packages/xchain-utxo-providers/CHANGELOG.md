@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11
+
+### Patch Changes
+
+- 153dead: Create zcash client
+
 ## 1.0.10
 
 ### Patch Changes

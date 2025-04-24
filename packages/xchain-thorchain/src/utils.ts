@@ -3,7 +3,7 @@
  */
 import { Uint53 } from '@cosmjs/math'
 import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
-import { Address, AssetType, assetToString, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
+import { Address, AssetType, assetToString, isSecuredAsset, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
 import axios from 'axios'
 //Import necessary constants for default client URLs
 import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL, RUNE_DENOM } from './const'
@@ -69,6 +69,7 @@ export const isAssetRuneNative = (asset: CompatibleAsset): boolean => assetToStr
 export const getDenom = (asset: CompatibleAsset) => {
   if (isAssetRuneNative(asset)) return RUNE_DENOM
   if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
+  if (isSecuredAsset(asset)) return assetToString(asset).toLowerCase()
   return asset.symbol.toLowerCase()
 }
 

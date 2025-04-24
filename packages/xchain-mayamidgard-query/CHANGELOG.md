@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.27
+
+### Patch Changes
+
+- 6c30cb9: Updating maya midgard base url order
+
 ## 0.1.26
 
 ### Patch Changes

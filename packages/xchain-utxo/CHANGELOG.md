@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.11
+
+### Patch Changes
+
+- Updated dependencies [153dead]
+  - @xchainjs/xchain-utxo-providers@1.0.11
+
 ## 1.0.10
 
 ### Patch Changes

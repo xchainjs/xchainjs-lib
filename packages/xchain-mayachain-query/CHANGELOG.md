@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.12
+
+### Patch Changes
+
+- Updated dependencies [6c30cb9]
+  - @xchainjs/xchain-mayamidgard-query@0.1.27
+
 ## 1.0.11
 
 ### Patch Changes
