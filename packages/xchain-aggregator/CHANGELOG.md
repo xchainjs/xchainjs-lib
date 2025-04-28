@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- 621a7a0: Major optimization
+
+### Patch Changes
+
+- Updated dependencies [621a7a0]
+  - @xchainjs/xchain-mayachain-query@2.0.0
+  - @xchainjs/xchain-thorchain-query@2.0.0
+  - @xchainjs/xchain-mayachain-amm@4.0.0
+  - @xchainjs/xchain-thorchain-amm@3.0.0
+  - @xchainjs/xchain-mayachain@3.0.0
+  - @xchainjs/xchain-thorchain@3.0.0
+  - @xchainjs/xchain-client@2.0.0
+  - @xchainjs/xchain-wallet@2.0.0
+  - @xchainjs/xchain-util@2.0.0
+
 ## 1.0.27
 
 ### Patch Changes

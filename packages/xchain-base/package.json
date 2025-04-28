@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-base",
-  "version": "0.0.10",
+  "version": "1.0.0",
   "description": "Base EVM client for XChainJS",
   "keywords": [
     "XChain",
