@@ -119,6 +119,9 @@ Blockchain clients with whom you can prepare, make and broadcast transactions, e
 | [@xchainjs/xchain-solana](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-solana) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-solana)](https://www.npmjs.com/package/@xchainjs/xchain-solana) |
 | [@xchainjs/xchain-binance](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-binance)](https://www.npmjs.com/package/@xchainjs/xchain-binance) |
 | [@xchainjs/xchain-base](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-base) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-base)](https://www.npmjs.com/package/@xchainjs/xchain-base) |
+| [@xchainjs/xchain-evm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-evm) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-evm)](https://www.npmjs.com/package/@xchainjs/xchain-evm) |
+| [@xchainjs/xchain-radix](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-radix) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-radix)](https://www.npmjs.com/package/@xchainjs/xchain-radix) |
+| [@xchainjs/xchain-cardano](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cardano) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cardano)](https://www.npmjs.com/package/@xchainjs/xchain-cardano) |
 
 ### Utility packages
 
