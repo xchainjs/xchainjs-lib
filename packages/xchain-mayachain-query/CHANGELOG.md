@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- 621a7a0: Major optimization
+
+### Patch Changes
+
+- Updated dependencies [621a7a0]
+  - @xchainjs/xchain-mayamidgard-query@1.0.0
+  - @xchainjs/xchain-mayamidgard@1.0.0
+  - @xchainjs/xchain-mayanode@1.0.0
+  - @xchainjs/xchain-client@2.0.0
+  - @xchainjs/xchain-util@2.0.0
+
 ## 1.0.12
 
 ### Patch Changes

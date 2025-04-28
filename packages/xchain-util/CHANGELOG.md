@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+### Major Changes
+
+- 621a7a0: Major optimization
+
 ## 1.0.8
 
 ### Patch Changes
