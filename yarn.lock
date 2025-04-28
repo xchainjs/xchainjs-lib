@@ -672,56 +672,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bnb-chain/javascript-sdk@npm:4.4.2":
-  version: 4.4.2
-  resolution: "@bnb-chain/javascript-sdk@npm:4.4.2"
-  dependencies:
-    "@babel/runtime": "npm:^7.10.4"
-    "@ledgerhq/hw-transport-node-hid": "npm:^5.10.0"
-    "@ledgerhq/hw-transport-u2f": "npm:^5.9.0"
-    "@ledgerhq/hw-transport-web-ble": "npm:^5.9.0"
-    "@types/bech32": "npm:^1.1.2"
-    "@types/big.js": "npm:^4.0.5"
-    "@types/bn.js": "npm:^4.11.6"
-    "@types/crypto-js": "npm:^3.1.43"
-    "@types/elliptic": "npm:^6.4.12"
-    "@types/jest": "npm:^25.1.4"
-    "@types/ledgerhq__hw-transport": "npm:^4.21.2"
-    "@types/lodash": "npm:^4.14.149"
-    "@types/node": "npm:^13.9.0"
-    "@types/pumpify": "npm:^1.4.1"
-    "@types/tiny-secp256k1": "npm:^1.0.0"
-    "@types/uuid": "npm:^7.0.0"
-    axios: "npm:^0.24.0"
-    bech32: "npm:^1.1.3"
-    big.js: "npm:^5.2.2"
-    bip32: "npm:^2.0.5"
-    bip39: "npm:^3.0.2"
-    bn.js: "npm:^4.11.8"
-    camelcase: "npm:^5.3.1"
-    crypto-browserify: "npm:^3.12.0"
-    crypto-js: "npm:^4.2.0"
-    elliptic: "npm:^6.5.4"
-    eslint-utils: "npm:^1.4.2"
-    events: "npm:^3.0.0"
-    is-it-check: "npm:^1.0.12"
-    lodash: "npm:^4.17.21"
-    minimist: "npm:^1.2.5"
-    ndjson: "npm:^1.5.0"
-    protocol-buffers-encodings: "npm:^1.1.0"
-    pumpify: "npm:^2.0.1"
-    secure-random: "npm:^1.1.2"
-    tiny-secp256k1: "npm:^1.1.3"
-    url: "npm:^0.11.0"
-    uuid: "npm:^3.3.2"
-    websocket-stream: "npm:^5.5.0"
-  dependenciesMeta:
-    "@ledgerhq/hw-transport-node-hid":
-      optional: true
-  checksum: 10c0/d962fefe89841e135ece3ae60f15005170187606de84f969b86ca98264d4f8594d9751b816426acaca5d276dcb92840297de93feb693bce4537b3237c24df6cd
-  languageName: node
-  linkType: hard
-
 "@chainflip/bitcoin@npm:^1.1.1":
   version: 1.1.1
   resolution: "@chainflip/bitcoin@npm:1.1.1"
@@ -1085,7 +1035,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cosmjs/math@npm:^0.32.4":
+"@cosmjs/math@npm:0.32.4, @cosmjs/math@npm:^0.32.4":
   version: 0.32.4
   resolution: "@cosmjs/math@npm:0.32.4"
   dependencies:
@@ -4487,12 +4437,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-binance@workspace:packages/xchain-binance"
   dependencies:
-    "@bnb-chain/javascript-sdk": "npm:4.4.2"
+    "@binance-chain/javascript-sdk": "npm:^4.2.0"
     "@types/big.js": "npm:^6.1.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     big.js: "npm:6.2.1"
+    bip39: "npm:^3.1.0"
     nock: "npm:13.0.5"
   languageName: unknown
   linkType: soft
@@ -4601,6 +4552,7 @@ __metadata:
     "@cosmjs/encoding": "npm:0.32.4"
     "@cosmjs/ledger-amino": "npm:0.32.4"
     "@cosmjs/proto-signing": "npm:0.32.4"
+    "@cosmjs/stargate": "npm:0.32.4"
     "@ledgerhq/hw-app-cosmos": "npm:6.29.6"
     "@ledgerhq/hw-transport": "npm:6.30.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
@@ -4710,6 +4662,7 @@ __metadata:
     "@ledgerhq/hw-transport": "npm:6.30.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
@@ -4726,10 +4679,15 @@ __metadata:
     "@cosmjs/encoding": "npm:0.32.4"
     "@cosmjs/proto-signing": "npm:0.32.4"
     "@cosmjs/stargate": "npm:0.32.4"
+    "@types/secp256k1": "npm:^4.0.3"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
+    bech32: "npm:^1.1.3"
+    bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
+    secp256k1: "npm:5.0.1"
   languageName: unknown
   linkType: soft
 
@@ -4760,13 +4718,16 @@ __metadata:
     "@xchainjs/xchain-arbitrum": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-dash": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
+    "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-kujira": "workspace:*"
     "@xchainjs/xchain-mayachain": "workspace:*"
     "@xchainjs/xchain-mayachain-query": "workspace:*"
     "@xchainjs/xchain-radix": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:1.20.0"
@@ -4798,8 +4759,10 @@ __metadata:
     "@cosmjs/crypto": "npm:0.32.4"
     "@cosmjs/encoding": "npm:0.32.4"
     "@cosmjs/proto-signing": "npm:0.32.4"
+    "@cosmjs/stargate": "npm:0.32.4"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
@@ -4950,11 +4913,14 @@ __metadata:
     "@cosmjs/amino": "npm:0.32.4"
     "@cosmjs/crypto": "npm:0.32.4"
     "@cosmjs/encoding": "npm:0.32.4"
+    "@cosmjs/math": "npm:0.32.4"
     "@cosmjs/proto-signing": "npm:0.32.4"
+    "@cosmjs/stargate": "npm:0.32.4"
     "@ledgerhq/hw-transport": "npm:6.30.6"
     "@xchainjs/ledger-thorchain": "npm:0.2.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
@@ -5484,15 +5450,6 @@ __metadata:
   dependencies:
     follow-redirects: "npm:^1.14.4"
   checksum: 10c0/cbc30b027003c0a2695911ac2617a2869f954a442b3e95a0a8017677e6246e2b8c69126c57683a5124ff8fbcf434a4e8832b450c0ba650f85e1c6389bd055d84
-  languageName: node
-  linkType: hard
-
-"axios@npm:^0.24.0":
-  version: 0.24.0
-  resolution: "axios@npm:0.24.0"
-  dependencies:
-    follow-redirects: "npm:^1.14.4"
-  checksum: 10c0/d106561e761bf48633633073626eafb80289eb7c7c27f9fae4fb796939b6ecd2c9f63b596e3b3d872f7c0bec6b2fb117c58456d387e4ca2da7fc07c795a979c3
   languageName: node
   linkType: hard
 
@@ -7098,6 +7055,13 @@ __metadata:
     gopd: "npm:^1.0.1"
     has-property-descriptors: "npm:^1.0.0"
   checksum: 10c0/77ef6e0bceb515e05b5913ab635a84d537cee84f8a7c37c77fdcb31fc5b80f6dbe81b33375e4b67d96aa04e6a0d8d4ea099e431d83f089af8d93adfb584bcb94
+  languageName: node
+  linkType: hard
+
+"define-lazy-prop@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "define-lazy-prop@npm:2.0.0"
+  checksum: 10c0/db6c63864a9d3b7dc9def55d52764968a5af296de87c1b2cc71d8be8142e445208071953649e0386a8cc37cfcf9a2067a47207f1eb9ff250c2a269658fdae422
   languageName: node
   linkType: hard
 
@@ -9036,6 +9000,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-docker@npm:^2.0.0, is-docker@npm:^2.1.1":
+  version: 2.2.1
+  resolution: "is-docker@npm:2.2.1"
+  bin:
+    is-docker: cli.js
+  checksum: 10c0/e828365958d155f90c409cdbe958f64051d99e8aedc2c8c4cd7c89dcf35329daed42f7b99346f7828df013e27deb8f721cf9408ba878c76eb9e8290235fbcdcc
+  languageName: node
+  linkType: hard
+
 "is-extglob@npm:^2.1.1":
   version: 2.1.1
   resolution: "is-extglob@npm:2.1.1"
@@ -9086,13 +9059,6 @@ __metadata:
   version: 1.0.0
   resolution: "is-interactive@npm:1.0.0"
   checksum: 10c0/dd47904dbf286cd20aa58c5192161be1a67138485b9836d5a70433b21a45442e9611b8498b8ab1f839fc962c7620667a50535fdfb4a6bc7989b8858645c06b4d
-  languageName: node
-  linkType: hard
-
-"is-it-check@npm:^1.0.12":
-  version: 1.0.12
-  resolution: "is-it-check@npm:1.0.12"
-  checksum: 10c0/53e047fca6284bbc20e7ba93c709f6ced3f31ef7b60dd107fc106610934f6703b498292e908b191f66f7e3b83b0ce88a4335bb88c7394c7feda2bbcb8afcc1cd
   languageName: node
   linkType: hard
 
@@ -9259,6 +9225,15 @@ __metadata:
   version: 1.0.2
   resolution: "is-windows@npm:1.0.2"
   checksum: 10c0/b32f418ab3385604a66f1b7a3ce39d25e8881dee0bd30816dc8344ef6ff9df473a732bcc1ec4e84fe99b2f229ae474f7133e8e93f9241686cfcf7eebe53ba7a5
+  languageName: node
+  linkType: hard
+
+"is-wsl@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "is-wsl@npm:2.2.0"
+  dependencies:
+    is-docker: "npm:^2.0.0"
+  checksum: 10c0/a6fa2d370d21be487c0165c7a440d567274fbba1a817f2f0bfa41cc5e3af25041d84267baa22df66696956038a43973e72fca117918c91431920bdef490fa25e
   languageName: node
   linkType: hard
 
@@ -11170,6 +11145,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"open@npm:^8.4.0":
+  version: 8.4.2
+  resolution: "open@npm:8.4.2"
+  dependencies:
+    define-lazy-prop: "npm:^2.0.0"
+    is-docker: "npm:^2.1.1"
+    is-wsl: "npm:^2.2.0"
+  checksum: 10c0/bb6b3a58401dacdb0aad14360626faf3fb7fba4b77816b373495988b724fb48941cad80c1b65d62bb31a17609b2cd91c41a181602caea597ca80dfbcc27e84c9
+  languageName: node
+  linkType: hard
+
 "optionator@npm:^0.9.1":
   version: 0.9.1
   resolution: "optionator@npm:0.9.1"
@@ -11471,6 +11457,13 @@ __metadata:
   version: 2.3.1
   resolution: "picomatch@npm:2.3.1"
   checksum: 10c0/26c02b8d06f03206fc2ab8d16f19960f2ff9e81a658f831ecb656d8f17d9edc799e8364b1f4a7873e89d9702dff96204be0fa26fe4181f6843f040f819dac4be
+  languageName: node
+  linkType: hard
+
+"picomatch@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "picomatch@npm:4.0.2"
+  checksum: 10c0/7c51f3ad2bb42c776f49ebf964c644958158be30d0a510efd5a395e8d49cb5acfed5b82c0c5b365523ce18e6ab85013c9ebe574f60305892ec3fa8eee8304ccc
   languageName: node
   linkType: hard
 
@@ -12195,6 +12188,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rollup-plugin-visualizer@npm:^5.14.0":
+  version: 5.14.0
+  resolution: "rollup-plugin-visualizer@npm:5.14.0"
+  dependencies:
+    open: "npm:^8.4.0"
+    picomatch: "npm:^4.0.2"
+    source-map: "npm:^0.7.4"
+    yargs: "npm:^17.5.1"
+  peerDependencies:
+    rolldown: 1.x
+    rollup: 2.x || 3.x || 4.x
+  peerDependenciesMeta:
+    rolldown:
+      optional: true
+    rollup:
+      optional: true
+  bin:
+    rollup-plugin-visualizer: dist/bin/cli.js
+  checksum: 10c0/ec6ca9ed125bce9994ba49a340bda730661d8e8dc5c5dc014dc757185182e1eda49c6708f990cb059095e71a3741a5248f1e6ba0ced7056020692888e06b1ddf
+  languageName: node
+  linkType: hard
+
 "rollup@npm:4.22.4":
   version: 4.22.4
   resolution: "rollup@npm:4.22.4"
@@ -12284,6 +12299,7 @@ __metadata:
     rimraf: "npm:5.0.0"
     rollup: "npm:4.22.4"
     rollup-plugin-typescript2: "npm:0.36.0"
+    rollup-plugin-visualizer: "npm:^5.14.0"
     ts-jest: "npm:^29.0.3"
     ts-node: "npm:10.9.2"
     tslib: "npm:^2.5.0"
@@ -12784,6 +12800,13 @@ __metadata:
   version: 0.6.1
   resolution: "source-map@npm:0.6.1"
   checksum: 10c0/ab55398007c5e5532957cb0beee2368529618ac0ab372d789806f5718123cc4367d57de3904b4e6a4170eb5a0b0f41373066d02ca0735a0c4d75c7d328d3e011
+  languageName: node
+  linkType: hard
+
+"source-map@npm:^0.7.4":
+  version: 0.7.4
+  resolution: "source-map@npm:0.7.4"
+  checksum: 10c0/dc0cf3768fe23c345ea8760487f8c97ef6fca8a73c83cd7c9bf2fde8bc2c34adb9c0824d6feb14bc4f9e37fb522e18af621543f1289038a66ac7586da29aa7dc
   languageName: node
   linkType: hard
 
@@ -14748,7 +14771,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^17.7.1":
+"yargs@npm:^17.5.1, yargs@npm:^17.7.1":
   version: 17.7.2
   resolution: "yargs@npm:17.7.2"
   dependencies:

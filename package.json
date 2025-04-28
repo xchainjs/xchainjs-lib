@@ -14,6 +14,7 @@
   "scripts": {
     "clean": "turbo run clean && rm -rf ./.turbo",
     "clean:nodemodules": "rm -rf ./packages/*/node_modules && rm -rf ./node_modules",
+    "clean:stats": "rm -r ./packages/*/stats.html",
     "build": "turbo run build --cache-dir=.turbo --filter='./packages/*'",
     "build:release": "turbo run build:release --cache-dir=.turbo --filter='./packages/*'",
     "build:examples": "turbo run build --cache-dir=.turbo --filter='./examples/*'",
@@ -25,7 +26,8 @@
     "update-packages": "yarn changeset",
     "increase-packages": "yarn changeset version",
     "publish-packages": "turbo run build:release test --cache-dir=.turbo && yarn increase-packages && yarn changeset publish",
-    "notification:prepare": "ts-node scripts/notification.ts"
+    "notification:prepare": "ts-node scripts/notification.ts",
+    "analyze-bundles": "turbo run build --cache-dir=.turbo --filter='./packages/*' && echo \"Bundle analysis files (stats.html) have been generated in each package's dist directory\""
   },
   "husky": {
     "hooks": {
@@ -60,6 +62,7 @@
     "rimraf": "5.0.0",
     "rollup": "4.22.4",
     "rollup-plugin-typescript2": "0.36.0",
+    "rollup-plugin-visualizer": "^5.14.0",
     "ts-jest": "^29.0.3",
     "ts-node": "10.9.2",
     "tslib": "^2.5.0",

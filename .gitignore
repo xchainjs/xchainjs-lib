@@ -29,3 +29,5 @@ packages/*/release/package
 !.yarn/plugins
 !.yarn/sdks
 !.yarn/versions
+
+stats.html
