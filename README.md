@@ -119,6 +119,9 @@ Blockchain clients with whom you can prepare, make and broadcast transactions, e
 | [@xchainjs/xchain-solana](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-solana) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-solana)](https://www.npmjs.com/package/@xchainjs/xchain-solana) |
 | [@xchainjs/xchain-binance](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-binance)](https://www.npmjs.com/package/@xchainjs/xchain-binance) |
 | [@xchainjs/xchain-base](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-base) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-base)](https://www.npmjs.com/package/@xchainjs/xchain-base) |
+| [@xchainjs/xchain-radix](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-radix) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-radix)](https://www.npmjs.com/package/@xchainjs/xchain-radix) |
+| [@xchainjs/xchain-cardano](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cardano) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cardano)](https://www.npmjs.com/package/@xchainjs/xchain-cardano) |
+| [@xchainjs/xchain-zcash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-zcash) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-zcash)](https://www.npmjs.com/package/@xchainjs/xchain-zcash) |
 
 ### Utility packages
 
@@ -129,6 +132,9 @@ Utility packages
 | [@xchainjs/xchain-util](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-util)](https://www.npmjs.com/package/@xchainjs/xchain-util) |
 | [@xchainjs/xchain-client](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-client) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-client)](https://www.npmjs.com/package/@xchainjs/xchain-client) |
 | [@xchainjs/xchain-crypto](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-crypto)](https://www.npmjs.com/package/@xchainjs/xchain-crypto) |
+| [@xchainjs/xchain-utxo](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-utxo) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-utxo)](https://www.npmjs.com/package/@xchainjs/xchain-utxo) |
+| [@xchainjs/xchain-evm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-evm) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-evm)](https://www.npmjs.com/package/@xchainjs/xchain-evm) |
+| [@xchainjs/xchain-cosmos-sdk](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos-sdk) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cosmos-sdk)](https://www.npmjs.com/package/@xchainjs/xchain-cosmos-sdk) |
 
 
 ### Data provider packages
