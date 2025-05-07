@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.2
+
+### Patch Changes
+
+- bc29744: Update tcy denom
+
 ## 3.0.1
 
 ### Patch Changes
