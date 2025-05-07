@@ -3,7 +3,7 @@
  */
 import { Network } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
-import { Asset, AssetType, BaseAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { Asset, AssetType, BaseAmount, TokenAsset, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
 import types from './types/proto/MsgCompiled'
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
@@ -24,9 +24,19 @@ export const RUNE_DECIMAL = 8
 export const RUNE_DENOM = 'rune'
 
 /**
+ * Denomination of the RUNE asset
+ */
+export const TCY_DENOM = 'tcy'
+
+/**
  * Ticker symbol for the RUNE asset
  */
 export const RUNE_TICKER = 'RUNE'
+
+/**
+ * Ticker symbol for the RUNE asset
+ */
+export const TCY_TICKER = 'TCY'
 
 /**
  * Default fee used by the client to make transactions
@@ -56,6 +66,16 @@ export const AssetRuneNative: Asset = {
   symbol: RUNE_TICKER,
   ticker: RUNE_TICKER,
   type: AssetType.NATIVE,
+}
+
+/**
+ * Native asset representation for RUNE in Thorchain
+ */
+export const AssetTCY: TokenAsset = {
+  chain: THORChain,
+  symbol: TCY_TICKER,
+  ticker: TCY_TICKER,
+  type: AssetType.TOKEN,
 }
 
 /**

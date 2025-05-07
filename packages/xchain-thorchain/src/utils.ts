@@ -6,7 +6,7 @@ import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
 import { Address, AssetType, assetToString, isSecuredAsset, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
 import axios from 'axios'
 //Import necessary constants for default client URLs
-import { AssetRuneNative as AssetRUNE, DEFAULT_EXPLORER_URL, RUNE_DENOM } from './const'
+import { AssetRuneNative as AssetRUNE, AssetTCY, DEFAULT_EXPLORER_URL, RUNE_DENOM } from './const'
 import { CompatibleAsset } from './types'
 
 /**
@@ -61,6 +61,14 @@ export const getExplorerTxUrl = (tx: TxHash): Record<Network, string> => ({
 export const isAssetRuneNative = (asset: CompatibleAsset): boolean => assetToString(asset) === assetToString(AssetRUNE)
 
 /**
+ * Checks whether an asset is the native TCY asset
+ *
+ * @param {CompatibleAsset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isTCYAsset = (asset: CompatibleAsset): boolean => assetToString(asset) === assetToString(AssetTCY)
+
+/**
  * Get denomination from Asset
  *
  * @param {CompatibleAsset} asset
@@ -70,6 +78,7 @@ export const getDenom = (asset: CompatibleAsset) => {
   if (isAssetRuneNative(asset)) return RUNE_DENOM
   if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
   if (isSecuredAsset(asset)) return assetToString(asset).toLowerCase()
+  if (isTCYAsset(asset)) return assetToString(asset).toLowerCase()
   return asset.symbol.toLowerCase()
 }
 
