@@ -18,7 +18,15 @@ import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 /**
  * Import constants and types
  */
-import { AssetRuneNative as AssetRUNE, MSG_SEND_TYPE_URL, RUNE_DECIMAL, RUNE_DENOM, defaultClientConfig } from './const'
+import {
+  AssetRuneNative as AssetRUNE,
+  AssetTCY,
+  MSG_SEND_TYPE_URL,
+  RUNE_DECIMAL,
+  RUNE_DENOM,
+  TCY_DENOM,
+  defaultClientConfig,
+} from './const'
 import { CompatibleAsset, DepositParam, DepositTx, TxOfflineParams } from './types'
 import { getDefaultExplorers, getDenom, getExplorerAddressUrl, getExplorerTxUrl, getPrefix } from './utils'
 
@@ -120,6 +128,7 @@ export abstract class Client extends CosmosSDKClient implements ThorchainClient 
    */
   public assetFromDenom(denom: string): CompatibleAsset | null {
     if (denom === RUNE_DENOM) return AssetRUNE
+    if (denom === TCY_DENOM) return AssetTCY
     return assetFromString(denom.toUpperCase())
   }
 

@@ -170,6 +170,19 @@ describe('Aggregator', () => {
     })
     printQuoteSwap(bestSwap(estimatedSwap))
   })
+  it('Should find estimated swap with secured assets', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: assetFromStringEx('AVAX-AVAX'),
+      destinationAsset: assetFromStringEx('ETH-ETH'),
+      amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), assetFromStringEx('AVAX-AVAX')),
+      destinationAddress: await wallet.getAddress(THORChain),
+      streamingInterval: 1,
+      streamingQuantity: 0,
+      toleranceBps: 10000,
+      fromAddress: await wallet.getAddress(THORChain),
+    })
+    printQuoteSwap(bestSwap(estimatedSwap))
+  })
 
   it('Should not estimate swap', async () => {
     try {
