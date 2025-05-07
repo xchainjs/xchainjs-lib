@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1
+
+### Patch Changes
+
+- ccd2b5d: update to support tcy
+
 ## 3.0.0
 
 ### Major Changes
