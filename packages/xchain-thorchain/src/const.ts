@@ -24,7 +24,7 @@ export const RUNE_DECIMAL = 8
 export const RUNE_DENOM = 'rune'
 
 /**
- * Denomination of the RUNE asset
+ * Denomination of the TCY asset
  */
 export const TCY_DENOM = 'tcy'
 
@@ -34,7 +34,7 @@ export const TCY_DENOM = 'tcy'
 export const RUNE_TICKER = 'RUNE'
 
 /**
- * Ticker symbol for the RUNE asset
+ * Ticker symbol for the TCY asset
  */
 export const TCY_TICKER = 'TCY'
 
@@ -69,7 +69,7 @@ export const AssetRuneNative: Asset = {
 }
 
 /**
- * Native asset representation for RUNE in Thorchain
+ * Native asset representation for TCY in Thorchain
  */
 export const AssetTCY: TokenAsset = {
   chain: THORChain,
