@@ -79,7 +79,7 @@ export const getDenom = (asset: CompatibleAsset) => {
   if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
   if (isSecuredAsset(asset)) return assetToString(asset).toLowerCase()
   if (isTCYAsset(asset)) return TCY_DENOM
-  return asset.symbol.toLowerCase()
+  return assetToString(asset).toLowerCase()
 }
 
 /**
