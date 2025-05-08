@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.3
+
+### Patch Changes
+
+- a88c0fa: Update client to support other tokens
+
 ## 3.0.2
 
 ### Patch Changes

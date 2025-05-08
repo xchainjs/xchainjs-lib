@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-thorchain-amm",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "depositRunePool": "npx ts-node runepool-deposit.ts",
     "withdrawRunePool": "npx ts-node runepool-withdraw.ts",
