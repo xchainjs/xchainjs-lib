@@ -32,9 +32,9 @@ function delay(ms: number) {
 }
 describe('xchain-evm (Eth) Integration Tests', () => {
   it('should fetch eth balances', async () => {
-    const address = '0x26000cc95ab0886FE8439E53c73b1219Eba9DBCF'
+    const address = '0xBCB883aB7f1cAFC8C6C5fa7F5aF9d064cCE73AC1'
     console.log(address)
-    const balances = await clientTestnet.getBalance(address)
+    const balances = await clientTestnet.getBalance(address, [])
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })

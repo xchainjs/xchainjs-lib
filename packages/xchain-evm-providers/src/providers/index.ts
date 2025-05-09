@@ -1,6 +1,9 @@
 export * from './etherscan/etherscan-data-provider'
 export * from './etherscan/types'
 
+export * from './etherscan-v2/etherscan-data-provider-v2'
+export * from './etherscan-v2/types-v2'
+
 import {
   DecodedEvent,
   GetBalanceResponse,

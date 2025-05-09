@@ -1,7 +1,7 @@
 // Import necessary modules and classes from external packages and files
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
-import { EtherscanProvider, RoutescanProvider } from '@xchainjs/xchain-evm-providers'
+import { EtherscanProviderV2, RoutescanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -19,8 +19,15 @@ const ankrApiKey = process.env.ANKR_API_KEY
 // Define JSON-RPC providers for mainnet and testnet
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
   `https://rpc.ankr.com/avalanche/${ankrApiKey}`,
+  { name: 'avalanche', chainId: 43114 },
 )
-const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/avalanche_fuji')
+const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
+  `https://rpc.ankr.com/avalanche_fuji/${ankrApiKey}`,
+  {
+    name: 'fuji',
+    chainId: 43113,
+  },
+)
 
 // Define ethers providers for different networks
 const ethersJSProviders = {
@@ -30,21 +37,23 @@ const ethersJSProviders = {
 }
 
 // Define online providers (Etherscan) for mainnet and testnet
-const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
+const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   AVALANCHE_TESTNET_ETHERS_PROVIDER,
-  'https://api-testnet.snowtrace.io',
-  process.env.SNOWTRACE_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   AVAXChain,
   AssetAVAX,
   18,
+  43113,
 )
-const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
+const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
-  'https://api.snowtrace.io',
-  process.env.SNOWTRACE_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   AVAXChain,
   AssetAVAX,
   18,
+  43114,
 )
 
 // Define providers for different networks

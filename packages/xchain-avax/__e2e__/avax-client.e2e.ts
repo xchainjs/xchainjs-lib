@@ -1,6 +1,5 @@
 import { Balance, Network, TxType } from '@xchainjs/xchain-client'
 import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
-import { CovalentProvider, EvmOnlineDataProvider } from '@xchainjs/xchain-evm-providers'
 import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import AvaxClient from '../src'
@@ -17,46 +16,48 @@ const assetRIP: TokenAsset = {
   type: AssetType.TOKEN,
 }
 
-const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(
-  process.env.COVALENT_API_KEY as string,
-  AVAXChain,
-  43113,
-  AssetAVAX,
-  18,
-)
+// const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(
+//   process.env.COVALENT_API_KEY as string,
+//   AVAXChain,
+//   43113,
+//   AssetAVAX,
+//   18,
+// )
 
-const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(
-  process.env.COVALENT_API_KEY as string,
-  AVAXChain,
-  43114,
-  AssetAVAX,
-  18,
-)
+// const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(
+//   process.env.COVALENT_API_KEY as string,
+//   AVAXChain,
+//   43114,
+//   AssetAVAX,
+//   18,
+// )
 
-const avaxProviders = {
-  [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
-  [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
-  [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
-}
+// const avaxProviders = {
+//   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
+//   [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
+//   [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
+// }
 
-const fakeProviders = {
-  [Network.Mainnet]: {} as EvmOnlineDataProvider,
-  [Network.Testnet]: {} as EvmOnlineDataProvider,
-  [Network.Stagenet]: {} as EvmOnlineDataProvider,
-}
+// const fakeProviders = {
+//   [Network.Mainnet]: {} as EvmOnlineDataProvider,
+//   [Network.Testnet]: {} as EvmOnlineDataProvider,
+//   [Network.Stagenet]: {} as EvmOnlineDataProvider,
+// }
 
-defaultAvaxParams.network = Network.Testnet
+defaultAvaxParams.network = Network.Mainnet
 defaultAvaxParams.phrase = process.env.TESTNET_PHRASE
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
-const client = new AvaxClient(defaultAvaxParams)
+// defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
+const client = new AvaxClient({
+  ...defaultAvaxParams,
+})
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 describe('xchain-evm (Avax) Integration Tests', () => {
   it('should fetch avax balances', async () => {
-    const address = await client.getAddressAsync(0)
+    const address = '0x09383137C1eEe3E1A8bc781228E4199f6b4A9bbf'
     console.log(address)
     const balances = await client.getBalance(address)
     balances.forEach((bal: Balance) => {
@@ -72,7 +73,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch single avax transfer tx', async () => {
-    const txId = '0x206d2300e57d0c23e48b8c4cc4af9c87abf33e2f406ac2265915b3d7b0e131e2'
+    const txId = '0x4dab51e68d03df97aaf3c8fd9afa3026f6ca7531f79b11a0c0ed39df6d0119e9'
     const tx = await client.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.01', 18))

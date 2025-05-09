@@ -1,6 +1,6 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
-import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
+import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -31,11 +31,12 @@ export const AssetETH: Asset = {
 }
 
 // ===== Ethers providers =====
-// Mainnet ethers provider
-const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('homestead', process.env.ETHERSCAN_API_KEY)
-// Testnet ethers provider as per https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider
+const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://eth.llamarpc.com', 'homestead')
 const network = ethers.providers.getNetwork('sepolia')
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
+const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
+  'https://ethereum-sepolia-rpc.publicnode.com',
+  network,
+)
 
 // Object to map network to ethers providers
 const ethersJSProviders = {
@@ -47,22 +48,24 @@ const ethersJSProviders = {
 
 // ===== ONLINE providers =====
 // Testnet online provider
-const ETH_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
+const ETH_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   ETH_TESTNET_ETHERS_PROVIDER,
-  'https://api-sepolia.etherscan.io/',
+  'https://api.etherscan.io/v2',
   process.env.ETHERSCAN_API_KEY || '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
+  11155111,
 )
 // Mainnet online provider
-const ETH_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
+const ETH_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   ETH_MAINNET_ETHERS_PROVIDER,
-  'https://api.etherscan.io/',
+  'https://api.etherscan.io/v2',
   process.env.ETHERSCAN_API_KEY || '',
   ETHChain,
   AssetETH,
   ETH_GAS_ASSET_DECIMAL,
+  1,
 )
 // Object to map network to online providers
 const ethProviders = {
