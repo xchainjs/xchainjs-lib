@@ -40,7 +40,7 @@ describe('Base', () => {
   it('should fetch Base balances', async () => {
     const address = testnetClient.getAddress(0)
     console.log(address)
-    const balances = await testnetClient.getBalance('0x585142ebBA458B681caea61Bb178E529EdAd23f4')
+    const balances = await testnetClient.getBalance('0x537b2331DdaA849e62756ab7d32A6749e83443aE', [])
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })

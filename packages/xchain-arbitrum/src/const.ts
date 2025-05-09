@@ -1,7 +1,7 @@
 // Import necessary modules and classes from external packages and files
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
-import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
+import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType, TokenAsset } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -23,8 +23,15 @@ export const AssetARB: TokenAsset = {
 }
 
 // Define JSON-RPC providers for mainnet and testnet
-const ARBITRUM_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc')
-const ARBITRUM_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://goerli-rollup.arbitrum.io/rpc')
+// Ankr api key
+const ankrApiKey = process.env.ANKR_API_KEY
+
+const ARBITRUM_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
+  `https://rpc.ankr.com/arbitrum/${ankrApiKey}`,
+)
+const ARBITRUM_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
+  `https://rpc.ankr.com/arbitrum_sepolia/${ankrApiKey}`,
+)
 
 // Define ethers providers for different networks
 const ethersJSProviders = {
@@ -34,22 +41,24 @@ const ethersJSProviders = {
 }
 
 // Define online providers (Etherscan) for mainnet and testnet
-const ARB_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
+const ARB_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   ARBITRUM_MAINNET_ETHERS_PROVIDER,
-  'https://api.arbiscan.io',
-  process.env.ARBISCAN_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   ARBChain,
   AssetAETH,
   18,
+  42161,
 )
 
-const ARB_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
+const ARB_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   ARBITRUM_TESTNET_ETHERS_PROVIDER,
-  'https://api-goerli.arbiscan.io',
-  process.env.ARBISCAN_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   ARBChain,
   AssetAETH,
   18,
+  421614,
 )
 
 // Define providers for different networks

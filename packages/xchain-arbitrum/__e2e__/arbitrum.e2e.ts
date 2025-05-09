@@ -32,9 +32,9 @@ const TestnetUSDCAsset: TokenAsset = {
 
 describe('Arbitrum', () => {
   it('should fetch Arbitrum balances', async () => {
-    const address = testnetClient.getAddress(0)
+    const address = '0x46545017fa98CA2efeF277c90B4c0044ca913596'
     console.log(address)
-    const balances = await testnetClient.getBalance(address)
+    const balances = await mainnetClient.getBalance(address, [])
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
@@ -55,7 +55,7 @@ describe('Arbitrum', () => {
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch arbitrum transfer transaction', async () => {
-    const txId = '0x1c3b135fe8f108b57973aee6f567aca4219ae5ec903461ac427d6ea71d25f3fb'
+    const txId = '0x11bbb59714a8056e2af018692f6153b0514514fe9b9edd23d94d4220821159da'
     const tx = await testnetClient.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.001', 18))
