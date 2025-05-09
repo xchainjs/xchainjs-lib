@@ -48,7 +48,9 @@ defaultAvaxParams.network = Network.Mainnet
 defaultAvaxParams.phrase = process.env.TESTNET_PHRASE
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
-const client = new AvaxClient(defaultAvaxParams)
+const client = new AvaxClient({
+  ...defaultAvaxParams,
+})
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -71,7 +73,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch single avax transfer tx', async () => {
-    const txId = '0x206d2300e57d0c23e48b8c4cc4af9c87abf33e2f406ac2265915b3d7b0e131e2'
+    const txId = '0x4dab51e68d03df97aaf3c8fd9afa3026f6ca7531f79b11a0c0ed39df6d0119e9'
     const tx = await client.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.01', 18))

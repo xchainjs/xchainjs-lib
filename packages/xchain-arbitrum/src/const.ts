@@ -24,14 +24,8 @@ export const AssetARB: TokenAsset = {
 
 // Define JSON-RPC providers for mainnet and testnet
 // Ankr api key
-const ankrApiKey = process.env.ANKR_API_KEY
-
-const ARBITRUM_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-  `https://rpc.ankr.com/arbitrum/${ankrApiKey}`,
-)
-const ARBITRUM_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-  `https://rpc.ankr.com/arbitrum_sepolia/${ankrApiKey}`,
-)
+const ARBITRUM_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc')
+const ARBITRUM_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://goerli-rollup.arbitrum.io/rpc')
 
 // Define ethers providers for different networks
 const ethersJSProviders = {

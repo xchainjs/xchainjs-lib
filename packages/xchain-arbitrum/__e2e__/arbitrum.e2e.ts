@@ -42,14 +42,14 @@ describe('Arbitrum', () => {
   })
   it('should fetch arbitrum txs', async () => {
     const address = '0x007ab5199b6c57f7aa51bc3d0604a43505501a0c'
-    const txPage = await testnetClient.getTransactions({ address })
+    const txPage = await mainnetClient.getTransactions({ address })
     console.log(JSON.stringify(txPage, null, 2))
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch arbitrum erc20 txs', async () => {
-    const address = '0xe77872fb49750e6ae361fc13aa67397637ddcf5d'
-    const txPage = await testnetClient.getTransactions({ address, asset: '0x179522635726710dd7d2035a81d856de4aa7836c' })
+    const address = '0x9f0b60CD0FCfE9828a92c2F6f6E6B4Cf8DAb003a'
+    const txPage = await mainnetClient.getTransactions({ address, asset: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' })
     console.log(JSON.stringify(txPage, null, 2))
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)

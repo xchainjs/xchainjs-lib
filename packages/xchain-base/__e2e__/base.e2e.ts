@@ -20,7 +20,7 @@ const mainnetClient = new BaseClient({
 const testnetClient = new BaseClient({
   ...defaultBaseParams,
   phrase: process.env.TESTNET_PHRASE,
-  network: Network.Mainnet,
+  network: Network.Testnet,
 })
 
 const MainnetUSDTAsset: TokenAsset = {
