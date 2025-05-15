@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.4
+
+### Patch Changes
+
+- @xchainjs/xchain-evm@2.0.1
+
 ## 2.0.3
 
 ### Patch Changes
