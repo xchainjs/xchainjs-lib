@@ -33,7 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@dashevo/dashcore-lib": "0.19.41",
+    "@dashevo/dashcore-lib": "^0.25.0",
     "@ledgerhq/hw-app-btc": "10.1.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
