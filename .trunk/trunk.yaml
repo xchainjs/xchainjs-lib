@@ -1,0 +1,72 @@
+# This file controls the behavior of Trunk: https://docs.trunk.io/cli
+# Format reference: https://docs.trunk.io/reference/trunk-yaml
+version: 0.1
+
+cli:
+  version: 1.22.15
+
+# Plugin source for Trunk plugins
+plugins:
+  sources:
+    - id: trunk
+      ref: v1.6.8
+      uri: https://github.com/trunk-io/plugins
+
+repo:
+  trunk_branch: main
+
+# Required runtimes for linting and security tools
+runtimes:
+  enabled:
+    - node@18.20.5      # Required for JS/TS linters like ESLint and Prettier
+    - python@3.10.8     # Required for Python-based tools like Checkov and Trufflehog
+
+lint:
+  enabled:
+    # 🧹 General Code Quality & Formatting
+     # JS/TS linting
+    - eslint@8.23.0!:
+        use_project_eslint: true
+        config: .eslintrc
+    # - prettier@2.6.2!            # Code formatting
+    - markdownlint@0.44.0        # Markdown formatting
+    - yamllint@1.37.0            # YAML formatting
+    - shfmt@3.6.0                # Shell script formatting
+
+    # 🔐 Security
+    - checkov@3.2.413            # IaC (Terraform, etc.) security scanning
+    # - osv-scanner@2.0.2          # Vulnerability scanning of open source packages
+    - trufflehog@3.88.26         # Secrets detection in code and history
+
+    # 📦 Project Hygiene
+    - git-diff-check             # Restrict checks to only changed files
+
+    # 🔧 CI/CD
+    - actionlint@1.7.7           # Linting for GitHub Actions workflows
+
+  definitions:
+    - name: codespell
+      commands:
+        - run: codespell --uri-ignore-words-list=* --ignore-words-list=liquify
+
+  ignore:
+    - linters: [ALL]
+      paths:
+        - node_modules/**
+        - .yarn/**
+        - .turbo/**
+
+    - linters: [markdownlint]
+      paths:
+        - '**/README.md'
+        - '**/CHANGELOG.md'
+        - '**/spec.md'
+        - examples/frameworks/next.js-example/*
+
+actions:
+  disabled:
+    - trunk-announce
+    - trunk-check-pre-push
+    - trunk-upgrade-available
+  enabled:
+    - trunk-fmt-pre-commit
