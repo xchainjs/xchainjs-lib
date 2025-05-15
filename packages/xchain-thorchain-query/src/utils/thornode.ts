@@ -434,6 +434,7 @@ export class Thornode {
     streamingInterval?: number,
     streamingQuantity?: number,
     toleranceBps?: number,
+    liquidityToleranceBps?: number,
     affiliateBps?: number,
     affiliate?: string,
     height?: number,
@@ -452,6 +453,7 @@ export class Thornode {
             streamingInterval,
             streamingQuantity,
             toleranceBps,
+            liquidityToleranceBps,
             affiliateBps,
             affiliate,
           )
