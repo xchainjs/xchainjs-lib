@@ -3,7 +3,7 @@
  */
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client' // Importing ExplorerProvider and Network from xchain-client
 import { EVMClientParams } from '@xchainjs/xchain-evm' // Importing EVMClientParams from xchain-evm
-import { EtherscanProvider } from '@xchainjs/xchain-evm-providers' // Importing EtherscanProvider from xchain-evm-providers
+import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers' // Importing EtherscanProvider from xchain-evm-providers
 import { Asset, AssetType } from '@xchainjs/xchain-util' // Importing Asset from xchain-util
 import { BigNumber, ethers } from 'ethers' // Importing BigNumber and ethers from ethers library
 
@@ -49,21 +49,23 @@ const ethersJSProviders = {
 }
 
 // ONLINE providers
-const BSC_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
+const BSC_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   BSC_TESTNET_ETHERS_PROVIDER,
-  'https://api-testnet.bscscan.com',
-  process.env.BSCSCAN_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   BSCChain,
   AssetBSC,
   BSC_GAS_ASSET_DECIMAL,
+  97,
 )
-const BSC_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
+const BSC_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   BSC_MAINNET_ETHERS_PROVIDER,
-  'https://api.bscscan.com',
-  process.env.BSCSCAN_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   BSCChain,
   AssetBSC,
   BSC_GAS_ASSET_DECIMAL,
+  56,
 )
 const bscProviders = {
   [Network.Mainnet]: BSC_ONLINE_PROVIDER_MAINNET,

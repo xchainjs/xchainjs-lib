@@ -1,7 +1,7 @@
 // Import necessary modules and classes from external packages and files
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
-import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
+import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
 
@@ -26,22 +26,24 @@ const ethersJSProviders = {
 }
 
 // Define online providers (Etherscan) for mainnet and testnet
-const BASE_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
+const BASE_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   BASE_MAINNET_ETHERS_PROVIDER,
-  'https://api.basescan.org',
-  process.env.BASE_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   BASEChain,
   AssetBETH,
   18,
+  8453,
 )
 
-const BASE_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
+const BASE_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   BASE_TESTNET_ETHERS_PROVIDER,
-  'https://api-sepolia.basescan.org',
-  process.env.BASE_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   BASEChain,
   AssetBETH,
   18,
+  84532,
 )
 
 // Define providers for different networks
