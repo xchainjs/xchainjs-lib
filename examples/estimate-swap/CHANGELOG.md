@@ -1,5 +1,13 @@
 # xchainjs-estimate-swap
 
+## 2.0.1
+
+### Patch Changes
+
+- Updated dependencies [561e2a4]
+  - @xchainjs/xchain-thorchain-query@2.0.1
+  - @xchainjs/xchain-thornode@1.0.1
+
 ## 2.0.0
 
 ### Major Changes
