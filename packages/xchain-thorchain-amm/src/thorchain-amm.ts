@@ -122,6 +122,7 @@ export class ThorchainAMM {
     affiliateAddress = '',
     affiliateBps = 0,
     toleranceBps,
+    liquidityToleranceBps,
     streamingInterval,
     streamingQuantity,
   }: QuoteSwapParams): Promise<TxDetails> {
@@ -140,6 +141,7 @@ export class ThorchainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      liquidityToleranceBps,
       streamingInterval,
       streamingQuantity,
     })
