@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.5
+
+### Patch Changes
+
+- 561e2a4: Pass new parameter to quoteswap liquidityToleranceBps
+- Updated dependencies [561e2a4]
+  - @xchainjs/xchain-thorchain-query@2.0.1
+
 ## 3.0.4
 
 ### Patch Changes

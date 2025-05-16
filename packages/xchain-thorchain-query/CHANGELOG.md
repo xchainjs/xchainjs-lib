@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 561e2a4: Pass new parameter to quoteswap liquidityToleranceBps
+- Updated dependencies [561e2a4]
+  - @xchainjs/xchain-thornode@1.0.1
+
 ## 2.0.0
 
 ### Major Changes
