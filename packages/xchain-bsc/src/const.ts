@@ -10,7 +10,7 @@ import { BigNumber, ethers } from 'ethers' // Importing BigNumber and ethers fro
 /**
  * Lower fee bound for BSC transactions.
  */
-export const LOWER_FEE_BOUND = 2_000_000_000
+export const LOWER_FEE_BOUND = 99000000
 /**
  * Upper fee bound for BSC transactions.
  */

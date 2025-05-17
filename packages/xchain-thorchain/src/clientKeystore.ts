@@ -332,7 +332,9 @@ export class ClientKeystore extends Client {
           },
           memo,
         )
-      } catch {}
+      } catch (e: unknown) {
+        console.warn(e instanceof Error ? e.message : String(e))
+      }
     }
     throw Error('No clients available. Can not sign and broadcast deposit transaction')
   }
