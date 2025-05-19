@@ -31,7 +31,9 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "bignumber.js": "9.0.0"
+    "bignumber.js": "9.0.0",
+    "jest": "^29.7.0",
+    "test": "^3.3.0"
   },
   "publishConfig": {
     "access": "public",

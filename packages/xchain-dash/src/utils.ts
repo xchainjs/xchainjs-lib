@@ -4,10 +4,9 @@ import { Script } from '@dashevo/dashcore-lib/typings/script/Script'
 import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
 import { Input } from '@dashevo/dashcore-lib/typings/transaction/input/Input'
 import { FeeRate, Network } from '@xchainjs/xchain-client'
-import { Address } from '@xchainjs/xchain-util'
+import { Address, toBitcoinJS } from '@xchainjs/xchain-util'
 import { TxParams, UTXO } from '@xchainjs/xchain-utxo'
 import * as Dash from 'bitcoinjs-lib'
-import * as coininfo from 'coininfo'
 import accumulative from 'coinselect/accumulative'
 
 import * as insight from './insight-api'
@@ -51,9 +50,9 @@ export const dashNetwork = (network: Network): Dash.Network => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return coininfo.dash.main.toBitcoinJS() // Convert Dash mainnet to BitcoinJS format
+      return toBitcoinJS('dash', 'main') // Convert Dash mainnet to BitcoinJS format
     case Network.Testnet:
-      return coininfo.dash.test.toBitcoinJS() // Convert Dash testnet to BitcoinJS format
+      return toBitcoinJS('dash', 'test') // Convert Dash testnet to BitcoinJS format
   }
 }
 

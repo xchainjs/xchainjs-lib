@@ -2,9 +2,8 @@
  * Import statements for required modules and types.
  */
 import { Network } from '@xchainjs/xchain-client'
-import { Address } from '@xchainjs/xchain-util'
+import { Address, toBitcoinJS } from '@xchainjs/xchain-util'
 import * as Dogecoin from 'bitcoinjs-lib' // Importing bitcoinjs-lib for Dogecoin operations
-import coininfo from 'coininfo' // Importing coininfo for cryptocurrency information retrieval
 
 /**
  * Constant values representing transaction sizes and lengths.
@@ -45,18 +44,11 @@ export function arrayAverage(array: number[]): number {
 export const dogeNetwork = (network: Network): Dogecoin.networks.Network => {
   switch (network) {
     case Network.Mainnet:
-      return coininfo.dogecoin.main.toBitcoinJS()
+      return toBitcoinJS('dogecoin', 'main')
     case Network.Stagenet:
-      return coininfo.dogecoin.main.toBitcoinJS()
+      return toBitcoinJS('dogecoin', 'main')
     case Network.Testnet: {
-      // Latest coininfo on NPM doesn't contain dogetest config information
-      const bip32 = {
-        private: 0x04358394,
-        public: 0x043587cf,
-      }
-      const test = coininfo.dogecoin.test
-      test.versions.bip32 = bip32
-      return test.toBitcoinJS()
+      return toBitcoinJS('dogecoin', 'test')
     }
   }
 }
