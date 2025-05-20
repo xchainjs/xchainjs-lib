@@ -2,8 +2,8 @@
  * Module importing and providing utilities for Bitcoin Cash (BCH) transactions and addresses.
  */
 import { Network, TxType } from '@xchainjs/xchain-client' // Importing types related to network and transactions
-import { Address, baseAmount, toBitcoinJS } from '@xchainjs/xchain-util' // Importing utilities related to addresses and amounts
-import { Tx, TxFrom, TxTo } from '@xchainjs/xchain-utxo' // Importing Bitcoin Cash address utilities
+import { Address, baseAmount } from '@xchainjs/xchain-util' // Importing utilities related to addresses and amounts
+import { Tx, TxFrom, TxTo, toBitcoinJS } from '@xchainjs/xchain-utxo' // Importing Bitcoin Cash address utilities
 import * as bchaddr from 'bchaddrjs' // Importing coin information utility
 
 import { AssetBCH, BCH_DECIMAL } from './const' // Importing BCH asset and decimal constants

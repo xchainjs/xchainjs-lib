@@ -27,7 +27,8 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
-    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
+    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0",
+    "test": "jest"
   },
   "publishConfig": {
     "access": "public",
@@ -37,5 +38,8 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

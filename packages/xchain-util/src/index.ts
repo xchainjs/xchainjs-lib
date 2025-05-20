@@ -21,5 +21,3 @@ export * from './crypto-amount'
 
 // Export all functions and variables from './cached-value'
 export * from './cached-value'
-
-export * from './coininfo'

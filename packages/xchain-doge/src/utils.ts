@@ -2,7 +2,8 @@
  * Import statements for required modules and types.
  */
 import { Network } from '@xchainjs/xchain-client'
-import { Address, toBitcoinJS } from '@xchainjs/xchain-util'
+import { Address } from '@xchainjs/xchain-util'
+import { toBitcoinJS } from '@xchainjs/xchain-utxo'
 import * as Dogecoin from 'bitcoinjs-lib' // Importing bitcoinjs-lib for Dogecoin operations
 
 /**

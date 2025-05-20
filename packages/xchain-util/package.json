@@ -32,8 +32,7 @@
   },
   "dependencies": {
     "bignumber.js": "9.0.0",
-    "jest": "^29.7.0",
-    "test": "^3.3.0"
+    "jest": "^29.7.0"
   },
   "publishConfig": {
     "access": "public",

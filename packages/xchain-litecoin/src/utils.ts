@@ -1,6 +1,6 @@
 import { Balance, Network, TxHash } from '@xchainjs/xchain-client'
-import { Address, assetAmount, assetToBase, toBitcoinJS } from '@xchainjs/xchain-util'
-import { UTXO } from '@xchainjs/xchain-utxo'
+import { Address, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { UTXO, toBitcoinJS } from '@xchainjs/xchain-utxo'
 import * as Litecoin from 'bitcoinjs-lib'
 
 import { AssetLTC, LTC_DECIMAL } from './const'
