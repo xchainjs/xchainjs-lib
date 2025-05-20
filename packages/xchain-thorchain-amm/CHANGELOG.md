@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [a8988c5]
+- Updated dependencies [a8988c5]
+  - @xchainjs/xchain-thorchain@3.0.4
+  - @xchainjs/xchain-bsc@2.0.2
+  - @xchainjs/xchain-ethereum@2.0.2
+  - @xchainjs/xchain-wallet@2.0.5
+
 ## 3.0.5
 
 ### Patch Changes
