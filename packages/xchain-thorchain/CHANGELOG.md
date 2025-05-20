@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.4
+
+### Patch Changes
+
+- a8988c5: Update lower fees BSC and clarify error message thorchain client
+
 ## 3.0.3
 
 ### Patch Changes

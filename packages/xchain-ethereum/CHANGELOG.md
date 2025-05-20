@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- a8988c5: Update lower fee for ETH
+
 ## 2.0.1
 
 ### Patch Changes
