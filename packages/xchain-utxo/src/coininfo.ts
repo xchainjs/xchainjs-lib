@@ -48,7 +48,6 @@ function toBitcoinJSInner(coinConfig: CoinConfig) {
         pubKeyHash: coinConfig.versions.public,
         scriptHash: coinConfig.versions.scripthash,
         wif: coinConfig.versions.private,
-        dustThreshold: null
     }
 }
 
