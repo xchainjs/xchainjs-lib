@@ -14,6 +14,7 @@ describe('coininfo', () => {
         pubKeyHash: 48,
         scriptHash: 50,
         wif: 176,
+        dustThreshold: null,
       })
     })
 
@@ -29,6 +30,7 @@ describe('coininfo', () => {
         pubKeyHash: 111,
         scriptHash: 58,
         wif: 239,
+        dustThreshold: null,
       })
     })
   })
@@ -46,6 +48,7 @@ describe('coininfo', () => {
         pubKeyHash: 30,
         scriptHash: 22,
         wif: 158,
+        dustThreshold: null,
       })
     })
 
@@ -61,6 +64,7 @@ describe('coininfo', () => {
         pubKeyHash: 113,
         scriptHash: 196,
         wif: 241,
+        dustThreshold: null,
       })
     })
   })
@@ -78,6 +82,7 @@ describe('coininfo', () => {
         pubKeyHash: 0,
         scriptHash: 5,
         wif: 128,
+        dustThreshold: null,
       })
     })
 
@@ -93,6 +98,7 @@ describe('coininfo', () => {
         pubKeyHash: 111,
         scriptHash: 196,
         wif: 239,
+        dustThreshold: null,
       })
     })
   })
@@ -110,6 +116,7 @@ describe('coininfo', () => {
         pubKeyHash: 76,
         scriptHash: 16,
         wif: 204,
+        dustThreshold: null,
       })
     })
 
@@ -125,6 +132,7 @@ describe('coininfo', () => {
         pubKeyHash: 140,
         scriptHash: 19,
         wif: 239,
+        dustThreshold: null,
       })
     })
   })

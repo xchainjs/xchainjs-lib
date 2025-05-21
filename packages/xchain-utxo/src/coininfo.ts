@@ -47,13 +47,13 @@ function toBitcoinJSInner(coinConfig: CoinConfig) {
     pubKeyHash: coinConfig.versions.public,
     scriptHash: coinConfig.versions.scripthash,
     wif: coinConfig.versions.private,
+    dustThreshold: null,
   }
 }
 
 const coinConfigs: Record<string, CoinData> = {
   bitcoincash: bchData,
   dogecoin: dogeData,
-
   dash: dashData,
   litecoin: ltcData,
 }
