@@ -50,9 +50,9 @@ export const dashNetwork = (network: Network): Dash.Network => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return toBitcoinJS('dash', 'main') // Convert Dash mainnet to BitcoinJS format
+      return toBitcoinJS('dash', 'main') as Dash.Network // Convert Dash mainnet to BitcoinJS format
     case Network.Testnet:
-      return toBitcoinJS('dash', 'test') // Convert Dash testnet to BitcoinJS format
+      return toBitcoinJS('dash', 'test') as Dash.Network // Convert Dash testnet to BitcoinJS format
   }
 }
 

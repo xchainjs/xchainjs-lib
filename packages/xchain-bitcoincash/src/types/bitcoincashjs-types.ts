@@ -39,14 +39,14 @@ export type TransactionBuilder = {
 }
 
 export interface Network {
-    messagePrefix: string;
-    bech32?: string;
-    bip32: Bip32;
-    pubKeyHash: number;
-    scriptHash: number;
-    wif: number;
+  messagePrefix: string
+  bech32?: string
+  bip32: Bip32
+  pubKeyHash: number
+  scriptHash: number
+  wif: number
 }
 interface Bip32 {
-    public: number;
-    private: number;
+  public: number
+  private: number
 }
