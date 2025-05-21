@@ -45,11 +45,11 @@ export function arrayAverage(array: number[]): number {
 export const dogeNetwork = (network: Network): Dogecoin.networks.Network => {
   switch (network) {
     case Network.Mainnet:
-      return toBitcoinJS('dogecoin', 'main')
+      return toBitcoinJS('dogecoin', 'main') as Dogecoin.networks.Network
     case Network.Stagenet:
-      return toBitcoinJS('dogecoin', 'main')
+      return toBitcoinJS('dogecoin', 'main') as Dogecoin.networks.Network
     case Network.Testnet: {
-      return toBitcoinJS('dogecoin', 'test')
+      return toBitcoinJS('dogecoin', 'test') as Dogecoin.networks.Network
     }
   }
 }

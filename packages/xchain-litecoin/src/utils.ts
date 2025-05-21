@@ -66,9 +66,9 @@ export const ltcNetwork = (network: Network): Litecoin.Network => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return toBitcoinJS('litecoin', 'main')
+      return toBitcoinJS('litecoin', 'main') as Litecoin.Network
     case Network.Testnet:
-      return toBitcoinJS('litecoin', 'test')
+      return toBitcoinJS('litecoin', 'test') as Litecoin.Network
   }
 }
 

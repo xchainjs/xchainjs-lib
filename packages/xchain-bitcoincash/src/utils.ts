@@ -28,9 +28,9 @@ export const bchNetwork = (network: Network): BCHNetwork => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return toBitcoinJS('bitcoincash', 'main')
+      return toBitcoinJS('bitcoincash', 'main') as BCHNetwork
     case Network.Testnet:
-      return toBitcoinJS('bitcoincash', 'test')
+      return toBitcoinJS('bitcoincash', 'test') as BCHNetwork
   }
 }
 
