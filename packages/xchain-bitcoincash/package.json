@@ -34,7 +34,7 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-btc": "10.1.0",
+    "@ledgerhq/hw-app-btc": "10.9.0",
     "@psf/bitcoincashjs-lib": "4.0.3",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",

@@ -32,10 +32,10 @@
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "@cosmjs/amino": "0.32.4",
-    "@cosmjs/encoding": "0.32.4",
-    "@cosmjs/proto-signing": "0.32.4",
-    "@cosmjs/stargate": "0.32.4",
+    "@cosmjs/amino": "0.33.1",
+    "@cosmjs/encoding": "0.33.1",
+    "@cosmjs/proto-signing": "0.33.1",
+    "@cosmjs/stargate": "0.33.1",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
