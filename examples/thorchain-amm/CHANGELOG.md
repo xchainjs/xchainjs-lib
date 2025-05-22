@@ -1,5 +1,18 @@
 # xchainjs-thorchain-amm
 
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [f777312]
+  - @xchainjs/xchain-bitcoincash@2.0.1
+  - @xchainjs/xchain-litecoin@2.0.1
+  - @xchainjs/xchain-dash@2.0.1
+  - @xchainjs/xchain-doge@2.0.1
+  - @xchainjs/xchain-thorchain-amm@3.0.7
+  - @xchainjs/xchain-wallet@2.0.6
+  - @xchainjs/xchain-bitcoin@2.0.1
+
 ## 1.0.6
 
 ### Patch Changes
