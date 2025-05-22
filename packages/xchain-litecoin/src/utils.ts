@@ -1,8 +1,7 @@
 import { Balance, Network, TxHash } from '@xchainjs/xchain-client'
 import { Address, assetAmount, assetToBase } from '@xchainjs/xchain-util'
-import { UTXO } from '@xchainjs/xchain-utxo'
+import { UTXO, toBitcoinJS } from '@xchainjs/xchain-utxo'
 import * as Litecoin from 'bitcoinjs-lib'
-import coininfo from 'coininfo'
 
 import { AssetLTC, LTC_DECIMAL } from './const'
 import * as nodeApi from './node-api'
@@ -67,9 +66,9 @@ export const ltcNetwork = (network: Network): Litecoin.Network => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return coininfo.litecoin.main.toBitcoinJS()
+      return toBitcoinJS('litecoin', 'main') as Litecoin.Network
     case Network.Testnet:
-      return coininfo.litecoin.test.toBitcoinJS()
+      return toBitcoinJS('litecoin', 'test') as Litecoin.Network
   }
 }
 

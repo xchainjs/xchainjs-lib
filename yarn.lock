@@ -4464,7 +4464,6 @@ __metadata:
     axios-mock-adapter: "npm:1.20.0"
     bip32: "npm:4.0.0"
     bitcoinjs-lib: "npm:6.1.6"
-    coininfo: "npm:5.1.0"
     coinselect: "npm:3.1.12"
     ecpair: "npm:2.1.0"
   languageName: unknown
@@ -4605,7 +4604,6 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:1.20.0"
     bitcoinjs-lib: "npm:5.2.0"
-    coininfo: "npm:5.1.0"
     coinselect: "npm:3.1.12"
   languageName: unknown
   linkType: soft
@@ -4624,7 +4622,6 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:1.20.0"
     bitcoinjs-lib: "npm:5.2.0"
-    coininfo: "npm:5.1.0"
     coinselect: "npm:3.1.12"
   languageName: unknown
   linkType: soft
@@ -4705,7 +4702,6 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:1.20.0"
     bitcoinjs-lib: "npm:5.2.0"
-    coininfo: "npm:5.1.0"
     coinselect: "npm:3.1.12"
   languageName: unknown
   linkType: soft
@@ -6569,24 +6565,6 @@ __metadata:
   version: 1.1.0
   resolution: "code-point-at@npm:1.1.0"
   checksum: 10c0/33f6b234084e46e6e369b6f0b07949392651b4dde70fc6a592a8d3dafa08d5bb32e3981a02f31f6fc323a26bc03a4c063a9d56834848695bda7611c2417ea2e6
-  languageName: node
-  linkType: hard
-
-"coininfo@npm:5.1.0":
-  version: 5.1.0
-  resolution: "coininfo@npm:5.1.0"
-  dependencies:
-    safe-buffer: "npm:^5.1.1"
-  checksum: 10c0/2aebbe162bb85294ba258b47b0a234e8d0ce3d8cb2211b297d932db1441e869f6b350aa5c4f3d2aba04da3f59e025f40d6d7f9fad170cc40f3855dccb4870bad
-  languageName: node
-  linkType: hard
-
-"coininfo@npm:^5.1.0":
-  version: 5.2.1
-  resolution: "coininfo@npm:5.2.1"
-  dependencies:
-    safe-buffer: "npm:^5.1.1"
-  checksum: 10c0/0cd8ec3a87400ff377b9ef03033dc16f6da66f2af2aea459526d81e2363eea8e5e9e27e6ca5b90bee626b9d98f775c5fb49d40fa1b06f7de8cbb09a2bbbf1314
   languageName: node
   linkType: hard
 
@@ -14495,7 +14473,6 @@ __metadata:
     bech32-buffer: "npm:^0.2.0"
     bignumber.js: "npm:^9.0.0"
     bitcoinjs-lib: "npm:5.2.0"
-    coininfo: "npm:^5.1.0"
     coinselect: "npm:^3.1.12"
     ethers: "npm:^5.6.6"
     rimraf: "npm:~3.0.2"
