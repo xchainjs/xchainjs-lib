@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- f777312: remove coininfo dependency
+
 ## 2.0.0
 
 ### Major Changes
