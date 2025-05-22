@@ -1,4 +1,4 @@
-import { getPrefix as getLowLevelPrefix, isValidAddr } from '@hippocampus-web3/zcash-wallet-js' // Importing the Network type from xchain-client module
+import { getPrefix as getLowLevelPrefix, isValidAddr } from '@mayaprotocol/zcash-js' // Importing the Network type from xchain-client module
 import { Network } from '@xchainjs/xchain-client' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util'
 

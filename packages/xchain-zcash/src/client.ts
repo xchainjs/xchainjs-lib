@@ -1,4 +1,4 @@
-import { getFee, memoToScript } from '@hippocampus-web3/zcash-wallet-js'
+import { getFee, memoToScript } from '@mayaprotocol/zcash-js'
 import {
   AssetInfo,
   FeeEstimateOptions,
