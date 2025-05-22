@@ -38,13 +38,15 @@ export type TransactionBuilder = {
   buildIncomplete(): Transaction
 }
 
-export type Network = {
-  messagePrefix: Buffer | string
-  bip32: {
-    public: Buffer
-    private: Buffer
-  }
-  pubKeyHash: Buffer
-  scriptHash: Buffer
-  wif: Buffer
+export interface Network {
+  messagePrefix: string
+  bech32?: string
+  bip32: Bip32
+  pubKeyHash: number
+  scriptHash: number
+  wif: number
+}
+interface Bip32 {
+  public: number
+  private: number
 }
