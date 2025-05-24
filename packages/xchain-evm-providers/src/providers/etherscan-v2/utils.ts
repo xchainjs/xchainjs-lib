@@ -166,7 +166,7 @@ export const call = async <T>({
  *
  * @returns {BigNumber} Estimated gas
  */
-export const estimateApprove = async ({
+export async function estimateApprove({
   provider,
   contractAddress,
   spenderAddress,
@@ -180,7 +180,7 @@ export const estimateApprove = async ({
   fromAddress: Address
   abi: ethers.ContractInterface
   amount?: BaseAmount
-}): Promise<ethers.BigNumber> => {
+}): Promise<ethers.BigNumber> {
   const txAmount = getApprovalAmount(amount)
   return await estimateCall({
     provider,
@@ -202,7 +202,7 @@ export const estimateApprove = async ({
  * @param {number} walletIndex (optional) HD wallet index
  * @returns {boolean} `true` or `false`.
  */
-export const isApproved = async ({
+export async function isApproved({
   provider,
   contractAddress,
   spenderAddress,
@@ -214,7 +214,7 @@ export const isApproved = async ({
   spenderAddress: Address
   fromAddress: Address
   amount?: BaseAmount
-}): Promise<boolean> => {
+}): Promise<boolean> {
   const txAmount = ethers.BigNumber.from(amount?.amount().toFixed() ?? 1)
   const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, provider)
   const allowance: ethers.BigNumberish = await contract.allowance(fromAddress, spenderAddress)
