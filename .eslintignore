@@ -1,3 +1,4 @@
 **/node_modules/**
 packages/**/lib/**
+packages/xchain-mayachain/src/types/proto/**
 packages/xchain-thorchain/src/types/proto/**
