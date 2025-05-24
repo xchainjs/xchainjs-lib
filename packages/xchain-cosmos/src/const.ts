@@ -1,6 +1,6 @@
 import { Network } from '@xchainjs/xchain-client/lib'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
-import { Asset, AssetType, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetType, baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
 
@@ -21,7 +21,7 @@ export const DEFAULT_GAS_LIMIT = '200000'
  * As defined in Cosmosstation's web wallet.
  * @see https://github.com/cosmostation/web-wallet-ts-react/blob/4d78718b613defbd6c92079b33aa8ce9f86d597c/src/constants/chain.ts#L66
  */
-export const DEFAULT_FEE = baseAmount(5000, COSMOS_DECIMAL)
+export const DEFAULT_FEE: BaseAmount = baseAmount(5000, COSMOS_DECIMAL)
 
 /**
  * Chain identifier for the Cosmos network.

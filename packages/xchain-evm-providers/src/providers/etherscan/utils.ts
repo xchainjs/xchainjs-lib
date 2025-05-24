@@ -46,7 +46,7 @@ export const validateSymbol = (symbol?: string | null): boolean => (symbol ? sym
 /**
  * Calculate fees by multiplying .
  *
- * @returns {Fees} The default gas price.
+ * @returns {BaseAmount} The default gas price.
  */
 export const getFee = ({
   gasPrice,
@@ -56,7 +56,7 @@ export const getFee = ({
   gasPrice: BaseAmount
   gasLimit: ethers.BigNumber
   decimals: number
-}) => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
+}): BaseAmount => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
 
 /**
  * Get address prefix based on the network.

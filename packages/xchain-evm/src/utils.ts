@@ -58,7 +58,7 @@ export const getFee = ({
   gasPrice: BaseAmount
   gasLimit: ethers.BigNumber
   decimals: number
-}) => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
+}): BaseAmount => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
 
 /**
  * Get address prefix based on the network.
