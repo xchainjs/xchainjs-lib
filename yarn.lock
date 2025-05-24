@@ -7551,15 +7551,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-ordered-imports@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "eslint-plugin-ordered-imports@npm:0.6.0"
-  peerDependencies:
-    eslint: ^7.0.0 || ^8.0.0
-  checksum: 10c0/f7495fe27374ab2d5d3821364a222a78ec36fdb256ed72a6547fe9faf35178a7ec6bfeb722aa3716260b2192a8a1ffdac11df6b97df09c53e1a6f1adaeef351d
-  languageName: node
-  linkType: hard
-
 "eslint-plugin-prettier@npm:^4.2.1":
   version: 4.2.1
   resolution: "eslint-plugin-prettier@npm:4.2.1"
@@ -12268,7 +12259,6 @@ __metadata:
     dotenv: "npm:^16.0.3"
     eslint: "npm:^8.31.0"
     eslint-config-prettier: "npm:^8.6.0"
-    eslint-plugin-ordered-imports: "npm:^0.6.0"
     eslint-plugin-prettier: "npm:^4.2.1"
     husky: "npm:^8.0.0"
     jest: "npm:^29.3.1"
