@@ -32,6 +32,7 @@ export default {
     // ignore(["@ethersproject/providers", "@ethersproject/abstract-provider", "@ethersproject/strings"]),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
+      declarationDir: 'lib',
       tsconfig: './tsconfig.json',
       exclude: '__tests__/**',
     }),
