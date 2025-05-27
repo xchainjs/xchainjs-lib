@@ -58,7 +58,7 @@ export const getFee = ({
   gasPrice: BaseAmount
   gasLimit: ethers.BigNumber
   decimals: number
-}) => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
+}): BaseAmount => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
 
 /**
  * Get address prefix based on the network.
@@ -186,7 +186,7 @@ export const getContract = async ({
  * @param {BaseAmount} amount (optional) The amount of token. By default, it will be unlimited token allowance.
  * @returns {Promise<ethers.BigNumber>} The estimated gas.
  */
-export const estimateApprove = async ({
+export async function estimateApprove({
   provider,
   contractAddress,
   spenderAddress,
@@ -200,7 +200,7 @@ export const estimateApprove = async ({
   fromAddress: Address
   abi: ethers.ContractInterface
   amount?: BaseAmount
-}): Promise<ethers.BigNumber> => {
+}): Promise<ethers.BigNumber> {
   const txAmount = getApprovalAmount(amount)
   return await estimateCall({
     provider,
@@ -222,7 +222,7 @@ export const estimateApprove = async ({
  * @param {number} walletIndex (optional) HD wallet index
  * @returns {Promise<boolean>} `true` if the spender is allowed to spend the specified amount, `false` otherwise.
  */
-export const isApproved = async ({
+export async function isApproved({
   provider,
   contractAddress,
   spenderAddress,
@@ -234,7 +234,7 @@ export const isApproved = async ({
   spenderAddress: Address
   fromAddress: Address
   amount?: BaseAmount
-}): Promise<boolean> => {
+}): Promise<boolean> {
   const txAmount = ethers.BigNumber.from(amount?.amount().toFixed() ?? 1)
   const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, provider)
   const allowance: ethers.BigNumberish = await contract.allowance(fromAddress, spenderAddress)

@@ -1,4 +1,3 @@
-/* eslint-disable ordered-imports/ordered-imports */
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'

@@ -11,7 +11,6 @@ import {
 import { BigNumber } from 'bignumber.js'
 
 import { CompatibleAsset, InboundDetail } from '../types'
-// eslint-disable-next-line ordered-imports/ordered-imports
 import {
   AVAXChain,
   AssetATOM,

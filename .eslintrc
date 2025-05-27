@@ -4,12 +4,11 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["prettier", "ordered-imports"],
+  "plugins": ["prettier"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
     "prettier",
-    "plugin:prettier/recommended",
-    "plugin:ordered-imports/recommended"
+    "plugin:prettier/recommended"
   ],
   "ignorePatterns": "**/*.d.ts",
   "rules": {
@@ -27,31 +26,6 @@
     ],
     "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/no-duplicate-imports": "error",
-    "no-undef": "off",
-    "ordered-imports/ordered-imports": [
-      "error",
-      {
-        "symbols-first": false,
-        "declaration-ordering": ["source", "lowercase-last"],
-        "specifier-ordering": "lowercase-last",
-        "group-ordering": [
-          {
-            "name": "parent directories",
-            "match": "^\\.\\.",
-            "order": 30
-          },
-          {
-            "name": "current directory",
-            "match": "^\\.",
-            "order": 40
-          },
-          {
-            "name": "third-party",
-            "match": ".*",
-            "order": 10
-          }
-        ]
-      }
-    ]
+    "no-undef": "off"
   }
 }

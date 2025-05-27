@@ -9,7 +9,6 @@ import { Convert, Instruction, RadixEngineToolkit } from '@radixdlt/radix-engine
 import { Balance, Fees, Network, XChainClientParams } from '@xchainjs/xchain-client'
 import { AssetType, baseAmount } from '@xchainjs/xchain-util'
 
-// eslint-disable-next-line ordered-imports/ordered-imports
 import { generateMnemonic } from 'bip39'
 
 import {
