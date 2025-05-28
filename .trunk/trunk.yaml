@@ -13,7 +13,7 @@ plugins:
       uri: https://github.com/trunk-io/plugins
 
 repo:
-  trunk_branch: main
+  trunk_branch: master
 
 # Required runtimes for linting and security tools
 runtimes:
