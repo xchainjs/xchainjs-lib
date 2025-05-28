@@ -42,7 +42,7 @@ export interface Transaction {
   confirmations: number
   blockTime: number
   size: number
-  value: string 
+  value: string
   valueIn: string
   fees: string
   hex: string
@@ -56,7 +56,7 @@ export type AddressUTXO = {
   confirmations: number
 }
 
-export type GetAddressInfo= {
+export type GetAddressInfo = {
   page: number
   totalPages: number
   itemsOnPage: number
@@ -74,4 +74,3 @@ export type GetAddressInfo= {
 export type BroadcastDTO = {
   result: string
 }
-

@@ -3,12 +3,12 @@ import { BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import axios from 'axios'
 
 import {
-  GetAddressInfo,
+  AddressUTXO,
   BalanceParams,
   BroadcastDTO,
+  GetAddressInfo,
   Transaction,
   TxHashParams,
-  AddressUTXO,
 } from './nownodes-api-types'
 
 /**
@@ -21,14 +21,14 @@ import {
  */
 export const getTx = async ({ apiKey, baseUrl, hash }: TxHashParams): Promise<Transaction> => {
   const url = `${baseUrl}/tx/${hash}`
-  const response = await axios.get(url, { 
+  const response = await axios.get(url, {
     headers: {
       'api-key': apiKey,
-    }
+    },
   })
   const tx: Transaction = response.data
   return tx
-} 
+}
 
 /**
  * Get transactions
@@ -50,14 +50,14 @@ export const getTxs = async ({
   limit: number
 }): Promise<Transaction[]> => {
   const url = `${baseUrl}/address/${address}`
-  const response = await axios.get(url, { 
+  const response = await axios.get(url, {
     params: {
       details: 'txs',
-      pageSize: limit
+      pageSize: limit,
     },
     headers: {
       'api-key': apiKey,
-    }
+    },
   })
   const txs: GetAddressInfo = response.data
   return txs.transactions as Transaction[]
@@ -80,16 +80,16 @@ export const getUTXOs = async ({
   apiKey: string
   address: string
   baseUrl: string
-  isConfirmed: boolean,
+  isConfirmed: boolean
 }): Promise<AddressUTXO[]> => {
   const url = `${baseUrl}/utxo/${address}`
-  const response = await axios.get(url, { 
+  const response = await axios.get(url, {
     params: {
-      confirmed: isConfirmed
+      confirmed: isConfirmed,
     },
     headers: {
       'api-key': apiKey,
-    }
+    },
   })
   const utxos: AddressUTXO[] = response.data
   return utxos
@@ -112,13 +112,15 @@ export const getBalance = async ({
   assetDecimals,
 }: BalanceParams): Promise<BaseAmount> => {
   const url = `${baseUrl}/address/${address}`
-  const response = await axios.get(url, { 
+  const response = await axios.get(url, {
     headers: {
       'api-key': apiKey,
-    }
+    },
   })
   const balanceResponse: GetAddressInfo = response.data
-  const balance = confirmedOnly ? baseAmount(balanceResponse.balance, assetDecimals) : baseAmount(balanceResponse.balance).plus(balanceResponse.unconfirmedBalance, assetDecimals)
+  const balance = confirmedOnly
+    ? baseAmount(balanceResponse.balance, assetDecimals)
+    : baseAmount(balanceResponse.balance).plus(balanceResponse.unconfirmedBalance, assetDecimals)
   return balance
 }
 
@@ -132,10 +134,10 @@ export const broadcastTx = async ({
   txHex: string
 }): Promise<TxHash> => {
   const url = `${baseUrl}/sendtx/${txHex}`
-  const response = await axios.get(url, { 
+  const response = await axios.get(url, {
     headers: {
       'api-key': apiKey,
-    }
+    },
   })
   return (response.data as BroadcastDTO).result
 }

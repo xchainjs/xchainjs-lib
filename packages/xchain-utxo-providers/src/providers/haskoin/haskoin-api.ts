@@ -333,6 +333,7 @@ export const broadcastTx = async ({
       const response = await axiosInstance.post<{ txid: string }>(url, txHex)
       const { txid } = response.data
       return txid
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.response?.status === 500) {
         retries++

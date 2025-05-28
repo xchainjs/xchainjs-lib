@@ -4,9 +4,9 @@ import { Address } from '@xchainjs/xchain-util'
  * It constructs explorer URLs and replaces placeholders with specific addresses or transaction IDs.
  */
 export class ExplorerProvider {
-  private explorerUrl: string; // The base URL of the blockchain explorer
-  private explorerAddressUrlTemplate: string; // The template URL for address exploration
-  private explorerTxUrlTemplate: string; // The template URL for transaction exploration
+  private explorerUrl: string // The base URL of the blockchain explorer
+  private explorerAddressUrlTemplate: string // The template URL for address exploration
+  private explorerTxUrlTemplate: string // The template URL for transaction exploration
 
   /**
    * Constructor for ExplorerProvider class.
@@ -16,9 +16,9 @@ export class ExplorerProvider {
    * @param {string} explorerTxUrlTemplate The template URL for transaction exploration
    */
   constructor(explorerUrl: string, explorerAddressUrlTemplate: string, explorerTxUrlTemplate: string) {
-    this.explorerUrl = explorerUrl; // Initialize explorerUrl property
-    this.explorerAddressUrlTemplate = explorerAddressUrlTemplate; // Initialize explorerAddressUrlTemplate property
-    this.explorerTxUrlTemplate = explorerTxUrlTemplate; // Initialize explorerTxUrlTemplate property
+    this.explorerUrl = explorerUrl // Initialize explorerUrl property
+    this.explorerAddressUrlTemplate = explorerAddressUrlTemplate // Initialize explorerAddressUrlTemplate property
+    this.explorerTxUrlTemplate = explorerTxUrlTemplate // Initialize explorerTxUrlTemplate property
   }
 
   /**
@@ -27,7 +27,7 @@ export class ExplorerProvider {
    * @returns {string} The base URL of the blockchain explorer
    */
   getExplorerUrl(): string {
-    return this.explorerUrl; // Return the explorerUrl property
+    return this.explorerUrl // Return the explorerUrl property
   }
 
   /**
@@ -37,7 +37,7 @@ export class ExplorerProvider {
    * @returns {string} The URL for exploring the specified address
    */
   getExplorerAddressUrl(address: Address): string {
-    return this.explorerAddressUrlTemplate.replace('%%ADDRESS%%', address); // Replace the placeholder in the URL with the specified address
+    return this.explorerAddressUrlTemplate.replace('%%ADDRESS%%', address) // Replace the placeholder in the URL with the specified address
   }
 
   /**
@@ -47,6 +47,6 @@ export class ExplorerProvider {
    * @returns {string} The URL for exploring the specified transaction
    */
   getExplorerTxUrl(txID: string): string {
-    return this.explorerTxUrlTemplate.replace('%%TX_ID%%', txID); // Replace the placeholder in the URL with the specified transaction ID
+    return this.explorerTxUrlTemplate.replace('%%TX_ID%%', txID) // Replace the placeholder in the URL with the specified transaction ID
   }
 }

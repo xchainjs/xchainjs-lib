@@ -8,10 +8,10 @@
  * - provider-types: Type definitions for provider-related functionality.
  * - protocols: Modules related to different blockchain protocols supported by XChainClient.
  */
-export * from './BaseXChainClient'; // Export BaseXChainClient module
-export * from './types'; // Export types module
-export * from './feeRates'; // Export feeRates module
-export * from './fees'; // Export fees module
-export * from './explorer-provider'; // Export explorer-provider module
-export * from './provider-types'; // Export provider-types module
-export * from './protocols'; // Export protocols module
+export * from './BaseXChainClient' // Export BaseXChainClient module
+export * from './types' // Export types module
+export * from './feeRates' // Export feeRates module
+export * from './fees' // Export fees module
+export * from './explorer-provider' // Export explorer-provider module
+export * from './provider-types' // Export provider-types module
+export * from './protocols' // Export protocols module
