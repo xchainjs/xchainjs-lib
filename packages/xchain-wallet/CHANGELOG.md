@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.5
+
+### Patch Changes
+
+- Updated dependencies [a8988c5]
+  - @xchainjs/xchain-thorchain@3.0.4
+
+## 2.0.4
+
+### Patch Changes
+
+- @xchainjs/xchain-evm@2.0.1
+
 ## 2.0.3
 
 ### Patch Changes

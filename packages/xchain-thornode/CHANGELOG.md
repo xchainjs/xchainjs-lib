@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- 561e2a4: Pass new parameter to quoteswap liquidityToleranceBps
+
 ## 1.0.0
 
 ### Major Changes

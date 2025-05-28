@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- a8988c5: Update lower fee for ETH
+
+## 2.0.1
+
+### Patch Changes
+
+- 89585ee: Support etherscan v2
+- Updated dependencies [89585ee]
+  - @xchainjs/xchain-evm-providers@2.0.1
+  - @xchainjs/xchain-evm@2.0.1
+
 ## 2.0.0
 
 ### Major Changes

@@ -42,7 +42,6 @@
     "@xchainjs/xchain-utxo-providers": "workspace:*",
     "bip32": "4.0.0",
     "bitcoinjs-lib": "6.1.6",
-    "coininfo": "5.1.0",
     "coinselect": "3.1.12",
     "ecpair": "2.1.0"
   },

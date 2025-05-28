@@ -41,9 +41,9 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
     expect(assetInfo).toEqual(correctAssetInfo)
   })
   it('should fetch bsc balances', async () => {
-    const address = await clientTestnet.getAddressAsync(0)
+    const address = "0x1a3d9D7A717D64e6088aC937d5aAcDD3E20ca963"
     console.log(address)
-    const balances = await clientTestnet.getBalance(address)
+    const balances = await clientTestnet.getBalance(address, [])
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })

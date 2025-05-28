@@ -58,6 +58,7 @@ export type QuoteSwapParams = {
   streamingInterval?: number // The streaming interval (optional)
   streamingQuantity?: number // The streaming quantity (optional)
   toleranceBps?: number // The tolerance basis points (optional)
+  liquidityToleranceBps?: number // The pool swing tolerance points (optional)
   affiliateAddress?: string // The affiliate address (optional)
   affiliateBps?: number // The affiliate basis points (optional)
   height?: number // The block height (optional)

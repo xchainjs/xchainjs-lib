@@ -1,6 +1,6 @@
 {
   "name": "xchainjs-loans",
-  "version": "2.0.3",
+  "version": "2.0.6",
   "private": true,
   "scripts": {
     "loanQuoteOpen": "npx ts-node loanQuoteOpen.ts",
@@ -32,7 +32,6 @@
     "bech32-buffer": "^0.2.0",
     "bignumber.js": "^9.0.0",
     "bitcoinjs-lib": "5.2.0",
-    "coininfo": "^5.1.0",
     "coinselect": "^3.1.12",
     "ethers": "^5.6.6",
     "rimraf": "~3.0.2",

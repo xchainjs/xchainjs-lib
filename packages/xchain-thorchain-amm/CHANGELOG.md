@@ -1,5 +1,36 @@
 # Changelog
 
+## 3.0.6
+
+### Patch Changes
+
+- Updated dependencies [a8988c5]
+- Updated dependencies [a8988c5]
+  - @xchainjs/xchain-thorchain@3.0.4
+  - @xchainjs/xchain-bsc@2.0.2
+  - @xchainjs/xchain-ethereum@2.0.2
+  - @xchainjs/xchain-wallet@2.0.5
+
+## 3.0.5
+
+### Patch Changes
+
+- 561e2a4: Pass new parameter to quoteswap liquidityToleranceBps
+- Updated dependencies [561e2a4]
+  - @xchainjs/xchain-thorchain-query@2.0.1
+
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [89585ee]
+  - @xchainjs/xchain-ethereum@2.0.1
+  - @xchainjs/xchain-avax@2.0.1
+  - @xchainjs/xchain-base@1.0.1
+  - @xchainjs/xchain-bsc@2.0.1
+  - @xchainjs/xchain-evm@2.0.1
+  - @xchainjs/xchain-wallet@2.0.4
+
 ## 3.0.3
 
 ### Patch Changes

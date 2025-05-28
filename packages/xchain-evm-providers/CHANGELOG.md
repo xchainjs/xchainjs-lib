@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 89585ee: Support etherscan v2
+
 ## 2.0.0
 
 ### Major Changes
