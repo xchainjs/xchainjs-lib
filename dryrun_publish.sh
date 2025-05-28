@@ -6,7 +6,7 @@ npx lerna bootstrap
 npx lerna run build
 
 # Start local NPM registry
-npx verdaccio >> "local_registry.log" &
+npx verdaccio >>"local_registry.log" &
 sleep 10 # probably not needed
 
 # Configure sample user
@@ -14,6 +14,6 @@ npx npm-cli-login -u "${NPM_USERNAME}" -p "${NPM_PASSWORD}" -e "${NPM_EMAIL}" -r
 
 # Execute publish in dry-run
 npx lerna publish from-package \
-    --registry $LOCAL_REGISTRY_URL \
-    --no-git-tag-version --no-push --yes \
-    --loglevel verbose
+  --registry $LOCAL_REGISTRY_URL \
+  --no-git-tag-version --no-push --yes \
+  --loglevel verbose

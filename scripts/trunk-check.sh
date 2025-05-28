@@ -8,7 +8,7 @@ set -euo pipefail
 FLAGS="-j8 --ci"
 
 # Define your upstream branch (develop, main, etc.)
-UPSTREAM_BRANCH="main"
+UPSTREAM_BRANCH="master"
 
 # Normalize Git paths for all platforms (no color, no paging)
 GIT_DIFF="git diff --no-color --no-pager"
