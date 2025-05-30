@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr } from '@hippocampus-web3/zcash-wallet-js'
+import { buildTx, signAndFinalize, skToAddr } from '@mayaprotocol/zcash-js'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
@@ -43,8 +43,8 @@ class ClientKeystore extends Client {
         throw Error('Error getting private key')
       }
       const prefix = Utils.zecNetworkPrefix(this.network)
-      const bufferPrefix = Buffer.from(prefix)
-      return skToAddr(zecKeys.privateKey, bufferPrefix)
+      const prefixUint8Array = new Uint8Array(prefix)
+      return skToAddr(zecKeys.privateKey, prefixUint8Array)
     }
 
     throw new Error('Phrase must be provided')
