@@ -1658,25 +1658,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hippocampus-web3/zcash-wallet-js@npm:^0.0.4":
-  version: 0.0.4
-  resolution: "@hippocampus-web3/zcash-wallet-js@npm:0.0.4"
-  dependencies:
-    "@noble/curves": "npm:^1.7.0"
-    "@noble/hashes": "npm:^1.6.1"
-    axios: "npm:^1.8.4"
-    bl: "npm:^6.0.16"
-    blake2b-wasm: "npm:^2.4.0"
-    bs58check: "npm:^4.0.0"
-    buffer: "npm:^6.0.3"
-    js-sha256: "npm:^0.11.0"
-    js-yaml: "npm:^4.1.0"
-    json-rpc-2.0: "npm:^1.7.0"
-    lodash: "npm:^4.17.21"
-  checksum: 10c0/4ccfd2636fec617045468408869415e4e5d922e9c71f82c0ef88d59784e2ecaf18d6d3197ec7618b35e269e1af796a0c47d3fda96dd3740db7e9e91d1327026a
-  languageName: node
-  linkType: hard
-
 "@humanwhocodes/config-array@npm:^0.11.8":
   version: 0.11.8
   resolution: "@humanwhocodes/config-array@npm:0.11.8"
@@ -2457,6 +2438,25 @@ __metadata:
     globby: "npm:^11.0.0"
     read-yaml-file: "npm:^1.1.0"
   checksum: 10c0/f05907d1174ae28861eaa06d0efdc144f773d9a4b8b65e1e7cdc01eb93361d335351b4a336e05c6aac02661be39e8809a3f7ad28bc67b6b338071434ab442130
+  languageName: node
+  linkType: hard
+
+"@mayaprotocol/zcash-js@npm:1.0.3":
+  version: 1.0.3
+  resolution: "@mayaprotocol/zcash-js@npm:1.0.3"
+  dependencies:
+    "@noble/curves": "npm:^1.7.0"
+    "@noble/hashes": "npm:^1.6.1"
+    axios: "npm:^1.7.9"
+    bl: "npm:^6.0.16"
+    blake2b-wasm: "npm:^2.4.0"
+    bs58check: "npm:^4.0.0"
+    buffer: "npm:^6.0.3"
+    js-sha256: "npm:^0.11.0"
+    js-yaml: "npm:^4.1.0"
+    json-rpc-2.0: "npm:^1.7.0"
+    lodash: "npm:^4.17.21"
+  checksum: 10c0/083950f99b05c666495f7285b91c5d52ac33be28cde71f04c408dc1fed1d886589c0efd74b0acda96095ce481417558e074d946d8452e1744c11a1a125a5c4e5
   languageName: node
   linkType: hard
 
@@ -4991,7 +4991,7 @@ __metadata:
   resolution: "@xchainjs/xchain-zcash@workspace:packages/xchain-zcash"
   dependencies:
     "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
-    "@hippocampus-web3/zcash-wallet-js": "npm:^0.0.4"
+    "@mayaprotocol/zcash-js": "npm:1.0.3"
     "@types/blake2b-wasm": "npm:^2.4.3"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/lodash": "npm:^4.17.13"
@@ -5420,7 +5420,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.8.4, axios@npm:^1.8.4":
+"axios@npm:1.8.4":
   version: 1.8.4
   resolution: "axios@npm:1.8.4"
   dependencies:
@@ -5468,6 +5468,17 @@ __metadata:
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
   checksum: 10c0/4499efc89e86b0b49ffddc018798de05fab26e3bf57913818266be73279a6418c3ce8f9e934c7d2d707ab8c095e837fc6c90608fb7715b94d357720b5f568af7
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.7.9":
+  version: 1.9.0
+  resolution: "axios@npm:1.9.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.0"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/9371a56886c2e43e4ff5647b5c2c3c046ed0a3d13482ef1d0135b994a628c41fbad459796f101c655e62f0c161d03883454474d2e435b2e021b1924d9f24994c
   languageName: node
   linkType: hard
 
