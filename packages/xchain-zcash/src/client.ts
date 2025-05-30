@@ -1,4 +1,4 @@
-import { getFee, memoToScript } from '@hippocampus-web3/zcash-wallet-js'
+import { buildTx, getFee, memoToScript } from '@mayaprotocol/zcash-js'
 import {
   AssetInfo,
   FeeEstimateOptions,
@@ -8,8 +8,8 @@ import {
   FeesWithRates,
   Network,
 } from '@xchainjs/xchain-client'
-import { baseAmount } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { Address, baseAmount } from '@xchainjs/xchain-util'
+import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import {
   AssetZEC,
@@ -101,9 +101,9 @@ abstract class Client extends UTXOClient {
    */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, _data: Buffer | null = null): number {
     if (feeRate) {
-      throw 'No feerate supported for thsi clienet'
+      throw 'No feerate supported for this client'
     }
-    return getFee(inputs.length, !!_data)
+    return getFee(inputs.length, 2, _data ? 'memo' : undefined)
   }
 
   /**
@@ -112,8 +112,66 @@ abstract class Client extends UTXOClient {
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
    */
-  async prepareTx(): Promise<PreparedTx> {
-    throw Error('Prepare unsiged TX not supported for Zcash. Request functionality if you need it.')
+  async prepareTx({
+    sender,
+    memo,
+    amount,
+    recipient,
+    feeRate: _feeRate, // Ignored: Zcash uses flat fees
+    spendPendingUTXO = true,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+  }): Promise<PreparedTx> {
+    // Validate recipient address
+    if (!this.validateAddress(recipient)) {
+      throw new Error('Invalid recipient address')
+    }
+
+    // Get UTXOs for sender
+    const utxos = await this.scanUTXOs(sender, spendPendingUTXO)
+    if (utxos.length === 0) {
+      throw new Error('No UTXOs available for transaction')
+    }
+
+    // Convert UTXOs to zcash-js format
+    const zcashUtxos = utxos.map((utxo) => ({
+      address: sender,
+      txid: utxo.hash,
+      outputIndex: utxo.index,
+      satoshis: utxo.value,
+    }))
+
+    // Build unsigned transaction
+    const unsignedTx = await buildTx(
+      0, // height - can be 0 for prepared tx
+      sender,
+      recipient,
+      amount.amount().toNumber(),
+      zcashUtxos,
+      this.network === Network.Testnet ? false : true,
+      memo,
+    )
+
+    // For Zcash, we return the transaction data as JSON string
+    // since zcash-js doesn't produce a standard raw transaction format
+    const rawUnsignedTx = JSON.stringify({
+      height: 0,
+      from: sender,
+      to: recipient,
+      amount: amount.amount().toNumber(),
+      utxos: zcashUtxos,
+      isMainnet: this.network === Network.Testnet ? false : true,
+      memo,
+      fee: unsignedTx.fee,
+    })
+
+    return {
+      rawUnsignedTx,
+      utxos,
+      inputs: utxos, // All UTXOs are potential inputs
+    }
   }
 
   async getFeesWithRates(): Promise<FeesWithRates> {
@@ -130,7 +188,7 @@ abstract class Client extends UTXOClient {
       const utxo = await this.scanUTXOs(options?.sender, false)
       utxoNumber = utxo.length // Max possible fee for interface display
     }
-    const flatFee = getFee(utxoNumber, !!options?.memo)
+    const flatFee = getFee(utxoNumber, 2, options?.memo)
     return {
       average: baseAmount(flatFee, ZEC_DECIMAL),
       fast: baseAmount(flatFee, ZEC_DECIMAL),
