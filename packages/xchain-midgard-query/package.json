@@ -9,7 +9,7 @@
   "author": "THORChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib#readme",
   "main": "lib/index.js",
-  "module": "lib/index.esm.js",
+  "exports": "./lib/index.esm.js",
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",

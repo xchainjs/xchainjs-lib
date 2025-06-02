@@ -21,7 +21,7 @@ export default {
       sourcemap: false,
     },
     {
-      file: pkg.module,
+      file: pkg.exports,
       format: 'es',
       exports: 'named',
       sourcemap: false,

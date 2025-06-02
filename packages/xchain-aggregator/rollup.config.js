@@ -23,7 +23,7 @@ export default {
       inlineDynamicImports: true,
     },
     {
-      file: pkg.module,
+      file: pkg.exports,
       format: 'es',
       exports: 'named',
       sourcemap: false,
