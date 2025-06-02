@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",
-  "module": "lib/index.es.js",
+  "exports": "./lib/index.es.js",
   "jsnext:main": "lib/index.es.js",
   "typings": "lib/index.d.ts",
   "directories": {
