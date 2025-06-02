@@ -204,6 +204,10 @@ export class Client extends BaseXChainClient {
     return isAddress(address)
   }
 
+  public async validateAddressAsync(address: Address): Promise<boolean> {
+    return this.validateAddress(address)
+  }
+
   /**
    * Retrieves the balance of a given address.
    * @param {Address} address - The address to retrieve the balance for.

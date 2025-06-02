@@ -71,10 +71,15 @@ abstract class Client extends UTXOClient {
    * Validate the given address.
    *
    * @param {Address} address
+   * @deprecated
    * @returns {boolean} `true` or `false`
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
+  }
+
+  async validateAddressAsync(address: string): Promise<boolean> {
+    return this.validateAddress(address)
   }
 
   /**

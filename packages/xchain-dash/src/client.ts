@@ -79,11 +79,17 @@ abstract class Client extends UTXOClient {
   /**
    * Validate a DASH address.
    * @param {string} address The DASH address to validate.
+   * @deprecated
    * @returns {boolean} True if the address is valid, false otherwise.
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
+
+  async validateAddressAsync(address: string): Promise<boolean> {
+    return this.validateAddress(address)
+  }
+
   /**
    * Asynchronously get the balance for a DASH address.
    * @param {string} address The DASH address.

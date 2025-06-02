@@ -199,6 +199,11 @@ export class Client extends BaseXChainClient implements EVMClient {
   validateAddress(address: Address): boolean {
     return validateAddress(address)
   }
+
+  async validateAddressAsync(address: Address): Promise<boolean> {
+    return this.validateAddress(address)
+  }
+
   /**
    * Retrieves the balance of a given address.
    * @param {Address} address - The address to retrieve the balance for.

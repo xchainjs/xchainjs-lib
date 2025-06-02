@@ -89,10 +89,15 @@ abstract class Client extends UTXOClient {
    * Validates the given Litecoin address.
    *
    * @param {string} address The Litecoin address to validate.
+   * @deprecated
    * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
+  }
+
+  async validateAddressAsync(address: string): Promise<boolean> {
+    return this.validateAddress(address)
   }
 
   /**

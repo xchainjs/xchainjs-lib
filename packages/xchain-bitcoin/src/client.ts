@@ -88,6 +88,7 @@ abstract class Client extends UTXOClient {
   /**
    * Validate the given Bitcoin address.
    * @param {string} address Bitcoin address to validate.
+   * @deprecated
    * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
   validateAddress(address: string): boolean {

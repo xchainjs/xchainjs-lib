@@ -1,28 +1,4 @@
-import { BlockFrostAPI } from '@hippocampus-web3/blockfrost-js'
-import {
-  Address as CardanoAddress,
-  BaseAddress,
-  BigNum,
-  Bip32PrivateKey,
-  CoinSelectionStrategyCIP2,
-  Credential,
-  FixedTransaction,
-  GeneralTransactionMetadata,
-  LinearFee,
-  Transaction,
-  TransactionBuilder,
-  TransactionBuilderConfigBuilder,
-  TransactionHash,
-  TransactionInput,
-  TransactionMetadatum,
-  TransactionOutput,
-  TransactionUnspentOutput,
-  TransactionUnspentOutputs,
-  TransactionWitnessSet,
-  Value,
-  Vkeywitnesses,
-  make_vkey_witness,
-} from '@hippocampus-web3/cardano-serialization-lib-asmjs'
+import { type Bip32PrivateKey, type TransactionBuilder } from '@emurgo/cardano-serialization-lib-browser'
 import {
   AssetInfo,
   BaseXChainClient,
@@ -30,6 +6,7 @@ import {
   FeeEstimateOptions,
   FeeType,
   Fees,
+  FeesWithRates,
   Network,
   PreparedTx,
   TxHash,
@@ -38,14 +15,17 @@ import {
 } from '@xchainjs/xchain-client'
 import { phraseToEntropy } from '@xchainjs/xchain-crypto'
 import { Address, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import WAValidator from 'multicoin-address-validator'
 
+import { BlockFrostClient } from './blockfrost-client'
 import { ADAAsset, ADAChain, ADA_DECIMALS, defaultAdaParams } from './const'
 import { ADAClientParams, Balance, Tx, TxParams } from './types'
 import { getCardanoNetwork } from './utils'
+import { getCardano } from './wasm'
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
-  private blockfrostApis: Record<Network, BlockFrostAPI[]>
+  private blockfrostApis: Record<Network, BlockFrostClient[]>
 
   constructor(params: ADAClientParams) {
     const allParams = {
@@ -57,13 +37,13 @@ export class Client extends BaseXChainClient {
     this.blockfrostApis = {
       [Network.Mainnet]: allParams.apiKeys.blockfrostApiKeys
         .filter((apiKey) => apiKey.mainnet.trim() !== '')
-        .map((apiKey) => new BlockFrostAPI({ projectId: apiKey.mainnet })),
+        .map((apiKey) => new BlockFrostClient({ projectId: apiKey.mainnet, network: Network.Mainnet })),
       [Network.Testnet]: allParams.apiKeys.blockfrostApiKeys
         .filter((apiKey) => apiKey.testnet.trim() !== '')
-        .map((apiKey) => new BlockFrostAPI({ projectId: apiKey.testnet })),
+        .map((apiKey) => new BlockFrostClient({ projectId: apiKey.testnet, network: Network.Testnet })),
       [Network.Stagenet]: allParams.apiKeys.blockfrostApiKeys
         .filter((apiKey) => apiKey.stagenet.trim() !== '')
-        .map((apiKey) => new BlockFrostAPI({ projectId: apiKey.stagenet })),
+        .map((apiKey) => new BlockFrostClient({ projectId: apiKey.stagenet, network: Network.Stagenet })),
     }
   }
 
@@ -128,15 +108,18 @@ export class Client extends BaseXChainClient {
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
   public async getAddressAsync(walletIndex = 0): Promise<string> {
-    const accountKey = this.generatePrivateKey(walletIndex)
+    const accountKey = await this.generatePrivateKey(walletIndex)
 
     const paymentKeyPub = accountKey.derive(0).derive(0)
     const stakeKeyPub = accountKey.derive(2).derive(0)
 
-    const baseAddress = BaseAddress.new(
-      getCardanoNetwork(this.getNetwork()).network_id(),
-      Credential.from_keyhash(paymentKeyPub.to_raw_key().to_public().hash()),
-      Credential.from_keyhash(stakeKeyPub.to_raw_key().to_public().hash()),
+    const cardanoLib = await getCardano()
+    const network = await getCardanoNetwork(this.getNetwork())
+
+    const baseAddress = cardanoLib.BaseAddress.new(
+      network.network_id(),
+      cardanoLib.Credential.from_keyhash(paymentKeyPub.to_raw_key().to_public().hash()),
+      cardanoLib.Credential.from_keyhash(stakeKeyPub.to_raw_key().to_public().hash()),
     )
 
     return baseAddress.to_address().to_bech32()
@@ -151,15 +134,24 @@ export class Client extends BaseXChainClient {
   }
 
   /**
+   * @deprecated
+   */
+  public validateAddress(address: string): boolean {
+    return WAValidator.validate(address, 'ada', this.network === Network.Mainnet ? 'mainnet' : 'testnet')
+  }
+
+  /**
    * Validate the given Cardano address.
    * @param {string} address Cardano address to validate.
    * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
-  public validateAddress(address: string): boolean {
+  public async validateAddressAsync(address: string): Promise<boolean> {
     try {
-      const addr = CardanoAddress.from_bech32(address)
-      return !addr.is_malformed() && addr.network_id() === getCardanoNetwork(this.getNetwork()).network_id()
-    } catch {
+      const cardanoLib = await getCardano()
+      const network = await getCardanoNetwork(this.getNetwork())
+      const addr = cardanoLib.Address.from_bech32(address)
+      return !addr.is_malformed() && addr.network_id() === network.network_id()
+    } catch (e) {
       return false
     }
   }
@@ -191,12 +183,55 @@ export class Client extends BaseXChainClient {
       memo: params.memo,
       amount: params.amount,
     })
-    const fee: string = Transaction.from_hex(rawUnsignedTx).body().fee().to_js_value()
+    const cardanoLib = await getCardano()
+    const fee: string = cardanoLib.Transaction.from_hex(rawUnsignedTx).body().fee().to_js_value()
     return {
       average: baseAmount(fee, ADA_DECIMALS),
       fast: baseAmount(Number(fee) * 1.25, ADA_DECIMALS),
       fastest: baseAmount(Number(fee) * 1.5, ADA_DECIMALS),
       type: FeeType.PerByte,
+    }
+  }
+
+  async getFeesWithRates(options?: FeeEstimateOptions): Promise<FeesWithRates> {
+    const blockfrostClient = this.blockfrostApis[this.getNetwork()][0]
+    if (!blockfrostClient) {
+      throw new Error('No BlockFrost client available for the current network')
+    }
+
+    const parameters = await blockfrostClient.epochsLatestParameters()
+    const rates = await blockfrostClient.getFeeRates()
+
+    // base size
+    const baseTxSize = 100
+    const utxoInputSize = 57
+    const outputSize = 29
+    // memo size
+    const memoSize = options?.memo ? Buffer.from(options.memo).length : 0
+
+    let estimatedInputs = 1 // 1 input by default
+    if (options?.sender) {
+      const utxos = await blockfrostClient.addressesUtxosAll(options.sender)
+      const lovelaceUtxos = utxos.filter((u) => u.amount.some((a) => a.unit === 'lovelace'))
+      estimatedInputs = Math.max(1, Math.ceil(lovelaceUtxos.length / 2)) // Estimamos usar la mitad de los UTXOs disponibles
+    }
+
+    const totalSize = baseTxSize + utxoInputSize * estimatedInputs + outputSize + memoSize
+
+    const calculateFee = () => {
+      return parameters.min_fee_a * totalSize + parameters.min_fee_b
+    }
+
+    const fee = calculateFee()
+
+    return {
+      fees: {
+        average: baseAmount(fee, ADA_DECIMALS),
+        fast: baseAmount(fee, ADA_DECIMALS),
+        fastest: baseAmount(fee, ADA_DECIMALS),
+        type: FeeType.PerByte,
+      },
+      rates,
     }
   }
 
@@ -256,27 +291,28 @@ export class Client extends BaseXChainClient {
       asset: ADAAsset,
     })
 
-    const accountKey = this.generatePrivateKey(params.walletIndex)
+    const accountKey = await this.generatePrivateKey(params.walletIndex)
 
     const privKey = accountKey.derive(0).derive(0)
 
-    const usignedTx = Transaction.from_hex(rawUnsignedTx)
+    const cardanoLib = await getCardano()
+    const usignedTx = cardanoLib.Transaction.from_hex(rawUnsignedTx)
     const txBody = usignedTx.body()
     const auxData = usignedTx.auxiliary_data()
 
-    const fixedTx = FixedTransaction.new_from_body_bytes(txBody.to_bytes())
+    const fixedTx = cardanoLib.FixedTransaction.new_from_body_bytes(txBody.to_bytes())
 
     const txHash = fixedTx.transaction_hash()
 
-    const witnesses = TransactionWitnessSet.new()
-    const vKeyWitnesses = Vkeywitnesses.new()
+    const witnesses = cardanoLib.TransactionWitnessSet.new()
+    const vKeyWitnesses = cardanoLib.Vkeywitnesses.new()
 
-    const vKeyWitness = make_vkey_witness(txHash, privKey.to_raw_key())
+    const vKeyWitness = cardanoLib.make_vkey_witness(txHash, privKey.to_raw_key())
 
     vKeyWitnesses.add(vKeyWitness)
     witnesses.set_vkeys(vKeyWitnesses)
 
-    const tx = Transaction.new(txBody, witnesses, auxData)
+    const tx = cardanoLib.Transaction.new(txBody, witnesses, auxData)
 
     const hash = await this.broadcastTx(tx.to_hex())
 
@@ -312,33 +348,39 @@ export class Client extends BaseXChainClient {
     // If the transaction is not included in a block before that slot it will be cancelled.
     txBuilder.set_ttl(currentSlot.slot + 7200)
 
-    const recipientAddr = CardanoAddress.from_bech32(recipient)
-    const senderAddr = CardanoAddress.from_bech32(sender)
+    const cardanoLib = await getCardano()
+    const recipientAddr = cardanoLib.Address.from_bech32(recipient)
+    const senderAddr = cardanoLib.Address.from_bech32(sender)
 
-    txBuilder.add_output(TransactionOutput.new(recipientAddr, Value.new(BigNum.from_str(amount.amount().toString()))))
+    txBuilder.add_output(
+      cardanoLib.TransactionOutput.new(
+        recipientAddr,
+        cardanoLib.Value.new(cardanoLib.BigNum.from_str(amount.amount().toString())),
+      ),
+    )
 
     const lovelaceUtxos = utxos.filter((u) => u.amount.some((a) => a.unit === 'lovelace'))
 
-    const unspentOutputs = TransactionUnspentOutputs.new()
+    const unspentOutputs = cardanoLib.TransactionUnspentOutputs.new()
     for (const utxo of lovelaceUtxos) {
       const amount = utxo.amount.find((a) => a.unit === 'lovelace')?.quantity
 
       if (!amount) continue
 
-      const inputValue = Value.new(BigNum.from_str(amount.toString()))
+      const inputValue = cardanoLib.Value.new(cardanoLib.BigNum.from_str(amount.toString()))
 
-      const input = TransactionInput.new(
-        TransactionHash.from_bytes(Buffer.from(utxo.tx_hash, 'hex')),
+      const input = cardanoLib.TransactionInput.new(
+        cardanoLib.TransactionHash.from_bytes(Buffer.from(utxo.tx_hash, 'hex')),
         utxo.output_index,
       )
-      const output = TransactionOutput.new(senderAddr, inputValue)
-      unspentOutputs.add(TransactionUnspentOutput.new(input, output))
+      const output = cardanoLib.TransactionOutput.new(senderAddr, inputValue)
+      unspentOutputs.add(cardanoLib.TransactionUnspentOutput.new(input, output))
     }
-    txBuilder.add_inputs_from(unspentOutputs, CoinSelectionStrategyCIP2.LargestFirst)
+    txBuilder.add_inputs_from(unspentOutputs, cardanoLib.CoinSelectionStrategyCIP2.LargestFirst)
 
     if (memo) {
-      const metadata = GeneralTransactionMetadata.new()
-      metadata.insert(BigNum.from_str('674'), TransactionMetadatum.new_text(memo))
+      const metadata = cardanoLib.GeneralTransactionMetadata.new()
+      metadata.insert(cardanoLib.BigNum.from_str('674'), cardanoLib.TransactionMetadatum.new_text(memo))
       txBuilder.set_metadata(metadata)
     }
 
@@ -374,7 +416,9 @@ export class Client extends BaseXChainClient {
           }
           throw e
         }
-      } catch {}
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     throw Error('Can not get balance')
@@ -384,7 +428,9 @@ export class Client extends BaseXChainClient {
     for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
       try {
         return await blockFrostApi.epochsLatestParameters()
-      } catch {}
+      } catch (e) {
+        console.warn(e)
+      }
     }
     throw Error('Can not get epoch parameters')
   }
@@ -411,7 +457,9 @@ export class Client extends BaseXChainClient {
     for (const blockFrostApi of this.blockfrostApis[this.getNetwork()]) {
       try {
         return await blockFrostApi.txs(txId)
-      } catch {}
+      } catch (e) {
+        console.warn(e)
+      }
     }
     throw Error('Can not get transaction')
   }
@@ -436,35 +484,37 @@ export class Client extends BaseXChainClient {
     throw Error('Can not broadcast transaction')
   }
 
-  private generatePrivateKey(walletIndex = 0): Bip32PrivateKey {
+  private async generatePrivateKey(walletIndex = 0): Promise<Bip32PrivateKey> {
     if (!this.phrase) throw new Error('Phrase must be provided')
 
-    const rootKey = Bip32PrivateKey.from_bip39_entropy(
+    const cardanoLib = await getCardano()
+    const rootKey = cardanoLib.Bip32PrivateKey.from_bip39_entropy(
       Buffer.from(phraseToEntropy(this.phrase), 'hex'),
       Buffer.from(''),
     )
 
     return rootKey
-      .derive(1852 | 0x80000000) // 0x80000000 means hardened
-      .derive(1815 | 0x80000000) // 0x80000000 means hardened
-      .derive(walletIndex | 0x80000000) // 0x80000000 means hardened
+      .derive(1852 | 0x80000000)
+      .derive(1815 | 0x80000000)
+      .derive(walletIndex | 0x80000000)
   }
 
   private async getTransactionBuilder(): Promise<TransactionBuilder> {
     const protocolParams = await this.roundRobinGetEpochParameters()
-    return TransactionBuilder.new(
-      TransactionBuilderConfigBuilder.new()
+    const cardanoLib = await getCardano()
+    return cardanoLib.TransactionBuilder.new(
+      cardanoLib.TransactionBuilderConfigBuilder.new()
         .fee_algo(
-          LinearFee.new(
-            BigNum.from_str(protocolParams.min_fee_a.toString()),
-            BigNum.from_str(protocolParams.min_fee_b.toString()),
+          cardanoLib.LinearFee.new(
+            cardanoLib.BigNum.from_str(protocolParams.min_fee_a.toString()),
+            cardanoLib.BigNum.from_str(protocolParams.min_fee_b.toString()),
           ),
         )
-        .pool_deposit(BigNum.from_str(protocolParams.pool_deposit))
-        .key_deposit(BigNum.from_str(protocolParams.key_deposit))
+        .pool_deposit(cardanoLib.BigNum.from_str(protocolParams.pool_deposit))
+        .key_deposit(cardanoLib.BigNum.from_str(protocolParams.key_deposit))
         // coins_per_utxo_size is already introduced in current Cardano fork
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .coins_per_utxo_byte(BigNum.from_str(protocolParams.coins_per_utxo_size!))
+        .coins_per_utxo_byte(cardanoLib.BigNum.from_str(protocolParams.coins_per_utxo_size!))
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         .max_value_size(parseInt(protocolParams.max_val_size!))
         .max_tx_size(protocolParams.max_tx_size)

@@ -76,10 +76,15 @@ abstract class Client extends UTXOClient {
    * Validate the given address.
    *
    * @param {Address} address The Dogecoin address to validate.
+   * @deprecated
    * @returns {boolean} `true` if the address is valid, otherwise `false`.
    */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
+  }
+
+  async validateAddressAsync(address: string): Promise<boolean> {
+    return this.validateAddress(address)
   }
 
   /**

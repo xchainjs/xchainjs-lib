@@ -48,6 +48,10 @@ class ClientLedger extends Client {
     return result.bitcoinAddress
   }
 
+  async validateAddressAsync(address: string): Promise<boolean> {
+    return this.validateAddress(address)
+  }
+
   // Transfer BTC from Ledger
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const app = await this.getApp()
