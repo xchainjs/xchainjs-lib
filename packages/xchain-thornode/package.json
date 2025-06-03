@@ -31,7 +31,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "test": "jest --passWithNoTests",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
     "generate:types": "yarn clean:types:thornode && yarn generate:types:thornode",
     "generate:types:thornode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://thornode.ninerealms.com/thorchain/doc/openapi.yaml -g typescript-axios -o ./src/generated/thornodeApi --skip-validate-spec --generate-alias-as-model",
     "clean:types:thornode": "rimraf ./src/generated/thornodeApi"

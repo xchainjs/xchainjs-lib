@@ -31,7 +31,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "test": "jest --passWithNoTests",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
     "generate:types": "yarn clean:types:midgard && yarn generate:types:midgard",
     "generate:types:midgard": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://midgard.ninerealms.com/v2/swagger.json -g typescript-axios -o ./src/generated/midgardApi --generate-alias-as-model --reserved-words-mappings in=in",
     "clean:types:midgard": "rimraf ./src/generated/midgardApi"
