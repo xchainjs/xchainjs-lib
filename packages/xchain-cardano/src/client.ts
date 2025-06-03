@@ -352,7 +352,7 @@ export class Client extends BaseXChainClient {
 
     const hash = await this.broadcastTx(tx.to_hex())
 
-    return hash
+    return hash.replace(/"/g, '')
   }
 
   /**
