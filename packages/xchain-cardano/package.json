@@ -33,9 +33,9 @@
   },
   "dependencies": {
     "@emurgo/cardano-serialization-lib-browser": "^14.1.2",
-    "@xchainjs/xchain-client": "latest",
-    "@xchainjs/xchain-crypto": "latest",
-    "@xchainjs/xchain-util": "latest",
+    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:*",
     "multicoin-address-validator": "^0.5.25"
   },
   "publishConfig": {
