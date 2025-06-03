@@ -57,6 +57,11 @@ export interface TransactionUTxOResponse {
   }>
 }
 
+export interface TransactionHistoryResponse {
+  tx_hash: string
+  block_time: number
+}
+
 export class BlockFrostClient {
   private readonly baseUrl: string
   private readonly headers: HeadersInit
@@ -134,5 +139,9 @@ export class BlockFrostClient {
     }
 
     return response.text()
+  }
+
+  async addressesTransactions(address: string, page = 1, count = 100): Promise<TransactionHistoryResponse[]> {
+    return this.fetch<TransactionHistoryResponse[]>(`/addresses/${address}/transactions?page=${page}&count=${count}`)
   }
 }

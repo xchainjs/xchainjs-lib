@@ -22,10 +22,6 @@ class ClientLedger extends Client {
     throw Error('Not implemented.')
   }
 
-  async validateAddressAsync(address: string): Promise<boolean> {
-    return this.validateAddress(address)
-  }
-
   async transfer(): Promise<TxHash> {
     throw Error('Not implemented.')
   }

@@ -60,10 +60,6 @@ class ClientKeystore extends Client {
     return this.getAddress(index)
   }
 
-  async validateAddressAsync(address: string): Promise<boolean> {
-    return this.validateAddress(address)
-  }
-
   /**
    * @private
    * Get the keys derived from the given phrase.

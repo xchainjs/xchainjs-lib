@@ -96,10 +96,6 @@ abstract class Client extends UTXOClient {
     return Utils.validateAddress(address, this.network)
   }
 
-  async validateAddressAsync(address: string): Promise<boolean> {
-    return this.validateAddress(address)
-  }
-
   /**
    * Builds a Litecoin (LTC) transaction.
    *

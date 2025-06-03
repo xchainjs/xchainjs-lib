@@ -160,12 +160,7 @@ export abstract class BaseXChainClient implements XChainClient {
   abstract getExplorerUrl(): string
   abstract getExplorerAddressUrl(address: string): string
   abstract getExplorerTxUrl(txID: string): string
-  /**
-   * Validate address synchronously
-   * @deprecated Use validateAddressAsync instead.
-   */
   abstract validateAddress(address: string): boolean
-  abstract validateAddressAsync(address: string): Promise<boolean>
   abstract getBalance(address: string, assets?: AnyAsset[]): Promise<Balance[]>
   abstract getTransactions(params?: TxHistoryParams): Promise<TxsPage>
   abstract getTransactionData(txId: string, assetAddress?: string): Promise<Tx>

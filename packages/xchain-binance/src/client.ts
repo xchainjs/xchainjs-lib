@@ -213,10 +213,6 @@ class Client extends BaseXChainClient implements BinanceClient, XChainClient {
   validateAddress(address: Address): boolean {
     return this.bncClient.checkAddress(address, getPrefix(this.network))
   }
-
-  async validateAddressAsync(address: Address): Promise<boolean> {
-    return this.validateAddress(address)
-  }
   /**
    * Get asset information.
    * @returns Asset information.

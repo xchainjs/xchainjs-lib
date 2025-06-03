@@ -10,6 +10,7 @@ import {
   Network,
   PreparedTx,
   TxHash,
+  TxHistoryParams,
   TxType,
   TxsPage,
 } from '@xchainjs/xchain-client'
@@ -18,7 +19,7 @@ import { Address, BaseAmount, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import WAValidator from 'multicoin-address-validator'
 
 import { BlockFrostClient } from './blockfrost-client'
-import { ADAAsset, ADAChain, ADA_DECIMALS, defaultAdaParams } from './const'
+import { ADAAsset, ADAChain, ADA_DECIMALS, LOWER_FEE_BOUND, UPPER_FEE_BOUND, defaultAdaParams } from './const'
 import { ADAClientParams, Balance, Tx, TxParams } from './types'
 import { getCardanoNetwork } from './utils'
 import { getCardano } from './wasm'
@@ -141,22 +142,6 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Validate the given Cardano address.
-   * @param {string} address Cardano address to validate.
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
-  public async validateAddressAsync(address: string): Promise<boolean> {
-    try {
-      const cardanoLib = await getCardano()
-      const network = await getCardanoNetwork(this.getNetwork())
-      const addr = cardanoLib.Address.from_bech32(address)
-      return !addr.is_malformed() && addr.network_id() === network.network_id()
-    } catch (e) {
-      return false
-    }
-  }
-
-  /**
    * Retrieves the balance of a given address.
    * @param {Address} address - The address to retrieve the balance for.
    * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
@@ -269,8 +254,53 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  public async getTransactions(): Promise<TxsPage> {
-    throw Error('Not implemented')
+  public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const address = params?.address || (await this.getAddress())
+    const offset = params?.offset || 0
+
+    if (params?.limit && params.limit > 10) {
+      throw new Error('Maximum transaction limit is 10 to avoid API rate limit issues')
+    }
+
+    const limit = Math.min(params?.limit || 10, 10)
+
+    const page = Math.floor(offset / limit) + 1
+    const count = limit
+
+    const blockfrostClient = this.blockfrostApis[this.getNetwork()][0]
+    if (!blockfrostClient) {
+      throw new Error('No BlockFrost client available for the current network')
+    }
+
+    const transactions = await blockfrostClient.addressesTransactions(address, page, count)
+    const nativeAsset = this.getAssetInfo()
+
+    const txs = await Promise.all(
+      transactions.map(async (tx) => {
+        const txUtxos = await this.roundRobinGetTransactionUtxos(tx.tx_hash)
+        return {
+          type: TxType.Transfer,
+          hash: tx.tx_hash,
+          date: new Date(tx.block_time * 1000),
+          asset: nativeAsset.asset,
+          from: txUtxos.inputs.map((input) => ({
+            from: input.address,
+            amount: baseAmount(input.amount[0].quantity, nativeAsset.decimal),
+            asset: nativeAsset.asset,
+          })),
+          to: txUtxos.outputs.map((output) => ({
+            to: output.address,
+            amount: baseAmount(output.amount[0].quantity, nativeAsset.decimal),
+            asset: nativeAsset.asset,
+          })),
+        }
+      }),
+    )
+
+    return {
+      total: txs.length,
+      txs,
+    }
   }
 
   /**
@@ -313,6 +343,12 @@ export class Client extends BaseXChainClient {
     witnesses.set_vkeys(vKeyWitnesses)
 
     const tx = cardanoLib.Transaction.new(txBody, witnesses, auxData)
+
+    const fee = tx.body().fee().to_js_value()
+
+    if (Number(fee) < LOWER_FEE_BOUND || Number(fee) > UPPER_FEE_BOUND) {
+      throw Error('Fee is out of bounds')
+    }
 
     const hash = await this.broadcastTx(tx.to_hex())
 

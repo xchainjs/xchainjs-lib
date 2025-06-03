@@ -276,10 +276,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
   }
 
-  public async validateAddressAsync(address: string): Promise<boolean> {
-    return this.validateAddress(address)
-  }
-
   /**
    * Obtains the balances of the specified address for all assets on the network.
    * @param {string} address The address for which balances are to be retrieved.

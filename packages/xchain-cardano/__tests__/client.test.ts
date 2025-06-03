@@ -224,19 +224,14 @@ describe('Cardano client', () => {
         // Test valid address
         const validAddress =
           'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
-        const validResult = await client.validateAddressAsync(validAddress)
+        const validResult = await client.validateAddress(validAddress)
         expect(validResult).toBeTruthy()
 
         // Test invalid address
         const invalidAddress =
           'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhf'
-        const invalidResult = await client.validateAddressAsync(invalidAddress)
+        const invalidResult = await client.validateAddress(invalidAddress)
         expect(invalidResult).toBeFalsy()
-
-        // Test deprecated method throws error
-        expect(() => client.validateAddress(validAddress)).toThrow(
-          'Deprecated method, use validateAddressAsync instead',
-        )
       })
     })
   })
