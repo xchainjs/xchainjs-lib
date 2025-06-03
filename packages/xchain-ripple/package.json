@@ -28,7 +28,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest --passWithNoTests",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
