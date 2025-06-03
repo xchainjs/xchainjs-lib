@@ -1,4 +1,4 @@
-import { Asset, AssetType, TokenAsset, baseAmount } from '@xchainjs/xchain-util'
+import { Asset, AssetType, TokenAsset, baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 /**
  * Decimal places for KUJI asset.
  */
@@ -12,7 +12,7 @@ export const DEFAULT_GAS_LIMIT = '200000'
 /**
  * Default fee for transactions, represented as a base amount.
  */
-export const DEFAULT_FEE = baseAmount(5000, KUJI_DECIMAL)
+export const DEFAULT_FEE: BaseAmount = baseAmount(5000, KUJI_DECIMAL)
 
 /**
  * Chain identifier for KUJI.
