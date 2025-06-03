@@ -10,7 +10,7 @@ import { Fee, FeeOption, FeeType, Fees } from './types'
 export function singleFee(feeType: FeeType, amount: Fee): Fees {
   return Object.values(FeeOption).reduce<Partial<Fees>>((a, x) => ((a[x] = amount), a), {
     type: feeType,
-  }) as Fees;
+  }) as Fees
 }
 
 /**
@@ -25,5 +25,5 @@ export function standardFees(feeType: FeeType, amount: Fee): Fees {
     ...singleFee(feeType, amount), // Include single fee amount for all fee options
     [FeeOption.Average]: amount.times(0.5), // Set fee amount for average option as half of the base amount
     [FeeOption.Fastest]: amount.times(5.0), // Set fee amount for fastest option as five times the base amount
-  };
+  }
 }

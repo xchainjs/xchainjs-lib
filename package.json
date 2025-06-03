@@ -23,6 +23,7 @@
     "pub": "turbo publish",
     "e2e": "turbo run e2e",
     "lint": "turbo run lint",
+    "check:trunk": "./scripts/trunk-check.sh",
     "update-packages": "yarn changeset",
     "increase-packages": "yarn changeset version",
     "publish-packages": "turbo run build:release test --cache-dir=.turbo && yarn increase-packages && yarn changeset publish",
