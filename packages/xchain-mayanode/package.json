@@ -9,6 +9,7 @@
   ],
   "author": "MAYAChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "type": "module",
   "main": "lib/index.js",
   "exports": "./lib/index.esm.js",
   "typings": "lib/index.d.ts",
