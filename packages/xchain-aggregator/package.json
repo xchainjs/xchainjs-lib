@@ -3,6 +3,7 @@
   "description": "Protocol aggregator to make actions in different protocols",
   "version": "2.0.14",
   "license": "MIT",
+  "type": "module",
   "main": "lib/index.js",
   "exports": "./lib/index.esm.js",
   "typings": "lib/index.d.ts",
