@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client/lib'
+import { Network } from '@xchainjs/xchain-client'
 import { CosmosSdkClientParams } from '@xchainjs/xchain-cosmos-sdk'
 import { Asset, AssetType, baseAmount, BaseAmount } from '@xchainjs/xchain-util'
 
