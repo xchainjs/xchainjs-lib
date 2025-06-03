@@ -4,8 +4,10 @@
   "version": "2.0.14",
   "license": "MIT",
   "type": "module",
-  "main": "lib/index.js",
-  "exports": "./lib/index.esm.js",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.esm.js"
+  },
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
