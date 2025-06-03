@@ -1,5 +1,5 @@
 export default {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/lib'],
   testMatch: ['<rootDir>/__e2e__/**/*.[jt]s?(x)'],
