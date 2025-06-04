@@ -1,5 +1,5 @@
 import AppBtc from '@ledgerhq/hw-app-btc'
-import { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
+import type { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
 import * as bitcash from '@psf/bitcoincashjs-lib'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
