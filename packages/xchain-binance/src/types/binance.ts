@@ -1,5 +1,8 @@
-import { Msg, StdSignature } from '@binance-chain/javascript-sdk/lib/types'
-import { BigSource } from 'big.js'
+import type { types } from '@binance-chain/javascript-sdk'
+import type { BigSource } from 'big.js'
+
+type Msg = types.Msg
+type StdSignature = types.StdSignature
 
 /**
  * Address
