@@ -84,7 +84,6 @@ abstract class Client extends UTXOClient {
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
-
   /**
    * Asynchronously get the balance for a DASH address.
    * @param {string} address The DASH address.
