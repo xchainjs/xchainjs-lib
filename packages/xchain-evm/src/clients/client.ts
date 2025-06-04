@@ -28,7 +28,8 @@ import {
   eqAsset,
 } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
-import { toUtf8Bytes } from 'ethers/lib/utils'
+
+const { toUtf8Bytes } = ethers.utils
 
 import erc20ABI from '../data/erc20.json'
 import {
