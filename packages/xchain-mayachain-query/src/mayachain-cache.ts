@@ -1,7 +1,7 @@
 import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
 import { MidgardQuery } from '@xchainjs/xchain-mayamidgard-query'
 import { CachedValue } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 import { InboundDetail } from './types'
 import { MayaChain, Mayanode } from './utils'
