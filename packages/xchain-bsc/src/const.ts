@@ -6,7 +6,7 @@ import { EVMClientParams } from '@xchainjs/xchain-evm' // Importing EVMClientPar
 import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers' // Importing EtherscanProvider from xchain-evm-providers
 import { Asset, AssetType } from '@xchainjs/xchain-util' // Importing Asset from xchain-util
 import { JsonRpcProvider } from 'ethers'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 /**
  * Lower fee bound for BSC transactions.

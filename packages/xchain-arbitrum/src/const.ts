@@ -4,7 +4,7 @@ import { EVMClientParams } from '@xchainjs/xchain-evm'
 import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType, TokenAsset } from '@xchainjs/xchain-util'
 import { JsonRpcProvider } from 'ethers'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 // Define constants related to Arbitrum
 export const ARB_DECIMAL = 18

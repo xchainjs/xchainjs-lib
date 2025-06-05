@@ -27,7 +27,7 @@ import {
   eqAsset,
 } from '@xchainjs/xchain-util'
 import { Provider, Contract, Transaction, toUtf8Bytes, hexlify } from 'ethers'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 import erc20ABI from '../data/erc20.json'
 import {

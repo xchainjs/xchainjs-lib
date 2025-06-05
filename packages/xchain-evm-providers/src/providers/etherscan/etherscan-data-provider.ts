@@ -11,7 +11,7 @@ import {
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import { Contract, Provider } from 'ethers'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 import { Balance, CompatibleAsset, EvmOnlineDataProvider, Tx, TxsPage } from '../../types'
 

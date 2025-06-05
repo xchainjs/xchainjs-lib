@@ -21,7 +21,7 @@ import {
   baseAmount,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { LiquidityPool } from './liquidity-pool'

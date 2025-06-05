@@ -1,6 +1,6 @@
 import { Address, BaseAmount, TokenAsset, baseAmount } from '@xchainjs/xchain-util'
 import { Signer, Contract, Provider, getAddress, InterfaceAbi, BaseContract } from 'ethers'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 import erc20ABI from './data/erc20.json'
 /**
