@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 6b03221: Trunk fixes
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-client@2.0.1
+
 ## 2.0.0
 
 ### Major Changes

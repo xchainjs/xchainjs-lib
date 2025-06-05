@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- 842920f: remove references to defunct eslint-plugin-ordered-imports
+- Updated dependencies [6b03221]
+- Updated dependencies [842920f]
+- Updated dependencies [842920f]
+  - @xchainjs/xchain-mayachain@3.0.1
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-thorchain-query@2.0.2
+  - @xchainjs/xchain-thorchain-amm@3.0.7
+  - @xchainjs/xchain-wallet@2.0.6
+  - @xchainjs/xchain-mayachain-amm@4.0.6
+  - @xchainjs/xchain-mayachain-query@2.0.1
+  - @xchainjs/xchain-thorchain@3.0.5
+
 ## 2.0.6
 
 ### Patch Changes

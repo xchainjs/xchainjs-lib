@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- 842920f: remove references to defunct eslint-plugin-ordered-imports
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-midgard-query@2.0.1
+
 ## 2.0.1
 
 ### Patch Changes

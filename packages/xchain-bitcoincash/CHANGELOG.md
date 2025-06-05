@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- f777312: remove coininfo dependency
+- 6b03221: Trunk fixes
+- Updated dependencies [f777312]
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-utxo@2.0.1
+  - @xchainjs/xchain-utxo-providers@2.0.1
+  - @xchainjs/xchain-client@2.0.1
+
 ## 2.0.0
 
 ### Major Changes
