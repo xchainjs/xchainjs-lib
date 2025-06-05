@@ -1,6 +1,6 @@
 import { Pool } from '@xchainjs/xchain-thornode'
 import { Asset, BaseAmount, TokenAsset, assetFromString, baseAmount } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
+import type BigNumber from 'bignumber.js'
 
 /**
  * Represents a Liquidity Pool in Thorchain

@@ -1,6 +1,6 @@
 import { TxParams as BaseTxParams } from '@xchainjs/xchain-cosmos-sdk'
 import { Asset, TokenAsset } from '@xchainjs/xchain-util'
-import BigNumber from 'bignumber.js'
+import type BigNumber from 'bignumber.js'
 
 export type CompatibleAsset = Asset | TokenAsset
 
