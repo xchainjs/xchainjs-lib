@@ -8,7 +8,7 @@ import {
   eqAsset,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 import { CompatibleAsset, InboundDetail } from '../types'
 import {
