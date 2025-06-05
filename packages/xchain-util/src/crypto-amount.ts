@@ -1,20 +1,7 @@
 import type BigNumber from 'bignumber.js'
 
-import {
-  AnyAsset,
-  Asset,
-  AssetAmount,
-  BaseAmount,
-  SecuredAsset,
-  SynthAsset,
-  TokenAsset,
-  TradeAsset,
-  assetToBase,
-  assetToString,
-  baseToAsset,
-  eqAsset,
-  formatAssetAmountCurrency,
-} from './'
+import type { AnyAsset, Asset, AssetAmount, BaseAmount, SecuredAsset, SynthAsset, TokenAsset, TradeAsset } from './'
+import { assetToBase, assetToString, baseToAsset, eqAsset, formatAssetAmountCurrency } from './'
 
 /**
  * Utility Class to combine an amount (asset/base) with the Asset
