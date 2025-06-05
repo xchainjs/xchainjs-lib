@@ -31,7 +31,7 @@
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^9.1.2",
     "commander": "^9.4.1",
     "weighted": "^1.0.0"
   }
