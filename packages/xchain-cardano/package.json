@@ -9,10 +9,9 @@
   "author": "THORChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
-  "type": "module",
   "exports": {
     "require": "./lib/index.cjs",
-    "import": "./lib/index.esm.js"
+    "import": "./lib/index.mjs"
   },
   "typings": "lib/index.d.ts",
   "directories": {
