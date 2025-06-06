@@ -31,6 +31,7 @@ export default {
   plugins: [
     json(),
     typescript({
+      declarationDir: 'lib',
       exclude: '__tests__/**',
     }),
     resolve({ extensions: ['.js', '.ts'], preferBuiltins: true, browser: true }),

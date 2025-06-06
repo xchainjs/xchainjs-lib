@@ -12,7 +12,6 @@
       "jest",
       "node"
     ],
-    "outDir": "lib",
     "module": "esnext",
     "target": "es6",
     "lib": [

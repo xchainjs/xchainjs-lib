@@ -32,6 +32,7 @@ export default {
     json({}),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
+      declarationDir: 'lib',
       exclude: '__tests__/**',
     }),
     commonjs(),
