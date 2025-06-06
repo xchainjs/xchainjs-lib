@@ -4377,7 +4377,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
-    bignumber.js: "npm:9.0.0"
+    bignumber.js: "npm:^9.1.2"
     bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
@@ -4559,7 +4559,7 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:1.20.0"
     axios-retry: "npm:3.2.5"
-    bignumber.js: "npm:9.0.0"
+    bignumber.js: "npm:^9.1.2"
   languageName: unknown
   linkType: soft
 
@@ -4578,7 +4578,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
-    bignumber.js: "npm:9.0.0"
+    bignumber.js: "npm:^9.1.2"
     bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
@@ -4714,7 +4714,7 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:1.20.0"
     axios-retry: "npm:3.2.5"
-    bignumber.js: "npm:9.0.0"
+    bignumber.js: "npm:^9.1.2"
   languageName: unknown
   linkType: soft
 
@@ -4736,7 +4736,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
-    bignumber.js: "npm:9.0.0"
+    bignumber.js: "npm:^9.1.2"
     bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
@@ -4758,7 +4758,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-util@workspace:packages/xchain-util"
   dependencies:
-    bignumber.js: "npm:9.0.0"
+    bignumber.js: "npm:^9.1.2"
   languageName: unknown
   linkType: soft
 
@@ -5422,20 +5422,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:9.0.0":
-  version: 9.0.0
-  resolution: "bignumber.js@npm:9.0.0"
-  checksum: 10c0/a760979ca822533ad7a437a45bcac66c191554a407092baa4991e068fd4af7344ff52d9e82e0574946c831690de706cf86fbc80775b5ebc6e59c2eef7325172c
-  languageName: node
-  linkType: hard
-
-"bignumber.js@npm:9.0.1":
-  version: 9.0.1
-  resolution: "bignumber.js@npm:9.0.1"
-  checksum: 10c0/1d1aade64dc5d6cf1ebd226ef3030ebdb505d40d74f20e35069150007d1e747c8f746601a3452330ac88105f4288644236d7f4925654777e8511d5ebb9fbf760
-  languageName: node
-  linkType: hard
-
 "bignumber.js@npm:^7.2.1":
   version: 7.2.1
   resolution: "bignumber.js@npm:7.2.1"
@@ -5443,10 +5429,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:^9.0.0, bignumber.js@npm:^9.0.1, bignumber.js@npm:^9.1.2":
-  version: 9.1.2
-  resolution: "bignumber.js@npm:9.1.2"
-  checksum: 10c0/e17786545433f3110b868725c449fa9625366a6e675cd70eb39b60938d6adbd0158cb4b3ad4f306ce817165d37e63f4aa3098ba4110db1d9a3b9f66abfbaf10d
+"bignumber.js@npm:^9.0.1, bignumber.js@npm:^9.1.2":
+  version: 9.3.0
+  resolution: "bignumber.js@npm:9.3.0"
+  checksum: 10c0/f54a79cd6fc98552ac0510c1cd9381650870ae443bdb20ba9b98e3548188d941506ac3c22a9f9c69b2cc60da9be5700e87d3f54d2825310a8b2ae999dfd6d99d
   languageName: node
   linkType: hard
 
@@ -12984,7 +12970,7 @@ __metadata:
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    bignumber.js: "npm:9.0.0"
+    bignumber.js: "npm:^9.1.2"
     commander: "npm:^9.4.1"
     weighted: "npm:^1.0.0"
   languageName: unknown
@@ -13770,7 +13756,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:9.0.1"
+    bignumber.js: "npm:^9.1.2"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"
@@ -13836,7 +13822,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:9.0.1"
+    bignumber.js: "npm:^9.1.2"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"
@@ -13859,7 +13845,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"
@@ -13891,7 +13877,7 @@ __metadata:
     bchaddrjs: "npm:^0.5.2"
     bech32: "npm:^2.0.0"
     bech32-buffer: "npm:^0.2.0"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     bitcoinjs-lib: "npm:5.2.0"
     coinselect: "npm:^3.1.12"
     ethers: "npm:^5.6.6"

@@ -1,6 +1,6 @@
 import { TxHash } from '@xchainjs/xchain-client'
 import { Address, Asset, AssetCryptoAmount, Chain, CryptoAmount, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
+import type BigNumber from 'bignumber.js'
 
 export type CompatibleAsset = Asset | TokenAsset | SynthAsset
 

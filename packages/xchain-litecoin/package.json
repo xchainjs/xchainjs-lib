@@ -29,7 +29,7 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
