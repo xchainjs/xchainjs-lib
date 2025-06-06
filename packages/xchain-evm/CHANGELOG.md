@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- 842920f: add missing TypeScript annotations for functions using bignumber.js
+- Updated dependencies [6b03221]
+- Updated dependencies [842920f]
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-evm-providers@2.0.2
+
 ## 2.0.1
 
 ### Patch Changes
