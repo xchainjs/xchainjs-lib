@@ -2,19 +2,18 @@ import BigNumber from 'bignumber.js'
 
 import { fixedBN, formatBN } from './bn'
 import { trimZeros as trimZerosHelper } from './string'
-import {
+import type {
   Amount,
   AnyAsset,
   Asset,
   AssetAmount,
-  AssetType,
   BaseAmount,
-  Denomination,
   SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
 } from './types'
+import { AssetType, Denomination } from './types'
 
 export type Address = string
 

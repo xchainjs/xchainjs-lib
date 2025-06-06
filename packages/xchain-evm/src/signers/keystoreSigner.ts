@@ -1,8 +1,10 @@
 import { TxHash } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { Wallet, ethers } from 'ethers'
-import { HDNode } from 'ethers/lib/utils'
+import { Wallet, ethers, utils } from 'ethers'
+
+type HDNode = utils.HDNode
+const HDNode = utils.HDNode
 
 import { IKeystoreSigner, SignApproveParams, SignTransferParams } from '../types'
 
