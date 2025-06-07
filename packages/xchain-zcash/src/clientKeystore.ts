@@ -100,22 +100,22 @@ class ClientKeystore extends Client {
 
     // Determine network name for TransactionBuilder
     const networkName = this.network === Network.Mainnet ? 'mainnet' : 'testnet'
-    
+
     // Get the current block height for proper transaction version determination
     const providerNetwork = this.dataProviders[0][this.network]
     if (!providerNetwork) throw new Error('No data provider available')
-    
+
     // Get current block height by checking the latest transaction for this address
     // or use the highest block height from available UTXOs
     let blockHeight = 500000 // Fallback to a post-Overwinter height
-    
+
     try {
       // Try to get recent transactions to determine current block height
-      const recentTxs = await providerNetwork.getTransactions({ 
-        address: sender, 
-        limit: 1 
+      const recentTxs = await providerNetwork.getTransactions({
+        address: sender,
+        limit: 1,
       })
-      
+
       if (recentTxs.txs.length > 0) {
         // Use blockTime to estimate current height
         // Zcash has ~2.5 minute block times (150 seconds)
@@ -123,13 +123,15 @@ class ClientKeystore extends Client {
         const txTimestamp = latestTx.date.getTime() / 1000
         const currentTimestamp = Date.now() / 1000
         const blocksSinceLatestTx = Math.floor((currentTimestamp - txTimestamp) / 150)
-        
+
         // Get block height from UTXO data if available, or estimate
-        const utxoHeights = utxos.map(() => {
-          // UTXOs don't have height in this format, return 0
-          return 0
-        }).filter(h => h > 0)
-        
+        const utxoHeights = utxos
+          .map(() => {
+            // UTXOs don't have height in this format, return 0
+            return 0
+          })
+          .filter((h) => h > 0)
+
         if (utxoHeights.length > 0) {
           blockHeight = Math.max(...utxoHeights) + blocksSinceLatestTx
         } else {
@@ -163,15 +165,14 @@ class ClientKeystore extends Client {
     // Create a transaction builder and use it similar to Bitcoin's PSBT
     // TransactionBuilder accepts any format and normalizes internally
     const builder = new ZcashLib.TransactionBuilder(networkName)
-    
+
     // Build the transaction
     const buildResult = builder
       .selectUTXOs(zcashUtxos, 'all') // Use all available UTXOs for automatic selection
       .addOutput(params.recipient, params.amount.amount().toNumber(), params.memo)
       .setChangeAddress(sender)
       .build(blockHeight, pubkey)
-      
-      
+
     // Check fee bounds
     checkFeeBounds(this.feeBounds, buildResult.fee)
 

@@ -122,7 +122,9 @@ abstract class Client extends UTXOClient {
   }: TxParams & {
     sender: Address
     spendPendingUTXO?: boolean
-  }): Promise<PreparedTx & { builder: ZcashLib.TransactionBuilder; buildResult: any; pubkey: Buffer }> {
+  }): Promise<
+    PreparedTx & { builder: ZcashLib.TransactionBuilder; buildResult: ZcashLib.BuildResult; pubkey: Buffer }
+  > {
     if (!this.validateAddress(recipient)) throw new Error('Invalid recipient address')
     if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
 
@@ -133,16 +135,16 @@ abstract class Client extends UTXOClient {
 
     // Get current block height for proper transaction version determination
     let blockHeight = 500000 // Fallback to a post-Overwinter height
-    
+
     const providerNetwork = this.dataProviders[0][this.network]
     if (providerNetwork) {
       try {
         // Try to get recent transactions to determine current block height
-        const recentTxs = await providerNetwork.getTransactions({ 
-          address: sender, 
-          limit: 1 
+        const recentTxs = await providerNetwork.getTransactions({
+          address: sender,
+          limit: 1,
         })
-        
+
         if (recentTxs.txs.length > 0) {
           // Conservative estimate: use a recent mainnet height
           // As of Jan 2025, Zcash mainnet is around block 2,900,000
