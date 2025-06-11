@@ -18,43 +18,43 @@ repo:
 # Required runtimes for linting and security tools
 runtimes:
   enabled:
-    - node@20.14.0      # Match .nvmrc - Required for JS/TS linters like ESLint and Prettier
-    - python@3.10.8     # Required for Python-based tools like Checkov and Trufflehog
+    - node@20.14.0 # Match .nvmrc - Required for JS/TS linters like ESLint and Prettier
+    - python@3.10.8 # Required for Python-based tools like Checkov and Trufflehog
 
 lint:
   enabled:
     # 🧹 General Code Quality & Formatting
-     # JS/TS linting
+    # JS/TS linting
     - eslint@8.57.0:
         use_project_eslint: true
         config: .eslintrc
-    - prettier@2.8.8:            # Code formatting
+    - prettier@2.8.8: # Code formatting
         config: .prettierrc
     #- codespell@2.4.1           # Spell-checking
-    - markdownlint@0.44.0        # Markdown formatting
-    - yamllint@1.37.0            # YAML formatting
-    - shfmt@3.6.0                # Shell script formatting
+    - markdownlint@0.44.0 # Markdown formatting
+    - yamllint@1.37.0 # YAML formatting
+    - shfmt@3.6.0 # Shell script formatting
 
     # 🔐 Security
-    - checkov@3.2.413            # IaC (Terraform, etc.) security scanning
-    #- osv-scanner@2.0.2          # Vulnerability scanning of open source packages
+    - checkov@3.2.413 # IaC (Terraform, etc.) security scanning
+    - osv-scanner@2.0.2 # Vulnerability scanning of open source packages
     #- trufflehog@3.88.26         # Secrets detection in code and history
 
     # 📦 Project Hygiene
-    - git-diff-check             # Restrict checks to only changed files
+    - git-diff-check # Restrict checks to only changed files
 
     # 🔧 CI/CD
     # - actionlint@1.7.7           # Linting for GitHub Actions workflows
 
   files:
-      - name: typescript
-        extensions: [ts]
-      - name: markdown
-        extensions: [md]
-      - name: yaml
-        extensions: [yml, yaml]
-      - name: shell
-        extensions: [sh]
+    - name: typescript
+      extensions: [ts]
+    - name: markdown
+      extensions: [md]
+    - name: yaml
+      extensions: [yml, yaml]
+    - name: shell
+      extensions: [sh]
 
   definitions:
     - name: eslint
@@ -75,7 +75,7 @@ lint:
 
     - name: codespell
       commands:
-         - run: codespell --uri-ignore-words-list=* --ignore-words-list=liquify,afterAll
+        - run: codespell --uri-ignore-words-list=* --ignore-words-list=liquify,afterAll
 
   ignore:
     - linters: [ALL]
@@ -103,7 +103,7 @@ lint:
         - '**/README.md'
         - '**/CHANGELOG.md'
         - '**/spec.md'
-        - .changeset/few-dogs-nail.md
+        - .changeset/**
         - examples/frameworks/next.js-example/*
 
 actions:

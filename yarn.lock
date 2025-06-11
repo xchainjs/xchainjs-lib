@@ -4380,7 +4380,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
   languageName: unknown
   linkType: soft
 
@@ -4436,7 +4436,7 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     bip32: "npm:4.0.0"
     bitcoinjs-lib: "npm:6.1.6"
     coinselect: "npm:3.1.12"
@@ -4458,7 +4458,7 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     bchaddrjs: "npm:0.5.2"
     coinselect: "npm:3.1.12"
   languageName: unknown
@@ -4578,7 +4578,7 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     bitcoinjs-lib: "npm:5.2.0"
     coinselect: "npm:3.1.12"
   languageName: unknown
@@ -4596,7 +4596,7 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     bitcoinjs-lib: "npm:5.2.0"
     coinselect: "npm:3.1.12"
   languageName: unknown
@@ -4639,8 +4639,8 @@ __metadata:
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
+    axios-mock-adapter: "npm:2.1.0"
     ethers: "npm:5.7.2"
-    nock: "npm:13.0.5"
   languageName: unknown
   linkType: soft
 
@@ -4676,7 +4676,7 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     bitcoinjs-lib: "npm:5.2.0"
     coinselect: "npm:3.1.12"
   languageName: unknown
@@ -4702,7 +4702,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     ethers: "npm:5.7.2"
   languageName: unknown
   linkType: soft
@@ -4717,7 +4717,7 @@ __metadata:
     "@xchainjs/xchain-mayanode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
     bignumber.js: "npm:9.0.0"
   languageName: unknown
@@ -4754,7 +4754,7 @@ __metadata:
     "@xchainjs/xchain-mayamidgard": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
   languageName: unknown
   linkType: soft
@@ -4787,7 +4787,7 @@ __metadata:
     "@xchainjs/xchain-midgard": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
     dotenv: "npm:16.0.0"
   languageName: unknown
@@ -4858,7 +4858,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     ethers: "npm:5.7.2"
   languageName: unknown
   linkType: soft
@@ -4872,7 +4872,7 @@ __metadata:
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
     bignumber.js: "npm:9.0.0"
   languageName: unknown
@@ -4930,7 +4930,7 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    axios-mock-adapter: "npm:1.20.0"
+    axios-mock-adapter: "npm:2.1.0"
   languageName: unknown
   linkType: soft
 
@@ -5298,20 +5298,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-mock-adapter@npm:1.20.0":
-  version: 1.20.0
-  resolution: "axios-mock-adapter@npm:1.20.0"
-  dependencies:
-    fast-deep-equal: "npm:^3.1.3"
-    is-blob: "npm:^2.1.0"
-    is-buffer: "npm:^2.0.5"
-  peerDependencies:
-    axios: ">= 0.9.0"
-  checksum: 10c0/fa037222d02fec61bda1ff2577572b16e2f29a2e2e945698d59c6e993358135b98801473f60308e3dfddf77df0e381ddc84445ceeff81a6e1c013cb313a2eb89
-  languageName: node
-  linkType: hard
-
-"axios-mock-adapter@npm:^2.1.0":
+"axios-mock-adapter@npm:2.1.0, axios-mock-adapter@npm:^2.1.0":
   version: 2.1.0
   resolution: "axios-mock-adapter@npm:2.1.0"
   dependencies:
@@ -8806,13 +8793,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-blob@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "is-blob@npm:2.1.0"
-  checksum: 10c0/324eb4dc16a359acf14c56c0f65a031c9ddb6ec8ca651894783abe3f3252688facd9e02edeb756eddca0c8ddb5b1efd0af97ea7d3c7b8567fc29fa75f9b1a159
-  languageName: node
-  linkType: hard
-
 "is-boolean-object@npm:^1.1.0":
   version: 1.1.2
   resolution: "is-boolean-object@npm:1.1.2"
@@ -10064,13 +10044,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.set@npm:^4.3.2":
-  version: 4.3.2
-  resolution: "lodash.set@npm:4.3.2"
-  checksum: 10c0/c641d31905e51df43170dce8a1d11a1cff11356e2e2e75fe2615995408e9687d58c3e1d64c3c284c2df2bc519f79a98af737d2944d382ff82ffd244ff6075c29
-  languageName: node
-  linkType: hard
-
 "lodash.startcase@npm:^4.4.0":
   version: 4.4.0
   resolution: "lodash.startcase@npm:4.4.0"
@@ -10629,18 +10602,6 @@ __metadata:
     lower-case: "npm:^2.0.2"
     tslib: "npm:^2.0.3"
   checksum: 10c0/8ef545f0b3f8677c848f86ecbd42ca0ff3cd9dd71c158527b344c69ba14710d816d8489c746b6ca225e7b615108938a0bda0a54706f8c255933703ac1cf8e703
-  languageName: node
-  linkType: hard
-
-"nock@npm:13.0.5":
-  version: 13.0.5
-  resolution: "nock@npm:13.0.5"
-  dependencies:
-    debug: "npm:^4.1.0"
-    json-stringify-safe: "npm:^5.0.1"
-    lodash.set: "npm:^4.3.2"
-    propagate: "npm:^2.0.0"
-  checksum: 10c0/9845aab638ef97c0d84d3326920d07aafb491b7febc6c08f257fe01e53225a41854624013db8211d7817c2526041ae50d729ba3775c7af2ffc7a5f50b736e09e
   languageName: node
   linkType: hard
 
@@ -11413,13 +11374,6 @@ __metadata:
     kleur: "npm:^3.0.3"
     sisteransi: "npm:^1.0.5"
   checksum: 10c0/16f1ac2977b19fe2cf53f8411cc98db7a3c8b115c479b2ca5c82b5527cd937aa405fa04f9a5960abeb9daef53191b53b4d13e35c1f5d50e8718c76917c5f1ea4
-  languageName: node
-  linkType: hard
-
-"propagate@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "propagate@npm:2.0.1"
-  checksum: 10c0/01e1023b60ae4050d1a2783f976d7db702022dbdb70dba797cceedad8cfc01b3939c41e77032f8c32aa9d93192fe937ebba1345e8604e5ce61fd3b62ee3003b8
   languageName: node
   linkType: hard
 

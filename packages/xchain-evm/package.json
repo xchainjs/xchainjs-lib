@@ -47,6 +47,6 @@
     "@ledgerhq/hw-transport": "6.31.6",
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
     "axios": "1.8.4",
-    "nock": "13.0.5"
+    "axios-mock-adapter": "2.1.0"
   }
 }

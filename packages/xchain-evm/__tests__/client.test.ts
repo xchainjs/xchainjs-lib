@@ -2,8 +2,9 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType, Chain } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
-import nock from 'nock'
 
+import mock from '../__mocks__/axios-adapter'
+import { mock_gas_oracle_custom } from '../__mocks__/etherscan-api'
 import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
 import { Client, EVMKeystoreClientParams, KeystoreSigner } from '../src'
 
@@ -125,13 +126,25 @@ const avaxParams: EVMKeystoreClientParams = {
     derivationPath: ethRootDerivationPaths[Network.Testnet],
   }),
 }
+
+const setupCleanMocks = () => {
+  mock.reset()
+  mock.resetHistory()
+}
+
 /**
  * Wallet Tests
  */
 describe('EVM client', () => {
   let avaxClient: Client
+
+  beforeAll(() => {
+    setupCleanMocks()
+  })
+
   beforeEach(() => {
-    nock.disableNetConnect()
+    setupCleanMocks()
+
     avaxClient = new Client({
       ...avaxParams,
       signer: new KeystoreSigner({
@@ -143,7 +156,11 @@ describe('EVM client', () => {
   })
 
   afterEach(() => {
-    nock.cleanAll()
+    setupCleanMocks()
+  })
+
+  afterAll(() => {
+    mock.restore()
   })
 
   it('Should throw error with invalid phrase', () => {
@@ -231,6 +248,12 @@ describe('EVM client', () => {
       thornodeApiUrl,
       require('../__mocks__/responses/inbound_addresses_testnet.json'),
     )
+
+    mock_gas_oracle_custom('https://api-testnet.snowtrace.io', 43113, {
+      SafeGasPrice: '12.5',
+      ProposeGasPrice: '25',
+      FastGasPrice: '125',
+    })
 
     const { fast, fastest, average } = await avaxClient.estimateGasPrices()
 
