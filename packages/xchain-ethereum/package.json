@@ -36,7 +36,7 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@ledgerhq/hw-transport": "6.31.4",
+    "@ledgerhq/hw-transport": "6.31.6",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",

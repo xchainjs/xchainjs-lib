@@ -44,7 +44,7 @@
     "ethers": "5.7.2"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport": "6.31.4",
+    "@ledgerhq/hw-transport": "6.31.6",
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
     "axios": "1.8.4",
     "nock": "13.0.5"

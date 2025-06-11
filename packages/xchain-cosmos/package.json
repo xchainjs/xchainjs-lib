@@ -38,7 +38,7 @@
     "@cosmjs/proto-signing": "0.33.1",
     "@cosmjs/stargate": "0.33.1",
     "@ledgerhq/hw-app-cosmos": "6.32.0",
-    "@ledgerhq/hw-transport": "6.31.4",
+    "@ledgerhq/hw-transport": "6.31.6",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
