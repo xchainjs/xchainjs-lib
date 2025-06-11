@@ -37,7 +37,7 @@
     "@metaplex-foundation/umi-bundle-defaults": "0.9.2",
     "@solana/addresses": "2.0.0",
     "@solana/spl-token": "0.4.8",
-    "@solana/web3.js": "1.95.2",
+    "@solana/web3.js": "^1.98.2",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",

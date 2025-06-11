@@ -37,11 +37,12 @@
   },
   "resolutions": {
     "crypto-js": "4.2.0",
-    "socks": "2.7.3"
+    "socks": "2.7.3",
+    "unrs-resolver": "1.7.0"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
-    "@changesets/cli": "2.27.1",
+    "@changesets/cli": "^2.29.4",
     "@ledgerhq/types-cryptoassets": "7.23.0",
     "@ledgerhq/types-devices": "6.25.3",
     "@rollup/plugin-commonjs": "28.0.0",
