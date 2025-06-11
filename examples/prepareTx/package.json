@@ -11,6 +11,8 @@
   "author": "GRC",
   "license": "MIT",
   "dependencies": {
+    "@ledgerhq/types-cryptoassets": "^7.23.0",
+    "@ledgerhq/types-devices": "^6.25.3",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",

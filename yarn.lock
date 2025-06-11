@@ -2379,14 +2379,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/types-cryptoassets@npm:7.23.0":
+"@ledgerhq/types-cryptoassets@npm:^7.23.0":
   version: 7.23.0
   resolution: "@ledgerhq/types-cryptoassets@npm:7.23.0"
   checksum: 10c0/47a0d6cc0647a74adc905884e8e4ae4e0c4c627b382b5c15e05cd4fcaedbc9b078b8ba107c00ef328720fc0b2586013e0469c76f70ee4ee8c50fb4521fc8b35d
   languageName: node
   linkType: hard
 
-"@ledgerhq/types-devices@npm:6.25.3":
+"@ledgerhq/types-devices@npm:^6.25.3":
   version: 6.25.3
   resolution: "@ledgerhq/types-devices@npm:6.25.3"
   checksum: 10c0/bbddd449f2f8ed5b1c983fd9ea6d90eb8181ba5699eea8dababa5f1e9d4a804af527c9526e50437be230a1daded86562eb4ade1aa2493246cda3e520b32f9ac3
@@ -4386,6 +4386,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-bitcoin@workspace:packages/xchain-bitcoin"
   dependencies:
+    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
     "@ledgerhq/hw-app-btc": "npm:10.9.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
@@ -11507,8 +11508,6 @@ __metadata:
   dependencies:
     "@actions/core": "npm:1.10.0"
     "@changesets/cli": "npm:^2.29.4"
-    "@ledgerhq/types-cryptoassets": "npm:7.23.0"
-    "@ledgerhq/types-devices": "npm:6.25.3"
     "@rollup/plugin-commonjs": "npm:28.0.0"
     "@rollup/plugin-json": "npm:6.1.0"
     "@rollup/plugin-node-resolve": "npm:15.3.0"
@@ -13406,6 +13405,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-prepare-tx@workspace:examples/prepareTx"
   dependencies:
+    "@ledgerhq/types-cryptoassets": "npm:^7.23.0"
+    "@ledgerhq/types-devices": "npm:^6.25.3"
     "@types/node": "npm:20.11.28"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"

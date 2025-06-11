@@ -1,4 +1,3 @@
-import cosmosclient from '@cosmos-client/core'
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
@@ -28,7 +27,6 @@ import {
 import { Wallet } from '@xchainjs/xchain-wallet'
 import axios from 'axios'
 
-register9Rheader(cosmosclient.config.globalAxios)
 register9Rheader(axios)
 
 /**
