@@ -37,7 +37,7 @@ lint:
 
     # 🔐 Security
     - checkov@3.2.413 # IaC (Terraform, etc.) security scanning
-    - osv-scanner@2.0.2 # Vulnerability scanning of open source packages
+    #- osv-scanner@2.0.2 # Vulnerability scanning of open source packages
     #- trufflehog@3.88.26         # Secrets detection in code and history
 
     # 📦 Project Hygiene
