@@ -36,9 +36,12 @@
     }
   },
   "resolutions": {
-    "crypto-js": "4.2.0",
-    "socks": "2.7.3",
-    "unrs-resolver": "1.7.0"
+    "unrs-resolver": "1.7.0",
+    "braces": "3.0.3",
+    "cross-spawn": "7.0.5",
+    "micromatch": "4.0.8",
+    "word-wrap": "1.2.4",
+    "undici": "5.29.0"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",

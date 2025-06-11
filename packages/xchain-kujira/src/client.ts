@@ -16,7 +16,7 @@ import { encode, toWords } from 'bech32'
 import { fromSeed } from 'bip32'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { createHash } from 'crypto'
-import { publicKeyCreate } from 'secp256k1'
+import * as secp from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 import { AssetKUJI, AssetUSK, KUJI_DECIMAL, MSG_SEND_TYPE_URL, USK_ASSET_DENOM, USK_DECIMAL } from './const'
 import { CompatibleAsset, TxParams } from './types'
@@ -61,7 +61,8 @@ export class Client extends CosmosSdkClient {
     if (!child.privateKey) throw new Error('child does not have a privateKey')
 
     // TODO: Make this method async and use CosmosJS official address generation strategy
-    const pubKey = publicKeyCreate(child.privateKey)
+    const pubKey = secp.pointFromScalar(child.privateKey, true)
+    if (!pubKey) throw new Error('pubKey is null')
     const rawAddress = this.hash160(Uint8Array.from(pubKey))
     const words = toWords(Buffer.from(rawAddress))
     const address = encode(this.prefix, words)

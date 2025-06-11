@@ -30,7 +30,7 @@ import { Address, AssetType, TokenAsset, baseAmount, eqAsset } from '@xchainjs/x
 import { bech32m } from 'bech32'
 import BIP32Factory, { BIP32Interface } from 'bip32'
 import { derivePath } from 'ed25519-hd-key'
-import * as ecc from 'tiny-secp256k1'
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 import {
   AssetXRD,
