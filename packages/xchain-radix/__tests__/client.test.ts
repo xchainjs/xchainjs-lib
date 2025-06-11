@@ -60,7 +60,7 @@ describe('RadixClient Test', () => {
       network: Network.Mainnet,
       phrase: phrase,
     }
-    expect(() => new Client(params)).toThrowError('Invalid phrase')
+    await expect(() => new Client(params)).toThrow(/Invalid phrase/)
   })
 
   it('client should be able to get address', async () => {
@@ -80,10 +80,10 @@ describe('RadixClient Test', () => {
     expect(address).toBe('account_rdx16xmah09yu9p9ynrmuc8z3a206n02tsmmkdvlmnx3cgu4s9r59wsxt2')
   })
 
-  it('client should throw an Error when using getAddress', () => {
+  it('client should throw an Error when using getAddress', async () => {
     const client = createClient()
-    expect(() => client.getAddress()).toThrowError(
-      'getAddress is synchronous and cannot retrieve addresses directly. Use getAddressAsync instead.',
+    await expect(() => client.getAddress()).toThrow(
+      /getAddress is synchronous and cannot retrieve addresses directly. Use getAddressAsync instead./,
     )
   })
 
@@ -365,7 +365,7 @@ describe('RadixClient Test', () => {
       memo: 'test',
     }
     await client.transfer(txParams)
-    expect(broadcastTxMock).toBeCalledTimes(1)
+    expect(broadcastTxMock).toHaveBeenCalledTimes(1)
   })
 
   it('client should be able broadcast tx', async () => {
@@ -375,7 +375,7 @@ describe('RadixClient Test', () => {
     const transactionHex =
       '4d22030221022104210707020a7b000000000000000a850000000000000009a92f3af1220101200720f926e5d67daa984375a86abbb305abc350c7dadba11d348c1cf4db27640c8d4e0101080000202203410380005155d545fc40d2d01750b5d055631ddc6fa6b1f6779fec707b167ef695580c156c6f636b5f6665655f616e645f7769746864726177210385c48edb420206cc050000000000000000000000000000000080005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c685000064a7b3b6e00d00000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c685000064a7b3b6e00d0000000000000000000000000000000041038000515d2ea24237d6d7e3e3882a2f5c0175318f3b372ac70ae4b68892e0065a0c147472795f6465706f7369745f6f725f61626f72742102810000000022000020200022010121020c0a746578742f706c61696e2200010c04746573742022002201012101200740b2f028fb4e2e130a9480d253a7709839980a7ed5e91394825115795d3f5b688e9472521295f90ae840e64bb82b9d086d9127bf2e53be55f0ee13775148defb09'
     await client.broadcastTx(transactionHex)
-    expect(client.radixClient.gatewayClient.transaction.innerClient.transactionSubmit).toBeCalledTimes(1)
+    expect(client.radixClient.gatewayClient.transaction.innerClient.transactionSubmit).toHaveBeenCalledTimes(1)
   })
 
   it('client should be able prepare a tx without mocking', async () => {

@@ -49,7 +49,7 @@ describe('Wallet', () => {
   it('Should not get chain address of unknown client', async () => {
     await expect(async () => {
       await wallet.getAddress('BTC')
-    }).rejects.toThrowError(`Client not found for BTC chain`)
+    }).rejects.toThrow(/Client not found for BTC chain/)
   })
 
   it('Should get chain balance', async () => {
@@ -110,7 +110,7 @@ describe('Wallet', () => {
   it('Should not get chain balance of unknown client', async () => {
     expect(async () => {
       await wallet.getBalance('BTC')
-    }).rejects.toThrowError('Client not found for BTC chain')
+    }).rejects.toThrow(/Client not found for BTC chain/)
   })
 
   it('Should get transaction data', async () => {
@@ -143,7 +143,7 @@ describe('Wallet', () => {
   it('Should not get transaction data of unknown client', async () => {
     expect(async () => {
       await wallet.getTransactionData('BTC', '0eb1fd7d2ab247b2c3f6d79e9b48a71496a117c9bbaa5732636a2d46e72586e7')
-    }).rejects.toThrowError('Client not found for BTC chain')
+    }).rejects.toThrow(/Client not found for BTC chain/)
   })
 
   it('Should get chain history', async () => {
@@ -244,7 +244,7 @@ describe('Wallet', () => {
   it('Should not get chain history of unknown client', async () => {
     expect(async () => {
       await wallet.getBalance('BTC')
-    }).rejects.toThrowError('Client not found for BTC chain')
+    }).rejects.toThrow(/Client not found for BTC chain/)
   })
 
   it('Should estimate Utxo transfer', async () => {

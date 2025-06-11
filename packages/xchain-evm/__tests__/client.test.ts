@@ -163,8 +163,8 @@ describe('EVM client', () => {
     mock.restore()
   })
 
-  it('Should throw error with invalid phrase', () => {
-    expect(() => {
+  it('Should throw error with invalid phrase', async () => {
+    await expect(() => {
       new Client({
         ...avaxParams,
         signer: new KeystoreSigner({
@@ -173,7 +173,7 @@ describe('EVM client', () => {
           derivationPath: ethRootDerivationPaths[Network.Testnet],
         }),
       })
-    }).toThrowError()
+    }).toThrow()
   })
 
   it('Should not throw error on a client without a phrase', () => {
@@ -183,9 +183,9 @@ describe('EVM client', () => {
     }).not.toThrow()
   })
 
-  it('Should not have a phrase after purging', () => {
+  it('Should not have a phrase after purging', async () => {
     avaxClient.purgeClient()
-    expect(() => avaxClient.getAddress()).toThrowError()
+    await expect(() => avaxClient.getAddress()).toThrow()
   })
 
   it('Should set new phrase', () => {
@@ -194,8 +194,8 @@ describe('EVM client', () => {
     expect(newAddress).toBe('0xd7aa2e8903782e02f3cee4fa3f317f5bcfd62a4d')
   })
 
-  it('should fail to set new phrase', () => {
-    expect(() => avaxClient.setPhrase('bad bad phrase')).toThrowError()
+  it('should fail to set new phrase', async () => {
+    await expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
   })
 
   it('Should connect to specified network', async () => {
