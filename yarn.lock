@@ -3254,6 +3254,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@scure/base@npm:^1.1.1":
+  version: 1.2.6
+  resolution: "@scure/base@npm:1.2.6"
+  checksum: 10c0/49bd5293371c4e062cb6ba689c8fe3ea3981b7bb9c000400dc4eafa29f56814cdcdd27c04311c2fec34de26bc373c593a1d6ca6d754398a488d587943b7c128a
+  languageName: node
+  linkType: hard
+
 "@sinclair/typebox@npm:^0.25.16":
   version: 0.25.24
   resolution: "@sinclair/typebox@npm:0.25.24"
@@ -4758,6 +4765,7 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     bech32: "npm:^2.0.0"
+    bip32: "npm:^4.0.0"
     bip39: "npm:^3.1.0"
     ed25519-hd-key: "npm:^1.3.0"
   languageName: unknown
@@ -5542,6 +5550,18 @@ __metadata:
     typeforce: "npm:^1.11.5"
     wif: "npm:^2.0.6"
   checksum: 10c0/65005eec40786767842665d68ba37e9be789570516256b7419dad9cc1160a7bb0a5db51cc441ff57d10461506ae150c2dfcfb22e83076a3d566fbbd7420006c6
+  languageName: node
+  linkType: hard
+
+"bip32@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "bip32@npm:4.0.0"
+  dependencies:
+    "@noble/hashes": "npm:^1.2.0"
+    "@scure/base": "npm:^1.1.1"
+    typeforce: "npm:^1.11.5"
+    wif: "npm:^2.0.6"
+  checksum: 10c0/b74ffd3a96b42a783eca6455dff8f0decc8360025b69d486d5a047b52cca6e8436bc5a9812cbeae2638a50f35da7fcd85b55cfe58272f55a5b31d7ac40a25522
   languageName: node
   linkType: hard
 
