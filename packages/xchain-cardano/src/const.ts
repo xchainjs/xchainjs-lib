@@ -13,6 +13,9 @@ export const ADAChain = 'ADA' as const
  */
 export const ADA_DECIMALS = 6
 
+export const LOWER_FEE_BOUND = 150_000
+export const UPPER_FEE_BOUND = 3_000_000
+
 /**
  * Cardano native asset
  */

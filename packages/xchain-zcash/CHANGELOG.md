@@ -1,5 +1,16 @@
 # @xchainjs/xchain-zcash
 
+## 1.0.1
+
+### Patch Changes
+
+- 842920f: add missing TypeScript annotations for functions using bignumber.js
+- Updated dependencies [f777312]
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-utxo@2.0.1
+  - @xchainjs/xchain-utxo-providers@2.0.1
+  - @xchainjs/xchain-client@2.0.1
+
 ## 1.0.0
 
 ### Major Changes
