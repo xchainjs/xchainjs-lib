@@ -4935,7 +4935,7 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios-mock-adapter: "npm:^2.1.0"
-    bip32: "npm:^5.0.0-rc"
+    bip32: "npm:^5.0.0-rc.0"
     ecpair: "npm:^3.0.0"
   languageName: unknown
   linkType: soft
@@ -5573,7 +5573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip32@npm:^5.0.0-rc":
+"bip32@npm:^5.0.0-rc.0":
   version: 5.0.0-rc.0
   resolution: "bip32@npm:5.0.0-rc.0"
   dependencies:

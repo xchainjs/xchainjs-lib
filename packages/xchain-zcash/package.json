@@ -40,7 +40,7 @@
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
-    "bip32": "^5.0.0-rc",
+    "bip32": "^5.0.0-rc.0",
     "ecpair": "^3.0.0"
   },
   "publishConfig": {
