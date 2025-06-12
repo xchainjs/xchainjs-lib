@@ -1,0 +1,50 @@
+{
+  "name": "@xchainjs/xchain-ripple",
+  "version": "0.0.1",
+  "description": "Custom Ripple client and utilities used by XChainJS clients",
+  "keywords": [
+    "XChain",
+    "Ripple"
+  ],
+  "author": "XChainJS",
+  "homepage": "https://github.com/xchainjs/xchainjs-lib",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo && rm -rf lib",
+    "build": "yarn clean && rollup -c --bundleConfigAsCjs",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
+    "test": "jest",
+    "e2e": "jest --config jest.config.e2e.js",
+    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "postversion": "git push --follow-tags"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-app-xrp": "^6.31.2",
+    "@ledgerhq/hw-transport": "^6.31.6",
+    "@xchainjs/xchain-client": "workspace:^",
+    "@xchainjs/xchain-crypto": "workspace:*",
+    "@xchainjs/xchain-util": "workspace:^",
+    "xrpl": "^4.3.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "release/package"
+  },
+  "devDependencies": {
+    "axios-mock-adapter": "^2.1.0"
+  }
+}
