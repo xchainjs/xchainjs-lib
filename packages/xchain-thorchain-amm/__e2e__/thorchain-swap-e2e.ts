@@ -7,7 +7,6 @@ import {
   defaultAvaxParams,
 } from '@xchainjs/xchain-avax'
 import { AssetBETH, Client as BaseClient, defaultBaseParams } from '@xchainjs/xchain-base'
-import { AssetBNB, BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import {
   AssetBTC,
   BTCChain,
@@ -16,7 +15,7 @@ import {
   defaultBTCParams as defaultBtcParams,
 } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
-import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { AssetBSC, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM, Client as GaiaClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
@@ -106,7 +105,6 @@ describe('ThorchainAmm e2e tests', () => {
         AVAX: new AvaxClientKeystore({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
         BSC: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
         GAIA: new GaiaClient({ phrase, network: Network.Mainnet }),
-        BNB: new BnbClient({ phrase, network: Network.Mainnet }),
         THOR: new THORKeystoreClient({ ...defaultThorParams, phrase, network: Network.Mainnet }),
         BASE: new BaseClient({ ...defaultBaseParams, phrase, network: Network.Mainnet }),
       })
@@ -276,9 +274,9 @@ describe('ThorchainAmm e2e tests', () => {
     it('Should do non protocol asset swap. ATOM -> BNB', async () => {
       const txSubmitted = await thorchainAmm.doSwap({
         fromAsset: AssetATOM,
-        destinationAsset: AssetBNB,
+        destinationAsset: AssetBSC,
         amount: new CryptoAmount(assetToBase(assetAmount(0.55, 6)), AssetATOM),
-        destinationAddress: await wallet.getAddress(AssetBNB.chain),
+        destinationAddress: await wallet.getAddress(AssetBSC.chain),
       })
 
       console.log(txSubmitted)
@@ -299,7 +297,7 @@ describe('ThorchainAmm e2e tests', () => {
       const txSubmitted = await thorchainAmm.doSwap({
         fromAsset: assetFromStringEx('BNB/BNB'),
         amount: new CryptoAmount(assetToBase(assetAmount('1')), assetFromStringEx('BNB/BNB')),
-        destinationAddress: await wallet.getAddress(BNBChain),
+        destinationAddress: await wallet.getAddress(AssetBSC.chain),
         destinationAsset: assetFromStringEx('BNB.BNB'),
       })
 

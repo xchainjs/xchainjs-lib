@@ -68,7 +68,7 @@ describe('Mayachain protocol', () => {
       address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',
     })
 
-    expect(mockIsRouterApprovedToSpend).toBeCalledWith({
+    expect(mockIsRouterApprovedToSpend).toHaveBeenCalledWith({
       asset,
       amount,
       address: '0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97',

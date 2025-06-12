@@ -6,7 +6,7 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import { encode, toWords } from 'bech32'
 import { fromSeed } from 'bip32'
 import { createHash } from 'crypto'
-import { publicKeyCreate } from 'secp256k1'
+import * as secp from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 import { Client, CosmosClientParams } from './client'
 import { defaultClientConfig } from './const'
@@ -38,8 +38,9 @@ export class ClientKeystore extends Client {
     if (!child.privateKey) throw new Error('child does not have a privateKey')
 
     // TODO: Make this method async and use CosmosJS official address generation strategy
-    const pubKey = publicKeyCreate(child.privateKey)
-    const rawAddress = this.hash160(Uint8Array.from(pubKey))
+    const pubKey = secp.pointFromScalar(child.privateKey, true)
+    if (!pubKey) throw new Error('pubKey is null')
+    const rawAddress = this.hash160(pubKey)
     const words = toWords(Buffer.from(rawAddress))
     const address = encode(this.prefix, words)
     return address

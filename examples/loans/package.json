@@ -38,8 +38,6 @@
     "wif": "^2.0.6"
   },
   "devDependencies": {
-    "@binance-chain/javascript-sdk": "^4.2.0",
-    "@cosmos-client/core": "^0.46.1",
     "@types/node": "20.11.28",
     "ts-node": "10.9.2",
     "typescript": "^5.0.4"

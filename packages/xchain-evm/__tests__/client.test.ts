@@ -2,8 +2,9 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType, Chain } from '@xchainjs/xchain-util'
 import { BigNumber, ethers } from 'ethers'
-import nock from 'nock'
 
+import mock from '../__mocks__/axios-adapter'
+import { mock_gas_oracle_custom } from '../__mocks__/etherscan-api'
 import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
 import { Client, EVMKeystoreClientParams, KeystoreSigner } from '../src'
 
@@ -125,13 +126,25 @@ const avaxParams: EVMKeystoreClientParams = {
     derivationPath: ethRootDerivationPaths[Network.Testnet],
   }),
 }
+
+const setupCleanMocks = () => {
+  mock.reset()
+  mock.resetHistory()
+}
+
 /**
  * Wallet Tests
  */
 describe('EVM client', () => {
   let avaxClient: Client
+
+  beforeAll(() => {
+    setupCleanMocks()
+  })
+
   beforeEach(() => {
-    nock.disableNetConnect()
+    setupCleanMocks()
+
     avaxClient = new Client({
       ...avaxParams,
       signer: new KeystoreSigner({
@@ -143,11 +156,15 @@ describe('EVM client', () => {
   })
 
   afterEach(() => {
-    nock.cleanAll()
+    setupCleanMocks()
   })
 
-  it('Should throw error with invalid phrase', () => {
-    expect(() => {
+  afterAll(() => {
+    mock.restore()
+  })
+
+  it('Should throw error with invalid phrase', async () => {
+    await expect(() => {
       new Client({
         ...avaxParams,
         signer: new KeystoreSigner({
@@ -156,7 +173,7 @@ describe('EVM client', () => {
           derivationPath: ethRootDerivationPaths[Network.Testnet],
         }),
       })
-    }).toThrowError()
+    }).toThrow()
   })
 
   it('Should not throw error on a client without a phrase', () => {
@@ -166,9 +183,9 @@ describe('EVM client', () => {
     }).not.toThrow()
   })
 
-  it('Should not have a phrase after purging', () => {
+  it('Should not have a phrase after purging', async () => {
     avaxClient.purgeClient()
-    expect(() => avaxClient.getAddress()).toThrowError()
+    await expect(() => avaxClient.getAddress()).toThrow()
   })
 
   it('Should set new phrase', () => {
@@ -177,8 +194,8 @@ describe('EVM client', () => {
     expect(newAddress).toBe('0xd7aa2e8903782e02f3cee4fa3f317f5bcfd62a4d')
   })
 
-  it('should fail to set new phrase', () => {
-    expect(() => avaxClient.setPhrase('bad bad phrase')).toThrowError()
+  it('should fail to set new phrase', async () => {
+    await expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
   })
 
   it('Should connect to specified network', async () => {
@@ -231,6 +248,12 @@ describe('EVM client', () => {
       thornodeApiUrl,
       require('../__mocks__/responses/inbound_addresses_testnet.json'),
     )
+
+    mock_gas_oracle_custom('https://api-testnet.snowtrace.io', 43113, {
+      SafeGasPrice: '12.5',
+      ProposeGasPrice: '25',
+      FastGasPrice: '125',
+    })
 
     const { fast, fastest, average } = await avaxClient.estimateGasPrices()
 

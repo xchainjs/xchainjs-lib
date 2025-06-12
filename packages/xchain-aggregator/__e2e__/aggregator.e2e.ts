@@ -1,6 +1,6 @@
 import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { AssetBETH, BASEChain, Client as BaseClient, defaultBaseParams } from '@xchainjs/xchain-base'
-import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
+import { AssetBSC, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import {
   AssetBTC,
   BTCChain,
@@ -99,7 +99,7 @@ describe('Aggregator', () => {
       }),
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
       BASE: new BaseClient({ ...defaultBaseParams, phrase, network: Network.Mainnet }),
-      BNB: new BnbClient({ phrase, network: Network.Mainnet }),
+      BNB: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
     })
     aggregator = new Aggregator({ wallet })
@@ -200,9 +200,9 @@ describe('Aggregator', () => {
 
   it('Should do swap using chosen protocol', async () => {
     const txEstimatedSwap = await aggregator.estimateSwap({
-      fromAsset: AssetBNB,
+      fromAsset: AssetBSC,
       destinationAsset: AssetAVAX,
-      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
+      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBSC),
       destinationAddress: await wallet.getAddress(AssetAVAX.chain),
     })
 
@@ -210,9 +210,9 @@ describe('Aggregator', () => {
 
     const txSubmitted = await aggregator.doSwap({
       protocol: txEstimatedSwap[0].protocol,
-      fromAsset: AssetBNB,
+      fromAsset: AssetBSC,
       destinationAsset: AssetAVAX,
-      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
+      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBSC),
       destinationAddress: await wallet.getAddress(AssetAVAX.chain),
     })
 

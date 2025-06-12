@@ -43,7 +43,7 @@
     "bignumber.js": "9.0.0"
   },
   "devDependencies": {
-    "axios-mock-adapter": "1.20.0"
+    "axios-mock-adapter": "2.1.0"
   },
   "publishConfig": {
     "access": "public",
