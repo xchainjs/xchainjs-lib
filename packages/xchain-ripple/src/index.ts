@@ -1,9 +1,6 @@
 // Export the 'ClientKeystore' class as 'Client'
 export { ClientKeystore as Client } from './clientKeystore'
 
-// Export the 'ClientLedger' class
-export { ClientLedger } from './clientLedger'
-
 // Export the 'defaultXRPParams' constant from the 'client' file
 export { defaultXRPParams } from './client'
 
