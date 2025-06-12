@@ -33,8 +33,6 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-xrp": "^6.31.2",
-    "@ledgerhq/hw-transport": "^6.31.6",
     "@xchainjs/xchain-client": "workspace:^",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:^",
@@ -43,8 +41,5 @@
   "publishConfig": {
     "access": "public",
     "directory": "release/package"
-  },
-  "devDependencies": {
-    "axios-mock-adapter": "^2.1.0"
   }
 }

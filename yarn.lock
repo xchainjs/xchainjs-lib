@@ -1947,18 +1947,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/devices@npm:8.4.6":
-  version: 8.4.6
-  resolution: "@ledgerhq/devices@npm:8.4.6"
-  dependencies:
-    "@ledgerhq/errors": "npm:^6.21.0"
-    "@ledgerhq/logs": "npm:^6.13.0"
-    rxjs: "npm:^7.8.1"
-    semver: "npm:^7.3.5"
-  checksum: 10c0/3b2a2af3ba3d6a0019d96c1f0f14b7d14b2c4472f0daa162b6c071258ea55afec61281e71f17178919190c978d9a555a13235837d569281d98d28cbedc321f21
-  languageName: node
-  linkType: hard
-
 "@ledgerhq/devices@npm:^5.51.1":
   version: 5.51.1
   resolution: "@ledgerhq/devices@npm:5.51.1"
@@ -2009,13 +1997,6 @@ __metadata:
   version: 6.16.4
   resolution: "@ledgerhq/errors@npm:6.16.4"
   checksum: 10c0/6c0f31ac188486063f33ef3ae2e8b7cf5bdd73616ea4715caab3e3a7b722b3b230742c5dd6227b080f70f28598df6833b6c62f38a8a238035e4d48f2073c3636
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/errors@npm:^6.21.0":
-  version: 6.21.0
-  resolution: "@ledgerhq/errors@npm:6.21.0"
-  checksum: 10c0/44c599d0c3a6cd36ea461ca19019c62d95e159952990ec660a702b197ca63d253bc02223851b9f016703b4d9cc233a2af06b0f058406000b538fd4bcd45005e7
   languageName: node
   linkType: hard
 
@@ -2080,16 +2061,6 @@ __metadata:
     axios: "npm:^1.3.4"
     bignumber.js: "npm:^9.1.2"
   checksum: 10c0/a77c6a5117676d56d95df601be91baa76f13f8bcb0a0acfce7aeb3c5573c77603216ecd997f5c33e4bda6931798a3a6cf354d2b199dea317811a1b836cb74aca
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/hw-app-xrp@npm:^6.31.2":
-  version: 6.31.2
-  resolution: "@ledgerhq/hw-app-xrp@npm:6.31.2"
-  dependencies:
-    "@ledgerhq/hw-transport": "npm:^6.31.6"
-    bip32-path: "npm:0.4.2"
-  checksum: 10c0/a58c1ad318dfb56da21c98f3e1174d0fb1c849e7cc060cdb71a7615ac824a9fbf0fb7f98eb1081b73d630ca7bbcb4f03bb3115f8192ee2d1069eed2393329c14
   languageName: node
   linkType: hard
 
@@ -2262,18 +2233,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport@npm:^6.31.6":
-  version: 6.31.6
-  resolution: "@ledgerhq/hw-transport@npm:6.31.6"
-  dependencies:
-    "@ledgerhq/devices": "npm:8.4.6"
-    "@ledgerhq/errors": "npm:^6.21.0"
-    "@ledgerhq/logs": "npm:^6.13.0"
-    events: "npm:^3.3.0"
-  checksum: 10c0/f7b2c29cf254936b67a6b82fa4ed7913d88cc0653c3dfd85b24e0cde7358aaf56c78932c398e4b6cfce332a8508af4481198d71dca509fd601aa54421e825364
-  languageName: node
-  linkType: hard
-
 "@ledgerhq/live-env@npm:^2.0.1":
   version: 2.0.1
   resolution: "@ledgerhq/live-env@npm:2.0.1"
@@ -2295,13 +2254,6 @@ __metadata:
   version: 6.12.0
   resolution: "@ledgerhq/logs@npm:6.12.0"
   checksum: 10c0/573122867ae807a60c3218234019ba7c4b35c14551b90c291fd589d7c2e7f002c2e84151868e67801c9f89a33d8a5569da77aef83b5f5e03b5faa2811cab6a86
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/logs@npm:^6.13.0":
-  version: 6.13.0
-  resolution: "@ledgerhq/logs@npm:6.13.0"
-  checksum: 10c0/8b40a7af64a9526b441394e84f05afc42552b4d3d1e45c33dd262d669c77e2351e06bd354929ffdf6cfe0e0404b0042b8b5da610016232a0eb516f1daa73f39f
   languageName: node
   linkType: hard
 
@@ -4755,12 +4707,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-ripple@workspace:packages/xchain-ripple"
   dependencies:
-    "@ledgerhq/hw-app-xrp": "npm:^6.31.2"
-    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@xchainjs/xchain-client": "workspace:^"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:^"
-    axios-mock-adapter: "npm:^2.1.0"
     xrpl: "npm:^4.3.0"
   languageName: unknown
   linkType: soft
@@ -5610,7 +5559,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip32-path@npm:0.4.2, bip32-path@npm:^0.4.2":
+"bip32-path@npm:^0.4.2":
   version: 0.4.2
   resolution: "bip32-path@npm:0.4.2"
   checksum: 10c0/7d4123a5393fc5b70a20d0997c2b5a77feb789b49bdc3485ff7db02f916acf0f8c5eccf659f3d5dff5e0b34f22f5681babba86eb9ad7fa1287daf31d69982d75
