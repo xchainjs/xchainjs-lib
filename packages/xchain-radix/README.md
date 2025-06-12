@@ -63,7 +63,7 @@ second one submits the transaction to the ledger
 ```
 import { Network, TxParams, XChainClientParams } from '@xchainjs/xchain-client'
 import { Client, XrdAssetStokenet } from '@xchainjs/xchain-radix'
-import { baseAmount } from '@xchainjs/xchain-util/lib'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
 const params: XChainClientParams = {
@@ -93,7 +93,7 @@ main().catch(console.error)
 ```
 import { Network, TxParams, XChainClientParams } from '@xchainjs/xchain-client'
 import { Client, XrdAssetStokenet } from '@xchainjs/xchain-radix'
-import { baseAmount } from '@xchainjs/xchain-util/lib'
+import { baseAmount } from '@xchainjs/xchain-util'
 
 const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
 const params: XChainClientParams = {
@@ -121,7 +121,7 @@ main().catch(console.error)
 ### Getting a transaction data
 
 ```
-import { Network, Tx, TxParams, XChainClientParams } from '@xchainjs/xchain-client/lib'
+import { Network, Tx, TxParams, XChainClientParams } from '@xchainjs/xchain-client'
 import { Client } from '@xchainjs/xchain-radix'
 import { XrdAsset } from '@xchainjs/xchain-radix/src/const'
 import { baseAmount } from '@xchainjs/xchain-util'
@@ -146,9 +146,9 @@ console.log(transaction)
 ### Getting balances
 
 ```
-import { Balance, Network, XChainClientParams } from '@xchainjs/xchain-client/lib'
+import { Balance, Network, XChainClientParams } from '@xchainjs/xchain-client'
 import { Client } from '@xchainjs/xchain-radix'
-import { Asset } from '@xchainjs/xchain-util/lib'
+import { Asset } from '@xchainjs/xchain-util'
 
 const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
 const params: XChainClientParams = {
@@ -174,7 +174,7 @@ console.log(balances)
 ### Getting fees
 
 ```
-import { Fees, Network, XChainClientParams } from '@xchainjs/xchain-client/lib'
+import { Fees, Network, XChainClientParams } from '@xchainjs/xchain-client'
 import { Client } from '@xchainjs/xchain-radix'
 
 const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'
@@ -191,7 +191,7 @@ console.log(fees)
 ### Getting transactions history
 
 ```
-import { Network, XChainClientParams } from '@xchainjs/xchain-client/lib'
+import { Network, XChainClientParams } from '@xchainjs/xchain-client'
 import { Client } from '@xchainjs/xchain-radix'
 
 const phrase = 'rural bright ball negative already grass good grant nation screen model pizza'

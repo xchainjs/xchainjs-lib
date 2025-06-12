@@ -21,7 +21,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "clean": "rm -rf .turbo && rm -rf lib",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "test": "jest"
   },
   "publishConfig": {
