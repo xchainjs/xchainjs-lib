@@ -1,6 +1,5 @@
 import {
   AssetInfo,
-  FeeEstimateOptions,
   FeeType,
   Fees,
   Balance,
@@ -17,7 +16,7 @@ import {
   FeesWithRates,
   FeeRate,
 } from '@xchainjs/xchain-client'
-import { baseAmount, BaseAmount, Address, eqAsset } from '@xchainjs/xchain-util'
+import { baseAmount, Address, eqAsset } from '@xchainjs/xchain-util'
 import { Client as XrplClient } from 'xrpl'
 import type { Payment, ResponseOnlyTxInfo, Transaction } from 'xrpl'
 
