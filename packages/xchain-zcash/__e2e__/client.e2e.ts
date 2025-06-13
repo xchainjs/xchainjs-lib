@@ -27,7 +27,7 @@ describe('Zcash client', () => {
     const hash = await client.transfer({
       walletIndex: 0,
       amount: assetToBase(assetAmount('0.1', 8)),
-      recipient: address
+      recipient: address,
     })
     console.log('hash', hash)
   })
@@ -37,7 +37,7 @@ describe('Zcash client', () => {
     const hash = await client.transfer({
       amount: assetToBase(assetAmount('0.1', 8)),
       recipient: address,
-      memo: 'test'
+      memo: 'test',
     })
     console.log('hash', hash)
   })

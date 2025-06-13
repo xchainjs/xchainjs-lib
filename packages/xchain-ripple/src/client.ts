@@ -18,7 +18,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { baseAmount, Address, eqAsset } from '@xchainjs/xchain-util'
 import { Client as XrplClient } from 'xrpl'
-import type { Payment, ResponseOnlyTxInfo, Transaction } from 'xrpl'
+import type { Payment } from 'xrpl'
 
 import {
   AssetXRP,
@@ -257,7 +257,7 @@ export abstract class Client extends BaseXChainClient {
     const xrplClient = await this.getXrplClient()
     const address = params?.address || (await this.getAddress())
 
-    const count = Math.min(params?.limit || 10, 10)
+    const count = params?.limit || 10
     const offset = params?.offset || 0
     const limit = offset + count
 
@@ -274,21 +274,21 @@ export abstract class Client extends BaseXChainClient {
     const txs: Tx[] = []
 
     for (let i = offset; i < limit; i++) {
-      const txData = txArray[i]?.tx
+      const txData = txArray[i]
+      const tx = txData.tx_json
 
-      if (txData) {
-        const tx = txData as Transaction & ResponseOnlyTxInfo
+      if (tx) {
         if (tx.TransactionType !== 'Payment') continue
-
         const fromAddress = tx.Account
         const toAddress = tx.Destination
-        const amountStr: string = typeof tx.Amount === 'string' ? tx.Amount : tx.Amount.value
+        // @ts-expect-error ignore
+        const amountStr: string = txData?.meta?.delivered_amount ?? 0
         const amount = baseAmount(amountStr, XRP_DECIMAL)
         const unixTimestamp = (tx.date as number) + 946684800
 
         txs.push({
           type: TxType.Transfer,
-          hash: tx.hash as string,
+          hash: txData.hash as string,
           date: new Date(unixTimestamp * 1000),
           asset: nativeAsset.asset,
           from: [
@@ -335,10 +335,10 @@ export abstract class Client extends BaseXChainClient {
     const fromAddress = tx.tx_json.Account
     const toAddress = tx.tx_json.Destination as string
 
-    // @ts-expect-error ignore  tx.tx_json.Amount.value
-    const amountStr: string = typeof tx.tx_json.Amount === 'string' ? tx.tx_json.Amount : tx.tx_json.Amount.value
+    // @ts-expect-error ignore
+    const amountStr: string = tx?.meta?.delivered_amount ?? 0
     const amount = baseAmount(amountStr, XRP_DECIMAL)
-    const unixTimestamp = (tx.date as number) + 946684800
+    const unixTimestamp = (tx.tx_json.date as number) + 946684800
 
     return {
       type: TxType.Transfer,
