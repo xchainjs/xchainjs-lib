@@ -362,25 +362,19 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * deprecated
-   */
   public async prepareTx(_: TxParams & { sender: Address }): Promise<PreparedTx> {
     throw new Error('not supported')
   }
 
-  /**
-   * deprecated
-   */
   public async broadcastTx(_: string): Promise<TxHash> {
     throw new Error('not supported')
   }
 
   async getFeesWithRates(): Promise<FeesWithRates> {
-    throw Error('Error Zcash has flat fee. Fee rates not supported')
+    throw Error('not supported')
   }
 
   async getFeeRates(): Promise<FeeRate> {
-    throw Error('Error Zcash has flat fee. Fee rates not supported')
+    throw Error('not supported')
   }
 }
