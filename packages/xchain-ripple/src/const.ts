@@ -33,6 +33,8 @@ export const rippleExplorerProviders = {
   [Network.Mainnet]: XRP_MAINNET_EXPLORER,
 }
 
+export const XRP_DEFAULT_FEE = 10 // 10 drops
+
 export type IdentifierString = `${string}:${string}`
 
 export const XRPL_MAINNET = 'xrpl:0' as const

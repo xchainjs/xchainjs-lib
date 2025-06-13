@@ -29,6 +29,7 @@ import {
   rippleExplorerProviders,
   getXRPLIdentifierByNetwork,
   getNetworkWssEndpoint,
+  XRP_DEFAULT_FEE,
 } from './const'
 import * as Utils from './utils'
 import { SignedTransaction, XRPClientParams } from './types'
@@ -170,18 +171,18 @@ export abstract class Client extends BaseXChainClient {
 
   /**
    * Get transaction fees.
-   *
-   * @param {TxParams} params - The transaction parameters.
    * @returns {Fees} The average, fast, and fastest fees.
-   * @throws {"Params need to be passed"} Thrown if parameters are not provided.
    */
-  public async getFees(params?: FeeEstimateOptions & { amount: BaseAmount; sender: Address }): Promise<Fees> {
-    if (!params) {
-      throw Error('Params not provided')
-    }
+  public async getFees(): Promise<Fees> {
     const xrplClient = await this.getXrplClient()
-    const feeResponse = await xrplClient.request({ command: 'fee' })
-    const fee = feeResponse.result.drops.open_ledger_fee
+
+    let fee: string
+    try {
+      const feeResponse = await xrplClient.request({ command: 'fee' })
+      fee = feeResponse.result.drops.open_ledger_fee
+    } catch (error) {
+      fee = String(XRP_DEFAULT_FEE)
+    }
 
     return {
       average: baseAmount(fee, XRP_DECIMAL),
