@@ -2727,6 +2727,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:~1.9.0":
+  version: 1.9.2
+  resolution: "@noble/curves@npm:1.9.2"
+  dependencies:
+    "@noble/hashes": "npm:1.8.0"
+  checksum: 10c0/21d049ae4558beedbf5da0004407b72db84360fa29d64822d82dc9e80251e1ecb46023590cc4b20e70eed697d1b87279b4911dc39f8694c51c874289cfc8e9a7
+  languageName: node
+  linkType: hard
+
 "@noble/ed25519@npm:2.0.0":
   version: 2.0.0
   resolution: "@noble/ed25519@npm:2.0.0"
@@ -2762,7 +2771,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:^1.3.1":
+"@noble/hashes@npm:1.8.0, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:~1.8.0":
   version: 1.8.0
   resolution: "@noble/hashes@npm:1.8.0"
   checksum: 10c0/06a0b52c81a6fa7f04d67762e08b2c476a00285858150caeaaff4037356dd5e119f45b2a530f638b77a5eeca013168ec1b655db41bae3236cb2e9d511484fc77
@@ -3254,10 +3263,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scure/base@npm:^1.1.1":
+"@scure/base@npm:^1.1.1, @scure/base@npm:~1.2.5":
   version: 1.2.6
   resolution: "@scure/base@npm:1.2.6"
   checksum: 10c0/49bd5293371c4e062cb6ba689c8fe3ea3981b7bb9c000400dc4eafa29f56814cdcdd27c04311c2fec34de26bc373c593a1d6ca6d754398a488d587943b7c128a
+  languageName: node
+  linkType: hard
+
+"@scure/bip32@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "@scure/bip32@npm:1.7.0"
+  dependencies:
+    "@noble/curves": "npm:~1.9.0"
+    "@noble/hashes": "npm:~1.8.0"
+    "@scure/base": "npm:~1.2.5"
+  checksum: 10c0/e3d4c1f207df16abcd79babcdb74d36f89bdafc90bf02218a5140cc5cba25821d80d42957c6705f35210cc5769714ea9501d4ae34732cdd1c26c9ff182a219f7
   languageName: node
   linkType: hard
 
@@ -4389,6 +4409,7 @@ __metadata:
     "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
     "@ledgerhq/hw-app-btc": "npm:10.9.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
+    "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -4396,8 +4417,7 @@ __metadata:
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
-    bip32: "npm:4.0.0"
-    bitcoinjs-lib: "npm:6.1.6"
+    bitcoinjs-lib: "npm:6.1.7"
     coinselect: "npm:3.1.12"
     ecpair: "npm:2.1.0"
   languageName: unknown
@@ -4469,12 +4489,12 @@ __metadata:
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
     "@scure/base": "npm:1.1.5"
+    "@scure/bip32": "npm:^1.7.0"
     "@types/secp256k1": "npm:^4.0.3"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     bech32: "npm:^1.1.3"
-    bip32: "npm:^2.0.6"
   languageName: unknown
   linkType: soft
 
@@ -4491,6 +4511,7 @@ __metadata:
     "@ledgerhq/hw-app-cosmos": "npm:6.32.0"
     "@ledgerhq/hw-transport": "npm:6.31.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
+    "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
@@ -4498,7 +4519,6 @@ __metadata:
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
     bignumber.js: "npm:9.0.0"
-    bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -4610,13 +4630,13 @@ __metadata:
     "@cosmjs/encoding": "npm:0.33.1"
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
+    "@scure/bip32": "npm:^1.7.0"
     "@types/secp256k1": "npm:^4.0.3"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     bech32: "npm:^1.1.3"
-    bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
   languageName: unknown
   linkType: soft
@@ -4690,6 +4710,7 @@ __metadata:
     "@cosmjs/encoding": "npm:0.33.1"
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
+    "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
@@ -4697,7 +4718,6 @@ __metadata:
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
     bignumber.js: "npm:9.0.0"
-    bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -4764,7 +4784,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-radix@workspace:packages/xchain-radix"
   dependencies:
-    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
     "@radixdlt/babylon-gateway-api-sdk": "npm:^1.4.1"
     "@radixdlt/radix-engine-toolkit": "npm:^1.0.3"
     "@xchainjs/xchain-client": "workspace:*"
@@ -4848,6 +4867,7 @@ __metadata:
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
     "@ledgerhq/hw-transport": "npm:6.31.4"
+    "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/ledger-thorchain": "npm:0.2.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
@@ -4856,7 +4876,6 @@ __metadata:
     axios: "npm:1.8.4"
     bech32: "npm:^1.1.3"
     bignumber.js: "npm:9.0.0"
-    bip32: "npm:^2.0.6"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -4926,6 +4945,7 @@ __metadata:
   dependencies:
     "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
     "@hippocampus-web3/zcash-wallet-js": "npm:^0.0.4"
+    "@scure/bip32": "npm:^1.7.0"
     "@types/blake2b-wasm": "npm:^2.4.3"
     "@types/js-yaml": "npm:^4.0.9"
     "@types/lodash": "npm:^4.17.13"
@@ -4935,7 +4955,6 @@ __metadata:
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
     axios-mock-adapter: "npm:^2.1.0"
-    bip32: "npm:^5.0.0-rc.0"
     ecpair: "npm:^3.0.0"
   languageName: unknown
   linkType: soft
@@ -5546,19 +5565,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip32@npm:4.0.0, bip32@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "bip32@npm:4.0.0"
-  dependencies:
-    "@noble/hashes": "npm:^1.2.0"
-    "@scure/base": "npm:^1.1.1"
-    typeforce: "npm:^1.11.5"
-    wif: "npm:^2.0.6"
-  checksum: 10c0/b74ffd3a96b42a783eca6455dff8f0decc8360025b69d486d5a047b52cca6e8436bc5a9812cbeae2638a50f35da7fcd85b55cfe58272f55a5b31d7ac40a25522
-  languageName: node
-  linkType: hard
-
-"bip32@npm:^2.0.4, bip32@npm:^2.0.6":
+"bip32@npm:^2.0.4":
   version: 2.0.6
   resolution: "bip32@npm:2.0.6"
   dependencies:
@@ -5573,16 +5580,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip32@npm:^5.0.0-rc.0":
-  version: 5.0.0-rc.0
-  resolution: "bip32@npm:5.0.0-rc.0"
+"bip32@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "bip32@npm:4.0.0"
   dependencies:
     "@noble/hashes": "npm:^1.2.0"
     "@scure/base": "npm:^1.1.1"
-    uint8array-tools: "npm:^0.0.8"
-    valibot: "npm:^0.37.0"
-    wif: "npm:^5.0.0"
-  checksum: 10c0/9d95e1e3a3d276f60122dc6722388aa3a84981f9eed0e2d4e7bc4631bee175f4f8865fc7eee2b7ac5449a1cde4e81069c1811fc2c5f52aae3737ea0127a2b6a9
+    typeforce: "npm:^1.11.5"
+    wif: "npm:^2.0.6"
+  checksum: 10c0/b74ffd3a96b42a783eca6455dff8f0decc8360025b69d486d5a047b52cca6e8436bc5a9812cbeae2638a50f35da7fcd85b55cfe58272f55a5b31d7ac40a25522
   languageName: node
   linkType: hard
 
@@ -5611,7 +5617,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bitcoinjs-lib@npm:*, bitcoinjs-lib@npm:6.1.6":
+"bitcoinjs-lib@npm:*":
   version: 6.1.6
   resolution: "bitcoinjs-lib@npm:6.1.6"
   dependencies:
@@ -5645,6 +5651,20 @@ __metadata:
     varuint-bitcoin: "npm:^1.0.4"
     wif: "npm:^2.0.1"
   checksum: 10c0/08722efd645deaff1caea62a9df3f69ca12fc169e975f6d7fac9982b00437200a5333a591bce2971e580a4fc32960f28cd9f682841b43db94905c1f6eea601fd
+  languageName: node
+  linkType: hard
+
+"bitcoinjs-lib@npm:6.1.7":
+  version: 6.1.7
+  resolution: "bitcoinjs-lib@npm:6.1.7"
+  dependencies:
+    "@noble/hashes": "npm:^1.2.0"
+    bech32: "npm:^2.0.0"
+    bip174: "npm:^2.1.1"
+    bs58check: "npm:^3.0.1"
+    typeforce: "npm:^1.11.3"
+    varuint-bitcoin: "npm:^1.1.2"
+  checksum: 10c0/1ce7415cc967bfc5ea7cba0032e73eaba8e3dd7683dffcc90c020d0dba92de6cf1dc92359733c9efa186a4c3ae9547cc379fa4b4a7fb106c0b126c226dec2a40
   languageName: node
   linkType: hard
 
@@ -13290,7 +13310,7 @@ __metadata:
     axios-retry: "npm:^3.3.1"
     bchaddrjs: "npm:^0.5.2"
     bech32-buffer: "npm:^0.2.0"
-    bitcoinjs-lib: "npm:5.2.0"
+    bitcoinjs-lib: "npm:6.1.7"
     dotenv: "npm:^16.0.0"
     ethers: "npm:^5.6.6"
     ts-node: "npm:10.9.2"
@@ -13365,7 +13385,7 @@ __metadata:
     bech32: "npm:^2.0.0"
     bech32-buffer: "npm:^0.2.0"
     bignumber.js: "npm:^9.0.0"
-    bitcoinjs-lib: "npm:5.2.0"
+    bitcoinjs-lib: "npm:6.1.7"
     coinselect: "npm:^3.1.12"
     ethers: "npm:^5.6.6"
     rimraf: "npm:~3.0.2"
@@ -13491,7 +13511,7 @@ __metadata:
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.3.1"
     bech32-buffer: "npm:^0.2.0"
-    bitcoinjs-lib: "npm:5.2.0"
+    bitcoinjs-lib: "npm:6.1.7"
     dotenv: "npm:^16.0.0"
     ethers: "npm:^5.6.6"
     ts-node: "npm:10.9.2"

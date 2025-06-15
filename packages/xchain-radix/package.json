@@ -38,7 +38,6 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@radixdlt/babylon-gateway-api-sdk": "^1.4.1",
     "@radixdlt/radix-engine-toolkit": "^1.0.3",
     "@xchainjs/xchain-client": "workspace:*",
