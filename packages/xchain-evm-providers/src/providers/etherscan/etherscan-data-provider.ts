@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider'
 import { FeeOption, FeeRates, TxHistoryParams } from '@xchainjs/xchain-client'
 import {
   Address,
@@ -11,7 +10,8 @@ import {
   baseAmount,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { BigNumber, ethers } from 'ethers'
+import { Contract, Provider } from 'ethers'
+import { BigNumber } from 'bignumber.js'
 
 import { Balance, CompatibleAsset, EvmOnlineDataProvider, Tx, TxsPage } from '../../types'
 
@@ -76,7 +76,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     return balances
   }
   private async getNativeAssetBalance(address: Address): Promise<{ asset: Asset; amount: BaseAmount }> {
-    const gasAssetBalance: BigNumber = await this.provider.getBalance(address.toLowerCase())
+    const gasAssetBalance: BigNumber = new BigNumber(await this.provider.getBalance(address.toLowerCase()).toString())
     const amount = baseAmount(gasAssetBalance.toString(), this.nativeAssetDecimals)
     return {
       asset: this.nativeAsset,
@@ -95,7 +95,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
       type: AssetType.TOKEN,
     }
 
-    const contract: ethers.Contract = new ethers.Contract(contractAddress.toLowerCase(), erc20ABI, this.provider)
+    const contract: Contract = new Contract(contractAddress.toLowerCase(), erc20ABI, this.provider)
     const balance = (await contract.balanceOf(address.toLowerCase())).toString()
 
     const decimals = (await contract.decimals()).toString()

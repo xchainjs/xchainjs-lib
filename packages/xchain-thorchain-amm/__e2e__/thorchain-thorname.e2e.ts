@@ -5,7 +5,7 @@ import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { Asset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
-import { ethers } from 'ethers'
+import { EtherscanProvider, Network as EthersNetwork } from 'ethers'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
 
@@ -15,12 +15,9 @@ describe('ThorchainAmm e2e tests', () => {
     let wallet: Wallet
 
     beforeAll(() => {
-      const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(
-        'homestead',
-        process.env.ETHERSCAN_API_KEY,
-      )
-      const network = ethers.providers.getNetwork('sepolia')
-      const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
+      const ETH_MAINNET_ETHERS_PROVIDER = new EtherscanProvider('homestead', process.env.ETHERSCAN_API_KEY)
+      const network = EthersNetwork.from('sepolia')
+      const ETH_TESTNET_ETHERS_PROVIDER = new EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
 
       const ethersJSProviders = {
         [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,

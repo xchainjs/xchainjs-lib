@@ -1,4 +1,4 @@
-import { Provider } from '@ethersproject/abstract-provider'
+import { Provider } from 'ethers'
 
 import { ISigner, SignApproveParams, SignTransferParams } from '../types'
 

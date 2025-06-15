@@ -26,7 +26,7 @@ import {
   getContractAddressFromAsset,
 } from '@xchainjs/xchain-util'
 import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
-import { BigNumber } from 'ethers'
+import BigNumber from 'bignumber.js'
 
 import { ChainBalances, CosmosTxParams, EvmTxParams, RadixTxParams, UtxoTxParams } from './types'
 

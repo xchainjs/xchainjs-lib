@@ -41,6 +41,6 @@
     "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "ethers": "5.7.2"
+    "ethers": "6.14.3"
   }
 }

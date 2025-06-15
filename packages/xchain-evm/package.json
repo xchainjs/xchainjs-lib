@@ -41,7 +41,7 @@
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "ethers": "5.7.2"
+    "ethers": "6.14.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport": "6.31.6",

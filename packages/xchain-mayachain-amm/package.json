@@ -50,7 +50,7 @@
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
-    "ethers": "5.7.2"
+    "ethers": "6.14.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6",

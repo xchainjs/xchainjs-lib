@@ -20,9 +20,9 @@ import {
   baseAmount,
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
-import { ethers } from 'ethers'
 
 import { MayachainAMM } from '../src'
+import { EtherscanProvider, Network as EthersNetwork } from 'ethers'
 
 function printQuoteSwap(quoteSwap: QuoteSwap) {
   console.log({
@@ -89,9 +89,9 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
 
 const ETH_USDT: TokenAsset = assetFromStringEx('ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7') as TokenAsset
 
-const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider('homestead', process.env.ETHERSCAN_API_KEY)
-const network = ethers.providers.getNetwork('sepolia')
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
+const ETH_MAINNET_ETHERS_PROVIDER = new EtherscanProvider('homestead', process.env.ETHERSCAN_API_KEY)
+const network = EthersNetwork.from('sepolia')
+const ETH_TESTNET_ETHERS_PROVIDER = new EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
 
 const ethersJSProviders = {
   [Network.Mainnet]: ETH_MAINNET_ETHERS_PROVIDER,
