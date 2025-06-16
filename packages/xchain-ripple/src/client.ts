@@ -130,7 +130,7 @@ export abstract class Client extends BaseXChainClient {
   /**
    * get connected xrpl client
    */
-  protected async getXrplClient() {
+  public async getXrplClient() {
     await this.connectXrplClient()
     return this.xrplClient
   }
@@ -242,15 +242,7 @@ export abstract class Client extends BaseXChainClient {
     const prepared: Payment = await xrplClient.autofill(baseTx)
     const signed = await this.signTransaction(prepared, params.walletIndex || 0)
 
-    const { result } = await xrplClient.submitAndWait(signed.tx_blob)
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const txResult = (result.meta as any)?.TransactionResult
-    if (txResult !== 'tesSUCCESS') {
-      throw new Error(`XRP transaction failed with code: ${txResult}`)
-    }
-
-    return result.hash
+    return await this.broadcastTx(signed.tx_blob)
   }
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
@@ -362,19 +354,29 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  public async prepareTx(_: TxParams & { sender: Address }): Promise<PreparedTx> {
-    throw new Error('not supported')
+  public async broadcastTx(signedTx: string): Promise<TxHash> {
+    const xrplClient = await this.getXrplClient()
+
+    const { result } = await xrplClient.submitAndWait(signedTx)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const txResult = (result.meta as any)?.TransactionResult
+    if (txResult !== 'tesSUCCESS') {
+      throw new Error(`XRP transaction failed with code: ${txResult}`)
+    }
+
+    return result.hash
   }
 
-  public async broadcastTx(_: string): Promise<TxHash> {
-    throw new Error('not supported')
+  public async prepareTx(_: TxParams & { sender: Address }): Promise<PreparedTx> {
+    throw new Error('Error: raw tx string not supported, use prepareTxForXrpl to get Payment tx_json to submit')
   }
 
   async getFeesWithRates(): Promise<FeesWithRates> {
-    throw Error('not supported')
+    throw Error('Error: Ripple has flat fee. Fee rates not supported')
   }
 
   async getFeeRates(): Promise<FeeRate> {
-    throw Error('not supported')
+    throw Error('Error: Ripple has flat fee. Fee rates not supported')
   }
 }

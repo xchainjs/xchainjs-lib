@@ -70,6 +70,31 @@ describe('XRP client e2e test', () => {
     console.log('transfer with memo tx hash:', hash)
   })
 
+  it('Should get signed transaction and broadcast', async () => {
+    // NOTE: should send to another address because XRPL doesn't support transfer to same address
+    const address_1 = await client.getAddressAsync(1)
+    const txParams = {
+      asset: AssetXRP,
+      amount: assetToBase(assetAmount('1', XRP_DECIMAL)),
+      recipient: address_1,
+      memo: 'test',
+      walletIndex: 0,
+    }
+
+    const xrplClient = await client.getXrplClient()
+    const sender = await client.getAddressAsync(0)
+    const baseTx = await client.prepareTxForXrpl({ ...txParams, sender })
+    const prepared = await xrplClient.autofill(baseTx)
+
+    // get signed tx
+    const signed = await client.signTransaction(prepared, txParams.walletIndex || 0)
+    console.log('signed tx:', signed.tx_blob)
+
+    // broadcast
+    const hash = await client.broadcastTx(signed.tx_blob)
+    console.log('tx hash:', hash)
+  })
+
   it('Should get transactions', async () => {
     const txHistoryParam = {
       address: client.getAddress(),
