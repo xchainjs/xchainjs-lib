@@ -50,7 +50,6 @@
     "@rollup/plugin-json": "6.1.0",
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-wasm": "^6.2.2",
-    "@types/jest": "29.5.14",
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
     "dotenv": "^16.0.3",
@@ -58,7 +57,6 @@
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.0",
-    "jest": "30.0.0",
     "jest-fetch-mock": "^3.0.3",
     "lint-staged": "^13.1.0",
     "prettier": "^2.2.0",
@@ -73,5 +71,8 @@
     "typescript": "^5.0.4",
     "weighted": "^1.0.0",
     "yarn-audit-ci": "^1.2.0"
+  },
+  "dependencies": {
+    "jest": "^30.0.0"
   }
 }
