@@ -26,7 +26,7 @@ import {
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
-import { Provider, Contract, Transaction, ContractTransaction, toUtf8Bytes } from 'ethers'
+import { Provider, Contract, Transaction, toUtf8Bytes, hexlify } from 'ethers'
 import { BigNumber } from 'bignumber.js'
 
 import erc20ABI from '../data/erc20.json'
@@ -313,7 +313,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    */
   async broadcastTx(txHex: string): Promise<TxHash> {
     const provider = this.config.providers[this.network]
-    if (!provider.sendTransaction) {
+    if (!provider.broadcastTransaction) {
       throw new Error('Provider does not support sendTransaction')
     }
     const resp = await provider.broadcastTransaction(txHex)
@@ -417,9 +417,9 @@ export class Client extends BaseXChainClient implements EVMClient {
       })
     } else {
       // ETH gas estimate
-      let stringEncodedMemo: string | undefined
+      let stringEncodedMemo
       if (memo) {
-        stringEncodedMemo = btoa(String.fromCharCode(...toUtf8Bytes(memo)))
+        stringEncodedMemo = hexlify(toUtf8Bytes(memo))
       }
       const parsedMemo = memo ? (isMemoEncoded ? memo : stringEncodedMemo) : undefined
       const transactionRequest = {
@@ -428,7 +428,8 @@ export class Client extends BaseXChainClient implements EVMClient {
         value: txAmount,
         data: parsedMemo,
       }
-      gasEstimate = new BigNumber(await this.getProvider().estimateGas(transactionRequest).toString())
+      const gasEstimation = await this.getProvider().estimateGas(transactionRequest)
+      gasEstimate = new BigNumber(gasEstimation.toString())
     }
 
     return gasEstimate
@@ -598,9 +599,9 @@ export class Client extends BaseXChainClient implements EVMClient {
     const nonce = await this.getProvider().getTransactionCount(sender)
 
     if (this.isGasAsset(asset)) {
-      let stringEncodedMemo: string | undefined
+      let stringEncodedMemo
       if (memo) {
-        stringEncodedMemo = btoa(String.fromCharCode(...toUtf8Bytes(memo)))
+        stringEncodedMemo = toUtf8Bytes(memo)
       }
       const parsedMemo = memo ? (isMemoEncoded ? memo : stringEncodedMemo) : undefined
 
@@ -622,18 +623,17 @@ export class Client extends BaseXChainClient implements EVMClient {
       if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
 
       const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
-      /* as same as ethers.TransactionResponse expected by `sendTransaction` */
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const unsignedTx: ContractTransaction = await (contract.populateTransaction as any).transfer(
-        recipient,
-        new BigNumber(amount.amount().toFixed()),
-      )
+
+      const amountToTransfer = BigInt(amount.amount().toFixed())
+      const unsignedTx = await contract.getFunction('transfer').populateTransaction(recipient, amountToTransfer)
 
       unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
       unsignedTx.nonce = nonce
 
+      const tx = Transaction.from(unsignedTx)
+
       return {
-        rawUnsignedTx: unsignedTx.data,
+        rawUnsignedTx: tx.unsignedSerialized,
       }
     }
   }
@@ -659,18 +659,19 @@ export class Client extends BaseXChainClient implements EVMClient {
     const valueToApprove = getApprovalAmount(amount)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const unsignedTx: ContractTransaction = await (contract.populateTransaction as any).approve(
-      spenderAddress,
-      valueToApprove,
-    )
+    const unsignedTx = await contract
+      .getFunction('approve')
+      .populateTransaction(spenderAddress, BigInt(valueToApprove.toString()))
 
     const nonce = await this.getProvider().getTransactionCount(sender)
 
     unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
     unsignedTx.nonce = nonce
 
+    const tx = Transaction.from(unsignedTx)
+
     return {
-      rawUnsignedTx: unsignedTx.data,
+      rawUnsignedTx: tx.unsignedSerialized,
     }
   }
 
@@ -852,6 +853,8 @@ export class Client extends BaseXChainClient implements EVMClient {
     tx.type = 1
     tx.gasLimit = BigInt(gasLimit.toString())
     tx.gasPrice = BigInt(gasPrice.toString())
+    tx.maxFeePerGas = null
+    tx.maxPriorityFeePerGas = null
 
     const signedTx = await this.getSigner().signApprove({
       walletIndex,

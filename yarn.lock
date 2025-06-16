@@ -4182,8 +4182,8 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.3.0"
-    ethers: "npm:6.14.3"
+    bignumber.js: "npm:^9.0.0"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4197,7 +4197,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4210,7 +4210,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4264,7 +4264,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4400,7 +4400,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4412,7 +4412,7 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4429,7 +4429,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4492,7 +4492,7 @@ __metadata:
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4648,7 +4648,7 @@ __metadata:
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -4747,7 +4747,7 @@ __metadata:
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
-    ethers: "npm:6.14.3"
+    ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
 
@@ -5292,13 +5292,6 @@ __metadata:
   version: 9.0.0
   resolution: "bignumber.js@npm:9.0.0"
   checksum: 10c0/a760979ca822533ad7a437a45bcac66c191554a407092baa4991e068fd4af7344ff52d9e82e0574946c831690de706cf86fbc80775b5ebc6e59c2eef7325172c
-  languageName: node
-  linkType: hard
-
-"bignumber.js@npm:9.0.1":
-  version: 9.0.1
-  resolution: "bignumber.js@npm:9.0.1"
-  checksum: 10c0/1d1aade64dc5d6cf1ebd226ef3030ebdb505d40d74f20e35069150007d1e747c8f746601a3452330ac88105f4288644236d7f4925654777e8511d5ebb9fbf760
   languageName: node
   linkType: hard
 
@@ -7200,21 +7193,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:6.14.3, ethers@npm:^6.14.3":
-  version: 6.14.3
-  resolution: "ethers@npm:6.14.3"
-  dependencies:
-    "@adraffy/ens-normalize": "npm:1.10.1"
-    "@noble/curves": "npm:1.2.0"
-    "@noble/hashes": "npm:1.3.2"
-    "@types/node": "npm:22.7.5"
-    aes-js: "npm:4.0.0-beta.5"
-    tslib: "npm:2.7.0"
-    ws: "npm:8.17.1"
-  checksum: 10c0/8e28174e9293d53c8e3597f5cdb77ace1da696a9d4a4694260fc3f0c8193c80f61fb36762b449003d73e7708f1e2aeaecf6a5e00afdc27e5d5cc4bdd95d16bcd
-  languageName: node
-  linkType: hard
-
 "ethers@npm:^6.13.3":
   version: 6.13.5
   resolution: "ethers@npm:6.13.5"
@@ -7227,6 +7205,21 @@ __metadata:
     tslib: "npm:2.7.0"
     ws: "npm:8.17.1"
   checksum: 10c0/64bc7b8907de199392b8a88c15c9a085892919cff7efa2e5326abc7fe5c426001726c51d91e10c74e5fc5e2547188297ce4127f6e52ea42a97ade0b2ae474677
+  languageName: node
+  linkType: hard
+
+"ethers@npm:^6.14.3":
+  version: 6.14.3
+  resolution: "ethers@npm:6.14.3"
+  dependencies:
+    "@adraffy/ens-normalize": "npm:1.10.1"
+    "@noble/curves": "npm:1.2.0"
+    "@noble/hashes": "npm:1.3.2"
+    "@types/node": "npm:22.7.5"
+    aes-js: "npm:4.0.0-beta.5"
+    tslib: "npm:2.7.0"
+    ws: "npm:8.17.1"
+  checksum: 10c0/8e28174e9293d53c8e3597f5cdb77ace1da696a9d4a4694260fc3f0c8193c80f61fb36762b449003d73e7708f1e2aeaecf6a5e00afdc27e5d5cc4bdd95d16bcd
   languageName: node
   linkType: hard
 
@@ -13029,7 +13022,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:9.0.1"
+    bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"
@@ -13092,7 +13085,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:9.0.1"
+    bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"

@@ -15,7 +15,7 @@ import {
   defaultBTCParams as defaultBtcParams,
 } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
-import { AssetBSC, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { AssetBSC, BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM, Client as GaiaClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
@@ -30,7 +30,7 @@ import {
 import {
   AssetRuneNative,
   ClientKeystore as THORKeystoreClient,
-  ClientLedger as THORLedgerClient,
+  // ClientLedger as THORLedgerClient,
   THORChain,
   defaultClientConfig as defaultThorParams,
 } from '@xchainjs/xchain-thorchain'
@@ -169,7 +169,7 @@ describe('ThorchainAmm e2e tests', () => {
       const errors = await thorchainAmm.validateSwap({
         fromAsset: assetFromStringEx('BNB/BNB'),
         amount: new CryptoAmount(assetToBase(assetAmount('1')), assetFromStringEx('BNB/BNB')),
-        destinationAddress: await wallet.getAddress(BNBChain),
+        destinationAddress: await wallet.getAddress(BSCChain),
         destinationAsset: assetFromStringEx('BNB.BNB'),
       })
 
@@ -264,7 +264,7 @@ describe('ThorchainAmm e2e tests', () => {
       const estimatedSwap = await thorchainAmm.estimateSwap({
         fromAsset: assetFromStringEx('BNB/BNB'),
         amount: new CryptoAmount(assetToBase(assetAmount('1')), assetFromStringEx('BNB/BNB')),
-        destinationAddress: await wallet.getAddress(BNBChain),
+        destinationAddress: await wallet.getAddress(BSCChain),
         destinationAsset: assetFromStringEx('BNB.BNB'),
       })
 
@@ -306,11 +306,12 @@ describe('ThorchainAmm e2e tests', () => {
 
     it('Should check if Thorchain router is allowed to spend', async () => {
       const asset = assetFromStringEx('AVAX.USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E') as TokenAsset
+      const address = await wallet.getAddress(asset.chain)
 
       const isApprovedToSpend = await thorchainAmm.isRouterApprovedToSpend({
         asset,
         amount: new CryptoAmount(assetToBase(assetAmount(10, 6)), asset),
-        address: '0x3fb42E9C800E7A40F1101E39195E78F0c4C25886',
+        address: address,
       })
 
       console.log(!isApprovedToSpend.length)

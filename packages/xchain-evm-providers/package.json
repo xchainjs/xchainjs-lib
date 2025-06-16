@@ -32,6 +32,6 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.8.4",
-    "ethers": "6.14.3"
+    "ethers": "^6.14.3"
   }
 }

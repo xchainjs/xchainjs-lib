@@ -197,10 +197,6 @@ describe('EVM client', () => {
     await expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
   })
 
-  it('Should connect to specified network', async () => {
-    // TODO
-  })
-
   it('Should get network', () => {
     expect(avaxClient.getNetwork()).toEqual('testnet')
   })

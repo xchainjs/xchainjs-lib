@@ -1,9 +1,147 @@
-import { Balance, Network, TxType } from '@xchainjs/xchain-client'
-import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '@xchainjs/xchain-evm'
-import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import { Balance, Network, TxType, ExplorerProvider } from '@xchainjs/xchain-client'
+import {
+  Asset,
+  AssetType,
+  Chain,
+  TokenAsset,
+  assetAmount,
+  assetToBase,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 
-import AvaxClient from '../src'
-import { AVAXChain, AssetAVAX, defaultAvaxParams } from '../src/const'
+import AvaxClient, {
+  ApproveParams,
+  EstimateApproveParams,
+  EVMKeystoreClientParams,
+  IsApprovedParams,
+  KeystoreSigner,
+} from '../src'
+import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
+import { BigNumber } from 'bignumber.js'
+import { JsonRpcProvider } from 'ethers'
+
+const AVAXChain: Chain = 'AVAX'
+const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
+
+// =====Defaults=====
+export const transferGasAssetGasLimit: BigNumber = new BigNumber(21000)
+export const transferTokenGasLimit: BigNumber = new BigNumber(100000)
+// =====Ethers providers=====
+const ankrApiKey = process.env.ANKR_API_KEY
+
+// Define JSON-RPC providers for mainnet and testnet
+const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche/${ankrApiKey}`, {
+  name: 'avalanche',
+  chainId: 43114,
+})
+const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche_fuji/${ankrApiKey}`, {
+  name: 'fuji',
+  chainId: 43113,
+})
+
+const ethersJSProviders = {
+  [Network.Mainnet]: AVALANCHE_MAINNET_ETHERS_PROVIDER,
+  [Network.Testnet]: AVALANCHE_TESTNET_ETHERS_PROVIDER,
+  [Network.Stagenet]: AVALANCHE_MAINNET_ETHERS_PROVIDER,
+}
+// =====Ethers providers=====
+// =====ONLINE providers=====
+// const API_KEY = 'FAKE_KEY'
+const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
+  AVALANCHE_TESTNET_ETHERS_PROVIDER,
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
+  AVAXChain,
+  AssetAVAX,
+  18,
+  43113,
+)
+const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
+  AVALANCHE_MAINNET_ETHERS_PROVIDER,
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
+  AVAXChain,
+  AssetAVAX,
+  18,
+  43114,
+)
+
+const avaxProviders = {
+  [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
+  [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
+  [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
+}
+// =====ONLINE providers=====
+
+// =====Explorers=====
+const AVAX_MAINNET_EXPLORER = new ExplorerProvider(
+  'https://snowtrace.io/',
+  'https://snowtrace.io/tx/%%TX_ID%%',
+  'https://snowtrace.io/address/%%ADDRESS%%',
+)
+const AVAX_TESTNET_EXPLORER = new ExplorerProvider(
+  'https://testnet.snowtrace.io/',
+  'https://testnet.snowtrace.io/tx/%%TX_ID%%',
+  'https://testnet.snowtrace.io/address/%%ADDRESS%%',
+)
+const avaxExplorerProviders = {
+  [Network.Mainnet]: AVAX_MAINNET_EXPLORER,
+  [Network.Testnet]: AVAX_TESTNET_EXPLORER,
+  [Network.Stagenet]: AVAX_MAINNET_EXPLORER,
+}
+// =====Explorers=====
+
+// const avaxRootDerivationPaths = {
+//   [Network.Mainnet]: `m/44'/9000'/0'/0/`,
+//   [Network.Testnet]: `m/44'/9000'/0'/0/`,
+//   [Network.Stagenet]: `m/44'/9000'/0'/0/`,
+// }
+const ethRootDerivationPaths = {
+  [Network.Mainnet]: `m/44'/60'/0'/0/`,
+  [Network.Testnet]: `m/44'/60'/0'/0/`,
+  [Network.Stagenet]: `m/44'/60'/0'/0/`,
+}
+const defaults = {
+  [Network.Mainnet]: {
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
+  },
+  [Network.Testnet]: {
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
+  },
+  [Network.Stagenet]: {
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
+  },
+}
+const avaxParams: EVMKeystoreClientParams = {
+  chain: AVAXChain,
+  gasAsset: AssetAVAX,
+  gasAssetDecimals: 18,
+  defaults,
+  providers: ethersJSProviders,
+  explorerProviders: avaxExplorerProviders,
+  dataProviders: [avaxProviders],
+  network: Network.Mainnet,
+  feeBounds: {
+    lower: 1_000_000_000,
+    upper: 1_000_000_000_000,
+  },
+  rootDerivationPaths: ethRootDerivationPaths,
+  signer: new KeystoreSigner({
+    phrase: process.env.MAINNET_PHRASE as string,
+    provider: ethersJSProviders[Network.Mainnet],
+    derivationPath: ethRootDerivationPaths[Network.Mainnet],
+  }),
+}
 
 // import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '../src/types'
 
@@ -16,40 +154,19 @@ const assetRIP: TokenAsset = {
   type: AssetType.TOKEN,
 }
 
-// const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(
-//   process.env.COVALENT_API_KEY as string,
-//   AVAXChain,
-//   43113,
-//   AssetAVAX,
-//   18,
-// )
+const assetUSDC: TokenAsset = {
+  chain: AVAXChain,
+  symbol: `USDC-0XB97EF9EF8734C71904D8002F8B6BC66DD9C48A6E`,
+  ticker: `USDC`,
+  type: AssetType.TOKEN,
+}
 
-// const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(
-//   process.env.COVALENT_API_KEY as string,
-//   AVAXChain,
-//   43114,
-//   AssetAVAX,
-//   18,
-// )
-
-// const avaxProviders = {
-//   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
-//   [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
-//   [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
-// }
-
-// const fakeProviders = {
-//   [Network.Mainnet]: {} as EvmOnlineDataProvider,
-//   [Network.Testnet]: {} as EvmOnlineDataProvider,
-//   [Network.Stagenet]: {} as EvmOnlineDataProvider,
-// }
-
-defaultAvaxParams.network = Network.Mainnet
-defaultAvaxParams.phrase = process.env.MAINNET_PHRASE
+avaxParams.network = Network.Mainnet
+avaxParams.phrase = process.env.MAINNET_PHRASE
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
 const client = new AvaxClient({
-  ...defaultAvaxParams,
+  ...avaxParams,
 })
 
 function delay(ms: number) {
@@ -58,7 +175,6 @@ function delay(ms: number) {
 describe('xchain-evm (Avax) Integration Tests', () => {
   it('should fetch avax balances', async () => {
     const address = '0x09383137C1eEe3E1A8bc781228E4199f6b4A9bbf'
-    console.log(address)
     const balances = await client.getBalance(address)
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
@@ -133,12 +249,33 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     })
     console.log(txHash)
   })
+  it('should transfer 0.1 USDC between wallet 0 and 1', async () => {
+    const recipient = client.getAddress(1)
+    const amount = assetToBase(assetAmount('0.1', 6))
+    //ERC20 address The Crypt (RIP)
+
+    const txHash = await client.transfer({ amount, recipient, asset: assetUSDC })
+    console.log(txHash)
+  })
   it('should transfer 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     //ERC20 address The Crypt (RIP)
 
     const txHash = await client.transfer({ amount, recipient, asset: assetRIP })
+    console.log(txHash)
+  })
+  it('should approve 10 USDC tc router', async () => {
+    const spender = '0x8F66c4AE756BEbC49Ec8B81966DD8bba9f127549'
+    const contractAddress = '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e'
+    const amount = assetToBase(assetAmount('10', 6))
+    //ERC20 address The Crypt (RIP)
+
+    const txHash = await client.approve({
+      amount,
+      contractAddress: contractAddress,
+      spenderAddress: spender,
+    })
     console.log(txHash)
   })
   it('should approve 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {

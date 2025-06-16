@@ -1,8 +1,6 @@
 import AppEth, { ledgerService } from '@ledgerhq/hw-app-eth'
 import Transport from '@ledgerhq/hw-transport'
 import { Address } from '@xchainjs/xchain-util'
-import { Transaction } from 'ethers'
-import { BigNumber } from 'bignumber.js'
 
 import { SignApproveParams, SignTransferParams } from '../types'
 
@@ -61,7 +59,7 @@ export class LedgerSigner extends Signer {
    */
   public async signTransfer({ walletIndex, tx }: SignTransferParams): Promise<string> {
     // const unsignedTx = ethers.utils.serializeTransaction(tx).substring(2)
-    const unsignedTx = tx.unsignedSerialized
+    const unsignedTx = tx.unsignedSerialized.substring(2)
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 
     const ethApp = await this.getApp()
@@ -87,33 +85,7 @@ export class LedgerSigner extends Signer {
    * @returns {string} The raw signed transaction.
    */
   public async signApprove({ walletIndex, tx }: SignApproveParams): Promise<string> {
-    const baseTx = new Transaction()
-    baseTx.type = 1
-
-    if (tx.chainId) {
-      baseTx.chainId = tx.chainId
-    }
-
-    if (tx.to) {
-      baseTx.to = tx.to
-    }
-
-    if (tx.data) {
-      baseTx.data = tx.data
-    }
-
-    if (tx.nonce) {
-      baseTx.nonce = new BigNumber(tx.nonce).toNumber()
-    }
-
-    if (tx.value) {
-      baseTx.value = tx.value
-    }
-
-    baseTx.gasLimit = tx.gasLimit
-    baseTx.gasPrice = tx.gasPrice
-
-    const unsignedTx = baseTx.unsignedSerialized
+    const unsignedTx = tx.unsignedSerialized.substring(2)
 
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 

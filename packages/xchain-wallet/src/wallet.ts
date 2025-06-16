@@ -29,6 +29,7 @@ import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
 import BigNumber from 'bignumber.js'
 
 import { ChainBalances, CosmosTxParams, EvmTxParams, RadixTxParams, UtxoTxParams } from './types'
+import { getAddress } from 'ethers'
 
 // Record type to hold network URLs
 export type NodeUrls = Record<Network, string>
@@ -488,7 +489,7 @@ export class Wallet {
     if (!this.isEvmClient(client)) throw Error('Can not make approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not make approve over native asset')
 
-    const contractAddress = getContractAddressFromAsset(asset)
+    const contractAddress = getAddress(getContractAddressFromAsset(asset))
 
     return await client.approve({ contractAddress, amount, spenderAddress })
   }
@@ -512,7 +513,7 @@ export class Wallet {
     if (!this.isEvmClient(client)) throw Error('Can not validate approve over non EVM client')
     if (asset.chain === asset.ticker) throw Error('Can not validate approve over native asset')
 
-    const contractAddress = getContractAddressFromAsset(asset)
+    const contractAddress = getAddress(getContractAddressFromAsset(asset))
 
     return isApproved({
       provider: client.getProvider(),

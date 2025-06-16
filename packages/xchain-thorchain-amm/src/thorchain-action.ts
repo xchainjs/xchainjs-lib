@@ -114,7 +114,7 @@ export class ThorchainAction {
     const routerContract = new Contract(inboundDetails.router, abi.router)
     const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
 
-    const unsignedTx = await routerContract.depositWithExpiry(...depositParams)
+    const unsignedTx = await routerContract.getFunction('depositWithExpiry').populateTransaction(...depositParams)
 
     const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
 

@@ -19,6 +19,9 @@ export abstract class Signer implements ISigner {
 
   constructor({ provider, derivationPath }: SignerParams) {
     this.provider = provider
+    if (derivationPath.endsWith('/')) {
+      derivationPath = derivationPath.slice(0, -1)
+    }
     this.derivationPath = derivationPath
   }
 
@@ -28,7 +31,7 @@ export abstract class Signer implements ISigner {
    * @returns {string} The full derivation path
    */
   public getFullDerivationPath(walletIndex: number): string {
-    return `${this.derivationPath}${walletIndex}`
+    return `${this.derivationPath}/${walletIndex}`
   }
 
   /**

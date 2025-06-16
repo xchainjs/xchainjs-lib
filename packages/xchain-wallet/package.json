@@ -36,7 +36,7 @@
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
-    "ethers": "6.14.3"
+    "ethers": "^6.14.3"
   },
   "devDependencies": {
     "@xchainjs/xchain-bitcoin": "workspace:*",
