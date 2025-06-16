@@ -57,6 +57,7 @@
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^8.0.0",
+    "jest": "^30.0.0",
     "jest-fetch-mock": "^3.0.3",
     "lint-staged": "^13.1.0",
     "prettier": "^2.2.0",
@@ -64,15 +65,12 @@
     "rollup": "4.22.4",
     "rollup-plugin-typescript2": "0.36.0",
     "rollup-plugin-visualizer": "^5.14.0",
-    "ts-jest": "29.3.4",
+    "ts-jest": "^29.4.0",
     "ts-node": "10.9.2",
     "tslib": "^2.5.0",
     "turbo": "1.13.0",
     "typescript": "^5.0.4",
     "weighted": "^1.0.0",
     "yarn-audit-ci": "^1.2.0"
-  },
-  "dependencies": {
-    "jest": "^30.0.0"
   }
 }
