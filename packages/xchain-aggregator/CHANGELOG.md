@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.8
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-query@2.0.2
+- @xchainjs/xchain-mayachain-amm@4.0.7
+
 ## 2.0.7
 
 ### Patch Changes

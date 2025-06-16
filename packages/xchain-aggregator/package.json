@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-aggregator",
   "description": "Protocol aggregator to make actions in different protocols",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -29,7 +29,7 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@chainflip/sdk": "1.9.2",
+    "@chainflip/sdk": "^1.9.2",
     "@trpc/server": "^10.45.2",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-mayachain": "workspace:*",

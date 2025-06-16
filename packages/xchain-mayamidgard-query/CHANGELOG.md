@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- 12dd7c2: Change primary midgard endpoint
+
 ## 1.0.1
 
 ### Patch Changes
