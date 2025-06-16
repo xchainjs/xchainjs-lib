@@ -185,8 +185,8 @@ export abstract class Client extends BaseXChainClient {
 
     return {
       average: baseAmount(fee, XRP_DECIMAL),
-      fast: baseAmount(Number(fee) * 1.25, XRP_DECIMAL),
-      fastest: baseAmount(Number(fee) * 1.5, XRP_DECIMAL),
+      fast: baseAmount(fee, XRP_DECIMAL),
+      fastest: baseAmount(fee, XRP_DECIMAL),
       type: FeeType.FlatFee,
     }
   }
