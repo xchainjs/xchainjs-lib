@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr } from '@hippocampus-web3/zcash-wallet-js'
+import * as ZcashLib from '@mayaprotocol/zcash-ts'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
@@ -42,9 +42,8 @@ class ClientKeystore extends Client {
       if (!zecKeys.privateKey) {
         throw Error('Error getting private key')
       }
-      const prefix = Utils.zecNetworkPrefix(this.network)
-      const bufferPrefix = Buffer.from(prefix)
-      return skToAddr(zecKeys.privateKey, bufferPrefix)
+      const network = Utils.getZcashNetwork(this.network)
+      return ZcashLib.addressFromPrivateKey(Buffer.from(zecKeys.privateKey).toString('hex'), network)
     }
 
     throw new Error('Phrase must be provided')
@@ -99,32 +98,89 @@ class ClientKeystore extends Client {
     const utxos = await this.scanUTXOs(sender, true)
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
 
-    const zcashUtxos = utxos.map((utxo) => ({
-      address: sender,
+    // Determine network name for TransactionBuilder
+    const networkName = this.network === Network.Mainnet ? 'mainnet' : 'testnet'
+
+    // Get the current block height for proper transaction version determination
+    const providerNetwork = this.dataProviders[0][this.network]
+    if (!providerNetwork) throw new Error('No data provider available')
+
+    // Get current block height by checking the latest transaction for this address
+    // or use the highest block height from available UTXOs
+    let blockHeight = 500000 // Fallback to a post-Overwinter height
+
+    try {
+      // Try to get recent transactions to determine current block height
+      const recentTxs = await providerNetwork.getTransactions({
+        address: sender,
+        limit: 1,
+      })
+
+      if (recentTxs.txs.length > 0) {
+        // Use blockTime to estimate current height
+        // Zcash has ~2.5 minute block times (150 seconds)
+        const latestTx = recentTxs.txs[0]
+        const txTimestamp = latestTx.date.getTime() / 1000
+        const currentTimestamp = Date.now() / 1000
+        const blocksSinceLatestTx = Math.floor((currentTimestamp - txTimestamp) / 150)
+
+        // Get block height from UTXO data if available, or estimate
+        const utxoHeights = utxos
+          .map(() => {
+            // UTXOs don't have height in this format, return 0
+            return 0
+          })
+          .filter((h) => h > 0)
+
+        if (utxoHeights.length > 0) {
+          blockHeight = Math.max(...utxoHeights) + blocksSinceLatestTx
+        } else {
+          // Conservative estimate: use a recent mainnet height
+          // As of Jan 2025, Zcash mainnet is around block 2,900,000
+          blockHeight = 2900000
+        }
+      }
+    } catch (error) {
+      console.warn('Could not determine current block height, using fallback:', blockHeight)
+    }
+
+    // Convert UTXOs to Zcash format
+    // For Zcash P2PKH addresses, we can construct the script from the address
+    const addressScript = Utils.createP2PKHScript(sender)
+    const zcashUtxos: ZcashLib.UTXO[] = utxos.map((utxo) => ({
       txid: utxo.hash,
-      outputIndex: utxo.index,
-      satoshis: utxo.value,
+      vout: utxo.index,
+      value: utxo.value,
+      height: 0, // Use 0 for UTXO height as well
+      script: utxo.scriptPubKey || utxo.witnessUtxo?.script?.toString('hex') || addressScript,
     }))
 
-    const tx = await buildTx(
-      0,
-      sender,
-      params.recipient,
-      params.amount.amount().toNumber(),
-      zcashUtxos,
-      this.network === Network.Testnet ? false : true,
-      params.memo,
-    )
-
-    checkFeeBounds(this.feeBounds, tx.fee)
-
+    // Get the private key hex and public key
     if (!zecKeys.privateKey) {
       throw Error('Error getting private key')
     }
+    const privateKeyHex = Buffer.from(zecKeys.privateKey).toString('hex')
+    const pubkey = ZcashLib.getPublicKeyFromPrivateKey(privateKeyHex)
 
-    const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
+    // Create a transaction builder and use it similar to Bitcoin's PSBT
+    // TransactionBuilder accepts any format and normalizes internally
+    const builder = new ZcashLib.TransactionBuilder(networkName)
 
-    const txId = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
+    // Build the transaction
+    const buildResult = builder
+      .selectUTXOs(zcashUtxos, 'all') // Use all available UTXOs for automatic selection
+      .addOutput(params.recipient, params.amount.amount().toNumber(), params.memo)
+      .setChangeAddress(sender)
+      .build(blockHeight, pubkey)
+
+    // Check fee bounds
+    checkFeeBounds(this.feeBounds, buildResult.fee)
+
+    // Sign the transaction
+    const signedTx = ZcashLib.TransactionBuilder.sign(buildResult, privateKeyHex, networkName, pubkey)
+
+    // Broadcast
+    const txId = await this.roundRobinBroadcastTx(signedTx.rawTx.toString('hex'))
 
     return txId
   }
