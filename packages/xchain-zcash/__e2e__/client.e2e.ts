@@ -1,38 +1,18 @@
+import { Client, defaultZECParams } from '../src'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { ClientKeystore, defaultZECParams } from '../src'
-
-/**
- * Zcash E2E tests
- *
- * To run these tests:
- * 1. Set PHRASE_MAINNET environment variable with a mnemonic phrase that has Zcash funds
- * 2. Set NOWNODES_API_KEY environment variable with your NowNodes API key
- * 3. Run: PHRASE_MAINNET="your phrase here" NOWNODES_API_KEY="your-api-key" yarn e2e
- *
- * Note: These tests will perform real transactions on mainnet
- *
- * To get a NowNodes API key:
- * - Sign up at https://nownodes.io/
- * - Create a free API key (up to 100,000 requests/month)
- */
-describe('Zcash ClientKeystore E2E', () => {
-  let client: ClientKeystore
+describe('Zcash client', () => {
+  let client: Client
 
   beforeAll(() => {
-    const phrase = process.env.PHRASE_MAINNET
-    if (!phrase) {
-      throw new Error('PHRASE_MAINNET environment variable is required for e2e tests')
-    }
-
-    client = new ClientKeystore({
+    client = new Client({
       ...defaultZECParams,
-      phrase,
+      phrase: process.env.PHRASE_MAINNET,
     })
   })
 
   it('Should get address', async () => {
-    console.log(await client.getAddressAsync(0))
+    console.log(await client.getAddressAsync(1))
   })
 
   it('Should get balance', async () => {
@@ -47,7 +27,7 @@ describe('Zcash ClientKeystore E2E', () => {
     const hash = await client.transfer({
       walletIndex: 0,
       amount: assetToBase(assetAmount('0.1', 8)),
-      recipient: address,
+      recipient: address
     })
     console.log('hash', hash)
   })
@@ -57,7 +37,7 @@ describe('Zcash ClientKeystore E2E', () => {
     const hash = await client.transfer({
       amount: assetToBase(assetAmount('0.1', 8)),
       recipient: address,
-      memo: '=:c:maya1a7gg93dgwlulsrqf6qtage985ujhpu068zllw7',
+      memo: 'test'
     })
     console.log('hash', hash)
   })

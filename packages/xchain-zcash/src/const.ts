@@ -21,9 +21,9 @@ export const AssetZEC: Asset = { chain: ZECChain, symbol: 'ZEC', ticker: 'ZEC', 
 
 // Explorer providers for Zcash
 const ZEC_MAINNET_EXPLORER = new ExplorerProvider(
-  'https://mainnet.zcashexplorer.app/',
-  'https://mainnet.zcashexplorer.app/address/%%ADDRESS%%',
-  'https://mainnet.zcashexplorer.app/transactions/%%TX_ID%%',
+  'https://blockchair.com/zcash/',
+  'https://blockchair.com/zcash/address/%%ADDRESS%%',
+  'https://blockchair.com/zcash/transaction/%%TX_ID%%',
 )
 const ZEC_TESTNET_EXPLORER = new ExplorerProvider(
   'https://testnet.zcashexplorer.app/',
