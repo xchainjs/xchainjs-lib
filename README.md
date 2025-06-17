@@ -122,6 +122,7 @@ Blockchain clients with whom you can prepare, make and broadcast transactions, e
 | [@xchainjs/xchain-radix](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-radix) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-radix)](https://www.npmjs.com/package/@xchainjs/xchain-radix) |
 | [@xchainjs/xchain-cardano](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cardano) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cardano)](https://www.npmjs.com/package/@xchainjs/xchain-cardano) |
 | [@xchainjs/xchain-zcash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-zcash) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-zcash)](https://www.npmjs.com/package/@xchainjs/xchain-zcash) |
+| [@xchainjs/xchain-ripple](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ripple) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-ripple)](https://www.npmjs.com/package/@xchainjs/xchain-ripple) |
 
 ### Utility packages
 
