@@ -139,9 +139,9 @@ describe('Zcash client', () => {
     const fees = await client.getFees()
     const expected = {
       type: FeeType.FlatFee,
-      average: baseAmount(30000, ZEC_DECIMAL),
-      fast: baseAmount(30000, ZEC_DECIMAL),
-      fastest: baseAmount(30000, ZEC_DECIMAL),
+      average: baseAmount(20000, ZEC_DECIMAL),
+      fast: baseAmount(20000, ZEC_DECIMAL),
+      fastest: baseAmount(20000, ZEC_DECIMAL),
     }
     expect(deepSerialize(fees)).toEqual(deepSerialize(expected))
   })
@@ -150,9 +150,9 @@ describe('Zcash client', () => {
     const fees = await client.getFees({ memo: 'test' })
     const expected = {
       type: FeeType.FlatFee,
-      average: baseAmount(35000, ZEC_DECIMAL),
-      fast: baseAmount(35000, ZEC_DECIMAL),
-      fastest: baseAmount(35000, ZEC_DECIMAL),
+      average: baseAmount(25000, ZEC_DECIMAL),
+      fast: baseAmount(25000, ZEC_DECIMAL),
+      fastest: baseAmount(25000, ZEC_DECIMAL),
     }
     expect(deepSerialize(fees)).toEqual(deepSerialize(expected))
   })
@@ -161,9 +161,9 @@ describe('Zcash client', () => {
     const fees = await client.getFees({ sender: 't1eiZYPXWurGMxFwoTu62531s8fAiExFh88' })
     const expected = {
       type: FeeType.FlatFee,
-      average: baseAmount(40000, ZEC_DECIMAL),
-      fast: baseAmount(40000, ZEC_DECIMAL),
-      fastest: baseAmount(40000, ZEC_DECIMAL),
+      average: baseAmount(30000, ZEC_DECIMAL),
+      fast: baseAmount(30000, ZEC_DECIMAL),
+      fastest: baseAmount(30000, ZEC_DECIMAL),
     }
     expect(deepSerialize(fees)).toEqual(deepSerialize(expected))
   })
