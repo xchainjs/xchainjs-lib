@@ -47,11 +47,9 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
       apiKey: this._apiKey,
       baseUrl: this.baseUrl,
       address: address,
-      isConfirmed: true
+      isConfirmed: true,
     })
-    return this.mapUTXOs(
-      allUnspent
-    )
+    return this.mapUTXOs(allUnspent)
   }
 
   async getUnspentTxs(address: string): Promise<UTXO[]> {
@@ -59,11 +57,9 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
       apiKey: this._apiKey,
       baseUrl: this.baseUrl,
       address: address,
-      isConfirmed: false
+      isConfirmed: false,
     })
-    return this.mapUTXOs(
-      allUnspent
-    )
+    return this.mapUTXOs(allUnspent)
   }
 
   async getBalance(address: Address, confirmedOnly?: boolean): Promise<Balance[]> {
@@ -123,16 +119,17 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
 
   private async mapUTXOs(utxos: AddressUTXO[]): Promise<UTXO[]> {
     return utxos.flatMap((currentUtxo) => {
-      return [{
-        hash: currentUtxo.txid,
-        index: currentUtxo.vout,
-        value: Number(currentUtxo.value)
-      }]
+      return [
+        {
+          hash: currentUtxo.txid,
+          index: currentUtxo.vout,
+          value: Number(currentUtxo.value),
+        },
+      ]
     })
   }
 
   private async getRawTransactions(params?: TxHistoryParams): Promise<Transaction[]> {
-
     if (params?.startTime) {
       throw Error('startTime not supported on nownodes provider')
     }

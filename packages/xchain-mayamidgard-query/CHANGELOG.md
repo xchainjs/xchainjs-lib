@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- 12dd7c2: Change primary midgard endpoint
+
+## 1.0.1
+
+### Patch Changes
+
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-client@2.0.1
+
 ## 1.0.0
 
 ### Major Changes
