@@ -2138,27 +2138,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mayaprotocol/xchain-zcash@workspace:packages/xchain-zcash":
-  version: 0.0.0-use.local
-  resolution: "@mayaprotocol/xchain-zcash@workspace:packages/xchain-zcash"
-  dependencies:
-    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
-    "@mayaprotocol/zcash-js": "npm:1.0.7"
-    "@types/blake2b-wasm": "npm:^2.4.3"
-    "@types/js-yaml": "npm:^4.0.9"
-    "@types/lodash": "npm:^4.17.13"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-utxo": "workspace:*"
-    "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios-mock-adapter: "npm:^2.1.0"
-    bip32: "npm:^5.0.0-rc.0"
-    ecpair: "npm:^3.0.0"
-    jest: "npm:^29.7.0"
-  languageName: unknown
-  linkType: soft
-
 "@mayaprotocol/zcash-js@npm:1.0.7":
   version: 1.0.7
   resolution: "@mayaprotocol/zcash-js@npm:1.0.7"
@@ -4710,6 +4689,27 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
     ethers: "npm:5.7.2"
+  languageName: unknown
+  linkType: soft
+
+"@xchainjs/xchain-zcash@workspace:packages/xchain-zcash":
+  version: 0.0.0-use.local
+  resolution: "@xchainjs/xchain-zcash@workspace:packages/xchain-zcash"
+  dependencies:
+    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
+    "@mayaprotocol/zcash-js": "npm:1.0.7"
+    "@types/blake2b-wasm": "npm:^2.4.3"
+    "@types/js-yaml": "npm:^4.0.9"
+    "@types/lodash": "npm:^4.17.13"
+    "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    "@xchainjs/xchain-utxo": "workspace:*"
+    "@xchainjs/xchain-utxo-providers": "workspace:*"
+    axios-mock-adapter: "npm:^2.1.0"
+    bip32: "npm:^5.0.0-rc.0"
+    ecpair: "npm:^3.0.0"
+    jest: "npm:^29.7.0"
   languageName: unknown
   linkType: soft
 
