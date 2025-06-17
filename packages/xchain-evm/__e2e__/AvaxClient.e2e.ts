@@ -19,7 +19,7 @@ import AvaxClient, {
 } from '../src'
 import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
 import { BigNumber } from 'bignumber.js'
-import { JsonRpcProvider } from 'ethers'
+import { getAddress, JsonRpcProvider } from 'ethers'
 
 const AVAXChain: Chain = 'AVAX'
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
@@ -292,35 +292,30 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   })
   it('should test erc-20 approvals ', async () => {
     let isApproved = false
-    // check if approved for 1 RIP, should be false
     const params: IsApprovedParams = {
-      contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
-      spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
-      amount: assetToBase(assetAmount('1', 18)),
+      contractAddress: getAddress('0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'), // USDC
+      spenderAddress: '0x8F66c4AE756BEbC49Ec8B81966DD8bba9f127549', // TC router
+      amount: assetToBase(assetAmount('1', 6)),
     }
     isApproved = await client.isApproved(params)
     expect(isApproved).toBe(false)
 
-    //  approve for 1 RIP
     const approveParams: ApproveParams = {
-      contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
-      spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
-      amount: assetToBase(assetAmount('1', 18)),
+      contractAddress: getAddress('0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'), // USDC
+      spenderAddress: '0x8F66c4AE756BEbC49Ec8B81966DD8bba9f127549', // TC router
+      amount: assetToBase(assetAmount('1', 6)),
       walletIndex: 0,
     }
     await client.approve(approveParams)
     await delay(10_000) //wait 10 secs for block to be mined
 
-    // check if approved for 1 RIP, should be true
     isApproved = await client.isApproved(params)
     expect(isApproved).toBe(true)
 
-    // set approve below 1 rip
-    approveParams.amount = assetToBase(assetAmount('0.1', 18))
+    approveParams.amount = assetToBase(assetAmount('0.1', 6))
     await client.approve(approveParams)
     await delay(10_000) //wait 10 secs for block to be mined
 
-    // check if approved for 1 RIP, should be false
     isApproved = await client.isApproved(params)
     expect(isApproved).toBe(false)
   })
@@ -347,5 +342,48 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(gasPrices.fast.gte(gasPrices.average)).toBe(true)
     expect(gasPrices.fastest.gte(gasPrices.average)).toBe(true)
     expect(gasPrices.fastest.gte(gasPrices.fast)).toBe(true)
+  })
+
+  it('calls balanceOf on ERC20 contract and returns the result', async () => {
+    const tokenAddress = '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'
+    const walletAddress = await client.getAddressAsync(1)
+    console.log(walletAddress)
+
+    const ERC20_ABI = [
+      {
+        constant: true,
+        inputs: [{ name: 'owner', type: 'address' }],
+        name: 'balanceOf',
+        outputs: [{ name: 'balance', type: 'uint256' }],
+        type: 'function',
+      },
+    ]
+
+    const params = {
+      contractAddress: tokenAddress,
+      abi: ERC20_ABI,
+      funcName: 'balanceOf',
+      funcParams: [walletAddress],
+      signer: undefined,
+    }
+
+    const result = await client.call<bigint>(params)
+
+    console.log(result)
+  })
+
+  it('should estimate gas for ERC20 transfer', async () => {
+    const asset = assetUSDC
+    const amount = assetToBase(assetAmount(1, 6))
+
+    const recipient = await client.getAddressAsync(1)
+
+    const gas = await client.estimateGasLimit({
+      asset,
+      recipient: recipient,
+      amount,
+    })
+
+    console.log(gas.toString())
   })
 })

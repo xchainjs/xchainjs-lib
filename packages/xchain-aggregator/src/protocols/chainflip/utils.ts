@@ -1,7 +1,7 @@
 import { Asset as CAsset, AssetData, Chain as CChain, Chains } from '@chainflip/sdk/swap'
 import { Asset as XAsset, AssetType, Chain as XChain, TokenAsset as XTokenAsset } from '@xchainjs/xchain-util'
 
-export const cChainToXChain = (chain: CChain): XChain => {
+export const cChainToXChain = (chain: CChain): XChain | null => {
   switch (chain) {
     case 'Bitcoin':
       return 'BTC'
@@ -14,11 +14,11 @@ export const cChainToXChain = (chain: CChain): XChain => {
     case 'Solana':
       return 'SOL'
     default:
-      throw Error('Unsupported chain in XChainJS')
+      return null
   }
 }
 
-export const xChainToCChain = (chain: XChain): CChain => {
+export const xChainToCChain = (chain: XChain): CChain | null => {
   switch (chain) {
     case 'BTC':
       return Chains.Bitcoin
@@ -31,7 +31,7 @@ export const xChainToCChain = (chain: XChain): CChain => {
     case 'SOL':
       return Chains.Solana
     default:
-      throw Error('Unsupported chain in Chainflip')
+      return null
   }
 }
 

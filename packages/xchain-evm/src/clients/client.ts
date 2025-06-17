@@ -411,10 +411,13 @@ export class Client extends BaseXChainClient implements EVMClient {
       if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(theAsset)}`)
       const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
 
+      const address = from || (await this.getAddressAsync())
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      gasEstimate = await (contract.estimateGas as any).transfer(recipient, txAmount, {
-        from: from || (await this.getAddressAsync()),
+      const gasEstimateResponse = await contract.getFunction('transfer').estimateGas(recipient, txAmount, {
+        from: address,
       })
+
+      gasEstimate = new BigNumber(gasEstimateResponse.toString())
     } else {
       // ETH gas estimate
       let stringEncodedMemo

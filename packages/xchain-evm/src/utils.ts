@@ -120,8 +120,8 @@ export const estimateCall = async ({
   funcParams?: unknown[]
 }): Promise<BigNumber> => {
   const contract = new Contract(contractAddress, abi, provider)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return await new BigNumber((contract.estimateGas as any)[funcName](...funcParams).toString())
+  const estiamtion = await contract.getFunction(funcName).estimateGas(...funcParams)
+  return await new BigNumber(estiamtion.toString())
 }
 /**
  * Calls a contract function.
@@ -210,7 +210,7 @@ export async function estimateApprove({
     contractAddress,
     abi,
     funcName: 'approve',
-    funcParams: [spenderAddress, txAmount, { from: fromAddress }],
+    funcParams: [spenderAddress, BigInt(txAmount.toString()), { from: fromAddress }],
   })
 }
 
@@ -240,7 +240,8 @@ export async function isApproved({
 }): Promise<boolean> {
   const txAmount = new BigNumber(amount?.amount().toFixed() ?? 1)
   const contract: Contract = new Contract(contractAddress, erc20ABI, provider)
-  const allowance: BigNumber = new BigNumber(await contract.allowance(fromAddress, spenderAddress).toString())
+  const allowanceResponse = await contract.allowance(fromAddress, spenderAddress)
+  const allowance: BigNumber = new BigNumber(allowanceResponse.toString())
 
   return txAmount.lte(allowance)
 }

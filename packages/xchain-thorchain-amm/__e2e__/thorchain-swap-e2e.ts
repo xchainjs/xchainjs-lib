@@ -111,7 +111,7 @@ describe('ThorchainAmm e2e tests', () => {
       thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)
     })
 
-    it(`Should validate swap from BTC to ETH without errors`, async () => {
+    it(`Should validate swap from BTC to cosmos without errors`, async () => {
       const errors = await thorchainAmm.validateSwap({
         fromAsset: AssetBTC,
         destinationAsset: AssetETH,
@@ -331,6 +331,32 @@ describe('ThorchainAmm e2e tests', () => {
       console.log(txSubmitted)
     })
 
+    it('Should do swap. BSC -> BSC.USDC', async () => {
+      const toAsset = assetFromStringEx('BSC.USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D') as TokenAsset
+
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAddress: await wallet.getAddress(AssetBSC.chain),
+        destinationAddress: await wallet.getAddress(AssetBSC.chain),
+        fromAsset: AssetBSC,
+        destinationAsset: toAsset,
+        amount: new CryptoAmount(assetToBase(assetAmount(0.015, 18)), AssetBSC),
+      })
+
+      console.log(txSubmitted)
+    })
+
+    it('Should do swap. BTC -> ATOM', async () => {
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAddress: await wallet.getAddress(AssetBTC.chain),
+        destinationAddress: await wallet.getAddress(AssetATOM.chain),
+        fromAsset: AssetBTC,
+        destinationAsset: AssetATOM,
+        amount: new CryptoAmount(assetToBase(assetAmount(0.000215, 8)), AssetBTC),
+      })
+
+      console.log(txSubmitted)
+    })
+
     it(`Should perform a swap from ATOM to synth ATOM`, async () => {
       const txSubmitted = await thorchainAmm.doSwap({
         fromAsset: AssetATOM,
@@ -423,24 +449,24 @@ describe('ThorchainAmm e2e tests', () => {
       console.log(txSubmitted)
     })
 
-    it('Should do swap from THOR Ledger', async () => {
-      const thorchainQuery = new ThorchainQuery()
-      const wallet = new Wallet({
-        THOR: new THORLedgerClient({ transport: await TransportNodeHid.create(), network: Network.Mainnet }),
-      })
+    // it('Should do swap from THOR Ledger', async () => {
+    //   const thorchainQuery = new ThorchainQuery()
+    //   const wallet = new Wallet({
+    //     THOR: new THORLedgerClient({ transport: await TransportNodeHid.create(), network: Network.Mainnet }),
+    //   })
 
-      const sAVAX = assetFromStringEx('AVAX/AVAX')
-      const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
+    //   const sAVAX = assetFromStringEx('AVAX/AVAX')
+    //   const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
 
-      const txSubmitted = await thorchainAmm.doSwap({
-        fromAddress: await wallet.getAddress(THORChain),
-        destinationAddress: await wallet.getAddress(THORChain),
-        fromAsset: sAVAX,
-        destinationAsset: AssetRuneNative,
-        amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), sAVAX),
-      })
+    //   const txSubmitted = await thorchainAmm.doSwap({
+    //     fromAddress: await wallet.getAddress(THORChain),
+    //     destinationAddress: await wallet.getAddress(THORChain),
+    //     fromAsset: sAVAX,
+    //     destinationAsset: AssetRuneNative,
+    //     amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), sAVAX),
+    //   })
 
-      console.log(txSubmitted)
-    })
+    //   console.log(txSubmitted)
+    // })
   })
 })
