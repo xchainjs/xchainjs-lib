@@ -658,7 +658,6 @@ export class Client extends BaseXChainClient implements EVMClient {
     const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
     const valueToApprove = getApprovalAmount(amount)
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const unsignedTx = await contract
       .getFunction('approve')
       .populateTransaction(spenderAddress, BigInt(valueToApprove.toString()))
@@ -795,8 +794,6 @@ export class Client extends BaseXChainClient implements EVMClient {
     tx.gasPrice = feeData.gasPrice || null
     tx.maxFeePerGas = feeData.maxFeePerGas || null
     tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || null
-
-    // const tx = await resolveProperties(transactionRequest)
 
     const signedTx = await this.getSigner().signTransfer({
       walletIndex,
