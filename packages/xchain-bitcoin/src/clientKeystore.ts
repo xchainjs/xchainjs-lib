@@ -92,7 +92,7 @@ class ClientKeystore extends Client {
   private getBtcKeys(phrase: string, index = 0): ECPairInterface {
     const btcNetwork = Utils.btcNetwork(this.network)
     const seed = getSeed(phrase)
-    const master = HDKey.fromMasterSeed(seed).derive(this.getFullDerivationPath(index))
+    const master = HDKey.fromMasterSeed(Uint8Array.from(seed)).derive(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')

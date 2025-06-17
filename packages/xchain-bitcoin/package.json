@@ -41,12 +41,13 @@
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
-    "bitcoinjs-lib": "6.1.7",
+    "bitcoinjs-lib": "^6.1.7",
     "coinselect": "3.1.12",
     "ecpair": "2.1.0"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
+    "@types/bitcoinjs-lib": "^5.0.4",
     "axios": "1.8.4",
     "axios-mock-adapter": "2.1.0"
   },
