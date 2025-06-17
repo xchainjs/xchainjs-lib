@@ -4,7 +4,7 @@ export { ClientKeystore as Client } from './clientKeystore'
 // Export the 'ClientLedger' class
 export { ClientLedger } from './clientLedger'
 
-// Export the 'defaultBTCParams' constant from the 'client' file
+// Export the 'defaultZECParams' constant from the 'client' file
 export { defaultZECParams } from './client'
 
 // Export all constants from the 'const' file
