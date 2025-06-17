@@ -50,6 +50,7 @@
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
+    "@xchainjs/xchain-zcash": "workspace:*",
     "ethers": "5.7.2"
   },
   "devDependencies": {

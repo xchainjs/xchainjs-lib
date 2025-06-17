@@ -4,6 +4,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI, Client as KujiraClient, KUJIChain, defaultKujiParams } from '@xchainjs/xchain-kujira'
+import { Client as ZecClient, ZECChain, defaultZECParams } from '@xchainjs/xchain-zcash'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { CompatibleAsset } from '@xchainjs/xchain-mayachain-query'
 import { Client as RadixClient, RadixChain } from '@xchainjs/xchain-radix'
@@ -84,6 +85,8 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new MayaClient({ network }).validateAddress(address)
     case RadixChain:
       return new RadixClient({ network }).validateAddress(address)
+    case ZECChain:
+      return new ZecClient({ ...defaultZECParams, network }).validateAddress(address)
     case ARBChain:
       return new ArbClient({ ...defaultArbParams, network: Network.Mainnet }).validateAddress(address)
     default:
