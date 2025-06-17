@@ -1,5 +1,5 @@
-import { FeeType } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
+import { FeeType } from '@xchainjs/xchain-client/lib'
+import { baseAmount } from '@xchainjs/xchain-util/lib'
 import * as bip39 from 'bip39'
 
 import MockNowNodes from '../__mocks__/nownodes'
@@ -98,7 +98,7 @@ describe('Zcash client', () => {
   it('Should validate address', async () => {
     let isValid = client.validateAddress('t1XVXWCvpMgBvUaed4XDqWtgQgJSu1Ghz7F')
     expect(isValid).toBe(true)
-    isValid = client.validateAddress('t1INVALID')
+    isValid = client.validateAddress('t1XVXWCvpMgBvUaed4XDqWtgQgJSu1Ghz7X')
     expect(isValid).toBe(false)
   })
 

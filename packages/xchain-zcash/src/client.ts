@@ -5,7 +5,6 @@ import {
   FeeRate,
   FeeRates,
   FeeType,
-  Fees,
   FeesWithRates,
   Network,
 } from '@xchainjs/xchain-client'
@@ -90,7 +89,7 @@ abstract class Client extends UTXOClient {
    * @returns {Buffer} Compiled memo.
    */
   protected compileMemo(memo: string): Buffer {
-    return ZcashLib.createMemoScript(memo)
+    return memoToScript(memo)
   }
 
   /**
@@ -183,8 +182,8 @@ abstract class Client extends UTXOClient {
     throw Error('Error Zcash has flat fee. Fee rates not supported')
   }
 
-  async getFees(options?: FeeEstimateOptions): Promise<Fees> {
-    let utxoNumber = 2 // By default pro rough estimation to display on interface
+  async getFees(options?: FeeEstimateOptions) {
+    let utxoNumber = 2 // By default pro rought estimation to display on interface
     if (options?.sender) {
       const utxo = await this.scanUTXOs(options?.sender, false)
       utxoNumber = utxo.length // Max possible fee for interface display

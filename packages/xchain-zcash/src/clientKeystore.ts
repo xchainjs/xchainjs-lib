@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr, getPublicKeyFromPrivateKey } from '@mayaprotocol/zcash-js'
+import { buildTx, signAndFinalize, skToAddr } from '@mayaprotocol/zcash-js'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
@@ -99,53 +99,6 @@ class ClientKeystore extends Client {
     const utxos = await this.scanUTXOs(sender, true)
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
 
-    // Determine network name for TransactionBuilder
-    const networkName = this.network === Network.Mainnet ? 'mainnet' : 'testnet'
-
-    // Get the current block height for proper transaction version determination
-    const providerNetwork = this.dataProviders[0][this.network]
-    if (!providerNetwork) throw new Error('No data provider available')
-
-    // Get current block height by checking the latest transaction for this address
-    // or use the highest block height from available UTXOs
-    let blockHeight = 500000 // Fallback to a post-Overwinter height
-
-    try {
-      // Try to get recent transactions to determine current block height
-      const recentTxs = await providerNetwork.getTransactions({
-        address: sender,
-        limit: 1,
-      })
-
-      if (recentTxs.txs.length > 0) {
-        // Use blockTime to estimate current height
-        // Zcash has ~2.5 minute block times (150 seconds)
-        const latestTx = recentTxs.txs[0]
-        const txTimestamp = latestTx.date.getTime() / 1000
-        const currentTimestamp = Date.now() / 1000
-        const blocksSinceLatestTx = Math.floor((currentTimestamp - txTimestamp) / 150)
-
-        // Get block height from UTXO data if available, or estimate
-        const utxoHeights = utxos
-          .map(() => {
-            // UTXOs don't have height in this format, return 0
-            return 0
-          })
-          .filter((h) => h > 0)
-
-        if (utxoHeights.length > 0) {
-          blockHeight = Math.max(...utxoHeights) + blocksSinceLatestTx
-        } else {
-          // Conservative estimate: use a recent mainnet height
-          // As of Jan 2025, Zcash mainnet is around block 2,900,000
-          blockHeight = 2900000
-        }
-      }
-    } catch (error) {
-      console.warn('Could not determine current block height, using fallback:', blockHeight)
-    }
-
-    // Convert UTXOs to zcash-js format
     const zcashUtxos = utxos.map((utxo) => ({
       address: sender,
       txid: utxo.hash,
@@ -153,37 +106,25 @@ class ClientKeystore extends Client {
       satoshis: utxo.value,
     }))
 
-    // Get the private key hex
-    if (!zecKeys.privateKey) {
-      throw Error('Error getting private key')
-    }
-    const privateKeyHex = Buffer.from(zecKeys.privateKey).toString('hex')
-    const pubkey = getPublicKeyFromPrivateKey(privateKeyHex)
-
-    // Build the transaction
-    const unsignedTx = await buildTx(
-      blockHeight,
+    const tx = await buildTx(
+      0,
       sender,
       params.recipient,
       params.amount.amount().toNumber(),
       zcashUtxos,
-      networkName === 'zcash',
+      this.network === Network.Testnet ? false : true,
       params.memo,
     )
 
-    // Check fee bounds
-    checkFeeBounds(this.feeBounds, unsignedTx.fee)
+    checkFeeBounds(this.feeBounds, tx.fee)
 
-    // Sign and finalize the transaction
-    const signedTx = await signAndFinalize(
-      unsignedTx,
-      privateKeyHex,
-      networkName === 'zcash',
-      pubkey,
-    )
+    if (!zecKeys.privateKey) {
+      throw Error('Error getting private key')
+    }
 
-    // Broadcast
-    const txId = await this.roundRobinBroadcastTx(signedTx.rawTx.toString('hex'))
+    const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
+
+    const txId = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
 
     return txId
   }
