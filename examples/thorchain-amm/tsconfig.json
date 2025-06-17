@@ -2,6 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "ES2017",
+    "skipLibCheck": true,
     "noEmitOnError": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,

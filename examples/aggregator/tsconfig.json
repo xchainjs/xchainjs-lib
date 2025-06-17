@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "module": "commonjs",
+        "skipLibCheck": true,
         "target": "ES2017",
         "noEmitOnError": true,
         "resolveJsonModule": true,
