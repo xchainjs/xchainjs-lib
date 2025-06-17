@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.0.8
+
+### Patch Changes
+
+- 2e74e96: add xchain-zcash to amm
+- Updated dependencies [2e74e96]
+  - @xchainjs/xchain-mayachain-query@2.0.3
+
 ## 4.0.7
 
 ### Patch Changes

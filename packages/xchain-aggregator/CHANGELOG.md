@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [2e74e96]
+  - @xchainjs/xchain-mayachain-query@2.0.3
+  - @xchainjs/xchain-mayachain-amm@4.0.8
+
 ## 2.0.8
 
 ### Patch Changes
