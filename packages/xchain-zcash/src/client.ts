@@ -1,11 +1,11 @@
-import * as ZcashLib from '@mayaprotocol/zcash-ts'
+import { buildTx, getFee, memoToScript } from '@mayaprotocol/zcash-js'
 import {
   AssetInfo,
   FeeEstimateOptions,
   FeeRate,
   FeeRates,
-  FeeType,
   Fees,
+  FeeType,
   FeesWithRates,
   Network,
 } from '@xchainjs/xchain-client'
@@ -90,7 +90,7 @@ abstract class Client extends UTXOClient {
    * @returns {Buffer} Compiled memo.
    */
   protected compileMemo(memo: string): Buffer {
-    return ZcashLib.createMemoScript(memo)
+    return memoToScript(memo)
   }
 
   /**
@@ -104,97 +104,7 @@ abstract class Client extends UTXOClient {
     if (feeRate) {
       throw 'No feerate supported for this client'
     }
-    const memoLength = _data ? _data.length : 0
-    return ZcashLib.calculateFee(inputs.length, 2, memoLength)
-  }
-
-  /**
-   * Build transaction using TransactionBuilder
-   *
-   * @param {TxParams} params The transfer options.
-   * @returns {Promise<PreparedTx>} The prepared transaction data.
-   */
-  async buildTx({
-    amount,
-    recipient,
-    memo,
-    sender,
-    spendPendingUTXO = true,
-  }: TxParams & {
-    sender: Address
-    spendPendingUTXO?: boolean
-  }): Promise<
-    PreparedTx & { builder: ZcashLib.TransactionBuilder; buildResult: ZcashLib.BuildResult; pubkey: Buffer }
-  > {
-    if (!this.validateAddress(recipient)) throw new Error('Invalid recipient address')
-    if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
-
-    // Scan UTXOs
-    const confirmedOnly = !spendPendingUTXO
-    const utxos = await this.scanUTXOs(sender, confirmedOnly)
-    if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
-
-    // Get current block height for proper transaction version determination
-    let blockHeight = 500000 // Fallback to a post-Overwinter height
-
-    const providerNetwork = this.dataProviders[0][this.network]
-    if (providerNetwork) {
-      try {
-        // Try to get recent transactions to determine current block height
-        const recentTxs = await providerNetwork.getTransactions({
-          address: sender,
-          limit: 1,
-        })
-
-        if (recentTxs.txs.length > 0) {
-          // Conservative estimate: use a recent mainnet height
-          // As of Jan 2025, Zcash mainnet is around block 2,900,000
-          blockHeight = 2900000
-        }
-      } catch (error) {
-        console.warn('Could not determine current block height, using fallback:', blockHeight)
-      }
-    }
-
-    // Convert UTXOs to Zcash format
-    const addressScript = Utils.createP2PKHScript(sender)
-    const zcashUtxos: ZcashLib.UTXO[] = utxos.map((utxo) => ({
-      txid: utxo.hash,
-      vout: utxo.index,
-      value: utxo.value,
-      height: blockHeight,
-      script: utxo.scriptPubKey || utxo.witnessUtxo?.script?.toString('hex') || addressScript,
-    }))
-
-    // Create a dummy pubkey for building unsigned transaction
-    // This will be replaced with actual pubkey when signing
-    // Use a valid compressed public key format (33 bytes starting with 0x02 or 0x03)
-    const dummyPubkey = Buffer.from('0339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2', 'hex')
-
-    // Create transaction builder
-    const network = Utils.getZcashNetwork(this.network)
-    const builder = new ZcashLib.TransactionBuilder(network)
-
-    // Build transaction
-    const buildResult = builder
-      .selectUTXOs(zcashUtxos, 'all')
-      .addOutput(recipient, amount.amount().toNumber(), memo)
-      .setChangeAddress(sender)
-      .build(blockHeight, dummyPubkey)
-
-    return {
-      rawUnsignedTx: JSON.stringify({
-        builder: builder.getState(),
-        buildResult,
-        blockHeight,
-        network,
-      }),
-      utxos,
-      inputs: utxos, // Use original UTXO format for compatibility
-      builder,
-      buildResult,
-      pubkey: dummyPubkey,
-    }
+    return getFee(inputs.length, 2, _data ? 'memo' : undefined)
   }
 
   /**
@@ -208,24 +118,60 @@ abstract class Client extends UTXOClient {
     memo,
     amount,
     recipient,
+    feeRate: _feeRate, // Ignored: Zcash uses flat fees
     spendPendingUTXO = true,
   }: TxParams & {
     sender: Address
+    feeRate: FeeRate
     spendPendingUTXO?: boolean
   }): Promise<PreparedTx> {
-    const prepared = await this.buildTx({
+    // Validate recipient address
+    if (!this.validateAddress(recipient)) {
+      throw new Error('Invalid recipient address')
+    }
+
+    // Get UTXOs for sender
+    const utxos = await this.scanUTXOs(sender, spendPendingUTXO)
+    if (utxos.length === 0) {
+      throw new Error('No UTXOs available for transaction')
+    }
+
+    // Convert UTXOs to zcash-js format
+    const zcashUtxos = utxos.map((utxo) => ({
+      address: sender,
+      txid: utxo.hash,
+      outputIndex: utxo.index,
+      satoshis: utxo.value,
+    }))
+
+    // Build unsigned transaction
+    const unsignedTx = await buildTx(
+      0, // height - can be 0 for prepared tx
       sender,
       recipient,
-      amount,
+      amount.amount().toNumber(),
+      zcashUtxos,
+      this.network === Network.Testnet ? false : true,
       memo,
-      spendPendingUTXO,
+    )
+
+    // For Zcash, we return the transaction data as JSON string
+    // since zcash-js doesn't produce a standard raw transaction format
+    const rawUnsignedTx = JSON.stringify({
+      height: 0,
+      from: sender,
+      to: recipient,
+      amount: amount.amount().toNumber(),
+      utxos: zcashUtxos,
+      isMainnet: this.network === Network.Testnet ? false : true,
+      memo,
+      fee: unsignedTx.fee,
     })
 
-    // Return only the standard PreparedTx fields
     return {
-      rawUnsignedTx: prepared.rawUnsignedTx,
-      utxos: prepared.utxos,
-      inputs: prepared.inputs,
+      rawUnsignedTx,
+      utxos,
+      inputs: utxos, // All UTXOs are potential inputs
     }
   }
 
@@ -238,13 +184,12 @@ abstract class Client extends UTXOClient {
   }
 
   async getFees(options?: FeeEstimateOptions): Promise<Fees> {
-    let utxoNumber = 2 // By default pro rough estimation to display on interface
+    let utxoNumber = 2 // By default pro rought estimation to display on interface
     if (options?.sender) {
       const utxo = await this.scanUTXOs(options?.sender, false)
       utxoNumber = utxo.length // Max possible fee for interface display
     }
-    const memoLength = options?.memo ? options.memo.length : 0
-    const flatFee = ZcashLib.calculateFee(utxoNumber, 2, memoLength)
+    const flatFee = getFee(utxoNumber, 2, options?.memo)
     return {
       average: baseAmount(flatFee, ZEC_DECIMAL),
       fast: baseAmount(flatFee, ZEC_DECIMAL),

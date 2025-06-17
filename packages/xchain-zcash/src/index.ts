@@ -1,11 +1,5 @@
-// Export the 'ClientKeystore' class as 'Client' for backward compatibility
+// Export the 'ClientKeystore' class as 'Client'
 export { ClientKeystore as Client } from './clientKeystore'
-
-// Also export ClientKeystore by its actual name for explicit usage
-export { ClientKeystore } from './clientKeystore'
-
-// Export the base Client class for cases where keystore is not needed
-export { Client as BaseClient } from './client'
 
 // Export the 'ClientLedger' class
 export { ClientLedger } from './clientLedger'

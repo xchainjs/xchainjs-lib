@@ -1,10 +1,10 @@
 {
-  "name": "@xchainjs/xchain-zcash",
-  "version": "1.0.2",
-  "description": "Custom Zcash client and utilities used by XChainJS clients",
+  "name": "@xchainjs/xchain-ripple",
+  "version": "1.0.0",
+  "description": "Custom Ripple client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
-    "Zcash"
+    "Ripple"
   ],
   "author": "XChainJS",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
@@ -27,29 +27,19 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@mayaprotocol/zcash-js": "1.0.7",
-    "@xchainjs/xchain-client": "workspace:*",
+    "@xchainjs/xchain-client": "workspace:^",
     "@xchainjs/xchain-crypto": "workspace:*",
-    "@xchainjs/xchain-util": "workspace:*",
-    "@xchainjs/xchain-utxo": "workspace:*",
-    "@xchainjs/xchain-utxo-providers": "workspace:*",
-    "ecpair": "^3.0.0"
+    "@xchainjs/xchain-util": "workspace:^",
+    "xrpl": "^4.3.0"
   },
   "publishConfig": {
     "access": "public",
     "directory": "release/package"
-  },
-  "devDependencies": {
-    "@types/blake2b-wasm": "^2.4.3",
-    "@types/js-yaml": "^4.0.9",
-    "@types/lodash": "^4.17.13",
-    "axios-mock-adapter": "^2.1.0"
   }
 }
