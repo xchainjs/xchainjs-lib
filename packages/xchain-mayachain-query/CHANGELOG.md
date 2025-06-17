@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3
+
+### Patch Changes
+
+- 2e74e96: add xchain-zcash to amm
+
 ## 2.0.2
 
 ### Patch Changes
