@@ -4,6 +4,7 @@ import {
   FeeEstimateOptions,
   FeeRate,
   FeeRates,
+  Fees,
   FeeType,
   FeesWithRates,
   Network,
@@ -182,7 +183,7 @@ abstract class Client extends UTXOClient {
     throw Error('Error Zcash has flat fee. Fee rates not supported')
   }
 
-  async getFees(options?: FeeEstimateOptions) {
+  async getFees(options?: FeeEstimateOptions): Promise<Fees> {
     let utxoNumber = 2 // By default pro rought estimation to display on interface
     if (options?.sender) {
       const utxo = await this.scanUTXOs(options?.sender, false)
