@@ -4104,7 +4104,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-client@workspace:*, @xchainjs/xchain-client@workspace:^, @xchainjs/xchain-client@workspace:packages/xchain-client":
+"@xchainjs/xchain-client@workspace:*, @xchainjs/xchain-client@workspace:packages/xchain-client":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-client@workspace:packages/xchain-client"
   dependencies:
@@ -4326,6 +4326,7 @@ __metadata:
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
+    "@xchainjs/xchain-zcash": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
     ethers: "npm:^6.14.3"
@@ -4448,9 +4449,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-ripple@workspace:packages/xchain-ripple"
   dependencies:
-    "@xchainjs/xchain-client": "workspace:^"
+    "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:^"
+    "@xchainjs/xchain-util": "workspace:*"
     xrpl: "npm:^4.3.0"
   languageName: unknown
   linkType: soft
@@ -4550,7 +4551,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-util@workspace:*, @xchainjs/xchain-util@workspace:^, @xchainjs/xchain-util@workspace:packages/xchain-util":
+"@xchainjs/xchain-util@workspace:*, @xchainjs/xchain-util@workspace:packages/xchain-util":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-util@workspace:packages/xchain-util"
   dependencies:
@@ -4599,7 +4600,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-zcash@workspace:packages/xchain-zcash":
+"@xchainjs/xchain-zcash@workspace:*, @xchainjs/xchain-zcash@workspace:packages/xchain-zcash":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-zcash@workspace:packages/xchain-zcash"
   dependencies:

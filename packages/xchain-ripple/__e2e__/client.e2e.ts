@@ -11,7 +11,7 @@ describe('XRP client e2e test', () => {
     })
   })
 
-  it('Should get address', async () => {
+  it('Should get ripple address', async () => {
     const address_0 = await client.getAddressAsync(0)
     console.log('address with wallet index 0:', address_0)
     const address_1 = await client.getAddressAsync(1)
