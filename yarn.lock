@@ -1727,7 +1727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/devices@npm:8.4.6, @ledgerhq/devices@npm:^8.4.4":
+"@ledgerhq/devices@npm:8.4.6":
   version: 8.4.6
   resolution: "@ledgerhq/devices@npm:8.4.6"
   dependencies:
@@ -1966,30 +1966,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/hw-transport@npm:6.31.4":
-  version: 6.31.4
-  resolution: "@ledgerhq/hw-transport@npm:6.31.4"
-  dependencies:
-    "@ledgerhq/devices": "npm:^8.4.4"
-    "@ledgerhq/errors": "npm:^6.19.1"
-    "@ledgerhq/logs": "npm:^6.12.0"
-    events: "npm:^3.3.0"
-  checksum: 10c0/033acb802d991788efcda9223356528d0987a268e94c34cbafde499541722363e7cfa6e2734365ef3282c0a80a69f4964a6d728690ff7494662a650516530b02
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/hw-transport@npm:6.31.6, @ledgerhq/hw-transport@npm:^6.30.1, @ledgerhq/hw-transport@npm:^6.30.6, @ledgerhq/hw-transport@npm:^6.31.4":
-  version: 6.31.6
-  resolution: "@ledgerhq/hw-transport@npm:6.31.6"
-  dependencies:
-    "@ledgerhq/devices": "npm:8.4.6"
-    "@ledgerhq/errors": "npm:^6.21.0"
-    "@ledgerhq/logs": "npm:^6.13.0"
-    events: "npm:^3.3.0"
-  checksum: 10c0/f7b2c29cf254936b67a6b82fa4ed7913d88cc0653c3dfd85b24e0cde7358aaf56c78932c398e4b6cfce332a8508af4481198d71dca509fd601aa54421e825364
-  languageName: node
-  linkType: hard
-
 "@ledgerhq/hw-transport@npm:^5.25.0":
   version: 5.51.1
   resolution: "@ledgerhq/hw-transport@npm:5.51.1"
@@ -1998,6 +1974,18 @@ __metadata:
     "@ledgerhq/errors": "npm:^5.50.0"
     events: "npm:^3.3.0"
   checksum: 10c0/69dd4c7fbcede877f21af31ff4e50ac82dc0dc4dc24d041357efb4d9b5dc629185fad2ab837f4caf64cb04e852bce2a384e0adfa0e9c4027c333bbe4c8adb292
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport@npm:^6.30.1, @ledgerhq/hw-transport@npm:^6.30.6, @ledgerhq/hw-transport@npm:^6.31.4, @ledgerhq/hw-transport@npm:^6.31.6":
+  version: 6.31.6
+  resolution: "@ledgerhq/hw-transport@npm:6.31.6"
+  dependencies:
+    "@ledgerhq/devices": "npm:8.4.6"
+    "@ledgerhq/errors": "npm:^6.21.0"
+    "@ledgerhq/logs": "npm:^6.13.0"
+    events: "npm:^3.3.0"
+  checksum: 10c0/f7b2c29cf254936b67a6b82fa4ed7913d88cc0653c3dfd85b24e0cde7358aaf56c78932c398e4b6cfce332a8508af4481198d71dca509fd601aa54421e825364
   languageName: node
   linkType: hard
 
@@ -4022,7 +4010,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-avax@workspace:packages/xchain-avax"
   dependencies:
-    "@ledgerhq/hw-transport": "npm:6.31.6"
+    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-evm": "workspace:*"
@@ -4093,7 +4081,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-bsc@workspace:packages/xchain-bsc"
   dependencies:
-    "@ledgerhq/hw-transport": "npm:6.31.6"
+    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
@@ -4156,7 +4144,7 @@ __metadata:
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
     "@ledgerhq/hw-app-cosmos": "npm:6.32.0"
-    "@ledgerhq/hw-transport": "npm:6.31.6"
+    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/xchain-client": "workspace:*"
@@ -4237,7 +4225,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-ethereum@workspace:packages/xchain-ethereum"
   dependencies:
-    "@ledgerhq/hw-transport": "npm:6.31.6"
+    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
@@ -4264,7 +4252,7 @@ __metadata:
   resolution: "@xchainjs/xchain-evm@workspace:packages/xchain-evm"
   dependencies:
     "@ledgerhq/hw-app-eth": "npm:6.45.4"
-    "@ledgerhq/hw-transport": "npm:6.31.6"
+    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
@@ -4537,7 +4525,7 @@ __metadata:
     "@cosmjs/math": "npm:0.33.1"
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
-    "@ledgerhq/hw-transport": "npm:6.31.4"
+    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/ledger-thorchain": "npm:0.2.0"
     "@xchainjs/xchain-client": "workspace:*"

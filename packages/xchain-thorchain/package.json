@@ -41,7 +41,7 @@
     "@cosmjs/math": "0.33.1",
     "@cosmjs/proto-signing": "0.33.1",
     "@cosmjs/stargate": "0.33.1",
-    "@ledgerhq/hw-transport": "6.31.4",
+    "@ledgerhq/hw-transport": "^6.31.6",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/ledger-thorchain": "0.2.0",
     "@xchainjs/xchain-client": "workspace:*",
