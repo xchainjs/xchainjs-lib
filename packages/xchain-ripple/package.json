@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-ripple",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Custom Ripple client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -33,9 +33,9 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@xchainjs/xchain-client": "workspace:^",
+    "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
-    "@xchainjs/xchain-util": "workspace:^",
+    "@xchainjs/xchain-util": "workspace:*",
     "xrpl": "^4.3.0"
   },
   "publishConfig": {
