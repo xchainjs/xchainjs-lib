@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr } from '@mayaprotocol/zcash-js'
+import { buildTx, signAndFinalize, skToAddr, getPublicKeyFromPrivateKey } from '@mayaprotocol/zcash-js'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
@@ -145,40 +145,42 @@ class ClientKeystore extends Client {
       console.warn('Could not determine current block height, using fallback:', blockHeight)
     }
 
-    // Convert UTXOs to Zcash format
-    // For Zcash P2PKH addresses, we can construct the script from the address
-    const addressScript = Utils.createP2PKHScript(sender)
-    const zcashUtxos: ZcashLib.UTXO[] = utxos.map((utxo) => ({
+    // Convert UTXOs to zcash-js format
+    const zcashUtxos = utxos.map((utxo) => ({
+      address: sender,
       txid: utxo.hash,
-      vout: utxo.index,
-      value: utxo.value,
-      height: 0, // Use 0 for UTXO height as well
-      script: utxo.scriptPubKey || utxo.witnessUtxo?.script?.toString('hex') || addressScript,
+      outputIndex: utxo.index,
+      satoshis: utxo.value,
     }))
 
-    // Get the private key hex and public key
+    // Get the private key hex
     if (!zecKeys.privateKey) {
       throw Error('Error getting private key')
     }
     const privateKeyHex = Buffer.from(zecKeys.privateKey).toString('hex')
-    const pubkey = ZcashLib.getPublicKeyFromPrivateKey(privateKeyHex)
-
-    // Create a transaction builder and use it similar to Bitcoin's PSBT
-    // TransactionBuilder accepts any format and normalizes internally
-    const builder = new ZcashLib.TransactionBuilder(networkName)
+    const pubkey = getPublicKeyFromPrivateKey(privateKeyHex)
 
     // Build the transaction
-    const buildResult = builder
-      .selectUTXOs(zcashUtxos, 'all') // Use all available UTXOs for automatic selection
-      .addOutput(params.recipient, params.amount.amount().toNumber(), params.memo)
-      .setChangeAddress(sender)
-      .build(blockHeight, pubkey)
+    const unsignedTx = await buildTx(
+      blockHeight,
+      sender,
+      params.recipient,
+      params.amount.amount().toNumber(),
+      zcashUtxos,
+      networkName === 'zcash',
+      params.memo,
+    )
 
     // Check fee bounds
-    checkFeeBounds(this.feeBounds, buildResult.fee)
+    checkFeeBounds(this.feeBounds, unsignedTx.fee)
 
-    // Sign the transaction
-    const signedTx = ZcashLib.TransactionBuilder.sign(buildResult, privateKeyHex, networkName, pubkey)
+    // Sign and finalize the transaction
+    const signedTx = await signAndFinalize(
+      unsignedTx,
+      privateKeyHex,
+      networkName === 'zcash',
+      pubkey,
+    )
 
     // Broadcast
     const txId = await this.roundRobinBroadcastTx(signedTx.rawTx.toString('hex'))

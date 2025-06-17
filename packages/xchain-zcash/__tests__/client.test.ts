@@ -1,5 +1,5 @@
-import { FeeType } from '@xchainjs/xchain-client/lib'
-import { assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util/lib'
+import { FeeType } from '@xchainjs/xchain-client'
+import { assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import * as bip39 from 'bip39'
 
 import MockNowNodes from '../__mocks__/nownodes'

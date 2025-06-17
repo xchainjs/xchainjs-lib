@@ -1407,28 +1407,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hippocampus-web3/blockfrost-js@npm:^6.0.4":
-  version: 6.0.4
-  resolution: "@hippocampus-web3/blockfrost-js@npm:6.0.4"
-  dependencies:
-    "@blockfrost/openapi": "npm:0.1.73"
-    "@emurgo/cip14-js": "npm:3.0.1"
-    "@hippocampus-web3/cardano-serialization-lib-asmjs": "npm:^14.1.5"
-    bottleneck: "npm:^2.19.5"
-    form-data: "npm:^4.0.0"
-    json-bigint: "npm:^1.0.0"
-    ky: "npm:^1.7.5"
-  checksum: 10c0/6983584110ef7de0c62df1a6484d96f027aaa7c62704d8c7a642df7b7152f46153820615005b0cdd2a83ce365eddddef333fd78927ea1a7d2cfa1600aefde216
-  languageName: node
-  linkType: hard
-
-"@hippocampus-web3/cardano-serialization-lib-asmjs@npm:^14.1.5":
-  version: 14.1.5
-  resolution: "@hippocampus-web3/cardano-serialization-lib-asmjs@npm:14.1.5"
-  checksum: 10c0/b9cabc5e82674716330d485807f15646f1ea11fa53b2ce566376799130d798e0c652d571631cb23ae6b8aeb926e7767d839b7469dc92aa8a82898cf83c25876b
-  languageName: node
-  linkType: hard
-
 "@humanwhocodes/config-array@npm:^0.11.8":
   version: 0.11.8
   resolution: "@humanwhocodes/config-array@npm:0.11.8"
@@ -2160,9 +2138,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mayaprotocol/zcash-js@npm:1.0.3":
-  version: 1.0.3
-  resolution: "@mayaprotocol/zcash-js@npm:1.0.3"
+"@mayaprotocol/xchain-zcash@workspace:packages/xchain-zcash":
+  version: 0.0.0-use.local
+  resolution: "@mayaprotocol/xchain-zcash@workspace:packages/xchain-zcash"
+  dependencies:
+    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
+    "@mayaprotocol/zcash-js": "npm:1.0.7"
+    "@types/blake2b-wasm": "npm:^2.4.3"
+    "@types/js-yaml": "npm:^4.0.9"
+    "@types/lodash": "npm:^4.17.13"
+    "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    "@xchainjs/xchain-utxo": "workspace:*"
+    "@xchainjs/xchain-utxo-providers": "workspace:*"
+    axios-mock-adapter: "npm:^2.1.0"
+    bip32: "npm:^5.0.0-rc.0"
+    ecpair: "npm:^3.0.0"
+    jest: "npm:^29.7.0"
+  languageName: unknown
+  linkType: soft
+
+"@mayaprotocol/zcash-js@npm:1.0.7":
+  version: 1.0.7
+  resolution: "@mayaprotocol/zcash-js@npm:1.0.7"
   dependencies:
     "@noble/curves": "npm:^1.7.0"
     "@noble/hashes": "npm:^1.6.1"
@@ -2175,7 +2174,7 @@ __metadata:
     js-yaml: "npm:^4.1.0"
     json-rpc-2.0: "npm:^1.7.0"
     lodash: "npm:^4.17.21"
-  checksum: 10c0/083950f99b05c666495f7285b91c5d52ac33be28cde71f04c408dc1fed1d886589c0efd74b0acda96095ce481417558e074d946d8452e1744c11a1a125a5c4e5
+  checksum: 10c0/0ab85a442f687e907a2005cfcd7ed3e12791934c71b1c4daaf8506e98e9fc5485b595e1cc8ca98e97e389e3aa880125275fc3f1755f133be5c211c284f6da1b4
   languageName: node
   linkType: hard
 
@@ -3810,6 +3809,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/readable-stream@npm:^4.0.0":
+  version: 4.0.21
+  resolution: "@types/readable-stream@npm:4.0.21"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/5c0a69a994d7efb8de6c27a626a5353b0d5d510979dd6bddc344d3fe54630ad175bf5fafe48eeaa9f423cf22d60247d0b20264aad68ced2eb49318b071168fed
+  languageName: node
+  linkType: hard
+
 "@types/resolve@npm:1.20.2":
   version: 1.20.2
   resolution: "@types/resolve@npm:1.20.2"
@@ -4705,27 +4713,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-zcash@workspace:packages/xchain-zcash":
-  version: 0.0.0-use.local
-  resolution: "@xchainjs/xchain-zcash@workspace:packages/xchain-zcash"
-  dependencies:
-    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
-    "@mayaprotocol/zcash-js": "npm:1.0.3"
-    "@types/blake2b-wasm": "npm:^2.4.3"
-    "@types/js-yaml": "npm:^4.0.9"
-    "@types/lodash": "npm:^4.17.13"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-utxo": "workspace:*"
-    "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios-mock-adapter: "npm:^2.1.0"
-    bip32: "npm:^5.0.0-rc.0"
-    ecpair: "npm:^3.0.0"
-    jest: "npm:^29.7.0"
-  languageName: unknown
-  linkType: soft
-
 "@xrplf/isomorphic@npm:^1.0.0, @xrplf/isomorphic@npm:^1.0.1":
   version: 1.0.1
   resolution: "@xrplf/isomorphic@npm:1.0.1"
@@ -4763,6 +4750,15 @@ __metadata:
   version: 2.0.0
   resolution: "abbrev@npm:2.0.0"
   checksum: 10c0/f742a5a107473946f426c691c08daba61a1d15942616f300b5d32fd735be88fef5cba24201757b6c407fd564555fb48c751cfa33519b2605c8a7aadd22baf372
+  languageName: node
+  linkType: hard
+
+"abort-controller@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "abort-controller@npm:3.0.0"
+  dependencies:
+    event-target-shim: "npm:^5.0.0"
+  checksum: 10c0/90ccc50f010250152509a344eb2e71977fbf8db0ab8f1061197e3275ddf6c61a41a6edfd7b9409c664513131dd96e962065415325ef23efa5db931b382d24ca5
   languageName: node
   linkType: hard
 
@@ -5138,14 +5134,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.7.9":
-  version: 1.9.0
-  resolution: "axios@npm:1.9.0"
+"axios@npm:^1.3.4, axios@npm:^1.6.0, axios@npm:^1.6.5":
+  version: 1.10.0
+  resolution: "axios@npm:1.10.0"
   dependencies:
     follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/9371a56886c2e43e4ff5647b5c2c3c046ed0a3d13482ef1d0135b994a628c41fbad459796f101c655e62f0c161d03883454474d2e435b2e021b1924d9f24994c
+  checksum: 10c0/2239cb269cc789eac22f5d1aabd58e1a83f8f364c92c2caa97b6f5cbb4ab2903d2e557d9dc670b5813e9bcdebfb149e783fb8ab3e45098635cd2f559b06bd5d8
   languageName: node
   linkType: hard
 
@@ -5171,7 +5167,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"b4a@npm:^1.0.1":
+"b4a@npm:^1.0.1, b4a@npm:^1.6.0":
   version: 1.6.7
   resolution: "b4a@npm:1.6.7"
   checksum: 10c0/ec2f004d1daae04be8c5a1f8aeb7fea213c34025e279db4958eb0b82c1729ee25f7c6e89f92a5f65c8a9cf2d017ce27e3dda912403341d1781bd74528a4849d4
@@ -5564,6 +5560,18 @@ __metadata:
     inherits: "npm:^2.0.4"
     readable-stream: "npm:^3.4.0"
   checksum: 10c0/02847e1d2cb089c9dc6958add42e3cdeaf07d13f575973963335ac0fdece563a50ac770ac4c8fa06492d2dd276f6cc3b7f08c7cd9c7a7ad0f8d388b2a28def5f
+  languageName: node
+  linkType: hard
+
+"bl@npm:^6.0.16":
+  version: 6.1.0
+  resolution: "bl@npm:6.1.0"
+  dependencies:
+    "@types/readable-stream": "npm:^4.0.0"
+    buffer: "npm:^6.0.3"
+    inherits: "npm:^2.0.4"
+    readable-stream: "npm:^4.2.0"
+  checksum: 10c0/57407cb04d48fd913320f8f3a4a73b62b5a771fdf845dfc4071f46640cb48c01df40eb19cc2487d8acc0590a458ac0129ebd9a42c04b8573661fa8ed46522d06
   languageName: node
   linkType: hard
 
@@ -7440,6 +7448,13 @@ __metadata:
     tslib: "npm:2.7.0"
     ws: "npm:8.17.1"
   checksum: 10c0/64bc7b8907de199392b8a88c15c9a085892919cff7efa2e5326abc7fe5c426001726c51d91e10c74e5fc5e2547188297ce4127f6e52ea42a97ade0b2ae474677
+  languageName: node
+  linkType: hard
+
+"event-target-shim@npm:^5.0.0":
+  version: 5.0.1
+  resolution: "event-target-shim@npm:5.0.1"
+  checksum: 10c0/0255d9f936215fd206156fd4caa9e8d35e62075d720dc7d847e89b417e5e62cf1ce6c9b4e0a1633a9256de0efefaf9f8d26924b1f3c8620cffb9db78e7d3076b
   languageName: node
   linkType: hard
 
@@ -9445,6 +9460,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-sha256@npm:^0.11.0":
+  version: 0.11.1
+  resolution: "js-sha256@npm:0.11.1"
+  checksum: 10c0/ef8e294b6f38f218e4834cb653471dd1a76808cea93dc66eaffcb04124116bc36d6cebc4e8866753e184ab4e57892b6ef21918e8ab0450179a7e093ea962d974
+  languageName: node
+  linkType: hard
+
 "js-sha3@npm:0.8.0":
   version: 0.8.0
   resolution: "js-sha3@npm:0.8.0"
@@ -11395,6 +11417,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"readable-stream@npm:^4.2.0":
+  version: 4.7.0
+  resolution: "readable-stream@npm:4.7.0"
+  dependencies:
+    abort-controller: "npm:^3.0.0"
+    buffer: "npm:^6.0.3"
+    events: "npm:^3.3.0"
+    process: "npm:^0.11.10"
+    string_decoder: "npm:^1.3.0"
+  checksum: 10c0/fd86d068da21cfdb10f7a4479f2e47d9c0a9b0c862fc0c840a7e5360201580a55ac399c764b12a4f6fa291f8cee74d9c4b7562e0d53b3c4b2769f2c98155d957
+  languageName: node
+  linkType: hard
+
 "readonly-date@npm:^1.0.0":
   version: 1.0.0
   resolution: "readonly-date@npm:1.0.0"
@@ -12429,7 +12464,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string_decoder@npm:^1.1.1":
+"string_decoder@npm:^1.1.1, string_decoder@npm:^1.3.0":
   version: 1.3.0
   resolution: "string_decoder@npm:1.3.0"
   dependencies:
