@@ -13,10 +13,10 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import { EvmTxParams, Wallet } from '@xchainjs/xchain-wallet'
-import { ethers } from 'ethers'
 
 import { TxSubmitted } from './types'
 import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain, isRadixChain } from './utils'
+import { Contract, getAddress, ZeroAddress } from 'ethers'
 
 export type NonProtocolActionParams = {
   wallet: Wallet
@@ -125,8 +125,8 @@ export class MayachainAction {
     const isERC20 = isProtocolERC20Asset(assetAmount.asset)
 
     const checkSummedContractAddress = isERC20
-      ? ethers.utils.getAddress(getContractAddressFromAsset(assetAmount.asset))
-      : ethers.constants.AddressZero
+      ? getAddress(getContractAddressFromAsset(assetAmount.asset))
+      : ZeroAddress
 
     const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
     const depositParams = [
@@ -137,10 +137,10 @@ export class MayachainAction {
       expiration,
     ]
 
-    const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
+    const routerContract = new Contract(inboundDetails.router, abi.router)
     const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
 
-    const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
+    const unsignedTx = await routerContract.depositWithExpiry(...depositParams)
 
     const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
 

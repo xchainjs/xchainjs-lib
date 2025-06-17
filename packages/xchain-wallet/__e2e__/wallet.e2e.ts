@@ -3,15 +3,24 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, ETH_GAS_ASSET_DECIMAL, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { AssetRuneNative, Client as ThorClient, RUNE_DECIMAL } from '@xchainjs/xchain-thorchain'
-import { assetAmount, assetFromStringEx, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
+import {
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+  baseAmount,
+  baseToAsset,
+  TokenAsset,
+} from '@xchainjs/xchain-util'
 
 import { Wallet } from '../src/wallet'
+import { defaultAvaxParams, Client as AvaxClient } from '@xchainjs/xchain-avax'
 
 describe('Wallet', () => {
   let wallet: Wallet
 
   beforeAll(() => {
-    const seed = ''
+    const seed = process.env.MAINNET_PHRASE
     const network = Network.Mainnet
     wallet = new Wallet({
       THOR: new ThorClient({ network, phrase: seed }),
@@ -22,6 +31,7 @@ describe('Wallet', () => {
         phrase: seed,
       }),
       BCH: new BchClient({ ...defaultBchParams, network, phrase: seed }),
+      AVAX: new AvaxClient({ ...defaultAvaxParams, network, phrase: seed }),
     })
   })
 
@@ -111,6 +121,11 @@ describe('Wallet', () => {
     expect(async () => {
       await wallet.getBalance('BTC')
     }).rejects.toThrow(/Client not found for BTC chain/)
+  })
+
+  it('Should approve', async () => {
+    const asset = assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e')
+    await wallet.approve(asset as TokenAsset, baseAmount(100000000, 6), '0x8F66c4AE756BEbC49Ec8B81966DD8bba9f127549')
   })
 
   it('Should get transaction data', async () => {

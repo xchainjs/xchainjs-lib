@@ -1,7 +1,8 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType, Chain } from '@xchainjs/xchain-util'
-import { BigNumber, ethers } from 'ethers'
+import { JsonRpcProvider } from 'ethers'
+import { BigNumber } from 'bignumber.js'
 
 import mock from '../__mocks__/axios-adapter'
 import { mock_gas_oracle_custom } from '../__mocks__/etherscan-api'
@@ -17,13 +18,11 @@ const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const thornodeApiUrl = 'https://testnet.thornode.thorchain.info'
 
 // =====Defaults=====
-export const transferGasAssetGasLimit: ethers.BigNumber = ethers.BigNumber.from(21000)
-export const transferTokenGasLimit: ethers.BigNumber = ethers.BigNumber.from(100000)
+export const transferGasAssetGasLimit: BigNumber = new BigNumber(21000)
+export const transferTokenGasLimit: BigNumber = new BigNumber(100000)
 // =====Ethers providers=====
-const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
-const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-  'https://api.avax-test.network/ext/bc/C/rpc',
-)
+const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
+const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc')
 
 const ethersJSProviders = {
   [Network.Mainnet]: AVALANCHE_MAINNET_ETHERS_PROVIDER,
@@ -88,22 +87,22 @@ const ethRootDerivationPaths = {
 }
 const defaults = {
   [Network.Mainnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Testnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Stagenet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
 }
 const avaxParams: EVMKeystoreClientParams = {
@@ -196,10 +195,6 @@ describe('EVM client', () => {
 
   it('should fail to set new phrase', async () => {
     await expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
-  })
-
-  it('Should connect to specified network', async () => {
-    // TODO
   })
 
   it('Should get network', () => {

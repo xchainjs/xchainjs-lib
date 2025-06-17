@@ -3,7 +3,7 @@ import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-cli
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
-import { BIP32Factory } from 'bip32'
+import { HDKey } from '@scure/bip32'
 import * as Bitcoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 
@@ -92,14 +92,13 @@ class ClientKeystore extends Client {
   private getBtcKeys(phrase: string, index = 0): ECPairInterface {
     const btcNetwork = Utils.btcNetwork(this.network)
     const seed = getSeed(phrase)
-    const bip32 = BIP32Factory(ecc)
-    const master = bip32.fromSeed(seed, btcNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = HDKey.fromMasterSeed(seed).derive(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return ECPair.fromPrivateKey(master.privateKey, { network: btcNetwork })
+    return ECPair.fromPrivateKey(Buffer.from(master.privateKey), { network: btcNetwork })
   }
 
   /**

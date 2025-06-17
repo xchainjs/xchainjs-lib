@@ -4,7 +4,7 @@ import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
 import { MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { encode, toWords } from 'bech32'
-import { fromSeed } from 'bip32'
+import { HDKey } from '@scure/bip32'
 import { createHash } from 'crypto'
 import * as secp from '@bitcoin-js/tiny-secp256k1-asmjs'
 
@@ -32,8 +32,8 @@ export class ClientKeystore extends Client {
    */
   public getAddress(walletIndex?: number | undefined): string {
     const seed = getSeed(this.phrase)
-    const node = fromSeed(seed)
-    const child = node.derivePath(this.getFullDerivationPath(walletIndex || 0))
+    const node = HDKey.fromMasterSeed(seed)
+    const child = node.derive(this.getFullDerivationPath(walletIndex || 0))
 
     if (!child.privateKey) throw new Error('child does not have a privateKey')
 

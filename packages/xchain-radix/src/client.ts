@@ -28,9 +28,8 @@ import {
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, AssetType, TokenAsset, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { bech32m } from 'bech32'
-import BIP32Factory, { BIP32Interface } from 'bip32'
+import { HDKey } from '@scure/bip32'
 import { derivePath } from 'ed25519-hd-key'
-import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 
 import {
   AssetXRD,
@@ -138,11 +137,10 @@ export default class Client extends BaseXChainClient {
       const keys = derivePath(updatedDerivationPath, seedHex)
       return keys.key
     } else {
-      const bip32 = BIP32Factory(ecc)
-      const node: BIP32Interface = bip32.fromSeed(seed)
-      const child: BIP32Interface = node.derivePath(updatedDerivationPath)
+      const node = HDKey.fromMasterSeed(seed)
+      const child = node.derive(updatedDerivationPath)
       if (!child.privateKey) throw new Error('child does not have a privateKey')
-      return child.privateKey
+      return Buffer.from(child.privateKey)
     }
   }
 
