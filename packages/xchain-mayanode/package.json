@@ -9,8 +9,11 @@
   ],
   "author": "MAYAChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
-  "main": "lib/index.js",
-  "module": "lib/index.esm.js",
+  "type": "module",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.esm.js"
+  },
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
@@ -28,7 +31,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "test": "jest --passWithNoTests",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
     "generate:types": "yarn clean:types:mayanode && yarn generate:types:mayanode",
     "generate:types:mayanode": "TS_POST_PROCESS_FILE=./node_modules/.bin/prettier openapi-generator-cli generate -i https://mayanode.mayachain.info/mayachain/doc/openapi.yaml -g typescript-axios -o ./src/generated/mayanodeApi --skip-validate-spec --generate-alias-as-model",
     "clean:types:mayanode": "rimraf ./src/generated/mayanodeApi"

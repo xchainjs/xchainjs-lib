@@ -11,7 +11,7 @@ import {
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { BaseAmount } from '@xchainjs/xchain-util'
 import { encode, toWords } from 'bech32'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 import { fromSeed } from 'bip32'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 import { createHash } from 'crypto'

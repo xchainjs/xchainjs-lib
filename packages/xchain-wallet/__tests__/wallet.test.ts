@@ -3,7 +3,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 
-import { Wallet } from '../'
+import { Wallet } from '@xchainjs/xchain-wallet'
 
 describe('Wallet', () => {
   describe('Instantiation', () => {

@@ -6,7 +6,7 @@ import Transport from '@ledgerhq/hw-transport'
 import THORChainApp, { extractSignatureFromTLV } from '@xchainjs/ledger-thorchain'
 import { CompatibleAsset, base64ToBech32, bech32ToBase64 } from '@xchainjs/xchain-cosmos-sdk'
 import { assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
 

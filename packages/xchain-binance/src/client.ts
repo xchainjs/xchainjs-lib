@@ -1,7 +1,6 @@
 // Import necessary modules and types from external packages and files
-import { BncClient } from '@binance-chain/javascript-sdk/lib/client'
-import * as crypto from '@binance-chain/javascript-sdk/lib/crypto'
-import { SignedSend } from '@binance-chain/javascript-sdk/lib/types'
+import { crypto, BncClient, type types } from '@binance-chain/javascript-sdk'
+type SignedSend = types.SignedSend
 import {
   AssetInfo,
   BaseXChainClient,
