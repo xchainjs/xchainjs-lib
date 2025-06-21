@@ -1,6 +1,6 @@
 import { Balance } from '@xchainjs/xchain-client'
 import { Asset, AssetType, assetToString } from '@xchainjs/xchain-util'
-import { ethers } from 'ethers'
+import { JsonRpcProvider } from 'ethers'
 
 import { RoutescanProvider } from '../src/providers'
 
@@ -14,7 +14,7 @@ describe('AVAX', () => {
   const AVAXChain = 'AVAX'
   const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
-  const provider = new ethers.providers.JsonRpcProvider(rpcEndpint)
+  const provider = new JsonRpcProvider(rpcEndpint)
   const dataProvider = new RoutescanProvider(provider, 'https://api.routescan.io', 43114, AssetAVAX, 18)
 
   it('should fetch all balances', async () => {
@@ -60,7 +60,7 @@ describe('ETH', () => {
     type: AssetType.NATIVE,
   }
 
-  const provider = new ethers.providers.JsonRpcProvider(rpcEndpint, 'homestead')
+  const provider = new JsonRpcProvider(rpcEndpint, 'homestead')
   const dataProvider = new RoutescanProvider(provider, 'https://api.routescan.io', 1, AssetETH, 18)
 
   it('should fetch all balances', async () => {

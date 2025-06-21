@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider'
 import {
   AssetInfo,
   BaseXChainClient,
@@ -27,8 +26,8 @@ import {
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
-import { BigNumber, ethers } from 'ethers'
-import { toUtf8Bytes } from 'ethers/lib/utils'
+import { Provider, Contract, Transaction, toUtf8Bytes, hexlify } from 'ethers'
+import { BigNumber } from 'bignumber.js'
 
 import erc20ABI from '../data/erc20.json'
 import {
@@ -313,7 +312,11 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @returns {Promise<TxHash>} The transaction hash.
    */
   async broadcastTx(txHex: string): Promise<TxHash> {
-    const resp = await this.config.providers[this.network].sendTransaction(txHex)
+    const provider = this.config.providers[this.network]
+    if (!provider.broadcastTransaction) {
+      throw new Error('Provider does not support sendTransaction')
+    }
+    const resp = await provider.broadcastTransaction(txHex)
     return resp.hash
   }
 
@@ -338,12 +341,19 @@ export class Client extends BaseXChainClient implements EVMClient {
 
       try {
         // If round-robin fails, fetch gas price from the primary provider
-        const gasPrice = await this.getProvider().getGasPrice()
+        const feeData = await this.getProvider().getFeeData()
+
+        if (!feeData.gasPrice) {
+          throw new Error('Gas price is null')
+        }
+
+        const gasPrice = new BigNumber(feeData.gasPrice.toString())
+
         // Adjust gas prices for different fee options
         return {
-          [FeeOption.Average]: baseAmount(gasPrice.toNumber(), this.config.gasAssetDecimals),
-          [FeeOption.Fast]: baseAmount(gasPrice.toNumber() * 1.5, this.config.gasAssetDecimals),
-          [FeeOption.Fastest]: baseAmount(gasPrice.toNumber() * 2, this.config.gasAssetDecimals),
+          [FeeOption.Average]: baseAmount(gasPrice.toString(), this.config.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(gasPrice.multipliedBy(1.5).toString(), this.config.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(gasPrice.multipliedBy(2).toString(), this.config.gasAssetDecimals),
         }
       } catch (error) {
         console.warn(`Can not get gasPrice from provider: ${error}`)
@@ -392,27 +402,37 @@ export class Client extends BaseXChainClient implements EVMClient {
     from,
     isMemoEncoded,
   }: TxParams & { from?: Address }): Promise<BigNumber> {
-    const txAmount = BigNumber.from(amount.amount().toFixed())
+    const txAmount = BigInt(amount.amount().toFixed())
     const theAsset = asset ?? this.config.gasAsset
     let gasEstimate: BigNumber
     if (!this.isGasAsset(theAsset)) {
       // ERC20 gas estimate
       const assetAddress = getTokenAddress(theAsset)
       if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(theAsset)}`)
-      const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
+      const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
 
-      gasEstimate = await contract.estimateGas.transfer(recipient, txAmount, {
-        from: from || (await this.getAddressAsync()),
+      const address = from || (await this.getAddressAsync())
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const gasEstimateResponse = await contract.getFunction('transfer').estimateGas(recipient, txAmount, {
+        from: address,
       })
+
+      gasEstimate = new BigNumber(gasEstimateResponse.toString())
     } else {
       // ETH gas estimate
+      let stringEncodedMemo
+      if (memo) {
+        stringEncodedMemo = hexlify(toUtf8Bytes(memo))
+      }
+      const parsedMemo = memo ? (isMemoEncoded ? memo : stringEncodedMemo) : undefined
       const transactionRequest = {
         from: from || (await this.getAddressAsync()),
         to: recipient,
         value: txAmount,
-        data: memo ? (isMemoEncoded ? memo : toUtf8Bytes(memo)) : undefined,
+        data: parsedMemo,
       }
-      gasEstimate = await this.getProvider().estimateGas(transactionRequest)
+      const gasEstimation = await this.getProvider().estimateGas(transactionRequest)
+      gasEstimate = new BigNumber(gasEstimation.toString())
     }
 
     return gasEstimate
@@ -582,32 +602,41 @@ export class Client extends BaseXChainClient implements EVMClient {
     const nonce = await this.getProvider().getTransactionCount(sender)
 
     if (this.isGasAsset(asset)) {
+      let stringEncodedMemo
+      if (memo) {
+        stringEncodedMemo = toUtf8Bytes(memo)
+      }
+      const parsedMemo = memo ? (isMemoEncoded ? memo : stringEncodedMemo) : undefined
+
+      const tx = new Transaction()
+      tx.chainId = await this.cachedNetworkId.getValue()
+      tx.to = recipient
+      tx.value = amount.amount().toFixed()
+      tx.nonce = nonce
+
+      if (parsedMemo) {
+        tx.data = parsedMemo
+      }
+
       return {
-        rawUnsignedTx: ethers.utils.serializeTransaction({
-          chainId: await this.cachedNetworkId.getValue(),
-          to: recipient,
-          value: BigNumber.from(amount.amount().toFixed()),
-          data: memo ? (isMemoEncoded ? memo : toUtf8Bytes(memo)) : undefined,
-          nonce,
-        }),
+        rawUnsignedTx: tx.unsignedSerialized,
       }
     } else {
       const assetAddress = getTokenAddress(asset)
       if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
 
-      const contract = new ethers.Contract(assetAddress, erc20ABI, this.getProvider())
-      /* as same as ethers.TransactionResponse expected by `sendTransaction` */
-      const unsignedTx: ethers.PopulatedTransaction = await contract.populateTransaction.transfer(
-        recipient,
-        BigNumber.from(amount.amount().toFixed()),
-      )
+      const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
+
+      const amountToTransfer = BigInt(amount.amount().toFixed())
+      const unsignedTx = await contract.getFunction('transfer').populateTransaction(recipient, amountToTransfer)
+
+      unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
+      unsignedTx.nonce = nonce
+
+      const tx = Transaction.from(unsignedTx)
 
       return {
-        rawUnsignedTx: ethers.utils.serializeTransaction({
-          ...unsignedTx,
-          chainId: await this.cachedNetworkId.getValue(),
-          nonce,
-        }),
+        rawUnsignedTx: tx.unsignedSerialized,
       }
     }
   }
@@ -629,18 +658,22 @@ export class Client extends BaseXChainClient implements EVMClient {
     if (!this.validateAddress(spenderAddress)) throw Error('Invalid spenderAddress address')
     if (!this.validateAddress(sender)) throw Error('Invalid sender address')
 
-    const contract = new ethers.Contract(contractAddress, erc20ABI, this.getProvider())
+    const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
     const valueToApprove = getApprovalAmount(amount)
 
-    const unsignedTx = await contract.populateTransaction.approve(spenderAddress, valueToApprove)
+    const unsignedTx = await contract
+      .getFunction('approve')
+      .populateTransaction(spenderAddress, BigInt(valueToApprove.toString()))
+
     const nonce = await this.getProvider().getTransactionCount(sender)
 
+    unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
+    unsignedTx.nonce = nonce
+
+    const tx = Transaction.from(unsignedTx)
+
     return {
-      rawUnsignedTx: ethers.utils.serializeTransaction({
-        ...unsignedTx,
-        chainId: await this.cachedNetworkId.getValue(),
-        nonce,
-      }),
+      rawUnsignedTx: tx.unsignedSerialized,
     }
   }
 
@@ -692,35 +725,42 @@ export class Client extends BaseXChainClient implements EVMClient {
       throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
     }
     // Initialize fee data object
-    const feeData: ethers.providers.FeeData = {
-      lastBaseFeePerGas: null,
+    const feeData: {
+      maxFeePerGas: bigint | null
+      maxPriorityFeePerGas: bigint | null
+      gasPrice: bigint | null
+    } = {
       maxFeePerGas: null,
       maxPriorityFeePerGas: null,
       gasPrice: null,
     }
+
     // If EIP 1559 parameters are provided, use them; otherwise, estimate gas price
     if (maxFeePerGas || maxPriorityFeePerGas) {
       // Get fee info from the provider
       const feeInfo = await this.getProvider().getFeeData()
+      const block = await this.getProvider().getBlock('latest')
       // Set max fee per gas
       if (maxFeePerGas) {
         // Set max priority fee per gas
-        feeData.maxFeePerGas = BigNumber.from(maxFeePerGas.amount().toFixed())
-      } else if (maxPriorityFeePerGas && feeInfo.lastBaseFeePerGas) {
-        feeData.maxFeePerGas = feeInfo.lastBaseFeePerGas.mul(2).add(maxPriorityFeePerGas.amount().toFixed())
+        feeData.maxFeePerGas = BigInt(maxFeePerGas.amount().toFixed())
+      } else if (maxPriorityFeePerGas && block?.baseFeePerGas) {
+        const baseFee = block.baseFeePerGas
+        const maxPriority = BigInt(maxPriorityFeePerGas.amount().toFixed())
+        feeData.maxFeePerGas = baseFee * BigInt(2) + maxPriority
       }
       feeData.maxPriorityFeePerGas = maxPriorityFeePerGas
-        ? BigNumber.from(maxPriorityFeePerGas.amount().toFixed())
+        ? BigInt(maxPriorityFeePerGas.amount().toFixed())
         : feeInfo.maxPriorityFeePerGas
     } else {
-      const txGasPrice: BigNumber = gasPrice
+      const txGasPrice = gasPrice
         ? // Estimate gas price based on fee option
-          BigNumber.from(gasPrice.amount().toFixed())
+          BigInt(gasPrice.amount().toFixed())
         : await this.estimateGasPrices()
             .then((prices) => prices[feeOption])
-            .then((gp) => BigNumber.from(gp.amount().toFixed()))
+            .then((gp) => BigInt(gp.amount().toFixed()))
       // Check fee bounds
-      checkFeeBounds(this.feeBounds, txGasPrice.toNumber())
+      checkFeeBounds(this.feeBounds, Number(txGasPrice))
       // Set gas price
       feeData.gasPrice = txGasPrice
     }
@@ -750,24 +790,17 @@ export class Client extends BaseXChainClient implements EVMClient {
       isMemoEncoded,
     })
 
-    const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
+    const tx = Transaction.from(rawUnsignedTx)
 
-    const tx = await ethers.utils.resolveProperties(transactionRequest)
+    tx.type = feeData.gasPrice ? 1 : 2
+    tx.gasLimit = BigInt(txGasLimit.toString())
+    tx.gasPrice = feeData.gasPrice || null
+    tx.maxFeePerGas = feeData.maxFeePerGas || null
+    tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || null
 
     const signedTx = await this.getSigner().signTransfer({
       walletIndex,
-      tx: {
-        type: feeData.gasPrice ? 1 : 2, // Type 2 for EIP-1559
-        chainId: tx.chainId,
-        data: tx.data,
-        gasLimit: txGasLimit,
-        gasPrice: feeData.gasPrice || undefined,
-        maxFeePerGas: feeData.maxFeePerGas || undefined,
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas || undefined,
-        nonce: ethers.BigNumber.from(tx.nonce).toNumber(),
-        to: tx.to || undefined,
-        value: tx.value,
-      },
+      tx,
     })
 
     return this.broadcastTx(signedTx)
@@ -794,7 +827,7 @@ export class Client extends BaseXChainClient implements EVMClient {
   }: ApproveParams): Promise<string> {
     const sender = await this.getAddressAsync(walletIndex || 0)
 
-    const gasPrice: BigNumber = BigNumber.from(
+    const gasPrice: BigNumber = new BigNumber(
       (await this.estimateGasPrices().then((prices) => prices[feeOption])).amount().toFixed(),
     )
 
@@ -806,7 +839,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       fromAddress: sender,
       amount,
     }).catch(() => {
-      return BigNumber.from(this.config.defaults[this.network].approveGasLimit)
+      return new BigNumber(this.config.defaults[this.network].approveGasLimit)
     })
 
     const { rawUnsignedTx } = await this.prepareApprove({
@@ -816,21 +849,16 @@ export class Client extends BaseXChainClient implements EVMClient {
       sender,
     })
 
-    const transactionRequest = ethers.utils.parseTransaction(rawUnsignedTx)
+    const tx = Transaction.from(rawUnsignedTx)
+    tx.type = 1
+    tx.gasLimit = BigInt(gasLimit.toString())
+    tx.gasPrice = BigInt(gasPrice.toString())
+    tx.maxFeePerGas = null
+    tx.maxPriorityFeePerGas = null
 
-    const tx = await ethers.utils.resolveProperties(transactionRequest)
     const signedTx = await this.getSigner().signApprove({
       walletIndex,
-      tx: {
-        type: 1,
-        chainId: tx.chainId,
-        data: tx.data,
-        gasLimit,
-        gasPrice,
-        nonce: ethers.BigNumber.from(tx.nonce).toNumber(),
-        to: tx.to,
-        value: tx.value,
-      },
+      tx,
     })
 
     return this.broadcastTx(signedTx)

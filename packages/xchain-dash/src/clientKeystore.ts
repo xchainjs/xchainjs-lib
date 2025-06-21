@@ -1,15 +1,19 @@
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import * as dashcore from '@dashevo/dashcore-lib'
 import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams } from '@xchainjs/xchain-utxo'
+import { HDKey } from '@scure/bip32'
 import * as Dash from 'bitcoinjs-lib'
+import { ECPairFactory, ECPairInterface } from 'ecpair'
 
 import { Client } from './client'
 import * as nodeApi from './node-api'
 import * as Utils from './utils'
 
+const ECPair = ECPairFactory(ecc)
 export class ClientKeystore extends Client {
   /**
    * Get the DASH address corresponding to the given index.
@@ -59,17 +63,19 @@ export class ClientKeystore extends Client {
    * @returns {Dash.ECPairInterface} The DASH ECPairInterface object.
    * @throws {"Could not get private key from phrase"} Thrown if private key cannot be obtained from the phrase.
    */
-  public getDashKeys(phrase: string, index = 0): Dash.ECPairInterface {
+  public getDashKeys(phrase: string, index = 0): ECPairInterface {
     const dashNetwork = Utils.dashNetwork(this.network)
 
     const seed = getSeed(phrase)
-    const master = Dash.bip32.fromSeed(seed, dashNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = HDKey.fromMasterSeed(Uint8Array.from(seed), dashNetwork.bip32).derive(
+      this.getFullDerivationPath(index),
+    )
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return Dash.ECPair.fromPrivateKey(master.privateKey, { network: dashNetwork })
+    return ECPair.fromPrivateKey(Buffer.from(master.privateKey), { network: dashNetwork })
   }
 
   /**

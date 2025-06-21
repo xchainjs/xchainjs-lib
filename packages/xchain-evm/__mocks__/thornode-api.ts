@@ -1,5 +1,5 @@
 import { Chain } from '@xchainjs/xchain-util'
-import nock from 'nock'
+import mock from './axios-adapter'
 
 type InboundAddress = {
   chain: Chain
@@ -10,31 +10,6 @@ type InboundAddress = {
   router?: string
 }
 
-type MimirDetails = {
-  HALTTRADING: number
-  HALTETHTRADING: number
-  HALTETHCHAIN: number
-}
-
 export const mock_thornode_inbound_addresses_success = (url: string, result: InboundAddress[]) => {
-  nock(url)
-    .get(`/thorchain/inbound_addresses`)
-    .query((_) => true)
-    .reply(200, result)
-}
-
-export const mock_thornode_inbound_addresses_fail = (url: string) => {
-  nock(url)
-    .get(`/thorchain/inbound_addresses`)
-    .query((_) => true)
-    .reply(500, {
-      error: 'somthing bad happened',
-    })
-}
-
-export const mock_thornode_mimir = (url: string, result: MimirDetails) => {
-  nock(url)
-    .get('/thorchain/mimir')
-    .query((_) => true)
-    .reply(200, result)
+  mock.onGet(new RegExp(`${url}/thorchain/inbound_addresses`)).reply(200, result)
 }

@@ -18,9 +18,9 @@ const defaultBTCParams: UtxoClientParams = {
   explorerProviders: blockstreamExplorerProviders,
   dataProviders: [BlockcypherDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
-    [Network.Testnet]: `84'/1'/0'/0/`,
-    [Network.Stagenet]: `84'/0'/0'/0/`,
+    [Network.Mainnet]: `m/84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+    [Network.Testnet]: `m/84'/1'/0'/0/`,
+    [Network.Stagenet]: `m/84'/0'/0'/0/`,
   },
   feeBounds: {
     lower: LOWER_FEE_BOUND,
@@ -29,13 +29,9 @@ const defaultBTCParams: UtxoClientParams = {
 }
 const btcClient = new Client({
   ...defaultBTCParams,
+  phrase: process.env.PHRASE_MAINNET,
 })
 
-const btcClientTestnet = new Client({
-  ...defaultBTCParams,
-  network: Network.Testnet,
-  phrase: process.env.TESTNET_PHRASE,
-})
 describe('Bitcoin Integration Tests for BlockCypher', () => {
   it('should fetch correct asset ', async () => {
     const info = btcClient.getAssetInfo()
@@ -105,18 +101,18 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
     //console.log(JSON.stringify(tx, null, 2))
     expect(tx.hash).toBe(txId)
   })
-  it('should send a testnet btc tx via blockcypher', async () => {
+  it('should send btc tx via blockcypher', async () => {
     try {
       // const from = btcClientTestnet.getAddress(0)
-      const to = await btcClientTestnet.getAddressAsync(1)
+      const to = await btcClient.getAddressAsync(1)
+      console.log('to', to)
       // console.log(JSON.stringify(to, null, 2))
-      const amount = assetToBase(assetAmount('0.000011'))
-      const txid = await btcClientTestnet.transfer({
+      const amount = assetToBase(assetAmount('0.00002'))
+      const txid = await btcClient.transfer({
         asset: AssetBTC,
         recipient: to,
         amount,
         memo: 'test',
-        feeRate: 1,
       })
       console.log(JSON.stringify(txid, null, 2))
     } catch (err) {
@@ -126,10 +122,11 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
   })
   it('should prepare transaction', async () => {
     try {
-      const from = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
-      const to = 'tb1q2pkall6rf6v6j0cvpady05xhy37erndvku08wp'
+      const from = await btcClient.getAddressAsync(0)
+      const to = await btcClient.getAddressAsync(1)
+      console.log('to', to)
       const amount = assetToBase(assetAmount('0.0001'))
-      const rawUnsignedTransaction = await btcClientTestnet.prepareTx({
+      const rawUnsignedTransaction = await btcClient.prepareTx({
         sender: from,
         recipient: to,
         amount,
@@ -144,17 +141,17 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
   })
   it('Try to send max amount', async () => {
     try {
-      const firstAddress = await btcClientTestnet.getAddressAsync(0)
-      const address = await btcClientTestnet.getAddressAsync(1)
+      const firstAddress = await btcClient.getAddressAsync(0)
+      const address = await btcClient.getAddressAsync(1)
       console.log('address', address)
-      const balance = await btcClientTestnet.getBalance(address)
+      const balance = await btcClient.getBalance(address)
       console.log(balance[0].amount.amount().toString())
-      const fee = await btcClientTestnet.getFees({
+      const fee = await btcClient.getFees({
         memo: address,
         sender: address,
       })
       console.log(fee.fast.amount().toString())
-      const txid = await btcClientTestnet.transfer({
+      const txid = await btcClient.transfer({
         walletIndex: 1,
         asset: AssetBTC,
         recipient: firstAddress,

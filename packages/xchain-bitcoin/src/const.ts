@@ -129,7 +129,7 @@ export const BitgoProviders: UtxoOnlineDataProviders = {
 }
 
 export const tapRootDerivationPaths = {
-  [Network.Mainnet]: `86'/0'/0'/0/`,
-  [Network.Testnet]: `86'/1'/0'/0/`,
-  [Network.Stagenet]: `86'/0'/0'/0/`,
+  [Network.Mainnet]: `m/86'/0'/0'/0/`,
+  [Network.Testnet]: `m/86'/1'/0'/0/`,
+  [Network.Stagenet]: `m/86'/0'/0'/0/`,
 }

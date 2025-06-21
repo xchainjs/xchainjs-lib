@@ -1,11 +1,16 @@
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams } from '@xchainjs/xchain-utxo'
 import * as Dogecoin from 'bitcoinjs-lib' // Importing the base Doge client
+import { ECPairFactory, ECPairInterface } from 'ecpair'
+import { HDKey } from '@scure/bip32'
 
 import { Client } from './client' // Importing utility functions
 import * as Utils from './utils'
+
+const ECPair = ECPairFactory(ecc)
 /**
  * Custom Doge client extended to support keystore functionality
  */
@@ -51,17 +56,19 @@ class ClientKeystore extends Client {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating Doge keys from the given phrase
    * */
-  private getDogeKeys(phrase: string, index = 0): Dogecoin.ECPairInterface {
+  private getDogeKeys(phrase: string, index = 0): ECPairInterface {
     const dogeNetwork = Utils.dogeNetwork(this.network)
 
     const seed = getSeed(phrase)
-    const master = Dogecoin.bip32.fromSeed(seed, dogeNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = HDKey.fromMasterSeed(Uint8Array.from(seed), dogeNetwork.bip32).derive(
+      this.getFullDerivationPath(index),
+    )
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return Dogecoin.ECPair.fromPrivateKey(master.privateKey, { network: dogeNetwork })
+    return ECPair.fromPrivateKey(Buffer.from(master.privateKey), { network: dogeNetwork })
   }
 
   /**

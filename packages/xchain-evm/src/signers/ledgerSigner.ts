@@ -1,7 +1,6 @@
 import AppEth, { ledgerService } from '@ledgerhq/hw-app-eth'
 import Transport from '@ledgerhq/hw-transport'
 import { Address } from '@xchainjs/xchain-util'
-import { ethers } from 'ethers'
 
 import { SignApproveParams, SignTransferParams } from '../types'
 
@@ -55,21 +54,25 @@ export class LedgerSigner extends Signer {
    *
    * @param {SignTransferParams} params Sign transfer params
    * @param {string} SignTransferParams.sender Fee option (optional)
-   * @param {ethers.Transaction} SignTransferParams.tx Fee option (optional)
+   * @param {Transaction} SignTransferParams.tx Fee option (optional)
    * @returns {string} The raw signed transaction.
    */
   public async signTransfer({ walletIndex, tx }: SignTransferParams): Promise<string> {
-    const unsignedTx = ethers.utils.serializeTransaction(tx).substring(2)
+    // const unsignedTx = ethers.utils.serializeTransaction(tx).substring(2)
+    const unsignedTx = tx.unsignedSerialized.substring(2)
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 
     const ethApp = await this.getApp()
 
     const signatureData = await ethApp.signTransaction(this.getFullDerivationPath(walletIndex), unsignedTx, resolution)
-    const rawSignedTx = ethers.utils.serializeTransaction(tx, {
+
+    tx.signature = {
       v: Number(BigInt(signatureData.v)),
       r: `0x${signatureData.r}`,
       s: `0x${signatureData.s}`,
-    })
+    }
+
+    const rawSignedTx = tx.serialized
     return rawSignedTx
   }
 
@@ -82,32 +85,20 @@ export class LedgerSigner extends Signer {
    * @returns {string} The raw signed transaction.
    */
   public async signApprove({ walletIndex, tx }: SignApproveParams): Promise<string> {
-    const txCompleted = await ethers.utils.resolveProperties(tx)
-
-    const baseTx = {
-      type: 1,
-      chainId: tx.chainId || undefined,
-      data: tx.data || undefined,
-      gasLimit: txCompleted.gasLimit,
-      gasPrice: txCompleted.gasPrice,
-      nonce: tx.nonce ? ethers.BigNumber.from(tx.nonce).toNumber() : undefined,
-      to: tx.to || undefined,
-      value: tx.value || undefined,
-    }
-
-    // Populate the transaction with necessary details
-    const unsignedTx = ethers.utils.serializeTransaction(baseTx).substring(2)
+    const unsignedTx = tx.unsignedSerialized.substring(2)
 
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 
     const ethApp = await this.getApp()
     const signatureData = await ethApp.signTransaction(this.getFullDerivationPath(walletIndex), unsignedTx, resolution)
 
-    const rawSignedTx = ethers.utils.serializeTransaction(baseTx, {
+    tx.signature = {
       v: Number(BigInt(signatureData.v)),
       r: `0x${signatureData.r}`,
       s: `0x${signatureData.s}`,
-    })
+    }
+
+    const rawSignedTx = tx.serialized
     return rawSignedTx
   }
 }

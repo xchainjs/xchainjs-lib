@@ -88,9 +88,9 @@ describe('Cosmos client e2e', () => {
     console.log(unsignedTx)
   })
 
-  it('Should make transfer to address 0', async () => {
+  it('Should make transfer to address 1', async () => {
     const hash = await client.transfer({
-      recipient: await client.getAddressAsync(0),
+      recipient: await client.getAddressAsync(1),
       amount: assetToBase(assetAmount(0.1, COSMOS_DECIMAL)),
       memo: 'test',
     })

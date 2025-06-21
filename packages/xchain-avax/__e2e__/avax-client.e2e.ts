@@ -16,38 +16,9 @@ const assetRIP: TokenAsset = {
   type: AssetType.TOKEN,
 }
 
-// const AVAX_ONLINE_PROVIDER_TESTNET = new CovalentProvider(
-//   process.env.COVALENT_API_KEY as string,
-//   AVAXChain,
-//   43113,
-//   AssetAVAX,
-//   18,
-// )
-
-// const AVAX_ONLINE_PROVIDER_MAINNET = new CovalentProvider(
-//   process.env.COVALENT_API_KEY as string,
-//   AVAXChain,
-//   43114,
-//   AssetAVAX,
-//   18,
-// )
-
-// const avaxProviders = {
-//   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
-//   [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
-//   [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
-// }
-
-// const fakeProviders = {
-//   [Network.Mainnet]: {} as EvmOnlineDataProvider,
-//   [Network.Testnet]: {} as EvmOnlineDataProvider,
-//   [Network.Stagenet]: {} as EvmOnlineDataProvider,
-// }
-
 defaultAvaxParams.network = Network.Mainnet
-defaultAvaxParams.phrase = process.env.TESTNET_PHRASE
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// defaultAvaxParams.dataProviders = [fakeProviders as any, avaxProviders]
+defaultAvaxParams.phrase = process.env.MAINNET_PHRASE
+
 const client = new AvaxClient({
   ...defaultAvaxParams,
 })
@@ -64,6 +35,10 @@ describe('xchain-evm (Avax) Integration Tests', () => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
     expect(balances.length).toBeGreaterThan(0)
+  })
+  it('should get address', async () => {
+    const address = await client.getAddressAsync()
+    console.log(address)
   })
   it('should fetch avax txs', async () => {
     const address = '0x55aEd0ce035883626e536254dda2F23a5b5D977f'
@@ -104,6 +79,7 @@ describe('xchain-evm (Avax) Integration Tests', () => {
 
   it('should transfer 0.01 AVAX between wallet 0 and 1, with a memo', async () => {
     const recipient = await client.getAddressAsync(1)
+    console.log('recipient', recipient)
     const amount = assetToBase(assetAmount('0.01', 18))
     const memo = `=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000`
     const txHash = await client.transfer({ amount, recipient, memo })

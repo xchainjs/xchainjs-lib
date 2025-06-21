@@ -1,9 +1,11 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType, Chain } from '@xchainjs/xchain-util'
-import { BigNumber, ethers } from 'ethers'
-import nock from 'nock'
+import { JsonRpcProvider } from 'ethers'
+import { BigNumber } from 'bignumber.js'
 
+import mock from '../__mocks__/axios-adapter'
+import { mock_gas_oracle_custom } from '../__mocks__/etherscan-api'
 import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
 import { Client, EVMKeystoreClientParams, KeystoreSigner } from '../src'
 
@@ -16,13 +18,11 @@ const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const thornodeApiUrl = 'https://testnet.thornode.thorchain.info'
 
 // =====Defaults=====
-export const transferGasAssetGasLimit: ethers.BigNumber = ethers.BigNumber.from(21000)
-export const transferTokenGasLimit: ethers.BigNumber = ethers.BigNumber.from(100000)
+export const transferGasAssetGasLimit: BigNumber = new BigNumber(21000)
+export const transferTokenGasLimit: BigNumber = new BigNumber(100000)
 // =====Ethers providers=====
-const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
-const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-  'https://api.avax-test.network/ext/bc/C/rpc',
-)
+const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
+const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc')
 
 const ethersJSProviders = {
   [Network.Mainnet]: AVALANCHE_MAINNET_ETHERS_PROVIDER,
@@ -87,22 +87,22 @@ const ethRootDerivationPaths = {
 }
 const defaults = {
   [Network.Mainnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Testnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Stagenet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
 }
 const avaxParams: EVMKeystoreClientParams = {
@@ -125,13 +125,25 @@ const avaxParams: EVMKeystoreClientParams = {
     derivationPath: ethRootDerivationPaths[Network.Testnet],
   }),
 }
+
+const setupCleanMocks = () => {
+  mock.reset()
+  mock.resetHistory()
+}
+
 /**
  * Wallet Tests
  */
 describe('EVM client', () => {
   let avaxClient: Client
+
+  beforeAll(() => {
+    setupCleanMocks()
+  })
+
   beforeEach(() => {
-    nock.disableNetConnect()
+    setupCleanMocks()
+
     avaxClient = new Client({
       ...avaxParams,
       signer: new KeystoreSigner({
@@ -143,11 +155,15 @@ describe('EVM client', () => {
   })
 
   afterEach(() => {
-    nock.cleanAll()
+    setupCleanMocks()
   })
 
-  it('Should throw error with invalid phrase', () => {
-    expect(() => {
+  afterAll(() => {
+    mock.restore()
+  })
+
+  it('Should throw error with invalid phrase', async () => {
+    await expect(() => {
       new Client({
         ...avaxParams,
         signer: new KeystoreSigner({
@@ -156,7 +172,7 @@ describe('EVM client', () => {
           derivationPath: ethRootDerivationPaths[Network.Testnet],
         }),
       })
-    }).toThrowError()
+    }).toThrow()
   })
 
   it('Should not throw error on a client without a phrase', () => {
@@ -166,9 +182,9 @@ describe('EVM client', () => {
     }).not.toThrow()
   })
 
-  it('Should not have a phrase after purging', () => {
+  it('Should not have a phrase after purging', async () => {
     avaxClient.purgeClient()
-    expect(() => avaxClient.getAddress()).toThrowError()
+    await expect(() => avaxClient.getAddress()).toThrow()
   })
 
   it('Should set new phrase', () => {
@@ -177,12 +193,8 @@ describe('EVM client', () => {
     expect(newAddress).toBe('0xd7aa2e8903782e02f3cee4fa3f317f5bcfd62a4d')
   })
 
-  it('should fail to set new phrase', () => {
-    expect(() => avaxClient.setPhrase('bad bad phrase')).toThrowError()
-  })
-
-  it('Should connect to specified network', async () => {
-    // TODO
+  it('should fail to set new phrase', async () => {
+    await expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
   })
 
   it('Should get network', () => {
@@ -231,6 +243,12 @@ describe('EVM client', () => {
       thornodeApiUrl,
       require('../__mocks__/responses/inbound_addresses_testnet.json'),
     )
+
+    mock_gas_oracle_custom('https://api-testnet.snowtrace.io', 43113, {
+      SafeGasPrice: '12.5',
+      ProposeGasPrice: '25',
+      FastGasPrice: '125',
+    })
 
     const { fast, fastest, average } = await avaxClient.estimateGasPrices()
 

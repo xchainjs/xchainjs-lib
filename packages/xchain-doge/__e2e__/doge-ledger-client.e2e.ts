@@ -41,7 +41,7 @@ describe('Doge Client Ledger', () => {
     })
   })
   it('get ledger address async without verification', async () => {
-    const address = await dogeClient.getAddressAsync()
+    const address = await dogeClient.getAddressAsync(1)
     console.log('address', address)
     expect(address).toContain('D')
   })
@@ -67,7 +67,6 @@ describe('Doge Client Ledger', () => {
         recipient: to,
         amount,
         memo: 'test',
-        feeRate: 1,
       })
       console.log(JSON.stringify(txid, null, 2))
     } catch (err) {

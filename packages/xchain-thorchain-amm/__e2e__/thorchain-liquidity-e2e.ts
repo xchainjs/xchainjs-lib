@@ -1,8 +1,7 @@
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { BNBChain, Client as BnbClient } from '@xchainjs/xchain-binance'
 import { AssetBTC, BTCChain, Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
-import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { BSCChain, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM, COSMOS_DECIMAL, Client as GaiaClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
@@ -64,7 +63,6 @@ describe('ThorchainAmm e2e tests', () => {
         AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
         BSC: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
         GAIA: new GaiaClient({ phrase, network: Network.Mainnet }),
-        BNB: new BnbClient({ phrase, network: Network.Mainnet }),
         THOR: new ThorClient({ ...defaultThorParams, phrase, network: Network.Mainnet }),
       })
       thorchainQuery = new ThorchainQuery()
@@ -154,7 +152,7 @@ describe('ThorchainAmm e2e tests', () => {
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
         asset: BUSDC,
-        assetAddress: await wallet.getAddress(BNBChain),
+        assetAddress: await wallet.getAddress(BSCChain),
       }
       const hash = await thorchainAmm.withdrawLiquidityPosition(removeLp)
       console.log(hash)

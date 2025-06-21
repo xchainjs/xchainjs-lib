@@ -16,7 +16,7 @@ export type TransactionHistoryParamV2 = {
   assetAddress?: string
   page?: number
   offset?: number
-  startblock?: number
+  startblock?: number | null
   endblock?: number
   chainId: number
 }

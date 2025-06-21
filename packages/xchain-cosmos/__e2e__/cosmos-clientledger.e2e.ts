@@ -16,7 +16,7 @@ describe('Cosmos client e2e', () => {
     })
   })
   it('get address async', async () => {
-    const address = await client.getAddressAsync(0, true)
+    const address = await client.getAddressAsync(1, true)
     console.log({ address })
   })
   it('should broadcast a normal transfer', async () => {
@@ -24,7 +24,7 @@ describe('Cosmos client e2e', () => {
     const hash = await client.transfer({
       walletIndex: 0,
       asset: AssetATOM,
-      recipient: await client.getAddressAsync(0),
+      recipient: await client.getAddressAsync(1),
       amount: assetToBase(amount),
       memo: 'test',
     })

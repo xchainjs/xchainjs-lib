@@ -1,4 +1,3 @@
-import cosmosclient from '@cosmos-client/core'
 import { Client as BtcClient, defaultBTCParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -6,7 +5,6 @@ import { assetAmount, assetToBase, register9Rheader } from '@xchainjs/xchain-uti
 import axios from 'axios'
 
 register9Rheader(axios)
-register9Rheader(cosmosclient.config.globalAxios)
 
 type PrepareParmas = {
   sender: string

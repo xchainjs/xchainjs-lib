@@ -33,9 +33,9 @@ export const getDefaultClientUrls = (): Record<Network, string[]> => {
  * @returns {RootDerivationPaths} Default root derivation paths for different networks.
  */
 export const getDefaultRootDerivationPaths = (): RootDerivationPaths => ({
-  [Network.Mainnet]: `44'/118'/0'/0/`,
-  [Network.Testnet]: `44'/118'/0'/0/`,
-  [Network.Stagenet]: `44'/118'/0'/0/`,
+  [Network.Mainnet]: `m/44'/118'/0'/0/`,
+  [Network.Testnet]: `m/44'/118'/0'/0/`,
+  [Network.Stagenet]: `m/44'/118'/0'/0/`,
 })
 
 /**

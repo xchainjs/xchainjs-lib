@@ -1,10 +1,10 @@
 <div align="center">
 
-  [![Contributors][contributors-shield]][contributors-url]
-  [![Forks][forks-shield]][forks-url]
-  [![Stargazers][stars-shield]][stars-url]
-  [![Issues][issues-shield]][issues-url]
-  [![MIT License][license-shield]][license-url]
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
 
 </div>
 
@@ -47,7 +47,6 @@ The library aims to abstract away the complexities of blockchain development, al
 - **Empower Developers**:
   By abstracting away the complexities of blockchain technology, the XchainJS library empowers developers of all skill levels to leverage the potential of blockchain in their projects, regardless of their expertise in cryptography or distributed systems.
 
-
 ## Scope
 
 **Blockchain Interaction**:
@@ -72,7 +71,6 @@ The library is designed to be protocol-agnostic, meaning it can support multiple
 **Community Support**:
 The xchain library is supported by a vibrant community of developers and contributors who actively maintain and improve the library, ensuring its relevance and usability in the rapidly evolving blockchain landscape.
 
-
 ## Examples
 
 To show different use cases and to facilitate developers experience with XChainJS, we have created a few examples on [CodeSandbox](https://codesandbox.io/) where you will be able to see and fork our examples to create yours.
@@ -92,7 +90,6 @@ Examples:
 
 More information about how to use each XChainJS package can be found on [documentation](https://xchainjs.gitbook.io/xchainjs)
 
-
 ## Packages
 
 XChainJS is a library made up of different packages through which you can interact with different blockchains, data providers and protocols, or use its utility functions to simplify blockchain development.
@@ -101,52 +98,50 @@ XChainJS is a library made up of different packages through which you can intera
 
 Blockchain clients with whom you can prepare, make and broadcast transactions, estimate transactions fees and get address balances.
 
-| Name | Keystore support | Ledger support | Download |
-|:-----:|:-----: |:-----: | :------|
-| [@xchainjs/xchain-bitcoin](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoin) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-bitcoin)](https://www.npmjs.com/package/@xchainjs/xchain-bitcoin) |
-| [@xchainjs/xchain-ethereum](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-ethereum)](https://www.npmjs.com/package/@xchainjs/xchain-ethereum) |
-| [@xchainjs/xchain-thorchain](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-thorchain)](https://www.npmjs.com/package/@xchainjs/xchain-thorchain) |
-| [@xchainjs/xchain-mayachain](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayachain)](https://www.npmjs.com/package/@xchainjs/xchain-mayachain) |
-| [@xchainjs/xchain-bitcoincash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoincash) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-bitcoincash)](https://www.npmjs.com/package/@xchainjs/xchain-bitcoincash) |
-| [@xchainjs/xchain-litecoin](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-litecoin)](https://www.npmjs.com/package/@xchainjs/xchain-litecoin) |
-| [@xchainjs/xchain-doge](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-doge)](https://www.npmjs.com/package/@xchainjs/xchain-doge) |
-| [@xchainjs/xchain-dash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-dash) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-dash)](https://www.npmjs.com/package/@xchainjs/xchain-dash) |
-| [@xchainjs/xchain-avax](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-avax) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-avax)](https://www.npmjs.com/package/@xchainjs/xchain-avax) |
-| [@xchainjs/xchain-arbitrum](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-arbitrum) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-arbitrum)](https://www.npmjs.com/package/@xchainjs/xchain-arbitrum) |
-| [@xchainjs/xchain-bsc](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bsc) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-bsc)](https://www.npmjs.com/package/@xchainjs/xchain-bsc) |
-| [@xchainjs/xchain-kujira](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-kujira) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-kujira)](https://www.npmjs.com/package/@xchainjs/xchain-kujira) |
-| [@xchainjs/xchain-cosmos](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cosmos)](https://www.npmjs.com/package/@xchainjs/xchain-cosmos) |
-| [@xchainjs/xchain-solana](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-solana) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-solana)](https://www.npmjs.com/package/@xchainjs/xchain-solana) |
-| [@xchainjs/xchain-binance](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-binance)](https://www.npmjs.com/package/@xchainjs/xchain-binance) |
-| [@xchainjs/xchain-base](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-base) | ✅ | ✅ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-base)](https://www.npmjs.com/package/@xchainjs/xchain-base) |
-| [@xchainjs/xchain-radix](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-radix) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-radix)](https://www.npmjs.com/package/@xchainjs/xchain-radix) |
-| [@xchainjs/xchain-cardano](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cardano) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cardano)](https://www.npmjs.com/package/@xchainjs/xchain-cardano) |
-| [@xchainjs/xchain-zcash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-zcash) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-zcash)](https://www.npmjs.com/package/@xchainjs/xchain-zcash) |
-| [@xchainjs/xchain-ripple](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ripple) | ✅ | ❌ | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-ripple)](https://www.npmjs.com/package/@xchainjs/xchain-ripple) |
+|                                                       Name                                                       | Keystore support | Ledger support | Download                                                                                                                        |
+| :--------------------------------------------------------------------------------------------------------------: | :--------------: | :------------: | :------------------------------------------------------------------------------------------------------------------------------ |
+|     [@xchainjs/xchain-bitcoin](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoin)     |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-bitcoin)](https://www.npmjs.com/package/@xchainjs/xchain-bitcoin)         |
+|    [@xchainjs/xchain-ethereum](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ethereum)    |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-ethereum)](https://www.npmjs.com/package/@xchainjs/xchain-ethereum)       |
+|   [@xchainjs/xchain-thorchain](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain)   |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-thorchain)](https://www.npmjs.com/package/@xchainjs/xchain-thorchain)     |
+|   [@xchainjs/xchain-mayachain](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain)   |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayachain)](https://www.npmjs.com/package/@xchainjs/xchain-mayachain)     |
+| [@xchainjs/xchain-bitcoincash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bitcoincash) |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-bitcoincash)](https://www.npmjs.com/package/@xchainjs/xchain-bitcoincash) |
+|    [@xchainjs/xchain-litecoin](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-litecoin)    |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-litecoin)](https://www.npmjs.com/package/@xchainjs/xchain-litecoin)       |
+|        [@xchainjs/xchain-doge](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-doge)        |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-doge)](https://www.npmjs.com/package/@xchainjs/xchain-doge)               |
+|        [@xchainjs/xchain-dash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-dash)        |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-dash)](https://www.npmjs.com/package/@xchainjs/xchain-dash)               |
+|        [@xchainjs/xchain-avax](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-avax)        |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-avax)](https://www.npmjs.com/package/@xchainjs/xchain-avax)               |
+|    [@xchainjs/xchain-arbitrum](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-arbitrum)    |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-arbitrum)](https://www.npmjs.com/package/@xchainjs/xchain-arbitrum)       |
+|         [@xchainjs/xchain-bsc](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-bsc)         |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-bsc)](https://www.npmjs.com/package/@xchainjs/xchain-bsc)                 |
+|      [@xchainjs/xchain-kujira](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-kujira)      |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-kujira)](https://www.npmjs.com/package/@xchainjs/xchain-kujira)           |
+|      [@xchainjs/xchain-cosmos](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos)      |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cosmos)](https://www.npmjs.com/package/@xchainjs/xchain-cosmos)           |
+|      [@xchainjs/xchain-solana](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-solana)      |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-solana)](https://www.npmjs.com/package/@xchainjs/xchain-solana)           |
+|     [@xchainjs/xchain-binance](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-binance)     |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-binance)](https://www.npmjs.com/package/@xchainjs/xchain-binance)         |
+|        [@xchainjs/xchain-base](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-base)        |        ✅        |       ✅       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-base)](https://www.npmjs.com/package/@xchainjs/xchain-base)               |
+|       [@xchainjs/xchain-radix](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-radix)       |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-radix)](https://www.npmjs.com/package/@xchainjs/xchain-radix)             |
+|     [@xchainjs/xchain-cardano](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cardano)     |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cardano)](https://www.npmjs.com/package/@xchainjs/xchain-cardano)         |
+|       [@xchainjs/xchain-zcash](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-zcash)       |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-zcash)](https://www.npmjs.com/package/@xchainjs/xchain-zcash)             |
+|      [@xchainjs/xchain-ripple](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-ripple)      |        ✅        |       ❌       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-ripple)](https://www.npmjs.com/package/@xchainjs/xchain-ripple)           |
 
 ### Utility packages
 
 Utility packages
 
-| Name | Download |
-|:-----:|:------|
-| [@xchainjs/xchain-util](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-util)](https://www.npmjs.com/package/@xchainjs/xchain-util) |
-| [@xchainjs/xchain-client](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-client) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-client)](https://www.npmjs.com/package/@xchainjs/xchain-client) |
-| [@xchainjs/xchain-crypto](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-crypto)](https://www.npmjs.com/package/@xchainjs/xchain-crypto) |
-| [@xchainjs/xchain-utxo](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-utxo) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-utxo)](https://www.npmjs.com/package/@xchainjs/xchain-utxo) |
-| [@xchainjs/xchain-evm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-evm) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-evm)](https://www.npmjs.com/package/@xchainjs/xchain-evm) |
+|                                                      Name                                                      | Download                                                                                                                      |
+| :------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------- |
+|       [@xchainjs/xchain-util](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-util)       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-util)](https://www.npmjs.com/package/@xchainjs/xchain-util)             |
+|     [@xchainjs/xchain-client](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-client)     | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-client)](https://www.npmjs.com/package/@xchainjs/xchain-client)         |
+|     [@xchainjs/xchain-crypto](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-crypto)     | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-crypto)](https://www.npmjs.com/package/@xchainjs/xchain-crypto)         |
+|       [@xchainjs/xchain-utxo](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-utxo)       | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-utxo)](https://www.npmjs.com/package/@xchainjs/xchain-utxo)             |
+|        [@xchainjs/xchain-evm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-evm)        | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-evm)](https://www.npmjs.com/package/@xchainjs/xchain-evm)               |
 | [@xchainjs/xchain-cosmos-sdk](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-cosmos-sdk) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-cosmos-sdk)](https://www.npmjs.com/package/@xchainjs/xchain-cosmos-sdk) |
-
 
 ### Data provider packages
 
 Data providers to retrieve blockchain data
 
-| Name | Download |
-|:-----:|:------|
+|                                                          Name                                                          | Download                                                                                                                              |
+| :--------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------ |
 | [@xchainjs/xchain-utxo-providers](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-utxo-providers) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-utxo-providers)](https://www.npmjs.com/package/@xchainjs/xchain-utxo-providers) |
-| [@xchainjs/xchain-evm-providers](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-evm-providers) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-evm-providers)](https://www.npmjs.com/package/@xchainjs/xchain-evm-providers) |
-
+|  [@xchainjs/xchain-evm-providers](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-evm-providers)  | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-evm-providers)](https://www.npmjs.com/package/@xchainjs/xchain-evm-providers)   |
 
 </p>
 
@@ -156,42 +151,38 @@ Data providers to retrieve blockchain data
 
 Packages to interact with Thorchain
 
-| Name | Download |
-|:-----:|:------|
-| [@xchainjs/xchain-thornode](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thornode) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-thornode)](https://www.npmjs.com/package/@xchainjs/xchain-thornode) |
-| [@xchainjs/xchain-midgard](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-midgard) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-midgard)](https://www.npmjs.com/package/@xchainjs/xchain-midgard) |
+|                                                           Name                                                           | Download                                                                                                                                |
+| :----------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------- |
+|        [@xchainjs/xchain-thornode](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thornode)        | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-thornode)](https://www.npmjs.com/package/@xchainjs/xchain-thornode)               |
+|         [@xchainjs/xchain-midgard](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-midgard)         | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-midgard)](https://www.npmjs.com/package/@xchainjs/xchain-midgard)                 |
 | [@xchainjs/xchain-thorchain-query](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-query) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-thorchain-query)](https://www.npmjs.com/package/@xchainjs/xchain-thorchain-query) |
-| [@xchainjs/xchain-thorchain-amm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-amm) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-thorchain-amm)](https://www.npmjs.com/package/@xchainjs/xchain-thorchain-amm) |
-
+|   [@xchainjs/xchain-thorchain-amm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-thorchain-amm)   | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-thorchain-amm)](https://www.npmjs.com/package/@xchainjs/xchain-thorchain-amm)     |
 
 #### Mayachain
 
 Packages to interact with Mayachain
 
-| Name | Download |
-|:-----:|:------|
-| [@xchainjs/xchain-mayanode](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayanode) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayanode)](https://www.npmjs.com/package/@xchainjs/xchain-mayanode) |
-| [@xchainjs/xchain-mayamidgard](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayamidgard) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayamidgard)](https://www.npmjs.com/package/@xchainjs/xchain-mayamidgard) |
+|                                                           Name                                                           | Download                                                                                                                                |
+| :----------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------- |
+|        [@xchainjs/xchain-mayanode](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayanode)        | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayanode)](https://www.npmjs.com/package/@xchainjs/xchain-mayanode)               |
+|     [@xchainjs/xchain-mayamidgard](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayamidgard)     | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayamidgard)](https://www.npmjs.com/package/@xchainjs/xchain-mayamidgard)         |
 | [@xchainjs/xchain-mayachain-query](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain-query) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayachain-query)](https://www.npmjs.com/package/@xchainjs/xchain-mayachain-query) |
-| [@xchainjs/xchain-mayachain-amm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain-amm) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayachain-amm)](https://www.npmjs.com/package/@xchainjs/xchain-mayachain-amm) |
-
+|   [@xchainjs/xchain-mayachain-amm](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-mayachain-amm)   | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-mayachain-amm)](https://www.npmjs.com/package/@xchainjs/xchain-mayachain-amm)     |
 
 ### Really cool packages
 
 Poweful tool to build whatever you want...
 
-| Name | Download |
-|:-----:|:------|
-| [@xchainjs/xchain-wallet](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-wallet) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-wallet)](https://www.npmjs.com/package/@xchainjs/xchain-wallet) |
+|                                                      Name                                                      | Download                                                                                                                      |
+| :------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------- |
+|     [@xchainjs/xchain-wallet](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-wallet)     | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-wallet)](https://www.npmjs.com/package/@xchainjs/xchain-wallet)         |
 | [@xchainjs/xchain-aggregator](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-aggregator) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-aggregator)](https://www.npmjs.com/package/@xchainjs/xchain-aggregator) |
-
 
 ## Tools
 
 ### TxJammer
 
 [Tx Jammer](https://github.com/xchainjs/xchainjs-lib/tree/master/tools/txJammer) is a script which pushes a random amount of different types of transactions to stagenet to verify new stagenet releases
-
 
 ## Contributing
 

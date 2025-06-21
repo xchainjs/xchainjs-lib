@@ -1,6 +1,6 @@
 import { AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { AssetBETH, BASEChain, Client as BaseClient, defaultBaseParams } from '@xchainjs/xchain-base'
-import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
+import { AssetBSC, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import {
   AssetBTC,
   BTCChain,
@@ -12,8 +12,8 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
+import { Client as SolClient, SOLAsset, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import {
-  Asset,
   AssetType,
   CryptoAmount,
   TokenAsset,
@@ -68,17 +68,18 @@ function bestSwap(allQuotes: QuoteSwap[]) {
   )
   return bestQuote
 }
-const SOLAsset: Asset = {
-  chain: 'SOL',
-  ticker: 'SOL',
-  symbol: 'SOL',
-  type: AssetType.NATIVE,
-}
 
 const AssetUSDT: TokenAsset = {
   chain: ETHChain,
   symbol: 'USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7',
   ticker: 'USDT',
+  type: AssetType.TOKEN,
+}
+
+const AssetUSDC: TokenAsset = {
+  chain: ETHChain,
+  symbol: 'USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+  ticker: 'USDC',
   type: AssetType.TOKEN,
 }
 
@@ -99,8 +100,9 @@ describe('Aggregator', () => {
       }),
       AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
       BASE: new BaseClient({ ...defaultBaseParams, phrase, network: Network.Mainnet }),
-      BNB: new BnbClient({ phrase, network: Network.Mainnet }),
+      BNB: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
+      SOL: new SolClient({ ...defaultSolanaParams, phrase, network: Network.Mainnet }),
     })
     aggregator = new Aggregator({ wallet })
   })
@@ -199,21 +201,23 @@ describe('Aggregator', () => {
   })
 
   it('Should do swap using chosen protocol', async () => {
+    const destinationAddress = await wallet.getAddress(SOLAsset.chain)
     const txEstimatedSwap = await aggregator.estimateSwap({
-      fromAsset: AssetBNB,
-      destinationAsset: AssetAVAX,
-      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
-      destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+      fromAsset: AssetUSDC,
+      destinationAsset: SOLAsset,
+      amount: new CryptoAmount(assetToBase(assetAmount(25, 6)), AssetUSDC),
+      destinationAddress: destinationAddress,
     })
 
     printQuoteSwap(txEstimatedSwap[0])
 
     const txSubmitted = await aggregator.doSwap({
       protocol: txEstimatedSwap[0].protocol,
-      fromAsset: AssetBNB,
-      destinationAsset: AssetAVAX,
-      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
-      destinationAddress: await wallet.getAddress(AssetAVAX.chain),
+      fromAsset: AssetUSDC,
+      fromAddress: await wallet.getAddress(ETHChain),
+      destinationAsset: SOLAsset,
+      amount: new CryptoAmount(assetToBase(assetAmount(25, 6)), AssetUSDC),
+      destinationAddress: destinationAddress,
     })
 
     console.log(txSubmitted)
@@ -248,42 +252,12 @@ describe('Aggregator', () => {
 
   it('Should do swap without selecting protocol', async () => {
     const txSubmitted = await aggregator.doSwap({
-      fromAsset: AssetBNB,
+      fromAsset: AssetBSC,
       destinationAsset: AssetAVAX,
-      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBNB),
+      amount: new CryptoAmount(assetToBase(assetAmount(1)), AssetBSC),
       destinationAddress: await wallet.getAddress(AssetAVAX.chain),
     })
 
     console.log(txSubmitted)
   })
-
-  // it('Should get swaps history', async () => {
-  //   const swapHistory = await aggregator.getSwapHistory({
-  //     chainAddresses: [{ chain: 'BTC', address: 'address' }],
-  //   })
-
-  //   console.log(
-  //     swapHistory.swaps.map((swap) => {
-  //       return {
-  //         protocol: swap.protocol,
-  //         status: swap.status,
-  //         date: swap.date.toDateString(),
-  //         inboundTX: {
-  //           hash: swap.inboundTx.hash,
-  //           address: swap.inboundTx.address,
-  //           asset: assetToString(swap.inboundTx.amount.asset),
-  //           amount: swap.inboundTx.amount.assetAmount.amount().toString(),
-  //         },
-  //         outboundTx: swap.outboundTx
-  //           ? {
-  //               hash: swap.outboundTx.hash,
-  //               address: swap.outboundTx.address,
-  //               asset: assetToString(swap.outboundTx.amount.asset),
-  //               amount: swap.outboundTx.amount.assetAmount.amount().toString(),
-  //             }
-  //           : undefined,
-  //       }
-  //     }),
-  //   )
-  // })
 })

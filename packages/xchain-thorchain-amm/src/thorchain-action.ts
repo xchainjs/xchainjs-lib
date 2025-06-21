@@ -14,7 +14,8 @@ import {
   isTradeAsset,
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
-import { ethers } from 'ethers'
+import { Contract, getAddress, ZeroAddress } from 'ethers'
+import BigNumber from 'bignumber.js'
 
 import { TxSubmitted } from './types'
 import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
@@ -98,8 +99,8 @@ export class ThorchainAction {
     const isERC20 = isProtocolERC20Asset(assetAmount.asset)
 
     const checkSummedContractAddress = isERC20
-      ? ethers.utils.getAddress(getContractAddressFromAsset(assetAmount.asset))
-      : ethers.constants.AddressZero
+      ? getAddress(getContractAddressFromAsset(assetAmount.asset))
+      : ZeroAddress
 
     const expiration = Math.floor(new Date(new Date().getTime() + 15 * 60000).getTime() / 1000)
     const depositParams = [
@@ -110,10 +111,10 @@ export class ThorchainAction {
       expiration,
     ]
 
-    const routerContract = new ethers.Contract(inboundDetails.router, abi.router)
+    const routerContract = new Contract(inboundDetails.router, abi.router)
     const gasPrices = await wallet.getFeeRates(assetAmount.asset.chain)
 
-    const unsignedTx = await routerContract.populateTransaction.depositWithExpiry(...depositParams)
+    const unsignedTx = await routerContract.getFunction('depositWithExpiry').populateTransaction(...depositParams)
 
     const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
 
@@ -124,7 +125,7 @@ export class ThorchainAction {
       recipient: inboundDetails.router,
       gasPrice: gasPrices.fast,
       isMemoEncoded: true,
-      gasLimit: ethers.BigNumber.from(160000),
+      gasLimit: new BigNumber(160000),
     })
 
     return {

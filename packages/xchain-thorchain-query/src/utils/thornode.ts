@@ -236,7 +236,7 @@ export class Thornode {
         const pools = await api.pools()
         return pools.data
       } catch (e) {
-        //console.error(e)
+        console.error(e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -460,7 +460,7 @@ export class Thornode {
         ).data
         return resp
       } catch (e) {
-        //console.error(e)
+        console.error(e)
       }
     }
     throw new Error(`THORNode not responding`)

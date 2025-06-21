@@ -15,14 +15,14 @@ import {
 jest.setTimeout(200000)
 
 const defaultBTCParams: UtxoClientParams = {
-  network: Network.Testnet,
+  network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
   dataProviders: [BlockcypherDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `84'/0'/0'/0/`,
-    [Network.Testnet]: `84'/1'/0'/0/`,
-    [Network.Stagenet]: `84'/0'/0'/0/`,
+    [Network.Mainnet]: `m/84'/0'/0'/0/`,
+    [Network.Testnet]: `m/84'/1'/0'/0/`,
+    [Network.Stagenet]: `m/84'/0'/0'/0/`,
   },
   feeBounds: {
     lower: LOWER_FEE_BOUND,
@@ -61,13 +61,12 @@ describe('Bitcoin Client Ledger', () => {
   it('transfer', async () => {
     try {
       const to = await btcClient.getAddressAsync(1)
-      const amount = assetToBase(assetAmount('0.000011'))
+      const amount = assetToBase(assetAmount('0.00002'))
       const txid = await btcClient.transfer({
         asset: AssetBTC,
         recipient: to,
         amount,
         memo: 'test',
-        feeRate: 1,
       })
       console.log(JSON.stringify(txid, null, 2))
     } catch (err) {

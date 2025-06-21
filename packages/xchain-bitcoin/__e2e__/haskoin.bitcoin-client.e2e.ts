@@ -17,9 +17,9 @@ const defaultBTCParams: UtxoClientParams = {
   explorerProviders: blockstreamExplorerProviders,
   dataProviders: [HaskoinDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
-    [Network.Testnet]: `84'/1'/0'/0/`,
-    [Network.Stagenet]: `84'/0'/0'/0/`,
+    [Network.Mainnet]: `m/84'/0'/0'/0/`, //note this isn't bip44 compliant, but it keeps the wallets generated compatible to pre HD wallets
+    [Network.Testnet]: `m/84'/1'/0'/0/`,
+    [Network.Stagenet]: `m/84'/0'/0'/0/`,
   },
   feeBounds: {
     lower: LOWER_FEE_BOUND,

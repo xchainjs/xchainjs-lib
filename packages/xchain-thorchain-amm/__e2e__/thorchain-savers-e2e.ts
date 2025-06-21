@@ -1,8 +1,7 @@
 import { AVAX_DECIMAL, AssetAVAX, Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { AssetBNB, Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
-import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
+import { AssetBSC, Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM, COSMOS_DECIMAL, Client as GaiaClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
@@ -42,7 +41,6 @@ describe('ThorchainAmm e2e tests', () => {
         AVAX: new AvaxClient({ ...defaultAvaxParams, phrase, network: Network.Mainnet }),
         BSC: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
         GAIA: new GaiaClient({ phrase, network: Network.Mainnet }),
-        BNB: new BnbClient({ phrase, network: Network.Mainnet }),
         THOR: new ThorClient({ ...defaultThorParams, phrase, network: Network.Mainnet }),
       })
       thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)
@@ -67,8 +65,8 @@ describe('ThorchainAmm e2e tests', () => {
 
     it(`Should withdraw BNB savers position`, async () => {
       const hash = await thorchainAmm.withdrawSaver({
-        asset: AssetBNB,
-        address: await wallet.getAddress(AssetBNB.chain),
+        asset: AssetBSC,
+        address: await wallet.getAddress(AssetBSC.chain),
         withdrawBps: 10000,
       })
       console.log(hash)
