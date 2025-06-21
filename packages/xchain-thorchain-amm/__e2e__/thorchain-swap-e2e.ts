@@ -30,7 +30,7 @@ import {
 import {
   AssetRuneNative,
   ClientKeystore as THORKeystoreClient,
-  // ClientLedger as THORLedgerClient,
+  ClientLedger as THORLedgerClient,
   THORChain,
   defaultClientConfig as defaultThorParams,
 } from '@xchainjs/xchain-thorchain'
@@ -449,24 +449,28 @@ describe('ThorchainAmm e2e tests', () => {
       console.log(txSubmitted)
     })
 
-    // it('Should do swap from THOR Ledger', async () => {
-    //   const thorchainQuery = new ThorchainQuery()
-    //   const wallet = new Wallet({
-    //     THOR: new THORLedgerClient({ transport: await TransportNodeHid.create(), network: Network.Mainnet }),
-    //   })
+    it('Should do swap from THOR Ledger', async () => {
+      const thorchainQuery = new ThorchainQuery()
+      const wallet = new Wallet({
+        LTC: new LtcKeystoreClient({
+          ...defaultLtcParams,
+          phrase: process.env.MAINNET_PHRASE,
+          network: Network.Mainnet,
+        }),
+        THOR: new THORLedgerClient({ transport: await TransportNodeHid.create(), network: Network.Mainnet }),
+      })
 
-    //   const sAVAX = assetFromStringEx('AVAX/AVAX')
-    //   const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
+      const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
 
-    //   const txSubmitted = await thorchainAmm.doSwap({
-    //     fromAddress: await wallet.getAddress(THORChain),
-    //     destinationAddress: await wallet.getAddress(THORChain),
-    //     fromAsset: sAVAX,
-    //     destinationAsset: AssetRuneNative,
-    //     amount: new CryptoAmount(assetToBase(assetAmount('1', 8)), sAVAX),
-    //   })
+      const txSubmitted = await thorchainAmm.doSwap({
+        fromAddress: await wallet.getAddress(THORChain),
+        destinationAddress: await wallet.getAddress(LTCChain),
+        fromAsset: AssetRuneNative,
+        destinationAsset: AssetLTC,
+        amount: new CryptoAmount(assetToBase(assetAmount('15', 8)), AssetRuneNative),
+      })
 
-    //   console.log(txSubmitted)
-    // })
+      console.log(txSubmitted)
+    })
   })
 })

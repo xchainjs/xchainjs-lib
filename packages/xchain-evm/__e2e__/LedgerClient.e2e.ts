@@ -18,7 +18,7 @@ import { ClientLedger, EVMClientParams, LedgerSigner } from '../src'
 
 // Define constants related to Avalanche
 const AVAX_DECIMAL = 18
-const LOWER_FEE_BOUND = 2_000_000_000
+const LOWER_FEE_BOUND = 1_000_000_000
 const UPPER_FEE_BOUND = 1_000_000_000_000
 const AVAX_GAS_ASSET_DECIMAL = 18
 const AVAXChain = 'AVAX' as const
@@ -188,7 +188,21 @@ describe('EVM Client Ledger', () => {
       const amount = assetToBase(assetAmount('1', 6))
       const txid = await client.transfer({
         asset: assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e') as TokenAsset,
-        recipient: await client.getAddressAsync(0),
+        recipient: await client.getAddressAsync(1),
+        amount,
+      })
+      console.log(JSON.stringify(txid, null, 2))
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+
+  it('aVAX transfer', async () => {
+    try {
+      const amount = assetToBase(assetAmount('0.01', 18))
+      const txid = await client.transfer({
+        recipient: await client.getAddressAsync(1),
         amount,
       })
       console.log(JSON.stringify(txid, null, 2))
