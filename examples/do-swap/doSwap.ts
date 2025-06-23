@@ -1,6 +1,4 @@
-import cosmosclient from '@cosmos-client/core'
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
@@ -29,7 +27,6 @@ import axios from 'axios'
 import { checkTx } from '../check-tx/check-tx'
 
 register9Rheader(axios)
-register9Rheader(cosmosclient.config.globalAxios)
 
 function printTx(txDetails: TxDetails, input: CryptoAmount) {
   const expanded = {
@@ -132,7 +129,6 @@ const main = async () => {
     AVAX: new AvaxClient({ ...defaultAvaxParams, phrase: seed, network }),
     BSC: new BscClient({ ...defaultBscParams, phrase: seed, network }),
     GAIA: new GaiaClient({ phrase: seed, network }),
-    BNB: new BnbClient({ phrase: seed, network }),
     THOR: new ThorClient({ ...defaultThorParams, phrase: seed, network }),
   })
   const thorchainAmm = new ThorchainAMM(new ThorchainQuery(), wallet)

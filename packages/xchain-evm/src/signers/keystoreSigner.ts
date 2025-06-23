@@ -1,8 +1,8 @@
 import { TxHash } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { Wallet, ethers } from 'ethers'
-import { HDNode } from 'ethers/lib/utils'
+import { HDNodeWallet, Mnemonic } from 'ethers'
+import BigNumber from 'bignumber.js'
 
 import { IKeystoreSigner, SignApproveParams, SignTransferParams } from '../types'
 
@@ -17,12 +17,16 @@ export type KeystoreSignerParams = SignerParams & { phrase: string }
  * Signer which operates with an EVM account thanks to the seed phrase
  */
 export class KeystoreSigner extends Signer implements IKeystoreSigner {
-  private hdNode?: HDNode
+  private hdNode?: HDNodeWallet
   private phrase?: string
 
   constructor(params: KeystoreSignerParams) {
     super(params)
-    this.hdNode = HDNode.fromMnemonic(params.phrase)
+    const mnemonic = Mnemonic.fromPhrase(params.phrase)
+    if (params.derivationPath.endsWith('/')) {
+      params.derivationPath = params.derivationPath.slice(0, -1)
+    }
+    this.hdNode = HDNodeWallet.fromMnemonic(mnemonic, params.derivationPath)
     this.phrase = params.phrase
   }
 
@@ -38,7 +42,8 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
-      this.hdNode = HDNode.fromMnemonic(phrase)
+      const mnemonic = Mnemonic.fromPhrase(phrase)
+      this.hdNode = HDNodeWallet.fromMnemonic(mnemonic, this.derivationPath)
     }
 
     return this.getAddress(walletIndex)
@@ -64,7 +69,8 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
     if (!this.hdNode) {
       throw new Error('HDNode is not defined. Make sure phrase has been provided.')
     }
-    return this.hdNode.derivePath(this.getFullDerivationPath(walletIndex)).address.toLowerCase()
+    const derived = this.hdNode.deriveChild(walletIndex)
+    return derived.address.toLowerCase()
   }
 
   /**
@@ -87,11 +93,13 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
    * @throws Error - Thrown if the HDNode is not defined, indicating that a phrase is needed to create a wallet and derive an address.
    * Note: A phrase is needed to create a wallet and to derive an address from it.
    */
-  public getWallet(walletIndex = 0): ethers.Wallet {
+  public getWallet(walletIndex = 0): HDNodeWallet {
     if (!this.hdNode) {
       throw new Error('HDNode is not defined. Make sure phrase has been provided.')
     }
-    return new Wallet(this.hdNode.derivePath(this.getFullDerivationPath(walletIndex))).connect(this.getProvider())
+    const derived = HDNodeWallet.fromExtendedKey(this.hdNode.extendedKey).deriveChild(walletIndex)
+    derived.connect(this.getProvider())
+    return derived as HDNodeWallet
   }
 
   /**
@@ -104,21 +112,9 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
    */
   public async signTransfer({ walletIndex, tx }: SignTransferParams): Promise<TxHash> {
     // Get the signer
-    const signer = this.getWallet()
-    // Populate the transaction with necessary details
-    const completedTx = await signer.populateTransaction({
-      from: await this.getAddressAsync(walletIndex),
-      to: tx.to,
-      data: tx.data,
-      value: tx.value,
-      nonce: tx.nonce ? ethers.BigNumber.from(tx.nonce).toNumber() : undefined,
-      gasLimit: tx.gasLimit,
-      gasPrice: tx.gasPrice,
-      maxPriorityFeePerGas: tx.maxPriorityFeePerGas,
-      maxFeePerGas: tx.maxFeePerGas,
-    })
+    const signer = this.getWallet(walletIndex)
     // Send the transaction and return the hash
-    return signer.signTransaction(completedTx)
+    return signer.signTransaction(tx)
   }
 
   /**
@@ -135,7 +131,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
       to: tx.to,
       value: tx.value,
       data: tx.data,
-      nonce: tx.nonce ? ethers.BigNumber.from(tx.nonce).toNumber() : undefined,
+      nonce: tx.nonce ? new BigNumber(tx.nonce).toNumber() : undefined,
       gasPrice: tx.gasPrice,
       gasLimit: tx.gasLimit,
       chainId: tx.chainId,

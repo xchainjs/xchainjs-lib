@@ -1,11 +1,16 @@
+import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams } from '@xchainjs/xchain-utxo'
+import { HDKey } from '@scure/bip32'
 import * as Litecoin from 'bitcoinjs-lib'
+import { ECPairFactory, ECPairInterface } from 'ecpair'
 
 import { Client } from './client'
 import * as Utils from './utils'
+
+const ECPair = ECPairFactory(ecc)
 
 export class ClientKeystore extends Client {
   /**
@@ -97,16 +102,18 @@ export class ClientKeystore extends Client {
    *
    * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
    * */
-  private getLtcKeys(phrase: string, index = 0): Litecoin.ECPairInterface {
+  private getLtcKeys(phrase: string, index = 0): ECPairInterface {
     const ltcNetwork = Utils.ltcNetwork(this.network)
 
     const seed = getSeed(phrase)
-    const master = Litecoin.bip32.fromSeed(seed, ltcNetwork).derivePath(this.getFullDerivationPath(index))
+    const master = HDKey.fromMasterSeed(Uint8Array.from(seed), ltcNetwork.bip32).derive(
+      this.getFullDerivationPath(index),
+    )
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')
     }
 
-    return Litecoin.ECPair.fromPrivateKey(master.privateKey, { network: ltcNetwork })
+    return ECPair.fromPrivateKey(Buffer.from(master.privateKey), { network: ltcNetwork })
   }
 }

@@ -46,7 +46,7 @@ describe('Aggregator', () => {
   })
 
   it('Should init with no parameters', () => {
-    expect(() => new Aggregator()).not.toThrowError()
+    expect(() => new Aggregator()).not.toThrow()
   })
 
   it('Should init with all protocols enabled', () => {
@@ -60,17 +60,17 @@ describe('Aggregator', () => {
   })
 
   it('Should throw error if no protocols enabled', () => {
-    expect(() => new Aggregator({ protocols: [] })).toThrowError('No protocols enabled')
+    expect(() => new Aggregator({ protocols: [] })).toThrow(/No protocols enabled/)
   })
 
   it('Should throw error if basis points lower than 0', () => {
-    expect(() => new Aggregator({ affiliate: { basisPoints: -1, affiliates: {} } })).toThrowError(
+    expect(() => new Aggregator({ affiliate: { basisPoints: -1, affiliates: {} } })).toThrow(
       'Invalid affiliate basis point due to it is out of bound. It must be between [0 - 10000]',
     )
   })
 
   it('Should throw error if basis points greater than 10000', () => {
-    expect(() => new Aggregator({ affiliate: { basisPoints: 10001, affiliates: {} } })).toThrowError(
+    expect(() => new Aggregator({ affiliate: { basisPoints: 10001, affiliates: {} } })).toThrow(
       'Invalid affiliate basis point due to it is out of bound. It must be between [0 - 10000]',
     )
   })

@@ -1,7 +1,6 @@
 import fs = require('fs')
 
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
-import { Client as BnbClient } from '@xchainjs/xchain-binance'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
@@ -149,7 +148,6 @@ export class TxJammer {
         AVAX: new AvaxClient({ ...defaultAvaxParams, network, phrase }),
         BSC: new BscClient({ ...defaultBscParams, network, phrase }),
         GAIA: new GaiaClient({ ...defaultGaiaParams, network, phrase }),
-        BNB: new BnbClient({ network, phrase }),
         THOR: new ThorClient({ ...defaultThorParams, network, phrase }),
       }
     }

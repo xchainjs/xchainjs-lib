@@ -15,7 +15,7 @@ export type TransactionHistoryParam = {
   assetAddress?: string
   page?: number
   offset?: number
-  startblock?: number
+  startblock?: number | null
   endblock?: number
 }
 

@@ -104,8 +104,8 @@ describe('Solana client', () => {
     beforeAll(() => {
       client = new Client()
     })
-    it('Should not get address without phrase', () => {
-      expect(async () => await client.getAddressAsync()).rejects.toThrowError('Phrase must be provided')
+    it('Should not get address without phrase', async () => {
+      await expect(async () => client.getAddressAsync()).rejects.toThrow(/Phrase must be provided/)
     })
 
     it('Should not get address sync method not be implemented', () => {

@@ -86,7 +86,7 @@ describe('Thorchain Keystore', () => {
     const address = await client.getAddressAsync()
     console.log(address)
   })
-  it('Should get wallet address Account', async () => {
+  it('Should get wallet Account address ', async () => {
     const acc = await client.getAccountDetails()
     console.log(acc)
   })
@@ -131,9 +131,9 @@ describe('Thorchain Keystore', () => {
     console.log(unsignedTx)
   })
 
-  it('Should make transfer to address 0', async () => {
+  it('Should make transfer to address 1', async () => {
     const hash = await client.transfer({
-      recipient: await client.getAddressAsync(0),
+      recipient: await client.getAddressAsync(1),
       amount: assetToBase(assetAmount(1, 8)),
       memo: 'test',
     })
@@ -151,7 +151,7 @@ describe('Thorchain Keystore', () => {
 
       const hash = await client.deposit({
         walletIndex: 0,
-        amount: assetToBase(assetAmount(1, 8)),
+        amount: assetToBase(assetAmount(0.2, 8)),
         asset: AssetRune,
         memo,
       })

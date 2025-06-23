@@ -1,6 +1,6 @@
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { Balance, ExplorerProvider, Network } from '@xchainjs/xchain-client'
-import { EtherscanProvider, RoutescanProvider } from '@xchainjs/xchain-evm-providers'
+import { EtherscanProviderV2, RoutescanProvider } from '@xchainjs/xchain-evm-providers'
 import {
   Asset,
   AssetType,
@@ -10,44 +10,58 @@ import {
   assetToBase,
   assetToString,
 } from '@xchainjs/xchain-util'
-import { BigNumber, ethers } from 'ethers'
+import { JsonRpcProvider } from 'ethers'
+import { BigNumber } from 'bignumber.js'
 
 // Import necessary modules and classes from external packages and files
 import { ClientLedger, EVMClientParams, LedgerSigner } from '../src'
 
 // Define constants related to Avalanche
 const AVAX_DECIMAL = 18
-const LOWER_FEE_BOUND = 2_000_000_000
+const LOWER_FEE_BOUND = 1_000_000_000
 const UPPER_FEE_BOUND = 1_000_000_000_000
 const AVAX_GAS_ASSET_DECIMAL = 18
 const AVAXChain = 'AVAX' as const
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
 // Define JSON-RPC providers for mainnet and testnet
-const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/avalanche')
-const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://rpc.ankr.com/avalanche_fuji')
+const ankrApiKey = process.env.ANKR_API_KEY
+
+// Define JSON-RPC providers for mainnet and testnet
+const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche/${ankrApiKey}`, {
+  name: 'avalanche',
+  chainId: 43114,
+})
+const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche_fuji/${ankrApiKey}`, {
+  name: 'fuji',
+  chainId: 43113,
+})
 
 // Define ethers providers for different networks
-const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
+const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
-  'https://api.snowtrace.io',
-  process.env.SNOWTRACE_API_KEY || '',
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
   AVAXChain,
   AssetAVAX,
   18,
+  43114,
+)
+
+const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
+  AVALANCHE_TESTNET_ETHERS_PROVIDER,
+  'https://api.etherscan.io/v2',
+  process.env.ETHERSCAN_API_KEY || '',
+  AVAXChain,
+  AssetAVAX,
+  18,
+  43113,
 )
 
 // Define providers for different networks
 const avaxProviders = {
   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
-  [Network.Testnet]: new EtherscanProvider(
-    AVALANCHE_TESTNET_ETHERS_PROVIDER,
-    'https://api-testnet.snowtrace.io',
-    process.env.SNOWTRACE_API_KEY || '',
-    AVAXChain,
-    AssetAVAX,
-    18,
-  ),
+  [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
   [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
 }
 
@@ -84,22 +98,22 @@ const AVAX_MAINNET_EXPLORER = new ExplorerProvider(
 // Define default parameters for the Avalanche client
 const defaults = {
   [Network.Mainnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Testnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Stagenet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
 }
 
@@ -174,7 +188,21 @@ describe('EVM Client Ledger', () => {
       const amount = assetToBase(assetAmount('1', 6))
       const txid = await client.transfer({
         asset: assetFromStringEx('AVAX.USDC-0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e') as TokenAsset,
-        recipient: await client.getAddressAsync(0),
+        recipient: await client.getAddressAsync(1),
+        amount,
+      })
+      console.log(JSON.stringify(txid, null, 2))
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
+
+  it('aVAX transfer', async () => {
+    try {
+      const amount = assetToBase(assetAmount('0.01', 18))
+      const txid = await client.transfer({
+        recipient: await client.getAddressAsync(1),
         amount,
       })
       console.log(JSON.stringify(txid, null, 2))

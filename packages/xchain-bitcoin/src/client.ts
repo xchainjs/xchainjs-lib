@@ -26,9 +26,9 @@ export const defaultBTCParams: UtxoClientParams = {
   explorerProviders: blockstreamExplorerProviders,
   dataProviders: [BitgoProviders, BlockcypherDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `84'/0'/0'/0/`, // Not BIP44 compliant but compatible with pre-HD wallets
-    [Network.Testnet]: `84'/1'/0'/0/`,
-    [Network.Stagenet]: `84'/0'/0'/0/`,
+    [Network.Mainnet]: `m/84'/0'/0'/0/`, // Not BIP44 compliant but compatible with pre-HD wallets
+    [Network.Testnet]: `m/84'/1'/0'/0/`,
+    [Network.Stagenet]: `m/84'/0'/0'/0/`,
   },
   feeBounds: {
     lower: LOWER_FEE_BOUND,
@@ -63,9 +63,9 @@ abstract class Client extends UTXOClient {
 
     if (this.addressFormat === AddressFormat.P2TR) {
       if (
-        !this.rootDerivationPaths?.mainnet.startsWith(`86'`) ||
-        !this.rootDerivationPaths?.testnet.startsWith(`86'`) ||
-        !this.rootDerivationPaths?.stagenet.startsWith(`86'`)
+        !this.rootDerivationPaths?.mainnet.startsWith(`m/86'`) ||
+        !this.rootDerivationPaths?.testnet.startsWith(`m/86'`) ||
+        !this.rootDerivationPaths?.stagenet.startsWith(`m/86'`)
       ) {
         throw Error(`Unsupported derivation paths for Taproot client. Use 86' paths`)
       }

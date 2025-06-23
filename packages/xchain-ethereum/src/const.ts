@@ -2,7 +2,8 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
 import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
-import { BigNumber, ethers } from 'ethers'
+import { JsonRpcProvider, Network as EthersNetwork } from 'ethers'
+import { BigNumber } from 'bignumber.js'
 
 /**
  * Constants for fee bounds in Gwei.
@@ -31,12 +32,9 @@ export const AssetETH: Asset = {
 }
 
 // ===== Ethers providers =====
-const ETH_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://eth.llamarpc.com', 'homestead')
-const network = ethers.providers.getNetwork('sepolia')
-const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-  'https://ethereum-sepolia-rpc.publicnode.com',
-  network,
-)
+const ETH_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider('https://eth.llamarpc.com', 'homestead')
+const network = EthersNetwork.from('sepolia')
+const ETH_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://ethereum-sepolia-rpc.publicnode.com', network)
 
 // Object to map network to ethers providers
 const ethersJSProviders = {
@@ -110,22 +108,22 @@ const ethRootDerivationPaths = {
  */
 const defaults = {
   [Network.Mainnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Testnet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
   [Network.Stagenet]: {
-    approveGasLimit: BigNumber.from(200000),
-    transferGasAssetGasLimit: BigNumber.from(23000),
-    transferTokenGasLimit: BigNumber.from(100000),
-    gasPrice: BigNumber.from(30 * 10 ** 9),
+    approveGasLimit: new BigNumber(200000),
+    transferGasAssetGasLimit: new BigNumber(23000),
+    transferTokenGasLimit: new BigNumber(100000),
+    gasPrice: new BigNumber(30 * 10 ** 9),
   },
 }
 

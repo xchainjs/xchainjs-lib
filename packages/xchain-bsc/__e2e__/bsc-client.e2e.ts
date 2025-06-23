@@ -14,26 +14,24 @@ const assetETH: TokenAsset = {
   type: AssetType.TOKEN,
 }
 
-const AssetBNB: TokenAsset = {
+const assetUSDC: TokenAsset = {
   chain: BSCChain,
-  symbol: `BNB`,
-  ticker: `BNB`,
+  symbol: 'USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D',
+  ticker: 'USDC',
   type: AssetType.TOKEN,
 }
 
-defaultBscParams.network = Network.Testnet
-// defaultBscParams.network = Network.Mainnet
-defaultBscParams.phrase = process.env.TESTNET_PHRASE
+defaultBscParams.network = Network.Mainnet
+defaultBscParams.phrase = process.env.MAINNET_PHRASE
 
-//const clientMainnet = new BscClient(defaultBscParams)
-const clientTestnet = new BscClient(defaultBscParams)
+const client = new BscClient(defaultBscParams)
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 describe('xchain-evm (Bsc) Integration Tests', () => {
   it('should fetch asset info', async () => {
-    const assetInfo = clientTestnet.getAssetInfo()
+    const assetInfo = client.getAssetInfo()
     const correctAssetInfo: AssetInfo = {
       asset: AssetBSC,
       decimal: BSC_GAS_ASSET_DECIMAL,
@@ -41,9 +39,9 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
     expect(assetInfo).toEqual(correctAssetInfo)
   })
   it('should fetch bsc balances', async () => {
-    const address = "0x1a3d9D7A717D64e6088aC937d5aAcDD3E20ca963"
+    const address = '0x1a3d9D7A717D64e6088aC937d5aAcDD3E20ca963'
     console.log(address)
-    const balances = await clientTestnet.getBalance(address, [])
+    const balances = await client.getBalance(address, [])
     balances.forEach((bal: Balance) => {
       console.log(`${assetToString(bal.asset)} = ${bal.amount.amount()}`)
     })
@@ -51,14 +49,14 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
   })
   it('should fetch bsc txs', async () => {
     const address = '0xf32DA51880374201852057009c4c4d1e75949e09'
-    const txPage = await clientTestnet.getTransactions({ address })
+    const txPage = await client.getTransactions({ address })
     console.log(JSON.stringify(txPage, null, 2))
     expect(txPage.total).toBeGreaterThan(0)
     expect(txPage.txs.length).toBeGreaterThan(0)
   })
   it('should fetch single bsc transfer tx', async () => {
     const txId = '0x0d67aea90aafc15cbb9f8ec31842f5fc4044e8dced4947079a83e8ab5c068df3'
-    const tx = await clientTestnet.getTransactionData(txId)
+    const tx = await client.getTransactionData(txId)
     console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.5', 18))
     expect(tx.asset.chain).toBe(BSCChain)
@@ -73,7 +71,7 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
   it('should fetch single  bsc.eth token transfer tx', async () => {
     const txId = '0x11a9471062f2b352699895ff5dca2ed805b65eeed2ab173c65e5f424eb2af29a'
     const assetAddress = '0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378'
-    const tx = await clientTestnet.getTransactionData(txId, assetAddress)
+    const tx = await client.getTransactionData(txId, assetAddress)
     // console.log(JSON.stringify(tx, null, 2))
     const amount = assetToBase(assetAmount('0.001', 18))
     expect(tx.asset.chain).toBe(assetETH.chain)
@@ -87,19 +85,28 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
     expect(tx.hash).toBe(txId)
   })
 
-  it('should transfer 0.01 Bnb between wallet 0 and 1, with a memo', async () => {
-    const recipient = await clientTestnet.getAddressAsync(1)
-    const amount = assetToBase(assetAmount('0.001', 18))
+  it('should transfer 0.002 BNB between wallet 0 and 1, with a memo', async () => {
+    const recipient = await client.getAddressAsync(1)
+    const amount = assetToBase(assetAmount('0.002', 18))
     const memo = `=:BNB.BNB:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000`
-    const txHash = await clientTestnet.transfer({ amount, recipient, asset: AssetBNB, memo })
+    const txHash = await client.transfer({ amount, recipient, memo })
     console.log(txHash)
   })
+
+  it('should transfer 1 USDC between wallet 0 and 1, with a memo', async () => {
+    const recipient = await client.getAddressAsync(1)
+    const amount = assetToBase(assetAmount('1', 18))
+    const memo = `=:BNB.BNB:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000`
+    const txHash = await client.transfer({ amount, recipient, asset: assetUSDC, memo })
+    console.log(txHash)
+  })
+
   it('should transfer 0.001 eth between wallet 0 and 1, with a memo', async () => {
-    const recipient = await clientTestnet.getAddressAsync(1)
+    const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.001', 18))
 
     const memo = '=:BNB.BNB:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
-    const txHash = await clientTestnet.transfer({ amount, recipient, asset: assetETH, memo })
+    const txHash = await client.transfer({ amount, recipient, asset: assetETH, memo })
     console.log(txHash)
   })
   it('should test erc-20 approvals ', async () => {
@@ -110,7 +117,7 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
       spenderAddress: '0xdc4904b5f716Ff30d8495e35dC99c109bb5eCf81', //PancakeRouter contract on testnet
       amount: assetToBase(assetAmount('0.01', 18)),
     }
-    isApproved = await clientTestnet.isApproved(params)
+    isApproved = await client.isApproved(params)
     expect(isApproved).toBe(false)
 
     //  approve for 0.01 eth
@@ -120,42 +127,42 @@ describe('xchain-evm (Bsc) Integration Tests', () => {
       amount: assetToBase(assetAmount('0.01', 18)),
       walletIndex: 0,
     }
-    await clientTestnet.approve(approveParams)
+    await client.approve(approveParams)
     await delay(10000) //wait 10 secs for block to be mined
 
     // check if approved for eth, should be true
-    isApproved = await clientTestnet.isApproved(params)
+    isApproved = await client.isApproved(params)
     expect(isApproved).toBe(true)
 
     // set approve below 0.01 eth
     approveParams.amount = assetToBase(assetAmount('0.001', 18))
-    await clientTestnet.approve(approveParams)
+    await client.approve(approveParams)
     await delay(10000) //wait 10 secs for block to be mined
 
     // check if approved for 0.01 eth, should be false
-    isApproved = await clientTestnet.isApproved(params)
+    isApproved = await client.isApproved(params)
     expect(isApproved).toBe(false)
   })
   it('should test estimates ', async () => {
     const estimateParams: EstimateApproveParams = {
-      fromAddress: await clientTestnet.getAddressAsync(0),
+      fromAddress: await client.getAddressAsync(0),
       contractAddress: '0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378', //ETh address
       spenderAddress: '0xdc4904b5f716Ff30d8495e35dC99c109bb5eCf81', //PancakeRouter contract on testnet
       amount: assetToBase(assetAmount('80', 18)),
     }
-    const gasEstimate = await clientTestnet.estimateApprove(estimateParams)
+    const gasEstimate = await client.estimateApprove(estimateParams)
     console.log(gasEstimate.toString())
     expect(gasEstimate.gte(0)).toBe(true)
 
-    const recipient = await clientTestnet.getAddressAsync(1)
+    const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 18))
     const memo = '=:BNB.BUSD-BD1:bnb1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:100000000000'
-    const gasEstimateWithMemo = await clientTestnet.estimateFeesWithGasPricesAndLimits({ amount, recipient, memo })
-    const gasEstimateWithoutMemo = await clientTestnet.estimateFeesWithGasPricesAndLimits({ amount, recipient })
+    const gasEstimateWithMemo = await client.estimateFeesWithGasPricesAndLimits({ amount, recipient, memo })
+    const gasEstimateWithoutMemo = await client.estimateFeesWithGasPricesAndLimits({ amount, recipient })
     expect(gasEstimateWithMemo.gasLimit.gte(gasEstimateWithoutMemo.gasLimit)).toBe(true)
     expect(gasEstimateWithMemo.fees.average.gte(gasEstimateWithoutMemo.fees.average)).toBe(true)
 
-    const gasPrices = await clientTestnet.estimateGasPrices()
+    const gasPrices = await client.estimateGasPrices()
     expect(gasPrices.fast.gte(gasPrices.average)).toBe(true)
     expect(gasPrices.fastest.gte(gasPrices.average)).toBe(true)
     expect(gasPrices.fastest.gte(gasPrices.fast)).toBe(true)
