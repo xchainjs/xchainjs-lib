@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-utxo-providers@2.0.2
+  - @xchainjs/xchain-crypto@1.0.1
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-utxo@2.0.2
+  - @xchainjs/xchain-client@2.0.2
+
 ## 2.0.1
 
 ### Patch Changes

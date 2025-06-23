@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-radix",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Custom Radix client and utilities used by XChainJS clients",
   "keywords": [
     "XRD",
