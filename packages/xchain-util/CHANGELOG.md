@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1
+
+### Patch Changes
+
+- 9370688: More dependency updates
+
 ## 2.0.0
 
 ### Major Changes

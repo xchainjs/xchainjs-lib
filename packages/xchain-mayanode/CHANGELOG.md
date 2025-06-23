@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+
 ## 1.0.0
 
 ### Major Changes

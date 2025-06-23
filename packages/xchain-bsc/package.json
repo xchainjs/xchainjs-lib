@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bsc",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Binance Smart Chain EVM client for XChainJS",
   "keywords": [
     "XChain",

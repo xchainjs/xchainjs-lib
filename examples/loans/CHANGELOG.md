@@ -1,5 +1,26 @@
 # xchainjs-loans
 
+## 2.0.8
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-thorchain-query@2.0.3
+  - @xchainjs/xchain-utxo-providers@2.0.2
+  - @xchainjs/xchain-midgard-query@2.0.2
+  - @xchainjs/xchain-thorchain-amm@3.0.8
+  - @xchainjs/xchain-thornode@1.0.2
+  - @xchainjs/xchain-midgard@1.0.1
+  - @xchainjs/xchain-cosmos@3.0.2
+  - @xchainjs/xchain-crypto@1.0.1
+  - @xchainjs/xchain-evm@2.0.3
+  - @xchainjs/xchain-evm-providers@2.0.3
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-client@2.0.2
+
 ## 2.0.7
 
 ### Patch Changes

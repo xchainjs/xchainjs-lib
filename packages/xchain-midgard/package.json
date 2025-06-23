@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-midgard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "description": "Midgard module that exposes all midgard functions using openapi-generator-cli",
   "keywords": [

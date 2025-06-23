@@ -1,5 +1,18 @@
 # xchainjs-aggregator
 
+## 1.0.10
+
+### Patch Changes
+
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-aggregator@2.0.10
+  - @xchainjs/xchain-ethereum@2.0.4
+  - @xchainjs/xchain-bitcoin@2.0.2
+  - @xchainjs/xchain-wallet@2.0.7
+  - @xchainjs/xchain-util@2.0.1
+
 ## 1.0.9
 
 ### Patch Changes
