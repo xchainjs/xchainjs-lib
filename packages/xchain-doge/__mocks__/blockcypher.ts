@@ -9,7 +9,7 @@ export default {
   init: () => {
     mock.onGet(/\/addrs\//).reply(async (config: MockConfig) => {
       const id: string = config.url?.split('/').pop() ?? ''
-      const resp = require(`./response/addresses/${id}.json`)
+      const resp = (await import(`./response/addresses/${id}.json`, { with: { type: 'json' } })).default
       console.log(resp)
       return [200, resp]
     })
@@ -17,7 +17,7 @@ export default {
     //Mock get transaction data
     mock.onGet(/\/transaction\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = require(`./response/tx/${id}.json`)
+      const resp = (await import(`./response/tx/${id}.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
 
@@ -25,14 +25,14 @@ export default {
     mock.onGet(/\/txs\//).reply(async (config: MockConfig) => {
       const split = config.url?.split('/')
       const address = split?.[7] || ''
-      const resp = require(`./response/txs/${address}.json`)
+      const resp = (await import(`./response/txs/${address}.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
 
     //Mock get balance for address
     mock.onGet(/\/balance\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = require(`./response/balances/${id}.json`)
+      const resp = (await import(`./response/balances/${id}.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
 
@@ -48,7 +48,7 @@ export default {
         // this allows you to page utxos starting from a given txid
         filePath = `./response/unspent-txs/${address}/${startingfrompage}.json`
       }
-      const resp = require(filePath)
+      const resp = (await import(filePath, { with: { type: 'json' } })).default
       return [200, resp]
     })
     // Mock send tx

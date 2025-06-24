@@ -11,12 +11,14 @@ const mocks = {
   restore: axiosMockAdapter.restore,
   mockThorchain: () => {
     axiosMockAdapter.onGet(/testnet(.*)\/thorchain\/inbound_addresses/).reply(async () => {
-      const resp = require(`./response/thornode-testnet-inbound-addresses.json`)
+      const resp = (await import(`./response/thornode-testnet-inbound-addresses.json`, { with: { type: 'json' } }))
+        .default
       return [200, resp]
     })
 
     axiosMockAdapter.onGet(/\/inbound_addresses/).reply(async () => {
-      const resp = require(`./response/thornode-mainnet-inbound-addresses.json`)
+      const resp = (await import(`./response/thornode-mainnet-inbound-addresses.json`, { with: { type: 'json' } }))
+        .default
       return [200, resp]
     })
   },
@@ -33,28 +35,33 @@ const mocks = {
     const getAddressPattern = /insight-api\/addr\/(\w+)$/
     axiosMockAdapter.onGet(getAddressPattern).reply(async (config: MockConfig) => {
       const address = config.url?.match(getAddressPattern)?.[1]
-      const resp = require(`./response/insight-addr-${address?.substr(0, 4)}.json`)
+      const resp = (await import(`./response/insight-addr-${address?.substr(0, 4)}.json`, { with: { type: 'json' } }))
+        .default
       return [200, resp]
     })
 
     const getAddressUnspentTransactionsPattern = /insight-api\/addr\/(\w+)\/utxo$/
     axiosMockAdapter.onGet(getAddressUnspentTransactionsPattern).reply(async (config: MockConfig) => {
       const address = config.url?.match(getAddressUnspentTransactionsPattern)?.[1]
-      const resp = require(`./response/insight-addr-utxos-${address?.substr(0, 4)}.json`)
+      const resp = (
+        await import(`./response/insight-addr-utxos-${address?.substr(0, 4)}.json`, { with: { type: 'json' } })
+      ).default
       return [200, resp]
     })
 
     const getAddressTransactionsPattern = /insight-api\/txs\?address=(\w+)/
     axiosMockAdapter.onGet(getAddressTransactionsPattern).reply(async (config: MockConfig) => {
       const address = config.url?.match(getAddressTransactionsPattern)?.[1]
-      const resp = require(`./response/insight-txs-${address?.substr(0, 4)}.json`)
+      const resp = (await import(`./response/insight-txs-${address?.substr(0, 4)}.json`, { with: { type: 'json' } }))
+        .default
       return [200, resp]
     })
 
     const getTransactionPattern = /insight-api\/tx\/(\w+)/
     axiosMockAdapter.onGet(getTransactionPattern).reply(async (config: MockConfig) => {
       const txid = config.url?.match(getTransactionPattern)?.[1]
-      const resp = require(`./response/insight-tx-${txid?.substr(0, 4)}.json`)
+      const resp = (await import(`./response/insight-tx-${txid?.substr(0, 4)}.json`, { with: { type: 'json' } }))
+        .default
       return [200, resp]
     })
   },

@@ -5,13 +5,13 @@ export default {
   restore: mock.restore,
   init: () => {
     mock.onGet(/\/mayachain\/quote\/swap/).reply(async () => {
-      return [200, require('./responses/quoteSwap.json')]
+      return [200, (await import('./responses/quoteSwap.json', { with: { type: 'json' } })).default]
     })
     mock.onGet(/\/mayachain\/inbound_addresses/).reply(async () => {
-      return [200, require('./responses/inboundAddresses.json')]
+      return [200, (await import('./responses/inboundAddresses.json', { with: { type: 'json' } })).default]
     })
     mock.onGet(/\/mayachain\/mimir/).reply(async () => {
-      return [200, require('./responses/mimir.json')]
+      return [200, (await import('./responses/mimir.json', { with: { type: 'json' } })).default]
     })
   },
 }
