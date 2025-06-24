@@ -6,7 +6,7 @@ export * from './types'
 /**
  * Export the 'Client' class from the 'client' module.
  */
-export { NodeUrls, defaultLtcParams } from './client'
+export { type NodeUrls, defaultLtcParams } from './client'
 export { ClientKeystore, ClientKeystore as Client } from './ClientKeystore'
 export { ClientLedger } from './ClientLedger'
 

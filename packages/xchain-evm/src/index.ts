@@ -7,14 +7,14 @@ export {
   ClientLedger,
   ClientKeystore,
   ClientKeystore as Client,
-  EVMKeystoreClientParams,
-  EVMClientParams,
+  type EVMKeystoreClientParams,
+  type EVMClientParams,
 } from './clients'
 export default ClientKeystore
 
 export * from './types'
 
-export { KeystoreSigner, KeystoreSignerParams, LedgerSigner, LedgerSignerParams } from './signers'
+export { KeystoreSigner, type KeystoreSignerParams, LedgerSigner, type LedgerSignerParams } from './signers'
 
 // Exporting utility functions
 export {
