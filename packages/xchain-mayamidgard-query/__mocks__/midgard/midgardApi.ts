@@ -4,11 +4,11 @@ export default {
   restore: mock.restore,
   init: () => {
     //Mock GET https://{{midgard}}/v2/pools
-    mock.onGet(/\/v2\/pools/).reply(() => {
+    mock.onGet(/\/v2\/pools/).reply(async () => {
       const resp = require(`./responses/pools.json`)
       return [200, resp]
     })
-    mock.onGet(/\/v2\/actions/).reply(() => {
+    mock.onGet(/\/v2\/actions/).reply(async () => {
       const resp = require(`./responses/actions.json`)
       return [200, resp]
     })

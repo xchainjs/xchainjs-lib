@@ -10,18 +10,18 @@ const axiosMockAdapter = new MockAdapter(axios)
 const mocks = {
   restore: axiosMockAdapter.restore,
   mockThorchain: () => {
-    axiosMockAdapter.onGet(/testnet(.*)\/thorchain\/inbound_addresses/).reply(() => {
+    axiosMockAdapter.onGet(/testnet(.*)\/thorchain\/inbound_addresses/).reply(async () => {
       const resp = require(`./response/thornode-testnet-inbound-addresses.json`)
       return [200, resp]
     })
 
-    axiosMockAdapter.onGet(/\/inbound_addresses/).reply(() => {
+    axiosMockAdapter.onGet(/\/inbound_addresses/).reply(async () => {
       const resp = require(`./response/thornode-mainnet-inbound-addresses.json`)
       return [200, resp]
     })
   },
   mockBitgo: () => {
-    axiosMockAdapter.onGet('https://app.bitgo.com/api/v2/dash/tx/fee').reply(() => [
+    axiosMockAdapter.onGet('https://app.bitgo.com/api/v2/dash/tx/fee').reply(async () => [
       200,
       {
         feePerKb: 10000,
@@ -31,35 +31,35 @@ const mocks = {
   },
   mockInsight: () => {
     const getAddressPattern = /insight-api\/addr\/(\w+)$/
-    axiosMockAdapter.onGet(getAddressPattern).reply((config: MockConfig) => {
+    axiosMockAdapter.onGet(getAddressPattern).reply(async (config: MockConfig) => {
       const address = config.url?.match(getAddressPattern)?.[1]
       const resp = require(`./response/insight-addr-${address?.substr(0, 4)}.json`)
       return [200, resp]
     })
 
     const getAddressUnspentTransactionsPattern = /insight-api\/addr\/(\w+)\/utxo$/
-    axiosMockAdapter.onGet(getAddressUnspentTransactionsPattern).reply((config: MockConfig) => {
+    axiosMockAdapter.onGet(getAddressUnspentTransactionsPattern).reply(async (config: MockConfig) => {
       const address = config.url?.match(getAddressUnspentTransactionsPattern)?.[1]
       const resp = require(`./response/insight-addr-utxos-${address?.substr(0, 4)}.json`)
       return [200, resp]
     })
 
     const getAddressTransactionsPattern = /insight-api\/txs\?address=(\w+)/
-    axiosMockAdapter.onGet(getAddressTransactionsPattern).reply((config: MockConfig) => {
+    axiosMockAdapter.onGet(getAddressTransactionsPattern).reply(async (config: MockConfig) => {
       const address = config.url?.match(getAddressTransactionsPattern)?.[1]
       const resp = require(`./response/insight-txs-${address?.substr(0, 4)}.json`)
       return [200, resp]
     })
 
     const getTransactionPattern = /insight-api\/tx\/(\w+)/
-    axiosMockAdapter.onGet(getTransactionPattern).reply((config: MockConfig) => {
+    axiosMockAdapter.onGet(getTransactionPattern).reply(async (config: MockConfig) => {
       const txid = config.url?.match(getTransactionPattern)?.[1]
       const resp = require(`./response/insight-tx-${txid?.substr(0, 4)}.json`)
       return [200, resp]
     })
   },
   mockDashNode: () => {
-    axiosMockAdapter.onPost(/dash\.thorchain\.info/).reply(() => [
+    axiosMockAdapter.onPost(/dash\.thorchain\.info/).reply(async () => [
       200,
       {
         id: '1',
