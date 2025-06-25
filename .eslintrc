@@ -4,9 +4,11 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": ["prettier"],
+  "plugins": ["import", "prettier"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
     "prettier",
     "plugin:prettier/recommended"
   ],
@@ -25,6 +27,7 @@
       }
     ],
     "@typescript-eslint/no-var-requires": "off",
+    "import/no-duplicates": "error",
     "no-undef": "off"
   }
 }
