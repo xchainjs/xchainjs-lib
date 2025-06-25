@@ -13,6 +13,11 @@
     "plugin:prettier/recommended"
   ],
   "ignorePatterns": "**/*.d.ts",
+  "settings": {
+    "import/resolver": {
+      "typescript": {}
+    },
+  },
   "rules": {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
