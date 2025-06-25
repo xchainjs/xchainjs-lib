@@ -50,6 +50,10 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0, // No block reward for base
     avgBlockTimeInSecs: 2, // Average block time for Base in seconds
   },
+  XRP: {
+    blockReward: 0, // No block reward for xrp
+    avgBlockTimeInSecs: 4, // Average block time for xrp in seconds
+  },
 }
 
 // Export the DefaultChainAttributes object
