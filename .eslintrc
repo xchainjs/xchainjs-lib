@@ -28,6 +28,7 @@
     ],
     "@typescript-eslint/no-var-requires": "off",
     "import/no-duplicates": "error",
+    "import/no-named-as-default": "off",
     "no-undef": "off"
   }
 }
