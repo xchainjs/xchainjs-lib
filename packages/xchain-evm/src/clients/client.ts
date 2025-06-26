@@ -663,7 +663,7 @@ export class Client extends BaseXChainClient implements EVMClient {
 
     const unsignedTx = await contract
       .getFunction('approve')
-      .populateTransaction(spenderAddress, BigInt(valueToApprove.toString()))
+      .populateTransaction(spenderAddress, BigInt(valueToApprove.toFixed()))
 
     const nonce = await this.getProvider().getTransactionCount(sender)
 
