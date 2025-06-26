@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.4
+
+### Patch Changes
+
+- f17cad7: Add XRP to query and TC amm
+- f17cad7: add XRP to tc query
+
 ## 2.0.3
 
 ### Patch Changes
