@@ -47,6 +47,7 @@
     "@xchainjs/xchain-ethereum": "workspace:*",
     "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-litecoin": "workspace:*",
+    "@xchainjs/xchain-ripple": "workspace:*",
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-thorchain-query": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
