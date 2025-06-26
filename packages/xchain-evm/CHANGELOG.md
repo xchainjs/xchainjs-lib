@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.4
+
+### Patch Changes
+
+- 5c90c64: Fix problem on approve MAX amount
+- Updated dependencies [5c90c64]
+  - @xchainjs/xchain-evm-providers@2.0.4
+
 ## 2.0.3
 
 ### Patch Changes

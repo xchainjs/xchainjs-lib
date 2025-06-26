@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.4
+
+### Patch Changes
+
+- 5c90c64: Fix problem on approve MAX amount
+
 ## 2.0.3
 
 ### Patch Changes
