@@ -72,10 +72,10 @@ class ClientKeystore extends Client {
     if (!child.privateKey) {
       throw new Error('Invalid derived private key')
     }
-  
+
     const privateKey = new bitcore.PrivateKey(
       Buffer.from(child.privateKey).toString('hex'),
-      Utils.bchNetwork(this.network)
+      Utils.bchNetwork(this.network),
     )
 
     return privateKey
@@ -115,22 +115,25 @@ class ClientKeystore extends Client {
     const sender = await this.getAddressAsync(fromAddressIndex)
 
     tx.from(
-      inputs.map((input) =>
-        new bitcore.Transaction.UnspentOutput({
-          txId: input.hash,
-          outputIndex: input.index,
-          address: sender,
-          script: bitcore.Script.fromHex(input.witnessUtxo?.script.toString('hex') || ''),
-          satoshis: input.value,
-        }),
-      )
+      inputs.map(
+        (input) =>
+          new bitcore.Transaction.UnspentOutput({
+            txId: input.hash,
+            outputIndex: input.index,
+            address: sender,
+            script: bitcore.Script.fromHex(input.witnessUtxo?.script.toString('hex') || ''),
+            satoshis: input.value,
+          }),
+      ),
     )
 
     unsignedTx.outputs.forEach((out) => {
-      tx.addOutput(new bitcore.Transaction.Output({
-        script: out.script,
-        satoshis: out.satoshis,
-      }))
+      tx.addOutput(
+        new bitcore.Transaction.Output({
+          script: out.script,
+          satoshis: out.satoshis,
+        }),
+      )
     })
 
     tx.sign(privateKey)

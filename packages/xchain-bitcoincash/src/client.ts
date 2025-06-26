@@ -125,15 +125,17 @@ abstract class Client extends UTXOClient {
     // Throw error if no solution is found
     if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
 
-    const tx = new bitcore.Transaction()
-      .from(inputs.map((utxo: UTXO) => ({
+    const tx = new bitcore.Transaction().from(
+      inputs.map((utxo: UTXO) => ({
         txId: utxo.hash,
         outputIndex: utxo.index,
         address: sender,
         script: bitcore.Script.fromHex(utxo.witnessUtxo?.script.toString('hex') || ''),
         satoshis: utxo.value,
-      })))
-    
+      })),
+    )
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     outputs.forEach((output: any) => {
       if (!output.address) {
         tx.to(sender, output.value) // change back to sender
@@ -141,14 +143,15 @@ abstract class Client extends UTXOClient {
         tx.to(output.address, output.value)
       }
     })
-  
+
     if (compiledMemo) {
-      tx.addOutput(new bitcore.Transaction.Output({
-        script: compiledMemo,
-        satoshis: 0,
-      }))
+      tx.addOutput(
+        new bitcore.Transaction.Output({
+          script: compiledMemo,
+          satoshis: 0,
+        }),
+      )
     }
-  
 
     // Return transaction builder, UTXOs, and inputs
     return {
