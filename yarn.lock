@@ -2588,7 +2588,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@psf/bitcoincashjs-lib@npm:4.0.3, @psf/bitcoincashjs-lib@npm:^4.0.3":
+"@psf/bitcoincashjs-lib@npm:^4.0.3":
   version: 4.0.3
   resolution: "@psf/bitcoincashjs-lib@npm:4.0.3"
   dependencies:
@@ -3368,6 +3368,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/bitcore-lib-cash@npm:^8.23.8":
+  version: 8.23.8
+  resolution: "@types/bitcore-lib-cash@npm:8.23.8"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/3a3dfe1490570edacf1898bc302f32e7823b5deea7a88f279f226d4148c7d849b5e67713486e85816a57e23db65ca646447b9ab349bc835afa3e272729298748
+  languageName: node
+  linkType: hard
+
 "@types/blake2b-wasm@npm:^2.4.3":
   version: 2.4.3
   resolution: "@types/blake2b-wasm@npm:2.4.3"
@@ -4006,8 +4015,9 @@ __metadata:
   dependencies:
     "@ledgerhq/hw-app-btc": "npm:10.9.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
-    "@psf/bitcoincashjs-lib": "npm:4.0.3"
+    "@scure/bip32": "npm:^1.7.0"
     "@types/bchaddrjs": "npm:0.4.0"
+    "@types/bitcore-lib-cash": "npm:^8.23.8"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -4016,6 +4026,7 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
     bchaddrjs: "npm:0.5.2"
+    bitcore-lib-cash: "npm:11.0.0"
     coinselect: "npm:3.1.12"
   languageName: unknown
   linkType: soft
@@ -5265,6 +5276,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bitcore-lib-cash@npm:11.0.0":
+  version: 11.0.0
+  resolution: "bitcore-lib-cash@npm:11.0.0"
+  dependencies:
+    bn.js: "npm:=4.11.8"
+    bs58: "npm:^4.0.1"
+    buffer-compare: "npm:=1.1.1"
+    elliptic: "npm:^6.5.3"
+    inherits: "npm:=2.0.1"
+    lodash: "npm:^4.17.20"
+  checksum: 10c0/a6b554b386790b46b629e806547d6f092827b3be1273275f57dc0e6eeab0af6b8c0b9a3db9ee1bd0630d470fd0e5053660c8eb72253e32de506cb6c8f13c3770
+  languageName: node
+  linkType: hard
+
 "bl@npm:^4.0.3, bl@npm:^4.1.0":
   version: 4.1.0
   resolution: "bl@npm:4.1.0"
@@ -5309,6 +5334,13 @@ __metadata:
   version: 0.2.0
   resolution: "bloom-filter@npm:0.2.0"
   checksum: 10c0/efc7c8a0c64e43ebbf5d0a4778bd9c29cf589137aa04dd05bd361e7d08610add8abc7b1d6793deb0ac79550eeaf6e924f165d2b55f0a81472e5f7b41e0c13e56
+  languageName: node
+  linkType: hard
+
+"bn.js@npm:=4.11.8":
+  version: 4.11.8
+  resolution: "bn.js@npm:4.11.8"
+  checksum: 10c0/d1bd5f8721c9c101c5e5bb3077d8689b3116f618506c6dd009fee5701b8b116da373b35c60d437549c8c720b6b62a161ab070d6a8266a164ef4503a1582b634e
   languageName: node
   linkType: hard
 
@@ -5480,6 +5512,13 @@ __metadata:
   dependencies:
     node-int64: "npm:^0.4.0"
   checksum: 10c0/24d8dfb7b6d457d73f32744e678a60cc553e4ec0e9e1a01cf614b44d85c3c87e188d3cc78ef0442ce5032ee6818de20a0162ba1074725c0d08908f62ea979227
+  languageName: node
+  linkType: hard
+
+"buffer-compare@npm:=1.1.1":
+  version: 1.1.1
+  resolution: "buffer-compare@npm:1.1.1"
+  checksum: 10c0/3c47e7a3b45239b749213ba1d4d70c177b4c99e620ac01acc6d232be370c755e44b7131ee3034fc4b37a814f56dd6955b7b231fa2ab4559d2c9e12683fb7cee0
   languageName: node
   linkType: hard
 
@@ -6448,7 +6487,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"elliptic@npm:^6.6.1":
+"elliptic@npm:^6.5.3, elliptic@npm:^6.6.1":
   version: 6.6.1
   resolution: "elliptic@npm:6.6.1"
   dependencies:

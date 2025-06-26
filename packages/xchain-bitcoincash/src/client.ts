@@ -1,8 +1,8 @@
 // Import statements for necessary modules and types
-import * as bitcash from '@psf/bitcoincashjs-lib'
+import * as bitcore from 'bitcore-lib-cash'
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client' // Importing various types and constants from xchain-client module
 import { Address } from '@xchainjs/xchain-util' // Importing the Address type from xchain-util module
-import { Client as UTXOClient, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
+import { Client as UTXOClient, TxParams, UtxoClientParams, UTXO } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 import accumulative from 'coinselect/accumulative' // Importing accumulative function from coinselect/accumulative module
 
 import {
@@ -16,7 +16,6 @@ import {
   explorerProviders,
 } from './const' // Importing various constants from the const module
 import { BchPreparedTx } from './types' // Importing the BchPreparedTx type from types module
-import { TransactionBuilder } from './types/bitcoincashjs-types' // Importing necessary types from bitcoincashjs-types module
 import * as Utils from './utils' // Importing utility functions from utils module
 // Default parameters for Bitcoin Cash (BCH) client
 export const defaultBchParams: UtxoClientParams = {
@@ -93,7 +92,7 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     sender: Address
   }): Promise<{
-    builder: TransactionBuilder
+    builder: bitcore.Transaction
     utxos: UTXO[]
     inputs: UTXO[]
   }> {
@@ -126,35 +125,37 @@ abstract class Client extends UTXOClient {
     // Throw error if no solution is found
     if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
 
-    // Initialize a new transaction builder
-    const transactionBuilder = new bitcash.TransactionBuilder(Utils.bchNetwork(this.network))
-
-    // Add inputs to the transaction builder
-    inputs.forEach((utxo: UTXO) =>
-      transactionBuilder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex || '', 'hex')), utxo.index),
+    const tx = new bitcore.Transaction().from(
+      inputs.map((utxo: UTXO) => ({
+        txId: utxo.hash,
+        outputIndex: utxo.index,
+        address: sender,
+        script: bitcore.Script.fromHex(utxo.witnessUtxo?.script.toString('hex') || ''),
+        satoshis: utxo.value,
+      })),
     )
 
-    // Add outputs to the transaction builder
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     outputs.forEach((output: any) => {
-      let out = undefined
       if (!output.address) {
-        // An empty address means this is the change address
-        out = bitcash.address.toOutputScript(Utils.toLegacyAddress(sender), Utils.bchNetwork(this.network))
-      } else if (output.address) {
-        out = bitcash.address.toOutputScript(Utils.toLegacyAddress(output.address), Utils.bchNetwork(this.network))
+        tx.to(sender, output.value) // change back to sender
+      } else {
+        tx.to(output.address, output.value)
       }
-      transactionBuilder.addOutput(out, output.value)
     })
 
-    // Add output for memo if compiled
     if (compiledMemo) {
-      transactionBuilder.addOutput(compiledMemo, 0) // Add OP_RETURN {script, value}
+      tx.addOutput(
+        new bitcore.Transaction.Output({
+          script: compiledMemo,
+          satoshis: 0,
+        }),
+      )
     }
 
     // Return transaction builder, UTXOs, and inputs
     return {
-      builder: transactionBuilder,
+      builder: tx,
       utxos,
       inputs,
     }
@@ -183,7 +184,7 @@ abstract class Client extends UTXOClient {
       feeRate,
     })
     // Return the raw unsigned transaction and UTXOs
-    return { rawUnsignedTx: builder.buildIncomplete().toHex(), utxos, inputs }
+    return { rawUnsignedTx: builder.toString(), utxos, inputs }
   }
   /**
    * Compile a memo.
@@ -191,8 +192,9 @@ abstract class Client extends UTXOClient {
    * @returns {Buffer} - The compiled memo.
    */
   protected compileMemo(memo: string): Buffer {
-    const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-    return bitcash.script.compile([bitcash.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+    const data = Buffer.from(memo, 'utf8')
+    const script = bitcore.Script.buildDataOut(data)
+    return script.toBuffer()
   }
   /**
    * Calculate the transaction fee.
