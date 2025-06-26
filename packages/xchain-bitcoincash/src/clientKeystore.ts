@@ -1,12 +1,12 @@
-import * as bitcash from '@psf/bitcoincashjs-lib'
+import * as bitcore from 'bitcore-lib-cash'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
 import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
 import { TxParams } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 
 import { Client } from './client' // Importing the base BitcoinCash client
-import { KeyPair, Transaction, TransactionBuilder } from './types/bitcoincashjs-types' // Importing utility functions
 import * as Utils from './utils'
+import { HDKey } from '@scure/bip32'
 
 /**
  * Custom Bitcoin client extended to support keystore functionality
@@ -32,7 +32,7 @@ class ClientKeystore extends Client {
       const bchKeys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
 
       // Generate the address using the Bitcoinjs library
-      const address = bchKeys.getAddress(index)
+      const address = bchKeys.toAddress().toString()
 
       // Throw an error if the address is not defined
       if (!address) {
@@ -64,10 +64,21 @@ class ClientKeystore extends Client {
    *
    * @throws {"Invalid phrase"} Thrown if an invalid phrase is provided.
    * */
-  private getBCHKeys(phrase: string, derivationPath: string): KeyPair {
+  private getBCHKeys(phrase: string, derivationPath: string) {
     const rootSeed = getSeed(phrase) // Get seed from the phrase
-    const masterHDNode = bitcash.HDNode.fromSeedBuffer(rootSeed, Utils.bchNetwork(this.network)) // Create HD node from seed
-    return masterHDNode.derivePath(derivationPath).keyPair // Derive key pair from the HD node and derivation path
+    const root = HDKey.fromMasterSeed(Uint8Array.from(rootSeed))
+    const child = root.derive(derivationPath)
+
+    if (!child.privateKey) {
+      throw new Error('Invalid derived private key')
+    }
+  
+    const privateKey = new bitcore.PrivateKey(
+      Buffer.from(child.privateKey).toString('hex'),
+      Utils.bchNetwork(this.network)
+    )
+
+    return privateKey
   }
 
   /**
@@ -85,47 +96,47 @@ class ClientKeystore extends Client {
     const fromAddressIndex = params.walletIndex || 0
 
     // Prepare the transaction by gathering necessary data
-    const { rawUnsignedTx, utxos } = await this.prepareTx({
+    const { rawUnsignedTx, inputs } = await this.prepareTx({
       ...params,
       feeRate,
       sender: await this.getAddressAsync(fromAddressIndex),
     })
 
-    // Convert the raw unsigned transaction to a Transaction object
-    const tx: Transaction = bitcash.Transaction.fromHex(rawUnsignedTx)
-
-    // Initialize a new transaction builder
-    const builder: TransactionBuilder = new bitcash.TransactionBuilder(Utils.bchNetwork(this.network))
-
-    // Add inputs to the transaction builder
-    tx.ins.forEach((input) => {
-      const utxo = utxos.find(
-        (utxo) =>
-          Buffer.compare(Buffer.from(utxo.hash, 'hex').reverse(), input.hash) === 0 && input.index === utxo.index,
-      )
-      if (!utxo) throw Error('Can not find UTXO')
-      builder.addInput(bitcash.Transaction.fromBuffer(Buffer.from(utxo.txHex || '', 'hex')), utxo.index)
-    })
-
-    // Add outputs to the transaction builder
-    tx.outs.forEach((output) => {
-      builder.addOutput(output.script, output.value)
-    })
-
-    // Get the derivation path for the sender's address
+    // Get key from mnemonic and path
     const derivationPath = this.getFullDerivationPath(fromAddressIndex)
-    // Get the key pair for signing the transaction
-    const keyPair = this.getBCHKeys(this.phrase, derivationPath)
+    const privateKey = this.getBCHKeys(this.phrase, derivationPath)
 
-    // Sign each input of the transaction with the key pair
-    builder.inputs.forEach((input: { value: number }, index: number) => {
-      builder.sign(index, keyPair, undefined, 0x41, input.value)
+    // Recreate the transaction from rawUnsignedTx
+    const unsignedTx = new bitcore.Transaction(rawUnsignedTx)
+
+    // Rebuild the transaction with inputs enriched with UTXO values and scripts
+    const tx = new bitcore.Transaction()
+
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    tx.from(
+      inputs.map((input) =>
+        new bitcore.Transaction.UnspentOutput({
+          txId: input.hash,
+          outputIndex: input.index,
+          address: sender,
+          script: bitcore.Script.fromHex(input.witnessUtxo?.script.toString('hex') || ''),
+          satoshis: input.value,
+        }),
+      )
+    )
+
+    unsignedTx.outputs.forEach((out) => {
+      tx.addOutput(new bitcore.Transaction.Output({
+        script: out.script,
+        satoshis: out.satoshis,
+      }))
     })
 
-    // Build the final transaction and convert it to hexadecimal format
-    const txHex = builder.build().toHex()
+    tx.sign(privateKey)
 
-    // Broadcast the transaction to the BCH network and return the transaction hash
+    const txHex = tx.toString()
+
     return await this.roundRobinBroadcastTx(txHex)
   }
 }

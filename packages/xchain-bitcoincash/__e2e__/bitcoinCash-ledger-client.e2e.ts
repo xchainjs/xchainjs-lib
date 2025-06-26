@@ -68,7 +68,6 @@ describe('BitcoinCash Client Ledger', () => {
         recipient: to,
         amount,
         memo: 'test',
-        feeRate: 1,
       })
       console.log(JSON.stringify(txid, null, 2))
     } catch (err) {

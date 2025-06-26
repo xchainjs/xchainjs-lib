@@ -3,12 +3,11 @@
  */
 import { Network, TxType } from '@xchainjs/xchain-client' // Importing types related to network and transactions
 import { Address, baseAmount } from '@xchainjs/xchain-util' // Importing utilities related to addresses and amounts
-import { Tx, TxFrom, TxTo, toBitcoinJS } from '@xchainjs/xchain-utxo' // Importing Bitcoin Cash address utilities
+import { Tx, TxFrom, TxTo } from '@xchainjs/xchain-utxo' // Importing Bitcoin Cash address utilities
 import * as bchaddr from 'bchaddrjs' // Importing coin information utility
-
+import * as bitcore from 'bitcore-lib-cash'
 import { AssetBCH, BCH_DECIMAL } from './const' // Importing BCH asset and decimal constants
 import { Transaction, TransactionInput, TransactionOutput } from './types' // Importing custom transaction types
-import { Network as BCHNetwork } from './types/bitcoincashjs-types' // Importing custom network type
 
 /**
  * Size constants for BCH transactions.
@@ -24,13 +23,13 @@ export const TX_OUTPUT_PUBKEYHASH = 25
  * @param {Network} network The network type.
  * @returns {BCHNetwork} The BCH network.
  */
-export const bchNetwork = (network: Network): BCHNetwork => {
+export const bchNetwork = (network: Network) => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return toBitcoinJS('bitcoincash', 'main') as BCHNetwork
+      return bitcore.Networks.mainnet
     case Network.Testnet:
-      return toBitcoinJS('bitcoincash', 'test') as BCHNetwork
+      return bitcore.Networks.testnet
   }
 }
 

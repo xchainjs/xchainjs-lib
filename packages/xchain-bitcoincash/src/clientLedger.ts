@@ -1,6 +1,5 @@
 import AppBtc from '@ledgerhq/hw-app-btc'
 import { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
-import * as bitcash from '@psf/bitcoincashjs-lib'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
@@ -64,8 +63,7 @@ class ClientLedger extends Client {
         if (!txHex) {
           throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)
         }
-        const utxoTx = bitcash.Transaction.fromHex(txHex)
-        const splittedTx = app.splitTransaction(txHex, utxoTx.hasWitnesses())
+        const splittedTx = app.splitTransaction(txHex, false)
         return [splittedTx, index, null, null]
       },
     )
