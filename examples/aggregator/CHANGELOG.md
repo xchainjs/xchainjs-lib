@@ -1,5 +1,11 @@
 # xchainjs-aggregator
 
+## 1.0.11
+
+### Patch Changes
+
+- @xchainjs/xchain-aggregator@2.0.11
+
 ## 1.0.10
 
 ### Patch Changes

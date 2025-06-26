@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.9
+
+### Patch Changes
+
+- f17cad7: Add XRP to query and TC amm
+- Updated dependencies [f17cad7]
+- Updated dependencies [f17cad7]
+  - @xchainjs/xchain-thorchain-query@2.0.4
+
 ## 3.0.8
 
 ### Patch Changes
