@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3
+
+### Patch Changes
+
+- d2ab59a: Update core dependency
+
 ## 2.0.2
 
 ### Patch Changes

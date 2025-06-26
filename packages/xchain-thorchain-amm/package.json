@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-amm",
-  "version": "3.0.9",
+  "version": "3.0.10",
   "description": "module that exposes estimating & swappping cryptocurrency assets on thorchain",
   "keywords": [
     "THORChain",
