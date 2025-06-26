@@ -20,6 +20,3 @@ export * from './types'
 
 // Export everything from 'utils.ts' which contains utility functions used across the application
 export * from './utils'
-
-// Export everything from 'chain-defaults.ts' again (assuming it's a duplicate, can be removed if not needed)
-export * from './chain-defaults'
