@@ -344,6 +344,17 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     expect(gasPrices.fastest.gte(gasPrices.fast)).toBe(true)
   })
 
+  it('should test max ammount estimates ', async () => {
+    const estimateParams: EstimateApproveParams = {
+      fromAddress: client.getAddress(0),
+      contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
+      spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
+    }
+    const gasEstimate = await client.estimateApprove(estimateParams)
+    console.log(gasEstimate.toString())
+    expect(gasEstimate.gte(0)).toBe(true)
+  })
+
   it('calls balanceOf on ERC20 contract and returns the result', async () => {
     const tokenAddress = '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E'
     const walletAddress = await client.getAddressAsync(1)

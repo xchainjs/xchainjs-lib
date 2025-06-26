@@ -190,7 +190,7 @@ export async function estimateApprove({
     contractAddress,
     abi,
     funcName: 'approve',
-    funcParams: [spenderAddress, txAmount, { from: fromAddress }],
+    funcParams: [spenderAddress, BigInt(txAmount.toFixed(0)), { from: fromAddress }],
   })
 }
 
