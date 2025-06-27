@@ -33,4 +33,4 @@ export type TxParams = BaseTxParams & {
 
 export type UtxoOnlineDataProviders = Record<Network, UtxoOnlineDataProvider | undefined>
 
-export { UTXO, Witness, Balance, Tx, TxsPage, TxFrom, TxTo }
+export type { UTXO, Witness, Balance, Tx, TxsPage, TxFrom, TxTo }

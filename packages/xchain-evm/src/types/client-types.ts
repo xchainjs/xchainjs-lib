@@ -73,4 +73,4 @@ export type TxParams = BaseTxParams & {
   isMemoEncoded?: boolean
 }
 
-export { CompatibleAsset, Balance, Tx, TxsPage }
+export type { CompatibleAsset, Balance, Tx, TxsPage }
