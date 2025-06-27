@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.11
+
+### Patch Changes
+
+- Updated dependencies [8c58393]
+  - @xchainjs/xchain-evm@2.0.5
+  - @xchainjs/xchain-avax@2.0.5
+  - @xchainjs/xchain-base@1.0.5
+  - @xchainjs/xchain-bsc@2.0.6
+  - @xchainjs/xchain-ethereum@2.0.6
+  - @xchainjs/xchain-wallet@2.0.9
+
 ## 3.0.10
 
 ### Patch Changes
