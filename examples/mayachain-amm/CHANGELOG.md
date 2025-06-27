@@ -1,5 +1,13 @@
 # xchainjs-maya-do-swap
 
+## 2.0.11
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@2.0.6
+- @xchainjs/xchain-mayachain-amm@4.0.11
+- @xchainjs/xchain-wallet@2.0.9
+
 ## 2.0.10
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # xchainjs-prepare-tx
 
+## 2.0.6
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@2.0.6
+
 ## 2.0.5
 
 ### Patch Changes
