@@ -735,10 +735,11 @@ export class Client extends BaseXChainClient implements EVMClient {
       gasPrice: null,
     }
 
+    const feeInfo = await this.getProvider().getFeeData()
+
     // If EIP 1559 parameters are provided, use them; otherwise, estimate gas price
     if (maxFeePerGas || maxPriorityFeePerGas) {
       // Get fee info from the provider
-      const feeInfo = await this.getProvider().getFeeData()
       const block = await this.getProvider().getBlock('latest')
       // Set max fee per gas
       if (maxFeePerGas) {
@@ -764,7 +765,6 @@ export class Client extends BaseXChainClient implements EVMClient {
       // Set gas price
       feeData.gasPrice = txGasPrice
     }
-
     // Get the sender address
     const sender = await this.getAddressAsync(walletIndex)
     // Determine gas limit: estimate or use default
@@ -780,6 +780,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     } else {
       txGasLimit = gasLimit
     }
+
     // Prepare the transaction
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
@@ -797,6 +798,14 @@ export class Client extends BaseXChainClient implements EVMClient {
     tx.gasPrice = feeData.gasPrice || null
     tx.maxFeePerGas = feeData.maxFeePerGas || null
     tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || null
+
+    // EMULATE ethers v5 behavior https://github.com/ethers-io/ethers.js/blob/0bfa7f497dc5793b66df7adfb42c6b846c51d794/packages/abstract-signer/src.ts/index.ts#L247
+    if (tx.type === 1 && feeInfo.maxFeePerGas && feeInfo.maxPriorityFeePerGas) {
+      tx.type = 2
+      tx.maxFeePerGas = feeData.gasPrice
+      tx.maxPriorityFeePerGas = feeData.gasPrice
+      tx.gasPrice = null
+    }
 
     const signedTx = await this.getSigner().signTransfer({
       walletIndex,
