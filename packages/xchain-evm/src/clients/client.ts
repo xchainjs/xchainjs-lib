@@ -794,7 +794,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     const tx = Transaction.from(rawUnsignedTx)
 
     tx.type = feeData.gasPrice ? 1 : 2
-    tx.gasLimit = BigInt(txGasLimit.toString())
+    tx.gasLimit = BigInt(txGasLimit.toFixed())
     tx.gasPrice = feeData.gasPrice || null
     tx.maxFeePerGas = feeData.maxFeePerGas || null
     tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || null
@@ -860,8 +860,8 @@ export class Client extends BaseXChainClient implements EVMClient {
 
     const tx = Transaction.from(rawUnsignedTx)
     tx.type = 1
-    tx.gasLimit = BigInt(gasLimit.toString())
-    tx.gasPrice = BigInt(gasPrice.toString())
+    tx.gasLimit = BigInt(gasLimit.toFixed())
+    tx.gasPrice = BigInt(gasPrice.toFixed())
     tx.maxFeePerGas = null
     tx.maxPriorityFeePerGas = null
 
