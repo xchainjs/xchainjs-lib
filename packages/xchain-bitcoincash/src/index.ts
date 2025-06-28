@@ -16,7 +16,7 @@ export { ClientLedger } from './clientLedger'
 /**
  * Export the 'defaultBchParams' constant from the 'client' file
  */
-export * from './client'
+export { defaultBchParams } from './client'
 
 /**
  * Re-exports all utility functions from the 'utils' module.
