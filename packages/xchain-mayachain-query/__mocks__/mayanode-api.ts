@@ -4,7 +4,7 @@ export default {
   reset: mock.reset,
   restore: mock.restore,
   init: () => {
-    mock.onGet(/\/mayachain\/quote/).reply(function (config) {
+    mock.onGet(/\/mayachain\/quote/).reply(async (config) => {
       const parsedUrl = new URL(`${config.url}`)
       const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''
       const to_asset = parsedUrl.searchParams.get('to_asset') ?? ''
@@ -28,11 +28,11 @@ export default {
 
       return [200, {}]
     })
-    mock.onGet(/\/mayachain\/mimir/).reply(function () {
+    mock.onGet(/\/mayachain\/mimir/).reply(async () => {
       const resp = require(`./responses/mayanode/mimir.json`)
       return [200, resp]
     })
-    mock.onGet(/\/mayachain\/lastblock/).reply(function () {
+    mock.onGet(/\/mayachain\/lastblock/).reply(async () => {
       const resp = require(`./responses/mayanode/latestBlock.json`)
       return [200, resp]
     })
