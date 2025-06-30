@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.3
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-client@2.0.3
+  - @xchainjs/xchain-cosmos-sdk@2.0.3
+
 ## 3.0.2
 
 ### Patch Changes

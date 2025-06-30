@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-query",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "license": "MIT",
   "description": "Mayachain query module that is responsible for estimating swap calculations and add/remove liquidity for thorchain",
   "keywords": [
