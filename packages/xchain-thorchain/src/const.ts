@@ -29,6 +29,11 @@ export const RUNE_DENOM = 'rune'
 export const TCY_DENOM = 'tcy'
 
 /**
+ * Denomination of the ruji asset
+ */
+export const RUJI_DENOM = 'x/ruji'
+
+/**
  * Ticker symbol for the RUNE asset
  */
 export const RUNE_TICKER = 'RUNE'
@@ -37,6 +42,11 @@ export const RUNE_TICKER = 'RUNE'
  * Ticker symbol for the TCY asset
  */
 export const TCY_TICKER = 'TCY'
+
+/**
+ * Ticker symbol for the RUJI asset
+ */
+export const RUJI_TICKER = 'RUJI'
 
 /**
  * Default fee used by the client to make transactions
@@ -76,6 +86,16 @@ export const AssetTCY: TokenAsset = {
   symbol: TCY_TICKER,
   ticker: TCY_TICKER,
   type: AssetType.TOKEN,
+}
+
+/**
+ * Native asset representation for TCY in Thorchain
+ */
+export const AssetRUJI: Asset = {
+  chain: THORChain,
+  symbol: RUJI_TICKER,
+  ticker: RUJI_TICKER,
+  type: AssetType.NATIVE,
 }
 
 /**
