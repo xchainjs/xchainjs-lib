@@ -49,7 +49,7 @@ import {
   getContractAddressFromAsset,
 } from '@xchainjs/xchain-util'
 import bs58 from 'bs58'
-import { HDKey } from 'micro-ed25519-hdkey'
+import slip10 from 'micro-key-producer/slip10.js'
 
 import { SOLAsset, SOLChain, SOL_DECIMALS, defaultSolanaParams } from './const'
 import { TokenAssetData } from './solana-types'
@@ -318,7 +318,7 @@ export class Client extends BaseXChainClient {
     if (!this.phrase) throw new Error('Phrase must be provided')
 
     const seed = getSeed(this.phrase)
-    const hd = HDKey.fromMasterSeed(seed.toString('hex'))
+    const hd = slip10.fromMasterSeed(seed)
 
     return Keypair.fromSeed(hd.derive(this.getFullDerivationPath(index)).privateKey)
   }
