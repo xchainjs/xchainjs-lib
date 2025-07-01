@@ -2,18 +2,18 @@ export * from './sochainv3/sochain-api-types'
 export * from './sochainv3/sochain-api'
 export * from './sochainv3/sochain-data-provider'
 
-export {
+export type {
   AddressDTO,
   AddressParams,
   AddressUTXO,
   BalanceData,
   GetTxsDTO,
-  HaskoinNetwork,
   HaskoinResponse,
   Transaction,
   TxConfirmedStatus,
   TxHashParams,
 } from './haskoin/haskoin-api-types'
+export { HaskoinNetwork } from './haskoin/haskoin-api-types'
 export {
   getAddress,
   getBalance,
