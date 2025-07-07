@@ -3524,26 +3524,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.11.28":
-  version: 20.11.28
-  resolution: "@types/node@npm:20.11.28"
-  dependencies:
-    undici-types: "npm:~5.26.4"
-  checksum: 10c0/c599745243ed9ae4ca87460f18f88d02ab7424b545136aa504ed7a1d898e3a9bb133c927bcc7e861f79d7f6043ef917a173e780c8a001e129221e92f6d97b0ee
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^12.12.47, @types/node@npm:^12.12.54, @types/node@npm:^12.7.1":
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
   checksum: 10c0/3b190bb0410047d489c49bbaab592d2e6630de6a50f00ba3d7d513d59401d279972a8f5a598b5bb8ddc1702f8a2f4ec57a65d93852f9c329639738e7053637d1
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^18.15.12":
-  version: 18.16.0
-  resolution: "@types/node@npm:18.16.0"
-  checksum: 10c0/6e158e0e8a49f597f590f1d4c94a7b89b7ae707c0134540359559b14427e94dbde289c7557c8a2fe33baaaad478248a819fdccaa2b97a76dfa47bc61ab7f2ab6
   languageName: node
   linkType: hard
 
@@ -4117,7 +4101,7 @@ __metadata:
     "@types/bech32": "npm:^1.1.2"
     "@types/bip39": "npm:^3.0.0"
     "@types/crypto-js": "npm:^4.1.1"
-    "@types/node": "npm:^18.15.12"
+    "@types/node": "npm:*"
     "@types/uuid": "npm:^9.0.1"
     bech32: "npm:^2.0.0"
     bip39: "npm:^3.1.0"
@@ -13043,13 +13027,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~5.26.4":
-  version: 5.26.5
-  resolution: "undici-types@npm:5.26.5"
-  checksum: 10c0/bb673d7876c2d411b6eb6c560e0c571eef4a01c1c19925175d16e3a30c4c428181fb8d7ae802a261f283e4166a0ac435e2f505743aa9e45d893f9a3df017b501
-  languageName: node
-  linkType: hard
-
 "undici-types@npm:~6.19.2":
   version: 6.19.8
   resolution: "undici-types@npm:6.19.8"
@@ -13574,7 +13551,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-aggregator@workspace:examples/aggregator"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-aggregator": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
@@ -13589,7 +13566,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-bitcoin@workspace:examples/bitcoin"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
@@ -13601,7 +13578,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-check-tx@workspace:examples/check-tx"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-midgard": "workspace:*"
@@ -13623,7 +13600,7 @@ __metadata:
   resolution: "xchainjs-do-swap@workspace:examples/do-swap"
   dependencies:
     "@psf/bitcoincashjs-lib": "npm:^4.0.3"
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-bitcoincash": "workspace:*"
@@ -13664,7 +13641,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-estimate-swap@workspace:examples/estimate-swap"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-midgard": "workspace:*"
@@ -13685,7 +13662,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-liquidity@workspace:examples/liquidity"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-midgard": "workspace:*"
@@ -13708,7 +13685,7 @@ __metadata:
   resolution: "xchainjs-loans@workspace:examples/loans"
   dependencies:
     "@psf/bitcoincashjs-lib": "npm:^4.0.3"
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
@@ -13741,7 +13718,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-mayachain-amm@workspace:examples/mayachain-amm"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos": "workspace:*"
@@ -13769,7 +13746,7 @@ __metadata:
   dependencies:
     "@ledgerhq/types-cryptoassets": "npm:^7.23.0"
     "@ledgerhq/types-devices": "npm:^6.25.3"
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
@@ -13783,7 +13760,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-solana@workspace:examples/solana"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-solana": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
@@ -13795,7 +13772,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-thorchain-amm@workspace:examples/thorchain-amm"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-bitcoincash": "workspace:*"
@@ -13823,7 +13800,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-thorchain@workspace:examples/thorchain"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
@@ -13835,7 +13812,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-wallet@workspace:examples/wallet"
   dependencies:
-    "@types/node": "npm:20.11.28"
+    "@types/node": "npm:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos": "workspace:*"
