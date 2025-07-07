@@ -15,7 +15,6 @@
 '@xchainjs/xchain-arbitrum': patch
 '@xchainjs/xchain-ethereum': patch
 '@xchainjs/xchain-litecoin': patch
-'@xchainjs/xchain-binance': patch
 '@xchainjs/xchain-bitcoin': patch
 '@xchainjs/xchain-cardano': patch
 'xchainjs-estimate-swap': patch
