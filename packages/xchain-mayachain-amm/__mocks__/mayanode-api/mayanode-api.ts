@@ -4,17 +4,17 @@ export default {
   restore: mock.restore,
   init: () => {
     // Mimir
-    mock.onGet(/\/mayachain\/mimir/).reply(() => {
+    mock.onGet(/\/mayachain\/mimir/).reply(async () => {
       const resp = require(`./responses/mimir.json`)
       return [200, resp]
     })
     // Inbound addresses
-    mock.onGet(/\/mayachain\/inbound_addresses/).reply(() => {
+    mock.onGet(/\/mayachain\/inbound_addresses/).reply(async () => {
       const resp = require(`./responses/inbound-addresses.json`)
       return [200, resp]
     })
     // Quote swap
-    mock.onGet(/\/mayachain\/quote/).reply((config) => {
+    mock.onGet(/\/mayachain\/quote/).reply(async (config) => {
       const parsedUrl = new URL(`${config.url}`)
       const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''
       const to_asset = parsedUrl.searchParams.get('to_asset') ?? ''
@@ -29,7 +29,7 @@ export default {
       return [200, {}]
     })
     // Latest block
-    mock.onGet(/\/mayachain\/lastblock/).reply(() => {
+    mock.onGet(/\/mayachain\/lastblock/).reply(async () => {
       const resp = require(`./responses/latestBlock.json`)
       return [200, resp]
     })

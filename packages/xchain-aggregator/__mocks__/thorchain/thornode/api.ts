@@ -4,10 +4,10 @@ export default {
   reset: mock.reset,
   restore: mock.restore,
   init: () => {
-    mock.onGet(/\/pools/).reply(function () {
+    mock.onGet(/\/pools/).reply(async () => {
       return [200, require('./responses/pools.json')]
     })
-    mock.onGet(/\/thorchain\/quote\/swap/).reply(function (config) {
+    mock.onGet(/\/thorchain\/quote\/swap/).reply(async (config) => {
       const parsedUrl = new URL(`${config.url}`)
       const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''
       const to_asset = parsedUrl.searchParams.get('to_asset') ?? ''
@@ -19,10 +19,10 @@ export default {
       }
       return [500, { error: 'Not found' }]
     })
-    mock.onGet(/\/thorchain\/inbound_addresses/).reply(function () {
+    mock.onGet(/\/thorchain\/inbound_addresses/).reply(async () => {
       return [200, require('./responses/inboundAddresses.json')]
     })
-    mock.onGet(/\/thorchain\/mimir/).reply(function () {
+    mock.onGet(/\/thorchain\/mimir/).reply(async () => {
       return [200, require('./responses/mimir.json')]
     })
   },
