@@ -2,7 +2,7 @@ import { FeeOption, Fees, Network, TxParams as BaseTxParams } from '@xchainjs/xc
 import { Balance, CompatibleAsset, Tx, TxsPage } from '@xchainjs/xchain-evm-providers'
 import { Address, BaseAmount } from '@xchainjs/xchain-util'
 import { Signer, InterfaceAbi, BigNumberish, BytesLike } from 'ethers'
-import { BigNumber } from 'bignumber.js'
+import type BigNumber from 'bignumber.js'
 
 export type ClientUrl = Record<Network, string>
 export type ExplorerUrl = Record<Network, string>

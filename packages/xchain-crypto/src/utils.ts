@@ -1,8 +1,10 @@
 import { bech32 } from 'bech32'
 import crypto from 'crypto'
-import hexEncoding from 'crypto-js/enc-hex'
-import ripemd160 from 'crypto-js/ripemd160'
-import sha256 from 'crypto-js/sha256'
+import cryptojs from 'crypto-js'
+
+const ripemd160 = cryptojs.RIPEMD160,
+  sha256 = cryptojs.SHA256,
+  hexEncoding = cryptojs.enc.Hex
 
 /**
  * Convert a string to an array of bytes.
