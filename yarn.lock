@@ -2044,23 +2044,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metaplex-foundation/mpl-token-metadata@npm:3.2.1":
-  version: 3.2.1
-  resolution: "@metaplex-foundation/mpl-token-metadata@npm:3.2.1"
+"@metaplex-foundation/mpl-token-metadata@npm:^3.2.1":
+  version: 3.4.0
+  resolution: "@metaplex-foundation/mpl-token-metadata@npm:3.4.0"
   dependencies:
-    "@metaplex-foundation/mpl-toolbox": "npm:^0.9.4"
+    "@metaplex-foundation/mpl-toolbox": "npm:^0.10.0"
   peerDependencies:
-    "@metaplex-foundation/umi": ">= 0.8.2 < 1"
-  checksum: 10c0/6c64e99b12c43362dfad0f809b1754e0bd84680a51a007cf3439a8c5954c3ffb3d6e7130bdf5bcb0304985a8e60cf66cfd9e897ffb8a4f9953eb522b27fac473
+    "@metaplex-foundation/umi": ">= 0.8.2 <= 1"
+  checksum: 10c0/1c85ea8314ebf4847f5a6fb8c7dff5669a9cccf2d7c1fdf9028707041015db81dba7337f558d56266e4c78c9783edd97e57d619615376b1c76d39851a9ff0639
   languageName: node
   linkType: hard
 
-"@metaplex-foundation/mpl-toolbox@npm:^0.9.4":
-  version: 0.9.4
-  resolution: "@metaplex-foundation/mpl-toolbox@npm:0.9.4"
+"@metaplex-foundation/mpl-toolbox@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "@metaplex-foundation/mpl-toolbox@npm:0.10.0"
   peerDependencies:
-    "@metaplex-foundation/umi": ">= 0.8.2 < 1"
-  checksum: 10c0/5036b0d941ada428cc199a3d8472bfc18473dd04cc9226c98971aa133e7d1cd619f4c5b25207f1b4470a1f0c5c108f2ef69404c808a5ee3bf4390fa88c47227d
+    "@metaplex-foundation/umi": ">= 0.8.2 <= 1"
+  checksum: 10c0/5faf3c31f7eda511bb67c31f41f9627e41d5b1d9b496d561715c8a48a7d035ec084df1685cda5022bfd2d8fd85dfa3bddba14183af1f313166fac25cdce493eb
   languageName: node
   linkType: hard
 
@@ -2317,6 +2317,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/ciphers@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@noble/ciphers@npm:1.3.0"
+  checksum: 10c0/3ba6da645ce45e2f35e3b2e5c87ceba86b21dfa62b9466ede9edfb397f8116dae284f06652c0cd81d99445a2262b606632e868103d54ecc99fd946ae1af8cd37
+  languageName: node
+  linkType: hard
+
 "@noble/curves@npm:1.2.0":
   version: 1.2.0
   resolution: "@noble/curves@npm:1.2.0"
@@ -2335,7 +2342,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:~1.9.0":
+"@noble/curves@npm:^1.9.0, @noble/curves@npm:~1.9.0":
   version: 1.9.2
   resolution: "@noble/curves@npm:1.9.2"
   dependencies:
@@ -2348,13 +2355,6 @@ __metadata:
   version: 2.0.0
   resolution: "@noble/ed25519@npm:2.0.0"
   checksum: 10c0/877f5c278f93f302f616651efb6dc2c96d3d725eaee00d2b2ebf42414bed448e2dcb20dd566f8926787655d667ab02b9bf1aabb60a5795125169a600d2f5743e
-  languageName: node
-  linkType: hard
-
-"@noble/ed25519@npm:~1.7.1":
-  version: 1.7.3
-  resolution: "@noble/ed25519@npm:1.7.3"
-  checksum: 10c0/dc162c3be5ae5a3cc0e6aff8209c8d175f24bba22f2b473aa849e102471193c83664b06f0ba2b5e01e9aa1a67a44daf313f478adb9f38768408a8bcad6145a48
   languageName: node
   linkType: hard
 
@@ -2379,17 +2379,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.8.0, @noble/hashes@npm:^1.0.0, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:~1.8.0":
+"@noble/hashes@npm:1.8.0, @noble/hashes@npm:^1.0.0, @noble/hashes@npm:^1.3.1, @noble/hashes@npm:^1.8.0, @noble/hashes@npm:~1.8.0":
   version: 1.8.0
   resolution: "@noble/hashes@npm:1.8.0"
   checksum: 10c0/06a0b52c81a6fa7f04d67762e08b2c476a00285858150caeaaff4037356dd5e119f45b2a530f638b77a5eeca013168ec1b655db41bae3236cb2e9d511484fc77
-  languageName: node
-  linkType: hard
-
-"@noble/hashes@npm:~1.1.1":
-  version: 1.1.5
-  resolution: "@noble/hashes@npm:1.1.5"
-  checksum: 10c0/cf7f3baff1d95968309d260441d823a854dd76ca0b02f970db0c2f2e0de980c3cc55afcc6a8f3808bb505e65c59cd5332c5f32f821cf35b7982dc7570e991731
   languageName: node
   linkType: hard
 
@@ -4411,7 +4404,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-solana@workspace:packages/xchain-solana"
   dependencies:
-    "@metaplex-foundation/mpl-token-metadata": "npm:3.2.1"
+    "@metaplex-foundation/mpl-token-metadata": "npm:^3.2.1"
     "@metaplex-foundation/umi": "npm:0.9.2"
     "@metaplex-foundation/umi-bundle-defaults": "npm:0.9.2"
     "@solana/addresses": "npm:^2.1.1"
@@ -4420,8 +4413,8 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bs58: "npm:6.0.0"
-    micro-ed25519-hdkey: "npm:0.1.2"
+    bs58: "npm:^6.0.0"
+    micro-key-producer: "npm:^0.7.6"
   languageName: unknown
   linkType: soft
 
@@ -5541,15 +5534,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bs58@npm:6.0.0, bs58@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "bs58@npm:6.0.0"
-  dependencies:
-    base-x: "npm:^5.0.0"
-  checksum: 10c0/61910839746625ee4f69369f80e2634e2123726caaa1da6b3bcefcf7efcd9bdca86603360fed9664ffdabe0038c51e542c02581c72ca8d44f60329fe1a6bc8f4
-  languageName: node
-  linkType: hard
-
 "bs58@npm:=4.0.1, bs58@npm:^4.0.0, bs58@npm:^4.0.1":
   version: 4.0.1
   resolution: "bs58@npm:4.0.1"
@@ -5565,6 +5549,15 @@ __metadata:
   dependencies:
     base-x: "npm:^4.0.0"
   checksum: 10c0/0d1b05630b11db48039421b5975cb2636ae0a42c62f770eec257b2e5c7d94cb5f015f440785f3ec50870a6e9b1132b35bd0a17c7223655b22229f24b2a3491d1
+  languageName: node
+  linkType: hard
+
+"bs58@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "bs58@npm:6.0.0"
+  dependencies:
+    base-x: "npm:^5.0.0"
+  checksum: 10c0/61910839746625ee4f69369f80e2634e2123726caaa1da6b3bcefcf7efcd9bdca86603360fed9664ffdabe0038c51e542c02581c72ca8d44f60329fe1a6bc8f4
   languageName: node
   linkType: hard
 
@@ -9928,13 +9921,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"micro-ed25519-hdkey@npm:0.1.2":
-  version: 0.1.2
-  resolution: "micro-ed25519-hdkey@npm:0.1.2"
+"micro-key-producer@npm:^0.7.6":
+  version: 0.7.6
+  resolution: "micro-key-producer@npm:0.7.6"
   dependencies:
-    "@noble/ed25519": "npm:~1.7.1"
-    "@noble/hashes": "npm:~1.1.1"
-  checksum: 10c0/d0d266252d69953043ba2decf53b2c73df1ffd3f87ca84cd35b5568196c80cf8a1674d0caa2744709e7ba0f30b0648ca2784fcba334eda68a72fb329019d939e
+    "@noble/ciphers": "npm:^1.3.0"
+    "@noble/curves": "npm:^1.9.0"
+    "@noble/hashes": "npm:^1.8.0"
+    "@scure/base": "npm:~1.2.5"
+    micro-packed: "npm:~0.7.3"
+  checksum: 10c0/03fce10fdcae43f19e1001e05f3156f66ff4d42d87313214bf6254bc3ed9b3fe056db8060e90dd085a2a19fa46cd178bc58130e7b8dab1b0e0b8ea187ed66db8
+  languageName: node
+  linkType: hard
+
+"micro-packed@npm:~0.7.3":
+  version: 0.7.3
+  resolution: "micro-packed@npm:0.7.3"
+  dependencies:
+    "@scure/base": "npm:~1.2.5"
+  checksum: 10c0/1fde48a96d8d5606d3298ff36717bf7483d6d59e2d96f50cb88727379127a4d52881f48e7e1ce0d4906b2711b1902fb04d2128576326ce4d07e171ac022a4c2d
   languageName: node
   linkType: hard
 
