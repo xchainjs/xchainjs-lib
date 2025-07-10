@@ -17,6 +17,8 @@ tput setaf 2
 echo "Generating $MSG_COMPILED_OUTPUTFILE"
 tput sgr0
 yarn run pbjs -w commonjs -t static-module $TMP_DIR/mayanode/proto/mayachain/v1/common/common.proto $TMP_DIR/mayanode/proto/mayachain/v1/x/mayachain/types/msg_deposit.proto $TMP_DIR/mayanode/proto/mayachain/v1/x/mayachain/types/msg_send.proto $TMP_DIR/mayanode/third_party/proto/cosmos/base/v1beta1/coin.proto -o $MSG_COMPILED_OUTPUTFILE
+# Fix import to be ESM-compatible (no omitted file extension)
+sed -i -E 's|"(protobufjs/minimal)"|"\1.js"|' "$MSG_COMPILED_OUTPUTFILE"
 
 tput setaf 2
 echo "Generating $MSG_COMPILED_TYPES_OUTPUTFILE"
