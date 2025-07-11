@@ -18,7 +18,7 @@
 '@xchainjs/xchain-litecoin': patch
 '@xchainjs/xchain-mayanode': patch
 '@xchainjs/xchain-thornode': patch
-'@xchainjs/xchain-binance': patch
+'@xchainjs/xchain-ripple': patch
 '@xchainjs/xchain-bitcoin': patch
 '@xchainjs/xchain-cardano': patch
 '@xchainjs/xchain-midgard': patch
