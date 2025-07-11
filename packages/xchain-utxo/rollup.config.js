@@ -31,6 +31,7 @@ export default {
   plugins: [
     json(),
     typescript({
+      declarationDir: 'lib',
       tsconfig: './tsconfig.json',
       exclude: '__tests__/**',
     }),
