@@ -1,5 +1,84 @@
 # xchainjs-wallet
 
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-thorchain@3.0.7
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-wallet@2.0.10
+  - @xchainjs/xchain-bitcoin@2.0.3
+  - @xchainjs/xchain-client@2.0.3
+  - @xchainjs/xchain-cosmos@3.0.3
+  - @xchainjs/xchain-dash@2.0.3
+  - @xchainjs/xchain-ethereum@2.0.7
+  - @xchainjs/xchain-kujira@2.0.3
+  - @xchainjs/xchain-mayachain@3.0.3
+  - @xchainjs/xchain-mayamidgard-query@1.0.4
+
+## 2.0.10
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@2.0.6
+- @xchainjs/xchain-wallet@2.0.9
+
+## 2.0.9
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@2.0.5
+- @xchainjs/xchain-wallet@2.0.8
+
+## 2.0.8
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-mayamidgard-query@1.0.3
+  - @xchainjs/xchain-mayamidgard@1.0.1
+  - @xchainjs/xchain-mayachain@3.0.2
+  - @xchainjs/xchain-thorchain@3.0.6
+  - @xchainjs/xchain-ethereum@2.0.4
+  - @xchainjs/xchain-mayanode@1.0.1
+  - @xchainjs/xchain-bitcoin@2.0.2
+  - @xchainjs/xchain-cosmos@3.0.2
+  - @xchainjs/xchain-crypto@1.0.1
+  - @xchainjs/xchain-kujira@2.0.2
+  - @xchainjs/xchain-wallet@2.0.7
+  - @xchainjs/xchain-dash@2.0.2
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-client@2.0.2
+
+## 2.0.7
+
+### Patch Changes
+
+- Updated dependencies [12dd7c2]
+  - @xchainjs/xchain-mayamidgard-query@1.0.2
+
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [f777312]
+- Updated dependencies [6b03221]
+- Updated dependencies [842920f]
+  - @xchainjs/xchain-dash@2.0.1
+  - @xchainjs/xchain-mayachain@3.0.1
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-cosmos@3.0.1
+  - @xchainjs/xchain-kujira@2.0.1
+  - @xchainjs/xchain-wallet@2.0.6
+  - @xchainjs/xchain-bitcoin@2.0.1
+  - @xchainjs/xchain-ethereum@2.0.3
+  - @xchainjs/xchain-mayamidgard-query@1.0.1
+  - @xchainjs/xchain-thorchain@3.0.5
+
 ## 2.0.5
 
 ### Patch Changes

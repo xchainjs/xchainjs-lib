@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cardano",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "Cardano client for XChainJS",
   "keywords": [
     "Cardano",
@@ -28,18 +28,21 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "@hippocampus-web3/blockfrost-js": "^6.0.4",
-    "@hippocampus-web3/cardano-serialization-lib-asmjs": "^14.1.5",
+    "@emurgo/cardano-serialization-lib-browser": "^14.1.2",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
-    "@xchainjs/xchain-util": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*",
+    "multicoin-address-validator": "^0.5.25"
   },
   "publishConfig": {
     "access": "public",
     "directory": "release/package"
+  },
+  "devDependencies": {
+    "@types/multicoin-address-validator": "^0"
   }
 }

@@ -1,4 +1,4 @@
-import * as dashcore from '@dashevo/dashcore-lib'
+import dashcore from '@dashevo/dashcore-lib'
 import { Address as DashAddress } from '@dashevo/dashcore-lib/typings/Address'
 import { Script } from '@dashevo/dashcore-lib/typings/script/Script'
 import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'

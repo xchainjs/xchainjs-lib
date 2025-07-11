@@ -1,10 +1,10 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr } from '@hippocampus-web3/zcash-wallet-js'
+import { buildTx, signAndFinalize, skToAddr } from '@mayaprotocol/zcash-js'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
-import { BIP32Factory } from 'bip32'
+import { HDKey } from '@scure/bip32'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 
 import { Client, defaultZECParams } from './client'
@@ -43,8 +43,8 @@ class ClientKeystore extends Client {
         throw Error('Error getting private key')
       }
       const prefix = Utils.zecNetworkPrefix(this.network)
-      const bufferPrefix = Buffer.from(prefix)
-      return skToAddr(zecKeys.privateKey, bufferPrefix)
+      const prefixUint8Array = new Uint8Array(prefix)
+      return skToAddr(zecKeys.privateKey, prefixUint8Array)
     }
 
     throw new Error('Phrase must be provided')
@@ -72,8 +72,7 @@ class ClientKeystore extends Client {
   private getZecKeys(phrase: string, index = 0): ECPairInterface {
     const seed = getSeed(phrase)
 
-    const bip32 = BIP32Factory(ecc)
-    const master = bip32.fromSeed(seed).derivePath(this.getFullDerivationPath(index))
+    const master = HDKey.fromMasterSeed(seed).derive(this.getFullDerivationPath(index))
 
     if (!master.privateKey) {
       throw new Error('Could not get private key from phrase')

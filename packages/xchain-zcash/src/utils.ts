@@ -1,4 +1,4 @@
-import { getPrefix as getLowLevelPrefix, isValidAddr } from '@hippocampus-web3/zcash-wallet-js' // Importing the Network type from xchain-client module
+import { isValidAddr, mainnetPrefix, testnetPrefix } from '@mayaprotocol/zcash-js' // Importing the Network type from xchain-client module
 import { Network } from '@xchainjs/xchain-client' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util'
 
@@ -8,13 +8,15 @@ import { Address } from '@xchainjs/xchain-util'
  * @param {Network} network - The network type (Mainnet, Testnet, or Stagenet).
  * @returns {utxolib.Network} The Zcash network.
  */
-export const zecNetworkPrefix = (network: Network) => {
+export const zecNetworkPrefix = (network: Network): number[] => {
   switch (network) {
     case Network.Mainnet:
     case Network.Stagenet:
-      return getLowLevelPrefix('mainnet')
+      return mainnetPrefix
     case Network.Testnet:
-      return getLowLevelPrefix('testnet')
+      return testnetPrefix
+    default:
+      return mainnetPrefix
   }
 }
 
@@ -25,7 +27,8 @@ export const zecNetworkPrefix = (network: Network) => {
  * @returns {boolean} `true` if the address is valid, `false` otherwise.
  */
 export const validateAddress = (address: Address, network: Network): boolean => {
-  return isValidAddr(address, Buffer.from(zecNetworkPrefix(network)))
+  const prefix = zecNetworkPrefix(network)
+  return isValidAddr(address, new Uint8Array(prefix))
 }
 
 /**

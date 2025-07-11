@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-solana",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Solana client for XChainJS",
   "keywords": [
     "Solana",
@@ -28,21 +28,21 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "@metaplex-foundation/mpl-token-metadata": "3.2.1",
+    "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@metaplex-foundation/umi": "0.9.2",
     "@metaplex-foundation/umi-bundle-defaults": "0.9.2",
-    "@solana/addresses": "2.0.0",
-    "@solana/spl-token": "0.4.8",
-    "@solana/web3.js": "1.95.2",
+    "@solana/addresses": "^2.1.1",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.98.2",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "bs58": "6.0.0",
-    "micro-ed25519-hdkey": "0.1.2"
+    "bs58": "^6.0.0",
+    "micro-key-producer": "^0.7.6"
   },
   "publishConfig": {
     "access": "public",

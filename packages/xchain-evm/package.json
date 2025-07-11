@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-evm",
-  "version": "2.0.1",
+  "version": "2.0.6",
   "description": "Genereic EVM client for XChainJS",
   "keywords": [
     "XChain",
@@ -28,7 +28,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
   },
   "publishConfig": {
@@ -36,17 +36,18 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-eth": "6.36.0",
+    "@ledgerhq/hw-app-eth": "6.45.4",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "ethers": "5.7.2"
+    "bignumber.js": "^9.0.0",
+    "ethers": "^6.14.3"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport": "6.30.6",
+    "@ledgerhq/hw-transport": "^6.31.6",
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
     "axios": "1.8.4",
-    "nock": "13.0.5"
+    "axios-mock-adapter": "2.1.0"
   }
 }

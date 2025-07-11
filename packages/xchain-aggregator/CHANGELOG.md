@@ -1,5 +1,95 @@
 # Changelog
 
+## 2.0.14
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-thorchain@3.0.7
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-mayachain-amm@4.0.12
+  - @xchainjs/xchain-thorchain-amm@3.0.12
+  - @xchainjs/xchain-wallet@2.0.10
+  - @xchainjs/xchain-client@2.0.3
+  - @xchainjs/xchain-mayachain@3.0.3
+  - @xchainjs/xchain-mayachain-query@2.0.5
+  - @xchainjs/xchain-thorchain-query@2.0.5
+
+## 2.0.13
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.0.11
+- @xchainjs/xchain-thorchain-amm@3.0.11
+- @xchainjs/xchain-wallet@2.0.9
+
+## 2.0.12
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.0.10
+- @xchainjs/xchain-thorchain-amm@3.0.10
+- @xchainjs/xchain-wallet@2.0.8
+
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [f17cad7]
+- Updated dependencies [f17cad7]
+  - @xchainjs/xchain-thorchain-query@2.0.4
+  - @xchainjs/xchain-thorchain-amm@3.0.9
+
+## 2.0.10
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-mayachain-query@2.0.4
+  - @xchainjs/xchain-thorchain-query@2.0.3
+  - @xchainjs/xchain-mayachain-amm@4.0.9
+  - @xchainjs/xchain-thorchain-amm@3.0.8
+  - @xchainjs/xchain-mayachain@3.0.2
+  - @xchainjs/xchain-thorchain@3.0.6
+  - @xchainjs/xchain-wallet@2.0.7
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-client@2.0.2
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [2e74e96]
+  - @xchainjs/xchain-mayachain-query@2.0.3
+  - @xchainjs/xchain-mayachain-amm@4.0.8
+
+## 2.0.8
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-query@2.0.2
+- @xchainjs/xchain-mayachain-amm@4.0.7
+
+## 2.0.7
+
+### Patch Changes
+
+- 842920f: remove references to defunct eslint-plugin-ordered-imports
+- Updated dependencies [6b03221]
+- Updated dependencies [842920f]
+- Updated dependencies [842920f]
+  - @xchainjs/xchain-mayachain@3.0.1
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-thorchain-query@2.0.2
+  - @xchainjs/xchain-thorchain-amm@3.0.7
+  - @xchainjs/xchain-wallet@2.0.6
+  - @xchainjs/xchain-mayachain-amm@4.0.6
+  - @xchainjs/xchain-mayachain-query@2.0.1
+  - @xchainjs/xchain-thorchain@3.0.5
+
 ## 2.0.6
 
 ### Patch Changes

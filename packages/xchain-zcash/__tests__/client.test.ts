@@ -1,5 +1,5 @@
-import { FeeType } from '@xchainjs/xchain-client/lib'
-import { baseAmount } from '@xchainjs/xchain-util/lib'
+import { FeeType } from '@xchainjs/xchain-client'
+import { baseAmount } from '@xchainjs/xchain-util'
 import * as bip39 from 'bip39'
 
 import MockNowNodes from '../__mocks__/nownodes'
@@ -65,25 +65,33 @@ describe('Zcash client', () => {
   })
 
   it('Should prepareTx TX without memo', async () => {
-    await expect(client.prepareTx()).rejects.toThrow(
-      'Prepare unsiged TX not supported for Zcash. Request functionality if you need it.',
-    )
+    const preparedTx = await client.prepareTx({
+      sender: 't1XVXWCvpMgBvUaed4XDqWtgQgJSu1Ghz7F',
+      recipient: 't1eiZYPXWurGMxFwoTu62531s8fAiExFh88',
+      amount: baseAmount(100000000, ZEC_DECIMAL),
+      feeRate: 1, // Will be ignored for Zcash
+    })
+
+    expect(preparedTx.rawUnsignedTx).toBeDefined()
+    expect(preparedTx.utxos).toBeDefined()
+    expect(preparedTx.inputs).toBeDefined()
+    expect(typeof preparedTx.rawUnsignedTx).toBe('string')
   })
 
   it('Should generate explorer URL', async () => {
     const url = await client.getExplorerUrl()
-    expect(url).toBe('https://mainnet.zcashexplorer.app/')
+    expect(url).toBe('https://blockchair.com/zcash/')
   })
 
   it('Should generate explorer address URL', async () => {
     const url = await client.getExplorerAddressUrl('t1eiZYPXWurGMxFwoTu62531s8fAiExFh88')
-    expect(url).toBe('https://mainnet.zcashexplorer.app/address/t1eiZYPXWurGMxFwoTu62531s8fAiExFh88')
+    expect(url).toBe('https://blockchair.com/zcash/address/t1eiZYPXWurGMxFwoTu62531s8fAiExFh88')
   })
 
   it('Should generate explorer tx URL', async () => {
     const url = await client.getExplorerTxUrl('601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789')
     expect(url).toBe(
-      'https://mainnet.zcashexplorer.app/transactions/601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789',
+      'https://blockchair.com/zcash/transaction/601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789',
     )
   })
 
@@ -131,9 +139,9 @@ describe('Zcash client', () => {
     const fees = await client.getFees()
     const expected = {
       type: FeeType.FlatFee,
-      average: baseAmount(10000, ZEC_DECIMAL),
-      fast: baseAmount(10000, ZEC_DECIMAL),
-      fastest: baseAmount(10000, ZEC_DECIMAL),
+      average: baseAmount(20000, ZEC_DECIMAL),
+      fast: baseAmount(20000, ZEC_DECIMAL),
+      fastest: baseAmount(20000, ZEC_DECIMAL),
     }
     expect(deepSerialize(fees)).toEqual(deepSerialize(expected))
   })
@@ -142,9 +150,9 @@ describe('Zcash client', () => {
     const fees = await client.getFees({ memo: 'test' })
     const expected = {
       type: FeeType.FlatFee,
-      average: baseAmount(15000, ZEC_DECIMAL),
-      fast: baseAmount(15000, ZEC_DECIMAL),
-      fastest: baseAmount(15000, ZEC_DECIMAL),
+      average: baseAmount(25000, ZEC_DECIMAL),
+      fast: baseAmount(25000, ZEC_DECIMAL),
+      fastest: baseAmount(25000, ZEC_DECIMAL),
     }
     expect(deepSerialize(fees)).toEqual(deepSerialize(expected))
   })
@@ -153,9 +161,9 @@ describe('Zcash client', () => {
     const fees = await client.getFees({ sender: 't1eiZYPXWurGMxFwoTu62531s8fAiExFh88' })
     const expected = {
       type: FeeType.FlatFee,
-      average: baseAmount(20000, ZEC_DECIMAL),
-      fast: baseAmount(20000, ZEC_DECIMAL),
-      fastest: baseAmount(20000, ZEC_DECIMAL),
+      average: baseAmount(30000, ZEC_DECIMAL),
+      fast: baseAmount(30000, ZEC_DECIMAL),
+      fastest: baseAmount(30000, ZEC_DECIMAL),
     }
     expect(deepSerialize(fees)).toEqual(deepSerialize(expected))
   })

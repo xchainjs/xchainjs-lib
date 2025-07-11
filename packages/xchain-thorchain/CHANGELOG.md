@@ -1,5 +1,36 @@
 # Changelog
 
+## 3.0.7
+
+### Patch Changes
+
+- 4012c06: Update for native thor.ruji support
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-client@2.0.3
+  - @xchainjs/xchain-cosmos-sdk@2.0.3
+
+## 3.0.6
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-cosmos-sdk@2.0.2
+  - @xchainjs/xchain-crypto@1.0.1
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-client@2.0.2
+
+## 3.0.5
+
+### Patch Changes
+
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-cosmos-sdk@2.0.1
+
 ## 3.0.4
 
 ### Patch Changes

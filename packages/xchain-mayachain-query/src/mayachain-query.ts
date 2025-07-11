@@ -46,6 +46,8 @@ import {
   ThorChain,
   XdrAsset,
   XdrChain,
+  ZecAsset,
+  ZecChain,
   getBaseAmountWithDiffDecimals,
   getCryptoAmountWithNotation,
 } from './utils'
@@ -204,6 +206,7 @@ export class MayachainQuery {
       [MayaChain]: new AssetCryptoAmount(baseAmount(0, 10), CacaoAsset),
       [ArbChain]: new AssetCryptoAmount(baseAmount(0, 18), ArbAsset),
       [XdrChain]: new AssetCryptoAmount(baseAmount(0, 18), XdrAsset),
+      [ZecChain]: new AssetCryptoAmount(baseAmount(1000, 8), ZecAsset),
     }
   }
 

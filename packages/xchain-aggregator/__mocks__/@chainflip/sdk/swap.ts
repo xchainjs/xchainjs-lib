@@ -1,13 +1,4 @@
-import {
-  Asset,
-  AssetData,
-  ChainData,
-  Chains,
-  DepositAddressRequestV2,
-  DepositAddressResponse,
-  QuoteRequest,
-  QuoteResponseV2,
-} from '@chainflip/sdk/swap'
+import { Asset, AssetData, ChainData, Chains, DepositAddressRequestV2, QuoteRequest } from '@chainflip/sdk/swap'
 
 class SwapSDK {
   async getChains(): Promise<ChainData[]> {
@@ -122,7 +113,7 @@ class SwapSDK {
     ]
   }
 
-  async requestDepositAddressV2(params: DepositAddressRequestV2): Promise<DepositAddressResponse> {
+  async requestDepositAddressV2(params: DepositAddressRequestV2) {
     if (params.quote.srcAsset.chain === 'Bitcoin')
       return {
         amount: params.quote.depositAmount,
@@ -174,7 +165,7 @@ class SwapSDK {
     throw Error('Can not get deposit address')
   }
 
-  async getQuoteV2({ srcAsset, srcChain, destAsset, destChain, amount }: QuoteRequest): Promise<QuoteResponseV2> {
+  async getQuoteV2({ srcAsset, srcChain, destAsset, destChain, amount }: QuoteRequest) {
     if (
       srcChain === 'Ethereum' &&
       srcAsset === 'ETH' &&

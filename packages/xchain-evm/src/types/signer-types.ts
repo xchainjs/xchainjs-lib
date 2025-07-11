@@ -1,14 +1,14 @@
 import { Address } from '@xchainjs/xchain-util'
-import { ethers } from 'ethers'
+import { Transaction } from 'ethers'
 
 export type SignTransferParams = {
   walletIndex: number
-  tx: ethers.Transaction
+  tx: Transaction
 }
 
 export type SignApproveParams = {
   walletIndex: number
-  tx: ethers.Transaction
+  tx: Transaction
 }
 
 export interface ISigner {

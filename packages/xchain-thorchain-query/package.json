@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-query",
-  "version": "2.0.1",
+  "version": "2.0.5",
   "license": "MIT",
   "description": "Thorchain query module that is responsible for estimating swap calculations and add/remove liquidity for thorchain ",
   "keywords": [
@@ -28,7 +28,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
@@ -39,10 +39,10 @@
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.8.4",
     "axios-retry": "3.2.5",
-    "bignumber.js": "9.0.0"
+    "bignumber.js": "^9.0.0"
   },
   "devDependencies": {
-    "axios-mock-adapter": "1.20.0"
+    "axios-mock-adapter": "2.1.0"
   },
   "publishConfig": {
     "access": "public",

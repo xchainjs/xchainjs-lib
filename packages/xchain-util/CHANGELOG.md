@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+- 4012c06: Update for native thor.ruji support
+
+## 2.0.1
+
+### Patch Changes
+
+- 9370688: More dependency updates
+
 ## 2.0.0
 
 ### Major Changes

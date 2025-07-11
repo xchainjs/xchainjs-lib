@@ -6,6 +6,7 @@ import { AssetBSC, BSCChain, Client as BscClient, defaultBscParams } from '@xcha
 import { Network } from '@xchainjs/xchain-client'
 import { AssetATOM, Client as GaiaClient, GAIAChain } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, DOGEChain, defaultDogeParams } from '@xchainjs/xchain-doge'
+import { Client as XRPClient, XRPChain, defaultXRPParams } from '@xchainjs/xchain-ripple'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient, LTCChain, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, THORChain, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
@@ -85,6 +86,8 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new GaiaClient({ network }).validateAddress(address)
     case THORChain:
       return new ThorClient({ ...defaultThorParams, network }).validateAddress(address)
+    case XRPChain:
+      return new XRPClient({ ...defaultXRPParams, network }).validateAddress(address)
     default:
       throw Error('Unsupported chain')
   }

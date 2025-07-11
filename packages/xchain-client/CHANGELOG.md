@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.3
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-util@2.0.2
+
+## 2.0.2
+
+### Patch Changes
+
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-crypto@1.0.1
+  - @xchainjs/xchain-util@2.0.1
+
+## 2.0.1
+
+### Patch Changes
+
+- 6b03221: Trunk fixes
+
 ## 2.0.0
 
 ### Major Changes

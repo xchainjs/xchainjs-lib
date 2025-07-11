@@ -1,4 +1,3 @@
-import { Provider } from '@ethersproject/abstract-provider'
 import { FeeOption, FeeRates, TxHistoryParams } from '@xchainjs/xchain-client'
 import {
   Address,
@@ -11,7 +10,7 @@ import {
   baseAmount,
 } from '@xchainjs/xchain-util'
 import axios from 'axios'
-import { BigNumber, ethers } from 'ethers'
+import { AbstractProvider, Contract } from 'ethers'
 
 import { Balance, CompatibleAsset, EvmOnlineDataProvider, Tx, TxsPage } from '../../types'
 
@@ -20,7 +19,7 @@ import * as etherscanAPI from './etherscan-api-v2'
 import { ERC20TxV2, GetERC20TxsResponseV2 } from './types-v2'
 
 export class EtherscanProviderV2 implements EvmOnlineDataProvider {
-  private provider: Provider
+  private provider: AbstractProvider
   private apiKey: string
   protected baseUrl: string
   protected chain: Chain
@@ -29,7 +28,7 @@ export class EtherscanProviderV2 implements EvmOnlineDataProvider {
   protected chainId: number
 
   constructor(
-    provider: Provider,
+    provider: AbstractProvider,
     baseUrl: string,
     apiKey: string,
     chain: Chain,
@@ -79,7 +78,7 @@ export class EtherscanProviderV2 implements EvmOnlineDataProvider {
     return balances
   }
   private async getNativeAssetBalance(address: Address): Promise<{ asset: Asset; amount: BaseAmount }> {
-    const gasAssetBalance: BigNumber = await this.provider.getBalance(address.toLowerCase())
+    const gasAssetBalance = await this.provider.getBalance(address.toLowerCase())
     const amount = baseAmount(gasAssetBalance.toString(), this.nativeAssetDecimals)
     return {
       asset: this.nativeAsset,
@@ -98,7 +97,7 @@ export class EtherscanProviderV2 implements EvmOnlineDataProvider {
       type: AssetType.TOKEN,
     }
 
-    const contract: ethers.Contract = new ethers.Contract(contractAddress.toLowerCase(), erc20ABI, this.provider)
+    const contract: Contract = new Contract(contractAddress.toLowerCase(), erc20ABI, this.provider)
     const balance = (await contract.balanceOf(address.toLowerCase())).toString()
 
     const decimals = (await contract.decimals()).toString()

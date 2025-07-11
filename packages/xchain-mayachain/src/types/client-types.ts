@@ -1,6 +1,6 @@
 import { CompatibleAsset, Tx, TxParams as BaseTxParams } from '@xchainjs/xchain-cosmos-sdk'
 import { BaseAmount } from '@xchainjs/xchain-util'
-import { BigNumber } from 'bignumber.js'
+import type BigNumber from 'bignumber.js'
 
 export type DepositParam = {
   walletIndex?: number

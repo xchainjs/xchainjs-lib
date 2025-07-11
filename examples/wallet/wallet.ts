@@ -1,4 +1,3 @@
-import cosmosclient from '@cosmos-client/core'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
@@ -12,7 +11,6 @@ import {
   Chain,
   SynthAsset,
   TokenAsset,
-  assetAmount,
   assetFromStringEx,
   assetToBase,
   assetToString,
@@ -23,7 +21,6 @@ import {
 import { Wallet } from '@xchainjs/xchain-wallet'
 import axios from 'axios'
 
-register9Rheader(cosmosclient.config.globalAxios)
 register9Rheader(axios)
 
 const _getBalances = async (wallet: Wallet, assets?: Record<Chain, Asset[] | undefined>) => {

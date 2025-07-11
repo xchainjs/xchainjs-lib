@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-utxo-providers",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -20,7 +20,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "clean": "rm -rf .turbo && rm -rf lib",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "test": "jest "
   },
   "publishConfig": {
@@ -34,6 +34,6 @@
     "axios": "1.8.4"
   },
   "devDependencies": {
-    "axios-mock-adapter": "1.20.0"
+    "axios-mock-adapter": "2.1.0"
   }
 }

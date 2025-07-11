@@ -1,5 +1,63 @@
 # Changelog
 
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-thorchain@3.0.7
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-client@2.0.3
+  - @xchainjs/xchain-evm@2.0.6
+  - @xchainjs/xchain-mayachain@3.0.3
+  - @xchainjs/xchain-radix@2.0.3
+  - @xchainjs/xchain-utxo@2.0.3
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [8c58393]
+  - @xchainjs/xchain-evm@2.0.5
+
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [5c90c64]
+  - @xchainjs/xchain-evm@2.0.4
+
+## 2.0.7
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-mayachain@3.0.2
+  - @xchainjs/xchain-thorchain@3.0.6
+  - @xchainjs/xchain-radix@2.0.2
+  - @xchainjs/xchain-evm@2.0.3
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-utxo@2.0.2
+  - @xchainjs/xchain-client@2.0.2
+
+## 2.0.6
+
+### Patch Changes
+
+- Updated dependencies [f777312]
+- Updated dependencies [6b03221]
+- Updated dependencies [842920f]
+- Updated dependencies [842920f]
+  - @xchainjs/xchain-utxo@2.0.1
+  - @xchainjs/xchain-mayachain@3.0.1
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-evm@2.0.2
+  - @xchainjs/xchain-radix@2.0.1
+  - @xchainjs/xchain-thorchain@3.0.5
+
 ## 2.0.5
 
 ### Patch Changes

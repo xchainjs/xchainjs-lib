@@ -6,7 +6,15 @@ import { Network, RootDerivationPaths, TxHash } from '@xchainjs/xchain-client'
 import { Address, AssetType, assetToString, isSecuredAsset, isSynthAsset } from '@xchainjs/xchain-util' // Import axios for making HTTP requests
 import axios from 'axios'
 //Import necessary constants for default client URLs
-import { AssetRuneNative as AssetRUNE, AssetTCY, DEFAULT_EXPLORER_URL, RUNE_DENOM, TCY_DENOM } from './const'
+import {
+  AssetRUJI,
+  AssetRuneNative as AssetRUNE,
+  AssetTCY,
+  DEFAULT_EXPLORER_URL,
+  RUJI_DENOM,
+  RUNE_DENOM,
+  TCY_DENOM,
+} from './const'
 import { CompatibleAsset } from './types'
 
 /**
@@ -69,6 +77,14 @@ export const isAssetRuneNative = (asset: CompatibleAsset): boolean => assetToStr
 export const isTCYAsset = (asset: CompatibleAsset): boolean => assetToString(asset) === assetToString(AssetTCY)
 
 /**
+ * Checks whether an asset is the native RUJI asset
+ *
+ * @param {CompatibleAsset} asset
+ * @returns {boolean} `true` or `false`
+ */
+export const isRUJIAsset = (asset: CompatibleAsset): boolean => assetToString(asset) === assetToString(AssetRUJI)
+
+/**
  * Get denomination from Asset
  *
  * @param {CompatibleAsset} asset
@@ -79,6 +95,7 @@ export const getDenom = (asset: CompatibleAsset) => {
   if (isSynthAsset(asset)) return assetToString(asset).toLowerCase()
   if (isSecuredAsset(asset)) return assetToString(asset).toLowerCase()
   if (isTCYAsset(asset)) return TCY_DENOM
+  if (isRUJIAsset(asset)) return RUJI_DENOM
   return assetToString(asset).toLowerCase()
 }
 

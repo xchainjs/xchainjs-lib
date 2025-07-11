@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain-amm",
-  "version": "4.0.5",
+  "version": "4.0.12",
   "description": "module that exposes estimating & swapping cryptocurrency assets on mayachain",
   "keywords": [
     "MAYAChain",
@@ -28,7 +28,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
@@ -50,12 +50,13 @@
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
-    "ethers": "5.7.2"
+    "@xchainjs/xchain-zcash": "workspace:*",
+    "ethers": "^6.14.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
     "axios": "1.8.4",
-    "axios-mock-adapter": "1.20.0"
+    "axios-mock-adapter": "2.1.0"
   },
   "publishConfig": {
     "access": "public",

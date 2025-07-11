@@ -17,7 +17,7 @@ describe('BCH e2e tests', () => {
 
   it('Should get address 0 async', async () => {
     try {
-      const address = await client.getAddressAsync()
+      const address = await client.getAddressAsync(1)
       console.log(address)
     } catch (error) {
       console.error(`Error running "Should get address 0 async". ${error}`)
@@ -71,10 +71,10 @@ describe('BCH e2e tests', () => {
     }
   })
 
-  it('Should self transfer', async () => {
+  it('Should transfer from index 0 to index 1', async () => {
     try {
       const txHash = await client.transfer({
-        recipient: await client.getAddressAsync(0),
+        recipient: await client.getAddressAsync(1),
         amount: assetToBase(assetAmount('0.001', BCH_DECIMAL)),
       })
       console.log(txHash)

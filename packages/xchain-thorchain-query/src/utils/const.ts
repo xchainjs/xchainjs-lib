@@ -13,6 +13,7 @@ export const AssetRuneNative = assetFromStringEx('THOR.RUNE') as Asset
 export const assetUSDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48') as TokenAsset
 export const AssetBNB = assetFromStringEx('BSC.BNB') as Asset
 export const AssetBASE = assetFromStringEx('BASE.ETH') as Asset
+export const AssetXRP = assetFromStringEx('XRP.XRP') as Asset
 
 export const BNBChain = 'BNB'
 export const BTCChain = 'BTC'
@@ -26,6 +27,7 @@ export const MAYAChain = 'MAYA'
 export const BSCChain = 'BSC'
 export const THORChain = 'THOR'
 export const BASEChain = 'BASE'
+export const XRPChain = 'XRP'
 
 export const THORCHAIN_DECIMAL = 8
 

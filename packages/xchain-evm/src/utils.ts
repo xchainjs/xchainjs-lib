@@ -1,11 +1,12 @@
 import { Address, BaseAmount, TokenAsset, baseAmount } from '@xchainjs/xchain-util'
-import { Signer, ethers, providers } from 'ethers'
+import { Signer, Contract, Provider, getAddress, InterfaceAbi, BaseContract } from 'ethers'
+import BigNumber from 'bignumber.js'
 
 import erc20ABI from './data/erc20.json'
 /**
  * Maximum approval amount possible, set to 2^256 - 1.
  */
-export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).sub(1)
+export const MAX_APPROVAL: BigNumber = new BigNumber(2).pow(256).minus(1)
 
 /**
  * Validate the given address.
@@ -15,7 +16,7 @@ export const MAX_APPROVAL: ethers.BigNumber = ethers.BigNumber.from(2).pow(256).
  */
 export const validateAddress = (address: Address): boolean => {
   try {
-    ethers.utils.getAddress(address)
+    getAddress(address)
     return true
   } catch (error) {
     return false
@@ -31,7 +32,7 @@ export const validateAddress = (address: Address): boolean => {
 export const getTokenAddress = (asset: TokenAsset): Address | null => {
   try {
     // strip 0X only - 0x is still valid
-    return ethers.utils.getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))
+    return getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))
   } catch (err) {
     return null
   }
@@ -56,7 +57,7 @@ export const getFee = ({
   decimals,
 }: {
   gasPrice: BaseAmount
-  gasLimit: ethers.BigNumber
+  gasLimit: BigNumber
   decimals: number
 }): BaseAmount => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
 
@@ -91,8 +92,8 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
  * @param {BaseAmount} amount The amount to check.
  * @returns {ethers.BigNumber} The approval amount.
  */
-export const getApprovalAmount = (amount?: BaseAmount): ethers.BigNumber =>
-  amount && amount.gt(baseAmount(0, amount.decimal)) ? ethers.BigNumber.from(amount.amount().toFixed()) : MAX_APPROVAL
+export const getApprovalAmount = (amount?: BaseAmount): BigNumber =>
+  amount && amount.gt(baseAmount(0, amount.decimal)) ? new BigNumber(amount.amount().toFixed()) : MAX_APPROVAL
 
 /**
  * Estimate gas required for calling a contract function.
@@ -112,14 +113,15 @@ export const estimateCall = async ({
   funcName,
   funcParams = [],
 }: {
-  provider: providers.Provider
+  provider: Provider
   contractAddress: Address
-  abi: ethers.ContractInterface
+  abi: InterfaceAbi
   funcName: string
   funcParams?: unknown[]
-}): Promise<ethers.BigNumber> => {
-  const contract: ethers.Contract = new ethers.Contract(contractAddress, abi, provider)
-  return await contract.estimateGas[funcName](...funcParams)
+}): Promise<BigNumber> => {
+  const contract = new Contract(contractAddress, abi, provider)
+  const estiamtion = await contract.getFunction(funcName).estimateGas(...funcParams)
+  return await new BigNumber(estiamtion.toString())
 }
 /**
  * Calls a contract function.
@@ -140,19 +142,20 @@ export const call = async <T>({
   funcName,
   funcParams = [],
 }: {
-  provider: providers.Provider
+  provider: Provider
   signer?: Signer
   contractAddress: Address
-  abi: ethers.ContractInterface
+  abi: InterfaceAbi
   funcName: string
   funcParams?: unknown[]
 }): Promise<T> => {
-  let contract = new ethers.Contract(contractAddress, abi, provider)
+  let contract: BaseContract = new Contract(contractAddress, abi, provider)
   if (signer) {
     // For sending transactions, a signer is needed
     contract = contract.connect(signer)
   }
-  return contract[funcName](...funcParams)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (contract as any)[funcName](...funcParams)
 }
 
 /**
@@ -168,11 +171,11 @@ export const getContract = async ({
   contractAddress,
   abi,
 }: {
-  provider: providers.Provider
+  provider: Provider
   contractAddress: Address
-  abi: ethers.ContractInterface
-}): Promise<ethers.Contract> => {
-  return new ethers.Contract(contractAddress, abi, provider)
+  abi: InterfaceAbi
+}): Promise<Contract> => {
+  return new Contract(contractAddress, abi, provider)
 }
 
 /**
@@ -194,20 +197,20 @@ export async function estimateApprove({
   abi,
   amount,
 }: {
-  provider: providers.Provider
+  provider: Provider
   contractAddress: Address
   spenderAddress: Address
   fromAddress: Address
-  abi: ethers.ContractInterface
+  abi: InterfaceAbi
   amount?: BaseAmount
-}): Promise<ethers.BigNumber> {
+}): Promise<BigNumber> {
   const txAmount = getApprovalAmount(amount)
   return await estimateCall({
     provider,
     contractAddress,
     abi,
     funcName: 'approve',
-    funcParams: [spenderAddress, txAmount, { from: fromAddress }],
+    funcParams: [spenderAddress, BigInt(txAmount.toFixed(0)), { from: fromAddress }],
   })
 }
 
@@ -229,15 +232,16 @@ export async function isApproved({
   fromAddress,
   amount,
 }: {
-  provider: providers.Provider
+  provider: Provider
   contractAddress: Address
   spenderAddress: Address
   fromAddress: Address
   amount?: BaseAmount
 }): Promise<boolean> {
-  const txAmount = ethers.BigNumber.from(amount?.amount().toFixed() ?? 1)
-  const contract: ethers.Contract = new ethers.Contract(contractAddress, erc20ABI, provider)
-  const allowance: ethers.BigNumberish = await contract.allowance(fromAddress, spenderAddress)
+  const txAmount = new BigNumber(amount?.amount().toFixed() ?? 1)
+  const contract: Contract = new Contract(contractAddress, erc20ABI, provider)
+  const allowanceResponse = await contract.allowance(fromAddress, spenderAddress)
+  const allowance: BigNumber = new BigNumber(allowanceResponse.toString())
 
   return txAmount.lte(allowance)
 }
@@ -252,10 +256,10 @@ export const strip0x = (addr: Address) => addr.replace(/^0(x|X)/, '')
 
 /**
  * Get the chain identifier the provider is connected with
- * @param {providers.Provider} provider Provider
+ * @param {Provider} provider Provider
  * @returns {number} the chain identifier the provider is connected with
  */
-export const getNetworkId = async (provider: providers.Provider): Promise<number> => {
+export const getNetworkId = async (provider: Provider): Promise<number> => {
   const network = await provider.getNetwork()
-  return network.chainId
+  return Number(network.chainId)
 }

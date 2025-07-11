@@ -1,5 +1,108 @@
 # xchainjs-thorchain-amm
 
+## 1.0.12
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-thorchain@3.0.7
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-thorchain-amm@3.0.12
+  - @xchainjs/xchain-wallet@2.0.10
+  - @xchainjs/xchain-avax@2.0.6
+  - @xchainjs/xchain-bitcoin@2.0.3
+  - @xchainjs/xchain-bitcoincash@2.0.4
+  - @xchainjs/xchain-bsc@2.0.7
+  - @xchainjs/xchain-client@2.0.3
+  - @xchainjs/xchain-cosmos@3.0.3
+  - @xchainjs/xchain-cosmos-sdk@2.0.3
+  - @xchainjs/xchain-dash@2.0.3
+  - @xchainjs/xchain-doge@2.0.3
+  - @xchainjs/xchain-ethereum@2.0.7
+  - @xchainjs/xchain-litecoin@2.0.3
+  - @xchainjs/xchain-thorchain-query@2.0.5
+
+## 1.0.11
+
+### Patch Changes
+
+- @xchainjs/xchain-avax@2.0.5
+- @xchainjs/xchain-bsc@2.0.6
+- @xchainjs/xchain-ethereum@2.0.6
+- @xchainjs/xchain-thorchain-amm@3.0.11
+- @xchainjs/xchain-wallet@2.0.9
+
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [d2ab59a]
+  - @xchainjs/xchain-bitcoincash@2.0.3
+  - @xchainjs/xchain-avax@2.0.4
+  - @xchainjs/xchain-bsc@2.0.5
+  - @xchainjs/xchain-ethereum@2.0.5
+  - @xchainjs/xchain-thorchain-amm@3.0.10
+  - @xchainjs/xchain-wallet@2.0.8
+
+## 1.0.9
+
+### Patch Changes
+
+- Updated dependencies [f17cad7]
+- Updated dependencies [f17cad7]
+  - @xchainjs/xchain-thorchain-query@2.0.4
+  - @xchainjs/xchain-thorchain-amm@3.0.9
+
+## 1.0.8
+
+### Patch Changes
+
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-thorchain-query@2.0.3
+  - @xchainjs/xchain-thorchain-amm@3.0.8
+  - @xchainjs/xchain-bitcoincash@2.0.2
+  - @xchainjs/xchain-cosmos-sdk@2.0.2
+  - @xchainjs/xchain-thorchain@3.0.6
+  - @xchainjs/xchain-ethereum@2.0.4
+  - @xchainjs/xchain-litecoin@2.0.2
+  - @xchainjs/xchain-thornode@1.0.2
+  - @xchainjs/xchain-bitcoin@2.0.2
+  - @xchainjs/xchain-cosmos@3.0.2
+  - @xchainjs/xchain-crypto@1.0.1
+  - @xchainjs/xchain-wallet@2.0.7
+  - @xchainjs/xchain-avax@2.0.3
+  - @xchainjs/xchain-dash@2.0.2
+  - @xchainjs/xchain-doge@2.0.2
+  - @xchainjs/xchain-bsc@2.0.4
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-client@2.0.2
+
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [f777312]
+- Updated dependencies [6b03221]
+- Updated dependencies [842920f]
+- Updated dependencies [842920f]
+  - @xchainjs/xchain-bitcoincash@2.0.1
+  - @xchainjs/xchain-litecoin@2.0.1
+  - @xchainjs/xchain-dash@2.0.1
+  - @xchainjs/xchain-doge@2.0.1
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-cosmos@3.0.1
+  - @xchainjs/xchain-thorchain-query@2.0.2
+  - @xchainjs/xchain-thorchain-amm@3.0.7
+  - @xchainjs/xchain-wallet@2.0.6
+  - @xchainjs/xchain-bitcoin@2.0.1
+  - @xchainjs/xchain-avax@2.0.2
+  - @xchainjs/xchain-bsc@2.0.3
+  - @xchainjs/xchain-cosmos-sdk@2.0.1
+  - @xchainjs/xchain-ethereum@2.0.3
+  - @xchainjs/xchain-thorchain@3.0.5
+
 ## 1.0.6
 
 ### Patch Changes

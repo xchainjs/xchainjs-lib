@@ -1,5 +1,43 @@
 # Changelog
 
+## 2.0.5
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-client@2.0.3
+  - @xchainjs/xchain-midgard-query@2.0.3
+
+## 2.0.4
+
+### Patch Changes
+
+- f17cad7: Add XRP to query and TC amm
+- f17cad7: add XRP to tc query
+
+## 2.0.3
+
+### Patch Changes
+
+- 0479f1b: Update dependencies
+- 9370688: More dependency updates
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-midgard-query@2.0.2
+  - @xchainjs/xchain-thornode@1.0.2
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-client@2.0.2
+
+## 2.0.2
+
+### Patch Changes
+
+- 842920f: remove references to defunct eslint-plugin-ordered-imports
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-client@2.0.1
+  - @xchainjs/xchain-midgard-query@2.0.1
+
 ## 2.0.1
 
 ### Patch Changes

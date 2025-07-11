@@ -1,8 +1,8 @@
 import { Balance } from '@xchainjs/xchain-client'
 import { Asset, AssetType, assetToString } from '@xchainjs/xchain-util'
-import { ethers } from 'ethers'
+import { JsonRpcProvider, Network, EtherscanProvider } from 'ethers'
 
-import { EtherscanProvider } from '../src/providers'
+import { EtherscanProviderV2 } from '../lib'
 
 // =====Erc-20 asset=====
 
@@ -18,19 +18,18 @@ import { EtherscanProvider } from '../src/providers'
 // }
 describe('etherscan Integration Tests (AVAX)', () => {
   // const AVALANCHE_MAINNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
-  const AVALANCHE_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider(
-    'https://api.avax-test.network/ext/bc/C/rpc',
-  )
+  const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc')
   // Define here to avoid cyclic dependency
   const AVAXChain = 'AVAX'
   const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
-  const avaxProvider = new EtherscanProvider(
+  const avaxProvider = new EtherscanProviderV2(
     AVALANCHE_TESTNET_ETHERS_PROVIDER,
     'https://api-testnet.snowtrace.io',
     'fake',
     AVAXChain,
     AssetAVAX,
     18,
+    43113,
   )
   it('should fetch all balances', async () => {
     const balances = await avaxProvider.getBalance('0xf32DA51880374201852057009c4c4d1e75949e09')
@@ -74,7 +73,7 @@ describe('etherscan Integration Tests (AVAX)', () => {
 })
 
 describe('etherscan Integration Tests (BSC)', () => {
-  const BSC_TESTNET_ETHERS_PROVIDER = new ethers.providers.JsonRpcProvider('https://bsc-testnet.public.blastapi.io')
+  const BSC_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://bsc-testnet.public.blastapi.io')
   // Define here to avoid cyclic dependency
   const BSCChain = 'BSC'
   const AssetBSC: Asset = {
@@ -83,13 +82,14 @@ describe('etherscan Integration Tests (BSC)', () => {
     ticker: 'BNB',
     type: AssetType.NATIVE,
   }
-  const provider = new EtherscanProvider(
+  const provider = new EtherscanProviderV2(
     BSC_TESTNET_ETHERS_PROVIDER,
     'https://api-testnet.bscscan.com',
     process.env.BSCSCAN_API_KEY || '',
     BSCChain,
     AssetBSC,
     18,
+    97,
   )
   it('should fetch all balances 1', async () => {
     const balances = await provider.getBalance('0x0af7e0671c82920c28e951e40c4bd20b5fc3937d')
@@ -116,8 +116,8 @@ describe('etherscan Integration Tests (BSC)', () => {
 
 describe('etherscan Integration Tests (ETH)', () => {
   // as per https://docs.ethers.org/v5/api/providers/api-providers/#EtherscanProvider
-  const network = ethers.providers.getNetwork('sepolia')
-  const ETH_TESTNET_ETHERS_PROVIDER = new ethers.providers.EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
+  const network = Network.from('sepolia')
+  const ETH_TESTNET_ETHERS_PROVIDER = new EtherscanProvider(network, process.env.ETHERSCAN_API_KEY)
 
   // Define here to avoid cyclic dependency
   const ETHChain = 'ETH'
@@ -127,13 +127,14 @@ describe('etherscan Integration Tests (ETH)', () => {
     ticker: 'ETH',
     type: AssetType.NATIVE,
   }
-  const provider = new EtherscanProvider(
+  const provider = new EtherscanProviderV2(
     ETH_TESTNET_ETHERS_PROVIDER,
     'https://api-sepolia.etherscan.io/',
     process.env.ETHERSCAN_API_KEY || '',
     ETHChain,
     AssetETH,
     18,
+    11155111,
   )
   it('should fetch all balances sepolia', async () => {
     const balances = await provider.getBalance('0xFf5800fbd96906532a4366CE1A01a904a5dA0FB9')

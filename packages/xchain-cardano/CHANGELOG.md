@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [4012c06]
+  - @xchainjs/xchain-util@2.0.2
+  - @xchainjs/xchain-client@2.0.3
+
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [0479f1b]
+- Updated dependencies [9370688]
+  - @xchainjs/xchain-crypto@1.0.1
+  - @xchainjs/xchain-util@2.0.1
+  - @xchainjs/xchain-client@2.0.2
+
+## 1.1.0
+
+### Minor Changes
+
+- 67c4465: User WASM version for cardano lib
+
+### Patch Changes
+
+- Updated dependencies [6b03221]
+  - @xchainjs/xchain-client@2.0.1
+
 ## 1.0.0
 
 ### Major Changes

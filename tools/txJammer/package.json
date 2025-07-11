@@ -1,6 +1,6 @@
 {
   "name": "txJammer",
-  "version": "1.0.47",
+  "version": "1.0.53",
   "private": true,
   "description": "A simple script to test all types of transactions broadcasted to a thornode but on stagenet",
   "main": "index.js",
@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@xchainjs/xchain-avax": "workspace:*",
-    "@xchainjs/xchain-binance": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-bitcoincash": "workspace:*",
     "@xchainjs/xchain-bsc": "workspace:*",
@@ -32,7 +31,7 @@
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
-    "bignumber.js": "9.0.0",
+    "bignumber.js": "^9.0.0",
     "commander": "^9.4.1",
     "weighted": "^1.0.0"
   }

@@ -1,4 +1,4 @@
-import { Provider } from '@ethersproject/abstract-provider'
+import { Provider } from 'ethers'
 import { TxHistoryParams } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 

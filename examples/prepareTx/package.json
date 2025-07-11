@@ -1,6 +1,6 @@
 {
   "name": "xchainjs-prepare-tx",
-  "version": "2.0.2",
+  "version": "2.0.7",
   "private": true,
   "scripts": {
     "preparetx": "npx ts-node prepare-tx.ts",
@@ -11,13 +11,14 @@
   "author": "GRC",
   "license": "MIT",
   "dependencies": {
+    "@ledgerhq/types-cryptoassets": "^7.23.0",
+    "@ledgerhq/types-devices": "^6.25.3",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*"
   },
   "devDependencies": {
-    "@cosmos-client/core": "^0.46.1",
     "@types/node": "20.11.28",
     "ts-node": "10.9.2",
     "typescript": "^5.0.4"

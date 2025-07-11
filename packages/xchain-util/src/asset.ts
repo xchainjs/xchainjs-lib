@@ -2,19 +2,18 @@ import BigNumber from 'bignumber.js'
 
 import { fixedBN, formatBN } from './bn'
 import { trimZeros as trimZerosHelper } from './string'
-import {
+import type {
   Amount,
   AnyAsset,
   Asset,
   AssetAmount,
-  AssetType,
   BaseAmount,
-  Denomination,
   SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
 } from './types'
+import { AssetType, Denomination } from './types'
 
 export type Address = string
 
@@ -276,6 +275,7 @@ const assetConfigs = new Map<string, AnyAsset>([
   ['KUJI.USK', { chain: 'KUJI', symbol: 'USK', ticker: 'USK', type: AssetType.TOKEN }],
   ['MAYA.MAYA', { chain: 'MAYA', symbol: 'MAYA', ticker: 'MAYA', type: AssetType.TOKEN }],
   ['RUNE', { chain: 'THOR', symbol: 'RUNE', ticker: 'RUNE', type: AssetType.NATIVE }],
+  ['X/RUJI', { chain: 'THOR', symbol: 'RUJI', ticker: 'RUJI', type: AssetType.NATIVE }],
 ])
 
 // Helper function to create an asset from its components

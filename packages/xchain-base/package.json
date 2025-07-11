@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-base",
-  "version": "1.0.1",
+  "version": "1.0.6",
   "description": "Base EVM client for XChainJS",
   "keywords": [
     "XChain",
@@ -28,7 +28,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest --passWithNoTests",
-    "e2e": "jest --config jest.config.e2e.js",
+    "e2e": "jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
   },
   "publishConfig": {
@@ -40,7 +40,8 @@
     "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "ethers": "5.7.2"
+    "bignumber.js": "^9.0.0",
+    "ethers": "^6.14.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6"
