@@ -9,8 +9,11 @@
   "author": "THORChain",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
-  "main": "lib/index.js",
-  "module": "lib/index.esm.js",
+  "type": "module",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.esm.js"
+  },
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
@@ -27,8 +30,8 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
-    "test": "jest",
-    "e2e": "jest --config jest.config.e2e.mjs",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {

@@ -2,8 +2,11 @@
   "name": "@xchainjs/xchain-utxo-providers",
   "version": "2.0.3",
   "license": "MIT",
-  "main": "lib/index.js",
-  "module": "lib/index.esm.js",
+  "type": "module",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.esm.js"
+  },
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
@@ -20,8 +23,8 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "clean": "rm -rf .turbo && rm -rf lib",
-    "e2e": "jest --config jest.config.e2e.mjs",
-    "test": "jest "
+    "e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.e2e.mjs",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest "
   },
   "publishConfig": {
     "access": "public",

@@ -20,7 +20,7 @@
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.8.4",
     "axios-retry": "^3.2.5",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^9.1.2",
     "rimraf": "~3.0.2"
   },
   "devDependencies": {

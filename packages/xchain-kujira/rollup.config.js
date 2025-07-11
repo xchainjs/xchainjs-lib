@@ -17,14 +17,14 @@ export default {
   input: 'src/index.ts',
   output: [
     {
-      file: pkg.main,
+      file: pkg.exports.require,
       format: 'cjs',
       interop: 'auto',
       exports: 'named',
       sourcemap: false,
     },
     {
-      file: pkg.module,
+      file: pkg.exports.import,
       format: 'es',
       exports: 'named',
       sourcemap: false,

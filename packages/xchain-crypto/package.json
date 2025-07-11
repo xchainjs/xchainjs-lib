@@ -2,8 +2,11 @@
   "name": "@xchainjs/xchain-crypto",
   "version": "1.0.1",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
-  "main": "lib/index.js",
-  "module": "lib/index.es.js",
+  "type": "module",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.esm.js"
+  },
   "jsnext:main": "lib/index.es.js",
   "typings": "lib/index.d.ts",
   "directories": {
@@ -18,7 +21,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "test": "jest --coverage"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "repository": {
     "type": "git",

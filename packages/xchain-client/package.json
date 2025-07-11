@@ -2,8 +2,11 @@
   "name": "@xchainjs/xchain-client",
   "version": "2.0.3",
   "license": "MIT",
-  "main": "lib/index.js",
-  "module": "lib/index.esm.js",
+  "type": "module",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.esm.js"
+  },
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib"
@@ -16,7 +19,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "compile": "tsc -p tsconfig.build.json",
-    "test": "jest --passWithNoTests"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests"
   },
   "dependencies": {
     "@xchainjs/xchain-crypto": "workspace:*",

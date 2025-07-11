@@ -9,8 +9,11 @@
   "author": "XChainJS",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
-  "main": "lib/index.js",
-  "module": "lib/index.esm.js",
+  "type": "module",
+  "exports": {
+    "require": "./lib/index.cjs",
+    "import": "./lib/index.esm.js"
+  },
   "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
@@ -27,8 +30,8 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
-    "test": "jest --passWithNoTests",
-    "e2e": "jest --config jest.config.e2e.mjs",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --passWithNoTests",
+    "e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.e2e.mjs",
     "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
   },
   "publishConfig": {
@@ -41,7 +44,7 @@
     "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^9.1.2",
     "ethers": "^6.14.3"
   }
 }
