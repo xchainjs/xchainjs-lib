@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-util@2.0.3
+
 ## 1.0.4
 
 ### Patch Changes

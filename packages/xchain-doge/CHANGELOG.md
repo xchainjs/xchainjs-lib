@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.4
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-utxo-providers@2.0.4
+  - @xchainjs/xchain-utxo@2.0.4
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-crypto@1.0.2
+  - @xchainjs/xchain-util@2.0.3
+
 ## 2.0.3
 
 ### Patch Changes

@@ -1,5 +1,23 @@
 # xchainjs-loans
 
+## 2.0.13
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-utxo-providers@2.0.4
+  - @xchainjs/xchain-evm-providers@2.0.6
+  - @xchainjs/xchain-cosmos@3.0.4
+  - @xchainjs/xchain-evm@2.0.7
+  - @xchainjs/xchain-thorchain-query@2.0.6
+  - @xchainjs/xchain-midgard-query@2.0.4
+  - @xchainjs/xchain-thorchain-amm@3.0.13
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-crypto@1.0.2
+  - @xchainjs/xchain-util@2.0.3
+
 ## 2.0.12
 
 ### Patch Changes

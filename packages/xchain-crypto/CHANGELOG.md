@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+
 ## 1.0.1
 
 ### Patch Changes
