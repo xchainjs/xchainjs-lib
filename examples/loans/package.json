@@ -38,7 +38,7 @@
     "wif": "^2.0.6"
   },
   "devDependencies": {
-    "@types/node": "20.11.28",
+    "@types/node": "*",
     "ts-node": "10.9.2",
     "typescript": "^5.0.4"
   }
