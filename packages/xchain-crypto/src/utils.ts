@@ -1,4 +1,4 @@
-import { bech32 } from 'bech32'
+import { bech32 } from '@scure/base'
 import crypto from 'crypto'
 import cryptojs from 'crypto-js'
 
@@ -63,12 +63,8 @@ export const sha256ripemd160 = (hex: string): string => {
  * @returns {string} The address generated from the input string or Buffer.
  */
 export const encodeAddress = (value: string | Buffer, prefix = 'thor', type: BufferEncoding = 'hex'): string => {
-  let words
-  if (Buffer.isBuffer(value)) {
-    words = bech32.toWords(Buffer.from(value))
-  } else {
-    words = bech32.toWords(Buffer.from(value, type))
-  }
+  const data = Buffer.isBuffer(value) ? value : Buffer.from(value, type)
+  const words = bech32.toWords(Uint8Array.from(data))
   return bech32.encode(prefix, words)
 }
 

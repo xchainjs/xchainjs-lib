@@ -1,4 +1,5 @@
 import { decryptFromKeystore, encryptToKeyStore, generatePhrase, validatePhrase } from '../src/crypto'
+import { encodeAddress } from '../src/utils'
 
 describe('Generate Phrase', () => {
   it('Generates 12-word phrase', () => {
@@ -52,5 +53,25 @@ describe('Import Keystore', () => {
     const keystore = await encryptToKeyStore(phrase, password)
     const phraseDecrypted = await decryptFromKeystore(keystore, password)
     expect(phraseDecrypted).toEqual(phrase)
+  })
+})
+
+describe('encodeAddress', () => {
+  const hexValue = '00112233445566778899aabbccddeeff'
+  const expected = 'thor1qqgjyv6y24n80zye42aueh0wlu65gth0'
+
+  it('encodes a hex string into a Bech32 address with default prefix', () => {
+    const result = encodeAddress(hexValue)
+    expect(result).toBe(expected)
+  })
+
+  it('encodes a Buffer into a Bech32 address with default prefix', () => {
+    const buffer = Buffer.from(hexValue, 'hex')
+    const result = encodeAddress(buffer, undefined, 'hex')
+    expect(result).toBe(expected)
+  })
+  it('should encode using a custom prefix', () => {
+    const result = encodeAddress(hexValue, 'bnb')
+    expect(result.startsWith('bnb1')).toBe(true)
   })
 })

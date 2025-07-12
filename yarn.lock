@@ -2574,45 +2574,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@psf/bitcoincash-ops@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@psf/bitcoincash-ops@npm:2.0.0"
-  checksum: 10c0/9f128a7b75b597e388f165dfded351259c27a0482e7f58f8bc4f47fc34ef75afc2ea68c9dd6e235254e120ea387ade0141f7025621e3c3a0ab8b3cd582adcfeb
-  languageName: node
-  linkType: hard
-
-"@psf/bitcoincashjs-lib@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "@psf/bitcoincashjs-lib@npm:4.0.3"
-  dependencies:
-    "@psf/bitcoincash-ops": "npm:^2.0.0"
-    "@psf/pushdata-bitcoin": "npm:^1.2.2"
-    bech32: "npm:^1.1.2"
-    bigi: "npm:^1.4.0"
-    bip66: "npm:^1.1.0"
-    bs58check: "npm:^2.0.0"
-    create-hash: "npm:^1.1.0"
-    create-hmac: "npm:^1.1.3"
-    ecurve: "npm:^1.0.0"
-    merkle-lib: "npm:^2.0.10"
-    randombytes: "npm:^2.0.1"
-    safe-buffer: "npm:^5.0.1"
-    typeforce: "npm:^1.18.0"
-    varuint-bitcoin: "npm:^1.0.4"
-    wif: "npm:^2.0.1"
-  checksum: 10c0/2a48c6ee06076849162802c96da9340f6f913fcfa238cf65e96c9ce22747f19de1616c6de057590c74a6f349ac7bbcf19e9bac4bbd677a37bf5f7da83ed0600f
-  languageName: node
-  linkType: hard
-
-"@psf/pushdata-bitcoin@npm:^1.2.2":
-  version: 1.2.2
-  resolution: "@psf/pushdata-bitcoin@npm:1.2.2"
-  dependencies:
-    "@psf/bitcoincash-ops": "npm:^2.0.0"
-  checksum: 10c0/5ca35fa33c8ae5e5a66d177faf7a50241acf64b9c68aa9fea3c70ae77343c1d1ff382a450e66bc059f56b9d77ccb07d2647d204ee72d58d2af05403c02c25cbc
-  languageName: node
-  linkType: hard
-
 "@radixdlt/babylon-gateway-api-sdk@npm:^1.4.1":
   version: 1.6.1
   resolution: "@radixdlt/babylon-gateway-api-sdk@npm:1.6.1"
@@ -2871,7 +2832,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scure/base@npm:^1.1.1, @scure/base@npm:^1.1.3, @scure/base@npm:~1.2.5":
+"@scure/base@npm:^1.1.1, @scure/base@npm:^1.1.3, @scure/base@npm:^1.2.6, @scure/base@npm:~1.2.5":
   version: 1.2.6
   resolution: "@scure/base@npm:1.2.6"
   checksum: 10c0/49bd5293371c4e062cb6ba689c8fe3ea3981b7bb9c000400dc4eafa29f56814cdcdd27c04311c2fec34de26bc373c593a1d6ca6d754398a488d587943b7c128a
@@ -3338,15 +3299,6 @@ __metadata:
   version: 0.4.0
   resolution: "@types/bchaddrjs@npm:0.4.0"
   checksum: 10c0/f83528294d4921d93f2a6eb78e4d9d6730022ba9da72cfcb390fe5bf863301fe6188c8584a4d8865a81fc8e958ebe6f9b4f1a02326d5e007a42c8a07be11e617
-  languageName: node
-  linkType: hard
-
-"@types/bech32@npm:^1.1.2":
-  version: 1.1.4
-  resolution: "@types/bech32@npm:1.1.4"
-  dependencies:
-    bech32: "npm:*"
-  checksum: 10c0/f07ad54b8d1c302d5ea95704638715003c4bb9f768e2ec6c75b90b74ae383e7041ed106d7398053a72c45d40c68366773aa5843a088e750ee5dcec43f05ff026
   languageName: node
   linkType: hard
 
@@ -4073,7 +4025,6 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bech32: "npm:^1.1.3"
   languageName: unknown
   linkType: soft
 
@@ -4090,13 +4041,13 @@ __metadata:
     "@ledgerhq/hw-app-cosmos": "npm:6.32.0"
     "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
+    "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    bech32: "npm:^1.1.3"
     bignumber.js: "npm:^9.0.0"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
@@ -4107,12 +4058,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-crypto@workspace:packages/xchain-crypto"
   dependencies:
-    "@types/bech32": "npm:^1.1.2"
+    "@scure/base": "npm:^1.2.6"
     "@types/bip39": "npm:^3.0.0"
     "@types/crypto-js": "npm:^4.1.1"
     "@types/node": "npm:^18.15.12"
     "@types/uuid": "npm:^9.0.1"
-    bech32: "npm:^2.0.0"
     bip39: "npm:^3.1.0"
     crypto-js: "npm:4.2.0"
     foundry-primitives-xchainjs: "github:xchainjs/foundry-primitives-js#master"
@@ -4218,13 +4168,13 @@ __metadata:
     "@cosmjs/encoding": "npm:0.33.1"
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
+    "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"
     "@types/secp256k1": "npm:^4.0.3"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bech32: "npm:^1.1.3"
     cosmjs-types: "npm:0.9.0"
   languageName: unknown
   linkType: soft
@@ -4303,13 +4253,13 @@ __metadata:
     "@cosmjs/encoding": "npm:0.33.1"
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
+    "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    bech32: "npm:^1.1.3"
     bignumber.js: "npm:^9.0.0"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
@@ -4379,10 +4329,10 @@ __metadata:
   dependencies:
     "@radixdlt/babylon-gateway-api-sdk": "npm:^1.4.1"
     "@radixdlt/radix-engine-toolkit": "npm:^1.0.3"
+    "@scure/base": "npm:^1.2.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bech32: "npm:^2.0.0"
     bip32: "npm:^4.0.0"
     bip39: "npm:^3.1.0"
     ed25519-hd-key: "npm:^1.3.0"
@@ -4472,6 +4422,7 @@ __metadata:
     "@cosmjs/proto-signing": "npm:0.33.1"
     "@cosmjs/stargate": "npm:0.33.1"
     "@ledgerhq/hw-transport": "npm:^6.31.6"
+    "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/ledger-thorchain": "npm:0.3.0"
     "@xchainjs/xchain-client": "workspace:*"
@@ -4479,7 +4430,6 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    bech32: "npm:^1.1.3"
     bignumber.js: "npm:^9.0.0"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
@@ -5143,17 +5093,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bech32@npm:*, bech32@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "bech32@npm:2.0.0"
-  checksum: 10c0/45e7cc62758c9b26c05161b4483f40ea534437cf68ef785abadc5b62a2611319b878fef4f86ddc14854f183b645917a19addebc9573ab890e19194bc8f521942
-  languageName: node
-  linkType: hard
-
-"bech32@npm:^1.1.2, bech32@npm:^1.1.3, bech32@npm:^1.1.4":
+"bech32@npm:^1.1.2, bech32@npm:^1.1.4":
   version: 1.1.4
   resolution: "bech32@npm:1.1.4"
   checksum: 10c0/5f62ca47b8df99ace9c0e0d8deb36a919d91bf40066700aaa9920a45f86bb10eb56d537d559416fd8703aa0fb60dddb642e58f049701e7291df678b2033e5ee5
+  languageName: node
+  linkType: hard
+
+"bech32@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "bech32@npm:2.0.0"
+  checksum: 10c0/45e7cc62758c9b26c05161b4483f40ea534437cf68ef785abadc5b62a2611319b878fef4f86ddc14854f183b645917a19addebc9573ab890e19194bc8f521942
   languageName: node
   linkType: hard
 
@@ -5170,13 +5120,6 @@ __metadata:
   version: 1.6.36
   resolution: "big-integer@npm:1.6.36"
   checksum: 10c0/6a8b1b46d903738a50479527c6fdd5ddea4ef98228e7c5f66ca04e32acb0a1f5e7793a35eb50e91c34e6453d4c94f99df4391973cd665b52923d0e2aeef6aa2f
-  languageName: node
-  linkType: hard
-
-"bigi@npm:^1.1.0, bigi@npm:^1.4.0":
-  version: 1.4.2
-  resolution: "bigi@npm:1.4.2"
-  checksum: 10c0/59acf628a3bd27ea032a1a9257dc6aa759483ed97d65e1cbf094aa2e1f762ec0ec8f86173a5095ff0da42cc53e481ece7cc9462e5ac5abb15efa060788c19ef7
   languageName: node
   linkType: hard
 
@@ -5990,13 +5933,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"coinselect@npm:^3.1.12":
-  version: 3.1.13
-  resolution: "coinselect@npm:3.1.13"
-  checksum: 10c0/bdab9186e2b735c82a835e7c8fb23f21b5d79538a270e82c079194e865d0bbd90a4cfcf189465cb971992657dfbe4eeb5397e44f42382876c476e6be8b6a3265
-  languageName: node
-  linkType: hard
-
 "collect-v8-coverage@npm:^1.0.2":
   version: 1.0.2
   resolution: "collect-v8-coverage@npm:1.0.2"
@@ -6587,16 +6523,6 @@ __metadata:
     typeforce: "npm:^1.18.0"
     wif: "npm:^2.0.6"
   checksum: 10c0/206a3c9af725416e6e91515278259319d88c880cf067c4e4d275fee5e746064cc5bc6279bdb2f87a9218ef25dd82921422d05e0952d4b41c8e91c070c504aa70
-  languageName: node
-  linkType: hard
-
-"ecurve@npm:^1.0.0":
-  version: 1.0.6
-  resolution: "ecurve@npm:1.0.6"
-  dependencies:
-    bigi: "npm:^1.1.0"
-    safe-buffer: "npm:^5.0.1"
-  checksum: 10c0/f480e5731a67864f4b9b43c9cedd15727452bc5b99fa94f97b3576e2612fc76ce89c6c77a3cf828bf5cb38c3a17ffca46ecd47d08d34437e88bcdd2008fe8404
   languageName: node
   linkType: hard
 
@@ -13627,7 +13553,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "xchainjs-do-swap@workspace:examples/do-swap"
   dependencies:
-    "@psf/bitcoincashjs-lib": "npm:^4.0.3"
     "@types/node": "npm:20.11.28"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
@@ -13705,40 +13630,6 @@ __metadata:
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.0.4"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-loans@workspace:examples/loans":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-loans@workspace:examples/loans"
-  dependencies:
-    "@psf/bitcoincashjs-lib": "npm:^4.0.3"
-    "@types/node": "npm:20.11.28"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-cosmos": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-evm": "workspace:*"
-    "@xchainjs/xchain-evm-providers": "workspace:*"
-    "@xchainjs/xchain-midgard": "workspace:*"
-    "@xchainjs/xchain-midgard-query": "workspace:*"
-    "@xchainjs/xchain-thorchain-amm": "workspace:*"
-    "@xchainjs/xchain-thorchain-query": "workspace:*"
-    "@xchainjs/xchain-thornode": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-utxo-providers": "workspace:*"
-    axios: "npm:1.8.4"
-    axios-retry: "npm:^3.2.5"
-    bchaddrjs: "npm:^0.5.2"
-    bech32: "npm:^2.0.0"
-    bech32-buffer: "npm:^0.2.0"
-    bignumber.js: "npm:^9.0.0"
-    bitcoinjs-lib: "npm:^6.1.7"
-    coinselect: "npm:^3.1.12"
-    ethers: "npm:^6.14.3"
-    rimraf: "npm:~3.0.2"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
-    wif: "npm:^2.0.6"
   languageName: unknown
   linkType: soft
 
