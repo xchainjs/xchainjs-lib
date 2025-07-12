@@ -5,19 +5,19 @@ export default {
   init: () => {
     //Mock testnet thorchain/inbound_addresses
     mock.onGet(/testnet(.*)\/thorchain\/inbound_addresses/).reply(async () => {
-      const resp = require(`./response/inbound_addresses/testnet.json`)
+      const resp = (await import(`./response/inbound_addresses/testnet.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
 
     // inbound_addresses
     mock.onGet(/\/inbound_addresses/).reply(async () => {
-      const resp = require(`./response/inbound_addresses/mainnet.json`)
+      const resp = (await import(`./response/inbound_addresses/mainnet.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
 
     //Mock thorchain/mimir
     mock.onGet(/\/thorchain\/mimir/).reply(async () => {
-      const resp = require(`./response/thornode/mimir.json`)
+      const resp = (await import(`./response/thornode/mimir.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
 

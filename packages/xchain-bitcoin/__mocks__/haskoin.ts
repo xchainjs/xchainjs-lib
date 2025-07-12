@@ -10,13 +10,13 @@ export default {
     //Mock GET https://{haskoinurl}/{btc|btctest}/address/{address}/balance
     mock.onGet(/\/address\/\w+\/balance/).reply(async (config: MockConfig) => {
       const address = config.url?.split('/')?.[5] ?? ''
-      const resp = require(`./response/balances/${address}.json`)
+      const resp = (await import(`./response/balances/${address}.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     //Mock Get utxo's
     mock.onGet(/\/address\/\w+\/unspent/).reply(async (config: MockConfig) => {
       const address = config.url?.split('/')?.[5] ?? ''
-      const resp = require(`./response/unspent-txs/${address}.json`)
+      const resp = (await import(`./response/unspent-txs/${address}.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     //Mock POST https://{haskoinurl}/{btc|btctest}/transactions

@@ -5,7 +5,7 @@ export default {
   init: () => {
     //Mock GET https://{{bitgourl}}/api/v2/{{coin}}/tx/fee
     mock.onGet(/\/api\/v2\/\w+\/tx\/fee/).reply(async () => {
-      const resp = require(`./response/bitgo/get-fee-estimate.json`)
+      const resp = (await import(`./response/bitgo/get-fee-estimate.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
   },

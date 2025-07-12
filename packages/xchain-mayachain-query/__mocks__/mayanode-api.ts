@@ -11,29 +11,29 @@ export default {
 
       // Should fetch BTC to ETH swap
       if (from_asset === 'BTC.BTC' && to_asset === 'ETH.ETH') {
-        const resp = require(`./responses/mayanode/QuoteSwapBtcEth.json`)
+        const resp = (await import(`./responses/mayanode/QuoteSwapBtcEth.json`, { with: { type: 'json' } })).default
         return [200, resp]
       }
 
       // Should fetch RUNE to BTC swap
       if (from_asset === 'THOR.RUNE' && to_asset === 'BTC.BTC') {
-        const resp = require(`./responses/mayanode/QuoteSwapRuneBtc.json`)
+        const resp = (await import(`./responses/mayanode/QuoteSwapRuneBtc.json`, { with: { type: 'json' } })).default
         return [200, resp]
       }
 
       if (from_asset === 'ETH.ETH' && to_asset === 'BTC.BTC') {
-        const resp = require(`./responses/mayanode/QuoteSSwapEthBtc.json`)
+        const resp = (await import(`./responses/mayanode/QuoteSSwapEthBtc.json`, { with: { type: 'json' } })).default
         return [200, resp]
       }
 
       return [200, {}]
     })
     mock.onGet(/\/mayachain\/mimir/).reply(async () => {
-      const resp = require(`./responses/mayanode/mimir.json`)
+      const resp = (await import(`./responses/mayanode/mimir.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     mock.onGet(/\/mayachain\/lastblock/).reply(async () => {
-      const resp = require(`./responses/mayanode/latestBlock.json`)
+      const resp = (await import(`./responses/mayanode/latestBlock.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
   },

@@ -5,32 +5,32 @@ export default {
   init: () => {
     //Mock midgard pools
     mock.onGet(/\/v2\/pools/).reply(async () => {
-      const resp = require(`./responses/midgard/pools.json`)
+      const resp = (await import(`./responses/midgard/pools.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     //Mock thorchain/mimir
     mock.onGet(/\/thorchain\/mimir/).reply(async () => {
-      const resp = require(`./responses/mimir/mimirConstants.json`)
+      const resp = (await import(`./responses/mimir/mimirConstants.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     //Mock thorchain/mimir
     mock.onGet(/\/thorchain\/constants/).reply(async () => {
-      const resp = require(`./responses/thorchain/thorchainConstants.json`)
+      const resp = (await import(`./responses/thorchain/thorchainConstants.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     //Mock thorchain/mimir
     mock.onGet(/\/thorchain\/queue/).reply(async () => {
-      const resp = require(`./responses/thorchain/outboundQueue.json`)
+      const resp = (await import(`./responses/thorchain/outboundQueue.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     //Mock midgard health
     mock.onGet(/\/v2\/health/).reply(async () => {
-      const resp = require(`./responses/midgard/health.json`)
+      const resp = (await import(`./responses/midgard/health.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
     //Mock midgard health
     mock.onGet(/\/v2\/thorname\/lookup\/odin/).reply(async () => {
-      const resp = require(`./responses/midgard/thorname.json`)
+      const resp = (await import(`./responses/midgard/thorname.json`, { with: { type: 'json' } })).default
       return [200, resp]
     })
   },
