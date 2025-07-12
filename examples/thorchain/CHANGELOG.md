@@ -1,5 +1,14 @@
 # xchainjs-thorchain
 
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-thorchain@3.0.8
+  - @xchainjs/xchain-util@2.0.3
+
 ## 1.0.7
 
 ### Patch Changes

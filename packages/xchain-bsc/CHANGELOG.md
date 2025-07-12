@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.8
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-evm-providers@2.0.6
+  - @xchainjs/xchain-evm@2.0.7
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-util@2.0.3
+
 ## 2.0.7
 
 ### Patch Changes

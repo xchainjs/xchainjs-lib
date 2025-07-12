@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+
 ## 2.0.2
 
 ### Patch Changes

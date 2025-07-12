@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.0.8
+
+### Patch Changes
+
+- c612862: consistently export types with 'export type'
+- 4ff6d9a: updates and jest config changes
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-cosmos-sdk@2.0.4
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-crypto@1.0.2
+  - @xchainjs/xchain-util@2.0.3
+
 ## 3.0.7
 
 ### Patch Changes

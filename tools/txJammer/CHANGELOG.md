@@ -1,5 +1,28 @@
 # txJammer
 
+## 1.0.54
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-thorchain@3.0.8
+  - @xchainjs/xchain-litecoin@2.0.4
+  - @xchainjs/xchain-cosmos@3.0.4
+  - @xchainjs/xchain-wallet@2.0.11
+  - @xchainjs/xchain-thorchain-query@2.0.6
+  - @xchainjs/xchain-thorchain-amm@3.0.13
+  - @xchainjs/xchain-bitcoincash@2.0.5
+  - @xchainjs/xchain-ethereum@2.0.8
+  - @xchainjs/xchain-bitcoin@2.0.4
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-crypto@1.0.2
+  - @xchainjs/xchain-avax@2.0.7
+  - @xchainjs/xchain-doge@2.0.4
+  - @xchainjs/xchain-util@2.0.3
+  - @xchainjs/xchain-bsc@2.0.8
+
 ## 1.0.53
 
 ### Patch Changes

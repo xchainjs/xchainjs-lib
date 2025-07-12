@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- c612862: consistently export types with 'export type'
+- 4ff6d9a: updates and jest config changes
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+  - @xchainjs/xchain-evm-providers@2.0.6
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-crypto@1.0.2
+  - @xchainjs/xchain-util@2.0.3
+
 ## 2.0.6
 
 ### Patch Changes
