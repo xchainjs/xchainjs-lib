@@ -12,7 +12,6 @@
   "author": "THORIANITE",
   "license": "MIT",
   "dependencies": {
-    "@psf/bitcoincashjs-lib": "^4.0.3",
     "@xchainjs/xchain-avax": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
     "@xchainjs/xchain-bitcoincash": "workspace:*",
