@@ -48,7 +48,6 @@
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "6.28.6",
-    "@types/bitcoinjs-lib": "^5.0.4",
     "axios-mock-adapter": "2.1.0"
   },
   "publishConfig": {
