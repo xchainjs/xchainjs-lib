@@ -17,7 +17,6 @@
 '@xchainjs/xchain-litecoin': patch
 '@xchainjs/xchain-bitcoin': patch
 '@xchainjs/xchain-cardano': patch
-'xchainjs-estimate-swap': patch
 '@xchainjs/xchain-client': patch
 '@xchainjs/xchain-cosmos': patch
 '@xchainjs/xchain-crypto': patch
@@ -34,10 +33,6 @@
 '@xchainjs/xchain-utxo': patch
 '@xchainjs/xchain-bsc': patch
 '@xchainjs/xchain-evm': patch
-'xchainjs-liquidity': patch
-'xchainjs-check-tx': patch
-'xchainjs-loans': patch
-'txJammer': patch
 ---
 
 updates and jest config changes
