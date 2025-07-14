@@ -1,5 +1,32 @@
 # Changelog
 
+## 3.0.13
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- 2a9674b: fix typescript config
+- Updated dependencies [16de875]
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+- Updated dependencies [2a9674b]
+  - @xchainjs/xchain-thorchain@3.0.8
+  - @xchainjs/xchain-cosmos@3.0.4
+  - @xchainjs/xchain-litecoin@2.0.4
+  - @xchainjs/xchain-wallet@2.0.11
+  - @xchainjs/xchain-evm@2.0.7
+  - @xchainjs/xchain-thorchain-query@2.0.6
+  - @xchainjs/xchain-bitcoincash@2.0.5
+  - @xchainjs/xchain-ethereum@2.0.8
+  - @xchainjs/xchain-bitcoin@2.0.4
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-avax@2.0.7
+  - @xchainjs/xchain-base@1.0.7
+  - @xchainjs/xchain-doge@2.0.4
+  - @xchainjs/xchain-util@2.0.3
+  - @xchainjs/xchain-bsc@2.0.8
+  - @xchainjs/xchain-ripple@1.0.5
+
 ## 3.0.12
 
 ### Patch Changes
