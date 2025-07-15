@@ -3311,15 +3311,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bitcoinjs-lib@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "@types/bitcoinjs-lib@npm:5.0.4"
-  dependencies:
-    bitcoinjs-lib: "npm:*"
-  checksum: 10c0/87b3c731305374a513cbcfc3bbf410e5b12301ec7d86068303c664b3da3a8fda96b4db9de34d557492193e5cfc26fe52d9931323406a50f503b28bd6907b2301
-  languageName: node
-  linkType: hard
-
 "@types/bitcore-lib-cash@npm:^8.23.8":
   version: 8.23.8
   resolution: "@types/bitcore-lib-cash@npm:8.23.8"
@@ -3937,7 +3928,6 @@ __metadata:
     "@ledgerhq/hw-app-btc": "npm:10.9.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@scure/bip32": "npm:^1.7.0"
-    "@types/bitcoinjs-lib": "npm:^5.0.4"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -4079,7 +4069,6 @@ __metadata:
     "@ledgerhq/hw-app-btc": "npm:10.9.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@scure/bip32": "npm:^1.7.0"
-    "@types/bitcoinjs-lib": "npm:^5.0.4"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -4101,7 +4090,6 @@ __metadata:
     "@ledgerhq/hw-app-btc": "npm:10.9.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@scure/bip32": "npm:^1.7.0"
-    "@types/bitcoinjs-lib": "npm:^5.0.4"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -4187,7 +4175,6 @@ __metadata:
     "@ledgerhq/hw-app-btc": "npm:10.9.0"
     "@ledgerhq/hw-transport-node-hid": "npm:6.28.6"
     "@scure/bip32": "npm:^1.7.0"
-    "@types/bitcoinjs-lib": "npm:^5.0.4"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -5253,20 +5240,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bitcoinjs-lib@npm:*, bitcoinjs-lib@npm:^6.1.7":
-  version: 6.1.7
-  resolution: "bitcoinjs-lib@npm:6.1.7"
-  dependencies:
-    "@noble/hashes": "npm:^1.2.0"
-    bech32: "npm:^2.0.0"
-    bip174: "npm:^2.1.1"
-    bs58check: "npm:^3.0.1"
-    typeforce: "npm:^1.11.3"
-    varuint-bitcoin: "npm:^1.1.2"
-  checksum: 10c0/1ce7415cc967bfc5ea7cba0032e73eaba8e3dd7683dffcc90c020d0dba92de6cf1dc92359733c9efa186a4c3ae9547cc379fa4b4a7fb106c0b126c226dec2a40
-  languageName: node
-  linkType: hard
-
 "bitcoinjs-lib@npm:7.0.0-rc.0":
   version: 7.0.0-rc.0
   resolution: "bitcoinjs-lib@npm:7.0.0-rc.0"
@@ -5302,6 +5275,20 @@ __metadata:
     varuint-bitcoin: "npm:^1.0.4"
     wif: "npm:^2.0.1"
   checksum: 10c0/08722efd645deaff1caea62a9df3f69ca12fc169e975f6d7fac9982b00437200a5333a591bce2971e580a4fc32960f28cd9f682841b43db94905c1f6eea601fd
+  languageName: node
+  linkType: hard
+
+"bitcoinjs-lib@npm:^6.1.7":
+  version: 6.1.7
+  resolution: "bitcoinjs-lib@npm:6.1.7"
+  dependencies:
+    "@noble/hashes": "npm:^1.2.0"
+    bech32: "npm:^2.0.0"
+    bip174: "npm:^2.1.1"
+    bs58check: "npm:^3.0.1"
+    typeforce: "npm:^1.11.3"
+    varuint-bitcoin: "npm:^1.1.2"
+  checksum: 10c0/1ce7415cc967bfc5ea7cba0032e73eaba8e3dd7683dffcc90c020d0dba92de6cf1dc92359733c9efa186a4c3ae9547cc379fa4b4a7fb106c0b126c226dec2a40
   languageName: node
   linkType: hard
 
