@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayamidgard-query",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "description": "Module that is responsible for get data from Mayachain Midgard API",
   "keywords": [
