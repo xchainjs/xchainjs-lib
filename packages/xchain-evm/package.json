@@ -36,7 +36,7 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@ledgerhq/hw-app-eth": "6.45.4",
+    "@ledgerhq/hw-app-eth": "6.45.10",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
