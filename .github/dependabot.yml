@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: "yarn"
+    directory: "/packages/xchain-utxo"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "yarn"
+    directory: "/packages/xchain-evm"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "yarn"
+    directory: "/packages/xchain-cosmos-sdk"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "yarn"
+    directory: "/packages/xchain-client"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 1
