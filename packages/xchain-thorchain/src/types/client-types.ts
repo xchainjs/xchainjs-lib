@@ -21,4 +21,4 @@ export type TxOfflineParams = TxParams & {
   gasLimit?: BigNumber
 }
 
-export { CompatibleAsset }
+export type { CompatibleAsset }

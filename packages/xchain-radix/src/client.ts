@@ -27,7 +27,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, AssetType, TokenAsset, baseAmount, eqAsset } from '@xchainjs/xchain-util'
-import { bech32m } from 'bech32'
+import { bech32m } from '@scure/base'
 import { HDKey } from '@scure/bip32'
 import { derivePath } from 'ed25519-hd-key'
 
@@ -224,7 +224,7 @@ export default class Client extends BaseXChainClient {
 
   validateAddress(address: string): boolean {
     try {
-      const decodedAddress = bech32m.decode(address)
+      const decodedAddress = bech32m.decode(address as `${string}1${string}`)
       if (!decodedAddress.prefix.startsWith('account_')) {
         return false
       }

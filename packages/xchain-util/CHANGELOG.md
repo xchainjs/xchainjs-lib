@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.3
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- 2a9674b: fix typescript config
+
 ## 2.0.2
 
 ### Patch Changes

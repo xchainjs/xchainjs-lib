@@ -1,5 +1,28 @@
 # xchainjs-wallet
 
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [16de875]
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+- Updated dependencies [2a9674b]
+  - @xchainjs/xchain-mayachain@3.0.4
+  - @xchainjs/xchain-thorchain@3.0.8
+  - @xchainjs/xchain-cosmos@3.0.4
+  - @xchainjs/xchain-crypto@1.0.2
+  - @xchainjs/xchain-kujira@2.0.4
+  - @xchainjs/xchain-wallet@2.0.11
+  - @xchainjs/xchain-dash@2.0.4
+  - @xchainjs/xchain-mayamidgard-query@1.0.5
+  - @xchainjs/xchain-ethereum@2.0.8
+  - @xchainjs/xchain-bitcoin@2.0.4
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-util@2.0.3
+  - @xchainjs/xchain-mayamidgard@1.0.2
+  - @xchainjs/xchain-mayanode@1.0.2
+
 ## 2.0.11
 
 ### Patch Changes

@@ -8,4 +8,4 @@ import { Wallet } from './wallet'
  */
 export { Wallet }
 
-export { ChainBalances, EvmTxParams, UtxoTxParams, CosmosTxParams } from './types'
+export type { ChainBalances, EvmTxParams, UtxoTxParams, CosmosTxParams } from './types'

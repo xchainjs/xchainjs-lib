@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- 16de875: Remove bech32 dependency
+- 4ff6d9a: updates and jest config changes
+- 2a9674b: fix typescript config
+
 ## 1.0.1
 
 ### Patch Changes

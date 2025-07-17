@@ -169,7 +169,7 @@ interface IProtocol {
   shouldBeApproved(params: IsApprovedParams): Promise<boolean>
 }
 
-export {
+export type {
   IProtocol,
   QuoteSwapParams,
   QuoteSwap,

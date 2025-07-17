@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.0.15
+
+### Patch Changes
+
+- c612862: consistently export types with 'export type'
+- 4ff6d9a: updates and jest config changes
+- 2a9674b: fix typescript config
+- Updated dependencies [16de875]
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+- Updated dependencies [2a9674b]
+  - @xchainjs/xchain-mayachain@3.0.4
+  - @xchainjs/xchain-thorchain@3.0.8
+  - @xchainjs/xchain-wallet@2.0.11
+  - @xchainjs/xchain-mayachain-query@2.0.6
+  - @xchainjs/xchain-thorchain-query@2.0.6
+  - @xchainjs/xchain-mayachain-amm@4.0.13
+  - @xchainjs/xchain-thorchain-amm@3.0.13
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-util@2.0.3
+
 ## 2.0.14
 
 ### Patch Changes
