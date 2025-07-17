@@ -34,7 +34,7 @@
     "clean:types:mayanode": "rimraf ./src/generated/mayanodeApi"
   },
   "dependencies": {
-    "axios": "^1.8.4"
+    "axios": "1.8.4"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.20.2",

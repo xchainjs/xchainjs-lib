@@ -34,7 +34,7 @@
     "clean:types:thornode": "rimraf ./src/generated/thornodeApi"
   },
   "dependencies": {
-    "axios": "^1.8.4"
+    "axios": "1.8.4"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.20.2",
