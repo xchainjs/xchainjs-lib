@@ -10,6 +10,7 @@ import { Balance, Fees, Network, XChainClientParams } from '@xchainjs/xchain-cli
 import { AssetType, baseAmount } from '@xchainjs/xchain-util'
 
 import { generateMnemonic } from 'bip39'
+import { jest } from '@jest/globals'
 
 import {
   mockCommittedDetailsResponse,
