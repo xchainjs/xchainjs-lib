@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
-    "axios": "1.8.4",
+    "axios": "^1.8.4",
     "axios-mock-adapter": "^2.1.0"
   },
   "publishConfig": {

@@ -35,7 +35,7 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-midgard": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.8.4",
+    "axios": "^1.8.4",
     "axios-retry": "^3.9.1"
   },
   "devDependencies": {
