@@ -4237,7 +4237,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:^2.1.0"
-    axios-retry: "npm:^3.2.5"
+    axios-retry: "npm:^3.9.1"
   languageName: unknown
   linkType: soft
 
@@ -4270,7 +4270,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:^2.1.0"
-    axios-retry: "npm:^3.2.5"
+    axios-retry: "npm:^3.9.1"
     dotenv: "npm:16.0.0"
   languageName: unknown
   linkType: soft
@@ -4853,7 +4853,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-retry@npm:^3.2.5, axios-retry@npm:^3.3.1":
+"axios-retry@npm:^3.2.5, axios-retry@npm:^3.3.1, axios-retry@npm:^3.9.1":
   version: 3.9.1
   resolution: "axios-retry@npm:3.9.1"
   dependencies:
