@@ -1,7 +1,6 @@
 ---
 '@xchainjs/xchain-mayachain-query': patch
 '@xchainjs/xchain-thorchain-query': patch
-'@xchainjs/xchain-bitcoincash': patch
 '@xchainjs/xchain-mayachain': patch
 '@xchainjs/xchain-thorchain': patch
 '@xchainjs/xchain-arbitrum': patch
@@ -12,10 +11,8 @@
 '@xchainjs/xchain-cosmos': patch
 '@xchainjs/xchain-kujira': patch
 '@xchainjs/xchain-wallet': patch
-'@xchainjs/xchain-radix': patch
 '@xchainjs/xchain-avax': patch
 '@xchainjs/xchain-base': patch
-'@xchainjs/xchain-dash': patch
 '@xchainjs/xchain-doge': patch
 '@xchainjs/xchain-util': patch
 '@xchainjs/xchain-bsc': patch
