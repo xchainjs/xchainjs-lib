@@ -12,7 +12,7 @@ import { AssetInfo, PreparedTx } from '@xchainjs/xchain-client'
 import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, AssetType, eqAsset } from '@xchainjs/xchain-util'
-import { encode, toWords } from 'bech32'
+import { bech32 } from '@scure/base'
 import { HDKey } from '@scure/bip32'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 import { createHash } from 'crypto'
@@ -63,9 +63,9 @@ export class Client extends CosmosSdkClient {
     // TODO: Make this method async and use CosmosJS official address generation strategy
     const pubKey = secp.pointFromScalar(child.privateKey, true)
     if (!pubKey) throw new Error('pubKey is null')
-    const rawAddress = this.hash160(Uint8Array.from(pubKey))
-    const words = toWords(Buffer.from(rawAddress))
-    const address = encode(this.prefix, words)
+    const rawAddress = this.hash160(pubKey)
+    const words = bech32.toWords(new Uint8Array(rawAddress))
+    const address = bech32.encode(this.prefix, words)
     return address
   }
 

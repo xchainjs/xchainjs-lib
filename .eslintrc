@@ -2,21 +2,29 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2018,
+    "project": true,
     "sourceType": "module"
   },
-  "plugins": ["prettier"],
+  "plugins": ["import", "prettier"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript",
     "prettier",
     "plugin:prettier/recommended"
   ],
   "ignorePatterns": "**/*.d.ts",
+  "settings": {
+    "import/resolver": {
+      "typescript": {}
+    },
+  },
   "rules": {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-use-before-define": "warn",
     "@typescript-eslint/no-empty-function": "off",
-    "@typescript-eslint/ban-ts-ignore": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
@@ -25,7 +33,9 @@
       }
     ],
     "@typescript-eslint/no-var-requires": "off",
-    "@typescript-eslint/no-duplicate-imports": "error",
+    "import/no-duplicates": "error",
+    "import/no-named-as-default": "off",
+    "import/no-named-as-default-member": "off",
     "no-undef": "off"
   }
 }

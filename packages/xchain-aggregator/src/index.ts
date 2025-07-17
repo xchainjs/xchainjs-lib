@@ -1,5 +1,5 @@
 export { Aggregator } from './aggregator'
-export {
+export type {
   IProtocol,
   QuoteSwapParams,
   QuoteSwap,

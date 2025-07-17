@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-crypto",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "XChain Crypto is a crypto module needed by all XChain clients.",
   "main": "lib/index.js",
   "module": "lib/index.es.js",
@@ -18,19 +18,11 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "test": "jest --coverage"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
     "url": "git@github.com:xchainjs/xchainjs-lib.git"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "testPathIgnorePatterns": [
-      "<rootDir>/lib",
-      "<rootDir>/node_modules/"
-    ]
   },
   "husky": {
     "hooks": {
@@ -47,14 +39,13 @@
   "author": "Thorchain",
   "license": "MIT",
   "devDependencies": {
-    "@types/bech32": "^1.1.2",
     "@types/bip39": "^3.0.0",
     "@types/crypto-js": "^4.1.1",
     "@types/node": "^18.15.12",
     "@types/uuid": "^9.0.1"
   },
   "dependencies": {
-    "bech32": "^2.0.0",
+    "@scure/base": "^1.2.6",
     "bip39": "^3.1.0",
     "crypto-js": "4.2.0",
     "foundry-primitives-xchainjs": "github:xchainjs/foundry-primitives-js#master",

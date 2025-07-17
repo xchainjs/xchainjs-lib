@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cosmos",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Custom Cosmos client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -40,13 +40,13 @@
     "@cosmjs/stargate": "0.33.1",
     "@ledgerhq/hw-app-cosmos": "6.32.0",
     "@ledgerhq/hw-transport": "^6.31.6",
+    "@scure/base": "^1.2.6",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.8.4",
-    "bech32": "^1.1.3",
     "bignumber.js": "^9.1.2",
     "cosmjs-types": "0.9.0",
     "protobufjs": "6.11.4"
