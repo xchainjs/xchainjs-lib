@@ -21,4 +21,4 @@ export type TxParams = BaseTxParams & {
   asset?: CompatibleAsset
 }
 
-export { CompatibleAsset }
+export type { CompatibleAsset }

@@ -1,2 +1,2 @@
-export { KeystoreSigner, KeystoreSignerParams } from './keystoreSigner'
-export { LedgerSigner, LedgerSignerParams } from './ledgerSigner'
+export { KeystoreSigner, type KeystoreSignerParams } from './keystoreSigner'
+export { LedgerSigner, type LedgerSignerParams } from './ledgerSigner'

@@ -10,4 +10,4 @@ export * from './client'
  */
 export { base64ToBech32, bech32ToBase64, makeClientPath } from './utils'
 
-export { Balance, Tx, TxFrom, TxTo, TxsPage, CompatibleAsset, TxParams } from './types'
+export type { Balance, Tx, TxFrom, TxTo, TxsPage, CompatibleAsset, TxParams } from './types'

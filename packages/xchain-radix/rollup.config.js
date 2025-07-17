@@ -1,7 +1,7 @@
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
-import typescript from 'rollup-plugin-typescript2'
+import typescript from '@rollup/plugin-typescript'
 import { visualizer } from 'rollup-plugin-visualizer'
 import pkg from './package.json'
 
@@ -31,6 +31,7 @@ export default {
     json({}),
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
+      declarationDir: 'lib',
       exclude: '__tests__/**',
     }),
     commonjs(),

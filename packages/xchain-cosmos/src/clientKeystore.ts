@@ -3,7 +3,7 @@ import { DecodedTxRaw, DirectSecp256k1HdWallet, EncodeObject, decodeTxRaw } from
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
 import { MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { encode, toWords } from 'bech32'
+import { bech32 } from '@scure/base'
 import { HDKey } from '@scure/bip32'
 import { createHash } from 'crypto'
 import * as secp from '@bitcoin-js/tiny-secp256k1-asmjs'
@@ -32,7 +32,7 @@ export class ClientKeystore extends Client {
    */
   public getAddress(walletIndex?: number | undefined): string {
     const seed = getSeed(this.phrase)
-    const node = HDKey.fromMasterSeed(seed)
+    const node = HDKey.fromMasterSeed(new Uint8Array(seed))
     const child = node.derive(this.getFullDerivationPath(walletIndex || 0))
 
     if (!child.privateKey) throw new Error('child does not have a privateKey')
@@ -41,8 +41,8 @@ export class ClientKeystore extends Client {
     const pubKey = secp.pointFromScalar(child.privateKey, true)
     if (!pubKey) throw new Error('pubKey is null')
     const rawAddress = this.hash160(pubKey)
-    const words = toWords(Buffer.from(rawAddress))
-    const address = encode(this.prefix, words)
+    const words = bech32.toWords(new Uint8Array(rawAddress))
+    const address = bech32.encode(this.prefix, words)
     return address
   }
 

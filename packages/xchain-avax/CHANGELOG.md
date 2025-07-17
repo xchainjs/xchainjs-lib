@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- 4ff6d9a: updates and jest config changes
+- 2a9674b: fix typescript config
+- Updated dependencies [c612862]
+- Updated dependencies [4ff6d9a]
+- Updated dependencies [2a9674b]
+  - @xchainjs/xchain-evm-providers@2.0.6
+  - @xchainjs/xchain-evm@2.0.7
+  - @xchainjs/xchain-client@2.0.4
+  - @xchainjs/xchain-util@2.0.3
+
 ## 2.0.6
 
 ### Patch Changes
