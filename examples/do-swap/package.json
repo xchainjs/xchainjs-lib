@@ -46,7 +46,7 @@
     "ethers": "^6.14.3"
   },
   "devDependencies": {
-    "@types/node": "*",
+    "@types/node": ">=22.7.5",
     "ts-node": "10.9.2",
     "typescript": "^5.0.4"
   }
