@@ -1,4 +1,4 @@
-import * as dashcore from '@dashevo/dashcore-lib'
+import dashcore from '@dashevo/dashcore-lib'
 import AppBtc from '@ledgerhq/hw-app-btc'
 import type { Transaction as LedgerTransaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'

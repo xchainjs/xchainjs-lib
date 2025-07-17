@@ -1,5 +1,5 @@
 // Import statements for necessary modules and types
-import * as bitcore from 'bitcore-lib-cash'
+import bitcore from 'bitcore-lib-cash'
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client' // Importing various types and constants from xchain-client module
 import { Address } from '@xchainjs/xchain-util' // Importing the Address type from xchain-util module
 import { Client as UTXOClient, TxParams, UtxoClientParams, UTXO } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module

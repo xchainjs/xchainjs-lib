@@ -1,4 +1,4 @@
-import * as bitcore from 'bitcore-lib-cash'
+import bitcore from 'bitcore-lib-cash'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
 import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
