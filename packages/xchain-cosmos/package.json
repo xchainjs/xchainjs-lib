@@ -38,7 +38,7 @@
     "@cosmjs/ledger-amino": "0.33.1",
     "@cosmjs/proto-signing": "0.33.1",
     "@cosmjs/stargate": "0.33.1",
-    "@ledgerhq/hw-app-cosmos": "6.32.0",
+    "@ledgerhq/hw-app-cosmos": "^6.32.0",
     "@ledgerhq/hw-transport": "^6.31.6",
     "@scure/base": "^1.2.6",
     "@scure/bip32": "^1.7.0",
@@ -52,7 +52,7 @@
     "protobufjs": "6.11.4"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-node-hid": "6.28.6"
+    "@ledgerhq/hw-transport-node-hid": "^6.28.6"
   },
   "publishConfig": {
     "access": "public",

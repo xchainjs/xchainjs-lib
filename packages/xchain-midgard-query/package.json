@@ -35,11 +35,11 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-midgard": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.8.4",
-    "axios-retry": "3.2.5"
+    "axios": "^1.8.4",
+    "axios-retry": "^3.2.5"
   },
   "devDependencies": {
-    "axios-mock-adapter": "2.1.0",
+    "axios-mock-adapter": "^2.1.0",
     "dotenv": "16.0.0"
   },
   "publishConfig": {
