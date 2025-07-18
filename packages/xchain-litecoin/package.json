@@ -34,21 +34,21 @@
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@ledgerhq/hw-app-btc": "10.9.0",
+    "@ledgerhq/hw-app-btc": "^10.9.0",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
-    "axios": "1.8.4",
+    "axios": "^1.8.4",
     "bitcoinjs-lib": "^6.1.7",
     "coinselect": "3.1.12",
     "ecpair": "2.1.0"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-node-hid": "6.28.6",
-    "axios-mock-adapter": "2.1.0"
+    "@ledgerhq/hw-transport-node-hid": "^6.28.6",
+    "axios-mock-adapter": "^2.1.0"
   },
   "publishConfig": {
     "access": "public",
