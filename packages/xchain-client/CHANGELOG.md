@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.5
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+- Updated dependencies [e7bc97f]
+  - @xchainjs/xchain-crypto@1.0.3
+
 ## 2.0.4
 
 ### Patch Changes
