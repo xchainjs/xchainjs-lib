@@ -1,5 +1,12 @@
 # xchainjs-bitcoin
 
+## 1.0.5
+
+### Patch Changes
+
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-bitcoin@2.0.5
+
 ## 1.0.4
 
 ### Patch Changes
