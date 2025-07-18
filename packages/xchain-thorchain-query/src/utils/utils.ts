@@ -24,6 +24,7 @@ import {
   AssetLTC,
   AssetMAYA,
   AssetXRP,
+  AssetSOL,
   AssetRuneNative,
   BASEChain,
   BCHChain,
@@ -37,6 +38,7 @@ import {
   MAYAChain,
   THORChain,
   XRPChain,
+  SOLChain,
 } from './const'
 
 export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
@@ -87,6 +89,8 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetBASE
     case XRPChain:
       return AssetXRP
+    case SOLChain:
+      return AssetSOL
     default:
       throw Error('Unknown chain')
   }
@@ -154,6 +158,8 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBASE)
     case XRPChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetXRP)
+    case SOLChain:
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetSOL)
   }
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
@@ -192,7 +198,11 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
     case MAYAChain:
       return new AssetCryptoAmount(baseAmount(2000000), AssetMAYA)
     case BASEChain:
-      return new AssetCryptoAmount(baseAmount(2000000), AssetBASE)
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBASE)
+    case XRPChain:
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetXRP)
+    case SOLChain:
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetSOL)
   }
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
 }
@@ -230,6 +240,8 @@ export const getChain = (chain: string): Chain => {
       return BASEChain
     case 'XRP':
       return XRPChain
+    case 'SOL':
+      return SOLChain
     default:
       throw Error('Unknown chain')
   }
