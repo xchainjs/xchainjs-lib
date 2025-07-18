@@ -1,4 +1,4 @@
-import mock from './axios-adapter'
+import mock, { importjson } from './axios-adapter'
 
 type MockConfig = {
   url?: string
@@ -10,14 +10,14 @@ export default {
     //Mock addresses summary
     mock.onGet(/\/address_summary\//).reply(async (config: MockConfig) => {
       const id: string = config.url?.split('/').pop() ?? ''
-      const resp = (await import(`./response/addresses/${id}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/addresses/${id}.json`)
       return [200, resp]
     })
 
     //Mock get transaction data
     mock.onGet(/\/v3\/transaction\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = (await import(`./response/tx/${id}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/tx/${id}.json`)
       return [200, resp]
     })
 
@@ -25,14 +25,14 @@ export default {
     mock.onGet(/\/v3\/transactions\//).reply(async (config: MockConfig) => {
       const split = config.url?.split('/')
       const address = split?.[7] || ''
-      const resp = (await import(`./response/txs/${address}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/txs/${address}.json`)
       return [200, resp]
     })
 
     //Mock get_address_balance
     mock.onGet(/\/balance\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = (await import(`./response/balances/${id}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/balances/${id}.json`)
       return [200, resp]
     })
 
@@ -49,14 +49,14 @@ export default {
         // this allows you to return utxos starting from a given page
         filePath = `./response/unspent-txs/${address}/${page}.json`
       }
-      const resp = (await import(filePath, { with: { type: 'json' } })).default
+      const resp = await importjson(filePath)
       return [200, resp]
     })
 
     //Mock is_tx_confirmed
     mock.onGet(/\/is_tx_confirmed\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = (await import(`./response/is-tx-confirmed/${id}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/is-tx-confirmed/${id}.json`)
       return [200, resp]
     })
 
@@ -67,19 +67,18 @@ export default {
     //
     //Mock thorchain/inbound_addresses
     mock.onGet(/\/thorchain\/inbound_addresses/).reply(async () => {
-      const resp = (await import(`./response/thornode/inbound_addresses.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/thornode/inbound_addresses.json`)
       return [200, resp]
     })
 
     //Mock thorchain/mimir
     mock.onGet(/\/thorchain\/mimir/).reply(async () => {
-      const resp = (await import(`./response/thornode/mimir.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/thornode/mimir.json`)
       return [200, resp]
     })
 
     mock.onPost(/\/broadcast_transaction/).reply(async () => {
-      const resp = (await import(`./response/broadcast_tx/broadcast_transaction.json`, { with: { type: 'json' } }))
-        .default
+      const resp = await importjson(`./response/broadcast_tx/broadcast_transaction.json`)
       return [200, resp]
     })
   },

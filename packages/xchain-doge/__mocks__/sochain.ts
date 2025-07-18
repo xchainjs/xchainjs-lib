@@ -1,4 +1,4 @@
-import mock from './axios-adapter'
+import mock, { importjson } from './axios-adapter'
 
 type MockConfig = {
   url?: string
@@ -10,14 +10,14 @@ export default {
     //Mock address
     mock.onGet(/\/address_summary\//).reply(async (config: MockConfig) => {
       const id: string = config.url?.split('/').pop() ?? ''
-      const resp = (await import(`./response/addresses/${id}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/addresses/${id}.json`)
       return [200, resp]
     })
 
     //Mock get transaction data
     mock.onGet(/\/transaction\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = (await import(`./response/tx/${id}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/tx/${id}.json`)
       return [200, resp]
     })
 
@@ -25,14 +25,14 @@ export default {
     mock.onGet(/\/v3\/transactions\//).reply(async (config: MockConfig) => {
       const split = config.url?.split('/')
       const address = split?.[7] || ''
-      const resp = (await import(`./response/txs/${address}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/txs/${address}.json`)
       return [200, resp]
     })
 
     //Mock get balance for address
     mock.onGet(/\/balance\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = (await import(`./response/balances/${id}.json`, { with: { type: 'json' } })).default
+      const resp = await importjson(`./response/balances/${id}.json`)
       return [200, resp]
     })
 
@@ -48,14 +48,13 @@ export default {
         // this allows you to page utxos starting from a given txid
         filePath = `./response/unspent-txs/${address}/${startingfrompage}.json`
       }
-      const resp = (await import(filePath, { with: { type: 'json' } })).default
+      const resp = await importjson(filePath)
       return [200, resp]
     })
 
     // Mock broad cast tx
     mock.onPost(/\/broadcast_transaction/).reply(async () => {
-      const resp = (await import(`./response/broadcast_tx/broadcast_transaction.json`, { with: { type: 'json' } }))
-        .default
+      const resp = await importjson(`./response/broadcast_tx/broadcast_transaction.json`)
       return [200, resp]
     })
   },
