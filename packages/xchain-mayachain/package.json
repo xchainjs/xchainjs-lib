@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain",
-  "version": "3.0.4",
+  "version": "3.0.3",
   "description": "Custom Mayachain client and utilities used by XChainJS clients",
   "keywords": [
     "MAYAChain",
@@ -35,11 +35,11 @@
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@cosmjs/amino": "0.33.1",
-    "@cosmjs/crypto": "0.33.1",
-    "@cosmjs/encoding": "0.33.1",
-    "@cosmjs/proto-signing": "0.33.1",
-    "@cosmjs/stargate": "0.33.1",
+    "@cosmjs/amino": "^0.34.0",
+    "@cosmjs/crypto": "^0.34.0",
+    "@cosmjs/encoding": "^0.34.0",
+    "@cosmjs/proto-signing": "^0.34.0",
+    "@cosmjs/stargate": "^0.34.0",
     "@scure/base": "^1.2.6",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/xchain-client": "workspace:*",
@@ -47,6 +47,7 @@
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.8.4",
+    "bech32": "^1.1.3",
     "bignumber.js": "^9.0.0",
     "cosmjs-types": "0.9.0",
     "protobufjs": "6.11.4"
