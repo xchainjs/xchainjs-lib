@@ -41,7 +41,7 @@
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^9.1.2",
     "ethers": "^6.14.3"
   },
   "devDependencies": {

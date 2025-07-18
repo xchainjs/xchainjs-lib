@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import * as dashcore from '@dashevo/dashcore-lib'
+import dashcore from '@dashevo/dashcore-lib'
 import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transaction'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'

@@ -5,7 +5,7 @@ import { Network, TxType } from '@xchainjs/xchain-client' // Importing types rel
 import { Address, baseAmount } from '@xchainjs/xchain-util' // Importing utilities related to addresses and amounts
 import { Tx, TxFrom, TxTo } from '@xchainjs/xchain-utxo' // Importing Bitcoin Cash address utilities
 import * as bchaddr from 'bchaddrjs' // Importing coin information utility
-import * as bitcore from 'bitcore-lib-cash'
+import bitcore from 'bitcore-lib-cash'
 import { AssetBCH, BCH_DECIMAL } from './const' // Importing BCH asset and decimal constants
 import { Transaction, TransactionInput, TransactionOutput } from './types' // Importing custom transaction types
 

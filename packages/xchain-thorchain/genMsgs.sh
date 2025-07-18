@@ -41,6 +41,10 @@ yarn pbjs -w commonjs -t static-module \
   "$TMP_DIR/thornode/third_party/proto/cosmos/base/v1beta1/coin.proto" \
   -o "$MSG_COMPILED_OUTPUTFILE" 2>pbjs_errors.txt
 
+# Fix import to be ESM-compatible (no omitted file extension)
+sed -i -E 's|"(protobufjs/minimal)"|"\1.js"|' "$MSG_COMPILED_OUTPUTFILE"
+
+
 # Generate TypeScript definitions with explicit namespace
 tput setaf 2
 echo "Generating $MSG_COMPILED_TYPES_OUTPUTFILE"
