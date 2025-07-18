@@ -41,7 +41,7 @@
   "devDependencies": {
     "@types/bip39": "^3.0.0",
     "@types/crypto-js": "^4.1.1",
-    "@types/node": "^18.15.12",
+    "@types/node": "^22.7.5",
     "@types/uuid": "^9.0.1"
   },
   "dependencies": {
