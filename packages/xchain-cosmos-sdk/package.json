@@ -39,7 +39,7 @@
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@cosmjs/crypto": "0.33.1",
     "@cosmjs/encoding": "0.33.1",
-    "@cosmjs/proto-signing": "0.33.1",
+    "@cosmjs/proto-signing": "0.34.0",
     "@cosmjs/stargate": "0.33.1",
     "@scure/base": "1.1.5",
     "@scure/bip32": "^1.7.0",
