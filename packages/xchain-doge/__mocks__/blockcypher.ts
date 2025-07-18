@@ -1,4 +1,4 @@
-import mock from './axios-adapter'
+import mock, { importjson } from './axios-adapter'
 
 type MockConfig = {
   url?: string
@@ -9,7 +9,7 @@ export default {
   init: () => {
     mock.onGet(/\/addrs\//).reply(async (config: MockConfig) => {
       const id: string = config.url?.split('/').pop() ?? ''
-      const resp = require(`./response/addresses/${id}.json`)
+      const resp = await importjson(`./response/addresses/${id}.json`)
       console.log(resp)
       return [200, resp]
     })
@@ -17,7 +17,7 @@ export default {
     //Mock get transaction data
     mock.onGet(/\/transaction\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = require(`./response/tx/${id}.json`)
+      const resp = await importjson(`./response/tx/${id}.json`)
       return [200, resp]
     })
 
@@ -25,14 +25,14 @@ export default {
     mock.onGet(/\/txs\//).reply(async (config: MockConfig) => {
       const split = config.url?.split('/')
       const address = split?.[7] || ''
-      const resp = require(`./response/txs/${address}.json`)
+      const resp = await importjson(`./response/txs/${address}.json`)
       return [200, resp]
     })
 
     //Mock get balance for address
     mock.onGet(/\/balance\//).reply(async (config: MockConfig) => {
       const id = config.url?.split('/').pop() ?? ''
-      const resp = require(`./response/balances/${id}.json`)
+      const resp = await importjson(`./response/balances/${id}.json`)
       return [200, resp]
     })
 
@@ -48,7 +48,7 @@ export default {
         // this allows you to page utxos starting from a given txid
         filePath = `./response/unspent-txs/${address}/${startingfrompage}.json`
       }
-      const resp = require(filePath)
+      const resp = await importjson(filePath)
       return [200, resp]
     })
     // Mock send tx
