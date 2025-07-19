@@ -3800,14 +3800,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xchainjs/ledger-thorchain@npm:0.3.0":
-  version: 0.3.0
-  resolution: "@xchainjs/ledger-thorchain@npm:0.3.0"
+"@xchainjs/ledger-thorchain@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "@xchainjs/ledger-thorchain@npm:0.3.1"
   dependencies:
     "@ledgerhq/hw-transport": "npm:^6.31.6"
-    bech32: "npm:^2.0.0"
+    "@scure/base": "npm:^1.2.6"
     ripemd160: "npm:^2.0.2"
-  checksum: 10c0/b4542852c3880ba17bcdcb7551c2f8d3ddbf6c0bfa2fc0a25a1e3b5a178ed42db067cdc91534612cb0d00f855c1591b55c506dc9f7b29e1894bea22ea581870e
+  checksum: 10c0/291f76f593bc96cbfff48d5de7d780f44d9456bfcd4a283d3ac6c9878bfe698b2ad808feb50cf96467ad79db6c0a87d1156011d5b072f2e627fc391df6745509
   languageName: node
   linkType: hard
 
@@ -4371,7 +4371,7 @@ __metadata:
     "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"
-    "@xchainjs/ledger-thorchain": "npm:0.3.0"
+    "@xchainjs/ledger-thorchain": "npm:^0.3.1"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
