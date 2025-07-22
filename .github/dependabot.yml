@@ -23,3 +23,33 @@ updates:
     schedule:
       interval: 'daily'
     open-pull-requests-limit: 1
+
+  - package-ecosystem: npm
+    directory: '/packages/xchain-aggregator'
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: npm
+    directory: '/packages/xchain-arbitrum'
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: npm
+    directory: '/packages/xchain-avax'
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: npm
+    directory: '/packages/xchain-base'
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: npm
+    directory: '/packages/xchain-bsc'
+    schedule:
+      interval: 'daily'
+    open-pull-requests-limit: 1
