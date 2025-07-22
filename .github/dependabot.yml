@@ -49,7 +49,7 @@ updates:
     open-pull-requests-limit: 1
 
   - package-ecosystem: npm
-    directory: '/packages/xchain-binance'
+    directory: '/packages/xchain-bsc'
     schedule:
       interval: 'daily'
     open-pull-requests-limit: 1
