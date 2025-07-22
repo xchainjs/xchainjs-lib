@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.8
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+- Updated dependencies [ba9247b]
+- Updated dependencies [e7bc97f]
+  - @xchainjs/xchain-evm-providers@2.0.7
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-crypto@1.0.3
+
 ## 2.0.7
 
 ### Patch Changes

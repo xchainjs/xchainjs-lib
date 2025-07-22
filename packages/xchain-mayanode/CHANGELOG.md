@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+
 ## 1.0.2
 
 ### Patch Changes

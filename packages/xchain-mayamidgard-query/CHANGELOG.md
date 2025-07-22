@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-mayamidgard@1.0.3
+  - @xchainjs/xchain-client@2.0.5
+
 ## 1.0.5
 
 ### Patch Changes

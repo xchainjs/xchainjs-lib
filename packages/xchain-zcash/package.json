@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-zcash",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Custom Zcash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",

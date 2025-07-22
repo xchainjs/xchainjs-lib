@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-client@2.0.5
+
 ## 2.0.6
 
 ### Patch Changes

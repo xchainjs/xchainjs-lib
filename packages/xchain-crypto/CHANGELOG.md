@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+### Patch Changes
+
+- e7bc97f: drop dependency on foundry-primitives fork
+
 ## 1.0.2
 
 ### Patch Changes
