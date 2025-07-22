@@ -1,5 +1,15 @@
 # xchainjs-aggregator
 
+## 1.0.16
+
+### Patch Changes
+
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-bitcoin@2.0.5
+  - @xchainjs/xchain-aggregator@2.0.16
+  - @xchainjs/xchain-wallet@2.0.12
+  - @xchainjs/xchain-ethereum@2.0.9
+
 ## 1.0.15
 
 ### Patch Changes

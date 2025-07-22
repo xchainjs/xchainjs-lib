@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.7
+
+### Patch Changes
+
+- 0b6f12a: Update to support solana for quoting and tc-amm
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-midgard-query@2.0.5
+  - @xchainjs/xchain-thornode@1.0.4
+  - @xchainjs/xchain-client@2.0.5
+
 ## 2.0.6
 
 ### Patch Changes
