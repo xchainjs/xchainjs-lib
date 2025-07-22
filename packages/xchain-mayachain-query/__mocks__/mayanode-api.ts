@@ -1,4 +1,4 @@
-import mock from './axios-adapter'
+import mock, { importjson } from './axios-adapter'
 
 export default {
   reset: mock.reset,
@@ -11,29 +11,29 @@ export default {
 
       // Should fetch BTC to ETH swap
       if (from_asset === 'BTC.BTC' && to_asset === 'ETH.ETH') {
-        const resp = require(`./responses/mayanode/QuoteSwapBtcEth.json`)
+        const resp = await importjson(`./responses/mayanode/QuoteSwapBtcEth.json`)
         return [200, resp]
       }
 
       // Should fetch RUNE to BTC swap
       if (from_asset === 'THOR.RUNE' && to_asset === 'BTC.BTC') {
-        const resp = require(`./responses/mayanode/QuoteSwapRuneBtc.json`)
+        const resp = await importjson(`./responses/mayanode/QuoteSwapRuneBtc.json`)
         return [200, resp]
       }
 
       if (from_asset === 'ETH.ETH' && to_asset === 'BTC.BTC') {
-        const resp = require(`./responses/mayanode/QuoteSSwapEthBtc.json`)
+        const resp = await importjson(`./responses/mayanode/QuoteSSwapEthBtc.json`)
         return [200, resp]
       }
 
       return [200, {}]
     })
     mock.onGet(/\/mayachain\/mimir/).reply(async () => {
-      const resp = require(`./responses/mayanode/mimir.json`)
+      const resp = await importjson(`./responses/mayanode/mimir.json`)
       return [200, resp]
     })
     mock.onGet(/\/mayachain\/lastblock/).reply(async () => {
-      const resp = require(`./responses/mayanode/latestBlock.json`)
+      const resp = await importjson(`./responses/mayanode/latestBlock.json`)
       return [200, resp]
     })
   },
