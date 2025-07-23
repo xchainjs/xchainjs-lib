@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+
 ## 1.0.4
 
 ### Patch Changes

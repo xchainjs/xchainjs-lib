@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.7
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-mayamidgard@1.0.4
+  - @xchainjs/xchain-util@2.0.4
+
 ## 1.0.6
 
 ### Patch Changes

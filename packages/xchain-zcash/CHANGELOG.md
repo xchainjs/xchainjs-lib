@@ -1,5 +1,17 @@
 # @xchainjs/xchain-zcash
 
+## 1.0.7
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-crypto@1.0.4
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-utxo@2.0.6
+  - @xchainjs/xchain-utxo-providers@2.0.6
+
 ## 1.0.6
 
 ### Patch Changes

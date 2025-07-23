@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.6
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-util@2.0.4
+
 ## 2.0.5
 
 ### Patch Changes

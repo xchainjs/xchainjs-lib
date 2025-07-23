@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.0.17
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-mayachain@3.0.6
+  - @xchainjs/xchain-mayachain-amm@4.0.15
+  - @xchainjs/xchain-mayachain-query@2.0.8
+  - @xchainjs/xchain-thorchain@3.0.10
+  - @xchainjs/xchain-thorchain-amm@3.0.15
+  - @xchainjs/xchain-thorchain-query@2.0.8
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-wallet@2.0.13
+
 ## 2.0.16
 
 ### Patch Changes

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.13
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-evm@2.0.9
+  - @xchainjs/xchain-mayachain@3.0.6
+  - @xchainjs/xchain-radix@2.0.6
+  - @xchainjs/xchain-thorchain@3.0.10
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-utxo@2.0.6
+
 ## 2.0.12
 
 ### Patch Changes
