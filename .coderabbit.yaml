@@ -9,7 +9,7 @@ reviews:
   poem: false
   review_status: true
   collapse_walkthrough: true
-  sequence_diagram: false
+  sequence_diagrams: false
 
   auto_review:
     enabled: true
@@ -18,12 +18,6 @@ reviews:
   path_instructions:
     - path: '**/yarn.lock'
       instructions: skip
-
-  require:
-    changeset:
-      path: '.changeset'
-      enforce_for:
-        - 'packages/**'
 
 chat:
   auto_reply: true
