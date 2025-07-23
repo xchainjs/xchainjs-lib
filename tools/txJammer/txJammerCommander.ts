@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Network } from '@xchainjs/xchain-client'
 import { assetFromStringEx } from '@xchainjs/xchain-util'
 import * as commander from 'commander'
