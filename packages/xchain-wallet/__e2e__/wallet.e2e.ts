@@ -258,7 +258,7 @@ describe('Wallet', () => {
 
   it('Should not get chain history of unknown client', async () => {
     expect(async () => {
-      await wallet.getBalance('BTC')
+      await wallet.getTransactionsHistory('BTC')
     }).rejects.toThrow(/Client not found for BTC chain/)
   })
 
