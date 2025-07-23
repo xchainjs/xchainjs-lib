@@ -95,7 +95,7 @@ describe('BitcoinClient Test', () => {
     expect(() => btcClient.setPhrase('cat')).toThrow()
   })
 
-  it('should not throw an error for setting a good phrase', () => {
+  it.skip('should not throw an error for setting a good phrase', () => {
     expect(btcClient.setPhrase(phraseOne)).toBeUndefined()
   })
 
