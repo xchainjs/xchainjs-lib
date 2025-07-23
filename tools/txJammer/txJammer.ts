@@ -190,10 +190,10 @@ export class TxJammer {
       assetsIncludingSynths.push(assetToString(synth))
     }
     assetsIncludingSynths.push('THOR.RUNE') // add rune to the list of assets
-    this.setupWeightedSwaps(assetsIncludingSynths)
-    this.setupWeightedTransfers(assetsIncludingSynths)
-    this.setupWeightedAddLps(assets)
-    this.setupWeightedWithdrawLps(assets)
+    await this.setupWeightedSwaps(assetsIncludingSynths)
+    await this.setupWeightedTransfers(assetsIncludingSynths)
+    await this.setupWeightedAddLps(assets)
+    await this.setupWeightedWithdrawLps(assets)
   }
   private async setupWeightedTransfers(assetStrings: string[]) {
     for (const asset of assetStrings) {
