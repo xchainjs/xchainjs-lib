@@ -9,6 +9,8 @@ import { mock_gas_oracle_custom } from '../__mocks__/etherscan-api'
 import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
 import { Client, EVMKeystoreClientParams, KeystoreSigner } from '../src'
 
+const importjson = async (file: string) => (await import(file, { with: { type: 'json' } })).default
+
 const AVAXChain: Chain = 'AVAX'
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
@@ -241,7 +243,7 @@ describe('EVM client', () => {
   it('Should estimate gas prices', async () => {
     mock_thornode_inbound_addresses_success(
       thornodeApiUrl,
-      require('../__mocks__/responses/inbound_addresses_testnet.json'),
+      await importjson('../__mocks__/responses/inbound_addresses_testnet.json'),
     )
 
     mock_gas_oracle_custom('https://api-testnet.snowtrace.io', 43113, {
