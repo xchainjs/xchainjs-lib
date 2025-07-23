@@ -11386,7 +11386,7 @@ __metadata:
     ts-node: "npm:10.9.2"
     tslib: "npm:^2.5.0"
     turbo: "npm:1.13.0"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
     weighted: "npm:^1.0.0"
     yarn-audit-ci: "npm:^1.2.0"
   languageName: unknown
@@ -12714,23 +12714,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "typescript@npm:5.0.4"
+"typescript@npm:^5.8.3":
+  version: 5.8.3
+  resolution: "typescript@npm:5.8.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/2f5bd1cead194905957cb34e220b1d6ff1662399adef8ec1864f74620922d860ee35b6e50eafb3b636ea6fd437195e454e1146cb630a4236b5095ed7617395c2
+  checksum: 10c0/5f8bb01196e542e64d44db3d16ee0e4063ce4f3e3966df6005f2588e86d91c03e1fb131c2581baf0fb65ee79669eea6e161cd448178986587e9f6844446dbb48
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.0.4#optional!builtin<compat/typescript>":
-  version: 5.0.4
-  resolution: "typescript@patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"
+"typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>":
+  version: 5.8.3
+  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=b45daf"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/c3f7b80577bddf6fab202a7925131ac733bfc414aec298c2404afcddc7a6f242cfa8395cf2d48192265052e11a7577c27f6e5fac8d8fe6a6602023c83d6b3292
+  checksum: 10c0/92ea03509e06598948559ddcdd8a4ae5a7ab475766d5589f1b796f5731b3d631a4c7ddfb86a3bd44d58d10102b132cd4b4994dda9b63e6273c66d77d6a271dbd
   languageName: node
   linkType: hard
 
@@ -13314,7 +13314,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13326,7 +13326,7 @@ __metadata:
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13347,7 +13347,7 @@ __metadata:
     bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13387,7 +13387,7 @@ __metadata:
     dotenv: "npm:^16.0.0"
     ethers: "npm:^6.14.3"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13408,7 +13408,7 @@ __metadata:
     bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13430,7 +13430,7 @@ __metadata:
     bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13456,7 +13456,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13472,7 +13472,7 @@ __metadata:
     "@xchainjs/xchain-ethereum": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13484,7 +13484,7 @@ __metadata:
     "@xchainjs/xchain-solana": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13512,7 +13512,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13524,7 +13524,7 @@ __metadata:
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13554,7 +13554,7 @@ __metadata:
     dotenv: "npm:^16.0.0"
     ethers: "npm:^6.14.3"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
