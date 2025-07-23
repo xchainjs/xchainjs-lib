@@ -563,13 +563,13 @@ export class TxJammer {
     let runePosition = true
     try {
       await this.thorchainQuery.checkLiquidityPosition(asset, runeAddress)
-    } catch (error) {
+    } catch (_error) {
       runePosition = false
     }
     let assetPosition = true
     try {
       await this.thorchainQuery.checkLiquidityPosition(asset, sourceAddress)
-    } catch (error) {
+    } catch (_error) {
       assetPosition = false
     }
     return [runePosition, assetPosition]
