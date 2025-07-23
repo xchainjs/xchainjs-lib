@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.14
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.7
+- @xchainjs/xchain-evm@2.0.10
+- @xchainjs/xchain-mayachain@3.0.7
+- @xchainjs/xchain-radix@2.0.7
+- @xchainjs/xchain-thorchain@3.0.11
+- @xchainjs/xchain-utxo@2.0.7
+
 ## 2.0.13
 
 ### Patch Changes

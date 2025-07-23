@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.7
+- @xchainjs/xchain-evm@2.0.10
+- @xchainjs/xchain-evm-providers@2.0.9
+
 ## 2.0.10
 
 ### Patch Changes

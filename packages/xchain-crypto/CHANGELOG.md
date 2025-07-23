@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- 33b3ca5: Fix break compatibility
+
 ## 1.0.4
 
 ### Patch Changes
