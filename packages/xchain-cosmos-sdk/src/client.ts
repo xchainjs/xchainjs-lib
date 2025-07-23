@@ -271,7 +271,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
         return false
       }
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }

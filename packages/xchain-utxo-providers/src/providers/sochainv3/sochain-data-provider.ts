@@ -79,7 +79,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
         assetDecimals: this.assetDecimals,
       })
       return [{ amount, asset: this.asset }]
-    } catch (error) {
+    } catch (_error) {
       throw new Error(`Could not get balances for address ${address}`)
     }
   }

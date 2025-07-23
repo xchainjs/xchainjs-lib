@@ -239,7 +239,7 @@ export default class Client extends BaseXChainClient {
       }
 
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -318,7 +318,7 @@ export default class Client extends BaseXChainClient {
           const transaction: Tx = await this.convertTransactionFromHex(txn.raw_hex, txn.intent_hash, txn.confirmed_at)
           txList.txs.push(transaction)
         }
-      } catch (error) {}
+      } catch (_error) {}
     }
     txList.total = txList.txs.length
     return txList
@@ -359,7 +359,7 @@ export default class Client extends BaseXChainClient {
       } else {
         throw new Error('Incomplete transaction data received')
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Failed to fetch transaction data')
     }
   }
@@ -413,7 +413,7 @@ export default class Client extends BaseXChainClient {
       }
 
       return transaction
-    } catch (error) {
+    } catch (_error) {
       return {
         from: [],
         to: [],

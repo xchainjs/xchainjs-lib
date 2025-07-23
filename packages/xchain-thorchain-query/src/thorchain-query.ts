@@ -1283,7 +1283,7 @@ export class ThorchainQuery {
         aliases: thornameAliases || [],
       }
       return thornameDetails
-    } catch (e) {
+    } catch (_e) {
       // If an error occurs during the process, return an object with error details
       const errorResp: ThornameDetails = {
         name: '',

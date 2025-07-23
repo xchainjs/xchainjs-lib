@@ -18,7 +18,7 @@ export const validateAddress = (address: Address): boolean => {
   try {
     getAddress(address)
     return true
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }
@@ -33,7 +33,7 @@ export const getTokenAddress = (asset: TokenAsset): Address | null => {
   try {
     // strip 0X only - 0x is still valid
     return getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))
-  } catch (err) {
+  } catch (_err) {
     return null
   }
 }

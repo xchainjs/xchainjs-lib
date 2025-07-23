@@ -92,7 +92,7 @@ export class Mayanode {
             affiliate,
           )
         ).data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`MAYANode not responding`)
   }
@@ -105,7 +105,7 @@ export class Mayanode {
     for (const api of this.mimirApis) {
       try {
         return (await api.mimir()).data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw Error(`MAYANode not responding`)
   }
@@ -119,7 +119,7 @@ export class Mayanode {
       try {
         const resp = (await api.inboundAddresses()).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`MAYANode not responding`)
   }
@@ -133,7 +133,7 @@ export class Mayanode {
     for (const api of this.networkApis) {
       try {
         return (await api.lastblock(height)).data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw Error(`MAYANode not responding`)
   }

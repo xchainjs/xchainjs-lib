@@ -78,7 +78,7 @@ export class ClientKeystore extends Client {
     const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
     try {
       return createHash('rmd160').update(sha256Hash).digest()
-    } catch (err) {
+    } catch (_err) {
       return createHash('ripemd160').update(sha256Hash).digest()
     }
   }

@@ -179,7 +179,7 @@ export abstract class Client extends BaseXChainClient {
     try {
       const feeResponse = await xrplClient.request({ command: 'fee' })
       fee = feeResponse.result.drops.open_ledger_fee
-    } catch (error) {
+    } catch (_error) {
       fee = String(XRP_DEFAULT_FEE)
     }
 
