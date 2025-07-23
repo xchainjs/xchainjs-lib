@@ -1,4 +1,4 @@
-import fs = require('fs')
+import fs from 'node:fs'
 
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
