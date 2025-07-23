@@ -1,5 +1,25 @@
 # Changelog
 
+## 4.0.16
+
+### Patch Changes
+
+- Updated dependencies [33b3ca5]
+  - @xchainjs/xchain-crypto@1.0.5
+  - @xchainjs/xchain-bitcoin@2.0.7
+  - @xchainjs/xchain-client@2.0.7
+  - @xchainjs/xchain-dash@2.0.7
+  - @xchainjs/xchain-evm@2.0.10
+  - @xchainjs/xchain-kujira@2.0.7
+  - @xchainjs/xchain-mayachain@3.0.7
+  - @xchainjs/xchain-radix@2.0.7
+  - @xchainjs/xchain-thorchain@3.0.11
+  - @xchainjs/xchain-zcash@1.0.8
+  - @xchainjs/xchain-wallet@2.0.14
+  - @xchainjs/xchain-arbitrum@2.0.10
+  - @xchainjs/xchain-ethereum@2.0.11
+  - @xchainjs/xchain-mayachain-query@2.0.9
+
 ## 4.0.15
 
 ### Patch Changes

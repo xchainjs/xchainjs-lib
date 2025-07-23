@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-thorchain",
   "private": true,
-  "version": "1.0.10",
+  "version": "1.0.11",
   "scripts": {
     "transfer": "npx ts-node transaction-transfer.ts",
     "build": "tsc --noEmit"
