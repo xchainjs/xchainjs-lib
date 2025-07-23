@@ -182,7 +182,7 @@ export class TxJammer {
 
   private async setupWeightedChoices() {
     const assetsIncludingSynths: string[] = []
-    const assets = await this.getAvailablePoolAssets()
+    const assets = this.getAvailablePoolAssets()
     for (const asset of assets) {
       const synth = assetFromStringEx(asset)
       synth.type = AssetType.SYNTH
