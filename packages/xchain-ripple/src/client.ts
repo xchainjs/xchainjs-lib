@@ -235,7 +235,7 @@ export abstract class Client extends BaseXChainClient {
     if (!eqAsset(params.asset || AssetXRP, AssetXRP)) {
       throw Error(`Asset not supported`)
     }
-    const sender = this.getAddress(params.walletIndex)
+    const sender = await this.getAddressAsync(params.walletIndex)
     const baseTx = await this.prepareTxForXrpl({ ...params, sender })
 
     const xrplClient = await this.getXrplClient()
@@ -247,7 +247,7 @@ export abstract class Client extends BaseXChainClient {
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const xrplClient = await this.getXrplClient()
-    const address = params?.address || (await this.getAddress())
+    const address = params?.address || (await this.getAddressAsync())
 
     const count = params?.limit || 10
     const offset = params?.offset || 0

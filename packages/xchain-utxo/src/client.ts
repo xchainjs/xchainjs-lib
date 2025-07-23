@@ -78,7 +78,7 @@ export abstract class Client extends BaseXChainClient {
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     // Filter the parameters for transaction history
     const filteredParams: TxHistoryParams = {
-      address: params?.address || (await this.getAddress()),
+      address: params?.address || (await this.getAddressAsync()),
       offset: params?.offset,
       limit: params?.limit,
       startTime: params?.startTime,
