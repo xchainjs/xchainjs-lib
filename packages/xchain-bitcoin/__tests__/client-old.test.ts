@@ -219,7 +219,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
 
     const amount = baseAmount(2223)
-    expect(
+    await expect(
       btcClient.transfer({
         asset: AssetBTC,
         recipient: addyThreePath0,

@@ -118,7 +118,7 @@ describe('Wallet', () => {
   })
 
   it('Should not get chain balance of unknown client', async () => {
-    expect(async () => {
+    await expect(async () => {
       await wallet.getBalance('BTC')
     }).rejects.toThrow(/Client not found for BTC chain/)
   })
@@ -156,7 +156,7 @@ describe('Wallet', () => {
   })
 
   it('Should not get transaction data of unknown client', async () => {
-    expect(async () => {
+    await expect(async () => {
       await wallet.getTransactionData('BTC', '0eb1fd7d2ab247b2c3f6d79e9b48a71496a117c9bbaa5732636a2d46e72586e7')
     }).rejects.toThrow(/Client not found for BTC chain/)
   })
@@ -257,7 +257,7 @@ describe('Wallet', () => {
   })
 
   it('Should not get chain history of unknown client', async () => {
-    expect(async () => {
+    await expect(async () => {
       await wallet.getTransactionsHistory('BTC')
     }).rejects.toThrow(/Client not found for BTC chain/)
   })
