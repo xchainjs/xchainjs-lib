@@ -109,9 +109,8 @@ export abstract class Client extends BaseXChainClient {
    */
   // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
   // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
-  async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
+  async getBalance(address: Address, _assets?: Asset[] /* not used */, _confirmedOnly?: boolean): Promise<Balance[]> {
     // The actual logic for getting balances
-    confirmedOnly
     return await this.roundRobinGetBalance(address)
   }
   /**
