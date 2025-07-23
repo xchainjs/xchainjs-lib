@@ -71,8 +71,8 @@ describe('DogecoinClient Test', () => {
     expect(() => dogeClient.setPhrase('cat')).toThrow()
   })
 
-  it.skip('should not throw an error for setting a good phrase', () => {
-    expect(dogeClient.setPhrase(phraseOne)).toBeUndefined()
+  it('should not throw an error for setting a good phrase', () => {
+    expect(dogeClient.setPhrase(phraseOne)).toBeTruthy()
   })
 
   it('should not throw on a client without a phrase', () => {

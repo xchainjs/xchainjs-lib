@@ -53,8 +53,8 @@ describe('DashClient Test', () => {
     expect(() => dashClient.setPhrase('cat')).toThrow()
   })
 
-  it.skip('should not throw an error for setting a good phrase', () => {
-    expect(dashClient.setPhrase(phrase)).toBeUndefined()
+  it('should not throw an error for setting a good phrase', () => {
+    expect(dashClient.setPhrase(phrase)).toBeTruthy()
   })
 
   it('should validate the right address', async () => {

@@ -86,8 +86,8 @@ describe('BCHClient Test', () => {
     expect(() => bchClient.setPhrase('cat')).toThrow()
   })
 
-  it.skip('should not throw an error for setting a good phrase', () => {
-    expect(bchClient.setPhrase(phrase)).toBeUndefined()
+  it('should not throw an error for setting a good phrase', () => {
+    expect(bchClient.setPhrase(phrase)).toBeTruthy()
   })
 
   it('should validate the right address', async () => {
