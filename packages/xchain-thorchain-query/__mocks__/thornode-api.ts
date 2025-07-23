@@ -16,10 +16,14 @@ export default {
       const from_asset = parsedUrl.searchParams.get('from_asset') ?? ''
       const to_asset = parsedUrl.searchParams.get('to_asset') ?? ''
       if (from_asset.match('/')) {
-        const resp = await importjson(`./responses/thornode/s${from_asset.split('/')[0]}SwapTos${to_asset.split('/')[0]}.json`)
+        const resp = await importjson(
+          `./responses/thornode/s${from_asset.split('/')[0]}SwapTos${to_asset.split('/')[0]}.json`,
+        )
         return [200, resp]
       } else {
-        const resp = await importjson(`./responses/thornode/${from_asset.split('.')[0]}SwapTo${to_asset.split('.')[0]}.json`)
+        const resp = await importjson(
+          `./responses/thornode/${from_asset.split('.')[0]}SwapTo${to_asset.split('.')[0]}.json`,
+        )
         return [200, resp]
       }
     })
