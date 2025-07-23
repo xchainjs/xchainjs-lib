@@ -165,7 +165,7 @@ describe('EVM client', () => {
   })
 
   it('Should throw error with invalid phrase', async () => {
-    await expect(() => {
+    expect(() => {
       new Client({
         ...avaxParams,
         signer: new KeystoreSigner({
@@ -186,7 +186,7 @@ describe('EVM client', () => {
 
   it('Should not have a phrase after purging', async () => {
     avaxClient.purgeClient()
-    await expect(() => avaxClient.getAddress()).toThrow()
+    expect(() => avaxClient.getAddress()).toThrow()
   })
 
   it('Should set new phrase', () => {
@@ -196,7 +196,7 @@ describe('EVM client', () => {
   })
 
   it('should fail to set new phrase', async () => {
-    await expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
+    expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
   })
 
   it('Should get network', () => {

@@ -121,7 +121,7 @@ export const estimateCall = async ({
 }): Promise<BigNumber> => {
   const contract = new Contract(contractAddress, abi, provider)
   const estiamtion = await contract.getFunction(funcName).estimateGas(...funcParams)
-  return await new BigNumber(estiamtion.toString())
+  return new BigNumber(estiamtion.toString())
 }
 /**
  * Calls a contract function.
