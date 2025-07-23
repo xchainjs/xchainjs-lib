@@ -1,16 +1,4 @@
 ---
-'xchainjs-aggregator': patch
-'xchainjs-bitcoin': patch
-'xchainjs-check-tx': patch
-'xchainjs-do-swap': patch
-'xchainjs-estimate-swap': patch
-'xchainjs-liquidity': patch
-'xchainjs-mayachain-amm': patch
-'xchainjs-prepare-tx': patch
-'xchainjs-solana': patch
-'xchainjs-thorchain': patch
-'xchainjs-thorchain-amm': patch
-'xchainjs-wallet': patch
 '@xchainjs/xchain-aggregator': patch
 '@xchainjs/xchain-arbitrum': patch
 '@xchainjs/xchain-avax': patch
@@ -50,7 +38,6 @@
 '@xchainjs/xchain-utxo-providers': patch
 '@xchainjs/xchain-wallet': patch
 '@xchainjs/xchain-zcash': patch
-'txJammer': patch
 ---
 
 Fix vulnerability form-data
