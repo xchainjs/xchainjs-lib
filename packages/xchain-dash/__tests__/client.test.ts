@@ -54,7 +54,7 @@ describe('DashClient Test', () => {
   })
 
   it('should not throw an error for setting a good phrase', () => {
-    expect(dashClient.setPhrase(phrase)).toBeUndefined
+    expect(dashClient.setPhrase(phrase)).toBeUndefined()
   })
 
   it('should validate the right address', async () => {
