@@ -1,6 +1,6 @@
 import * as bip39 from 'bip39'
 import crypto from 'crypto'
-import { blake256 } from '@noble/hashes/blake1.js'
+import { blake2b } from '@noble/hashes/blake2'
 import { v4 as uuidv4 } from 'uuid'
 
 import { pbkdf2Async } from './utils'
@@ -123,7 +123,9 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
   const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
   const cipherText = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
-  const mac_bytes: Uint8Array = blake256(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]))
+  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]), {
+    dkLen: 32,
+  })
   const mac: string = Buffer.from(mac_bytes).toString('hex')
 
   const cryptoStruct = {
@@ -163,7 +165,7 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
   )
 
   const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
-  const mac_bytes: Uint8Array = blake256(Buffer.concat([derivedKey.slice(16, 32), ciphertext]))
+  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), ciphertext]), { dkLen: 32 })
   const mac: string = Buffer.from(mac_bytes).toString('hex')
 
   if (mac !== keystore.crypto.mac) throw new Error('Invalid password')
