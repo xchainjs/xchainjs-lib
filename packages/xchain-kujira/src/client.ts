@@ -53,7 +53,7 @@ export class Client extends CosmosSdkClient {
    * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
    * @returns {string} The user address at the specified walletIndex.
    */
-  public getAddress(walletIndex?: number | undefined): string {
+  public getAddress(walletIndex?: number): string {
     const seed = getSeed(this.phrase)
     const node = HDKey.fromMasterSeed(seed)
     const child = node.derive(this.getFullDerivationPath(walletIndex || 0))
