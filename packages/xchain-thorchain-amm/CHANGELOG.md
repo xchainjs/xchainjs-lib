@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.0.15
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-avax@2.0.9
+  - @xchainjs/xchain-base@1.0.9
+  - @xchainjs/xchain-bitcoin@2.0.6
+  - @xchainjs/xchain-bitcoincash@2.0.7
+  - @xchainjs/xchain-bsc@2.0.10
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-cosmos@3.0.6
+  - @xchainjs/xchain-doge@2.0.6
+  - @xchainjs/xchain-ethereum@2.0.10
+  - @xchainjs/xchain-evm@2.0.9
+  - @xchainjs/xchain-litecoin@2.0.6
+  - @xchainjs/xchain-ripple@1.0.7
+  - @xchainjs/xchain-solana@1.0.6
+  - @xchainjs/xchain-thorchain@3.0.10
+  - @xchainjs/xchain-thorchain-query@2.0.8
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-wallet@2.0.13
+
 ## 3.0.14
 
 ### Patch Changes

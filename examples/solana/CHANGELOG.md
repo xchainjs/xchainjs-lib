@@ -1,5 +1,13 @@
 # xchainjs-solana
 
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-solana@1.0.6
+  - @xchainjs/xchain-util@2.0.4
+
 ## 1.0.5
 
 ### Patch Changes
