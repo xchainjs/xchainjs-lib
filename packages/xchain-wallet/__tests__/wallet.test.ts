@@ -102,7 +102,7 @@ describe('Wallet', () => {
       expect(await wallet.getExplorerUrl('BTC')).toBeDefined()
     })
 
-    it('Should not get explorer url from unknown client', () => {
+    it('Should not get explorer url from unknown client', async () => {
       expect(async () => {
         await wallet.getExplorerUrl('THOR')
       }).rejects.toThrow(/Client not found for THOR chain/)
@@ -112,7 +112,7 @@ describe('Wallet', () => {
       expect(await wallet.getExplorerAddressUrl('BTC', 'bc1qlz7nwctel57wxm9hyzf20hzhkflw8nasx3c7gy')).toBeDefined()
     })
 
-    it('Should not get address url from unknown client', () => {
+    it('Should not get address url from unknown client', async () => {
       expect(async () => {
         await wallet.getExplorerAddressUrl('THOR', 'thor1dj5wnd3q9c48g9cuylldfxrpvfjgqk7nsjzlcl')
       }).rejects.toThrow(/Client not found for THOR chain/)
@@ -124,7 +124,7 @@ describe('Wallet', () => {
       ).toBeDefined()
     })
 
-    it('Should not get tx url from unknown client', () => {
+    it('Should not get tx url from unknown client', async () => {
       expect(async () => {
         await wallet.getExplorerTxUrl('THOR', 'A4A8EB504016E930C10C8E5A5AC2980F89FBE10CF2861D99524574B32E009EA3')
       }).rejects.toThrow(/Client not found for THOR chain/)
