@@ -29,7 +29,7 @@ import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, AssetType, TokenAsset, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import { bech32m } from '@scure/base'
 import { HDKey } from '@scure/bip32'
-import { derivePath } from 'ed25519-hd-key'
+import slip10 from 'micro-key-producer/slip10.js'
 
 import {
   AssetXRD,
@@ -133,9 +133,9 @@ export default class Client extends BaseXChainClient {
     }
     const updatedDerivationPath = derivationPath.replace(/\/$/, '') + `/${index}'`
     if (this.curve === 'Ed25519') {
-      const seedHex = seed.toString('hex')
-      const keys = derivePath(updatedDerivationPath, seedHex)
-      return keys.key
+      const masterKey = slip10.fromMasterSeed(seed)
+      const childKey = masterKey.derive(updatedDerivationPath)
+      return Buffer.from(childKey.privateKey)
     } else {
       const node = HDKey.fromMasterSeed(seed)
       const child = node.derive(updatedDerivationPath)
