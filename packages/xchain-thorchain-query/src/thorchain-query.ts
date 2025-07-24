@@ -457,7 +457,7 @@ export class ThorchainQuery {
     assetOrRuneAddress?: string,
   ): Promise<LiquidityPosition> {
     const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
-    if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
+    if (!poolAsset) throw Error(`Could not find pool for ${assetToString(asset)}`)
     if (!assetOrRuneAddress) throw Error(`No address provided ${assetOrRuneAddress}`)
     // Get the current block number for that chain
     const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(
