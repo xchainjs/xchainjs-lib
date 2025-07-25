@@ -135,6 +135,7 @@ export default class Client extends BaseXChainClient {
     if (this.curve === 'Ed25519') {
       const masterKey = slip10.fromMasterSeed(seed)
       const childKey = masterKey.derive(updatedDerivationPath)
+      if (!childKey.privateKey) throw new Error('child does not have a privateKey')
       return Buffer.from(childKey.privateKey)
     } else {
       const node = HDKey.fromMasterSeed(seed)
