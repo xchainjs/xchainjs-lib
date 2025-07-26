@@ -8,25 +8,23 @@ import { HaskoinNetwork, Transaction, TxUnspent } from './haskoin-api-types'
 
 export class HaskoinProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
-  private chain: Chain
+  // private chain: Chain
   private asset: Asset
   private assetDecimals: number
   private haskoinNetwork: HaskoinNetwork
 
   constructor(
     baseUrl = 'https://api.haskoin.com/',
-    chain: Chain,
+    _chain: Chain,
     asset: Asset,
     assetDecimals: number,
     haskoinNetwork: HaskoinNetwork,
   ) {
     this.baseUrl = baseUrl
-    this.chain = chain
+    // this.chain = chain
     this.asset = asset
     this.assetDecimals = assetDecimals
     this.haskoinNetwork = haskoinNetwork
-    this.asset
-    this.chain
   }
   async broadcastTx(txHex: string): Promise<TxHash> {
     return await haskoin.broadcastTx({

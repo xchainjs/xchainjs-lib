@@ -61,7 +61,7 @@ describe('Solana client', () => {
   })
 
   it('Should validate address', async () => {
-    const res = await client.validateAddress('GHityuQumkHn8JPpHYt9oxR5xi9X8R2kWsprdH9nPvT7')
+    const res = client.validateAddress('GHityuQumkHn8JPpHYt9oxR5xi9X8R2kWsprdH9nPvT7')
     console.log(res)
   })
 

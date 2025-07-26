@@ -6,14 +6,14 @@ const nownodesProvider = new NownodesProvider(
   ZECChain,
   AssetZEC,
   8,
-  process.env.NOWNODES_API_KEY as string
+  process.env.NOWNODES_API_KEY as string,
 )
 
 describe('nownodes api tests', () => {
   it(`Should fetch the balance for an address`, async () => {
     const address = 't1aVCAJMxUNLNAJFPmbLfZWkPWopf8aMyu9'
     const bal = await nownodesProvider.getBalance(address)
-    expect(bal[0].amount.amount().toString()).toBe("40000000")
+    expect(bal[0].amount.amount().toString()).toBe('40000000')
   })
   it(`Should getConfirmedUnspentTxs for an address`, async () => {
     const address = 't1aVCAJMxUNLNAJFPmbLfZWkPWopf8aMyu9'

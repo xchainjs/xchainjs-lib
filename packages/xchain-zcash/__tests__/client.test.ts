@@ -55,7 +55,7 @@ describe('Zcash client', () => {
   })
 
   it('Should get asset info', async () => {
-    const asset = await client.getAssetInfo()
+    const asset = client.getAssetInfo()
     expect(asset).toStrictEqual({ asset: AssetZEC, decimal: ZEC_DECIMAL })
   })
 
@@ -79,17 +79,17 @@ describe('Zcash client', () => {
   })
 
   it('Should generate explorer URL', async () => {
-    const url = await client.getExplorerUrl()
+    const url = client.getExplorerUrl()
     expect(url).toBe('https://blockchair.com/zcash/')
   })
 
   it('Should generate explorer address URL', async () => {
-    const url = await client.getExplorerAddressUrl('t1eiZYPXWurGMxFwoTu62531s8fAiExFh88')
+    const url = client.getExplorerAddressUrl('t1eiZYPXWurGMxFwoTu62531s8fAiExFh88')
     expect(url).toBe('https://blockchair.com/zcash/address/t1eiZYPXWurGMxFwoTu62531s8fAiExFh88')
   })
 
   it('Should generate explorer tx URL', async () => {
-    const url = await client.getExplorerTxUrl('601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789')
+    const url = client.getExplorerTxUrl('601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789')
     expect(url).toBe(
       'https://blockchair.com/zcash/transaction/601ead82c513ec0b0e125f86ec5ff50d115a0525786e5d10de38a9c95f61b789',
     )

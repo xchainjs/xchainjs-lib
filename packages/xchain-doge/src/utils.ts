@@ -65,7 +65,7 @@ export const validateAddress = (address: Address, network: Network): boolean => 
   try {
     Dogecoin.address.toOutputScript(address, dogeNetwork(network))
     return true
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }
