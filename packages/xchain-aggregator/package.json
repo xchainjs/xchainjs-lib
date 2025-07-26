@@ -29,8 +29,7 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@chainflip/sdk": "^1.9.2",
-    "@trpc/server": "^11.4.3",
+    "@chainflip/sdk": "^1.10.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-mayachain": "workspace:*",
     "@xchainjs/xchain-mayachain-amm": "workspace:*",
