@@ -3178,10 +3178,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trpc/server@npm:^10.45.2":
-  version: 10.45.2
-  resolution: "@trpc/server@npm:10.45.2"
-  checksum: 10c0/c6bff389f7c4e273101834d55c917c2fe271189ee17985b79e4a925920afc39d45da3f247611cd7f8aeca3a461739118c621679bd183e9ad8765676e85c95712
+"@trpc/server@npm:^11.4.3":
+  version: 11.4.3
+  resolution: "@trpc/server@npm:11.4.3"
+  peerDependencies:
+    typescript: ">=5.7.2"
+  checksum: 10c0/3d3fd2a52cb36de5a02c3454d66ac5c739ba53442546aa9a06c79e277951a31827f21b9c135f551c98a197d28f1d6c87aba590dc08c98c15b8ba7a4b9a7653d2
   languageName: node
   linkType: hard
 
@@ -3816,7 +3818,7 @@ __metadata:
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
   dependencies:
     "@chainflip/sdk": "npm:^1.9.2"
-    "@trpc/server": "npm:^10.45.2"
+    "@trpc/server": "npm:^11.4.3"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-base": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
