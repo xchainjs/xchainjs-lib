@@ -19,12 +19,13 @@ export type APIKeys = {
 
 export type DefaultADAClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
+  apiKeys: APIKeys
 }
 
 /**
  * Cardano client params
  */
-export type ADAClientParams = Partial<DefaultADAClientParams> & { apiKeys: APIKeys }
+export type ADAClientParams = Partial<DefaultADAClientParams>
 
 export type CompatibleAsset = Asset
 

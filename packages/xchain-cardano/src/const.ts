@@ -34,6 +34,15 @@ const mainnetExplorer = new ExplorerProvider(
 
 export const defaultAdaParams: DefaultADAClientParams = {
   network: Network.Mainnet,
+  apiKeys: {
+    blockfrostApiKeys: [
+      {
+        mainnet: 'not-key',
+        testnet: 'not-key',
+        stagenet: 'not-key',
+      },
+    ],
+  },
   rootDerivationPaths: {
     [Network.Mainnet]: "m/1852'/1815'/",
     [Network.Testnet]: "m/1852'/1815'/",
