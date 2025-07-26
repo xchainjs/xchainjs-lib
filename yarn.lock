@@ -2825,7 +2825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scure/bip39@npm:^1.2.1":
+"@scure/bip39@npm:^1.2.1, @scure/bip39@npm:^1.6.0":
   version: 1.6.0
   resolution: "@scure/bip39@npm:1.6.0"
   dependencies:
@@ -3270,15 +3270,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bip39@npm:^3.0.0":
-  version: 3.0.4
-  resolution: "@types/bip39@npm:3.0.4"
-  dependencies:
-    bip39: "npm:*"
-  checksum: 10c0/d0fbb4e72161f03bba993bebb4b234ecdd1a05189f2d09df566ad69178637d93633bcf8aa6b3ac2724902d7a477c53a24593d7e388b92322076819fac98d738c
-  languageName: node
-  linkType: hard
-
 "@types/bitcore-lib-cash@npm:^8.23.8":
   version: 8.23.8
   resolution: "@types/bitcore-lib-cash@npm:8.23.8"
@@ -3308,13 +3299,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/2e1cdba2c410f25649e77856505cd60223250fa12dff7a503e492208dbfdd25f62859918f28aba95315251fd1f5e1ffbfca1e25e73037189ab85dd3f8d0a148c
-  languageName: node
-  linkType: hard
-
-"@types/crypto-js@npm:^4.1.1":
-  version: 4.2.2
-  resolution: "@types/crypto-js@npm:4.2.2"
-  checksum: 10c0/760a2078f36f2a3a1089ef367b0d13229876adcf4bcd6e8824d00d9e9bfad8118dc7e6a3cc66322b083535e12be3a29044ccdc9603bfb12519ff61551a3322c6
   languageName: node
   linkType: hard
 
@@ -4009,13 +3993,9 @@ __metadata:
   resolution: "@xchainjs/xchain-crypto@workspace:packages/xchain-crypto"
   dependencies:
     "@noble/hashes": "npm:^1.8.0"
-    "@scure/base": "npm:^1.2.6"
-    "@types/bip39": "npm:^3.0.0"
-    "@types/crypto-js": "npm:^4.1.1"
+    "@scure/bip39": "npm:^1.6.0"
     "@types/node": "npm:^22.7.5"
     "@types/uuid": "npm:^9.0.1"
-    bip39: "npm:^3.1.0"
-    crypto-js: "npm:4.2.0"
     uuid: "npm:^9.0.0"
   languageName: unknown
   linkType: soft
@@ -5145,7 +5125,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip39@npm:*, bip39@npm:^3.1.0":
+"bip39@npm:^3.1.0":
   version: 3.1.0
   resolution: "bip39@npm:3.1.0"
   dependencies:
