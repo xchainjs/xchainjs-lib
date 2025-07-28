@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.7
+
+### Patch Changes
+
+- c77a849: Update default params types
+- Updated dependencies [cfd0dc7]
+  - @xchainjs/xchain-crypto@1.0.6
+  - @xchainjs/xchain-client@2.0.8
+
 ## 1.1.6
 
 ### Patch Changes

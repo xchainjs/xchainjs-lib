@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- cfd0dc7: Update crypto dependencies
+
 ## 1.0.5
 
 ### Patch Changes
