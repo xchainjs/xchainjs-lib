@@ -1,5 +1,14 @@
 # xchainjs-aggregator
 
+## 1.0.19
+
+### Patch Changes
+
+- @xchainjs/xchain-bitcoin@2.0.8
+- @xchainjs/xchain-aggregator@2.0.19
+- @xchainjs/xchain-wallet@2.0.15
+- @xchainjs/xchain-ethereum@2.0.12
+
 ## 1.0.18
 
 ### Patch Changes

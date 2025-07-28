@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.8
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.8
+- @xchainjs/xchain-utxo-providers@2.0.8
+
 ## 2.0.7
 
 ### Patch Changes

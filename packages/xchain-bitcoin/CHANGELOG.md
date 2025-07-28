@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [cfd0dc7]
+  - @xchainjs/xchain-crypto@1.0.6
+  - @xchainjs/xchain-client@2.0.8
+  - @xchainjs/xchain-utxo@2.0.8
+  - @xchainjs/xchain-utxo-providers@2.0.8
+
 ## 2.0.7
 
 ### Patch Changes
