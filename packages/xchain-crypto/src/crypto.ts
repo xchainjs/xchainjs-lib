@@ -1,4 +1,6 @@
-import * as bip39 from 'bip39'
+import { generateMnemonic, mnemonicToEntropy, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english'
+import { bytesToHex } from '@noble/hashes/utils'
 import crypto from 'crypto'
 import { blake2b } from '@noble/hashes/blake2'
 import { v4 as uuidv4 } from 'uuid'
@@ -53,15 +55,8 @@ const _isNode = (): boolean => {
  * @returns {string} The generated mnemonic phrase.
  */
 export const generatePhrase = (size = 12): string => {
-  if (_isNode()) {
-    const bytes = crypto.randomBytes((size == 12 ? 128 : 256) / 8)
-    const phrase = bip39.entropyToMnemonic(bytes)
-    return phrase
-  } else {
-    const entropy = size == 12 ? 128 : 256
-    const phrase = bip39.generateMnemonic(entropy)
-    return phrase
-  }
+  const strength = size === 12 ? 128 : 256
+  return generateMnemonic(wordlist, strength)
 }
 
 /**
@@ -70,7 +65,7 @@ export const generatePhrase = (size = 12): string => {
  * @returns {boolean} True if the phrase is valid, otherwise false.
  */
 export const validatePhrase = (phrase: string): boolean => {
-  return bip39.validateMnemonic(phrase)
+  return validateMnemonic(phrase, wordlist)
 }
 
 /**
@@ -79,11 +74,11 @@ export const validatePhrase = (phrase: string): boolean => {
  * @returns {Buffer} The seed derived from the phrase.
  * @throws {"Invalid BIP39 phrase"} Thrown if the phrase is invalid.
  */
-export const getSeed = (phrase: string): Buffer => {
+export const getSeed = (phrase: string): Uint8Array => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
   }
-  return bip39.mnemonicToSeedSync(phrase)
+  return mnemonicToSeedSync(phrase)
 }
 
 /**
@@ -92,9 +87,9 @@ export const getSeed = (phrase: string): Buffer => {
  * @returns the entropy phrase
  */
 export const phraseToEntropy = (phrase: string): string => {
-  return bip39.mnemonicToEntropy(phrase)
+  const entropyBytes = mnemonicToEntropy(phrase, wordlist) // Uint8Array
+  return bytesToHex(entropyBytes) // convert to hex string
 }
-
 /**
  * Encrypts the given phrase to a keystore object using the provided password.
  * @param {string} phrase The mnemonic phrase to encrypt.
