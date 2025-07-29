@@ -271,7 +271,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
         return false
       }
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -329,7 +329,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * @param {TxHistoryParams | undefined} params Parameters for filtering transactions. Only the 'address' parameter is supported in this client.
    * @returns {TxsPage} A promise that resolves to an array of transactions.
    */
-  public async getTransactions(params?: TxHistoryParams | undefined): Promise<TxsPage> {
+  public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     // TODO: Use all filters
     if (params?.startTime || params?.limit || params?.offset) {
       throw Error('Not supported param limit for this client')
@@ -364,7 +364,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    * @param {string | undefined} _assetAddress Ignored parameter.
    * @returns {Tx} A promise that resolves to transaction data.
    */
-  public async getTransactionData(txId: string, _assetAddress?: string | undefined): Promise<Tx> {
+  public async getTransactionData(txId: string, _assetAddress?: string): Promise<Tx> {
     const tx = await this.roundRobinGetTransaction(txId)
     return this.mapIndexedTxToTx(tx)
   }

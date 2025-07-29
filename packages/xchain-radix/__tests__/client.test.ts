@@ -60,7 +60,7 @@ describe('RadixClient Test', () => {
       network: Network.Mainnet,
       phrase: phrase,
     }
-    await expect(() => new Client(params)).toThrow(/Invalid phrase/)
+    expect(() => new Client(params)).toThrow(/Invalid phrase/)
   })
 
   it('client should be able to get address', async () => {
@@ -82,7 +82,7 @@ describe('RadixClient Test', () => {
 
   it('client should throw an Error when using getAddress', async () => {
     const client = createClient()
-    await expect(() => client.getAddress()).toThrow(
+    expect(() => client.getAddress()).toThrow(
       /getAddress is synchronous and cannot retrieve addresses directly. Use getAddressAsync instead./,
     )
   })
@@ -305,7 +305,7 @@ describe('RadixClient Test', () => {
       limit: 200,
       asset: 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd',
     }
-    const txs = await (await client.getTransactions(transactionsHistoryParams)).txs
+    const txs = (await client.getTransactions(transactionsHistoryParams)).txs
     txs.forEach((tx) => {
       expect(tx.from).not.toBeUndefined()
       expect(tx.to).not.toBeUndefined()

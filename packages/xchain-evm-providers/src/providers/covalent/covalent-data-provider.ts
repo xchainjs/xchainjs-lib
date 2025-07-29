@@ -30,7 +30,6 @@ export class CovalentProvider implements EvmOnlineDataProvider {
     this.chainId = chainId
     this.nativeAsset = nativeAsset
     this.nativeAssetDecimals = nativeAssetDecimals
-    this.nativeAsset
   }
 
   async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
@@ -174,8 +173,7 @@ export class CovalentProvider implements EvmOnlineDataProvider {
     }
   }
 
-  async getTransactionData(txHash: string, assetAddress?: Address): Promise<Tx> {
-    assetAddress
+  async getTransactionData(txHash: string, _assetAddress?: Address): Promise<Tx> {
     const response = (
       await axios.get<GetTransactionResponse>(
         `${this.baseUrl}/v1/${this.chainId}/transaction_v2/${txHash}/?key=${this.apiKey}`,

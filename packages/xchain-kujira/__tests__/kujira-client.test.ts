@@ -34,11 +34,11 @@ describe('Kujira client Integration Tests', () => {
     expect(fees.average).toBe(DEFAULT_FEE)
   })
   it('get explorer address url', async () => {
-    const url = await xchainClient.getExplorerAddressUrl('kujira1k688m5uq5gqwt2sltvvu0679vnh3ehlslvf9e2')
+    const url = xchainClient.getExplorerAddressUrl('kujira1k688m5uq5gqwt2sltvvu0679vnh3ehlslvf9e2')
     expect(url).toBe('https://finder.kujira.network/harpoon-4/address/kujira1k688m5uq5gqwt2sltvvu0679vnh3ehlslvf9e2')
   })
   it('get explorer tx url', async () => {
-    const url = await xchainClient.getExplorerTxUrl('F3131AE603FFDE602217330410DD3ADFB9E21C987DDAA5CCF54F99DB15A6714B')
+    const url = xchainClient.getExplorerTxUrl('F3131AE603FFDE602217330410DD3ADFB9E21C987DDAA5CCF54F99DB15A6714B')
     expect(url).toBe(
       'https://finder.kujira.network/harpoon-4/tx/F3131AE603FFDE602217330410DD3ADFB9E21C987DDAA5CCF54F99DB15A6714B',
     )

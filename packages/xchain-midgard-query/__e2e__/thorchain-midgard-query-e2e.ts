@@ -8,7 +8,7 @@ import { SaversPosition, getSaver } from '../src/types'
 import { AssetATOM, AssetAVAX, AssetBTC } from '../src/utils/const'
 import { Midgard } from '../src/utils/midgard'
 
-require('dotenv').config()
+import 'dotenv/config'
 
 const midgardCache = new MidgardCache(new Midgard(Network.Mainnet))
 const midgardQuery = new MidgardQuery(midgardCache)

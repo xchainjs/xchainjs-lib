@@ -62,7 +62,7 @@ export class LedgerSigner extends Signer {
     const unsignedTx = tx.unsignedSerialized.substring(2)
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 
-    const ethApp = await this.getApp()
+    const ethApp = this.getApp()
 
     const signatureData = await ethApp.signTransaction(this.getFullDerivationPath(walletIndex), unsignedTx, resolution)
 
@@ -89,7 +89,7 @@ export class LedgerSigner extends Signer {
 
     const resolution = await ledgerService.resolveTransaction(unsignedTx, {}, { externalPlugins: true, erc20: true })
 
-    const ethApp = await this.getApp()
+    const ethApp = this.getApp()
     const signatureData = await ethApp.signTransaction(this.getFullDerivationPath(walletIndex), unsignedTx, resolution)
 
     tx.signature = {

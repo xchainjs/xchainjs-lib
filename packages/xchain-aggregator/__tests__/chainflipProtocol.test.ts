@@ -78,7 +78,7 @@ describe('Chainflip protocol', () => {
   })
 
   it('Should not get swap history', async () => {
-    expect(async () => {
+    await expect(async () => {
       await protocol.getSwapHistory()
     }).rejects.toThrow(/Method not implemented./)
   })

@@ -18,7 +18,7 @@ export const validateAddress = (address: Address): boolean => {
   try {
     getAddress(address)
     return true
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }
@@ -33,7 +33,7 @@ export const getTokenAddress = (asset: TokenAsset): Address | null => {
   try {
     // strip 0X only - 0x is still valid
     return getAddress(asset.symbol.slice(asset.ticker.length + 1).replace(/^0X/, ''))
-  } catch (err) {
+  } catch (_err) {
     return null
   }
 }
@@ -121,7 +121,7 @@ export const estimateCall = async ({
 }): Promise<BigNumber> => {
   const contract = new Contract(contractAddress, abi, provider)
   const estiamtion = await contract.getFunction(funcName).estimateGas(...funcParams)
-  return await new BigNumber(estiamtion.toString())
+  return new BigNumber(estiamtion.toString())
 }
 /**
  * Calls a contract function.

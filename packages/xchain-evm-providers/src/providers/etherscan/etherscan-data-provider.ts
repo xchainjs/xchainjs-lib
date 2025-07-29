@@ -41,8 +41,6 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     this.chain = chain
     this.nativeAsset = nativeAsset
     this.nativeAssetDecimals = nativeAssetDecimals
-    this.nativeAsset
-    this.chain
   }
   async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
     //validate assets are for the correct chain
