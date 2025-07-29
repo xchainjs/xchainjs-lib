@@ -40,7 +40,7 @@
     "@scure/base": "^1.2.6",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/xchain-client": "workspace:*",
-    "@xchainjs/xchain-cosmos-sdk": "workspace:*",
+    "@xchainjs/xchain-cosmos-sdk": "0.1.0",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "cosmjs-types": "0.9.0"
