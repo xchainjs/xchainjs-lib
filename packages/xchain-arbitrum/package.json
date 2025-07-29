@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@xchainjs/xchain-client": "workspace:*",
-    "@xchainjs/xchain-evm": "workspace:*",
+    "@xchainjs/xchain-evm": "0.1.0",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "bignumber.js": "^9.0.0",
