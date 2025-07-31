@@ -68,6 +68,11 @@ Using MAYAChain AMM package, you could easily implement the following features
 - Get MAYAName details
 - Get MAYANames by owner
 
+### Trade Accounts
+
+- Add assets to trade accounts
+- Withdraw assets from trade accounts
+
 ## Examples
 
 You can find examples using the MAYAChain AMM package in the [mayachain-amm](https://github.com/xchainjs/xchainjs-lib/tree/master/examples/mayachain-amm) examples folder.
