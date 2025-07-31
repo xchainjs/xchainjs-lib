@@ -466,6 +466,18 @@ export class MayachainAMM {
   }
 
   /**
+   * Convert trade asset to underlying asset type for transactions
+   * @param {Asset} asset The asset to convert
+   * @returns {Asset} The asset with converted type
+   */
+  private convertToUnderlyingAsset(asset: Asset): Asset {
+    return {
+      ...asset,
+      type: asset.type === AssetType.TRADE ? AssetType.NATIVE : asset.type,
+    }
+  }
+
+  /**
    * Estimate adding trade amount to account
    * @param {AddToTradeAccountParams} param Add to trade account params
    * @returns {AddToTradeAccount} Estimation to add amount to trade account
@@ -514,10 +526,7 @@ export class MayachainAMM {
     if (!quote.allowed) throw Error(`Can not add to trade account. ${quote.errors.join(' ')}`)
 
     // Convert trade asset to underlying asset for the transaction
-    const underlyingAsset = {
-      ...quote.value.asset,
-      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
-    }
+    const underlyingAsset = this.convertToUnderlyingAsset(quote.value.asset)
     const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
 
     return MayachainAction.makeAction({
@@ -541,6 +550,10 @@ export class MayachainAMM {
 
     if (!validateAddress(this.mayachainQuery.getNetwork(), amount.asset.chain, address)) {
       errors.push('Invalid address to send the withdraw')
+    }
+
+    if (amount.baseAmount.amount().isLessThanOrEqualTo(0)) {
+      errors.push('Withdraw amount must be greater than zero')
     }
 
     if (errors.length) {
@@ -571,10 +584,7 @@ export class MayachainAMM {
     if (!quote.allowed) throw Error(`Can not withdraw from trade account. ${quote.errors.join(' ')}`)
 
     // Convert trade asset to underlying asset for the transaction
-    const underlyingAsset = {
-      ...quote.value.asset,
-      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
-    }
+    const underlyingAsset = this.convertToUnderlyingAsset(quote.value.asset)
     const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
 
     return MayachainAction.makeAction({

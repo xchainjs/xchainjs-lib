@@ -39,7 +39,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
     it('Should estimate add to trade account', async () => {
       const quote = await mayaAMM.estimateAddToTradeAccount({
         amount: new AssetCryptoAmount(assetToBase(assetAmount(0.1, 18)), AssetETH),
-        address: await wallet.getAddress(MAYAChain),
+        address: await wallet.getAddress(MAYAChain, 0),
       })
 
       console.log({
@@ -62,7 +62,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
     it('Should add to trade account', async () => {
       const txSubmitted = await mayaAMM.addToTradeAccount({
         amount: new AssetCryptoAmount(assetToBase(assetAmount(0.1, 18)), AssetETH),
-        address: await wallet.getAddress(MAYAChain),
+        address: await wallet.getAddress(MAYAChain, 0),
       })
 
       console.log(txSubmitted)
@@ -78,7 +78,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
           ticker: 'ETH',
           type: AssetType.TRADE,
         }),
-        address: await wallet.getAddress(ETHChain),
+        address: await wallet.getAddress(ETHChain, 0),
       })
 
       console.log({
@@ -104,7 +104,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
           ticker: 'ETH',
           type: AssetType.TRADE,
         }),
-        address: await wallet.getAddress(ETHChain),
+        address: await wallet.getAddress(ETHChain, 0),
       })
 
       console.log(txSubmitted)
@@ -126,7 +126,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
           ticker: 'ETH',
           type: AssetType.TRADE,
         }),
-        destinationAddress: await wallet.getAddress(MAYAChain),
+        destinationAddress: await wallet.getAddress(MAYAChain, 0),
         destinationAsset: {
           chain: DASHChain,
           symbol: 'DASH',
@@ -144,7 +144,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
       const txSubmitted = await mayaAMM.doSwap({
         fromAsset: AssetCacao,
         amount: new AssetCryptoAmount(assetToBase(assetAmount('10')), AssetCacao),
-        destinationAddress: await wallet.getAddress(MAYAChain),
+        destinationAddress: await wallet.getAddress(MAYAChain, 0),
         destinationAsset: {
           chain: DASHChain,
           symbol: 'DASH',
@@ -159,3 +159,4 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
     })
   })
 })
+
