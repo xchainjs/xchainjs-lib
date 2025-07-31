@@ -18,19 +18,19 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
       if (!phrase) {
         throw new Error('MAINNET_PHRASE environment variable is required for e2e tests')
       }
-      
+
       const mayachainQuery = new MayachainQuery()
       wallet = new Wallet({
-        ETH: new EthClient({ 
-          ...defaultEthParams, 
-          phrase, 
-          network: Network.Mainnet 
+        ETH: new EthClient({
+          ...defaultEthParams,
+          phrase,
+          network: Network.Mainnet,
         }),
         MAYA: new MayaClient({ phrase, network: Network.Mainnet }),
-        DASH: new DashClient({ 
-          ...defaultDashParams, 
-          phrase, 
-          network: Network.Mainnet 
+        DASH: new DashClient({
+          ...defaultDashParams,
+          phrase,
+          network: Network.Mainnet,
         }),
       })
       mayaAMM = new MayachainAMM(mayachainQuery, wallet)

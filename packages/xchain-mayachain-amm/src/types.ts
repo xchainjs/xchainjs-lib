@@ -1,5 +1,13 @@
 import { QuoteMAYAName as BaseQuoteMAYAName } from '@xchainjs/xchain-mayachain-query'
-import { Address, Asset, CryptoAmount, TokenAsset, TokenCryptoAmount, TradeAsset, TradeCryptoAmount } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  CryptoAmount,
+  TokenAsset,
+  TokenCryptoAmount,
+  TradeAsset,
+  TradeCryptoAmount,
+} from '@xchainjs/xchain-util'
 // Object representing a submitted transaction
 export type TxSubmitted = {
   hash: string // The transaction hash

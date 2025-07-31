@@ -1,4 +1,3 @@
-import { Network } from '@xchainjs/xchain-client'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
 import {
   AssetCryptoAmount,
@@ -137,7 +136,7 @@ describe('MayachainAMM', () => {
         expect.objectContaining({
           address: 'maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz',
           amount: expect.any(AssetCryptoAmount),
-        })
+        }),
       )
 
       expect(makeActionSpy).toHaveBeenCalledWith({
@@ -171,7 +170,7 @@ describe('MayachainAMM', () => {
         expect.objectContaining({
           address: '0x09383137C1eEe3E1A8bc781228E4199f6b4A9bbf',
           amount: expect.any(TradeCryptoAmount),
-        })
+        }),
       )
 
       expect(makeActionSpy).toHaveBeenCalledWith({
@@ -238,7 +237,7 @@ describe('MayachainAMM', () => {
       expect(typeof quote.toAddress).toBe('string')
       expect(typeof quote.memo).toBe('string')
       expect(quote.memo).toContain('=:BTC.BTC')
-      
+
       // Verify that the estimate swap functionality is working
       // Based on the actual structure returned
       expect(quote).toHaveProperty('dustThreshold')
@@ -249,7 +248,7 @@ describe('MayachainAMM', () => {
       expect(quote).toHaveProperty('slipBasisPoints')
       expect(quote).toHaveProperty('outboundDelayBlocks')
       expect(quote).toHaveProperty('totalSwapSeconds')
-      
+
       // Verify types
       expect(typeof quote.canSwap).toBe('boolean')
       expect(Array.isArray(quote.errors)).toBe(true)

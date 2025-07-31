@@ -217,7 +217,7 @@ export class MayachainAMM {
     if (isTradeAsset(fromAsset) && !isTradeAsset(destinationAsset) && !eqAsset(destinationAsset, AssetCacao)) {
       errors.push(
         'Can not make swap from trade asset to non trade asset or non Cacao asset. Use withdrawFromTrade (TRADE-) operation',
-      )  
+      )
     }
 
     if (streamingQuantity && streamingQuantity < 0) {
@@ -473,9 +473,7 @@ export class MayachainAMM {
   public async estimateAddToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<AddToTradeAccount> {
     const errors: string[] = []
 
-    if (
-      !validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, address)
-    ) {
+    if (!validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, address)) {
       errors.push('Invalid trade account address')
     }
 
@@ -516,9 +514,12 @@ export class MayachainAMM {
     if (!quote.allowed) throw Error(`Can not add to trade account. ${quote.errors.join(' ')}`)
 
     // Convert trade asset to underlying asset for the transaction
-    const underlyingAsset = { ...quote.value.asset, type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type }
+    const underlyingAsset = {
+      ...quote.value.asset,
+      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
+    }
     const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
-    
+
     return MayachainAction.makeAction({
       wallet: this.wallet,
       assetAmount: transactionAmount,
@@ -538,13 +539,7 @@ export class MayachainAMM {
   }: WithdrawFromTradeAccountParams): Promise<WithdrawFromTradeAccount> {
     const errors: string[] = []
 
-    if (
-      !validateAddress(
-        this.mayachainQuery.getNetwork(),
-        amount.asset.chain,
-        address,
-      )
-    ) {
+    if (!validateAddress(this.mayachainQuery.getNetwork(), amount.asset.chain, address)) {
       errors.push('Invalid address to send the withdraw')
     }
 
@@ -576,9 +571,12 @@ export class MayachainAMM {
     if (!quote.allowed) throw Error(`Can not withdraw from trade account. ${quote.errors.join(' ')}`)
 
     // Convert trade asset to underlying asset for the transaction
-    const underlyingAsset = { ...quote.value.asset, type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type }
+    const underlyingAsset = {
+      ...quote.value.asset,
+      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
+    }
     const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
-    
+
     return MayachainAction.makeAction({
       wallet: this.wallet,
       assetAmount: transactionAmount,
