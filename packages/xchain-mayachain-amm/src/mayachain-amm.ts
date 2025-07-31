@@ -465,17 +465,6 @@ export class MayachainAMM {
     })
   }
 
-  /**
-   * Convert trade asset to underlying asset type for transactions
-   * @param {Asset} asset The asset to convert
-   * @returns {Asset} The asset with converted type
-   */
-  private convertToUnderlyingAsset(asset: Asset): Asset {
-    return {
-      ...asset,
-      type: asset.type === AssetType.TRADE ? AssetType.NATIVE : asset.type,
-    }
-  }
 
   /**
    * Estimate adding trade amount to account
@@ -526,7 +515,10 @@ export class MayachainAMM {
     if (!quote.allowed) throw Error(`Can not add to trade account. ${quote.errors.join(' ')}`)
 
     // Convert trade asset to underlying asset for the transaction
-    const underlyingAsset = this.convertToUnderlyingAsset(quote.value.asset)
+    const underlyingAsset = {
+      ...quote.value.asset,
+      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
+    }
     const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
 
     return MayachainAction.makeAction({
@@ -584,7 +576,10 @@ export class MayachainAMM {
     if (!quote.allowed) throw Error(`Can not withdraw from trade account. ${quote.errors.join(' ')}`)
 
     // Convert trade asset to underlying asset for the transaction
-    const underlyingAsset = this.convertToUnderlyingAsset(quote.value.asset)
+    const underlyingAsset = {
+      ...quote.value.asset,
+      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
+    }
     const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
 
     return MayachainAction.makeAction({
