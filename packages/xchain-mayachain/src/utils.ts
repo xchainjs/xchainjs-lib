@@ -127,11 +127,13 @@ export const parseAssetToMayanodeAsset = (
   symbol: string
   ticker: string
   synth: boolean
+  trade: boolean
 } => {
   return {
     chain: asset.chain,
     symbol: asset.symbol,
     ticker: asset.ticker,
     synth: asset.type === AssetType.SYNTH,
+    trade: asset.type === AssetType.TRADE,
   }
 }
