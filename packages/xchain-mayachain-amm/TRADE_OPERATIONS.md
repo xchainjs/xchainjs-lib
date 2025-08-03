@@ -6,14 +6,18 @@ When performing trade operations that require broadcasting transactions (addToTr
 
 ### Correct Initialization for Trade Operations
 
-```typescript
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import { Wallet } from '@xchainjs/xchain-wallet'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { Network } from '@xchainjs/xchain-client'
-
+import {
+  assetToBase,
+  assetAmount,
+  assetFromStringEx,
+  AssetCryptoAmount,
+} from '@xchainjs/xchain-util'
 // Your mnemonic phrase (keep this secure!)
 const phrase = 'your twelve word mnemonic phrase here ...'
 
