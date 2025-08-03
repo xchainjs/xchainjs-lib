@@ -100,7 +100,7 @@ export type WithdrawFromTradeAccountParams = {
  */
 export type WithdrawFromTradeAccount = {
   /**
-   * Memo to add to the transaction to add the trade amount
+   * Memo to add to the transaction to withdraw the trade amount
    */
   memo: string
   /**
