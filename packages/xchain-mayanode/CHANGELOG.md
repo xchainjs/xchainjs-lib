@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- e4ae516: Trade accounts functionality was added
+
 ## 1.0.4
 
 ### Patch Changes
