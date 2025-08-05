@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.18
+
+### Patch Changes
+
+- @xchainjs/xchain-wallet@2.0.16
+
 ## 3.0.17
 
 ### Patch Changes

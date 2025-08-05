@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.0
+
+### Major Changes
+
+- e4ae516: Add trade account support
+
 ## 3.0.8
 
 ### Patch Changes

@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.1.0
+
+### Minor Changes
+
+- e4ae516: Trade accounts functionality was added
+
+### Patch Changes
+
+- Updated dependencies [e4ae516]
+- Updated dependencies [e4ae516]
+  - @xchainjs/xchain-mayachain-query@2.1.0
+  - @xchainjs/xchain-mayachain@4.0.0
+  - @xchainjs/xchain-wallet@2.0.16
+
 ## 4.0.17
 
 ### Patch Changes
