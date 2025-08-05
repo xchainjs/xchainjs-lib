@@ -28,6 +28,7 @@ $root.common = (function() {
          * @property {string|null} [symbol] Asset symbol
          * @property {string|null} [ticker] Asset ticker
          * @property {boolean|null} [synth] Asset synth
+         * @property {boolean|null} [trade] Asset trade
          */
 
         /**
@@ -78,6 +79,14 @@ $root.common = (function() {
         Asset.prototype.synth = false;
 
         /**
+         * Asset trade.
+         * @member {boolean} trade
+         * @memberof common.Asset
+         * @instance
+         */
+        Asset.prototype.trade = false;
+
+        /**
          * Creates a new Asset instance using the specified properties.
          * @function create
          * @memberof common.Asset
@@ -109,6 +118,8 @@ $root.common = (function() {
                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.ticker);
             if (message.synth != null && Object.hasOwnProperty.call(message, "synth"))
                 writer.uint32(/* id 4, wireType 0 =*/32).bool(message.synth);
+            if (message.trade != null && Object.hasOwnProperty.call(message, "trade"))
+                writer.uint32(/* id 5, wireType 0 =*/40).bool(message.trade);
             return writer;
         };
 
@@ -154,6 +165,9 @@ $root.common = (function() {
                     break;
                 case 4:
                     message.synth = reader.bool();
+                    break;
+                case 5:
+                    message.trade = reader.bool();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -202,6 +216,9 @@ $root.common = (function() {
             if (message.synth != null && message.hasOwnProperty("synth"))
                 if (typeof message.synth !== "boolean")
                     return "synth: boolean expected";
+            if (message.trade != null && message.hasOwnProperty("trade"))
+                if (typeof message.trade !== "boolean")
+                    return "trade: boolean expected";
             return null;
         };
 
@@ -225,6 +242,8 @@ $root.common = (function() {
                 message.ticker = String(object.ticker);
             if (object.synth != null)
                 message.synth = Boolean(object.synth);
+            if (object.trade != null)
+                message.trade = Boolean(object.trade);
             return message;
         };
 
@@ -246,6 +265,7 @@ $root.common = (function() {
                 object.symbol = "";
                 object.ticker = "";
                 object.synth = false;
+                object.trade = false;
             }
             if (message.chain != null && message.hasOwnProperty("chain"))
                 object.chain = message.chain;
@@ -255,6 +275,8 @@ $root.common = (function() {
                 object.ticker = message.ticker;
             if (message.synth != null && message.hasOwnProperty("synth"))
                 object.synth = message.synth;
+            if (message.trade != null && message.hasOwnProperty("trade"))
+                object.trade = message.trade;
             return object;
         };
 

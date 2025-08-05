@@ -8,6 +8,8 @@ import {
   SYNTH_ASSET_DELIMITER,
   TOKEN_ASSET_DELIMITER,
   TRADE_ASSET_DELIMITER,
+  TradeAsset,
+  TradeCryptoAmount,
   assetFromStringEx,
   assetToString,
   baseAmount,
@@ -17,6 +19,8 @@ import {
 
 import { MayachainCache } from './mayachain-cache'
 import {
+  AddressTradeAccounts,
+  AddressTradeAccountsParams,
   CompatibleAsset,
   InboundDetail,
   MAYANameDetails,
@@ -26,6 +30,11 @@ import {
   QuoteSwapParams,
   SwapHistoryParams,
   SwapsHistory,
+  TradeAssetAccounts,
+  TradeAssetAccountsParams,
+  TradeAssetUnits,
+  TradeAssetUnitsParams,
+  TradeAssetsUnitsParams,
   TransactionAction,
 } from './types'
 import {
@@ -69,6 +78,14 @@ export class MayachainQuery {
   constructor(mayachainCache = new MayachainCache()) {
     // Initialize MayachainCache instance
     this.mayachainCache = mayachainCache
+  }
+
+  /**
+   * Get the MayachainCache instance
+   * @returns MayachainCache instance
+   */
+  public getMayachainCache(): MayachainCache {
+    return this.mayachainCache
   }
 
   /**
@@ -461,5 +478,80 @@ export class MayachainQuery {
         isUpdate ? chainAddress || details?.aliases[0].address : chainAddress
       }:${isUpdate ? owner || details?.owner : owner}:MAYA.CACAO`,
     }
+  }
+
+  /**
+   * Get trade asset units
+   * @param {TradeAssetUnitsParams} params Trade asset units params
+   * @returns {TradeAssetUnits} Trade asset units
+   */
+  public async getTradeAssetUnits({ asset, height }: TradeAssetUnitsParams): Promise<TradeAssetUnits> {
+    const assetString = assetToString(asset)
+    const response = await this.mayachainCache.mayanode.getTradeAssetUnits(assetString, height)
+
+    return {
+      asset,
+      units: new TradeCryptoAmount(baseAmount(response.units), asset),
+      depth: new TradeCryptoAmount(baseAmount(response.depth), asset),
+    }
+  }
+
+  /**
+   * Get all trade assets units
+   * @param {TradeAssetsUnitsParams} params Trade assets units params
+   * @returns {TradeAssetUnits[]} Array of trade asset units
+   */
+  public async getTradeAssetsUnits({ height }: TradeAssetsUnitsParams = {}): Promise<TradeAssetUnits[]> {
+    const response = await this.mayachainCache.mayanode.getTradeAssetsUnits(height)
+
+    return response.map((item) => {
+      const asset = assetFromStringEx(item.asset) as TradeAsset
+      return {
+        asset,
+        units: new TradeCryptoAmount(baseAmount(item.units), asset),
+        depth: new TradeCryptoAmount(baseAmount(item.depth), asset),
+      }
+    })
+  }
+
+  /**
+   * Get trade accounts for an address
+   * @param {AddressTradeAccountsParams} params Address trade accounts params
+   * @returns {AddressTradeAccounts} Trade accounts for the address
+   */
+  public async getAddressTradeAccounts({ address, height }: AddressTradeAccountsParams): Promise<AddressTradeAccounts> {
+    const response = await this.mayachainCache.mayanode.getTradeAssetAccount(address, height)
+
+    return response.map((item) => {
+      const asset = assetFromStringEx(item.asset) as TradeAsset
+      return {
+        asset,
+        units: new TradeCryptoAmount(baseAmount(item.units), asset),
+        owner: item.owner,
+        lastAddHeight: item.last_add_height,
+        lastWithdrawHeight: item.last_withdraw_height,
+      }
+    })
+  }
+
+  /**
+   * Get all trade accounts for an asset
+   * @param {TradeAssetAccountsParams} params Trade asset accounts params
+   * @returns {TradeAssetAccounts} All trade accounts for the asset
+   */
+  public async getTradeAssetAccounts({ asset, height }: TradeAssetAccountsParams): Promise<TradeAssetAccounts> {
+    const assetString = assetToString(asset)
+    const response = await this.mayachainCache.mayanode.getTradeAssetAccounts(assetString, height)
+
+    return response.map((item) => {
+      const tradeAsset = assetFromStringEx(item.asset) as TradeAsset
+      return {
+        asset: tradeAsset,
+        units: new TradeCryptoAmount(baseAmount(item.units), tradeAsset),
+        owner: item.owner,
+        lastAddHeight: item.last_add_height,
+        lastWithdrawHeight: item.last_withdraw_height,
+      }
+    })
   }
 }

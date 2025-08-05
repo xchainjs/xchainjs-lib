@@ -36,5 +36,25 @@ export default {
       const resp = await importjson(`./responses/mayanode/latestBlock.json`)
       return [200, resp]
     })
+    // Trade unit endpoint - matches /trade/unit/{ASSET}
+    mock.onGet(/\/mayachain\/trade\/unit\/.+/).reply(async () => {
+      const resp = await importjson(`./responses/mayanode/tradeAssetUnit.json`)
+      return [200, resp]
+    })
+    // Trade units endpoint - matches /trade/units exactly
+    mock.onGet(/\/mayachain\/trade\/units$/).reply(async () => {
+      const resp = await importjson(`./responses/mayanode/tradeAssetUnits.json`)
+      return [200, resp]
+    })
+    // Trade account endpoint - matches /trade/account/{ADDRESS}/{ASSET}
+    mock.onGet(/\/mayachain\/trade\/account\/.+/).reply(async () => {
+      const resp = await importjson(`./responses/mayanode/tradeAccount.json`)
+      return [200, resp]
+    })
+    // Trade accounts endpoint - matches /trade/accounts/{ADDRESS}
+    mock.onGet(/\/mayachain\/trade\/accounts\/.+/).reply(async () => {
+      const resp = await importjson(`./responses/mayanode/tradeAccounts.json`)
+      return [200, resp]
+    })
   },
 }
