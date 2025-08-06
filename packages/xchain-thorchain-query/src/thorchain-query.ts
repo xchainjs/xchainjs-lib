@@ -173,6 +173,7 @@ export class ThorchainQuery {
             asset: destinationAsset,
             affiliateFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
             outboundFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
+            liquidityFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
           },
           slipBasisPoints: 0,
           netOutput: new CryptoAmount(baseAmount(0), destinationAsset),
@@ -223,6 +224,10 @@ export class ThorchainQuery {
           ),
           outboundFee: getCryptoAmountWithNotation(
             new CryptoAmount(baseAmount(swapQuote.fees.outbound), feeAsset),
+            feeAssetDecimals,
+          ),
+          liquidityFee: getCryptoAmountWithNotation(
+            new CryptoAmount(baseAmount(swapQuote.fees.liquidity), feeAsset),
             feeAssetDecimals,
           ),
         },
@@ -330,6 +335,7 @@ export class ThorchainQuery {
       // swapFee: await this.convert(fees.swapFee, asset),
       outboundFee: await this.convert(fees.outboundFee, asset),
       affiliateFee: await this.convert(fees.affiliateFee, asset),
+      liquidityFee: await this.convert(fees.liquidityFee, asset),
       // totatBps: fees.totatBps,
     }
   }

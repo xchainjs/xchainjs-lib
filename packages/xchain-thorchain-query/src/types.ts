@@ -24,6 +24,7 @@ export type TotalFees = {
   asset: CompatibleAsset // The asset for which fees are calculated
   affiliateFee: CryptoAmount<CompatibleAsset> // The affiliate fee
   outboundFee: CryptoAmount<CompatibleAsset> // The outbound fee
+  liquidityFee: CryptoAmount<CompatibleAsset> // The liquidity fee
 }
 /**
  * Represents an estimate for a swap transaction.
