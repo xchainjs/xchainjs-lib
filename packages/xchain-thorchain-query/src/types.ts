@@ -44,7 +44,6 @@ export type SwapEstimate = {
   streamingSwapSeconds: number // The time for streaming swap in seconds
   totalSwapSeconds: number // The total swap time in seconds
   router: string
-  inboundAddress: string
   recommendedGasRate: string
   canSwap: boolean // Indicates if swap can be performed
   errors: string[] // List of errors encountered during estimation

@@ -190,7 +190,6 @@ export class ThorchainQuery {
           totalSwapSeconds: 0,
           recommendedGasRate: '0',
           router: '',
-          inboundAddress: '',
           warning: '',
         },
       }
@@ -255,7 +254,6 @@ export class ThorchainQuery {
         canSwap: !swapQuote.memo || errors.length > 0 ? false : true,
         recommendedGasRate: swapQuote.recommended_gas_rate ? swapQuote.recommended_gas_rate : '0',
         router: swapQuote.router ? swapQuote.router : '',
-        inboundAddress: swapQuote.inbound_address ? swapQuote.inbound_address : '',
         errors,
         warning: swapQuote.warning,
       },
