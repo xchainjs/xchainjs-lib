@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- 74eba1f: Expose liquidity fee
+- 88a73be: Expose more info on quoteswap
+
 ## 2.0.10
 
 ### Patch Changes
