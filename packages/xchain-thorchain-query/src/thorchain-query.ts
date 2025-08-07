@@ -188,6 +188,8 @@ export class ThorchainQuery {
           streamingSwapBlocks: 0,
           streamingSwapSeconds: 0,
           totalSwapSeconds: 0,
+          recommendedGasRate: '0',
+          router: '',
           warning: '',
         },
       }
@@ -250,6 +252,8 @@ export class ThorchainQuery {
         streamingSwapSeconds: swapQuote.streaming_swap_seconds ? swapQuote.streaming_swap_seconds : 0,
         totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
         canSwap: !swapQuote.memo || errors.length > 0 ? false : true,
+        recommendedGasRate: swapQuote.recommended_gas_rate ? swapQuote.recommended_gas_rate : '0',
+        router: swapQuote.router ? swapQuote.router : '',
         errors,
         warning: swapQuote.warning,
       },
