@@ -6,13 +6,19 @@
 
 ## Installation
 
-```
+```sh
 yarn add @xchainjs/xchain-avax
+```
+
+or
+
+```sh
+npm install @xchainjs/xchain-avax
 ```
 
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-avax`.
 
-```
+```sh
 yarn add @xchainjs/xchain-evm @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios ethers
 ```
 
@@ -39,7 +45,7 @@ Etherscan API rate limits: https://snowtrace.io/apis
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
 
-### Enviroment variables
+### Environment Variables
 
 
 ```sh
