@@ -70,6 +70,25 @@ describe('XRP client e2e test', () => {
     console.log('transfer with memo tx hash:', hash)
   })
 
+  it('Should transfer TX with destination tag', async () => {
+    // NOTE: should send to another address because XRPL doesn't support transfer to same address
+    const address_1 = await client.getAddressAsync(1)
+    const hash = await client.transfer({
+      asset: AssetXRP,
+      amount: assetToBase(assetAmount('1', XRP_DECIMAL)),
+      recipient: address_1,
+      destinationTag: 12345,
+      memo: 'test with destination tag',
+    })
+    console.log('transfer with destination tag tx hash:', hash)
+  })
+
+  it('Should check if address requires destination tag', async () => {
+    const address_1 = await client.getAddressAsync(1)
+    const requiresTag = await client.requiresDestinationTag(address_1)
+    console.log(`Address ${address_1} requires destination tag:`, requiresTag)
+  })
+
   it('Should get signed transaction and broadcast', async () => {
     // NOTE: should send to another address because XRPL doesn't support transfer to same address
     const address_1 = await client.getAddressAsync(1)
@@ -78,6 +97,7 @@ describe('XRP client e2e test', () => {
       amount: assetToBase(assetAmount('1', XRP_DECIMAL)),
       recipient: address_1,
       memo: 'test',
+      destinationTag: 54321,
       walletIndex: 0,
     }
 
