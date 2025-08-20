@@ -7,9 +7,9 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import pkg from './package.json'
 
 const external = (id) => {
-  const deps = Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {}));
-  return deps.some(dep => id === dep || id.startsWith(`${dep}/`));
-};
+  const deps = Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {}))
+  return deps.some((dep) => id === dep || id.startsWith(`${dep}/`))
+}
 
 export default {
   input: 'src/index.ts',
@@ -32,20 +32,22 @@ export default {
     json(),
     typescript({
       declarationDir: 'lib',
-      tsconfig: './tsconfig.json',
       exclude: '__tests__/**',
     }),
-    resolve({ preferBuiltins: true, browser: true }),
+    resolve({ 
+      extensions: ['.js', '.ts'], 
+      preferBuiltins: true, 
+      browser: true 
+    }),
     commonjs({
-      include: /node_modules/,
-      exclude: '**/*.json',
+      browser: true,
     }),
     visualizer({
       filename: 'stats.html',
       gzipSize: true,
       brotliSize: true,
       open: false,
-    })
+    }),
   ],
-  external
+  external,
 }

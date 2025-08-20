@@ -31,7 +31,8 @@
     "test": "jest",
     "compile": "tsc -p tsconfig.build.json",
     "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
-    "fund": "ts-node src/utils.ts"
+    "fund": "ts-node src/utils.ts",
+    "e2e": "jest --config jest.config.e2e.mjs"
   },
   "publishConfig": {
     "access": "public",

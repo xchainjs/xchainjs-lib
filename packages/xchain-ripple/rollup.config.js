@@ -19,13 +19,13 @@ export default {
       format: 'cjs',
       interop: 'auto',
       exports: 'named',
-      sourcemap: true,
+      sourcemap: false,
     },
     {
       file: pkg.module,
       format: 'es',
       exports: 'named',
-      sourcemap: true,
+      sourcemap: false,
     },
   ],
   plugins: [
@@ -34,7 +34,11 @@ export default {
       declarationDir: 'lib',
       exclude: '__tests__/**',
     }),
-    resolve({ extensions: ['.js', '.ts'], preferBuiltins: true, browser: true }),
+    resolve({ 
+      extensions: ['.js', '.ts'], 
+      preferBuiltins: true, 
+      browser: true 
+    }),
     commonjs({
       browser: true,
     }),

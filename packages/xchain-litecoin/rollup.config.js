@@ -7,9 +7,9 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import pkg from './package.json'
 
 const external = (id) => {
-  const deps = Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {}));
-  return deps.some(dep => id === dep || id.startsWith(`${dep}/`));
-};
+  const deps = Object.keys(pkg.dependencies || {}).concat(Object.keys(pkg.peerDependencies || {}))
+  return deps.some((dep) => id === dep || id.startsWith(`${dep}/`))
+}
 
 export default {
   input: 'src/index.ts',
@@ -34,7 +34,11 @@ export default {
       declarationDir: 'lib',
       exclude: '__tests__/**',
     }),
-    resolve({ extensions: ['.js', '.ts'], preferBuiltins: true, browser: true }),
+    resolve({ 
+      extensions: ['.js', '.ts'], 
+      preferBuiltins: true, 
+      browser: true 
+    }),
     commonjs({
       browser: true,
     }),
@@ -43,7 +47,7 @@ export default {
       gzipSize: true,
       brotliSize: true,
       open: false,
-    })
+    }),
   ],
-  external
+  external,
 }

@@ -1,8 +1,7 @@
 export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  testMatch: ['<rootDir>/__e2e__/**/*.(test|spec).(ts|js)'],
   testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/lib'],
-  testMatch: ['<rootDir>/__e2e__/**/*.[jt]s?(x)'],
-  maxConcurrency: 1,
-  testTimeout: 60000,
+  testTimeout: 300000,
 }

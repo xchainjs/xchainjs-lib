@@ -1,7 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs'
 import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
-import wasm from '@rollup/plugin-wasm'
 import typescript from '@rollup/plugin-typescript'
 import { visualizer } from 'rollup-plugin-visualizer'
 
@@ -18,6 +17,7 @@ export default {
     {
       file: pkg.main,
       format: 'cjs',
+      interop: 'auto',
       exports: 'named',
       sourcemap: false,
     },
@@ -29,14 +29,19 @@ export default {
     },
   ],
   plugins: [
-    wasm(),
     json(),
-    resolve({ preferBuiltins: true, browser: true }),
     typescript({
       declarationDir: 'lib',
       exclude: '__tests__/**',
     }),
-    commonjs(),
+    resolve({ 
+      extensions: ['.js', '.ts'], 
+      preferBuiltins: true, 
+      browser: true 
+    }),
+    commonjs({
+      browser: true,
+    }),
     visualizer({
       filename: 'stats.html',
       gzipSize: true,

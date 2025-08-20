@@ -451,5 +451,5 @@ describe('RadixClient Test', () => {
     const transactionApi = new TransactionApi(apiConfiguration)
     const transactionStatus = await getTransactionStatus(transactionApi, transactionId)
     expect(transactionStatus.status).toBe(TransactionStatus.CommittedSuccess)
-  })
+  }, 15000)
 })

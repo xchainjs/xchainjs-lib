@@ -29,13 +29,19 @@ export default {
     },
   ],
   plugins: [
-    json({}),
-    resolve({ preferBuiltins: true, browser: true }),
+    json(),
     typescript({
       declarationDir: 'lib',
       exclude: '__tests__/**',
     }),
-    commonjs(),
+    resolve({ 
+      extensions: ['.js', '.ts'], 
+      preferBuiltins: true, 
+      browser: true 
+    }),
+    commonjs({
+      browser: true,
+    }),
     visualizer({
       filename: 'stats.html',
       gzipSize: true,
