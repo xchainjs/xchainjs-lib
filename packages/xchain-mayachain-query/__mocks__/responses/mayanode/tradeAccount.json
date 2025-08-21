@@ -1,0 +1,16 @@
+[
+  {
+    "asset": "ETH~ETH",
+    "units": "10000000000",
+    "owner": "maya1qtemwlu9ju3ts3da5l82qejnzdl3xfs3lv7xz4",
+    "last_add_height": 12345,
+    "last_withdraw_height": 0
+  },
+  {
+    "asset": "BTC~BTC",
+    "units": "50000000",
+    "owner": "maya1qtemwlu9ju3ts3da5l82qejnzdl3xfs3lv7xz4",
+    "last_add_height": 12350,
+    "last_withdraw_height": 12400
+  }
+]

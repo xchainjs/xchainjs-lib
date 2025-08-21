@@ -1,5 +1,52 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- e4ae516: Trade accounts functionality was added
+
+### Patch Changes
+
+- Updated dependencies [e4ae516]
+  - @xchainjs/xchain-mayanode@1.1.0
+
+## 2.0.10
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.8
+- @xchainjs/xchain-mayamidgard-query@1.0.9
+
+## 2.0.9
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.7
+- @xchainjs/xchain-mayamidgard-query@1.0.8
+
+## 2.0.8
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-mayamidgard@1.0.4
+  - @xchainjs/xchain-mayamidgard-query@1.0.7
+  - @xchainjs/xchain-mayanode@1.0.4
+  - @xchainjs/xchain-util@2.0.4
+
+## 2.0.7
+
+### Patch Changes
+
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-mayamidgard-query@1.0.6
+  - @xchainjs/xchain-mayamidgard@1.0.3
+  - @xchainjs/xchain-mayanode@1.0.3
+  - @xchainjs/xchain-client@2.0.5
+
 ## 2.0.6
 
 ### Patch Changes

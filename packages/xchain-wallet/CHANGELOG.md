@@ -1,5 +1,61 @@
 # Changelog
 
+## 2.0.16
+
+### Patch Changes
+
+- Updated dependencies [e4ae516]
+  - @xchainjs/xchain-mayachain@4.0.0
+
+## 2.0.15
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.8
+- @xchainjs/xchain-evm@2.0.11
+- @xchainjs/xchain-mayachain@3.0.8
+- @xchainjs/xchain-radix@2.0.8
+- @xchainjs/xchain-thorchain@3.0.12
+- @xchainjs/xchain-utxo@2.0.8
+
+## 2.0.14
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.7
+- @xchainjs/xchain-evm@2.0.10
+- @xchainjs/xchain-mayachain@3.0.7
+- @xchainjs/xchain-radix@2.0.7
+- @xchainjs/xchain-thorchain@3.0.11
+- @xchainjs/xchain-utxo@2.0.7
+
+## 2.0.13
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-evm@2.0.9
+  - @xchainjs/xchain-mayachain@3.0.6
+  - @xchainjs/xchain-radix@2.0.6
+  - @xchainjs/xchain-thorchain@3.0.10
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-utxo@2.0.6
+
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [156e836]
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-thorchain@3.0.9
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-evm@2.0.8
+  - @xchainjs/xchain-utxo@2.0.5
+  - @xchainjs/xchain-mayachain@3.0.5
+  - @xchainjs/xchain-radix@2.0.5
+
 ## 2.0.11
 
 ### Patch Changes

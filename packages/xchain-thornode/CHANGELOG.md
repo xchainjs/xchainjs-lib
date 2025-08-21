@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.5
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+
+## 1.0.4
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+
 ## 1.0.3
 
 ### Patch Changes

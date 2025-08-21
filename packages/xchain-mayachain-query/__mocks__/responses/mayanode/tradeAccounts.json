@@ -1,0 +1,23 @@
+[
+  {
+    "asset": "ETH~ETH",
+    "units": "10000000000",
+    "owner": "maya1qtemwlu9ju3ts3da5l82qejnzdl3xfs3lv7xz4",
+    "last_add_height": 12345,
+    "last_withdraw_height": 0
+  },
+  {
+    "asset": "ETH~ETH",
+    "units": "20000000000",
+    "owner": "maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgp3vy9z",
+    "last_add_height": 12400,
+    "last_withdraw_height": 12500
+  },
+  {
+    "asset": "ETH~ETH",
+    "units": "5000000000",
+    "owner": "maya1a3f7v8p2qh7j9x6w5c3d4z5s8e9r7t6y5u4i3",
+    "last_add_height": 12600,
+    "last_withdraw_height": 0
+  }
+]

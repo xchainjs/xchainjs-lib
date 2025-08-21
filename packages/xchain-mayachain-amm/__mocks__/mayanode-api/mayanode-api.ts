@@ -35,5 +35,17 @@ export default {
       const resp = await importjson(`./responses/latestBlock.json`)
       return [200, resp]
     })
+    // Gas rates mock for ETH
+    mock.onGet(/api\.etherscan\.io.*gastracker/).reply(() => {
+      return [200, {
+        status: "1",
+        message: "OK",
+        result: {
+          SafeGasPrice: "10",
+          ProposeGasPrice: "15",
+          FastGasPrice: "20"
+        }
+      }]
+    })
   },
 }

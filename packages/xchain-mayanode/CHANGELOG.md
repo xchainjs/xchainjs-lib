@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- e4ae516: Trade accounts functionality was added
+
+## 1.0.4
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+
+## 1.0.3
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+
 ## 1.0.2
 
 ### Patch Changes

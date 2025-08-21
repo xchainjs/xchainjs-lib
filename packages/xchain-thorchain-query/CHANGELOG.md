@@ -1,5 +1,47 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- 74eba1f: Expose liquidity fee
+- 88a73be: Expose more info on quoteswap
+
+## 2.0.10
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.8
+- @xchainjs/xchain-midgard-query@2.0.8
+
+## 2.0.9
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.7
+- @xchainjs/xchain-midgard-query@2.0.7
+
+## 2.0.8
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-midgard-query@2.0.6
+  - @xchainjs/xchain-thornode@1.0.5
+  - @xchainjs/xchain-util@2.0.4
+
+## 2.0.7
+
+### Patch Changes
+
+- 0b6f12a: Update to support solana for quoting and tc-amm
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-midgard-query@2.0.5
+  - @xchainjs/xchain-thornode@1.0.4
+  - @xchainjs/xchain-client@2.0.5
+
 ## 2.0.6
 
 ### Patch Changes

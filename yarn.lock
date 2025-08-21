@@ -2807,7 +2807,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scure/base@npm:^1.1.1, @scure/base@npm:^1.1.3, @scure/base@npm:^1.2.6, @scure/base@npm:~1.2.5":
+"@scure/base@npm:^1.1.3, @scure/base@npm:^1.2.6, @scure/base@npm:~1.2.5":
   version: 1.2.6
   resolution: "@scure/base@npm:1.2.6"
   checksum: 10c0/49bd5293371c4e062cb6ba689c8fe3ea3981b7bb9c000400dc4eafa29f56814cdcdd27c04311c2fec34de26bc373c593a1d6ca6d754398a488d587943b7c128a
@@ -2825,7 +2825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@scure/bip39@npm:^1.2.1":
+"@scure/bip39@npm:^1.2.1, @scure/bip39@npm:^1.6.0":
   version: 1.6.0
   resolution: "@scure/bip39@npm:1.6.0"
   dependencies:
@@ -3270,15 +3270,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bip39@npm:^3.0.0":
-  version: 3.0.4
-  resolution: "@types/bip39@npm:3.0.4"
-  dependencies:
-    bip39: "npm:*"
-  checksum: 10c0/d0fbb4e72161f03bba993bebb4b234ecdd1a05189f2d09df566ad69178637d93633bcf8aa6b3ac2724902d7a477c53a24593d7e388b92322076819fac98d738c
-  languageName: node
-  linkType: hard
-
 "@types/bitcore-lib-cash@npm:^8.23.8":
   version: 8.23.8
   resolution: "@types/bitcore-lib-cash@npm:8.23.8"
@@ -3308,13 +3299,6 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 10c0/2e1cdba2c410f25649e77856505cd60223250fa12dff7a503e492208dbfdd25f62859918f28aba95315251fd1f5e1ffbfca1e25e73037189ab85dd3f8d0a148c
-  languageName: node
-  linkType: hard
-
-"@types/crypto-js@npm:^4.1.1":
-  version: 4.2.2
-  resolution: "@types/crypto-js@npm:4.2.2"
-  checksum: 10c0/760a2078f36f2a3a1089ef367b0d13229876adcf4bcd6e8824d00d9e9bfad8118dc7e6a3cc66322b083535e12be3a29044ccdc9603bfb12519ff61551a3322c6
   languageName: node
   linkType: hard
 
@@ -4028,13 +4012,9 @@ __metadata:
   resolution: "@xchainjs/xchain-crypto@workspace:packages/xchain-crypto"
   dependencies:
     "@noble/hashes": "npm:^1.8.0"
-    "@scure/base": "npm:^1.2.6"
-    "@types/bip39": "npm:^3.0.0"
-    "@types/crypto-js": "npm:^4.1.1"
+    "@scure/bip39": "npm:^1.6.0"
     "@types/node": "npm:^22.7.5"
     "@types/uuid": "npm:^9.0.1"
-    bip39: "npm:^3.1.0"
-    crypto-js: "npm:4.2.0"
     uuid: "npm:^9.0.0"
   languageName: unknown
   linkType: soft
@@ -4296,12 +4276,12 @@ __metadata:
     "@radixdlt/babylon-gateway-api-sdk": "npm:^1.4.1"
     "@radixdlt/radix-engine-toolkit": "npm:^1.0.3"
     "@scure/base": "npm:^1.2.6"
+    "@scure/bip32": "npm:^1.7.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bip32: "npm:^4.0.0"
     bip39: "npm:^3.1.0"
-    ed25519-hd-key: "npm:^1.3.0"
+    micro-key-producer: "npm:^0.7.6"
   languageName: unknown
   linkType: soft
 
@@ -5164,19 +5144,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip32@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "bip32@npm:4.0.0"
-  dependencies:
-    "@noble/hashes": "npm:^1.2.0"
-    "@scure/base": "npm:^1.1.1"
-    typeforce: "npm:^1.11.5"
-    wif: "npm:^2.0.6"
-  checksum: 10c0/b74ffd3a96b42a783eca6455dff8f0decc8360025b69d486d5a047b52cca6e8436bc5a9812cbeae2638a50f35da7fcd85b55cfe58272f55a5b31d7ac40a25522
-  languageName: node
-  linkType: hard
-
-"bip39@npm:*, bip39@npm:^3.1.0":
+"bip39@npm:^3.1.0":
   version: 3.1.0
   resolution: "bip39@npm:3.1.0"
   dependencies:
@@ -6083,7 +6051,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-hmac@npm:1.1.7, create-hmac@npm:^1.1.3, create-hmac@npm:^1.1.7":
+"create-hmac@npm:^1.1.3, create-hmac@npm:^1.1.7":
   version: 1.1.7
   resolution: "create-hmac@npm:1.1.7"
   dependencies:
@@ -6471,16 +6439,6 @@ __metadata:
     typeforce: "npm:^1.18.0"
     wif: "npm:^2.0.6"
   checksum: 10c0/206a3c9af725416e6e91515278259319d88c880cf067c4e4d275fee5e746064cc5bc6279bdb2f87a9218ef25dd82921422d05e0952d4b41c8e91c070c504aa70
-  languageName: node
-  linkType: hard
-
-"ed25519-hd-key@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "ed25519-hd-key@npm:1.3.0"
-  dependencies:
-    create-hmac: "npm:1.1.7"
-    tweetnacl: "npm:1.0.3"
-  checksum: 10c0/8fb2fa9a9cb90bfbd0261b1f14f2f6367c98c51d0d5b9045df6e95634372493c59fc162dd1c584f569717fc18c23067a570edc3f48506d644c81eb8fde90c1b2
   languageName: node
   linkType: hard
 
@@ -7436,14 +7394,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "form-data@npm:4.0.0"
+"form-data@npm:4.0.4":
+  version: 4.0.4
+  resolution: "form-data@npm:4.0.4"
   dependencies:
     asynckit: "npm:^0.4.0"
     combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
-  checksum: 10c0/cb6f3ac49180be03ff07ba3ff125f9eba2ff0b277fb33c7fc47569fc5e616882c5b1c69b9904c4c4187e97dd0419dd03b134174756f296dec62041e6527e2c6e
+  checksum: 10c0/373525a9a034b9d57073e55eab79e501a714ffac02e7a9b01be1c820780652b16e4101819785e1e18f8d98f0aee866cc654d660a435c378e16a72f2e7cac9695
   languageName: node
   linkType: hard
 
@@ -11419,9 +11379,8 @@ __metadata:
     ts-node: "npm:10.9.2"
     tslib: "npm:^2.5.0"
     turbo: "npm:1.13.0"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
     weighted: "npm:^1.0.0"
-    yarn-audit-ci: "npm:^1.2.0"
   languageName: unknown
   linkType: soft
 
@@ -12595,13 +12554,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tweetnacl@npm:1.0.3":
-  version: 1.0.3
-  resolution: "tweetnacl@npm:1.0.3"
-  checksum: 10c0/069d9df51e8ad4a89fbe6f9806c68e06c65be3c7d42f0701cc43dba5f0d6064686b238bbff206c5addef8854e3ce00c643bff59432ea2f2c639feab0ee1a93f9
-  languageName: node
-  linkType: hard
-
 "txJammer@workspace:tools/txJammer":
   version: 0.0.0-use.local
   resolution: "txJammer@workspace:tools/txJammer"
@@ -12747,23 +12699,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "typescript@npm:5.0.4"
+"typescript@npm:^5.8.3":
+  version: 5.8.3
+  resolution: "typescript@npm:5.8.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/2f5bd1cead194905957cb34e220b1d6ff1662399adef8ec1864f74620922d860ee35b6e50eafb3b636ea6fd437195e454e1146cb630a4236b5095ed7617395c2
+  checksum: 10c0/5f8bb01196e542e64d44db3d16ee0e4063ce4f3e3966df6005f2588e86d91c03e1fb131c2581baf0fb65ee79669eea6e161cd448178986587e9f6844446dbb48
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.0.4#optional!builtin<compat/typescript>":
-  version: 5.0.4
-  resolution: "typescript@patch:typescript@npm%3A5.0.4#optional!builtin<compat/typescript>::version=5.0.4&hash=b5f058"
+"typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>":
+  version: 5.8.3
+  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=b45daf"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/c3f7b80577bddf6fab202a7925131ac733bfc414aec298c2404afcddc7a6f242cfa8395cf2d48192265052e11a7577c27f6e5fac8d8fe6a6602023c83d6b3292
+  checksum: 10c0/92ea03509e06598948559ddcdd8a4ae5a7ab475766d5589f1b796f5731b3d631a4c7ddfb86a3bd44d58d10102b132cd4b4994dda9b63e6273c66d77d6a271dbd
   languageName: node
   linkType: hard
 
@@ -13347,7 +13299,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13359,7 +13311,7 @@ __metadata:
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13380,7 +13332,7 @@ __metadata:
     bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13420,7 +13372,7 @@ __metadata:
     dotenv: "npm:^16.0.0"
     ethers: "npm:^6.14.3"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13441,7 +13393,7 @@ __metadata:
     bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13463,7 +13415,7 @@ __metadata:
     bignumber.js: "npm:^9.0.0"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13489,7 +13441,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13505,7 +13457,7 @@ __metadata:
     "@xchainjs/xchain-ethereum": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13517,7 +13469,7 @@ __metadata:
     "@xchainjs/xchain-solana": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13545,7 +13497,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13557,7 +13509,7 @@ __metadata:
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13587,7 +13539,7 @@ __metadata:
     dotenv: "npm:^16.0.0"
     ethers: "npm:^6.14.3"
     ts-node: "npm:10.9.2"
-    typescript: "npm:^5.0.4"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 
@@ -13689,16 +13641,6 @@ __metadata:
     y18n: "npm:^5.0.5"
     yargs-parser: "npm:^21.1.1"
   checksum: 10c0/ccd7e723e61ad5965fffbb791366db689572b80cca80e0f96aad968dfff4156cd7cd1ad18607afe1046d8241e6fb2d6c08bf7fa7bfb5eaec818735d8feac8f05
-  languageName: node
-  linkType: hard
-
-"yarn-audit-ci@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "yarn-audit-ci@npm:1.2.0"
-  bin:
-    yarn-audit-ci: bin/audit.js
-    yaudit: bin/audit.js
-  checksum: 10c0/56f6f827a942d4cd16569fc6bb70ea4a898e843c11b872ac5ca8719f8554a1e94310e614ce27997ddd7044c478f37cc89bd97f6cb9bd8031dd2cca8b6b1779d2
   languageName: node
   linkType: hard
 

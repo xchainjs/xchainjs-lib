@@ -105,6 +105,36 @@ Estimation of Add Saver
 }
 ```
 
+## Trade Accounts
+
+Query trade account information and trade asset units:
+
+```ts
+import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
+import { assetFromStringEx, TradeAsset } from '@xchainjs/xchain-util'
+
+const mayachainQuery = new MayachainQuery()
+
+// Get trade asset units
+const tradeAsset = assetFromStringEx('ETH~ETH') as TradeAsset
+const units = await mayachainQuery.getTradeAssetUnits({ asset: tradeAsset })
+console.log(`Units: ${units.units.assetAmount.amount()}`)
+console.log(`Depth: ${units.depth.assetAmount.amount()}`)
+
+// Get all trade assets units
+const allUnits = await mayachainQuery.getTradeAssetsUnits()
+
+// Get trade accounts for an address
+const accounts = await mayachainQuery.getAddressTradeAccounts({ 
+  address: 'maya1...' 
+})
+
+// Get all accounts for a trade asset
+const assetAccounts = await mayachainQuery.getTradeAssetAccounts({ 
+  asset: tradeAsset 
+})
+```
+
 ## Documentation
 
 [`Overview `](https://dev.thorchain.org/thorchain-dev/xchainjs-integration-guide/query-package)

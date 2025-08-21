@@ -8,7 +8,15 @@ import {
   NetworkApi,
   QuoteApi,
   QuoteSwapResponse,
+  TradeAccountApi,
+  TradeAccountsApi,
+  TradeAccountsResponse,
+  TradeUnitApi,
+  TradeUnitResponse,
+  TradeUnitsApi,
+  TradeUnitsResponse,
 } from '@xchainjs/xchain-mayanode'
+import { Address } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
@@ -39,6 +47,10 @@ export class Mayanode {
   private quoteApis: QuoteApi[]
   private mimirApis: MimirApi[]
   private networkApis: NetworkApi[]
+  private tradeUnitApis: TradeUnitApi[]
+  private tradeUnitsApis: TradeUnitsApi[]
+  private tradeAccountApis: TradeAccountApi[]
+  private tradeAccountsApis: TradeAccountsApi[]
 
   constructor(network: Network = Network.Mainnet, config?: MayanodeConfig) {
     this.network = network
@@ -46,6 +58,10 @@ export class Mayanode {
     this.quoteApis = this.config.mayanodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
     this.mimirApis = this.config.mayanodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
     this.networkApis = this.config.mayanodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
+    this.tradeUnitApis = this.config.mayanodeBaseUrls.map((url) => new TradeUnitApi(new Configuration({ basePath: url })))
+    this.tradeUnitsApis = this.config.mayanodeBaseUrls.map((url) => new TradeUnitsApi(new Configuration({ basePath: url })))
+    this.tradeAccountApis = this.config.mayanodeBaseUrls.map((url) => new TradeAccountApi(new Configuration({ basePath: url })))
+    this.tradeAccountsApis = this.config.mayanodeBaseUrls.map((url) => new TradeAccountsApi(new Configuration({ basePath: url })))
 
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
   }
@@ -85,10 +101,12 @@ export class Mayanode {
             toAsset,
             amount,
             destinationAddress,
+            undefined, // refundAddress
             streamingInterval,
             streamingQuantity,
             toleranceBps,
-            affiliateBps,
+            undefined, // liquidityToleranceBps
+            affiliateBps?.toString(),
             affiliate,
           )
         ).data
@@ -136,5 +154,68 @@ export class Mayanode {
       } catch (_e) {}
     }
     throw Error(`MAYANode not responding`)
+  }
+
+  /**
+   * Returns the total units and depth of a trade asset
+   * @param {string} asset Trade asset (e.g., ETH~ETH)
+   * @param {number} height Optional - Block height
+   * @returns Returns the total units and depth of a trade asset
+   */
+  public async getTradeAssetUnits(asset: string, height?: number): Promise<TradeUnitResponse> {
+    for (const api of this.tradeUnitApis) {
+      try {
+        const resp = (await api.tradeUnit(asset, height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`MAYANode not responding. Can not get asset trade units`)
+  }
+
+  /**
+   * Returns the total units and depth for each trade asset
+   * @param {number} height Block height
+   * @returns Returns the total units and depth for each trade asset
+   */
+  public async getTradeAssetsUnits(height?: number): Promise<TradeUnitsResponse> {
+    for (const api of this.tradeUnitsApis) {
+      try {
+        const resp = (await api.tradeUnits(height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`MAYANode not responding. Can not get trade units`)
+  }
+
+  /**
+   * Returns the units and depth of a trade account address
+   * @param {Address} address Maya address
+   * @param {number} height Optional - Block height
+   * @returns Returns the units and depth of a trade account
+   */
+  public async getTradeAssetAccount(address: Address, height?: number): Promise<TradeAccountsResponse> {
+    for (const api of this.tradeAccountApis) {
+      try {
+        const resp = (await api.tradeAccount(address, height)).data
+        return resp as unknown as TradeAccountsResponse
+      } catch (e) {}
+    }
+    throw new Error(`MAYANode not responding. Can not get trade asset account`)
+  }
+
+  /**
+   * Returns all trade accounts for an asset
+   * @param {string} asset Trade asset (e.g., ETH~ETH)
+   * @param {number} height Optional - Block height
+   * @returns Returns all trade accounts for an asset
+   */
+  public async getTradeAssetAccounts(asset: string, height?: number): Promise<TradeAccountsResponse> {
+    for (const api of this.tradeAccountsApis) {
+      try {
+        const resp = (await api.tradeAccounts(asset, height)).data
+        return resp
+      } catch (e) {}
+    }
+    throw new Error(`MAYANode not responding. Can not get trade asset accounts`)
   }
 }

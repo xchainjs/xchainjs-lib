@@ -24,6 +24,7 @@ export type TotalFees = {
   asset: CompatibleAsset // The asset for which fees are calculated
   affiliateFee: CryptoAmount<CompatibleAsset> // The affiliate fee
   outboundFee: CryptoAmount<CompatibleAsset> // The outbound fee
+  liquidityFee: CryptoAmount<CompatibleAsset> // The liquidity fee
 }
 /**
  * Represents an estimate for a swap transaction.
@@ -42,6 +43,8 @@ export type SwapEstimate = {
   streamingSwapBlocks: number // The number of blocks for streaming swap
   streamingSwapSeconds: number // The time for streaming swap in seconds
   totalSwapSeconds: number // The total swap time in seconds
+  router: string
+  recommendedGasRate: string
   canSwap: boolean // Indicates if swap can be performed
   errors: string[] // List of errors encountered during estimation
   warning: string // Any warning messages

@@ -16,6 +16,9 @@ export namespace common {
 
         /** Asset synth */
         synth?: (boolean|null);
+
+        /** Asset trade */
+        trade?: (boolean|null);
     }
 
     /** Represents an Asset. */
@@ -38,6 +41,9 @@ export namespace common {
 
         /** Asset synth. */
         public synth: boolean;
+
+        /** Asset trade. */
+        public trade: boolean;
 
         /**
          * Creates a new Asset instance using the specified properties.

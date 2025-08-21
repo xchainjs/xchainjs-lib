@@ -1,5 +1,41 @@
 # Changelog
 
+## 2.0.12
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.8
+- @xchainjs/xchain-evm@2.0.11
+- @xchainjs/xchain-evm-providers@2.0.10
+
+## 2.0.11
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.7
+- @xchainjs/xchain-evm@2.0.10
+- @xchainjs/xchain-evm-providers@2.0.9
+
+## 2.0.10
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-evm@2.0.9
+  - @xchainjs/xchain-evm-providers@2.0.8
+  - @xchainjs/xchain-util@2.0.4
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-evm-providers@2.0.7
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-evm@2.0.8
+
 ## 2.0.8
 
 ### Patch Changes

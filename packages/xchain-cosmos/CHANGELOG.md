@@ -1,5 +1,45 @@
 # Changelog
 
+## 3.0.8
+
+### Patch Changes
+
+- Updated dependencies [cfd0dc7]
+  - @xchainjs/xchain-crypto@1.0.6
+  - @xchainjs/xchain-client@2.0.8
+  - @xchainjs/xchain-cosmos-sdk@2.0.8
+
+## 3.0.7
+
+### Patch Changes
+
+- Updated dependencies [33b3ca5]
+  - @xchainjs/xchain-crypto@1.0.5
+  - @xchainjs/xchain-client@2.0.7
+  - @xchainjs/xchain-cosmos-sdk@2.0.7
+
+## 3.0.6
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-cosmos-sdk@2.0.6
+  - @xchainjs/xchain-crypto@1.0.4
+  - @xchainjs/xchain-util@2.0.4
+
+## 3.0.5
+
+### Patch Changes
+
+- ba9247b: use a semver version range for dependencies
+- Updated dependencies [ba9247b]
+- Updated dependencies [e7bc97f]
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-crypto@1.0.3
+  - @xchainjs/xchain-cosmos-sdk@2.0.5
+
 ## 3.0.4
 
 ### Patch Changes

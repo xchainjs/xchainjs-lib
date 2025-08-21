@@ -1,5 +1,15 @@
 import { TxHash } from '@xchainjs/xchain-client'
-import { Address, Asset, AssetCryptoAmount, Chain, CryptoAmount, SynthAsset, TokenAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  Asset,
+  AssetCryptoAmount,
+  Chain,
+  CryptoAmount,
+  SynthAsset,
+  TokenAsset,
+  TradeAsset,
+  TradeCryptoAmount,
+} from '@xchainjs/xchain-util'
 import type BigNumber from 'bignumber.js'
 
 export type CompatibleAsset = Asset | TokenAsset | SynthAsset
@@ -252,3 +262,109 @@ export type QuoteMAYAName = {
    */
   value: AssetCryptoAmount
 }
+
+/**
+ * Trade asset units parameters
+ */
+export type TradeAssetUnitsParams = {
+  /**
+   * Trade asset to get units for
+   */
+  asset: TradeAsset
+  /**
+   * Optional block height
+   */
+  height?: number
+}
+
+/**
+ * Trade asset units response
+ */
+export type TradeAssetUnits = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Total units of the trade asset
+   */
+  units: TradeCryptoAmount
+  /**
+   * Total depth of the trade asset
+   */
+  depth: TradeCryptoAmount
+}
+
+/**
+ * Trade assets units parameters
+ */
+export type TradeAssetsUnitsParams = {
+  /**
+   * Optional block height
+   */
+  height?: number
+}
+
+/**
+ * Address trade accounts parameters
+ */
+export type AddressTradeAccountsParams = {
+  /**
+   * Maya address to get trade accounts for
+   */
+  address: Address
+  /**
+   * Optional block height
+   */
+  height?: number
+}
+
+/**
+ * Address trade account
+ */
+export type AddressTradeAccount = {
+  /**
+   * Trade asset
+   */
+  asset: TradeAsset
+  /**
+   * Units of trade asset belonging to this owner
+   */
+  units: TradeCryptoAmount
+  /**
+   * Maya address of trade account owner
+   */
+  owner: Address
+  /**
+   * Last mayachain height trade assets were added
+   */
+  lastAddHeight?: number
+  /**
+   * Last mayachain height trade assets were withdrawn
+   */
+  lastWithdrawHeight?: number
+}
+
+/**
+ * Address trade accounts response
+ */
+export type AddressTradeAccounts = AddressTradeAccount[]
+
+/**
+ * Trade asset accounts parameters
+ */
+export type TradeAssetAccountsParams = {
+  /**
+   * Trade asset to get accounts for
+   */
+  asset: TradeAsset
+  /**
+   * Optional block height
+   */
+  height?: number
+}
+
+/**
+ * Trade asset accounts response
+ */
+export type TradeAssetAccounts = AddressTradeAccount[]
