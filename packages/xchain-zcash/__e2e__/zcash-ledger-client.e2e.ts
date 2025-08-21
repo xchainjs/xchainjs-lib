@@ -54,8 +54,8 @@ describe('Zcash Client Ledger', () => {
 
   it('transfer', async () => {
     try {
-      const to = 't1cet7Ko6aPRCttAzhz3DmWcQSSAUGJ2HhK'
-      const amount = assetToBase(assetAmount('0.1'))
+      const to = await zcashClient.getAddressAsync(1)
+      const amount = assetToBase(assetAmount('0.00002'))
       const txid = await zcashClient.transfer({
         asset: AssetZEC,
         recipient: to,
