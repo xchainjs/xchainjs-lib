@@ -31,7 +31,7 @@ import {
   XRP_DEFAULT_FEE,
 } from './const'
 import * as Utils from './utils'
-import { SignedTransaction, XRPClientParams } from './types'
+import { SignedTransaction, XRPClientParams, XRPTxParams } from './types'
 
 // Default parameters for the Ripple client
 export const defaultXRPParams: XRPClientParams = {
@@ -192,17 +192,55 @@ export abstract class Client extends BaseXChainClient {
   }
 
   /**
+   * Check if destination account requires destination tag
+   * @param {string} destination - The destination address
+   * @returns {Promise<boolean>} True if destination requires tag
+   */
+  public async requiresDestinationTag(destination: string): Promise<boolean> {
+    try {
+      const xrplClient = await this.getXrplClient()
+      const response = await xrplClient.request({
+        command: 'account_info',
+        account: destination,
+        ledger_index: 'validated',
+      })
+
+      const flags = response.result.account_data.Flags
+      // lsfRequireDestTag flag is 0x00020000 (bit 17)
+      const LSF_REQUIRE_DEST_TAG = 0x00020000
+      return (flags & LSF_REQUIRE_DEST_TAG) !== 0
+    } catch (error) {
+      // If account doesn't exist or we can't check, assume it doesn't require destination tag
+      return false
+    }
+  }
+
+  /**
    * Prepares a transaction for transfer.
    *
-   * @param {TxParams&Address} params - The transfer options.
+   * @param {TxParams & { sender: Address } & XRPTxParams} params - The transfer options.
    * @returns {Promise<PreparedTx>} The raw unsigned transaction.
    */
-  public async prepareTxForXrpl({ sender, recipient, amount, memo }: TxParams & { sender: Address }): Promise<Payment> {
+  public async prepareTxForXrpl({
+    sender,
+    recipient,
+    amount,
+    memo,
+    destinationTag,
+  }: TxParams & { sender: Address } & XRPTxParams): Promise<Payment> {
     const paymentTx: Payment = {
       TransactionType: 'Payment',
       Account: sender,
       Destination: recipient,
       Amount: amount.amount().toString(),
+    }
+
+    // Add destination tag if provided
+    if (destinationTag !== undefined) {
+      if (!Utils.validateDestinationTag(destinationTag)) {
+        throw new Error(`Invalid destination tag: ${destinationTag}. Must be an integer between 0 and 4294967295.`)
+      }
+      paymentTx.DestinationTag = destinationTag
     }
 
     if (memo && memo.trim() !== '') {
@@ -228,14 +266,23 @@ export abstract class Client extends BaseXChainClient {
 
   /**
    * Transfer XRP
-   * @param {TxParams} params The transfer options.
+   * @param {TxParams & XRPTxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
    */
-  public async transfer(params: TxParams): Promise<string> {
+  public async transfer(params: TxParams & XRPTxParams): Promise<string> {
     if (!eqAsset(params.asset || AssetXRP, AssetXRP)) {
       throw Error(`Asset not supported`)
     }
     const sender = await this.getAddressAsync(params.walletIndex)
+
+    // Check if destination requires destination tag
+    const requiresDestTag = await this.requiresDestinationTag(params.recipient)
+    if (requiresDestTag && params.destinationTag === undefined) {
+      throw new Error(
+        `Destination address requires a destination tag but none was provided. The recipient account has the RequireDestTag flag set.`,
+      )
+    }
+
     const baseTx = await this.prepareTxForXrpl({ ...params, sender })
 
     const xrplClient = await this.getXrplClient()
