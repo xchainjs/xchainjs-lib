@@ -209,7 +209,7 @@ export abstract class Client extends BaseXChainClient {
       // lsfRequireDestTag flag is 0x00020000 (bit 17)
       const LSF_REQUIRE_DEST_TAG = 0x00020000
       return (flags & LSF_REQUIRE_DEST_TAG) !== 0
-    } catch (error) {
+    } catch (_error) {
       // If account doesn't exist or we can't check, assume it doesn't require destination tag
       return false
     }
