@@ -4428,6 +4428,7 @@ __metadata:
   resolution: "@xchainjs/xchain-zcash@workspace:packages/xchain-zcash"
   dependencies:
     "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
+    "@ledgerhq/hw-transport-node-hid": "npm:^6.28.6"
     "@mayaprotocol/zcash-js": "npm:1.0.7"
     "@scure/bip32": "npm:^1.7.0"
     "@types/blake2b-wasm": "npm:^2.4.3"
