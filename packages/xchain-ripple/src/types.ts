@@ -8,3 +8,7 @@ export type SignedTransaction = {
   tx_blob: string
   hash?: string
 }
+
+export interface XRPTxParams {
+  destinationTag?: number
+}
