@@ -1,4 +1,4 @@
-const core = require('@actions/core')
+import * as core from '@actions/core'
 
 type Package = {
   name: string
