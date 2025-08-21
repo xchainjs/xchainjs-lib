@@ -15,8 +15,12 @@ function parseCustomSwap(value: string): SwapConfig[] {
     if (parts.length !== 3)
       throw Error(`${config} must have 3 parameters: [assetString | *] [assetString | *] [weight]`)
     //check asset strings parse ok
-    parts[0] === '*' || assetFromStringEx(parts[0])
-    parts[1] === '*' || assetFromStringEx(parts[1])
+    if (parts[0] !== '*' && !assetFromStringEx(parts[0])) {
+      throw Error(`Invalid asset string: ${parts[0]}`)
+    }
+    if (parts[1] !== '*' && !assetFromStringEx(parts[1])) {
+      throw Error(`Invalid asset string: ${parts[1]}`)
+    }
 
     const swapConfig = {
       sourceAssetString: parts[0],
@@ -35,7 +39,9 @@ function parseCustomTransfer(value: string): TransferConfig[] {
     const parts = config.trim().split(/\s+/)
     if (parts.length !== 2) throw Error(`${config} must have 2 parameters: [assetString | *] [weight]`)
     //check asset strings parse ok
-    parts[0] === '*' || assetFromStringEx(parts[0])
+    if (parts[0] !== '*' && !assetFromStringEx(parts[0])) {
+      throw Error(`Invalid asset string: ${parts[0]}`)
+    }
 
     const transferConfig = {
       assetString: parts[0],
@@ -53,7 +59,9 @@ function parseCustomAddLP(value: string): AddLpConfig[] {
     const parts = config.trim().split(/\s+/)
     if (parts.length !== 2) throw Error(`${config} must have 2 parameters: [assetString | *] [weight]`)
     //check asset strings parse ok
-    parts[0] === '*' || assetFromStringEx(parts[0])
+    if (parts[0] !== '*' && !assetFromStringEx(parts[0])) {
+      throw Error(`Invalid asset string: ${parts[0]}`)
+    }
 
     const addlpConfig = {
       assetString: parts[0],
@@ -71,7 +79,9 @@ function parseCustomWithdrawLP(value: string): WithdrawLpConfig[] {
     const parts = config.trim().split(/\s+/)
     if (parts.length !== 2) throw Error(`${config} must have 2 parameters: [assetString | *] [weight] `)
     //check asset strings parse ok
-    parts[0] === '*' || assetFromStringEx(parts[0])
+    if (parts[0] !== '*' && !assetFromStringEx(parts[0])) {
+      throw Error(`Invalid asset string: ${parts[0]}`)
+    }
 
     const withdrawlpConfig = {
       assetString: parts[0],

@@ -75,6 +75,7 @@ export default [
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
+      'no-unused-expressions': 'error',
       'import/no-duplicates': 'error',
       'import/no-named-as-default': 'off',
       'import/no-named-as-default-member': 'off',

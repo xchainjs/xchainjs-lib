@@ -52,7 +52,7 @@ const main = () => {
     core.setOutput('embeds', [embed])
     core.setOutput('success', true)
   } catch (e) {
-    core.setFailed(`Error preparing message: ${e}`)
+    core.setFailed(`Error preparing message: ${String(e)}`)
   }
 }
 
