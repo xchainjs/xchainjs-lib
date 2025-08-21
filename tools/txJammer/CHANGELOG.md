@@ -1,5 +1,11 @@
 # txJammer
 
+## 1.0.61
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@3.0.20
+
 ## 1.0.60
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.20
+
+### Patch Changes
+
+- Updated dependencies [3825976]
+  - @xchainjs/xchain-ripple@1.0.10
+
 ## 3.0.19
 
 ### Patch Changes
