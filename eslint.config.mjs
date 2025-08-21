@@ -8,11 +8,15 @@ export default [
   {
     ignores: [
       '**/node_modules/**',
-      'packages/**/lib/**',
+      '**/lib/**',
+      '**/types/proto/**',
+      '**/*.d.ts',
       'packages/xchain-mayachain/src/types/proto/**',
       'packages/xchain-thorchain/src/types/proto/**',
-      '**/*.d.ts',
     ],
+  },
+  {
+    files: ['**/*.{js,mjs,cjs,ts,tsx}'],
     languageOptions: {
       parser: tsparser,
       parserOptions: {

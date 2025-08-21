@@ -27,6 +27,7 @@ lint:
     # JS/TS linting
     - eslint@8.57.1:
         use_project_eslint: true
+        config: eslint.config.mjs
     - prettier@2.8.8: # Code formatting
         config: .prettierrc
     #- codespell@2.4.1           # Spell-checking
