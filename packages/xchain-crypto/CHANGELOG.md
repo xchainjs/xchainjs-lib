@@ -1,5 +1,29 @@
 # Changelog
 
+## 1.0.6
+
+### Patch Changes
+
+- cfd0dc7: Update crypto dependencies
+
+## 1.0.5
+
+### Patch Changes
+
+- 33b3ca5: Fix break compatibility
+
+## 1.0.4
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+
+## 1.0.3
+
+### Patch Changes
+
+- e7bc97f: drop dependency on foundry-primitives fork
+
 ## 1.0.2
 
 ### Patch Changes

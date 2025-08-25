@@ -1,5 +1,84 @@
 # Changelog
 
+## 2.0.21
+
+### Patch Changes
+
+- Updated dependencies [74eba1f]
+- Updated dependencies [88a73be]
+  - @xchainjs/xchain-thorchain-query@2.0.11
+  - @xchainjs/xchain-thorchain-amm@3.0.19
+
+## 2.0.20
+
+### Patch Changes
+
+- Updated dependencies [e4ae516]
+- Updated dependencies [e4ae516]
+  - @xchainjs/xchain-mayachain-query@2.1.0
+  - @xchainjs/xchain-mayachain-amm@4.1.0
+  - @xchainjs/xchain-mayachain@4.0.0
+  - @xchainjs/xchain-wallet@2.0.16
+  - @xchainjs/xchain-thorchain-amm@3.0.18
+
+## 2.0.19
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.8
+- @xchainjs/xchain-mayachain@3.0.8
+- @xchainjs/xchain-mayachain-amm@4.0.17
+- @xchainjs/xchain-thorchain@3.0.12
+- @xchainjs/xchain-thorchain-amm@3.0.17
+- @xchainjs/xchain-wallet@2.0.15
+- @xchainjs/xchain-mayachain-query@2.0.10
+- @xchainjs/xchain-thorchain-query@2.0.10
+
+## 2.0.18
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.7
+- @xchainjs/xchain-mayachain@3.0.7
+- @xchainjs/xchain-mayachain-amm@4.0.16
+- @xchainjs/xchain-thorchain@3.0.11
+- @xchainjs/xchain-thorchain-amm@3.0.16
+- @xchainjs/xchain-wallet@2.0.14
+- @xchainjs/xchain-mayachain-query@2.0.9
+- @xchainjs/xchain-thorchain-query@2.0.9
+
+## 2.0.17
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-mayachain@3.0.6
+  - @xchainjs/xchain-mayachain-amm@4.0.15
+  - @xchainjs/xchain-mayachain-query@2.0.8
+  - @xchainjs/xchain-thorchain@3.0.10
+  - @xchainjs/xchain-thorchain-amm@3.0.15
+  - @xchainjs/xchain-thorchain-query@2.0.8
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-wallet@2.0.13
+
+## 2.0.16
+
+### Patch Changes
+
+- Updated dependencies [156e836]
+- Updated dependencies [0b6f12a]
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-thorchain@3.0.9
+  - @xchainjs/xchain-thorchain-query@2.0.7
+  - @xchainjs/xchain-thorchain-amm@3.0.14
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-mayachain-amm@4.0.14
+  - @xchainjs/xchain-wallet@2.0.12
+  - @xchainjs/xchain-mayachain-query@2.0.7
+  - @xchainjs/xchain-mayachain@3.0.5
+
 ## 2.0.15
 
 ### Patch Changes

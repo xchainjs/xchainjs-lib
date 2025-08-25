@@ -1,5 +1,57 @@
 # xchainjs-aggregator
 
+## 1.0.21
+
+### Patch Changes
+
+- @xchainjs/xchain-aggregator@2.0.21
+
+## 1.0.20
+
+### Patch Changes
+
+- @xchainjs/xchain-aggregator@2.0.20
+- @xchainjs/xchain-wallet@2.0.16
+
+## 1.0.19
+
+### Patch Changes
+
+- @xchainjs/xchain-bitcoin@2.0.8
+- @xchainjs/xchain-aggregator@2.0.19
+- @xchainjs/xchain-wallet@2.0.15
+- @xchainjs/xchain-ethereum@2.0.12
+
+## 1.0.18
+
+### Patch Changes
+
+- @xchainjs/xchain-bitcoin@2.0.7
+- @xchainjs/xchain-aggregator@2.0.18
+- @xchainjs/xchain-wallet@2.0.14
+- @xchainjs/xchain-ethereum@2.0.11
+
+## 1.0.17
+
+### Patch Changes
+
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-aggregator@2.0.17
+  - @xchainjs/xchain-bitcoin@2.0.6
+  - @xchainjs/xchain-ethereum@2.0.10
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-wallet@2.0.13
+
+## 1.0.16
+
+### Patch Changes
+
+- Updated dependencies [ba9247b]
+  - @xchainjs/xchain-bitcoin@2.0.5
+  - @xchainjs/xchain-aggregator@2.0.16
+  - @xchainjs/xchain-wallet@2.0.12
+  - @xchainjs/xchain-ethereum@2.0.9
+
 ## 1.0.15
 
 ### Patch Changes

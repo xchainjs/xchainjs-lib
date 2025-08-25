@@ -173,6 +173,7 @@ export class ThorchainQuery {
             asset: destinationAsset,
             affiliateFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
             outboundFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
+            liquidityFee: new AssetCryptoAmount(baseAmount(0), AssetRuneNative),
           },
           slipBasisPoints: 0,
           netOutput: new CryptoAmount(baseAmount(0), destinationAsset),
@@ -187,6 +188,8 @@ export class ThorchainQuery {
           streamingSwapBlocks: 0,
           streamingSwapSeconds: 0,
           totalSwapSeconds: 0,
+          recommendedGasRate: '0',
+          router: '',
           warning: '',
         },
       }
@@ -225,6 +228,10 @@ export class ThorchainQuery {
             new CryptoAmount(baseAmount(swapQuote.fees.outbound), feeAsset),
             feeAssetDecimals,
           ),
+          liquidityFee: getCryptoAmountWithNotation(
+            new CryptoAmount(baseAmount(swapQuote.fees.liquidity), feeAsset),
+            feeAssetDecimals,
+          ),
         },
         slipBasisPoints: swapQuote.fees.slippage_bps,
         netOutput: getCryptoAmountWithNotation(
@@ -245,6 +252,8 @@ export class ThorchainQuery {
         streamingSwapSeconds: swapQuote.streaming_swap_seconds ? swapQuote.streaming_swap_seconds : 0,
         totalSwapSeconds: swapQuote.total_swap_seconds ? swapQuote.total_swap_seconds : 0,
         canSwap: !swapQuote.memo || errors.length > 0 ? false : true,
+        recommendedGasRate: swapQuote.recommended_gas_rate ? swapQuote.recommended_gas_rate : '0',
+        router: swapQuote.router ? swapQuote.router : '',
         errors,
         warning: swapQuote.warning,
       },
@@ -330,6 +339,7 @@ export class ThorchainQuery {
       // swapFee: await this.convert(fees.swapFee, asset),
       outboundFee: await this.convert(fees.outboundFee, asset),
       affiliateFee: await this.convert(fees.affiliateFee, asset),
+      liquidityFee: await this.convert(fees.liquidityFee, asset),
       // totatBps: fees.totatBps,
     }
   }

@@ -7,5 +7,8 @@ export { defaultXRPParams } from './client'
 // Export all constants from the 'const' file
 export * from './const'
 
-// Export 'validateAddress' functions from the 'utils' file
-export { validateAddress } from './utils'
+// Export utility functions from the 'utils' file
+export { validateAddress, validateDestinationTag, parseDestinationTag } from './utils'
+
+// Export types
+export type { XRPTxParams } from './types'

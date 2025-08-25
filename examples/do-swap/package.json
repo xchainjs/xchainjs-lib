@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-do-swap",
   "private": true,
-  "version": "2.0.13",
+  "version": "2.0.19",
   "scripts": {
     "doSwap": "npx ts-node doSwap.ts",
     "doStreamingSwap": "npx ts-node doStreamingSwap.ts",
@@ -38,7 +38,6 @@
     "@xchainjs/xchain-wallet": "workspace:*",
     "axios": "1.8.4",
     "axios-retry": "^3.3.1",
-    "bchaddrjs": "^0.5.2",
     "bech32-buffer": "^0.2.0",
     "bitcoinjs-lib": "^6.1.7",
     "dotenv": "^16.0.0",
@@ -47,6 +46,6 @@
   "devDependencies": {
     "@types/node": ">=22.7.5",
     "ts-node": "10.9.2",
-    "typescript": "^5.0.4"
+    "typescript": "^5.8.3"
   }
 }

@@ -11,6 +11,7 @@ import {
   eqAsset,
   getContractAddressFromAsset,
   isSynthAsset,
+  isTradeAsset,
 } from '@xchainjs/xchain-util'
 import { EvmTxParams, Wallet } from '@xchainjs/xchain-wallet'
 
@@ -168,12 +169,16 @@ export class MayachainAction {
 
   private static isNonProtocolParams(params: ActionParams): params is NonProtocolActionParams {
     if (
-      (params.assetAmount.asset.chain === MAYAChain || isSynthAsset(params.assetAmount.asset)) &&
+      (params.assetAmount.asset.chain === MAYAChain || 
+        isSynthAsset(params.assetAmount.asset) || 
+        isTradeAsset(params.assetAmount.asset)) &&
       'address' in params &&
       !!params.address
     ) {
       throw Error('Inconsistent params. Native actions do not support recipient')
     }
-    return params.assetAmount.asset.chain !== MAYAChain && !isSynthAsset(params.assetAmount.asset)
+    return params.assetAmount.asset.chain !== MAYAChain && 
+      !isSynthAsset(params.assetAmount.asset) && 
+      !isTradeAsset(params.assetAmount.asset)
   }
 }

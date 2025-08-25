@@ -1,5 +1,60 @@
 # xchainjs-estimate-swap
 
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [74eba1f]
+- Updated dependencies [88a73be]
+  - @xchainjs/xchain-thorchain-query@2.0.11
+
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [cfd0dc7]
+  - @xchainjs/xchain-crypto@1.0.6
+  - @xchainjs/xchain-client@2.0.8
+  - @xchainjs/xchain-midgard-query@2.0.8
+  - @xchainjs/xchain-thorchain-query@2.0.10
+
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [33b3ca5]
+  - @xchainjs/xchain-crypto@1.0.5
+  - @xchainjs/xchain-client@2.0.7
+  - @xchainjs/xchain-midgard-query@2.0.7
+  - @xchainjs/xchain-thorchain-query@2.0.9
+
+## 2.0.8
+
+### Patch Changes
+
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-crypto@1.0.4
+  - @xchainjs/xchain-midgard@1.0.4
+  - @xchainjs/xchain-midgard-query@2.0.6
+  - @xchainjs/xchain-thorchain-query@2.0.8
+  - @xchainjs/xchain-thornode@1.0.5
+  - @xchainjs/xchain-util@2.0.4
+
+## 2.0.7
+
+### Patch Changes
+
+- Updated dependencies [0b6f12a]
+- Updated dependencies [ba9247b]
+- Updated dependencies [e7bc97f]
+  - @xchainjs/xchain-thorchain-query@2.0.7
+  - @xchainjs/xchain-midgard-query@2.0.5
+  - @xchainjs/xchain-thornode@1.0.4
+  - @xchainjs/xchain-midgard@1.0.3
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-crypto@1.0.3
+
 ## 2.0.6
 
 ### Patch Changes

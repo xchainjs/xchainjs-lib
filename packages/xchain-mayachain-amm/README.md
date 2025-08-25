@@ -45,13 +45,18 @@ Otherwise, if you want to be able make actions the protocol needs you to sign, y
   import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
   import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
   import { Wallet } from '@xchainjs/xchain-wallet'
+  import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 
+  const phrase = 'your mnemonic phrase here'
   const mayaChainQuery = new MayachainQuery()
   const wallet = new Wallet({
-    // Your XChainJS clients
+    MAYA: new MayaClient({ phrase, network: Network.Mainnet }),
+    // Add other clients with phrases as needed
   })
   const mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
 ```
+
+**Important**: All clients in the wallet MUST be initialized with a mnemonic phrase to sign transactions. Without a phrase, you'll get the error: "No clients available. Can not sign and broadcast transaction"
 
 ## Features
 
@@ -67,6 +72,12 @@ Using MAYAChain AMM package, you could easily implement the following features
 
 - Get MAYAName details
 - Get MAYANames by owner
+
+### Trade Accounts
+
+- Add assets to trade accounts
+- Withdraw assets from trade accounts
+- Estimate add/withdraw operations
 
 ## Examples
 

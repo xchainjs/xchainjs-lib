@@ -1,5 +1,138 @@
 # xchainjs-do-swap
 
+## 2.0.19
+
+### Patch Changes
+
+- Updated dependencies [74eba1f]
+- Updated dependencies [88a73be]
+  - @xchainjs/xchain-thorchain-query@2.0.11
+  - @xchainjs/xchain-thorchain-amm@3.0.19
+
+## 2.0.18
+
+### Patch Changes
+
+- @xchainjs/xchain-wallet@2.0.16
+- @xchainjs/xchain-thorchain-amm@3.0.18
+
+## 2.0.17
+
+### Patch Changes
+
+- Updated dependencies [cfd0dc7]
+  - @xchainjs/xchain-crypto@1.0.6
+  - @xchainjs/xchain-bitcoin@2.0.8
+  - @xchainjs/xchain-bitcoincash@2.0.9
+  - @xchainjs/xchain-client@2.0.8
+  - @xchainjs/xchain-cosmos@3.0.8
+  - @xchainjs/xchain-cosmos-sdk@2.0.8
+  - @xchainjs/xchain-dash@2.0.8
+  - @xchainjs/xchain-doge@2.0.8
+  - @xchainjs/xchain-evm@2.0.11
+  - @xchainjs/xchain-litecoin@2.0.8
+  - @xchainjs/xchain-thorchain@3.0.12
+  - @xchainjs/xchain-thorchain-amm@3.0.17
+  - @xchainjs/xchain-wallet@2.0.15
+  - @xchainjs/xchain-avax@2.0.11
+  - @xchainjs/xchain-bsc@2.0.12
+  - @xchainjs/xchain-ethereum@2.0.12
+  - @xchainjs/xchain-evm-providers@2.0.10
+  - @xchainjs/xchain-midgard-query@2.0.8
+  - @xchainjs/xchain-thorchain-query@2.0.10
+  - @xchainjs/xchain-utxo@2.0.8
+  - @xchainjs/xchain-utxo-providers@2.0.8
+
+## 2.0.16
+
+### Patch Changes
+
+- Updated dependencies [33b3ca5]
+  - @xchainjs/xchain-crypto@1.0.5
+  - @xchainjs/xchain-bitcoin@2.0.7
+  - @xchainjs/xchain-bitcoincash@2.0.8
+  - @xchainjs/xchain-client@2.0.7
+  - @xchainjs/xchain-cosmos@3.0.7
+  - @xchainjs/xchain-cosmos-sdk@2.0.7
+  - @xchainjs/xchain-dash@2.0.7
+  - @xchainjs/xchain-doge@2.0.7
+  - @xchainjs/xchain-evm@2.0.10
+  - @xchainjs/xchain-litecoin@2.0.7
+  - @xchainjs/xchain-thorchain@3.0.11
+  - @xchainjs/xchain-thorchain-amm@3.0.16
+  - @xchainjs/xchain-wallet@2.0.14
+  - @xchainjs/xchain-avax@2.0.10
+  - @xchainjs/xchain-bsc@2.0.11
+  - @xchainjs/xchain-ethereum@2.0.11
+  - @xchainjs/xchain-evm-providers@2.0.9
+  - @xchainjs/xchain-midgard-query@2.0.7
+  - @xchainjs/xchain-thorchain-query@2.0.9
+  - @xchainjs/xchain-utxo@2.0.7
+  - @xchainjs/xchain-utxo-providers@2.0.7
+
+## 2.0.15
+
+### Patch Changes
+
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-avax@2.0.9
+  - @xchainjs/xchain-bitcoin@2.0.6
+  - @xchainjs/xchain-bitcoincash@2.0.7
+  - @xchainjs/xchain-bsc@2.0.10
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-cosmos@3.0.6
+  - @xchainjs/xchain-cosmos-sdk@2.0.6
+  - @xchainjs/xchain-crypto@1.0.4
+  - @xchainjs/xchain-dash@2.0.6
+  - @xchainjs/xchain-doge@2.0.6
+  - @xchainjs/xchain-ethereum@2.0.10
+  - @xchainjs/xchain-evm@2.0.9
+  - @xchainjs/xchain-evm-providers@2.0.8
+  - @xchainjs/xchain-litecoin@2.0.6
+  - @xchainjs/xchain-midgard@1.0.4
+  - @xchainjs/xchain-midgard-query@2.0.6
+  - @xchainjs/xchain-thorchain@3.0.10
+  - @xchainjs/xchain-thorchain-amm@3.0.15
+  - @xchainjs/xchain-thorchain-query@2.0.8
+  - @xchainjs/xchain-thornode@1.0.5
+  - @xchainjs/xchain-util@2.0.4
+  - @xchainjs/xchain-utxo@2.0.6
+  - @xchainjs/xchain-utxo-providers@2.0.6
+  - @xchainjs/xchain-wallet@2.0.13
+
+## 2.0.14
+
+### Patch Changes
+
+- Updated dependencies [156e836]
+- Updated dependencies [0b6f12a]
+- Updated dependencies [ba9247b]
+- Updated dependencies [e7bc97f]
+- Updated dependencies [134bbbd]
+  - @xchainjs/xchain-thorchain@3.0.9
+  - @xchainjs/xchain-thorchain-query@2.0.7
+  - @xchainjs/xchain-thorchain-amm@3.0.14
+  - @xchainjs/xchain-utxo-providers@2.0.5
+  - @xchainjs/xchain-evm-providers@2.0.7
+  - @xchainjs/xchain-midgard-query@2.0.5
+  - @xchainjs/xchain-bitcoincash@2.0.6
+  - @xchainjs/xchain-litecoin@2.0.5
+  - @xchainjs/xchain-thornode@1.0.4
+  - @xchainjs/xchain-bitcoin@2.0.5
+  - @xchainjs/xchain-midgard@1.0.3
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-cosmos@3.0.5
+  - @xchainjs/xchain-dash@2.0.5
+  - @xchainjs/xchain-doge@2.0.5
+  - @xchainjs/xchain-evm@2.0.8
+  - @xchainjs/xchain-crypto@1.0.3
+  - @xchainjs/xchain-wallet@2.0.12
+  - @xchainjs/xchain-utxo@2.0.5
+  - @xchainjs/xchain-avax@2.0.8
+  - @xchainjs/xchain-bsc@2.0.9
+  - @xchainjs/xchain-ethereum@2.0.9
+  - @xchainjs/xchain-cosmos-sdk@2.0.5
+
 ## 2.0.13
 
 ### Patch Changes

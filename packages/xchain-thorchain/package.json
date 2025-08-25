@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain",
-  "version": "3.0.8",
+  "version": "3.0.12",
   "description": "Custom Thorchain client and utilities used by XChainJS clients",
   "keywords": [
     "THORChain",
@@ -44,7 +44,7 @@
     "@ledgerhq/hw-transport": "^6.31.6",
     "@scure/base": "^1.2.6",
     "@scure/bip32": "^1.7.0",
-    "@xchainjs/ledger-thorchain": "0.3.0",
+    "@xchainjs/ledger-thorchain": "^0.3.1",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",

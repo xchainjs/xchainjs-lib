@@ -11,6 +11,7 @@ import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { AssetCacao, CACAO_DECIMAL, Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import {
+  InboundDetail,
   MAYANameDetails,
   MayachainQuery,
   QuoteSwap,
@@ -23,15 +24,27 @@ import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import {
   Address,
   AssetCryptoAmount,
+  AssetType,
   CryptoAmount,
   assetToString,
   baseAmount,
+  eqAsset,
+  isTradeAsset,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { MayachainAction } from './mayachain-action'
-import { ApproveParams, IsApprovedParams, QuoteMAYAName, TxSubmitted } from './types'
+import {
+  AddToTradeAccount,
+  AddToTradeAccountParams,
+  ApproveParams,
+  IsApprovedParams,
+  QuoteMAYAName,
+  TxSubmitted,
+  WithdrawFromTradeAccount,
+  WithdrawFromTradeAccountParams,
+} from './types'
 import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
 /**
@@ -192,6 +205,19 @@ export class MayachainAMM {
         })
         errors.push(...approveErrors)
       }
+    }
+
+    // Validate trade asset swap restrictions
+    if (!isTradeAsset(fromAsset) && !eqAsset(fromAsset, AssetCacao) && isTradeAsset(destinationAsset)) {
+      errors.push(
+        'Can not make swap from non trade asset or non Cacao asset to trade asset. Use addToTrade (TRADE+) operation',
+      )
+    }
+
+    if (isTradeAsset(fromAsset) && !isTradeAsset(destinationAsset) && !eqAsset(destinationAsset, AssetCacao)) {
+      errors.push(
+        'Can not make swap from trade asset to non trade asset or non Cacao asset. Use withdrawFromTrade (TRADE-) operation',
+      )
     }
 
     if (streamingQuantity && streamingQuantity < 0) {
@@ -435,6 +461,130 @@ export class MayachainAMM {
     return MayachainAction.makeAction({
       wallet: this.wallet,
       assetAmount: quote.value,
+      memo: quote.memo,
+    })
+  }
+
+
+  /**
+   * Estimate adding trade amount to account
+   * @param {AddToTradeAccountParams} param Add to trade account params
+   * @returns {AddToTradeAccount} Estimation to add amount to trade account
+   */
+  public async estimateAddToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<AddToTradeAccount> {
+    const errors: string[] = []
+
+    if (!validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, address)) {
+      errors.push('Invalid trade account address')
+    }
+
+    let inboundDetails: InboundDetail | undefined
+    try {
+      inboundDetails = await this.mayachainQuery.getChainInboundDetails(amount.asset.chain)
+    } catch {
+      errors.push(`Can not get inbound address for ${amount.asset.chain}`)
+    }
+
+    if (errors.length) {
+      return {
+        allowed: false,
+        errors,
+        value: new CryptoAmount(baseAmount(0, amount.assetAmount.decimal), amount.asset),
+        memo: '',
+        toAddress: '',
+      }
+    }
+
+    return {
+      allowed: true,
+      errors,
+      value: amount,
+      memo: `TRADE+:${address}`,
+      toAddress: inboundDetails?.address || '',
+    }
+  }
+
+  /**
+   * Add trade amount to account
+   * @param {AddToTradeAccountParams} param Add to trade account params
+   * @returns {TxSubmitted} Transaction made to add the trade amount
+   */
+  public async addToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<TxSubmitted> {
+    const quote = await this.estimateAddToTradeAccount({ amount, address })
+
+    if (!quote.allowed) throw Error(`Can not add to trade account. ${quote.errors.join(' ')}`)
+
+    // Convert trade asset to underlying asset for the transaction
+    const underlyingAsset = {
+      ...quote.value.asset,
+      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
+    }
+    const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
+
+    return MayachainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: transactionAmount,
+      memo: quote.memo,
+      recipient: quote.toAddress,
+    })
+  }
+
+  /**
+   * Estimate withdrawing trade amount from account
+   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
+   * @returns {WithdrawFromTradeAccount} Estimation to withdraw amount from trade account
+   */
+  public async estimateWithdrawFromTradeAccount({
+    amount,
+    address,
+  }: WithdrawFromTradeAccountParams): Promise<WithdrawFromTradeAccount> {
+    const errors: string[] = []
+
+    if (!validateAddress(this.mayachainQuery.getNetwork(), amount.asset.chain, address)) {
+      errors.push('Invalid address to send the withdraw')
+    }
+
+    if (amount.baseAmount.amount().isLessThanOrEqualTo(0)) {
+      errors.push('Withdraw amount must be greater than zero')
+    }
+
+    if (errors.length) {
+      return {
+        allowed: false,
+        errors,
+        value: new CryptoAmount(baseAmount(0, amount.assetAmount.decimal), amount.asset),
+        memo: '',
+      }
+    }
+
+    return {
+      allowed: true,
+      errors,
+      value: amount,
+      memo: `TRADE-:${address}`,
+    }
+  }
+
+  /**
+   * Withdraw trade amount from account
+   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
+   * @returns {TxSubmitted} Estimation to withdraw amount from trade account
+   */
+  public async withdrawFromTradeAccount({ amount, address }: WithdrawFromTradeAccountParams): Promise<TxSubmitted> {
+    const quote = await this.estimateWithdrawFromTradeAccount({ amount, address })
+
+    if (!quote.allowed) throw Error(`Can not withdraw from trade account. ${quote.errors.join(' ')}`)
+
+    // Convert trade asset to underlying asset for the transaction
+    const underlyingAsset = {
+      ...quote.value.asset,
+      type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
+    }
+    const transactionAmount = new CryptoAmount(quote.value.baseAmount, underlyingAsset)
+
+    return MayachainAction.makeAction({
+      wallet: this.wallet,
+      assetAmount: transactionAmount,
       memo: quote.memo,
     })
   }

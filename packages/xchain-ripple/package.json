@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-ripple",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "description": "Custom Ripple client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",

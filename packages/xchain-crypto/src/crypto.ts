@@ -1,6 +1,8 @@
-import * as bip39 from 'bip39'
+import { generateMnemonic, mnemonicToEntropy, mnemonicToSeedSync, validateMnemonic } from '@scure/bip39'
+import { wordlist } from '@scure/bip39/wordlists/english'
+import { bytesToHex } from '@noble/hashes/utils'
 import crypto from 'crypto'
-import { blake256 } from '@noble/hashes/blake1.js'
+import { blake2b } from '@noble/hashes/blake2'
 import { v4 as uuidv4 } from 'uuid'
 
 import { pbkdf2Async } from './utils'
@@ -53,15 +55,8 @@ const _isNode = (): boolean => {
  * @returns {string} The generated mnemonic phrase.
  */
 export const generatePhrase = (size = 12): string => {
-  if (_isNode()) {
-    const bytes = crypto.randomBytes((size == 12 ? 128 : 256) / 8)
-    const phrase = bip39.entropyToMnemonic(bytes)
-    return phrase
-  } else {
-    const entropy = size == 12 ? 128 : 256
-    const phrase = bip39.generateMnemonic(entropy)
-    return phrase
-  }
+  const strength = size === 12 ? 128 : 256
+  return generateMnemonic(wordlist, strength)
 }
 
 /**
@@ -70,7 +65,7 @@ export const generatePhrase = (size = 12): string => {
  * @returns {boolean} True if the phrase is valid, otherwise false.
  */
 export const validatePhrase = (phrase: string): boolean => {
-  return bip39.validateMnemonic(phrase)
+  return validateMnemonic(phrase, wordlist)
 }
 
 /**
@@ -79,11 +74,11 @@ export const validatePhrase = (phrase: string): boolean => {
  * @returns {Buffer} The seed derived from the phrase.
  * @throws {"Invalid BIP39 phrase"} Thrown if the phrase is invalid.
  */
-export const getSeed = (phrase: string): Buffer => {
+export const getSeed = (phrase: string): Uint8Array => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
   }
-  return bip39.mnemonicToSeedSync(phrase)
+  return mnemonicToSeedSync(phrase)
 }
 
 /**
@@ -92,9 +87,9 @@ export const getSeed = (phrase: string): Buffer => {
  * @returns the entropy phrase
  */
 export const phraseToEntropy = (phrase: string): string => {
-  return bip39.mnemonicToEntropy(phrase)
+  const entropyBytes = mnemonicToEntropy(phrase, wordlist) // Uint8Array
+  return bytesToHex(entropyBytes) // convert to hex string
 }
-
 /**
  * Encrypts the given phrase to a keystore object using the provided password.
  * @param {string} phrase The mnemonic phrase to encrypt.
@@ -123,7 +118,9 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
   const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
   const cipherText = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
-  const mac_bytes: Uint8Array = blake256(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]))
+  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]), {
+    dkLen: 32,
+  })
   const mac: string = Buffer.from(mac_bytes).toString('hex')
 
   const cryptoStruct = {
@@ -163,7 +160,7 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
   )
 
   const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
-  const mac_bytes: Uint8Array = blake256(Buffer.concat([derivedKey.slice(16, 32), ciphertext]))
+  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), ciphertext]), { dkLen: 32 })
   const mac: string = Buffer.from(mac_bytes).toString('hex')
 
   if (mac !== keystore.crypto.mac) throw new Error('Invalid password')

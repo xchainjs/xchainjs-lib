@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.1.7
+
+### Patch Changes
+
+- c77a849: Update default params types
+- Updated dependencies [cfd0dc7]
+  - @xchainjs/xchain-crypto@1.0.6
+  - @xchainjs/xchain-client@2.0.8
+
+## 1.1.6
+
+### Patch Changes
+
+- Updated dependencies [33b3ca5]
+  - @xchainjs/xchain-crypto@1.0.5
+  - @xchainjs/xchain-client@2.0.7
+
+## 1.1.5
+
+### Patch Changes
+
+- 59a4a07: Fix vulnerability form-data
+- Updated dependencies [59a4a07]
+  - @xchainjs/xchain-client@2.0.6
+  - @xchainjs/xchain-crypto@1.0.4
+  - @xchainjs/xchain-util@2.0.4
+
+## 1.1.4
+
+### Patch Changes
+
+- Updated dependencies [ba9247b]
+- Updated dependencies [e7bc97f]
+  - @xchainjs/xchain-client@2.0.5
+  - @xchainjs/xchain-crypto@1.0.3
+
 ## 1.1.3
 
 ### Patch Changes
