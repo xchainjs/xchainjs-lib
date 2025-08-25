@@ -52,8 +52,8 @@ export class Midgard {
       try {
         const saverDetails = (await api.getSaverDetail(address)).data
         return saverDetails
-      } catch (e) {
-        // console.error(e)
+      } catch (_e) {
+        // console.error(_e)
       }
     }
     throw Error(`Midgard not responding`)
@@ -67,8 +67,8 @@ export class Midgard {
     for (const api of this.midgardApis) {
       try {
         return (await api.getPools()).data
-      } catch (e) {
-        // console.error(e)
+      } catch (_e) {
+        // console.error(_e)
       }
     }
     throw new Error(`Midgard not responding`)
@@ -172,7 +172,7 @@ export class Midgard {
           fromHeight,
         )
         return response.data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`Midgard not responding`)
   }

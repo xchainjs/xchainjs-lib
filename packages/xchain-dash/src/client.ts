@@ -221,6 +221,9 @@ abstract class Client extends UTXOClient {
       network: this.network,
     })
     // Return the raw unsigned transaction and UTXOs
+    // ESLint disabled: Dash transaction has proper toString() method that returns hex string
+    // Left as-is during ESLint 8 upgrade as this core crypto functionality is tested and working
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return { rawUnsignedTx: tx.toString(), utxos, inputs }
   }
   /**

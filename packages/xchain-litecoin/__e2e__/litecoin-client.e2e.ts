@@ -64,11 +64,11 @@ describe('Litecoin Integration Tests', () => {
     try {
       txHistory = await ltcClient.getTransactions({ address, offset: -1, limit: 10 })
       fail()
-    } catch (error) {}
+    } catch (_error) {}
     try {
       txHistory = await ltcClient.getTransactions({ address, offset: 0, limit: -10 })
       fail()
-    } catch (error) {}
+    } catch (_error) {}
 
     expect(txHistory.total).toBeGreaterThan(0)
   })

@@ -336,7 +336,7 @@ export class Client extends BaseXChainClient implements EVMClient {
           [FeeOption.Fastest]: baseAmount(feeRates.fastest, this.config.gasAssetDecimals),
         }
       } catch (error) {
-        console.warn(`Can not round robin over GetFeeRates: ${error}`)
+        console.warn(`Can not round robin over GetFeeRates: ${String(error)}`)
       }
 
       try {
@@ -356,7 +356,7 @@ export class Client extends BaseXChainClient implements EVMClient {
           [FeeOption.Fastest]: baseAmount(gasPrice.multipliedBy(2).toString(), this.config.gasAssetDecimals),
         }
       } catch (error) {
-        console.warn(`Can not get gasPrice from provider: ${error}`)
+        console.warn(`Can not get gasPrice from provider: ${String(error)}`)
       }
     }
 
@@ -772,7 +772,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     if (!gasLimit) {
       try {
         txGasLimit = await this.estimateGasLimit({ asset, recipient, amount, memo, from: sender })
-      } catch (error) {
+      } catch (_error) {
         txGasLimit = eqAsset(asset, this.getAssetInfo().asset)
           ? this.defaults[this.network].transferGasAssetGasLimit
           : this.defaults[this.network].transferTokenGasLimit

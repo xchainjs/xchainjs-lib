@@ -10,14 +10,14 @@ import { BlockcypherNetwork, Transaction } from './blockcypher-api-types'
 export class BlockcypherProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
   private _apiKey?: string
-  private chain: Chain
+  // private chain: Chain
   private asset: Asset
   private assetDecimals: number
   private blockcypherNetwork: BlockcypherNetwork
 
   constructor(
     baseUrl = 'https://api.blockcypher.com/v1/',
-    chain: Chain,
+    _chain: Chain,
     asset: Asset,
     assetDecimals: number,
     blockcypherNetwork: BlockcypherNetwork,
@@ -25,12 +25,10 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
   ) {
     this.baseUrl = baseUrl
     this._apiKey = apiKey
-    this.chain = chain
+    // this.chain = chain
     this.asset = asset
     this.assetDecimals = assetDecimals
     this.blockcypherNetwork = blockcypherNetwork
-    this.asset
-    this.chain
   }
   public get apiKey(): string | undefined {
     return this._apiKey
@@ -212,8 +210,12 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
 
       //remove duplicates
       const txs: string[] = []
-      response.txrefs && txs.push(...response.txrefs.map((i) => i.tx_hash))
-      response.unconfirmed_txrefs && txs.push(...response.unconfirmed_txrefs.map((i) => i.tx_hash))
+      if (response.txrefs) {
+        txs.push(...response.txrefs.map((i) => i.tx_hash))
+      }
+      if (response.unconfirmed_txrefs) {
+        txs.push(...response.unconfirmed_txrefs.map((i) => i.tx_hash))
+      }
       const uniqTxs = [...new Set(txs)]
       const start = offset >= uniqTxs.length ? uniqTxs.length : offset
       const end = offset + limit >= uniqTxs.length ? uniqTxs.length : offset + limit

@@ -6,6 +6,7 @@ When performing trade operations that require broadcasting transactions (addToTr
 
 ### Correct Initialization for Trade Operations
 
+```typescript
 import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
 import { Wallet } from '@xchainjs/xchain-wallet'

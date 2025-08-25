@@ -224,13 +224,13 @@ describe('Cardano client', () => {
         // Test valid address
         const validAddress =
           'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
-        const validResult = await client.validateAddress(validAddress)
+        const validResult = client.validateAddress(validAddress)
         expect(validResult).toBeTruthy()
 
         // Test invalid address
         const invalidAddress =
           'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhf'
-        const invalidResult = await client.validateAddress(invalidAddress)
+        const invalidResult = client.validateAddress(invalidAddress)
         expect(invalidResult).toBeFalsy()
       })
     })

@@ -148,29 +148,29 @@ describe('Mayachain-query tests', () => {
   })
 
   it('Should return the number of decimals of Mayachain assets', async () => {
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC.BTC') as Asset)).toBe(8)
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC/BTC') as SynthAsset)).toBe(8)
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.ETH') as Asset)).toBe(18)
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('DASH.DASH') as Asset)).toBe(8)
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.KUJI') as Asset)).toBe(6)
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('THOR.RUNE') as Asset)).toBe(8)
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('MAYA.CACAO') as Asset)).toBe(10)
-    await expect(
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC.BTC') as Asset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC/BTC') as SynthAsset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.ETH') as Asset)).toBe(18)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('DASH.DASH') as Asset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.KUJI') as Asset)).toBe(6)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('THOR.RUNE') as Asset)).toBe(8)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('MAYA.CACAO') as Asset)).toBe(10)
+    expect(
       await mayachainQuery.getAssetDecimals(
         assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7') as TokenAsset,
       ),
     ).toBe(6)
-    await expect(
+    expect(
       await mayachainQuery.getAssetDecimals(
         assetFromStringEx('ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48') as TokenAsset,
       ),
     ).toBe(6)
-    await expect(
+    expect(
       await mayachainQuery.getAssetDecimals(
         assetFromStringEx('ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0') as TokenAsset,
       ),
     ).toBe(18)
-    await expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK') as TokenAsset)).toBe(6)
+    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK') as TokenAsset)).toBe(6)
     await expect(
       mayachainQuery.getAssetDecimals(
         assetFromStringEx('ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52') as TokenAsset,

@@ -1,5 +1,5 @@
 import { FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, Chain, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '../../types'
 
@@ -24,7 +24,7 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
     this.asset = asset
     this.assetDecimals = assetDecimals
     if (chain !== 'ZEC' || asset.chain !== 'ZEC') {
-      throw Error(`Now nodes provider does not support chain or asset ${chain} ${asset}`)
+      throw Error(`Now nodes provider does not support chain or asset ${chain} ${assetToString(asset)}`)
     }
   }
   public get apiKey(): string {

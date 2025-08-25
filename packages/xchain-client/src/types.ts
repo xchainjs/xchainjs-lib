@@ -75,7 +75,7 @@ export type TxTo = {
  * Type definition for the sender of a transaction.
  */
 export type TxFrom = {
-  from: Address | TxHash // The sender address or transaction hash
+  from: string // The sender Address or the TxHash
   amount: BaseAmount // The amount
   asset?: AnyAsset // The asset (optional)
 }

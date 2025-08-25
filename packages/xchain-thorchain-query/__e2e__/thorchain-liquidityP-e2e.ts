@@ -28,7 +28,7 @@ import {
 } from '../src/utils/const'
 import { Thornode } from '../src/utils/thornode'
 
-require('dotenv').config()
+import 'dotenv/config'
 
 const thorchainCache = new ThorchainCache(new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)

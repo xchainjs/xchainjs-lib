@@ -96,7 +96,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should not throw an error for setting a good phrase', () => {
-    expect(btcClient.setPhrase(phraseOne)).toBeUndefined
+    expect(btcClient.setPhrase(phraseOne)).toBeTruthy()
   })
 
   it('should validate the right address', async () => {
@@ -219,7 +219,7 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
 
     const amount = baseAmount(2223)
-    expect(
+    await expect(
       btcClient.transfer({
         asset: AssetBTC,
         recipient: addyThreePath0,

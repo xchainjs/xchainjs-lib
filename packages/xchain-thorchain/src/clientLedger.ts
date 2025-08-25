@@ -135,7 +135,7 @@ export class ClientLedger extends Client {
     const aminoTypes = this.getProtocolAminoMessages()
 
     const rawTx = TxRaw.fromPartial({
-      bodyBytes: await this.registry.encodeTxBody({
+      bodyBytes: this.registry.encodeTxBody({
         memo,
         messages: msgs.map((msg: AminoMsg) => aminoTypes.fromAmino(msg)),
       }),
@@ -220,7 +220,7 @@ export class ClientLedger extends Client {
     const aminoTypes = this.getProtocolAminoMessages()
 
     const rawTx = TxRaw.fromPartial({
-      bodyBytes: await this.registry.encodeTxBody({
+      bodyBytes: this.registry.encodeTxBody({
         messages: msgs.map((msg: AminoMsg) => aminoTypes.fromAmino(msg)),
         memo: params.memo,
       }),
