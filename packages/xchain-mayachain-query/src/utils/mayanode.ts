@@ -58,10 +58,18 @@ export class Mayanode {
     this.quoteApis = this.config.mayanodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
     this.mimirApis = this.config.mayanodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
     this.networkApis = this.config.mayanodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
-    this.tradeUnitApis = this.config.mayanodeBaseUrls.map((url) => new TradeUnitApi(new Configuration({ basePath: url })))
-    this.tradeUnitsApis = this.config.mayanodeBaseUrls.map((url) => new TradeUnitsApi(new Configuration({ basePath: url })))
-    this.tradeAccountApis = this.config.mayanodeBaseUrls.map((url) => new TradeAccountApi(new Configuration({ basePath: url })))
-    this.tradeAccountsApis = this.config.mayanodeBaseUrls.map((url) => new TradeAccountsApi(new Configuration({ basePath: url })))
+    this.tradeUnitApis = this.config.mayanodeBaseUrls.map(
+      (url) => new TradeUnitApi(new Configuration({ basePath: url })),
+    )
+    this.tradeUnitsApis = this.config.mayanodeBaseUrls.map(
+      (url) => new TradeUnitsApi(new Configuration({ basePath: url })),
+    )
+    this.tradeAccountApis = this.config.mayanodeBaseUrls.map(
+      (url) => new TradeAccountApi(new Configuration({ basePath: url })),
+    )
+    this.tradeAccountsApis = this.config.mayanodeBaseUrls.map(
+      (url) => new TradeAccountsApi(new Configuration({ basePath: url })),
+    )
 
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
   }
