@@ -6,11 +6,10 @@ import { Asset, CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-
 
 import mockMidgardApi from '../__mocks__/midgard-api'
 import mockThornodeApi from '../__mocks__/thornode-api'
-import { ThorchainAMM } from '../src/thorchain-amm'
+//import { ThorchainAMM } from '../src/thorchain-amm'
 
 const thorchainQuery = new ThorchainQuery()
-const thorchainAmm = new ThorchainAMM()
-thorchainAmm
+//const thorchainAmm = new ThorchainAMM()
 
 describe('ThorchainAmm Client Test', () => {
   beforeAll(() => {

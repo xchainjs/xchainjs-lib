@@ -179,7 +179,7 @@ export abstract class Client extends BaseXChainClient {
     try {
       const feeResponse = await xrplClient.request({ command: 'fee' })
       fee = feeResponse.result.drops.open_ledger_fee
-    } catch (error) {
+    } catch (_error) {
       fee = String(XRP_DEFAULT_FEE)
     }
 
@@ -209,7 +209,7 @@ export abstract class Client extends BaseXChainClient {
       // lsfRequireDestTag flag is 0x00020000 (bit 17)
       const LSF_REQUIRE_DEST_TAG = 0x00020000
       return (flags & LSF_REQUIRE_DEST_TAG) !== 0
-    } catch (error) {
+    } catch (_error) {
       // If account doesn't exist or we can't check, assume it doesn't require destination tag
       return false
     }
@@ -273,7 +273,7 @@ export abstract class Client extends BaseXChainClient {
     if (!eqAsset(params.asset || AssetXRP, AssetXRP)) {
       throw Error(`Asset not supported`)
     }
-    const sender = this.getAddress(params.walletIndex)
+    const sender = await this.getAddressAsync(params.walletIndex)
 
     // Check if destination requires destination tag
     const requiresDestTag = await this.requiresDestinationTag(params.recipient)
@@ -294,7 +294,7 @@ export abstract class Client extends BaseXChainClient {
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const xrplClient = await this.getXrplClient()
-    const address = params?.address || this.getAddress()
+    const address = params?.address || (await this.getAddressAsync())
 
     const count = params?.limit || 10
     const offset = params?.offset || 0

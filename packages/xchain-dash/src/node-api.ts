@@ -51,6 +51,6 @@ export const broadcastTx = async (params: BroadcastTxParams): Promise<TxHash> =>
     return response.txid
   } catch (ex) {
     // If an exception occurs during the request, reject the promise with the caught error message.
-    return Promise.reject(Error(`failed to broadcast a transaction caught: ${ex}`))
+    return Promise.reject(Error(`failed to broadcast a transaction caught: ${String(ex)}`))
   }
 }

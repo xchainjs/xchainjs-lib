@@ -48,7 +48,7 @@ export class MidgardQuery {
     const assetStringify = assetToString(asset)
     const pool = pools.find((pool) => pool.asset === assetStringify)
     if (!pool) {
-      throw new Error(`Can't find pool for asset: ${asset}`)
+      throw new Error(`Can't find pool for asset: ${assetStringify}`)
     }
     return pool
   }

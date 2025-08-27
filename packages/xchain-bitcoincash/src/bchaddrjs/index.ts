@@ -60,7 +60,7 @@ function isValidAddress(input) {
   try {
     decodeAddress(input)
     return true
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }
@@ -170,10 +170,10 @@ VERSION_BYTE[Format.Bitpay][Network.Testnet][Type.P2SH] = 196
 function decodeAddress(address) {
   try {
     return decodeBase58Address(address)
-  } catch (error) {}
+  } catch (_error) {}
   try {
     return decodeCashAddress(address)
-  } catch (error) {}
+  } catch (_error) {}
   throw new InvalidAddressError()
 }
 
@@ -243,7 +243,7 @@ function decodeBase58Address(address) {
           type: Type.P2SH,
         }
     }
-  } catch (error) {}
+  } catch (_error) {}
   throw new InvalidAddressError()
 }
 
@@ -258,14 +258,14 @@ function decodeCashAddress(address) {
   if (address.indexOf(':') !== -1) {
     try {
       return decodeCashAddressWithPrefix(address)
-    } catch (error) {}
+    } catch (_error) {}
   } else {
     const prefixes = ['bitcoincash', 'bchtest', 'bchreg']
     for (let i = 0; i < prefixes.length; ++i) {
       try {
         const prefix = prefixes[i]
         return decodeCashAddressWithPrefix(prefix + ':' + address)
-      } catch (error) {}
+      } catch (_error) {}
     }
   }
   throw new InvalidAddressError()
@@ -300,7 +300,7 @@ function decodeCashAddressWithPrefix(address) {
           type: type,
         }
     }
-  } catch (error) {}
+  } catch (_error) {}
   throw new InvalidAddressError()
 }
 

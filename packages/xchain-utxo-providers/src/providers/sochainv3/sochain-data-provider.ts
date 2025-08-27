@@ -9,7 +9,7 @@ import { AddressUTXO, SochainNetwork } from './sochain-api-types'
 export class SochainProvider implements UtxoOnlineDataProvider {
   private baseUrl: string
   private _apiKey: string
-  private chain: Chain
+  // private chain: Chain
   private asset: Asset
   private assetDecimals: number
   private sochainNetwork: SochainNetwork
@@ -17,19 +17,17 @@ export class SochainProvider implements UtxoOnlineDataProvider {
   constructor(
     baseUrl = 'https://sochain.com/api/v3',
     apiKey: string,
-    chain: Chain,
+    _chain: Chain,
     asset: Asset,
     assetDecimals: number,
     sochainNetwork: SochainNetwork,
   ) {
     this.baseUrl = baseUrl
     this._apiKey = apiKey
-    this.chain = chain
+    // this.chain = chain
     this.asset = asset
     this.assetDecimals = assetDecimals
     this.sochainNetwork = sochainNetwork
-    this.asset
-    this.chain
   }
   public get apiKey(): string {
     return this._apiKey
@@ -79,7 +77,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
         assetDecimals: this.assetDecimals,
       })
       return [{ amount, asset: this.asset }]
-    } catch (error) {
+    } catch (_error) {
       throw new Error(`Could not get balances for address ${address}`)
     }
   }

@@ -1,4 +1,4 @@
-const core = require('@actions/core')
+import * as core from '@actions/core'
 
 type Package = {
   name: string
@@ -52,7 +52,7 @@ const main = () => {
     core.setOutput('embeds', [embed])
     core.setOutput('success', true)
   } catch (e) {
-    core.setFailed(`Error preparing message: ${e}`)
+    core.setFailed(`Error preparing message: ${String(e)}`)
   }
 }
 
