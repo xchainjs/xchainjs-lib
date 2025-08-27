@@ -35,12 +35,22 @@ export interface UtxoSelectionPreferences {
  * Enhanced UTXO selector with multiple strategies
  */
 export class UtxoSelector {
-  private strategies: UtxoSelectionStrategy[] = [
-    new BranchAndBoundStrategy(),
-    new SingleRandomDrawStrategy(),
-    new AccumulativeStrategy(),
-    new LargestFirstStrategy(),
-  ]
+  private strategies: UtxoSelectionStrategy[]
+
+  constructor() {
+    this.strategies = [
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      new BranchAndBoundStrategy(),
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      new SingleRandomDrawStrategy(),
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      new AccumulativeStrategy(),
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      new LargestFirstStrategy(),
+      // eslint-disable-next-line @typescript-eslint/no-use-before-define
+      new SmallFirstStrategy(),
+    ]
+  }
 
   // Constants for calculations
   public static readonly DUST_THRESHOLD = 546 // satoshis
@@ -129,9 +139,13 @@ export class UtxoSelector {
     // Minimize change preference (exact or minimal change)
     if (preferences.minimizeChange) {
       if (result.changeAmount === 0) {
-        score += 0.15 // Perfect - no change needed
+        score += 0.5 // Perfect - no change needed (high bonus)
       } else if (result.changeAmount < UtxoSelector.DUST_THRESHOLD) {
-        score += 0.05 // Small change that might be added to fee
+        score += 0.3 // Small change that might be added to fee
+      } else {
+        // Penalize large change amounts when minimizeChange is requested
+        const changePenalty = Math.min(0.4, result.changeAmount / 50000) // Larger change = more penalty
+        score -= changePenalty
       }
     }
 
@@ -141,7 +155,11 @@ export class UtxoSelector {
         (utxo) => utxo.value < 10000, // Consider UTXOs under 0.0001 BTC as small
       ).length
       if (smallUtxoCount > 0) {
-        score += smallUtxoCount * 0.02 // Small bonus for each small UTXO consolidated
+        score += smallUtxoCount * 0.2 // Large bonus for each small UTXO consolidated
+      }
+      // Additional bonus for using multiple small UTXOs instead of one large one
+      if (smallUtxoCount >= 3) {
+        score += 0.3 // Extra bonus for consolidating 3+ small UTXOs
       }
     }
 
@@ -192,7 +210,7 @@ export class UtxoSelector {
 /**
  * Branch and Bound strategy - optimal for minimizing fees and change
  */
-class BranchAndBoundStrategy implements UtxoSelectionStrategy {
+export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
   name = 'BranchAndBound'
 
   private static readonly MAX_TRIES = 100000
@@ -340,7 +358,7 @@ class BranchAndBoundStrategy implements UtxoSelectionStrategy {
 /**
  * Single Random Draw strategy - good for privacy
  */
-class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
+export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
   name = 'SingleRandomDraw'
 
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
@@ -373,7 +391,7 @@ class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
 /**
  * Accumulative strategy - simple and reliable fallback
  */
-class AccumulativeStrategy implements UtxoSelectionStrategy {
+export class AccumulativeStrategy implements UtxoSelectionStrategy {
   name = 'Accumulative'
 
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
@@ -414,12 +432,25 @@ class AccumulativeStrategy implements UtxoSelectionStrategy {
 /**
  * Largest First strategy - good for consolidation
  */
-class LargestFirstStrategy implements UtxoSelectionStrategy {
+export class LargestFirstStrategy implements UtxoSelectionStrategy {
   name = 'LargestFirst'
 
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
     // Sort by value descending
     const sortedUtxos = [...utxos].sort((a, b) => b.value - a.value)
+    return new AccumulativeStrategy().select(sortedUtxos, targetValue, feeRate, extraOutputs)
+  }
+}
+
+/**
+ * Small First strategy - good for consolidating many small UTXOs
+ */
+export class SmallFirstStrategy implements UtxoSelectionStrategy {
+  name = 'SmallFirst'
+
+  select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
+    // Sort by value ascending to prioritize small UTXOs
+    const sortedUtxos = [...utxos].sort((a, b) => a.value - b.value)
     return new AccumulativeStrategy().select(sortedUtxos, targetValue, feeRate, extraOutputs)
   }
 }
