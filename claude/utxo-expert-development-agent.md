@@ -13,7 +13,7 @@ XChainJS supports multiple UTXO-based cryptocurrencies:
 - **Bitcoin** (`xchain-bitcoin`) - P2WPKH (Bech32) and P2TR (Taproot) support
 - **Litecoin** (`xchain-litecoin`) - Native SegWit implementation
 - **Bitcoin Cash** (`xchain-bitcoincash`) - BCH with CashAddr format
-- **Dogecoin** (`xchain-doge`) - DOGE with standard P2WPKH
+- **Dogecoin** (`xchain-doge`) - DOGE with legacy P2PKH/P2SH addresses
 - **Dash** (`xchain-dash`) - DASH with InstantSend support
 - **Zcash** (`xchain-zcash`) - ZEC with transparent addresses
 

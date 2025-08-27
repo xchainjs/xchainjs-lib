@@ -200,7 +200,7 @@ describe('BitcoinClient Test', () => {
       /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       const message = err.message as string
-      expect(message.includes('memo too long')).toBeTruthy()
+      expect(message.includes('Memo too long')).toBeTruthy()
     }
   })
 
@@ -250,7 +250,7 @@ describe('BitcoinClient Test', () => {
         memo: MEMO,
         feeRate: 1,
       }),
-    ).rejects.toThrow('Insufficient Balance for transaction')
+    ).rejects.toThrow('Insufficient balance:')
   })
 
   it('should prevent a tx when fees and valueOut exceed balance', async () => {
@@ -260,7 +260,7 @@ describe('BitcoinClient Test', () => {
     const asset = AssetBTC
     const amount = baseAmount(9999999999)
     return expect(btcClient.transfer({ asset, recipient: addyTwo, amount, feeRate: 1 })).rejects.toThrow(
-      'Insufficient Balance for transaction',
+      'Insufficient balance:',
     )
   })
 
