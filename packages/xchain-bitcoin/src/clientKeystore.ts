@@ -122,10 +122,15 @@ class ClientKeystore extends Client {
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
 
     // Prepare the transaction
-    const { rawUnsignedTx } = await this.prepareTx({
+    const { rawUnsignedTx } = await this.prepareTxEnhanced({
       ...params,
       sender: this.getAddress(fromAddressIndex),
       feeRate,
+      utxoSelectionPreferences: {
+        minimizeFee: true,
+        avoidDust: true,
+        minimizeInputs: false,
+      },
     })
 
     // Build the PSBT

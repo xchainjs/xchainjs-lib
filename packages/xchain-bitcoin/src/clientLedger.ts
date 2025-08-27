@@ -58,8 +58,17 @@ class ClientLedger extends Client {
     checkFeeBounds(this.feeBounds, feeRate)
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
-    // Prepare transaction
-    const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
+    // Prepare transaction using enhanced method with optimal UTXO selection
+    const { rawUnsignedTx, inputs } = await this.prepareTxEnhanced({
+      ...params,
+      sender,
+      feeRate,
+      utxoSelectionPreferences: {
+        minimizeFee: true,
+        avoidDust: true,
+        minimizeInputs: false,
+      },
+    })
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
     // Prepare Ledger inputs
     const ledgerInputs: [Transaction, number, string | null, number | null][] = (inputs as UTXO[]).map(
