@@ -1,5 +1,11 @@
 # @xchainjs/xchain-ripple
 
+## 1.0.10
+
+### Patch Changes
+
+- 3825976: Added transfer with Destination Tag to ripple client
+
 ## 1.0.9
 
 ### Patch Changes
