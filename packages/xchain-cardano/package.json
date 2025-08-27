@@ -32,7 +32,7 @@
     "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "@emurgo/cardano-serialization-lib-browser": "^14.1.2",
+    "@emurgo/cardano-serialization-lib-browser": "^15.0.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
