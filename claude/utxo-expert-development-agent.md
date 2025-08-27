@@ -203,15 +203,21 @@ class UTXOManager {
     targetAmount: number, 
     feeRate: number
   ): { inputs: UTXO[]; fee: number; change: number } {
-    // Implementation using coinselect algorithm
-    const accumulative = require('coinselect/accumulative')
+    // Implementation using first-party UtxoSelector with multi-strategy approach
+    const { UtxoSelector } = require('@xchainjs/xchain-utxo')
+    const selector = new UtxoSelector()
     
-    const targets = [{ address: 'target-address', value: targetAmount }]
-    const { inputs, outputs, fee } = accumulative(availableUTXOs, targets, feeRate)
-    
-    const change = outputs.find(output => !output.address)?.value || 0
-    
-    return { inputs: inputs || [], fee, change }
+    try {
+      const result = selector.selectOptimal(availableUTXOs, targetAmount, feeRate)
+      return { 
+        inputs: result.inputs, 
+        fee: result.fee, 
+        change: result.changeAmount 
+      }
+    } catch (error) {
+      // Handle selection failure
+      throw new Error(`UTXO selection failed: ${error.message}`)
+    }
   }
 
   private async getCurrentBlockHeight(): Promise<number> {
@@ -262,11 +268,12 @@ class TransactionBuilder {
           index: utxo.index,
           witnessUtxo: utxo.witnessUtxo
         })
-      } else if (utxo.nonWitnessUtxo) {
+      } else if (utxo.txHex) {
+        // Use full transaction hex when witnessUtxo is not available
         psbt.addInput({
           hash: utxo.hash,
           index: utxo.index,
-          nonWitnessUtxo: utxo.nonWitnessUtxo
+          nonWitnessUtxo: Buffer.from(utxo.txHex, 'hex')
         })
       }
     }

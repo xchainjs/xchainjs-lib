@@ -1,5 +1,5 @@
 import { AssetInfo, Network } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, assetToString, baseAmount, baseToAsset } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 
 import { ClientKeystore as Client } from '../src/clientKeystore'
@@ -291,18 +291,17 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
 
       // Optional: Actually broadcast the transaction (commented out for safety)
       // Uncomment the following to actually send the transaction
-
-      console.log('Broadcasting transaction...')
-      const txHash = await btcClient.transfer({
-        walletIndex: 0,
-        asset: AssetBTC,
-        recipient: recipientAddress,
-        amount: baseAmount(sendMaxResult.maxAmount, BTC_DECIMAL),
-        memo: 'max',
-        feeRate: feeRate,
-      })
-      console.log('✅ Transaction broadcast successfully!')
-      console.log('Transaction hash:', txHash)
+      // console.log('Broadcasting transaction...')
+      // const txHash = await btcClient.transfer({
+      //   walletIndex: 0,
+      //   asset: AssetBTC,
+      //   recipient: recipientAddress,
+      //   amount: baseAmount(sendMaxResult.maxAmount, BTC_DECIMAL),
+      //   memo: 'max',
+      //   feeRate: feeRate,
+      // })
+      // console.log('✅ Transaction broadcast successfully!')
+      // console.log('Transaction hash:', txHash)
     } catch (err) {
       console.error('ERR running send max test:', err)
       if (err instanceof Error) {

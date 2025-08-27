@@ -74,7 +74,7 @@ describe('Bitcoin Client Ledger', () => {
       fail()
     }
   })
-  it('send max', async () => {
+  it('send max ledger', async () => {
     try {
       const senderAddress = await btcClient.getAddressAsync(0)
       const recipientAddress = await btcClient.getAddressAsync(1)

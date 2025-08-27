@@ -2,7 +2,7 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import * as Bitcoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
@@ -108,7 +108,7 @@ class ClientKeystore extends Client {
    * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+  async transfer(params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences }): Promise<TxHash> {
     // Set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
 
@@ -121,16 +121,20 @@ class ClientKeystore extends Client {
     // Get the Bitcoin keys
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
 
+    // Merge default preferences with caller-provided preferences
+    const mergedUtxoSelectionPreferences = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+      ...params.utxoSelectionPreferences,
+    }
+
     // Prepare the transaction
     const { rawUnsignedTx } = await this.prepareTxEnhanced({
       ...params,
       sender: this.getAddress(fromAddressIndex),
       feeRate,
-      utxoSelectionPreferences: {
-        minimizeFee: true,
-        avoidDust: true,
-        minimizeInputs: false,
-      },
+      utxoSelectionPreferences: mergedUtxoSelectionPreferences,
     })
 
     // Build the PSBT

@@ -44,8 +44,8 @@ export class UtxoSelector {
 
   // Constants for calculations
   public static readonly DUST_THRESHOLD = 546 // satoshis
-  public static readonly BYTES_PER_INPUT = 148 // approximate bytes per P2WPKH input
-  public static readonly BYTES_PER_OUTPUT = 34 // bytes per P2WPKH output
+  public static readonly BYTES_PER_INPUT = 68 // approximate vbytes per P2WPKH input
+  public static readonly BYTES_PER_OUTPUT = 31 // vbytes per P2WPKH output
   public static readonly BASE_TX_SIZE = 10 // base transaction overhead
 
   /**
