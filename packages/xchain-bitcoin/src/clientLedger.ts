@@ -2,7 +2,7 @@ import AppBtc from '@ledgerhq/hw-app-btc'
 import type { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { Client } from './client'
@@ -49,7 +49,9 @@ class ClientLedger extends Client {
   }
 
   // Transfer BTC from Ledger
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+  async transfer(
+    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+  ): Promise<TxHash> {
     const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
     // Get fee rate
@@ -58,8 +60,25 @@ class ClientLedger extends Client {
     checkFeeBounds(this.feeBounds, feeRate)
     // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
-    // Prepare transaction
-    const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
+
+    // Create defaults and merge with caller-provided preferences
+    const defaults = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+    }
+    const mergedUtxoSelectionPreferences = {
+      ...defaults,
+      ...params.utxoSelectionPreferences,
+    }
+
+    // Prepare transaction using enhanced method with optimal UTXO selection
+    const { rawUnsignedTx, inputs } = await this.prepareTxEnhanced({
+      ...params,
+      sender,
+      feeRate,
+      utxoSelectionPreferences: mergedUtxoSelectionPreferences,
+    })
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
     // Prepare Ledger inputs
     const ledgerInputs: [Transaction, number, string | null, number | null][] = (inputs as UTXO[]).map(
