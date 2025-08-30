@@ -7,7 +7,7 @@ import { FeeRate, Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UTXO, toBitcoinJS } from '@xchainjs/xchain-utxo'
 import * as Dash from 'bitcoinjs-lib'
-import accumulative from 'coinselect/accumulative'
+import accumulative from 'coinselect/accumulative.js'
 
 import * as insight from './insight-api'
 

@@ -3848,7 +3848,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -3863,7 +3863,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -3877,7 +3877,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -3935,7 +3935,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -4001,7 +4001,7 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -4071,7 +4071,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -4101,7 +4101,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:^1.8.4"
     axios-mock-adapter: "npm:^2.1.0"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -4185,7 +4185,7 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
   languageName: unknown
   linkType: soft
 
@@ -4206,7 +4206,7 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -4353,7 +4353,7 @@ __metadata:
     axios: "npm:1.8.4"
     axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
   languageName: unknown
   linkType: soft
 
@@ -4377,7 +4377,7 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -4397,7 +4397,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-util@workspace:packages/xchain-util"
   dependencies:
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
   languageName: unknown
   linkType: soft
 
@@ -4437,7 +4437,7 @@ __metadata:
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -12545,7 +12545,7 @@ __metadata:
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     commander: "npm:^9.4.1"
     weighted: "npm:^1.0.0"
   languageName: unknown
@@ -13299,7 +13299,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.8.3"
@@ -13360,7 +13360,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.8.3"
@@ -13382,7 +13382,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.8.4"
     axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:^9.0.0"
+    bignumber.js: "npm:^9.1.2"
     rimraf: "npm:~3.0.2"
     ts-node: "npm:10.9.2"
     typescript: "npm:^5.8.3"
