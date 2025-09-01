@@ -138,13 +138,22 @@ export class UtxoSelector {
 
     // Minimize change preference (exact or minimal change)
     if (preferences.minimizeChange) {
+      // When minimizeChange is requested, change amount should be the primary factor
+      // Reduce base efficiency weight to make change optimization more important
+      score = result.efficiency * 0.1 // Reduce efficiency weight when minimizing change
+
       if (result.changeAmount === 0) {
-        score += 0.5 // Perfect - no change needed (high bonus)
+        score += 0.8 // Perfect - no change needed (very high bonus)
       } else if (result.changeAmount < UtxoSelector.DUST_THRESHOLD) {
-        score += 0.3 // Small change that might be added to fee
+        score += 0.6 // Small change that might be added to fee
+      } else if (result.changeAmount < 1000) {
+        score += 0.4 // Very small change (< 1000 sats)
+      } else if (result.changeAmount < 5000) {
+        score += 0.1 // Small change (< 5000 sats)
       } else {
-        // Penalize large change amounts when minimizeChange is requested
-        const changePenalty = Math.min(0.4, result.changeAmount / 50000) // Larger change = more penalty
+        // Heavily penalize large change amounts when minimizeChange is requested
+        // Use much stronger penalty for larger change amounts
+        const changePenalty = Math.min(0.9, result.changeAmount / 20000) // Very strong penalty
         score -= changePenalty
       }
     }
@@ -317,7 +326,13 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
           inputs: [...currentInputs],
           changeAmount: change > UtxoSelector.DUST_THRESHOLD ? change : 0,
           fee: finalFee,
-          efficiency: this.calculateEfficiency(currentInputs, target, finalFee, change, change <= UtxoSelector.DUST_THRESHOLD),
+          efficiency: this.calculateEfficiency(
+            currentInputs,
+            target,
+            finalFee,
+            change,
+            change <= UtxoSelector.DUST_THRESHOLD,
+          ),
           strategy: this.name,
         }
 
@@ -347,9 +362,15 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     return bestResult
   }
 
-  private calculateEfficiency(inputs: UTXO[], target: number, fee: number, change: number, changeAbsorbed: boolean = false): number {
+  private calculateEfficiency(
+    inputs: UTXO[],
+    target: number,
+    fee: number,
+    change: number,
+    changeAbsorbed: boolean = false,
+  ): number {
     const totalValue = inputs.reduce((sum, utxo) => sum + utxo.value, 0)
-    const wastedValue = changeAbsorbed ? 0 : (change > UtxoSelector.DUST_THRESHOLD ? 0 : change)
+    const wastedValue = changeAbsorbed ? 0 : change > UtxoSelector.DUST_THRESHOLD ? 0 : change
     const efficiency = target / (totalValue + fee + wastedValue)
     return Math.min(1, efficiency)
   }
