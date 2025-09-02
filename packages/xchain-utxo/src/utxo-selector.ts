@@ -122,7 +122,9 @@ export class UtxoSelector {
    * Calculate a score for a result based on preferences
    */
   private calculateScore(result: UtxoSelectionResult, preferences: UtxoSelectionPreferences): number {
-    let score = result.efficiency * 0.3 // Base efficiency weight
+    // Adjust base efficiency weight based on active preferences
+    const hasSpecialPreference = preferences.minimizeInputs || preferences.minimizeChange
+    let score = result.efficiency * (hasSpecialPreference ? 0.1 : 0.3)
 
     // Minimize fee preference
     if (preferences.minimizeFee) {
@@ -132,16 +134,21 @@ export class UtxoSelector {
 
     // Minimize inputs preference (privacy and transaction size)
     if (preferences.minimizeInputs) {
-      const inputScore = Math.max(0, 1 - result.inputs.length / 20) // Fewer inputs is better
-      score += inputScore * 0.2
+      if (result.inputs.length === 1) {
+        score += 0.8 // Very high bonus for single input
+      } else if (result.inputs.length === 2) {
+        score += 0.3 // Moderate bonus for 2 inputs
+      } else if (result.inputs.length === 3) {
+        score += 0.1 // Small bonus for 3 inputs
+      } else {
+        // Heavily penalize many inputs when minimizeInputs is requested
+        const inputPenalty = Math.min(0.7, (result.inputs.length - 1) * 0.2)
+        score -= inputPenalty
+      }
     }
 
     // Minimize change preference (exact or minimal change)
     if (preferences.minimizeChange) {
-      // When minimizeChange is requested, change amount should be the primary factor
-      // Reduce base efficiency weight to make change optimization more important
-      score = result.efficiency * 0.1 // Reduce efficiency weight when minimizing change
-
       if (result.changeAmount === 0) {
         score += 0.8 // Perfect - no change needed (very high bonus)
       } else if (result.changeAmount < UtxoSelector.DUST_THRESHOLD) {
@@ -472,6 +479,34 @@ export class SmallFirstStrategy implements UtxoSelectionStrategy {
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
     // Sort by value ascending to prioritize small UTXOs
     const sortedUtxos = [...utxos].sort((a, b) => a.value - b.value)
-    return new AccumulativeStrategy().select(sortedUtxos, targetValue, feeRate, extraOutputs)
+
+    const selectedInputs: UTXO[] = []
+    let currentValue = 0
+
+    for (const utxo of sortedUtxos) {
+      selectedInputs.push(utxo)
+      currentValue += utxo.value
+
+      const fee = UtxoSelector.calculateFee(selectedInputs.length, extraOutputs + 1, feeRate) // Assume change output
+      const required = targetValue + fee
+
+      if (currentValue >= required) {
+        const change = currentValue - required
+        const hasChange = change > UtxoSelector.DUST_THRESHOLD
+        const finalOutputs = hasChange ? extraOutputs + 1 : extraOutputs
+        const finalFee = UtxoSelector.calculateFee(selectedInputs.length, finalOutputs, feeRate)
+        const finalChange = currentValue - targetValue - finalFee
+
+        return {
+          inputs: [...selectedInputs],
+          changeAmount: finalChange > UtxoSelector.DUST_THRESHOLD ? finalChange : 0,
+          fee: finalChange > UtxoSelector.DUST_THRESHOLD ? finalFee : finalFee + finalChange,
+          efficiency: targetValue / (currentValue + finalFee),
+          strategy: this.name,
+        }
+      }
+    }
+
+    return null
   }
 }
