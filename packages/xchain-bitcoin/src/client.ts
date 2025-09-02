@@ -1,8 +1,20 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoTransactionValidator,
+  UtxoSelector,
+  UtxoSelectionPreferences,
+  UtxoSelectionResult,
+} from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
+
 import accumulative from 'coinselect/accumulative'
 
 import {
@@ -111,6 +123,136 @@ abstract class Client extends UTXOClient {
    * @param {Buffer | null} data Compiled memo (Optional).
    * @returns {number} Transaction fee.
    */
+  /**
+   * Enhanced UTXO selection using the new UtxoSelector with multiple strategies
+   */
+  private selectUtxosForTransaction(
+    utxos: UTXO[],
+    targetValue: number,
+    feeRate: number,
+    extraOutputs: number = 2, // recipient + change by default
+    preferences?: UtxoSelectionPreferences,
+  ): UtxoSelectionResult {
+    const selector = new UtxoSelector()
+
+    const defaultPreferences: UtxoSelectionPreferences = {
+      minimizeFee: true,
+      minimizeInputs: true,
+      avoidDust: true,
+      ...preferences,
+    }
+
+    try {
+      return selector.selectOptimal(utxos, targetValue, feeRate, defaultPreferences, extraOutputs)
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error // Re-throw typed errors
+      }
+      throw UtxoError.fromUnknown(error, 'UTXO selection')
+    }
+  }
+
+  /**
+   * Validate transaction inputs using comprehensive validation
+   */
+  private validateTransactionInputs(
+    params: TxParams & {
+      sender: Address
+      feeRate: FeeRate
+    },
+  ): void {
+    // Use comprehensive validator
+    UtxoTransactionValidator.validateTransferParams(params)
+
+    // Bitcoin-specific address validation
+    UtxoTransactionValidator.validateAddressFormat(params.recipient, this.network, 'BTC')
+    if (params.sender) {
+      UtxoTransactionValidator.validateAddressFormat(params.sender, this.network, 'BTC')
+    }
+
+    // Fee rate validation with Bitcoin network conditions
+    const networkConditions = {
+      minFeeRate: 1,
+      maxFeeRate: 1000,
+      recommendedRange: [5, 100] as [number, number],
+    }
+    UtxoTransactionValidator.validateFeeRate(params.feeRate, networkConditions)
+  }
+
+  /**
+   * Calculate maximum sendable amount by trying different amounts until optimal
+   */
+  private calculateMaxSendableAmount(
+    utxos: UTXO[],
+    feeRate: number,
+    hasMemo: boolean,
+    preferences?: UtxoSelectionPreferences,
+  ): { amount: number; fee: number; inputs: UTXO[] } {
+    const selector = new UtxoSelector()
+    const extraOutputs = hasMemo ? 2 : 1 // recipient + optional memo (no change for max send)
+
+    const totalBalance = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
+
+    // Binary search for maximum sendable amount
+    let low = UtxoSelector.DUST_THRESHOLD
+    let high = totalBalance
+    let bestResult: UtxoSelectionResult | null = null
+
+    while (high - low > 1) {
+      const mid = Math.floor((low + high) / 2)
+
+      try {
+        const result = selector.selectOptimal(utxos, mid, feeRate, { ...preferences, minimizeFee: true }, extraOutputs)
+
+        // For max send, we don't want change - the goal is to send everything
+        const totalInput = result.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
+        const maxSendable = totalInput - result.fee
+
+        if (maxSendable >= mid) {
+          bestResult = {
+            ...result,
+            changeAmount: 0, // No change for max send
+          }
+          low = mid
+        } else {
+          high = mid - 1
+        }
+      } catch {
+        high = mid - 1
+      }
+    }
+
+    if (!bestResult) {
+      throw UtxoError.insufficientBalance('max', totalBalance.toString(), 'BTC')
+    }
+
+    // Calculate the actual maximum we can send
+    const totalInput = bestResult.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
+    const maxAmount = totalInput - bestResult.fee
+
+    return {
+      amount: maxAmount,
+      fee: bestResult.fee,
+      inputs: bestResult.inputs,
+    }
+  }
+
+  /**
+   * Get and validate UTXOs for transaction building
+   */
+  private async getValidatedUtxos(sender: Address, confirmedOnly: boolean): Promise<UTXO[]> {
+    const utxos = await this.scanUTXOs(sender, confirmedOnly)
+
+    if (utxos.length === 0) {
+      throw UtxoError.insufficientBalance('any', '0', 'BTC')
+    }
+
+    // Validate UTXO set integrity
+    UtxoTransactionValidator.validateUtxoSet(utxos)
+
+    return utxos
+  }
+
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
     // Calculate input size based on inputs
     const inputSizeBasedOnInputs =
@@ -135,9 +277,108 @@ abstract class Client extends UTXOClient {
   }
 
   /**
+   * Enhanced Bitcoin transaction builder with comprehensive validation and optimal UTXO selection
+   * @param params Transaction parameters
+   * @returns Enhanced transaction build result with PSBT, UTXOs, and inputs
+   */
+  async buildTxEnhanced({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+    try {
+      // Comprehensive input validation
+      this.validateTransactionInputs({
+        amount,
+        recipient,
+        memo,
+        sender,
+        feeRate,
+      })
+
+      // Get validated UTXOs
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const targetValue = amount.amount().toNumber()
+      const extraOutputs = 1 + (compiledMemo ? 1 : 0) // recipient + optional memo (change calculated separately)
+
+      // Enhanced UTXO selection
+      const selectionResult = this.selectUtxosForTransaction(
+        utxos,
+        targetValue,
+        Math.ceil(feeRate),
+        extraOutputs,
+        utxoSelectionPreferences,
+      )
+
+      const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
+
+      // Add inputs based on selection
+      if (this.addressFormat === AddressFormat.P2WPKH) {
+        selectionResult.inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: utxo.witnessUtxo,
+          }),
+        )
+      } else {
+        const { pubkey, output } = Bitcoin.payments.p2tr({
+          address: sender,
+        })
+        selectionResult.inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: { value: utxo.value, script: output as Buffer },
+            tapInternalKey: pubkey,
+          }),
+        )
+      }
+
+      // Add recipient output
+      psbt.addOutput({
+        address: recipient,
+        value: targetValue,
+      })
+
+      // Add change output if needed
+      if (selectionResult.changeAmount > 0) {
+        psbt.addOutput({
+          address: sender,
+          value: selectionResult.changeAmount,
+        })
+      }
+
+      // Add memo output if present
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return { psbt, utxos, inputs: selectionResult.inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'buildTxEnhanced')
+    }
+  }
+
+  /**
    * Build a Bitcoin transaction.*
    * @param param0
-   * @deprecated
+   * @deprecated Use buildTxEnhanced for better performance and validation
    */
   async buildTx({
     amount,
@@ -231,10 +472,203 @@ abstract class Client extends UTXOClient {
   }
 
   /**
+   * Send maximum possible amount (sweep) with optimal fee calculation
+   * @param params Send max parameters
+   * @returns Transaction details with maximum sendable amount
+   */
+  async sendMax({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{
+    psbt: Bitcoin.Psbt
+    utxos: UTXO[]
+    inputs: UTXO[]
+    maxAmount: number
+    fee: number
+  }> {
+    try {
+      // Basic validation (skip amount validation since we're calculating max)
+      if (!recipient?.trim()) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+
+      UtxoTransactionValidator.validateAddressFormat(recipient, this.network, 'BTC')
+      UtxoTransactionValidator.validateAddressFormat(sender, this.network, 'BTC')
+
+      if (memo) {
+        // Only validate memo for send max (skip amount validation)
+        if (typeof memo !== 'string') {
+          throw UtxoError.validationError('Memo must be a string')
+        }
+        const memoBytes = Buffer.byteLength(memo, 'utf8')
+        if (memoBytes > 80) {
+          throw UtxoError.validationError(`Memo too long: ${memoBytes} bytes (max 80 bytes)`)
+        }
+      }
+
+      // Get validated UTXOs
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      // Calculate maximum sendable amount
+      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
+
+      // Add inputs
+      if (this.addressFormat === AddressFormat.P2WPKH) {
+        maxCalc.inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: utxo.witnessUtxo,
+          }),
+        )
+      } else {
+        const { pubkey, output } = Bitcoin.payments.p2tr({
+          address: sender,
+        })
+        maxCalc.inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: { value: utxo.value, script: output as Buffer },
+            tapInternalKey: pubkey,
+          }),
+        )
+      }
+
+      // Add recipient output (max amount - no change)
+      psbt.addOutput({
+        address: recipient,
+        value: maxCalc.amount,
+      })
+
+      // Add memo output if present
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return {
+        psbt,
+        utxos,
+        inputs: maxCalc.inputs,
+        maxAmount: maxCalc.amount,
+        fee: maxCalc.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'sendMax')
+    }
+  }
+
+  /**
+   * Prepare maximum amount transfer (sweep transaction)
+   * @param params Send max parameters
+   * @returns Prepared transaction with maximum sendable amount
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      const { psbt, utxos, inputs, maxAmount, fee } = await this.sendMax({
+        sender,
+        recipient,
+        memo,
+        feeRate,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return {
+        rawUnsignedTx: psbt.toBase64(),
+        utxos,
+        inputs,
+        maxAmount,
+        fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        console.error('Bitcoin max transaction preparation failed:', error.toJSON())
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
+    }
+  }
+
+  /**
+   * Enhanced prepare transfer with comprehensive validation and optimal UTXO selection.
+   *
+   * @param params The transfer options with enhanced UTXO selection preferences.
+   * @returns The raw unsigned transaction with enhanced error handling.
+   */
+  async prepareTxEnhanced({
+    sender,
+    memo,
+    amount,
+    recipient,
+    spendPendingUTXO = true,
+    feeRate,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx> {
+    try {
+      const { psbt, utxos, inputs } = await this.buildTxEnhanced({
+        sender,
+        recipient,
+        amount,
+        feeRate,
+        memo,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        console.error('Enhanced Bitcoin transaction preparation failed:', error.toJSON())
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareTxEnhanced')
+    }
+  }
+
+  /**
    * Prepare transfer.
    *
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
+   * @deprecated Use prepareTxEnhanced for better performance and validation
    */
   async prepareTx({
     sender,
