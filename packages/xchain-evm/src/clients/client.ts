@@ -26,10 +26,11 @@ import {
   baseAmount,
   eqAsset,
 } from '@xchainjs/xchain-util'
-import { Provider, Contract, Transaction, toUtf8Bytes, hexlify } from 'ethers'
+import { Provider, Transaction, toUtf8Bytes, hexlify } from 'ethers'
 import BigNumber from 'bignumber.js'
 
 import erc20ABI from '../data/erc20.json'
+import { getCachedContract, getCachedBigNumber } from '../cache'
 import {
   ApproveParams,
   Balance,
@@ -75,6 +76,33 @@ export type EVMClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
   dataProviders: EvmOnlineDataProviders[]
   signer?: ISigner
+}
+
+/**
+ * Helper function to race promises and return the first successful result
+ * Uses Promise.race with proper error handling as fallback for Promise.any
+ */
+async function promiseAny<T>(promises: Promise<T>[]): Promise<T> {
+  // Use Promise.race to get the first resolved promise
+  const errors: Error[] = []
+
+  return new Promise((resolve, reject) => {
+    let completedCount = 0
+
+    promises.forEach((promise) => {
+      promise.then(resolve).catch((error) => {
+        errors.push(error)
+        completedCount += 1
+        if (completedCount === promises.length) {
+          reject(new Error('All promises failed: ' + errors.map((e) => e.message).join(', ')))
+        }
+      })
+    })
+
+    if (promises.length === 0) {
+      reject(new Error('No promises provided'))
+    }
+  })
 }
 
 /**
@@ -347,7 +375,7 @@ export class Client extends BaseXChainClient implements EVMClient {
           throw new Error('Gas price is null')
         }
 
-        const gasPrice = new BigNumber(feeData.gasPrice.toString())
+        const gasPrice = getCachedBigNumber(feeData.gasPrice.toString())
 
         // Adjust gas prices for different fee options
         return {
@@ -425,7 +453,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       // ERC20 gas estimate
       const assetAddress = getTokenAddress(theAsset)
       if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(theAsset)}`)
-      const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
+      const contract = getCachedContract(assetAddress, erc20ABI, this.getProvider())
 
       const address = from || (await this.getAddressAsync())
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -433,7 +461,7 @@ export class Client extends BaseXChainClient implements EVMClient {
         from: address,
       })
 
-      gasEstimate = new BigNumber(gasEstimateResponse.toString())
+      gasEstimate = getCachedBigNumber(gasEstimateResponse.toString())
     } else {
       // ETH gas estimate
       let stringEncodedMemo
@@ -448,7 +476,7 @@ export class Client extends BaseXChainClient implements EVMClient {
         data: parsedMemo,
       }
       const gasEstimation = await this.getProvider().estimateGas(transactionRequest)
-      gasEstimate = new BigNumber(gasEstimation.toString())
+      gasEstimate = getCachedBigNumber(gasEstimation.toString())
     }
 
     return gasEstimate
@@ -470,18 +498,20 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @returns {FeesWithGasPricesAndLimits} The estimated gas prices/limits and fees.
    */
   async estimateFeesWithGasPricesAndLimits(params: TxParams): Promise<FeesWithGasPricesAndLimits> {
-    // Gas prices estimation
-    const gasPrices = await this.estimateGasPrices()
+    // Parallel gas prices and limits estimation
+    const [gasPrices, gasLimit] = await Promise.all([
+      this.estimateGasPrices(),
+      this.estimateGasLimit({
+        asset: params.asset,
+        amount: params.amount,
+        recipient: params.recipient,
+        memo: params.memo,
+      }),
+    ])
+
     const decimals = this.config.gasAssetDecimals
     const { fast: fastGP, fastest: fastestGP, average: averageGP } = gasPrices
 
-    // Gas limits estimation
-    const gasLimit = await this.estimateGasLimit({
-      asset: params.asset,
-      amount: params.amount,
-      recipient: params.recipient,
-      memo: params.memo,
-    })
     // Calculate fees
     return {
       gasPrices,
@@ -527,15 +557,23 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the balance.
    */
   protected async roundRobinGetBalance(address: Address, assets?: TokenAsset[]) {
-    for (const provider of this.config.dataProviders) {
-      try {
+    const promises = this.config.dataProviders
+      .map(async (provider) => {
         const prov = provider[this.network]
-        if (prov) return await prov.getBalance(address, assets)
-      } catch (error) {
-        console.warn(error)
-      }
+        if (!prov) throw new Error('Provider not available for network')
+        return await prov.getBalance(address, assets)
+      })
+      .filter(Boolean)
+
+    if (promises.length === 0) {
+      throw Error('No providers available for network')
     }
-    throw Error('no provider able to get balance')
+
+    try {
+      return await promiseAny(promises)
+    } catch (_error) {
+      throw Error('No provider able to get balance: all providers failed')
+    }
   }
   /**
    * Retrieves transaction data by round-robin querying multiple data providers.
@@ -546,15 +584,23 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the transaction data.
    */
   protected async roundRobinGetTransactionData(txId: string, assetAddress?: string) {
-    for (const provider of this.config.dataProviders) {
-      try {
+    const promises = this.config.dataProviders
+      .map(async (provider) => {
         const prov = provider[this.network]
-        if (prov) return await prov.getTransactionData(txId, assetAddress)
-      } catch (error) {
-        console.warn(error)
-      }
+        if (!prov) throw new Error('Provider not available for network')
+        return await prov.getTransactionData(txId, assetAddress)
+      })
+      .filter(Boolean)
+
+    if (promises.length === 0) {
+      throw Error('No providers available for network')
     }
-    throw Error('no provider able to GetTransactionData')
+
+    try {
+      return await promiseAny(promises)
+    } catch (_error) {
+      throw Error('No provider able to GetTransactionData: all providers failed')
+    }
   }
   /**
    * Retrieves transaction history by round-robin querying multiple data providers.
@@ -564,15 +610,23 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the transaction history.
    */
   protected async roundRobinGetTransactions(params: TxHistoryParams) {
-    for (const provider of this.config.dataProviders) {
-      try {
+    const promises = this.config.dataProviders
+      .map(async (provider) => {
         const prov = provider[this.network]
-        if (prov) return await prov.getTransactions(params)
-      } catch (error) {
-        console.warn(error)
-      }
+        if (!prov) throw new Error('Provider not available for network')
+        return await prov.getTransactions(params)
+      })
+      .filter(Boolean)
+
+    if (promises.length === 0) {
+      throw Error('No providers available for network')
     }
-    throw Error('no provider able to GetTransactions')
+
+    try {
+      return await promiseAny(promises)
+    } catch (_error) {
+      throw Error('No provider able to GetTransactions: all providers failed')
+    }
   }
   /**
    * Retrieves fee rates by round-robin querying multiple data providers.
@@ -581,15 +635,23 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @throws Error Thrown if no provider is able to retrieve the fee rates.
    */
   protected async roundRobinGetFeeRates(): Promise<FeeRates> {
-    for (const provider of this.config.dataProviders) {
-      try {
+    const promises = this.config.dataProviders
+      .map(async (provider) => {
         const prov = provider[this.network]
-        if (prov) return await prov.getFeeRates()
-      } catch (error) {
-        console.warn(error)
-      }
+        if (!prov) throw new Error('Provider not available for network')
+        return await prov.getFeeRates()
+      })
+      .filter(Boolean)
+
+    if (promises.length === 0) {
+      throw Error('No providers available for network')
     }
-    throw Error('No provider available to getFeeRates')
+
+    try {
+      return await promiseAny(promises)
+    } catch (_error) {
+      throw Error('No provider available to getFeeRates: all providers failed')
+    }
   }
 
   /**
@@ -641,7 +703,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       const assetAddress = getTokenAddress(asset)
       if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
 
-      const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
+      const contract = getCachedContract(assetAddress, erc20ABI, this.getProvider())
 
       const amountToTransfer = BigInt(amount.amount().toFixed())
       const unsignedTx = await contract.getFunction('transfer').populateTransaction(recipient, amountToTransfer)
@@ -674,7 +736,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     if (!this.validateAddress(spenderAddress)) throw Error('Invalid spenderAddress address')
     if (!this.validateAddress(sender)) throw Error('Invalid sender address')
 
-    const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
+    const contract = getCachedContract(contractAddress, erc20ABI, this.getProvider())
     const valueToApprove = getApprovalAmount(amount)
 
     const unsignedTx = await contract
@@ -852,7 +914,7 @@ export class Client extends BaseXChainClient implements EVMClient {
   }: ApproveParams): Promise<string> {
     const sender = await this.getAddressAsync(walletIndex || 0)
 
-    const gasPrice: BigNumber = new BigNumber(
+    const gasPrice: BigNumber = getCachedBigNumber(
       (await this.estimateGasPrices().then((prices) => prices[feeOption])).amount().toFixed(),
     )
 
@@ -864,7 +926,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       fromAddress: sender,
       amount,
     }).catch(() => {
-      return new BigNumber(this.config.defaults[this.network].approveGasLimit)
+      return getCachedBigNumber(this.config.defaults[this.network].approveGasLimit.toString())
     })
 
     const { rawUnsignedTx } = await this.prepareApprove({
