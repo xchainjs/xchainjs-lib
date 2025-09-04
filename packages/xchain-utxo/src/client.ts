@@ -111,7 +111,8 @@ export abstract class Client extends BaseXChainClient {
   // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
   async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
     // The actual logic for getting balances
-    confirmedOnly
+    // TODO: Use confirmedOnly parameter to filter balances
+    void confirmedOnly
     return await this.roundRobinGetBalance(address)
   }
   /**
@@ -173,7 +174,7 @@ export abstract class Client extends BaseXChainClient {
       try {
         const feeRates = await this.roundRobinGetFeeRates()
         return feeRates
-      } catch (error) {
+      } catch {
         console.warn('Can not retrieve fee rates from provider')
       }
     }
@@ -182,7 +183,7 @@ export abstract class Client extends BaseXChainClient {
       try {
         const feeRate = await this.getFeeRateFromThorchain()
         return standardFeeRates(feeRate)
-      } catch (error) {
+      } catch {
         console.warn(`Can not retrieve fee rates from Thorchain`)
       }
     }

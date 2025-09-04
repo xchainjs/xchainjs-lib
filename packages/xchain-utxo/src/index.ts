@@ -11,9 +11,6 @@ export type { UTXO, UtxoClientParams, Witness, PreparedTx, Balance, Tx, TxsPage,
 // Export new enhancement modules
 export { UtxoError, UtxoErrorCode } from './errors'
 export { UtxoTransactionValidator } from './validators'
-export {
-  UtxoSelector,
-  type UtxoSelectionStrategy,
-  type UtxoSelectionResult,
-  type UtxoSelectionPreferences,
-} from './utxo-selector'
+export { UtxoSelector } from './utxo-selector'
+export * from './strategies'
+export * from './constants'

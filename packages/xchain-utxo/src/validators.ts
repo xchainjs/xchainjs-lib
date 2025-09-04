@@ -1,8 +1,9 @@
 import { Address } from '@xchainjs/xchain-util'
-import { Network } from '@xchainjs/xchain-client'
+import { FeeBounds } from '@xchainjs/xchain-client'
 
 import { TxParams, UTXO } from './types'
 import { UtxoError } from './errors'
+import { DUST_THRESHOLD, MAX_REASONABLE_AMOUNT, MAX_UTXO_DECIMALS } from './constants'
 
 /**
  * Comprehensive input validation for UTXO transactions
@@ -16,18 +17,28 @@ export class UtxoTransactionValidator {
       sender?: Address
       feeRate?: number
     },
+    feeBounds?: FeeBounds,
   ): void {
     const errors: string[] = []
 
-    // Address validation
-    if (!params.recipient?.trim()) {
-      errors.push('Recipient address is required')
-    } else if (params.recipient.length > 100) {
-      errors.push('Recipient address is too long')
+    // Address validation - basic checks only
+    // Chain-specific validation should be done by the respective client packages
+    try {
+      this.validateAddressBasic(params.recipient)
+    } catch (error) {
+      if (error instanceof UtxoError) {
+        errors.push(`Invalid recipient address: ${error.message}`)
+      }
     }
 
-    if (params.sender && !params.sender.trim()) {
-      errors.push('Sender address cannot be empty')
+    if (params.sender) {
+      try {
+        this.validateAddressBasic(params.sender)
+      } catch (error) {
+        if (error instanceof UtxoError) {
+          errors.push(`Invalid sender address: ${error.message}`)
+        }
+      }
     }
 
     // Amount validation
@@ -42,19 +53,19 @@ export class UtxoTransactionValidator {
         }
 
         // Check for reasonable maximum (21M BTC equivalent in satoshis)
-        if (amount.gt('2100000000000000')) {
+        if (amount.gt(MAX_REASONABLE_AMOUNT)) {
           errors.push('Amount exceeds maximum possible value')
         }
 
-        // Check for dust amount (546 satoshis is standard dust threshold)
-        if (amount.lt(546)) {
-          errors.push('Amount is below dust threshold (546 satoshis)')
+        // Check for dust amount using the standard UTXO dust threshold
+        if (amount.lt(DUST_THRESHOLD)) {
+          errors.push(`Amount is below dust threshold (${DUST_THRESHOLD} satoshis)`)
         }
 
-        // Validate decimal precision
+        // Validate decimal precision for UTXO chains
         const decimals = params.amount.decimal
-        if (decimals < 0 || decimals > 18) {
-          errors.push(`Invalid decimal precision: ${decimals}`)
+        if (decimals < 0 || decimals > MAX_UTXO_DECIMALS) {
+          errors.push(`Invalid decimal precision: ${decimals} (UTXO chains support max ${MAX_UTXO_DECIMALS} decimals)`)
         }
       } catch (error) {
         errors.push(`Invalid amount format: ${error instanceof Error ? error.message : String(error)}`)
@@ -65,32 +76,31 @@ export class UtxoTransactionValidator {
     if (params.feeRate !== undefined) {
       if (!Number.isFinite(params.feeRate)) {
         errors.push('Fee rate must be a finite number')
-      } else if (params.feeRate < 1) {
-        errors.push('Fee rate must be at least 1 sat/byte')
-      } else if (params.feeRate > 1000000) {
-        errors.push('Fee rate is unreasonably high (max 1,000,000 sat/byte)')
+      } else {
+        const bounds = feeBounds || { lower: 1, upper: 1000 }
+        if (params.feeRate < bounds.lower) {
+          errors.push(`Fee rate must be at least ${bounds.lower} sat/byte`)
+        } else if (params.feeRate > bounds.upper) {
+          errors.push(`Fee rate is unreasonably high (max ${bounds.upper} sat/byte)`)
+        }
       }
     }
 
-    // Memo validation
+    // Memo validation (TypeScript ensures string type at compile time)
     if (params.memo !== undefined) {
-      if (typeof params.memo !== 'string') {
-        errors.push('Memo must be a string')
-      } else {
-        const memoBytes = Buffer.byteLength(params.memo, 'utf8')
-        if (memoBytes > 80) {
-          errors.push(`Memo too long: ${memoBytes} bytes (max 80 bytes)`)
-        }
+      const memoBytes = Buffer.byteLength(params.memo, 'utf8')
+      if (memoBytes > 80) {
+        errors.push(`Memo too long: ${memoBytes} bytes (max 80 bytes)`)
+      }
 
-        // Check for potentially problematic characters
-        if (this.containsControlCharacters(params.memo)) {
-          errors.push('Memo contains invalid control characters')
-        }
+      // Check for potentially problematic characters
+      if (this.containsControlCharacters(params.memo)) {
+        errors.push('Memo contains invalid control characters')
+      }
 
-        // Check for null bytes
-        if (params.memo.includes('\0')) {
-          errors.push('Memo cannot contain null bytes')
-        }
+      // Check for null bytes
+      if (params.memo.includes('\0')) {
+        errors.push('Memo cannot contain null bytes')
       }
     }
 
@@ -201,44 +211,25 @@ export class UtxoTransactionValidator {
   }
 
   /**
-   * Validate address format for specific network
+   * Basic address validation - checks for null/empty and basic format
+   * NOTE: Chain-specific validation should be done by the respective client packages
    */
-  static validateAddressFormat(address: string, network: Network, chain: string, allowedFormats?: string[]): void {
+  static validateAddressBasic(address: string): void {
     if (!address) {
-      throw UtxoError.invalidAddress('', network)
+      throw UtxoError.validationError('Address cannot be empty')
     }
 
     if (typeof address !== 'string') {
       throw UtxoError.validationError('Address must be a string')
     }
 
-    // Basic length check
-    if (address.length < 10 || address.length > 100) {
-      throw UtxoError.invalidAddress(address, network)
+    if (address.trim() !== address) {
+      throw UtxoError.validationError('Address cannot have leading or trailing whitespace')
     }
 
-    // Network-specific validation
-    switch (chain.toUpperCase()) {
-      case 'BTC':
-        this.validateBitcoinAddress(address, network, allowedFormats)
-        break
-      case 'LTC':
-        this.validateLitecoinAddress(address, network)
-        break
-      case 'BCH':
-        this.validateBitcoinCashAddress(address, network)
-        break
-      case 'DOGE':
-        this.validateDogecoinAddress(address, network)
-        break
-      case 'DASH':
-        this.validateDashAddress(address, network)
-        break
-      default:
-        // Generic validation for other chains
-        if (!/^[a-zA-Z0-9]+$/.test(address)) {
-          throw UtxoError.invalidAddress(address, network)
-        }
+    // Basic length check - most crypto addresses are between 25-100 characters
+    if (address.length < 10 || address.length > 100) {
+      throw UtxoError.validationError('Address length is invalid')
     }
   }
 
@@ -317,82 +308,6 @@ export class UtxoTransactionValidator {
       }
     }
     return false
-  }
-
-  private static validateBitcoinAddress(address: string, network: Network, allowedFormats?: string[]): void {
-    const mainnetPatterns = {
-      legacy: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/,
-      segwitV0: /^bc1[02-9ac-hj-np-z]{7,87}$/,
-      segwitV1: /^bc1p[02-9ac-hj-np-z]{58}$/,
-    }
-
-    const testnetPatterns = {
-      legacy: /^[mn2][a-km-zA-HJ-NP-Z1-9]{25,34}$/,
-      segwitV0: /^tb1[02-9ac-hj-np-z]{7,87}$/,
-      segwitV1: /^tb1p[02-9ac-hj-np-z]{58}$/,
-    }
-
-    const patterns = network === Network.Mainnet ? mainnetPatterns : testnetPatterns
-    const isValid = Object.values(patterns).some((pattern) => pattern.test(address))
-
-    if (!isValid) {
-      throw UtxoError.invalidAddress(address, network)
-    }
-
-    // Check allowed formats if specified
-    if (allowedFormats && allowedFormats.length > 0) {
-      const matchingFormats = Object.entries(patterns)
-        .filter(([, pattern]) => pattern.test(address))
-        .map(([format]) => format)
-
-      const hasAllowedFormat = matchingFormats.some((format) => allowedFormats.includes(format))
-      if (!hasAllowedFormat) {
-        throw UtxoError.invalidAddress(address, `${network} (allowed formats: ${allowedFormats.join(', ')})`)
-      }
-    }
-  }
-
-  private static validateLitecoinAddress(address: string, network: Network): void {
-    const mainnetPattern = /^[LM3][a-km-zA-HJ-NP-Z1-9]{26,33}$|^ltc1[02-9ac-hj-np-z]{7,87}$/
-    const testnetPattern = /^[mn2][a-km-zA-HJ-NP-Z1-9]{25,34}$|^tltc1[02-9ac-hj-np-z]{7,87}$/
-
-    const pattern = network === Network.Mainnet ? mainnetPattern : testnetPattern
-    if (!pattern.test(address)) {
-      throw UtxoError.invalidAddress(address, network)
-    }
-  }
-
-  private static validateBitcoinCashAddress(address: string, network: Network): void {
-    // Bitcoin Cash supports both legacy and CashAddr formats
-    const legacyPattern = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/
-    const cashAddrPattern =
-      network === Network.Mainnet
-        ? /^bitcoincash:[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{42}$/
-        : /^bchtest:[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{42}$/
-
-    if (!legacyPattern.test(address) && !cashAddrPattern.test(address)) {
-      throw UtxoError.invalidAddress(address, network)
-    }
-  }
-
-  private static validateDogecoinAddress(address: string, network: Network): void {
-    const mainnetPattern = /^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$/
-    const testnetPattern = /^[nm][a-km-zA-HJ-NP-Z1-9]{25,34}$/
-
-    const pattern = network === Network.Mainnet ? mainnetPattern : testnetPattern
-    if (!pattern.test(address)) {
-      throw UtxoError.invalidAddress(address, network)
-    }
-  }
-
-  private static validateDashAddress(address: string, network: Network): void {
-    const mainnetPattern = /^X[1-9A-HJ-NP-Za-km-z]{33}$|^7[a-km-zA-HJ-NP-Z1-9]{33}$/
-    const testnetPattern = /^[yY][a-km-zA-HJ-NP-Z1-9]{33}$|^8[a-km-zA-HJ-NP-Z1-9]{33}$/
-
-    const pattern = network === Network.Mainnet ? mainnetPattern : testnetPattern
-    if (!pattern.test(address)) {
-      throw UtxoError.invalidAddress(address, network)
-    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

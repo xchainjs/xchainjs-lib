@@ -2,6 +2,7 @@ import TransportNodeHid from '@ledgerhq/hw-transport-node-hid'
 import { Network } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { UtxoClientParams } from '@xchainjs/xchain-utxo'
+import BigNumber from 'bignumber.js'
 
 import { ClientLedger } from '../src/clientLedger'
 import {
@@ -85,14 +86,14 @@ describe('Bitcoin Client Ledger', () => {
       // Get current balance before send max
       const balance = await btcClient.getBalance(senderAddress)
       const feeRate = await btcClient.getFeesWithRates()
-      const currentBalance = balance[0].amount.amount().toNumber()
-      console.log('Current balance (satoshis):', currentBalance)
+      const currentBalanceBN = balance[0].amount.amount() // BigNumber
+      console.log('Current balance (satoshis):', currentBalanceBN.toString())
 
       // Calculate max sendable amount
       const maxTxData = await btcClient.prepareMaxTx({
         sender: senderAddress,
         recipient: recipientAddress,
-        feeRate: feeRate.rates.average, // 10 sat/byte
+        feeRate: feeRate.rates.average,
         memo: 'sendmax-test',
         utxoSelectionPreferences: {
           minimizeFee: true,
@@ -111,7 +112,9 @@ describe('Bitcoin Client Ledger', () => {
       // Verify calculations
       expect(maxTxData.maxAmount).toBeGreaterThan(0)
       expect(maxTxData.fee).toBeGreaterThan(0)
-      expect(maxTxData.maxAmount + maxTxData.fee).toBeLessThanOrEqual(currentBalance)
+      // Use BN-safe comparison
+      const totalSpendBN = new BigNumber(maxTxData.maxAmount).plus(maxTxData.fee)
+      expect(totalSpendBN.lte(currentBalanceBN)).toBeTruthy()
       expect(maxTxData.inputs.length).toBeGreaterThan(0)
 
       // Test the actual send max transaction

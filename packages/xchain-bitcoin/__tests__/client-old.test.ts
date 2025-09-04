@@ -96,7 +96,7 @@ describe('BitcoinClient Test', () => {
   })
 
   it('should not throw an error for setting a good phrase', () => {
-    expect(btcClient.setPhrase(phraseOne)).toBeUndefined
+    expect(() => btcClient.setPhrase(phraseOne)).not.toThrow()
   })
 
   it('should validate the right address', async () => {

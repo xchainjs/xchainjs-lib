@@ -1,4 +1,3 @@
-import { Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 
 import { UtxoError, UtxoErrorCode } from '../src/errors'
@@ -265,81 +264,47 @@ describe('UTXO Edge Cases', () => {
       })
     })
 
-    describe('Address Format Validation', () => {
-      it('should validate Bitcoin mainnet addresses correctly', () => {
+    describe('Basic Address Validation', () => {
+      it('should accept valid address formats for basic validation', () => {
         const validAddresses = [
           'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', // P2WPKH
           'bc1p5d7rjq7g6rdk2yhzks9smlaqtedr4dekq08ge8ztwac72sfr9rusxg3297', // P2TR
           '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', // Legacy P2PKH
           '3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy', // Legacy P2SH
+          'LQTpS3VaYTjCr4s9Y1t1KkXrTBvY3o9Yfw', // Litecoin
+          'DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L', // Dogecoin
         ]
 
         validAddresses.forEach((address) => {
           expect(() => {
-            UtxoTransactionValidator.validateAddressFormat(address, Network.Mainnet, 'BTC')
+            UtxoTransactionValidator.validateAddressBasic(address)
           }).not.toThrow()
         })
       })
 
-      it('should validate Bitcoin testnet addresses correctly', () => {
-        const validAddresses = [
-          'tb1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', // P2WPKH testnet
-          'tb1p5d7rjq7g6rdk2yhzks9smlaqtedr4dekq08ge8ztwac72sfr9rusxg3297', // P2TR testnet
-          'mjSk1Ny9spzU2fouzYgLqGUD8U41iR35QN', // Legacy testnet
+      it('should reject invalid basic address formats', () => {
+        const invalidAddresses = [
+          '', // Empty
+          '   ', // Only whitespace
+          '12345', // Too short
+          'x'.repeat(101), // Too long
+          ' bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh ', // Leading/trailing spaces
         ]
 
-        validAddresses.forEach((address) => {
+        invalidAddresses.forEach((address) => {
           expect(() => {
-            UtxoTransactionValidator.validateAddressFormat(address, Network.Testnet, 'BTC')
-          }).not.toThrow()
+            UtxoTransactionValidator.validateAddressBasic(address)
+          }).toThrow(UtxoError)
         })
       })
 
-      it('should reject cross-network addresses', () => {
+      it('should reject non-string addresses', () => {
         expect(() => {
-          UtxoTransactionValidator.validateAddressFormat(
-            'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', // mainnet
-            Network.Testnet,
-            'BTC',
-          )
+          UtxoTransactionValidator.validateAddressBasic(null as unknown as string)
         }).toThrow(UtxoError)
 
         expect(() => {
-          UtxoTransactionValidator.validateAddressFormat(
-            'tb1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', // testnet
-            Network.Mainnet,
-            'BTC',
-          )
-        }).toThrow(UtxoError)
-      })
-
-      it('should validate Litecoin addresses', () => {
-        const validMainnetAddresses = [
-          'LTC7k1pvpDbwGaWd9TApVVCt2zMEDQcj2', // Legacy
-          'ltc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', // Bech32
-        ]
-
-        validMainnetAddresses.forEach((address) => {
-          expect(() => {
-            UtxoTransactionValidator.validateAddressFormat(address, Network.Mainnet, 'LTC')
-          }).not.toThrow()
-        })
-      })
-
-      it('should validate Dogecoin addresses', () => {
-        const validAddress = 'DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L'
-
-        expect(() => {
-          UtxoTransactionValidator.validateAddressFormat(validAddress, Network.Mainnet, 'DOGE')
-        }).not.toThrow()
-
-        // Should reject Bitcoin address for Dogecoin
-        expect(() => {
-          UtxoTransactionValidator.validateAddressFormat(
-            'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-            Network.Mainnet,
-            'DOGE',
-          )
+          UtxoTransactionValidator.validateAddressBasic(123 as unknown as string)
         }).toThrow(UtxoError)
       })
     })
@@ -356,7 +321,8 @@ describe('UTXO Edge Cases', () => {
       it('should find exact matches when possible', () => {
         const utxos: UTXO[] = [
           { hash: 'hash1', index: 0, value: 100000 },
-          { hash: 'hash2', index: 0, value: 51090 }, // Perfect for 50000 + fee (1090)
+          // Perfect for 50000 + no-change fee (derived to stay in sync with sizing constants)
+          { hash: 'hash2', index: 0, value: 50000 + UtxoSelector.calculateFee(1, 1, 10) },
           { hash: 'hash3', index: 0, value: 200000 },
         ]
 
@@ -573,23 +539,19 @@ describe('UTXO Edge Cases', () => {
 
   describe('Network-Specific Edge Cases', () => {
     it('should handle network-specific constraints', () => {
-      // Test Bitcoin-specific validation
+      // Note: Chain-specific address validation is now done at the client level
+      // This test now focuses on basic validation that should pass generically
       expect(() => {
-        UtxoTransactionValidator.validateAddressFormat(
-          'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-          Network.Mainnet,
-          'BTC',
-          ['segwitV0'], // Only allow SegWit v0
-        )
+        UtxoTransactionValidator.validateAddressBasic('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')
       }).not.toThrow()
 
       expect(() => {
-        UtxoTransactionValidator.validateAddressFormat(
-          '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa', // Legacy address
-          Network.Mainnet,
-          'BTC',
-          ['segwitV0'], // Only allow SegWit v0
-        )
+        UtxoTransactionValidator.validateAddressBasic('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa')
+      }).not.toThrow()
+
+      // Test basic validation failures
+      expect(() => {
+        UtxoTransactionValidator.validateAddressBasic('invalid')
       }).toThrow(UtxoError)
     })
 

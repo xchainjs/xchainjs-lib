@@ -108,7 +108,9 @@ class ClientKeystore extends Client {
    * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences }): Promise<TxHash> {
+  async transfer(
+    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+  ): Promise<TxHash> {
     // Set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
 
@@ -160,7 +162,7 @@ class ClientKeystore extends Client {
       // Broadcast the transaction and return the transaction hash
       const txId = await this.roundRobinBroadcastTx(txHex)
       return txId
-    } catch (err) {
+    } catch {
       // If broadcasting fails, return an error message with a link to the explorer
       const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
         this.network

@@ -57,7 +57,7 @@ export const validateAddress = (address: Address, network: Network): boolean => 
   try {
     Bitcoin.address.toOutputScript(address, btcNetwork(network)) // Try to convert the address to an output script using the specified network
     return true // If successful, the address is valid
-  } catch (error) {
+  } catch {
     return false // If an error occurs, the address is invalid
   }
 }

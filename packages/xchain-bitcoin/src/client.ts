@@ -15,8 +15,6 @@ import {
 } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
-import accumulative from 'coinselect/accumulative'
-
 import {
   AssetBTC,
   BTCChain,
@@ -161,13 +159,15 @@ abstract class Client extends UTXOClient {
       feeRate: FeeRate
     },
   ): void {
-    // Use comprehensive validator
-    UtxoTransactionValidator.validateTransferParams(params)
+    // Use comprehensive validator with Bitcoin's fee bounds
+    UtxoTransactionValidator.validateTransferParams(params, this.feeBounds)
 
     // Bitcoin-specific address validation
-    UtxoTransactionValidator.validateAddressFormat(params.recipient, this.network, 'BTC')
-    if (params.sender) {
-      UtxoTransactionValidator.validateAddressFormat(params.sender, this.network, 'BTC')
+    if (!this.validateAddress(params.recipient)) {
+      throw UtxoError.invalidAddress(params.recipient, this.network)
+    }
+    if (params.sender && !this.validateAddress(params.sender)) {
+      throw UtxoError.invalidAddress(params.sender, this.network)
     }
 
     // Fee rate validation with Bitcoin network conditions
@@ -376,9 +376,9 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Build a Bitcoin transaction.*
+   * Build a Bitcoin transaction with enhanced validation and performance.
+   * Now uses the enhanced logic internally while maintaining the same API.
    * @param param0
-   * @deprecated Use buildTxEnhanced for better performance and validation
    */
   async buildTx({
     amount,
@@ -393,82 +393,15 @@ abstract class Client extends UTXOClient {
     spendPendingUTXO?: boolean
     withTxHex?: boolean
   }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
-    // Check memo length
-    if (memo && memo.length > 80) {
-      throw new Error('memo too long, must not be longer than 80 chars.')
-    }
-    // This section of the code is responsible for preparing a transaction by building a Bitcoin PSBT (Partially Signed Bitcoin Transaction).
-    if (!this.validateAddress(recipient)) throw new Error('Invalid address')
-    // Determine whether to only use confirmed UTXOs or include pending UTXOs based on the spendPendingUTXO flag.
-    const confirmedOnly = !spendPendingUTXO
-    // Scan UTXOs associated with the sender's address.
-    const utxos = await this.scanUTXOs(sender, confirmedOnly)
-    // Throw an error if there are no available UTXOs to cover the transaction.
-    if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
-    // Round up the fee rate to the nearest integer.
-    const feeRateWhole = Math.ceil(feeRate)
-    // Compile the memo into a Buffer if provided.
-    const compiledMemo = memo ? this.compileMemo(memo) : null
-    // Initialize an array to store the target outputs of the transaction.
-    const targetOutputs = []
-
-    // 1. Add the recipient address and amount to the target outputs.
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
+    // Use the enhanced logic internally while maintaining the same API
+    return this.buildTxEnhanced({
+      amount,
+      recipient,
+      memo,
+      feeRate,
+      sender,
+      spendPendingUTXO,
     })
-    // 2. Add the compiled memo to the target outputs if it exists.
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
-    // Use the coinselect library to determine the inputs and outputs for the transaction.
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-    // If no suitable inputs or outputs are found, throw an error indicating insufficient balance.
-    if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
-    // Initialize a new Bitcoin PSBT object.
-    const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) }) // Network-specific
-
-    if (this.addressFormat === AddressFormat.P2WPKH) {
-      // Add inputs to the PSBT from the accumulated inputs.
-      inputs.forEach((utxo: UTXO) =>
-        psbt.addInput({
-          hash: utxo.hash,
-          index: utxo.index,
-          witnessUtxo: utxo.witnessUtxo,
-        }),
-      )
-    } else {
-      const { pubkey, output } = Bitcoin.payments.p2tr({
-        address: sender,
-      })
-      inputs.forEach((utxo: UTXO) =>
-        psbt.addInput({
-          hash: utxo.hash,
-          index: utxo.index,
-          witnessUtxo: { value: utxo.value, script: output as Buffer },
-          tapInternalKey: pubkey,
-        }),
-      )
-    }
-    // Add outputs to the PSBT from the accumulated outputs.
-    outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
-      // If the output address is not specified, it's considered a change address and set to the sender's address.
-      if (!output.address) {
-        //an empty address means this is the change address
-        output.address = sender
-      }
-      // Add the output to the PSBT.
-      if (!output.script) {
-        psbt.addOutput(output)
-      } else {
-        // If the output is a memo, add it to the PSBT to avoid dust error.
-        if (compiledMemo) {
-          psbt.addOutput({ script: compiledMemo, value: 0 })
-        }
-      }
-    })
-
-    return { psbt, utxos, inputs }
   }
 
   /**
@@ -503,19 +436,14 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(recipient, this.network)
       }
 
-      UtxoTransactionValidator.validateAddressFormat(recipient, this.network, 'BTC')
-      UtxoTransactionValidator.validateAddressFormat(sender, this.network, 'BTC')
-
-      if (memo) {
-        // Only validate memo for send max (skip amount validation)
-        if (typeof memo !== 'string') {
-          throw UtxoError.validationError('Memo must be a string')
-        }
-        const memoBytes = Buffer.byteLength(memo, 'utf8')
-        if (memoBytes > 80) {
-          throw UtxoError.validationError(`Memo too long: ${memoBytes} bytes (max 80 bytes)`)
-        }
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
       }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Memo validation is handled by validateTransactionInputs
 
       // Get validated UTXOs
       const confirmedOnly = !spendPendingUTXO
@@ -664,11 +592,11 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Prepare transfer.
+   * Prepare transfer with enhanced validation and performance.
+   * Now uses the enhanced logic internally while maintaining the same API.
    *
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
-   * @deprecated Use prepareTxEnhanced for better performance and validation
    */
   async prepareTx({
     sender,
@@ -682,8 +610,8 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
   }): Promise<PreparedTx> {
-    // Build the transaction using the provided parameters.
-    const { psbt, utxos, inputs } = await this.buildTx({
+    // Use the enhanced logic internally while maintaining the same API
+    return this.prepareTxEnhanced({
       sender,
       recipient,
       amount,
@@ -691,8 +619,6 @@ abstract class Client extends UTXOClient {
       memo,
       spendPendingUTXO,
     })
-    // Return the raw unsigned transaction (PSBT) and associated UTXOs.
-    return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
   }
 }
 
