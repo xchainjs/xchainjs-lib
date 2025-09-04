@@ -117,7 +117,7 @@ export abstract class BaseXChainClient implements XChainClient {
       case 'gwei':
         return gasRate // Already in gwei for EVM chains
       case 'mwei':
-        return gasRate / 1e6 // Convert mwei to gwei
+        return gasRate / 1e3 // Convert mwei to gwei (1 mwei = 0.001 gwei)
       case 'centigwei':
         return gasRate / 100 // Convert centigwei to gwei
       case 'satsperbyte':
@@ -182,40 +182,25 @@ export abstract class BaseXChainClient implements XChainClient {
       console.debug(`Mayachain gas_rate for ${this.chain}: ${gasRate} ${gasRateUnits}`)
     }
 
-    // Maya supports a subset of chains, using same unit conversion logic as Thorchain
-    switch (this.chain) {
-      case 'ETH':
-        // Already in gwei, which is what EVM client expects
-        if (gasRateUnits !== 'gwei') {
-          console.warn(`Unexpected gas_rate_units for ETH on Maya: ${gasRateUnits}`)
-        }
+    // Prefer unit-based conversion (parity with Thornode logic)
+    switch (gasRateUnits) {
+      case 'gwei':
         return gasRate
-
-      case 'ARB':
-        // ARB returns centigwei (10^-2 gwei = 0.01 gwei), but EVM client expects gwei
-        // Need to convert: centigwei to gwei = divide by 100
-        if (gasRateUnits === 'centigwei') {
-          return gasRate / 100
-        }
-        console.warn(`Unexpected gas_rate_units for ARB: ${gasRateUnits}`)
+      case 'mwei':
+        return gasRate / 1e3
+      case 'centigwei':
+        return gasRate / 100
+      case 'satsperbyte':
         return gasRate
-
-      case 'BTC':
-      case 'DASH':
-        // UTXO chains return satsperbyte, which is what clients expect
-        if (gasRateUnits !== 'satsperbyte') {
-          console.warn(`Unexpected gas_rate_units for ${this.chain} on Maya: ${gasRateUnits}`)
-        }
+      case 'drop':
         return gasRate
-
-      case 'KUJI':
-      case 'MAYA':
-      case 'THOR':
-        // Cosmos-based chains return in smallest unit
+      case 'uatom':
         return gasRate
-
       default:
-        console.warn(`Unknown chain ${this.chain} on Maya with gas_rate_units: ${gasRateUnits}`)
+        // Chain-specific fallbacks for nano/micro prefixes
+        if (gasRateUnits.startsWith('n') && gasRateUnits.length > 1) return gasRate
+        if (gasRateUnits.startsWith('u') && gasRateUnits.length > 1) return gasRate
+        console.warn(`Unknown gas_rate_units "${gasRateUnits}" for chain ${this.chain} on Mayachain. Using raw value.`)
         return gasRate
     }
   }
