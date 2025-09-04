@@ -58,7 +58,7 @@ describe('Contract Cache', () => {
 
     // Contracts should be different instances (cache keys by provider instance, not just URL)
     expect(contract1).not.toBe(contract2)
-    
+
     // Each contract should be bound to its respective provider
     expect(contract1.runner).toBe(provider1)
     expect(contract2.runner).toBe(provider2)
@@ -67,7 +67,7 @@ describe('Contract Cache', () => {
     // Calling getCachedContract again with the same provider should return the cached instance
     const contract1Again = await getCachedContract(contractAddress, erc20ABI, provider1)
     const contract2Again = await getCachedContract(contractAddress, erc20ABI, provider2)
-    
+
     expect(contract1).toBe(contract1Again) // Same instance from cache for provider1
     expect(contract2).toBe(contract2Again) // Same instance from cache for provider2
   })
