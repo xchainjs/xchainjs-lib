@@ -378,6 +378,22 @@ export class Client extends BaseXChainClient implements EVMClient {
       }
     }
 
+    // If fallback to MAYAChain protocol, fetch gas prices from MAYAChain
+    if (protocol === Protocol.MAYACHAIN) {
+      try {
+        // Fetch fee rates from MAYAChain and convert to BaseAmount
+        // Same conversion logic as THORChain - rates are in gwei
+        const ratesInGwei: FeeRates = standardFeeRates(await this.getFeeRateFromMayachain())
+        return {
+          [FeeOption.Average]: baseAmount(ratesInGwei[FeeOption.Average] * 10 ** 9, this.config.gasAssetDecimals),
+          [FeeOption.Fast]: baseAmount(ratesInGwei[FeeOption.Fast] * 10 ** 9, this.config.gasAssetDecimals),
+          [FeeOption.Fastest]: baseAmount(ratesInGwei[FeeOption.Fastest] * 10 ** 9, this.config.gasAssetDecimals),
+        }
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+
     // Default fee rates if everything else fails
     const defaultRatesInGwei: FeeRates = standardFeeRates(this.defaults[this.network].gasPrice.toNumber())
     return {

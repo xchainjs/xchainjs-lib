@@ -177,7 +177,7 @@ export abstract class Client extends BaseXChainClient {
       }
     }
 
-    if (!protocol || Protocol.THORCHAIN) {
+    if (!protocol || protocol === Protocol.THORCHAIN) {
       try {
         const feeRate = await this.getFeeRateFromThorchain()
         return standardFeeRates(feeRate)
@@ -185,6 +185,16 @@ export abstract class Client extends BaseXChainClient {
         console.warn(`Can not retrieve fee rates from Thorchain`)
       }
     }
+
+    if (protocol === Protocol.MAYACHAIN) {
+      try {
+        const feeRate = await this.getFeeRateFromMayachain()
+        return standardFeeRates(feeRate)
+      } catch (_error) {
+        console.warn(`Can not retrieve fee rates from Mayachain`)
+      }
+    }
+
     // TODO: Return default value
     throw Error('Can not retrieve fee rates')
   }
