@@ -120,7 +120,7 @@ export const estimateCall = async ({
   funcName: string
   funcParams?: unknown[]
 }): Promise<BigNumber> => {
-  const contract = await getCachedContract(contractAddress, abi, provider)
+  const contract = getCachedContract(contractAddress, abi, provider)
   const estiamtion = await contract.getFunction(funcName).estimateGas(...funcParams)
   return getCachedBigNumber(estiamtion.toString())
 }
@@ -150,7 +150,7 @@ export const call = async <T>({
   funcName: string
   funcParams?: unknown[]
 }): Promise<T> => {
-  let contract: BaseContract = await getCachedContract(contractAddress, abi, provider)
+  let contract: BaseContract = getCachedContract(contractAddress, abi, provider)
   if (signer) {
     // For sending transactions, a signer is needed
     contract = contract.connect(signer)
@@ -176,7 +176,7 @@ export const getContract = async ({
   contractAddress: Address
   abi: InterfaceAbi
 }): Promise<Contract> => {
-  return await getCachedContract(contractAddress, abi, provider)
+  return getCachedContract(contractAddress, abi, provider)
 }
 
 /**
@@ -240,7 +240,7 @@ export async function isApproved({
   amount?: BaseAmount
 }): Promise<boolean> {
   const txAmount = getCachedBigNumber(amount?.amount().toFixed() ?? '1')
-  const contract = await getCachedContract(contractAddress, erc20ABI, provider)
+  const contract = getCachedContract(contractAddress, erc20ABI, provider)
   const allowanceResponse = await contract.allowance(fromAddress, spenderAddress)
   const allowance = getCachedBigNumber(allowanceResponse.toString())
 

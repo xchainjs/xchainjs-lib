@@ -453,7 +453,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       // ERC20 gas estimate
       const assetAddress = getTokenAddress(theAsset)
       if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(theAsset)}`)
-      const contract = await getCachedContract(assetAddress, erc20ABI, this.getProvider())
+      const contract = getCachedContract(assetAddress, erc20ABI, this.getProvider())
 
       const address = from || (await this.getAddressAsync())
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -703,7 +703,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       const assetAddress = getTokenAddress(asset)
       if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
 
-      const contract = await getCachedContract(assetAddress, erc20ABI, this.getProvider())
+      const contract = getCachedContract(assetAddress, erc20ABI, this.getProvider())
 
       const amountToTransfer = BigInt(amount.amount().toFixed())
       const unsignedTx = await contract.getFunction('transfer').populateTransaction(recipient, amountToTransfer)
@@ -736,7 +736,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     if (!this.validateAddress(spenderAddress)) throw Error('Invalid spenderAddress address')
     if (!this.validateAddress(sender)) throw Error('Invalid sender address')
 
-    const contract = await getCachedContract(contractAddress, erc20ABI, this.getProvider())
+    const contract = getCachedContract(contractAddress, erc20ABI, this.getProvider())
     const valueToApprove = getApprovalAmount(amount)
 
     const unsignedTx = await contract
