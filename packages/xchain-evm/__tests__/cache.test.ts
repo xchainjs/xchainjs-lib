@@ -43,4 +43,32 @@ describe('Contract Cache', () => {
     const contract1Again = await getCachedContract(address1, erc20ABI, provider)
     expect(contract1).toBe(contract1Again)
   })
+
+  it('should cache contracts separately for different provider instances with same URL', async () => {
+    // Create two distinct provider instances using the same URL
+    const sameUrl = 'https://eth.llamarpc.com'
+    const provider1 = new JsonRpcProvider(sameUrl)
+    const provider2 = new JsonRpcProvider(sameUrl)
+
+    const contractAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' // USDC address
+
+    // Get contracts from both provider instances
+    const contract1 = await getCachedContract(contractAddress, erc20ABI, provider1)
+    const contract2 = await getCachedContract(contractAddress, erc20ABI, provider2)
+
+    // Contracts should be different instances (cache keys by provider instance, not just URL)
+    expect(contract1).not.toBe(contract2)
+    
+    // Each contract should be bound to its respective provider
+    expect(contract1.runner).toBe(provider1)
+    expect(contract2.runner).toBe(provider2)
+    expect(contract1.runner).not.toBe(contract2.runner)
+
+    // Calling getCachedContract again with the same provider should return the cached instance
+    const contract1Again = await getCachedContract(contractAddress, erc20ABI, provider1)
+    const contract2Again = await getCachedContract(contractAddress, erc20ABI, provider2)
+    
+    expect(contract1).toBe(contract1Again) // Same instance from cache for provider1
+    expect(contract2).toBe(contract2Again) // Same instance from cache for provider2
+  })
 })
