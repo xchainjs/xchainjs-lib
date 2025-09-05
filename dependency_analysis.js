@@ -3,8 +3,86 @@
 const fs = require('fs')
 const path = require('path')
 
+// Parse CLI arguments for packagesDir
+function parsePackagesDir() {
+  const args = process.argv.slice(2)
+  let packagesDir = null
+
+  // Check for help flag
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('📊 Dependency Analysis Script')
+    console.log('')
+    console.log('Usage: node dependency_analysis.js [options]')
+    console.log('')
+    console.log('Options:')
+    console.log('  --packagesDir <path>    Path to packages directory')
+    console.log('  --packagesDir=<path>    Path to packages directory (alternative syntax)')
+    console.log('  --help, -h              Show this help message')
+    console.log('')
+    console.log('Examples:')
+    console.log('  node dependency_analysis.js')
+    console.log('  node dependency_analysis.js --packagesDir ./packages')
+    console.log('  node dependency_analysis.js --packagesDir=/path/to/packages')
+    process.exit(0)
+  }
+
+  // Look for --packagesDir argument
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--packagesDir' && i + 1 < args.length) {
+      packagesDir = args[i + 1]
+      break
+    }
+    if (args[i].startsWith('--packagesDir=')) {
+      packagesDir = args[i].split('=')[1]
+      break
+    }
+  }
+
+  // Use sensible defaults if not provided
+  if (!packagesDir) {
+    // Try common locations
+    const candidates = [
+      path.join(process.cwd(), 'packages'),
+      path.resolve(__dirname, '..', 'packages'),
+      path.resolve(__dirname, 'packages'),
+    ]
+
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
+        packagesDir = candidate
+        break
+      }
+    }
+  }
+
+  // Validate the packages directory
+  if (!packagesDir) {
+    console.error('❌ Error: Could not find packages directory.')
+    console.error('   Please specify with --packagesDir <path>')
+    console.error('   Example: node dependency_analysis.js --packagesDir ./packages')
+    process.exit(1)
+  }
+
+  const resolvedPath = path.resolve(packagesDir)
+
+  if (!fs.existsSync(resolvedPath)) {
+    console.error(`❌ Error: Packages directory does not exist: ${resolvedPath}`)
+    console.error('   Please specify a valid directory with --packagesDir <path>')
+    process.exit(1)
+  }
+
+  if (!fs.statSync(resolvedPath).isDirectory()) {
+    console.error(`❌ Error: Packages path is not a directory: ${resolvedPath}`)
+    console.error('   Please specify a valid directory with --packagesDir <path>')
+    process.exit(1)
+  }
+
+  console.log(`📦 Using packages directory: ${resolvedPath}`)
+  return resolvedPath
+}
+
 // Read all package.json files
-const packagesDir = '/Users/dev/Documents/xchainjs-lib/packages'
+const packagesDir = parsePackagesDir()
 const packages = fs.readdirSync(packagesDir).filter((dir) => fs.statSync(path.join(packagesDir, dir)).isDirectory())
 
 const packageData = []
@@ -23,15 +101,22 @@ packages.forEach((pkgName) => {
 
     // Separate internal vs external dependencies
     const internalDeps = deps.filter((dep) => dep.startsWith('@xchainjs/'))
-    const externalProductionDeps = deps.filter((dep) => !dep.startsWith('@xchainjs/') && dep !== 'workspace:*')
+    const externalProductionDeps = deps.filter((dep) => {
+      // Exclude internal @xchainjs packages
+      if (dep.startsWith('@xchainjs/')) return false
+
+      // Exclude workspace dependencies by checking their version
+      const version = pkg.dependencies[dep]
+      return version && !version.startsWith('workspace:')
+    })
 
     packageData.push({
       name: pkg.name,
       version: pkg.version,
       totalDeps: deps.length,
-      internalDeps: internalDeps.length,
+      internalDepsCount: internalDeps.length,
       externalDeps: externalProductionDeps.length,
-      devDeps: devDeps.length,
+      devDepsCount: devDeps.length,
       deps,
       devDeps,
       internalDeps,
@@ -40,10 +125,17 @@ packages.forEach((pkgName) => {
 
     // Track all dependencies
     deps.forEach((dep) => {
-      if (!dep.startsWith('@xchainjs/') && dep !== 'workspace:*') {
+      const version = pkg.dependencies[dep]
+
+      // Track external dependencies (exclude internal packages and workspace deps)
+      if (!dep.startsWith('@xchainjs/') && version && !version.startsWith('workspace:')) {
         externalDeps.set(dep, (externalDeps.get(dep) || 0) + 1)
       }
-      allDeps.set(dep, (allDeps.get(dep) || 0) + 1)
+
+      // Track all dependencies (including internal, but excluding workspace deps)
+      if (version && !version.startsWith('workspace:')) {
+        allDeps.set(dep, (allDeps.get(dep) || 0) + 1)
+      }
     })
   }
 })
@@ -77,7 +169,9 @@ packageData
   .sort((a, b) => b.totalDeps - a.totalDeps)
   .slice(0, 10)
   .forEach((pkg) => {
-    console.log(`  ${pkg.name}: ${pkg.totalDeps} deps (${pkg.externalDeps} external, ${pkg.internalDeps} internal)`)
+    console.log(
+      `  ${pkg.name}: ${pkg.totalDeps} deps (${pkg.externalDeps} external, ${pkg.internalDepsCount} internal)`,
+    )
   })
 
 console.log('\n🎯 HEAVY EXTERNAL DEPENDENCIES (common & likely large):')

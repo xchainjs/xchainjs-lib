@@ -4,7 +4,7 @@
  */
 
 import { MIDGARD_API_9R_URL } from './config'
-import { Configuration, DefaultApi } from './selective-api-complete'
+import { Configuration, DefaultApi, ConfigurationParameters } from './selective-api-complete'
 
 // Re-export config
 export * from './config'
@@ -22,24 +22,26 @@ export type {
 } from './selective-api-complete'
 
 /**
- * The base URL for the Mayamidgard API.
+ * Creates a fresh Configuration instance to avoid shared state mutations
  */
-const baseUrl = MIDGARD_API_9R_URL
-
-/**
- * Default configuration for the Mayamidgard API client.
- */
-const defaultConfig = new Configuration({ basePath: baseUrl })
+function createDefaultConfig(overrides: Partial<ConfigurationParameters> = {}): Configuration {
+  return new Configuration({
+    basePath: MIDGARD_API_9R_URL,
+    ...overrides,
+  })
+}
 
 /**
  * Class representing the Mayamidgard API client (optimized).
  */
 export class MayamidgardApi extends DefaultApi {
   /**
-   * Constructs a new instance of the Mayamidgard API client with the provided configuration.
-   * @param config Optional configuration for the API client. Defaults to the default configuration.
+   * Constructs a new instance of the Mayamidgard API client with fresh configuration.
+   * @param configParams Optional configuration parameters for the API client.
    */
-  constructor(config = defaultConfig) {
+  constructor(configParams?: Partial<ConfigurationParameters>) {
+    // Create fresh configuration to avoid shared state mutations
+    const config = createDefaultConfig(configParams)
     super(config)
   }
 }

@@ -139,8 +139,8 @@ export class DefaultApi extends BaseAPI {
     public async getPools(options?: AxiosRequestConfig): Promise<Array<Pool>> {
         const requestUrl = `${this.basePath}/v2/pools`;
         const response = await this.axios.get(requestUrl, {
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
         });
         return response.data;
     }
@@ -151,8 +151,8 @@ export class DefaultApi extends BaseAPI {
     public async getNetwork(options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/network`;
         const response = await this.axios.get(requestUrl, {
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
         });
         return response.data;
     }
@@ -163,9 +163,9 @@ export class DefaultApi extends BaseAPI {
     public async getPoolStats(pool: string, period?: string, options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/pool/${encodeURIComponent(String(pool))}/stats`;
         const response = await this.axios.get(requestUrl, {
-            params: { period },
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
+            params: { period, ...options?.params },
         });
         return response.data;
     }
@@ -176,9 +176,9 @@ export class DefaultApi extends BaseAPI {
     public async getDepthHistory(pool: string, interval?: string, from?: number, to?: number, options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/history/depths/${encodeURIComponent(String(pool))}`;
         const response = await this.axios.get(requestUrl, {
-            params: { interval, from, to },
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
+            params: { interval, from, to, ...options?.params },
         });
         return response.data;
     }
@@ -189,9 +189,9 @@ export class DefaultApi extends BaseAPI {
     public async getSwapHistory(pool?: string, interval?: string, from?: number, to?: number, options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/history/swaps`;
         const response = await this.axios.get(requestUrl, {
-            params: { pool, interval, from, to },
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
+            params: { pool, interval, from, to, ...options?.params },
         });
         return response.data;
     }
@@ -203,8 +203,8 @@ export class DefaultApi extends BaseAPI {
         const addresses = Array.isArray(address) ? address.join(',') : address;
         const requestUrl = `${this.basePath}/v2/member/${encodeURIComponent(String(addresses))}`;
         const response = await this.axios.get(requestUrl, {
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
         });
         return response.data;
     }
@@ -215,8 +215,8 @@ export class DefaultApi extends BaseAPI {
     public async getNodes(options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/mayachain/nodes`;
         const response = await this.axios.get(requestUrl, {
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
         });
         return response.data;
     }
@@ -227,8 +227,8 @@ export class DefaultApi extends BaseAPI {
     public async getQueue(options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/mayachain/queue`;
         const response = await this.axios.get(requestUrl, {
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
         });
         return response.data;
     }
@@ -242,8 +242,8 @@ export class SpecificationApi extends BaseAPI {
     public async getOpenApiSpec(options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/doc`;
         const response = await this.axios.get(requestUrl, {
-            ...options,
             ...this.configuration?.baseOptions,
+            ...options,
         });
         return response.data;
     }
