@@ -44,7 +44,6 @@ echo "Checking proto files"
 tput sgr0
 MISSING_FILES=0
 for proto_file in \
-  "$TMP_DIR/thornode/proto/thorchain/v1/common/common.proto" \
   "$TMP_DIR/thornode/proto/thorchain/v1/types/msg_deposit.proto" \
   "$TMP_DIR/thornode/proto/thorchain/v1/types/msg_send.proto"; do
   if [ ! -f "$proto_file" ]; then
@@ -59,6 +58,17 @@ if [ $MISSING_FILES -eq 1 ]; then
   echo "Error: Required proto files are missing"
   exit 1
 fi
+
+# Copy minimal common.proto to temp directory
+tput setaf 2
+echo "Using minimal common.proto to avoid bloat"
+tput sgr0
+mkdir -p "$TMP_DIR/thornode/proto/thorchain/v1/common"
+if ! cp common_minimal.proto "$TMP_DIR/thornode/proto/thorchain/v1/common/common.proto"; then
+  echo "Error: Failed to copy minimal common.proto"
+  exit 1
+fi
+echo "✓ Using minimal common.proto"
 
 # Download cosmos/base/v1beta1/coin.proto from cosmossdk if not exists
 COSMOS_COIN_PROTO="$TMP_DIR/thornode/third_party/proto/cosmos/base/v1beta1/coin.proto"
