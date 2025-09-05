@@ -33,7 +33,7 @@ trap cleanup EXIT
 tput setaf 2
 echo "Checking out https://gitlab.com/thorchain/thornode to $TMP_DIR"
 tput sgr0
-if ! (cd "$TMP_DIR" && git clone --branch develop https://gitlab.com/thorchain/thornode); then
+if ! (cd "$TMP_DIR" && git clone --depth 1 --single-branch --branch develop https://gitlab.com/thorchain/thornode); then
   echo "Error: Failed to clone thornode repository"
   exit 1
 fi
@@ -84,6 +84,7 @@ tput sgr0
 if ! yarn pbjs -w commonjs -t static-module --sparse \
   -p "$TMP_DIR/thornode/proto" \
   -p "$TMP_DIR/thornode/third_party/proto" \
+  "$TMP_DIR/thornode/proto/thorchain/v1/common/common.proto" \
   "$TMP_DIR/thornode/proto/thorchain/v1/types/msg_deposit.proto" \
   "$TMP_DIR/thornode/proto/thorchain/v1/types/msg_send.proto" \
   -o "$MSG_COMPILED_OUTPUTFILE" 2>pbjs_errors.txt; then

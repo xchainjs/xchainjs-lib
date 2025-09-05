@@ -33,7 +33,7 @@ trap cleanup EXIT
 tput setaf 2
 echo "Checking out https://gitlab.com/mayachain/mayanode to $TMP_DIR"
 tput sgr0
-if ! (cd "$TMP_DIR" && git clone https://gitlab.com/mayachain/mayanode); then
+if ! (cd "$TMP_DIR" && git clone --depth 1 --single-branch https://gitlab.com/mayachain/mayanode); then
   echo "Error: Failed to clone mayanode repository"
   exit 1
 fi
