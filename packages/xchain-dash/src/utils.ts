@@ -66,7 +66,7 @@ export const validateAddress = (address: Address, network: Network): boolean => 
   try {
     Dash.address.toOutputScript(address, dashNetwork(network)) // Convert address to output script
     return true // Address is valid
-  } catch (error) {
+  } catch (_error) {
     return false // Address is invalid
   }
 }

@@ -3,4 +3,5 @@
  */
 export enum Protocol {
   THORCHAIN = 1, // Protocol value for THORChain
+  MAYACHAIN = 2, // Protocol value for MAYAChain
 }

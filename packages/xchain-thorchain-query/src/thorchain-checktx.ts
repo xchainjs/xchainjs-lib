@@ -198,7 +198,7 @@ export class TransactionStage {
       if (inboundTxHash.length < 1) throw Error('inboundTxHash too short')
       txData = await this.thorchainCache.thornode.getTxDetail(inboundTxHash)
       // console.log(JSON.stringify(txData, null, 2))
-    } catch (error) {
+    } catch (_error) {
       return {
         txType: TxType.Unknown,
       }
