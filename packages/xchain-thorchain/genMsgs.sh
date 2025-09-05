@@ -64,6 +64,9 @@ if ! yarn pbjs -w commonjs -t static-module \
   exit 1
 fi
 
+# Fix import to be ESM-compatible (no omitted file extension)
+sed -i -E 's|"(protobufjs/minimal)"|"\1.js"|' "$MSG_COMPILED_OUTPUTFILE"
+
 # Generate TypeScript definitions with explicit namespace
 tput setaf 2
 echo "Generating $MSG_COMPILED_TYPES_OUTPUTFILE"

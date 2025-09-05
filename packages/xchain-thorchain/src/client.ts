@@ -13,7 +13,7 @@ import {
   bech32ToBase64,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { Address, assetFromString, eqAsset } from '@xchainjs/xchain-util'
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 
 /**
  * Import constants and types
