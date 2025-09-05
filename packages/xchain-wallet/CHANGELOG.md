@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.17
+
+### Patch Changes
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+  - @xchainjs/xchain-mayachain@4.0.1
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-utxo@2.0.9
+  - @xchainjs/xchain-evm@2.0.12
+  - @xchainjs/xchain-radix@2.0.9
+
 ## 2.0.16
 
 ### Patch Changes

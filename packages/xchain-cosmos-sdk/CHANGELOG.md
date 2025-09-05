@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.9
+
+### Patch Changes
+
+- e458a3e: update to CosmJs 0.34.0, migrate off elliptic to noble cryptography
+- Updated dependencies [b1c99c8]
+  - @xchainjs/xchain-client@2.0.9
+
 ## 2.0.8
 
 ### Patch Changes

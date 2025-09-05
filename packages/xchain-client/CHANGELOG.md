@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.9
+
+### Patch Changes
+
+- b1c99c8: Updated get fee rates to observe Mayachain as well
+
 ## 2.0.8
 
 ### Patch Changes
