@@ -12,7 +12,7 @@ import { AssetInfo, FeeType, Fees, PreparedTx, singleFee } from '@xchainjs/xchai
 import { Client as CosmosSDKClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
 import { Address, Asset, AssetType, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 
 import {
   AssetATOM,
