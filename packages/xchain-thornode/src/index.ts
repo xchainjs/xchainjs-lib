@@ -1,5 +1,5 @@
 /**
  * The base URL for the THORNode API endpoint.
+ * Optimized version with selective API loading
  */
-export * from './generated/thornodeApi'
-export * from './config'
+export * from './index-optimized'
