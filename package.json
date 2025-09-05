@@ -43,7 +43,8 @@
     "word-wrap": "1.2.4",
     "undici": "5.29.0",
     "form-data": "4.0.4",
-    "elliptic": "^6.6.1"
+    "elliptic": "^6.6.1",
+    "sha.js": "^2.4.12"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
