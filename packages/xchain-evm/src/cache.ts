@@ -33,9 +33,10 @@ export function getCachedContract(address: string, abi: InterfaceAbi, provider: 
 
 /**
  * Get a cached BigNumber instance or create a new one
+ * Only accepts string or bigint to preserve precision
  */
-export function getCachedBigNumber(value: string | number): BigNumber {
-  const stringValue = value.toString()
+export function getCachedBigNumber(value: string | bigint): BigNumber {
+  const stringValue = typeof value === 'bigint' ? value.toString() : value
   if (!bigNumberCache.has(stringValue)) {
     bigNumberCache.set(stringValue, new BigNumber(stringValue))
   }
