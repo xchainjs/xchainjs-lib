@@ -1,10 +1,21 @@
 #!/bin/bash
 
 # This script updates THORChain Protobuf bindings for MsgDeposit and MsgSend
-set -e # Exit on any error
+set -euo pipefail # Exit on error, undefined variables, and pipe failures
+
+# Check for required tools
+for tool in yarn git curl sed; do
+  if ! command -v "$tool" &>/dev/null; then
+    echo "Error: Required tool '$tool' is not installed"
+    exit 1
+  fi
+done
 
 MSG_COMPILED_OUTPUTFILE=src/types/proto/MsgCompiled.js
 MSG_COMPILED_TYPES_OUTPUTFILE=src/types/proto/MsgCompiled.d.ts
+
+# Ensure output directory exists
+mkdir -p "$(dirname "$MSG_COMPILED_OUTPUTFILE")"
 
 TMP_DIR=$(mktemp -d)
 
@@ -56,7 +67,7 @@ if [ ! -f "$COSMOS_COIN_PROTO" ]; then
   echo "Downloading cosmos/base/v1beta1/coin.proto from cosmossdk"
   tput sgr0
   mkdir -p "$TMP_DIR/thornode/third_party/proto/cosmos/base/v1beta1"
-  if ! curl -f -o "$COSMOS_COIN_PROTO" \
+  if ! curl -fSL --retry 3 --retry-delay 2 -o "$COSMOS_COIN_PROTO" \
     "https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/v1beta1/coin.proto"; then
     echo "Error: Failed to download cosmos coin.proto"
     exit 1
