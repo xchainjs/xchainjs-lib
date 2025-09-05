@@ -137,7 +137,7 @@ export abstract class Client extends CosmosSDKClient {
       const feeRate1e6 = feeRate * 10 ** decimalDiff
       const fee = baseAmount(feeRate1e6, COSMOS_DECIMAL)
       return singleFee(FeeType.FlatFee, fee)
-    } catch (error) {
+    } catch (_error) {
       return singleFee(FeeType.FlatFee, DEFAULT_FEE)
     }
   }

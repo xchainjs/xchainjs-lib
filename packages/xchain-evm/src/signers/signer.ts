@@ -45,5 +45,5 @@ export abstract class Signer implements ISigner {
   abstract purge(): void
   abstract signTransfer(params: SignTransferParams): Promise<string>
   abstract signApprove(params: SignApproveParams): Promise<string>
-  abstract getAddressAsync(walletIndex?: number | undefined): Promise<string>
+  abstract getAddressAsync(walletIndex?: number): Promise<string>
 }

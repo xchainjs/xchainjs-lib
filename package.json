@@ -2,9 +2,9 @@
   "name": "root",
   "private": true,
   "description": "XChainJS Chain Clients MonoRepo",
-  "packageManager": "yarn@4.2.2",
+  "packageManager": "yarn@4.9.2",
   "engines": {
-    "yarn": ">=1.4.0"
+    "yarn": ">=4.9.2"
   },
   "workspaces": [
     "packages/*",
@@ -42,7 +42,8 @@
     "micromatch": "4.0.8",
     "word-wrap": "1.2.4",
     "undici": "5.29.0",
-    "form-data": "4.0.4"
+    "form-data": "4.0.4",
+    "elliptic": "^6.6.1"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
@@ -53,8 +54,8 @@
     "@rollup/plugin-typescript": "^12.1.2",
     "@rollup/plugin-wasm": "^6.2.2",
     "@types/jest": "^30.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.6.0",

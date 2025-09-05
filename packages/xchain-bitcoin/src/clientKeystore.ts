@@ -151,7 +151,7 @@ class ClientKeystore extends Client {
       // Broadcast the transaction and return the transaction hash
       const txId = await this.roundRobinBroadcastTx(txHex)
       return txId
-    } catch (err) {
+    } catch (_err) {
       // If broadcasting fails, return an error message with a link to the explorer
       const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
         this.network

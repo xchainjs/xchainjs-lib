@@ -465,7 +465,6 @@ export class MayachainAMM {
     })
   }
 
-
   /**
    * Estimate adding trade amount to account
    * @param {AddToTradeAccountParams} param Add to trade account params

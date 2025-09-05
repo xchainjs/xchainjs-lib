@@ -29,7 +29,7 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest --passWithNoTests",
     "e2e": "jest --config jest.config.e2e.mjs",
-    "lint": "eslint \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__, __mocks__}/**/*.ts\" --fix --max-warnings 0"
   },
   "publishConfig": {
     "access": "public",
@@ -37,10 +37,10 @@
   },
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
-    "@cosmjs/crypto": "0.33.1",
-    "@cosmjs/encoding": "0.33.1",
-    "@cosmjs/proto-signing": "0.33.1",
-    "@cosmjs/stargate": "0.33.1",
+    "@cosmjs/crypto": "0.34.0",
+    "@cosmjs/encoding": "0.34.0",
+    "@cosmjs/proto-signing": "0.34.0",
+    "@cosmjs/stargate": "0.34.0",
     "@scure/base": "1.1.5",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/xchain-client": "workspace:*",

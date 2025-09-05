@@ -568,7 +568,7 @@ describe('asset', () => {
     it('formats amount of BTCB-123 in satoshi', () => {
       const amount = assetAmount(0.01, 8)
       const asset = assetFromString('BNB.BTCB-123') || AssetRune67C
-      assetFromString('BNB.BTCB-123') || expect(formatAssetAmountCurrency({ amount, asset })).toEqual('⚡ 1,000,000')
+      expect(formatAssetAmountCurrency({ amount, asset })).toEqual('⚡ 1,000,000')
     })
     it('formats amount of TUSD', () => {
       const amount = assetAmount(10, 8)

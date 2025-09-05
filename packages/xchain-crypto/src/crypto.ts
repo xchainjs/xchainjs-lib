@@ -102,7 +102,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
     throw new Error('Invalid BIP39 phrase')
   }
 
-  const ID = _isNode() ? require('uuid').v4() : uuidv4()
+  const ID = _isNode() ? (await import('uuid')).v4() : uuidv4()
   const salt = crypto.randomBytes(32)
   const iv = crypto.randomBytes(16)
   const kdfParams = {

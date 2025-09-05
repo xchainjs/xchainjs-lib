@@ -58,7 +58,7 @@ export class MidgardApi {
     for (const client of this.midgardClients) {
       try {
         return (await client.getPools()).data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`Midgard not responding`)
   }
@@ -119,7 +119,7 @@ export class MidgardApi {
     for (const client of this.midgardClients) {
       try {
         return (await client.getHealth()).data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw Error(`Midgard not responding`)
   }
@@ -133,7 +133,7 @@ export class MidgardApi {
     for (const client of this.midgardClients) {
       try {
         return (await client.getPoolStats(asset)).data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw Error(`Midgard not responding`)
   }
@@ -147,7 +147,7 @@ export class MidgardApi {
     for (const client of this.midgardClients) {
       try {
         return (await client.getMemberDetail(member)).data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw Error(`Midgard not responding`)
   }
@@ -210,7 +210,7 @@ export class MidgardApi {
           fromHeight,
         )
         return response.data
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`Midgard not responding`)
   }

@@ -38,7 +38,7 @@ export class ClientKeystore extends Client {
    * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
   public async getAddressAsync(walletIndex = 0): Promise<string> {
-    return await this.getAddress(walletIndex)
+    return this.getAddress(walletIndex)
   }
 
   /**
@@ -48,7 +48,7 @@ export class ClientKeystore extends Client {
    * @returns Transaction signed by phrase
    */
   public async signTransaction(payment: Payment, walletIndex = 0): Promise<SignedTransaction> {
-    const xrplAccount = await this.getXrplWallet(walletIndex)
+    const xrplAccount = this.getXrplWallet(walletIndex)
     return xrplAccount.sign(payment)
   }
 }

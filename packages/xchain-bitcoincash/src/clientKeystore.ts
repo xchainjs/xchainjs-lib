@@ -138,6 +138,9 @@ class ClientKeystore extends Client {
 
     tx.sign(privateKey)
 
+    // ESLint disabled: Bitcoin transaction has proper toString() method that returns hex string
+    // Left as-is during ESLint 8 upgrade as this core crypto functionality is tested and working
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     const txHex = tx.toString()
 
     return await this.roundRobinBroadcastTx(txHex)

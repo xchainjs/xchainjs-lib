@@ -78,7 +78,7 @@ export abstract class Client extends BaseXChainClient {
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     // Filter the parameters for transaction history
     const filteredParams: TxHistoryParams = {
-      address: params?.address || (await this.getAddress()),
+      address: params?.address || (await this.getAddressAsync()),
       offset: params?.offset,
       limit: params?.limit,
       startTime: params?.startTime,
@@ -109,9 +109,8 @@ export abstract class Client extends BaseXChainClient {
    */
   // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
   // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
-  async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
+  async getBalance(address: Address, _assets?: Asset[] /* not used */, _confirmedOnly?: boolean): Promise<Balance[]> {
     // The actual logic for getting balances
-    confirmedOnly
     return await this.roundRobinGetBalance(address)
   }
   /**
@@ -173,19 +172,29 @@ export abstract class Client extends BaseXChainClient {
       try {
         const feeRates = await this.roundRobinGetFeeRates()
         return feeRates
-      } catch (error) {
+      } catch (_error) {
         console.warn('Can not retrieve fee rates from provider')
       }
     }
 
-    if (!protocol || Protocol.THORCHAIN) {
+    if (!protocol || protocol === Protocol.THORCHAIN) {
       try {
         const feeRate = await this.getFeeRateFromThorchain()
         return standardFeeRates(feeRate)
-      } catch (error) {
+      } catch (_error) {
         console.warn(`Can not retrieve fee rates from Thorchain`)
       }
     }
+
+    if (protocol === Protocol.MAYACHAIN) {
+      try {
+        const feeRate = await this.getFeeRateFromMayachain()
+        return standardFeeRates(feeRate)
+      } catch (_error) {
+        console.warn(`Can not retrieve fee rates from Mayachain`)
+      }
+    }
+
     // TODO: Return default value
     throw Error('Can not retrieve fee rates')
   }

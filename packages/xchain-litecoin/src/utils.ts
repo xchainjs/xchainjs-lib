@@ -92,7 +92,7 @@ export const getBalance = async (params: {
         amount: balance,
       },
     ]
-  } catch (error) {
+  } catch (_error) {
     throw new Error(`Could not get balances for address ${params.address}`)
   }
 }
@@ -108,7 +108,7 @@ export const validateAddress = (address: Address, network: Network): boolean => 
   try {
     Litecoin.address.toOutputScript(address, ltcNetwork(network))
     return true
-  } catch (error) {
+  } catch (_error) {
     return false
   }
 }

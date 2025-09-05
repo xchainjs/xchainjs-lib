@@ -129,8 +129,8 @@ export class Thornode {
       try {
         const queueScheduled = await api.queueScheduled()
         return queueScheduled.data
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
         throw new Error(`THORNode not responding`)
       }
     }
@@ -148,8 +148,8 @@ export class Thornode {
       try {
         const queue = await api.queue()
         return queue.data
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
         throw new Error(`THORNode not responding`)
       }
     }
@@ -167,8 +167,8 @@ export class Thornode {
       try {
         const queue = await api.mimir()
         return queue.data
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
         throw new Error(`THORNode not responding`)
       }
     }
@@ -184,7 +184,7 @@ export class Thornode {
       try {
         const txResponse = await api.tx(txHash)
         return txResponse.data
-      } catch (e) {
+      } catch (_e) {
         const txR: TxResponse = {
           observed_tx: undefined,
           keysign_metric: undefined,
@@ -204,7 +204,7 @@ export class Thornode {
       try {
         const txResponse = await api.txSigners(txHash)
         return txResponse.data
-      } catch (e) {
+      } catch (_e) {
         throw new Error(`THORNode not responding`)
       }
     }
@@ -220,8 +220,8 @@ export class Thornode {
       try {
         const lastBlock = await api.lastblock(height)
         return lastBlock.data
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -250,8 +250,8 @@ export class Thornode {
       try {
         const pools = await api.pool(asset)
         return pools.data
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -268,8 +268,8 @@ export class Thornode {
         if (constants.data.int_64_values) {
           return constants.data.int_64_values
         }
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -311,8 +311,8 @@ export class Thornode {
       try {
         const lps = (await api.liquidityProviders(asset, height)).data
         return lps.find((lp) => lp.asset_address === address || lp.rune_address === address)
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -329,8 +329,8 @@ export class Thornode {
       try {
         const resp = (await api.inboundAddresses()).data
         return resp
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -346,8 +346,8 @@ export class Thornode {
       try {
         const resp = (await api.savers(asset, height)).data
         return resp
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -363,8 +363,8 @@ export class Thornode {
       try {
         const resp = (await api.saver(asset, address, height)).data
         return resp
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -382,8 +382,8 @@ export class Thornode {
       try {
         const resp = (await api.quotesaverdeposit(height, asset, amount)).data
         return resp
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -407,8 +407,8 @@ export class Thornode {
           withdrawParams.withdrawBps,
         )
         return resp.data
-      } catch (e) {
-        //console.error(e)
+      } catch (_e) {
+        //console.error(_e)
       }
     }
     throw new Error(`THORNode not responding`)
@@ -494,8 +494,8 @@ export class Thornode {
           await api.quoteloanopen(height, asset, amount, targetAsset, destination, minOut, affiliateBps, affiliate)
         ).data
         return resp
-      } catch (e) {
-        //console.log(e)
+      } catch (_e) {
+        //console.log(_e)
       }
     }
     throw new Error(`THORNode is not responding`)
@@ -525,8 +525,8 @@ export class Thornode {
       try {
         const resp = (await api.quoteloanclose(height, asset, amount, loanAsset, loanOwner, minOut)).data
         return resp
-      } catch (e) {
-        // console.log(e)
+      } catch (_e) {
+        // console.log(_e)
       }
     }
     throw new Error(`THORNode is not responding`)
@@ -537,7 +537,7 @@ export class Thornode {
       try {
         const resp = (await api.thorname(thorname, height)).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding`)
   }
@@ -553,7 +553,7 @@ export class Thornode {
       try {
         const resp = (await api.tradeUnit(asset, height)).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding. Can not get asset trade units`)
   }
@@ -568,7 +568,7 @@ export class Thornode {
       try {
         const resp = (await api.tradeUnits(height)).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding. Can not get trade units`)
   }
@@ -584,7 +584,7 @@ export class Thornode {
       try {
         const resp = (await api.tradeAccount(address, height)).data
         return resp as unknown as TradeAccountsResponse
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding. Can not get trade asset account`)
   }
@@ -600,7 +600,7 @@ export class Thornode {
       try {
         const resp = (await api.tradeAccounts(asset, height)).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding. Can not get trade asset accounts`)
   }
@@ -615,7 +615,7 @@ export class Thornode {
       try {
         const resp = (await api.runePool(height)).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding. Can not get Rune pool`)
   }
@@ -631,7 +631,7 @@ export class Thornode {
       try {
         const resp = (await api.runeProvider(address, height)).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding. Can not get Rune pool provider info`)
   }
@@ -646,7 +646,7 @@ export class Thornode {
       try {
         const resp = (await api.runeProviders(height)).data
         return resp
-      } catch (e) {}
+      } catch (_e) {}
     }
     throw new Error(`THORNode is not responding. Can not get all Rune providers info`)
   }
