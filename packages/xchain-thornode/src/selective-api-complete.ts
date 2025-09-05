@@ -164,12 +164,51 @@ export interface Saver {
 
 export interface TxDetailsResponse {
     'tx_id'?: string;
-    'tx'?: any;
+    'tx'?: ObservedTx;
+    'txs'?: Array<ObservedTx>;
+    'out_txs'?: Array<Tx>;
+    'outbound_height'?: number;
+    'finalised_height'?: number;
+    'consensus_height'?: number;
+}
+
+export interface ObservedTx {
+    'tx'?: Tx;
+    'status'?: string;
+    'out_hashes'?: Array<string>;
+    'block_height'?: string;
+    'signers'?: Array<string>;
+    'observed_pub_key'?: string;
+    'keysign_metric'?: KeysignMetric;
+}
+
+export interface Tx {
+    'id'?: string;
+    'chain'?: string;
+    'from_address'?: string;
+    'to_address'?: string;
+    'coins'?: Array<Coin>;
+    'gas'?: Array<Coin>;
+    'memo'?: string;
+}
+
+export interface Coin {
+    'asset'?: string;
+    'amount'?: string;
+}
+
+export interface KeysignMetric {
+    'tx_id'?: string;
+    'node_tss_times'?: any;
 }
 
 export interface TxSignersResponse {
     'tx_id'?: string;
     'current_signers'?: Array<string>;
+    'out_txs'?: Array<Tx>;
+    'outbound_height'?: number;
+    'finalised_height'?: number;
+    'consensus_height'?: number;
 }
 
 // Now include the selective API classes that are actually used

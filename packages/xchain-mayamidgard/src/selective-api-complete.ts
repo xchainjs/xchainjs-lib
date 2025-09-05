@@ -86,6 +86,50 @@ export interface PoolsResponse {
     pools?: Array<Pool>;
 }
 
+export interface PoolDetail {
+    'annualPercentageRate': string;
+    'asset': string;
+    'assetDepth': string;
+    'assetPrice': string;
+    'assetPriceUSD': string;
+    'earnings': string;
+    'earningsAnnualAsPercentOfDepth': string;
+    'liquidityUnits': string;
+    'lpLuvi': string;
+    'nativeDecimal': string;
+    'poolAPY': string;
+    'runeDepth': string;
+    'saversAPR': string;
+    'saversDepth': string;
+    'saversUnits': string;
+    'saversYieldShare'?: string;
+    'status': string;
+    'synthSupply': string;
+    'synthUnits': string;
+    'totalCollateral': string;
+    'totalDebtTor': string;
+    'units': string;
+    'volume24h': string;
+}
+
+export interface PoolDetails extends Array<PoolDetail> {}
+
+export interface SaverDetails {
+    'pools': Array<SaverPool>;
+}
+
+export interface SaverPool {
+    'assetAdded': string;
+    'assetAddress': string;
+    'assetDeposit': string;
+    'assetRedeem': string;
+    'assetWithdrawn': string;
+    'dateFirstAdded': string;
+    'dateLastAdded': string;
+    'pool': string;
+    'units': string;
+}
+
 // Core API classes - optimized implementations
 export class DefaultApi extends BaseAPI {
     

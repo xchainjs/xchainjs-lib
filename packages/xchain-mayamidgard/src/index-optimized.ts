@@ -11,7 +11,15 @@ export * from './config'
 
 // Re-export optimized API classes and types
 export { Configuration, DefaultApi, SpecificationApi } from './selective-api-complete'
-export type { Pool, PoolsResponse, ConfigurationParameters } from './selective-api-complete'
+export type {
+  Pool,
+  PoolsResponse,
+  PoolDetail,
+  PoolDetails,
+  SaverDetails,
+  SaverPool,
+  ConfigurationParameters,
+} from './selective-api-complete'
 
 /**
  * The base URL for the Mayamidgard API.
