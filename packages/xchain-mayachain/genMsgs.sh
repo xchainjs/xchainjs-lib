@@ -6,35 +6,36 @@ set -e # Exit on any error
 MSG_COMPILED_OUTPUTFILE=src/types/proto/MsgCompiled.js
 MSG_COMPILED_TYPES_OUTPUTFILE=src/types/proto/MsgCompiled.d.ts
 
-# Using local minimal proto files - no need to clone mayanode repository
+TMP_DIR=$(mktemp -d)
 
-# Download cosmos/base/v1beta1/coin.proto from cosmossdk
-COSMOS_COIN_PROTO="proto/cosmos/base/v1beta1/coin.proto"
-if [ ! -f "$COSMOS_COIN_PROTO" ]; then
-  tput setaf 2
-  echo "Downloading cosmos/base/v1beta1/coin.proto from cosmossdk"
-  tput sgr0
-  mkdir -p "proto/cosmos/base/v1beta1"
-  if ! curl -f -o "$COSMOS_COIN_PROTO" \
-    "https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/v1beta1/coin.proto"; then
-    echo "Error: Failed to download cosmos coin.proto"
-    exit 1
+# Cleanup function
+cleanup() {
+  if [ -d "$TMP_DIR" ]; then
+    tput setaf 2
+    echo "Cleaning up $TMP_DIR"
+    tput sgr0
+    rm -rf "$TMP_DIR"
   fi
-  echo "✓ Downloaded cosmos coin.proto"
-else
-  echo "✓ cosmos coin.proto already exists"
+}
+trap cleanup EXIT
+
+tput setaf 2
+echo "Checking out https://gitlab.com/mayachain/mayanode to $TMP_DIR"
+tput sgr0
+if ! (cd "$TMP_DIR" && git clone https://gitlab.com/mayachain/mayanode); then
+  echo "Error: Failed to clone mayanode repository"
+  exit 1
 fi
 
-# Verify our minimal proto files exist
+# Verify proto files exist
 tput setaf 2
-echo "Checking minimal proto files"
+echo "Checking proto files"
 tput sgr0
 MISSING_FILES=0
 for proto_file in \
-  "proto/common/minimal_common.proto" \
-  "proto/types/minimal_msg_deposit.proto" \
-  "proto/types/minimal_msg_send.proto" \
-  "$COSMOS_COIN_PROTO"; do
+  "$TMP_DIR/mayanode/proto/mayachain/v1/common/common.proto" \
+  "$TMP_DIR/mayanode/proto/mayachain/v1/x/mayachain/types/msg_deposit.proto" \
+  "$TMP_DIR/mayanode/proto/mayachain/v1/x/mayachain/types/msg_send.proto"; do
   if [ ! -f "$proto_file" ]; then
     echo "Error: $(basename "$proto_file") missing"
     MISSING_FILES=1
@@ -48,16 +49,33 @@ if [ $MISSING_FILES -eq 1 ]; then
   exit 1
 fi
 
-# Generate Protobuf JS bindings using minimal proto files to prevent over-inclusion
+# Download cosmos/base/v1beta1/coin.proto from cosmossdk if not exists
+COSMOS_COIN_PROTO="$TMP_DIR/mayanode/third_party/proto/cosmos/base/v1beta1/coin.proto"
+if [ ! -f "$COSMOS_COIN_PROTO" ]; then
+  tput setaf 2
+  echo "Downloading cosmos/base/v1beta1/coin.proto from cosmossdk"
+  tput sgr0
+  mkdir -p "$TMP_DIR/mayanode/third_party/proto/cosmos/base/v1beta1"
+  if ! curl -f -o "$COSMOS_COIN_PROTO" \
+    "https://raw.githubusercontent.com/cosmos/cosmos-sdk/main/proto/cosmos/base/v1beta1/coin.proto"; then
+    echo "Error: Failed to download cosmos coin.proto"
+    exit 1
+  fi
+  echo "✓ Downloaded cosmos coin.proto"
+else
+  echo "✓ cosmos coin.proto already exists"
+fi
+
+# Generate Protobuf JS bindings using sparse mode to only include referenced types
 tput setaf 2
-echo "Generating $MSG_COMPILED_OUTPUTFILE"
+echo "Generating $MSG_COMPILED_OUTPUTFILE (using sparse mode to avoid bloat)"
 tput sgr0
-if ! yarn pbjs -w commonjs -t static-module \
-  -p proto \
-  "proto/common/minimal_common.proto" \
-  "proto/types/minimal_msg_deposit.proto" \
-  "proto/types/minimal_msg_send.proto" \
-  "$COSMOS_COIN_PROTO" \
+if ! yarn pbjs -w commonjs -t static-module --sparse \
+  -p "$TMP_DIR/mayanode/proto" \
+  -p "$TMP_DIR/mayanode/third_party/proto" \
+  "$TMP_DIR/mayanode/proto/mayachain/v1/common/common.proto" \
+  "$TMP_DIR/mayanode/proto/mayachain/v1/x/mayachain/types/msg_deposit.proto" \
+  "$TMP_DIR/mayanode/proto/mayachain/v1/x/mayachain/types/msg_send.proto" \
   -o "$MSG_COMPILED_OUTPUTFILE" 2>pbjs_errors.txt; then
   echo "Error: Failed to generate JavaScript bindings"
   cat pbjs_errors.txt
@@ -71,7 +89,7 @@ sed -i -E 's|"(protobufjs/minimal)"|"\1.js"|' "$MSG_COMPILED_OUTPUTFILE"
 tput setaf 2
 echo "Generating $MSG_COMPILED_TYPES_OUTPUTFILE"
 tput sgr0
-if ! yarn pbts "$MSG_COMPILED_OUTPUTFILE" -o "$MSG_COMPILED_TYPES_OUTPUTFILE" 2>pbts_errors.txt; then
+if ! yarn pbts --name types "$MSG_COMPILED_OUTPUTFILE" -o "$MSG_COMPILED_TYPES_OUTPUTFILE" 2>pbts_errors.txt; then
   echo "Error: Failed to generate TypeScript definitions"
   cat pbts_errors.txt
   exit 1
