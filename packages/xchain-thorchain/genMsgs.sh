@@ -63,8 +63,9 @@ fi
 tput setaf 2
 echo "Using minimal common.proto to avoid bloat"
 tput sgr0
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "$TMP_DIR/thornode/proto/thorchain/v1/common"
-if ! cp common_minimal.proto "$TMP_DIR/thornode/proto/thorchain/v1/common/common.proto"; then
+if ! cp "$SCRIPT_DIR/proto/common/common_minimal.proto" "$TMP_DIR/thornode/proto/thorchain/v1/common/common.proto"; then
   echo "Error: Failed to copy minimal common.proto"
   exit 1
 fi
