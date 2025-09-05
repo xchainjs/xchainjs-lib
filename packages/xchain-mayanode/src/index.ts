@@ -1,9 +1,5 @@
 /**
- * Export all modules from the generated Mayanode API.
+ * The base URL for the Mayanode API endpoint.
+ * Optimized version with selective API loading
  */
-export * from './generated/mayanodeApi'
-
-/**
- * Export the configuration related to Mayanode.
- */
-export * from './config'
+export * from './index-optimized'

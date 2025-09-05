@@ -119,7 +119,7 @@ export interface Pool {
 }
 
 export interface LastBlock {
-    'thorchain'?: number;
+    'mayachain'?: number;
 }
 
 export interface TradeAccountResponse {
@@ -179,11 +179,11 @@ export interface TxSignersResponse {
 export const TransactionsApiFactory = function (basePath?: string, axios?: AxiosInstance) {
     return {
         async txDetail(txid: string, options?: AxiosRequestConfig) {
-            const response = await axios?.get(`${basePath}/thorchain/tx/details/${encodeURIComponent(String(txid))}`, options);
+            const response = await axios?.get(`${basePath}/mayachain/tx/details/${encodeURIComponent(String(txid))}`, options);
             return response?.data;
         },
         async txSigners(txid: string, options?: AxiosRequestConfig) {
-            const response = await axios?.get(`${basePath}/thorchain/tx/${encodeURIComponent(String(txid))}/signers`, options);
+            const response = await axios?.get(`${basePath}/mayachain/tx/${encodeURIComponent(String(txid))}/signers`, options);
             return response?.data;
         }
     };
@@ -204,7 +204,7 @@ export class TransactionsApi extends BaseAPI {
 // Pools API - for getting pool information
 export class PoolsApi extends BaseAPI {
     public async pools(options?: AxiosRequestConfig): Promise<Array<Pool>> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/pools`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/pools`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -215,7 +215,7 @@ export class PoolsApi extends BaseAPI {
 // Network API - for network information
 export class NetworkApi extends BaseAPI {
     public async network(options?: AxiosRequestConfig): Promise<any> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/network`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/network`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -223,7 +223,7 @@ export class NetworkApi extends BaseAPI {
     }
     
     public async lastblock(options?: AxiosRequestConfig): Promise<Array<LastBlock>> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/lastblock`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/lastblock`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -234,7 +234,7 @@ export class NetworkApi extends BaseAPI {
 // Liquidity Providers API
 export class LiquidityProvidersApi extends BaseAPI {
     public async liquidityProvider(asset: string, address: string, options?: AxiosRequestConfig): Promise<LiquidityProviderSummary> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/pool/${encodeURIComponent(String(asset))}/liquidity_provider/${encodeURIComponent(String(address))}`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/pool/${encodeURIComponent(String(asset))}/liquidity_provider/${encodeURIComponent(String(address))}`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -245,7 +245,7 @@ export class LiquidityProvidersApi extends BaseAPI {
 // Savers API  
 export class SaversApi extends BaseAPI {
     public async saver(asset: string, address: string, options?: AxiosRequestConfig): Promise<Saver> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/pool/${encodeURIComponent(String(asset))}/saver/${encodeURIComponent(String(address))}`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/pool/${encodeURIComponent(String(asset))}/saver/${encodeURIComponent(String(address))}`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -256,7 +256,7 @@ export class SaversApi extends BaseAPI {
 // Quote API
 export class QuoteApi extends BaseAPI {
     public async quoteSwap(fromAsset: string, toAsset: string, amount: string, options?: AxiosRequestConfig): Promise<any> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/quote/swap`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/quote/swap`, {
             params: {
                 from_asset: fromAsset,
                 to_asset: toAsset,
@@ -272,7 +272,7 @@ export class QuoteApi extends BaseAPI {
 // Mimir API
 export class MimirApi extends BaseAPI {
     public async mimir(options?: AxiosRequestConfig): Promise<any> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/mimir`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/mimir`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -283,7 +283,7 @@ export class MimirApi extends BaseAPI {
 // Queue API
 export class QueueApi extends BaseAPI {
     public async queue(options?: AxiosRequestConfig): Promise<any> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/queue`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/queue`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -294,7 +294,7 @@ export class QueueApi extends BaseAPI {
 // Trade APIs
 export class TradeAccountApi extends BaseAPI {
     public async tradeAccount(asset: string, address: string, options?: AxiosRequestConfig): Promise<TradeAccountResponse> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/trade/account/${encodeURIComponent(String(asset))}/${encodeURIComponent(String(address))}`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/trade/account/${encodeURIComponent(String(asset))}/${encodeURIComponent(String(address))}`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -304,7 +304,7 @@ export class TradeAccountApi extends BaseAPI {
 
 export class TradeAccountsApi extends BaseAPI {
     public async tradeAccounts(asset: string, options?: AxiosRequestConfig): Promise<Array<TradeAccountResponse>> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/trade/accounts/${encodeURIComponent(String(asset))}`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/trade/accounts/${encodeURIComponent(String(asset))}`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -314,7 +314,7 @@ export class TradeAccountsApi extends BaseAPI {
 
 export class TradeUnitApi extends BaseAPI {
     public async tradeUnit(asset: string, options?: AxiosRequestConfig): Promise<TradeUnitResponse> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/trade/unit/${encodeURIComponent(String(asset))}`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/trade/unit/${encodeURIComponent(String(asset))}`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -324,7 +324,7 @@ export class TradeUnitApi extends BaseAPI {
 
 export class TradeUnitsApi extends BaseAPI {
     public async tradeUnits(options?: AxiosRequestConfig): Promise<Array<TradeUnitResponse>> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/trade/units`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/trade/units`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -335,7 +335,7 @@ export class TradeUnitsApi extends BaseAPI {
 // THORNames API
 export class ThornamesApi extends BaseAPI {
     public async thorname(name: string, options?: AxiosRequestConfig): Promise<any> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/thorname/${encodeURIComponent(String(name))}`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/thorname/${encodeURIComponent(String(name))}`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
@@ -346,7 +346,7 @@ export class ThornamesApi extends BaseAPI {
 // RUNEPool API
 export class RUNEPoolApi extends BaseAPI {
     public async runepool(options?: AxiosRequestConfig): Promise<any> {
-        const response = await this.axios.get(`${this.basePath}/thorchain/runepool`, {
+        const response = await this.axios.get(`${this.basePath}/mayachain/runepool`, {
             ...options,
             ...this.configuration?.baseOptions,
         });
