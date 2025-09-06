@@ -30,6 +30,7 @@ const defaultCache = new MidgardCache()
  */
 export class MidgardQuery {
   readonly midgardCache: MidgardCache
+  readonly overrideDecimals: Record<string, number>
 
   /**
    * Constructor to create a MidgardQuery.
@@ -37,8 +38,9 @@ export class MidgardQuery {
    * @param midgardCache - An instance of the MidgardCache (could be pointing to stagenet, testnet, mainnet).
    * @returns MidgardQuery
    */
-  constructor(midgardCache = defaultCache) {
+  constructor(midgardCache = defaultCache, overrideDecimals: Record<string, number> = {}) {
     this.midgardCache = midgardCache
+    this.overrideDecimals = overrideDecimals
   }
 
   /**
@@ -108,6 +110,10 @@ export class MidgardQuery {
    * @returns {number} - Number of decimals from Midgard. Reference: https://gitlab.com/thorchain/midgard#refresh-native-decimals
    */
   public async getDecimalForAsset(asset: CompatibleAsset): Promise<number> {
+    if (this.overrideDecimals[assetToString(asset)]) {
+      return this.overrideDecimals[assetToString(asset)]
+    }
+
     if (isAssetRuneNative(asset) || isSynthAsset(asset) || isTradeAsset(asset) || isSecuredAsset(asset))
       return DEFAULT_THORCHAIN_DECIMALS
 
