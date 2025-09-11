@@ -128,6 +128,99 @@ export interface SaverPool {
     'dateLastAdded': string;
     'pool': string;
     'units': string;
+    'saverUnits': string;
+}
+
+// Additional types needed by mayamidgard-query package
+export interface Health {
+    'database'?: boolean;
+    'scannerHeight'?: number;
+    'catching_up'?: boolean;
+    'in_sync'?: boolean;
+    'version'?: string;
+    'cacheStatus'?: string;
+    'midgardReleased'?: string;
+    'scannerError'?: string;
+}
+
+export interface MemberDetails {
+    'pools'?: Array<any>;
+    'runeAdded'?: string;
+    'runeWithdrawn'?: string;
+    'runeValue'?: string;
+    'assetAdded'?: string;
+    'assetWithdrawn'?: string;
+    'assetValue'?: string;
+    'poolStats'?: any;
+    'MAYANameDetails'?: THORNameDetails;
+}
+
+export interface GetActions200Response {
+    'actions'?: Array<any>;
+    'count'?: string;
+    'meta'?: any;
+}
+
+export interface ReverseTHORNames extends Array<string> {
+}
+
+export interface THORNameDetails {
+    'entries': Array<THORNameEntry>;
+    'expire': string;
+    'owner': string;
+}
+
+export interface THORNameEntry {
+    'chain': string;
+    'address': string;
+}
+
+export interface Action {
+    'date': string;
+    'height': string;
+    'in': Array<Transaction>;
+    'metadata': Metadata;
+    'out': Array<Transaction>;
+    'pools': Array<string>;
+    'status': string;
+    'type': string;
+}
+
+export interface Transaction {
+    'address'?: string;
+    'coins'?: Array<any>;
+    'txID'?: string;
+}
+
+export interface Metadata {
+    'addLiquidity'?: any;
+    'refund'?: any;
+    'swap'?: SwapMetadata;
+    'withdraw'?: any;
+}
+
+export interface SwapMetadata {
+    'affiliateAddress': string;
+    'affiliateFee': string;
+    'inPriceUSD': string;
+    'isStreamingSwap': boolean;
+    'liquidityFee': string;
+    'memo': string;
+    'networkFees': Array<any>;
+    'outPriceUSD': string;
+    'swapSlip': string;
+    'swapTarget': string;
+}
+
+export interface PoolStatsDetail {
+    'addAssetLiquidityVolume'?: string;
+    'addLiquidityCount'?: string;
+    'addLiquidityVolume'?: string;
+    'addRuneLiquidityVolume'?: string;
+    'asset'?: string;
+    'assetDepth'?: string;
+    'assetPrice'?: string;
+    'assetPriceUSD'?: string;
 }
 
 // Core API classes - optimized implementations
@@ -136,7 +229,7 @@ export class DefaultApi extends BaseAPI {
     /**
      * Returns statistics of pools saved in database
      */
-    public async getPools(options?: AxiosRequestConfig): Promise<Array<Pool>> {
+    public async getPools(options?: AxiosRequestConfig): Promise<Array<PoolDetail>> {
         const requestUrl = `${this.basePath}/v2/pools`;
         const response = await this.axios.get(requestUrl, {
             ...this.configuration?.baseOptions,
@@ -157,18 +250,6 @@ export class DefaultApi extends BaseAPI {
         return response.data;
     }
 
-    /**
-     * Returns aggregate statistics of specified pool in specified period
-     */
-    public async getPoolStats(pool: string, period?: string, options?: AxiosRequestConfig): Promise<any> {
-        const requestUrl = `${this.basePath}/v2/pool/${encodeURIComponent(String(pool))}/stats`;
-        const response = await this.axios.get(requestUrl, {
-            ...this.configuration?.baseOptions,
-            ...options,
-            params: { period, ...options?.params },
-        });
-        return response.data;
-    }
 
     /**
      * Returns depth and price history of specified pool in specified period
@@ -196,18 +277,6 @@ export class DefaultApi extends BaseAPI {
         return response.data;
     }
 
-    /**
-     * Returns member details by address or multiple addresses
-     */
-    public async getMemberDetail(address: string | Array<string>, options?: AxiosRequestConfig): Promise<any> {
-        const addresses = Array.isArray(address) ? address.join(',') : address;
-        const requestUrl = `${this.basePath}/v2/member/${encodeURIComponent(String(addresses))}`;
-        const response = await this.axios.get(requestUrl, {
-            ...this.configuration?.baseOptions,
-            ...options,
-        });
-        return response.data;
-    }
 
     /**
      * Returns node information
@@ -226,6 +295,108 @@ export class DefaultApi extends BaseAPI {
      */
     public async getQueue(options?: AxiosRequestConfig): Promise<any> {
         const requestUrl = `${this.basePath}/v2/mayachain/queue`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
+
+    /**
+     * Returns health information
+     */
+    public async getHealth(options?: AxiosRequestConfig): Promise<Health> {
+        const requestUrl = `${this.basePath}/v2/health`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
+
+    /**
+     * Returns THORName details by name
+     */
+    public async getTHORNameDetail(name: string, options?: AxiosRequestConfig): Promise<THORNameDetails> {
+        const requestUrl = `${this.basePath}/v2/mayachain/thorname/${encodeURIComponent(String(name))}`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
+
+    /**
+     * Returns THORNames by address (reverse lookup)
+     */
+    public async getTHORNamesByAddress(address: string, options?: AxiosRequestConfig): Promise<ReverseTHORNames> {
+        const requestUrl = `${this.basePath}/v2/mayachain/reverse_lookup/${encodeURIComponent(String(address))}`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
+
+    /**
+     * Returns member details for a given address
+     */
+    public async getMemberDetail(address: string, options?: AxiosRequestConfig): Promise<MemberDetails> {
+        const requestUrl = `${this.basePath}/v2/member/${encodeURIComponent(String(address))}`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
+
+    /**
+     * Returns pool statistics for a given asset
+     */
+    public async getPoolStats(asset: string, options?: AxiosRequestConfig): Promise<PoolStatsDetail> {
+        const requestUrl = `${this.basePath}/v2/pool/${encodeURIComponent(String(asset))}/stats`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
+
+    /**
+     * Returns actions with optional filtering
+     */
+    public async getActions(
+        address?: string,
+        txid?: string, 
+        asset?: string,
+        type?: string,
+        affiliate?: string,
+        limit?: number,
+        offset?: number,
+        nextPageToken?: string,
+        timestamp?: number,
+        height?: number,
+        prevPageToken?: string,
+        fromTimestamp?: number,
+        fromHeight?: number,
+        options?: AxiosRequestConfig
+    ): Promise<GetActions200Response> {
+        const params = new URLSearchParams();
+        if (address) params.append('address', address);
+        if (txid) params.append('txid', txid);
+        if (asset) params.append('asset', asset);
+        if (type) params.append('type', type);
+        if (affiliate) params.append('affiliate', affiliate);
+        if (limit) params.append('limit', limit.toString());
+        if (offset) params.append('offset', offset.toString());
+        if (nextPageToken) params.append('nextPageToken', nextPageToken);
+        if (timestamp) params.append('timestamp', timestamp.toString());
+        if (height) params.append('height', height.toString());
+        if (prevPageToken) params.append('prevPageToken', prevPageToken);
+        if (fromTimestamp) params.append('fromTimestamp', fromTimestamp.toString());
+        if (fromHeight) params.append('fromHeight', fromHeight.toString());
+
+        const requestUrl = `${this.basePath}/v2/actions${params.toString() ? '?' + params.toString() : ''}`;
         const response = await this.axios.get(requestUrl, {
             ...this.configuration?.baseOptions,
             ...options,

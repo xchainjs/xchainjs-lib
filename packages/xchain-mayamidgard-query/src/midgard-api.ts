@@ -57,7 +57,7 @@ export class MidgardApi {
   async getPools(): Promise<PoolDetail[]> {
     for (const client of this.midgardClients) {
       try {
-        return (await client.getPools()).data
+        return await client.getPools()
       } catch (_e) {}
     }
     throw new Error(`Midgard not responding`)
@@ -72,14 +72,10 @@ export class MidgardApi {
     for (const client of this.midgardClients) {
       try {
         const resp = await client.getTHORNameDetail(name)
-        if (resp.status == 404) {
-          return undefined
-        } else if (resp.status == 200) {
-          return resp.data
-        }
+        return resp
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (e.response.status == 404) {
+        if (e.response?.status == 404) {
           return undefined
         }
       }
@@ -96,14 +92,10 @@ export class MidgardApi {
     for (const client of this.midgardClients) {
       try {
         const resp = await client.getTHORNamesByAddress(address)
-        if (resp.status == 404) {
-          return []
-        } else if (resp.status == 200) {
-          return resp.data
-        }
+        return resp
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (e.response.status == 404) {
+        if (e.response?.status == 404) {
           return []
         }
       }
@@ -118,7 +110,7 @@ export class MidgardApi {
   public async getHealth(): Promise<Health> {
     for (const client of this.midgardClients) {
       try {
-        return (await client.getHealth()).data
+        return await client.getHealth()
       } catch (_e) {}
     }
     throw Error(`Midgard not responding`)
@@ -132,7 +124,7 @@ export class MidgardApi {
   public async getPoolStats(asset: string): Promise<PoolStatsDetail> {
     for (const client of this.midgardClients) {
       try {
-        return (await client.getPoolStats(asset)).data
+        return await client.getPoolStats(asset)
       } catch (_e) {}
     }
     throw Error(`Midgard not responding`)
@@ -146,7 +138,7 @@ export class MidgardApi {
   public async getMemberDetails(member: string): Promise<MemberDetails> {
     for (const client of this.midgardClients) {
       try {
-        return (await client.getMemberDetail(member)).data
+        return await client.getMemberDetail(member)
       } catch (_e) {}
     }
     throw Error(`Midgard not responding`)
@@ -202,14 +194,14 @@ export class MidgardApi {
           affiliate,
           limit,
           offset,
-          nextPageToken,
+          nextPageToken?.toString(),
           timestamp,
           height,
-          prevPageToken,
+          prevPageToken?.toString(),
           fromTimestamp,
           fromHeight,
         )
-        return response.data
+        return response
       } catch (_e) {}
     }
     throw new Error(`Midgard not responding`)

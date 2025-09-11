@@ -354,3 +354,37 @@ export class RUNEPoolApi extends BaseAPI {
         return response.data;
     }
 }
+
+// Types
+export interface QuoteFees {
+    'asset': string;
+    'affiliate'?: string;
+    'outbound'?: string;
+    'liquidity': string;
+    'total': string;
+    'slippage_bps': number;
+    'total_bps': number;
+}
+
+export interface QuoteSwapResponse {
+    'inbound_address'?: string;
+    'inbound_confirmation_blocks'?: number;
+    'inbound_confirmation_seconds'?: number;
+    'outbound_delay_blocks': number;
+    'outbound_delay_seconds': number;
+    'fees': QuoteFees;
+    'router'?: string;
+    'expiry': number;
+    'warning': string;
+    'notes': string;
+    'dust_threshold'?: string;
+    'recommended_min_amount_in'?: string;
+    'recommended_gas_rate'?: string;
+    'gas_rate_units'?: string;
+    'memo'?: string;
+    'expected_amount_out': string;
+    'max_streaming_quantity'?: number;
+    'streaming_swap_blocks'?: number;
+    'streaming_swap_seconds'?: number;
+    'total_swap_seconds'?: number;
+}

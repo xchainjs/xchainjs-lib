@@ -14,7 +14,9 @@ export type {
   LiquidityProviderSummary,
   Saver,
   TxDetailsResponse,
-  TxSignersResponse
+  TxSignersResponse,
+  QuoteFees,
+  QuoteSwapResponse,
 } from './selective-api-complete'
 
 export { Configuration } from './selective-api-complete'
@@ -39,7 +41,7 @@ export const loadRUNEPoolApi = () => import('./selective-api-complete').then((m)
 export async function createMayanodeApiClient(baseUrl: string) {
   const { Configuration } = await import('./selective-api-complete')
   const config = new Configuration({ basePath: baseUrl })
-  
+
   return {
     async getTransactionsApi() {
       const TransactionsApi = await loadTransactionsApi()
@@ -96,13 +98,13 @@ export async function createMayanodeApiClient(baseUrl: string) {
     async getRUNEPoolApi() {
       const RUNEPoolApi = await loadRUNEPoolApi()
       return new RUNEPoolApi(config)
-    }
+    },
   }
 }
 
 // Legacy compatibility - direct exports for backward compatibility
 // These will be tree-shaken out if not used
-export { 
+export {
   TransactionsApi,
   QueueApi,
   NetworkApi,
@@ -116,5 +118,5 @@ export {
   TradeUnitsApi,
   TradeAccountApi,
   TradeAccountsApi,
-  RUNEPoolApi
+  RUNEPoolApi,
 } from './selective-api-complete'

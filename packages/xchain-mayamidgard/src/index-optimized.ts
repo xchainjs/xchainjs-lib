@@ -19,6 +19,17 @@ export type {
   SaverDetails,
   SaverPool,
   ConfigurationParameters,
+  Health,
+  MemberDetails,
+  GetActions200Response,
+  ReverseTHORNames,
+  THORNameDetails,
+  THORNameEntry,
+  PoolStatsDetail,
+  Action,
+  Transaction,
+  SwapMetadata,
+  Metadata,
 } from './selective-api-complete'
 
 /**
@@ -45,3 +56,6 @@ export class MayamidgardApi extends DefaultApi {
     super(config)
   }
 }
+
+// Legacy compatibility export
+export { MayamidgardApi as MidgardApi }

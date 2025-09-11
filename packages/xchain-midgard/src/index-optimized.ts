@@ -18,7 +18,15 @@ export type {
   PoolDetails,
   SaverDetails,
   SaverPool,
+  GetActions200Response,
+  ReverseTHORNames,
+  THORNameDetails,
   ConfigurationParameters,
+  Coin,
+  Coins,
+  NetworkFees,
+  SwapMetadata,
+  Transaction,
 } from './selective-api-complete'
 
 /**

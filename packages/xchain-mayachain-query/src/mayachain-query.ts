@@ -249,7 +249,7 @@ export class MayachainQuery {
 
     return {
       name: MAYAName,
-      owner: details.owner,
+      owner: details.owner || '',
       expireBlockHeight: Number(details.expire),
       aliases: details.entries,
     }
@@ -325,10 +325,10 @@ export class MayachainQuery {
 
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
-      swaps: actionsResume.actions
+      swaps: (actionsResume.actions || [])
         // Merge duplicated swaps in just one
         .reduce((prev, current) => {
-          const index = prev.findIndex((action) => action.in[0].txID === current.in[0].txID)
+          const index = prev.findIndex((action: Action) => action.in?.[0]?.txID === current.in?.[0]?.txID)
           if (index === -1) return [...prev, current]
 
           for (let i = 0; i < current.in.length; i++) {
@@ -338,11 +338,15 @@ export class MayachainQuery {
           }
           return prev
         }, [] as Action[])
-        .map((action) => {
+        .map((action: Action) => {
           const inboundTx: TransactionAction = {
-            hash: action.in[0].txID,
-            address: action.in[0].address,
-            amount: getCryptoAmount(assetDecimals, action.in[0].coins[0].asset, action.in[0].coins[0].amount),
+            hash: action.in?.[0]?.txID || '',
+            address: action.in?.[0]?.address || '',
+            amount: getCryptoAmount(
+              assetDecimals,
+              action.in?.[0]?.coins?.[0]?.asset,
+              action.in?.[0]?.coins?.[0]?.amount,
+            ),
           }
 
           const fromAsset: CompatibleAsset = inboundTx.amount.asset

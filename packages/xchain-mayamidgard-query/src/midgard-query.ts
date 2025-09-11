@@ -26,7 +26,7 @@ export class MidgardQuery {
    */
   public async getLatestBlockHeight(): Promise<number> {
     const health = await this.midgardCache.midgardApi.getHealth()
-    return +health.scannerHeight
+    return +(health.scannerHeight || 0)
   }
 
   /**

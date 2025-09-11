@@ -50,7 +50,7 @@ export class Midgard {
   public async getSavers(address: string): Promise<SaverDetails> {
     for (const api of this.midgardApis) {
       try {
-        const saverDetails = (await api.getSaverDetail(address)).data
+        const saverDetails = await api.getSaverDetail(address)
         return saverDetails
       } catch (_e) {
         // console.error(_e)
@@ -66,7 +66,7 @@ export class Midgard {
   async getPools(): Promise<PoolDetail[]> {
     for (const api of this.midgardApis) {
       try {
-        return (await api.getPools()).data
+        return await api.getPools()
       } catch (_e) {
         // console.error(_e)
       }
@@ -164,10 +164,10 @@ export class Midgard {
           affiliate,
           limit,
           offset,
-          nextPageToken,
+          nextPageToken?.toString(),
           timestamp,
           height,
-          prevPageToken,
+          prevPageToken?.toString(),
           fromTimestamp,
           fromHeight,
         )

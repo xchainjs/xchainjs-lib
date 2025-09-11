@@ -128,15 +128,45 @@ export interface SaverPool {
     'dateLastAdded': string;
     'pool': string;
     'units': string;
+    'saverUnits': string;
+}
+
+export interface GetActions200Response {
+    'actions'?: Array<any>;
+    'count'?: string;
+    'meta'?: any;
+}
+
+export interface ReverseTHORNames extends Array<string> {
+}
+
+export interface THORNameDetails {
+    'name'?: string;
+    'expireBlockHeight'?: number;
+    'owner'?: string;
+    'preferredAsset'?: string;
+    'aliasChains'?: Array<any>;
 }
 
 // Core API classes - optimized implementations
 export class DefaultApi extends BaseAPI {
     
     /**
-     * Returns statistics of pools saved in database
+     * Returns saver details for a given address
      */
-    public async getPools(options?: AxiosRequestConfig): Promise<Array<Pool>> {
+    public async getSaverDetail(address: string, options?: AxiosRequestConfig): Promise<SaverDetails> {
+        const requestUrl = `${this.basePath}/v2/saver/${encodeURIComponent(String(address))}`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
+
+    /**
+     * Returns pool details for all pools
+     */
+    public async getPools(options?: AxiosRequestConfig): Promise<Array<PoolDetail>> {
         const requestUrl = `${this.basePath}/v2/pools`;
         const response = await this.axios.get(requestUrl, {
             ...this.configuration?.baseOptions,
@@ -144,6 +174,7 @@ export class DefaultApi extends BaseAPI {
         });
         return response.data;
     }
+    
 
     /**
      * Returns Network data
@@ -232,6 +263,74 @@ export class DefaultApi extends BaseAPI {
         });
         return response.data;
     }
+
+    /**
+     * Returns THORName details for a given name
+     */
+    public async getTHORNameDetail(name: string, options?: AxiosRequestConfig): Promise<any> {
+        const requestUrl = `${this.basePath}/v2/thorname/${encodeURIComponent(String(name))}`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response;
+    }
+
+    /**
+     * Returns THORNames by address - reverse lookup
+     */
+    public async getTHORNamesByAddress(address: string, options?: AxiosRequestConfig): Promise<any> {
+        const requestUrl = `${this.basePath}/v2/thorname/lookup/${encodeURIComponent(String(address))}`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response;
+    }
+
+    /**
+     * Returns actions/transactions data
+     */
+    public async getActions(
+        address?: string, 
+        txid?: string, 
+        asset?: string, 
+        type?: string, 
+        txType?: string, 
+        affiliate?: string, 
+        limit?: number, 
+        offset?: number, 
+        nextPageToken?: string, 
+        timestamp?: number, 
+        height?: number, 
+        prevPageToken?: string, 
+        fromTimestamp?: number, 
+        fromHeight?: number, 
+        options?: AxiosRequestConfig
+    ): Promise<any> {
+        const params = new URLSearchParams();
+        if (address) params.append('address', address);
+        if (txid) params.append('txid', txid);
+        if (asset) params.append('asset', asset);
+        if (type) params.append('type', type);
+        if (txType) params.append('txType', txType);
+        if (affiliate) params.append('affiliate', affiliate);
+        if (limit !== undefined) params.append('limit', limit.toString());
+        if (offset !== undefined) params.append('offset', offset.toString());
+        if (nextPageToken) params.append('nextPageToken', nextPageToken);
+        if (timestamp !== undefined) params.append('timestamp', timestamp.toString());
+        if (height !== undefined) params.append('height', height.toString());
+        if (prevPageToken) params.append('prevPageToken', prevPageToken);
+        if (fromTimestamp !== undefined) params.append('fromTimestamp', fromTimestamp.toString());
+        if (fromHeight !== undefined) params.append('fromHeight', fromHeight.toString());
+
+        const requestUrl = `${this.basePath}/v2/actions${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await this.axios.get(requestUrl, {
+            ...this.configuration?.baseOptions,
+            ...options,
+        });
+        return response.data;
+    }
 }
 
 // Specification API - minimal implementation
@@ -247,4 +346,35 @@ export class SpecificationApi extends BaseAPI {
         });
         return response.data;
     }
+}
+
+// Types
+export interface Coin {
+    'amount': string;
+    'asset': string;
+}
+
+export interface Coins extends Array<Coin> {}
+
+export interface NetworkFees extends Array<Coin> {}
+
+export interface SwapMetadata {
+    'affiliateAddress': string;
+    'affiliateFee': string;
+    'inPriceUSD': string;
+    'isStreamingSwap': boolean;
+    'liquidityFee': string;
+    'memo': string;
+    'networkFees': NetworkFees;
+    'outPriceUSD': string;
+    'swapSlip': string;
+    'swapTarget': string;
+}
+
+export interface Transaction {
+    'address': string;
+    'affiliate'?: boolean;
+    'coins': Coins;
+    'height'?: string;
+    'txID': string;
 }
