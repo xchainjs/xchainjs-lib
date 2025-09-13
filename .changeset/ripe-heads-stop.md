@@ -7,7 +7,6 @@
 '@xchainjs/xchain-ethereum': patch
 '@xchainjs/xchain-litecoin': patch
 '@xchainjs/xchain-bitcoin': patch
-'xchainjs-estimate-swap': patch
 '@xchainjs/xchain-cosmos': patch
 '@xchainjs/xchain-kujira': patch
 '@xchainjs/xchain-wallet': patch
@@ -17,16 +16,12 @@
 '@xchainjs/xchain-util': patch
 '@xchainjs/xchain-bsc': patch
 '@xchainjs/xchain-evm': patch
-'xchainjs-liquidity': patch
-'xchainjs-check-tx': patch
-'xchainjs-loans': patch
-'txJammer': patch
 ---
 
 Fix ESM (ECMAScript Module) compatibility issues
 
 - Update bignumber.js to 9.1.2 for proper ESM support
-- Change bitcore-lib-cash imports from namespace to default imports for ESM compatibility 
+- Change bitcore-lib-cash imports from namespace to default imports for ESM compatibility
 - Change @dashevo/dashcore-lib imports from namespace to default imports for ESM compatibility
 - Add .js extensions to coinselect/accumulative imports for ESM
 - Add .js extensions to cosmjs-types imports for ESM
