@@ -253,7 +253,7 @@ export abstract class Client extends BaseXChainClient {
 
         if (!(contractAddress && balance)) continue
 
-        const tokenMetaData = await this.fetchTokenMetadata({ contractAddress, address })
+        const tokenMetaData = await this.fetchTokenMetadata({ contractAddress })
 
         if (!tokenMetaData) continue
 
