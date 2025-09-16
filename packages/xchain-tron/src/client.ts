@@ -552,7 +552,7 @@ export abstract class Client extends BaseXChainClient {
       throw new Error('Failed to build approve transaction')
     }
 
-    const signedTx = await this.signTransaction(transaction)
+    const signedTx = await this.signTransaction(transaction, walletIndex)
     const { txid } = await this.tronWeb.trx.sendRawTransaction(signedTx)
 
     if (!txid) {
