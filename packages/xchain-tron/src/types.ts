@@ -1,5 +1,5 @@
 import { ExplorerProviders, XChainClientParams } from '@xchainjs/xchain-client'
-import { Address, BaseAmount } from '@xchainjs/xchain-util/lib'
+import type { Address, BaseAmount } from '@xchainjs/xchain-util/lib'
 import type { Contract, Types } from 'tronweb'
 
 export type TRONClientParams = XChainClientParams & {

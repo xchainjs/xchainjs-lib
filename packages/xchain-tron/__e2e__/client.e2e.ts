@@ -37,6 +37,9 @@ describe('TRON client e2e test', () => {
     const address = client.getAddress()
     const balance = await client.getBalance(address)
     console.log(`Balance: ${balance[0].amount.amount().toString()} ${balance[0].asset.symbol}`)
+    if (balance.length > 1) {
+      console.log(`Balance: ${balance[1].amount.amount().toString()} ${balance[1].asset.symbol}`)
+    }
   })
 
   it('Should check if account exists', async () => {
@@ -57,8 +60,7 @@ describe('TRON client e2e test', () => {
   })
 
   it('Should fetch token metadata', async () => {
-    const address = client.getAddress()
-    const res = await client.fetchTokenMetadata({ contractAddress: TRON_USDT_CONTRACT, address })
+    const res = await client.fetchTokenMetadata({ contractAddress: TRON_USDT_CONTRACT })
     console.log(`USDT Token Metadata:`, res)
   })
 

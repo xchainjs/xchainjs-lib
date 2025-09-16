@@ -98,8 +98,6 @@ export class TronGrid {
           const fromAddress = TronWeb.address.fromHex(owner_address)
           const rawValue = decoded._value.toString()
 
-          // should set owner_address
-          this.tronWeb.setAddress(fromAddress)
           // Get token contract instance
           const contractHex = TronWeb.address.fromHex(contract_address)
           const tokenContract = await this.tronWeb.contract().at(contractHex)

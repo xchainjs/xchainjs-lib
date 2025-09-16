@@ -123,8 +123,7 @@ export abstract class Client extends BaseXChainClient {
   /**
    * Get token balance and info directly from contract
    */
-  public fetchTokenMetadata = async ({ contractAddress, address }: { contractAddress: string; address: string }) => {
-    this.tronWeb.setAddress(address) // Set address for contract calls
+  public fetchTokenMetadata = async ({ contractAddress }: { contractAddress: string }) => {
     const contract = this.tronWeb.contract(trc20ABI, contractAddress)
 
     const [symbolRaw, decimalsRaw] = await Promise.all([
@@ -205,7 +204,7 @@ export abstract class Client extends BaseXChainClient {
 
       return {
         bandwidth: {
-          free: resources.freeNetLimit - resources.freeNetUsed,
+          free: (resources?.freeNetLimit ?? 0) - (resources?.freeNetUsed ?? 0),
           total: resources.NetLimit || 0,
           used: resources.NetUsed || 0,
         },
@@ -248,7 +247,9 @@ export abstract class Client extends BaseXChainClient {
 
       // Add TRC20 balances
       for (const token of accountData.trc20) {
-        const [contractAddress, balance] = Object.entries(token)[0] || []
+        const entries = Object.entries(token)
+        if (entries.length !== 1) continue
+        const [contractAddress, balance] = entries[0]
 
         if (!(contractAddress && balance)) continue
 
@@ -447,7 +448,6 @@ export abstract class Client extends BaseXChainClient {
     const amount = baseValue.amount().toString()
     const sender = this.getAddress(walletIndex)
 
-    this.tronWeb.setAddress(sender)
     const isNative = asset.type === AssetType.NATIVE
 
     if (isNative) {
@@ -547,6 +547,10 @@ export abstract class Client extends BaseXChainClient {
       parameter,
       fromAddress,
     )
+
+    if (!transaction) {
+      throw new Error('Failed to build approve transaction')
+    }
 
     const signedTx = await this.signTransaction(transaction)
     const { txid } = await this.tronWeb.trx.sendRawTransaction(signedTx)

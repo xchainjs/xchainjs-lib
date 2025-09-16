@@ -56,7 +56,7 @@ export interface TronGridTrxTransactionData {
 export interface TronGridTransaction {
   txID: string
   raw_data: {
-    contract: TronContract[]
+    contract: TronGridContract[]
     ref_block_bytes?: string
     ref_block_hash?: string
     expiration?: number
@@ -78,7 +78,7 @@ export interface TronGridTransaction {
   trc20_transfer?: TronGridTrc20Transfer[]
 }
 
-export type TronContract = TronTransferContract | TronTransferAssetContract | TronTriggerSmartContract
+export type TronGridContract = TronTransferContract | TronTransferAssetContract | TronTriggerSmartContract
 
 export interface TronTransferContract {
   type: 'TransferContract'
