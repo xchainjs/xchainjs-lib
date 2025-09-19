@@ -482,6 +482,8 @@ export abstract class Client extends BaseXChainClient {
    * Check the current allowance for a spender on a token
    */
   public getApprovedAmount = async ({ contractAddress, spenderAddress, from }: TronGetApprovedParams) => {
+    this.tronWeb.setAddress(from)
+
     const contract = this.tronWeb.contract(trc20ABI, contractAddress)
 
     if (!contract.methods?.allowance) {

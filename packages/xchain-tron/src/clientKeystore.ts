@@ -1,8 +1,10 @@
 import { HDKey } from '@scure/bip32'
 import { mnemonicToSeedSync } from '@scure/bip39'
+import { TronWeb } from 'tronweb'
 
 import { TronTransaction, TronSignedTransaction, TRONClientParams } from './types'
 import { Client, defaultTRONParams } from './client'
+import { TRON_DEFAULT_RPC } from './const'
 
 export class ClientKeystore extends Client {
   constructor(params: TRONClientParams = defaultTRONParams) {
@@ -24,14 +26,18 @@ export class ClientKeystore extends Client {
 
     const privateKeyHex = Buffer.from(derived.privateKey).toString('hex')
 
-    this.tronWeb.setPrivateKey(privateKeyHex)
+    const isolatedTronWeb = new TronWeb({
+      fullHost: TRON_DEFAULT_RPC,
+      privateKey: privateKeyHex,
+    })
 
-    const address = this.tronWeb?.address.fromPrivateKey(privateKeyHex)
+    const address = isolatedTronWeb.address.fromPrivateKey(privateKeyHex)
 
     return {
       getAddress: () => (typeof address === 'string' ? address : ''),
       signTransaction: async (transaction: TronTransaction) => {
-        const signedTx = await this.tronWeb.trx.sign(transaction, privateKeyHex)
+        // Use isolated instance - no shared state
+        const signedTx = await isolatedTronWeb.trx.sign(transaction)
         return signedTx
       },
     }
