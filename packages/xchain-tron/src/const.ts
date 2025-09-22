@@ -12,7 +12,7 @@ export const TRONChain = 'TRON' as const
 
 export const AssetTRX: Asset = {
   chain: TRONChain,
-  symbol: 'TRON',
+  symbol: 'TRX',
   ticker: 'TRX',
   type: AssetType.NATIVE,
 }
