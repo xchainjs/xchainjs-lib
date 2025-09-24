@@ -51,6 +51,7 @@
     "@xchainjs/xchain-solana": "workspace:*",
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-thorchain-query": "workspace:*",
+    "@xchainjs/xchain-tron": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
     "ethers": "^6.14.3"
