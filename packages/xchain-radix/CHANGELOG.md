@@ -1,5 +1,14 @@
 # @xchainjs/xchain-radix
 
+## 2.0.9
+
+### Patch Changes
+
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-util@2.0.5
+
 ## 2.0.8
 
 ### Patch Changes

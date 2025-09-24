@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.0.9
+
+### Patch Changes
+
+- e458a3e: update to CosmJs 0.34.0, migrate off elliptic to noble cryptography
+- 63ec81f: Fix ESM (ECMAScript Module) compatibility issues
+
+  - Update bignumber.js to 9.1.2 for proper ESM support
+  - Change bitcore-lib-cash imports from namespace to default imports for ESM compatibility
+  - Change @dashevo/dashcore-lib imports from namespace to default imports for ESM compatibility
+  - Add .js extensions to coinselect/accumulative imports for ESM
+  - Add .js extensions to cosmjs-types imports for ESM
+  - Update module type declarations for ESM compatibility
+  - Regenerate protobuf files with correct ESM import patterns
+
+  This enables the library to work properly in ESM environments (Node.js type: "module", modern bundlers, etc.)
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-cosmos-sdk@2.0.9
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-util@2.0.5
+
 ## 2.0.8
 
 ### Patch Changes
