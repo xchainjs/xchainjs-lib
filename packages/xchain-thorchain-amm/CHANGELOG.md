@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.21
+
+### Patch Changes
+
+- ff17bc1: Added Tron to TC AMM
+- Updated dependencies [d6c3f36]
+- Updated dependencies [713ba6f]
+  - @xchainjs/xchain-thorchain-query@2.0.13
+  - @xchainjs/xchain-tron@2.0.0
+
 ## 3.0.20
 
 ### Patch Changes

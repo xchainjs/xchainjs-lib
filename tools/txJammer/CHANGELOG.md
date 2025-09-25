@@ -1,5 +1,14 @@
 # txJammer
 
+## 1.0.62
+
+### Patch Changes
+
+- Updated dependencies [ff17bc1]
+- Updated dependencies [d6c3f36]
+  - @xchainjs/xchain-thorchain-amm@3.0.21
+  - @xchainjs/xchain-thorchain-query@2.0.13
+
 ## 1.0.61
 
 ### Patch Changes
