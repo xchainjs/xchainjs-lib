@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.13
+
+### Patch Changes
+
+- d6c3f36: add tron support to tc query
+
 ## 2.0.12
 
 ### Patch Changes

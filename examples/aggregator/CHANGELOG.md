@@ -1,5 +1,12 @@
 # xchainjs-aggregator
 
+## 1.0.23
+
+### Patch Changes
+
+- Updated dependencies [67b9d17]
+  - @xchainjs/xchain-aggregator@2.0.23
+
 ## 1.0.22
 
 ### Patch Changes
