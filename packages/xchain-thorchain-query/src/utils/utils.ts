@@ -39,6 +39,8 @@ import {
   THORChain,
   XRPChain,
   SOLChain,
+  TRONChain,
+  AssetTRON,
 } from './const'
 
 export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
@@ -91,6 +93,8 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetXRP
     case SOLChain:
       return AssetSOL
+    case TRONChain:
+      return AssetTRON
     default:
       throw Error('Unknown chain')
   }
@@ -160,6 +164,8 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetXRP)
     case SOLChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetSOL)
+    case TRONChain:
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetTRON)
   }
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
@@ -203,6 +209,8 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetXRP)
     case SOLChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetSOL)
+    case TRONChain:
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetTRON)
   }
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
 }
@@ -242,6 +250,8 @@ export const getChain = (chain: string): Chain => {
       return XRPChain
     case 'SOL':
       return SOLChain
+    case 'TRON':
+      return TRONChain
     default:
       throw Error('Unknown chain')
   }
