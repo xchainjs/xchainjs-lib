@@ -4419,6 +4419,7 @@ __metadata:
     "@xchainjs/xchain-solana": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-thorchain-query": "workspace:*"
+    "@xchainjs/xchain-tron": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
     axios: "npm:1.12.1"
@@ -4478,7 +4479,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-tron@workspace:packages/xchain-tron":
+"@xchainjs/xchain-tron@workspace:*, @xchainjs/xchain-tron@workspace:packages/xchain-tron":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-tron@workspace:packages/xchain-tron"
   dependencies:

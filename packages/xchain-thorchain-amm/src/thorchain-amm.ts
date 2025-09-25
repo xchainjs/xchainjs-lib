@@ -11,6 +11,7 @@ import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
+import { Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
 import {
   AssetRuneNative,
   Client as ThorClient,
@@ -102,6 +103,7 @@ export class ThorchainAMM {
       BASE: new BaseClient({ ...defaultBaseParams, network: Network.Mainnet }),
       XRP: new XRPClient({ ...defaultXRPParams, network: Network.Mainnet }),
       SOL: new SOLClient({ ...defaultSolanaParams, network: Network.Mainnet }),
+      TRON: new TronClient({ ...defaultTRONParams, network: Network.Mainnet }),
     }),
   ) {
     this.thorchainQuery = thorchainQuery
