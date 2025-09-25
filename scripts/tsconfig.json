@@ -7,6 +7,6 @@
       "skipLibCheck": true,
       "strict": true
     },
-    "include": ["scripts/notification.ts", "scripts/**/*.ts"]
+    "include": ["./notification.ts", "./**/*.ts"]
   }
   
