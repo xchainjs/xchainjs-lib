@@ -1,4 +1,4 @@
-import { TxHash } from '@xchainjs/xchain-client'
+import { TxHash, Network } from '@xchainjs/xchain-client'
 import {
   Address,
   AnyAsset,
@@ -64,6 +64,10 @@ export type Config = Partial<{
    * Wallet
    */
   wallet: Wallet
+  /**
+   * Network to use for protocols. If not specified, will be inferred from wallet or default to mainnet
+   */
+  network: Network
 }>
 
 /**
@@ -73,6 +77,7 @@ export type ProtocolConfig = Partial<{
   wallet: Wallet
   affiliateBps: number
   affiliateAddress: string
+  network: Network
 }>
 
 /**
