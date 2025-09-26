@@ -1,6 +1,7 @@
+import { Network } from '@xchainjs/xchain-client'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
-import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
 import {
   AnyAsset,
   Chain,
@@ -22,6 +23,8 @@ import {
   TxSubmitted,
 } from '../../types'
 
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
+
 export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
@@ -30,7 +33,13 @@ export class ThorchainProtocol implements IProtocol {
   private wallet?: Wallet
 
   constructor(configuration?: ProtocolConfig) {
-    this.thorchainQuery = new ThorchainQuery()
+    // Use network from configuration, fallback to wallet network, or default to mainnet
+    const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
+
+    // Create ThorchainQuery with proper network configuration
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
+    this.thorchainQuery = new ThorchainQuery(thorchainCache)
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
     this.wallet = configuration?.wallet
