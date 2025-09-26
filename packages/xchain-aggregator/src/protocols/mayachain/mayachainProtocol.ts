@@ -2,7 +2,7 @@ import { Network } from '@xchainjs/xchain-client'
 import { AssetCacao, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { ApproveParams, IsApprovedParams, MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
 import { MayachainCache, MayachainQuery, Mayanode } from '@xchainjs/xchain-mayachain-query'
-import { MidgardQuery } from '@xchainjs/xchain-mayamidgard-query'
+import { MidgardCache, MidgardQuery, MidgardApi } from '@xchainjs/xchain-mayamidgard-query'
 import {
   AnyAsset,
   Chain,
@@ -39,8 +39,8 @@ export class MayachainProtocol implements IProtocol {
 
     // Create MayachainQuery with proper network configuration
     // TODO: Fix MidgardQuery constructor to accept network parameter
-    // For now, create with defaults and update Mayanode with network
-    const mayachainCache = new MayachainCache(new MidgardQuery(), new Mayanode(network))
+    const midgardCache = new MidgardCache(new MidgardApi(network))
+    const mayachainCache = new MayachainCache(new MidgardQuery(midgardCache), new Mayanode(network))
     this.mayachainQuery = new MayachainQuery(mayachainCache)
     this.mayachainAmm = new MayachainAMM(this.mayachainQuery, configuration?.wallet)
     this.configuration = configuration

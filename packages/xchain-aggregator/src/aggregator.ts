@@ -23,10 +23,10 @@ export class Aggregator {
   constructor(config?: Config) {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
 
-    // Determine network: explicit network > wallet network > mainnet default
-    let network = fConfig.network || Network.Mainnet
-    if (!fConfig.network && fConfig.wallet) {
-      network = fConfig.wallet.getNetwork()
+    // Determine network: explicit config.network > wallet network > default
+    let network = config?.network || Network.Mainnet
+    if (!config?.network && config?.wallet) {
+      network = config.wallet.getNetwork()
     }
     const configWithNetwork = { ...fConfig, network }
 
@@ -51,10 +51,10 @@ export class Aggregator {
   public setConfiguration(config: Config) {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
 
-    // Determine network: explicit network > wallet network > mainnet default
-    let network = fConfig.network || Network.Mainnet
-    if (!fConfig.network && fConfig.wallet) {
-      network = fConfig.wallet.getNetwork()
+    // Determine network: explicit config.network > wallet network > mainnet default
+    let network = config.network || Network.Mainnet
+    if (!config.network && config.wallet) {
+      network = config.wallet.getNetwork()
     }
     const configWithNetwork = { ...fConfig, network }
 

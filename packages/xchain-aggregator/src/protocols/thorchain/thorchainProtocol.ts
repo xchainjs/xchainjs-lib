@@ -23,6 +23,8 @@ import {
   TxSubmitted,
 } from '../../types'
 
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
+
 export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
@@ -35,7 +37,8 @@ export class ThorchainProtocol implements IProtocol {
     const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
 
     // Create ThorchainQuery with proper network configuration
-    const thorchainCache = new ThorchainCache(new Thornode(network))
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     this.thorchainQuery = new ThorchainQuery(thorchainCache)
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
