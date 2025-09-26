@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.24
+
+### Patch Changes
+
+- c9b188c: Added network param to aggregator config
+
 ## 2.0.23
 
 ### Patch Changes
