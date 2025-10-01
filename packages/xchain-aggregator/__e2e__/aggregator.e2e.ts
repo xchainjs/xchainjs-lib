@@ -13,6 +13,7 @@ import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xcha
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import { Client as SolClient, SOLAsset, defaultSolanaParams } from '@xchainjs/xchain-solana'
+import { AssetTRX, Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
 import {
   AssetType,
   CryptoAmount,
@@ -103,8 +104,15 @@ describe('Aggregator', () => {
       BNB: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
       SOL: new SolClient({ ...defaultSolanaParams, phrase, network: Network.Mainnet }),
+      TRON: new TronClient({ ...defaultTRONParams, phrase, network: Network.Mainnet }),
     })
-    aggregator = new Aggregator({ wallet })
+    aggregator = new Aggregator({
+      wallet,
+      affiliate: {
+        basisPoints: 30,
+        affiliates: { Thorchain: 'dx', Mayachain: 'dx' },
+      },
+    })
   })
 
   it('Should get configuration', () => {
@@ -259,5 +267,27 @@ describe('Aggregator', () => {
     })
 
     console.log(txSubmitted)
+  })
+
+  it('Should estimate swap from TRON.TRX to THOR.RUNE', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: AssetTRX,
+      destinationAsset: assetFromStringEx('THOR.RUNE'),
+      fromAddress: await wallet.getAddress(AssetTRX.chain),
+      destinationAddress: await wallet.getAddress(THORChain),
+      amount: new CryptoAmount(assetToBase(assetAmount(1000, 6)), AssetTRX),
+    })
+    printQuoteSwap(bestSwap(estimatedSwap))
+  })
+
+  it('Should estimate swap from THOR.RUNE to TRON.TRX', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: assetFromStringEx('THOR.RUNE'),
+      destinationAsset: AssetTRX,
+      fromAddress: await wallet.getAddress(THORChain),
+      destinationAddress: await wallet.getAddress(AssetTRX.chain),
+      amount: new CryptoAmount(assetToBase(assetAmount(100, 8)), assetFromStringEx('THOR.RUNE')),
+    })
+    printQuoteSwap(bestSwap(estimatedSwap))
   })
 })
