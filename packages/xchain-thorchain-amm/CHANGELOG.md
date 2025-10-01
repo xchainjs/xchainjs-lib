@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.22
+
+### Patch Changes
+
+- c7e4405: fix unsupported chain issue
+
 ## 3.0.21
 
 ### Patch Changes

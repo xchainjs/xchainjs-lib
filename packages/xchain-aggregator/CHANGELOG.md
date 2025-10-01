@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.25
+
+### Patch Changes
+
+- c7e4405: fix unsupported chain issue
+- Updated dependencies [c7e4405]
+  - @xchainjs/xchain-thorchain-amm@3.0.22
+
 ## 2.0.24
 
 ### Patch Changes

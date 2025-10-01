@@ -1,5 +1,12 @@
 # xchainjs-thorchain-amm
 
+## 1.0.22
+
+### Patch Changes
+
+- Updated dependencies [c7e4405]
+  - @xchainjs/xchain-thorchain-amm@3.0.22
+
 ## 1.0.21
 
 ### Patch Changes
