@@ -9,6 +9,7 @@ import { Client as DogeClient, DOGEChain, defaultDogeParams } from '@xchainjs/xc
 import { Client as XRPClient, XRPChain, defaultXRPParams } from '@xchainjs/xchain-ripple'
 import { Client as SOLClient, SOLChain, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as TronClient, TRONChain, defaultTRONParams } from '@xchainjs/xchain-tron'
 import { Client as LtcClient, LTCChain, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, THORChain, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
 import { CompatibleAsset } from '@xchainjs/xchain-thorchain-query'
@@ -91,6 +92,8 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new XRPClient({ ...defaultXRPParams, network }).validateAddress(address)
     case SOLChain:
       return new SOLClient({ ...defaultSolanaParams, network }).validateAddress(address)
+    case TRONChain:
+      return new TronClient({ ...defaultTRONParams, network }).validateAddress(address)
     default:
       throw Error('Unsupported chain')
   }
