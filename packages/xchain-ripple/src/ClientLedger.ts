@@ -67,6 +67,11 @@ class ClientLedger extends Client {
     // Sign the transaction with Ledger
     const signature = await app.signTransaction(derivationPath, txBlob)
 
+    // Validate signature exists
+    if (!signature) {
+      throw new Error('No signature received from Ledger device')
+    }
+
     // Create final signed transaction with signature
     const signedTx = {
       ...preparedTx,
@@ -119,7 +124,13 @@ class ClientLedger extends Client {
       Amount: params.amount.amount().toString(),
       Fee: fee,
       Sequence: accountInfo.result.account_data.Sequence,
-      LastLedgerSequence: ledgerInfo.result.ledger.ledger_index + 10,
+      LastLedgerSequence: (() => {
+        const ledgerIndex = Number(ledgerInfo.result.ledger.ledger_index)
+        if (!Number.isFinite(ledgerIndex)) {
+          throw new Error(`Invalid ledger index: ${ledgerInfo.result.ledger.ledger_index}`)
+        }
+        return ledgerIndex + 10
+      })(),
     }
 
     // Add destination tag if provided
