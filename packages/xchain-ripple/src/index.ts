@@ -1,6 +1,9 @@
 // Export the 'ClientKeystore' class as 'Client'
 export { ClientKeystore as Client } from './clientKeystore'
 
+// Export the 'ClientLedger' class for Ledger hardware wallet support
+export { ClientLedger } from './ClientLedger'
+
 // Export the 'defaultXRPParams' constant from the 'client' file
 export { defaultXRPParams } from './client'
 
