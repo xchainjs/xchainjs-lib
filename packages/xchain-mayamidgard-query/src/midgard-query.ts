@@ -1,23 +1,39 @@
 import { Network } from '@xchainjs/xchain-client'
 import { MemberDetails, PoolDetail, PoolStatsDetail } from '@xchainjs/xchain-mayamidgard'
-import { Asset, assetToString } from '@xchainjs/xchain-util'
+import { Asset, CachedValue, assetToString } from '@xchainjs/xchain-util'
 
 import { MidgardCache } from './midgard-cache'
 import { ActionHistory, GetActionsParams, MAYANameDetails, ReverseMAYANames } from './types'
+
+/**
+ * Default number of decimals used for MAYAChain assets.
+ */
+const DEFAULT_MAYACHAIN_DECIMALS = 8
+
+/**
+ * Aggressive cache TTL for asset decimals (24 hours) - decimals rarely change
+ */
+const DECIMALS_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
 
 /**
  * Class for retrieving data and processing it from the Midgard API using MidgardCache to optimize the number of requests (MAYAChain L2 API).
  */
 export class MidgardQuery {
   private midgardCache: MidgardCache
+  readonly overrideDecimals: Record<string, number>
+  private readonly decimalCache: CachedValue<Record<string, number>>
 
   /**
    * Constructor to create a MidgardQuery instance.
    * @param midgardCache - An instance of the MidgardCache (could be pointing to stagenet, testnet, mainnet).
+   * @param overrideDecimals - Override decimals for specific assets.
    * @returns MidgardQuery
    */
-  constructor(midgardCache = new MidgardCache()) {
+  constructor(midgardCache = new MidgardCache(), overrideDecimals: Record<string, number> = {}) {
     this.midgardCache = midgardCache
+    this.overrideDecimals = overrideDecimals
+    // Initialize aggressive decimal cache with 24h TTL
+    this.decimalCache = new CachedValue<Record<string, number>>(() => this.buildDecimalCache(), DECIMALS_CACHE_TTL)
   }
 
   /**
@@ -152,5 +168,89 @@ export class MidgardQuery {
       fromTimestamp,
       fromHeight,
     })
+  }
+
+  /**
+   * Builds a cache of asset decimals from available pools.
+   * This reduces the need to query pools repeatedly for decimal lookups.
+   *
+   * @returns {Record<string, number>} - Map of asset strings to decimal counts
+   */
+  private async buildDecimalCache(): Promise<Record<string, number>> {
+    const decimalsMap: Record<string, number> = {}
+
+    try {
+      const pools = await this.midgardCache.getPools()
+
+      // Cache decimals for all pool assets
+      for (const pool of pools) {
+        if (pool.asset && pool.nativeDecimal) {
+          decimalsMap[pool.asset] = Number(pool.nativeDecimal)
+        }
+      }
+
+      // Add known MAYAChain asset decimals
+      decimalsMap['MAYA.CACAO'] = DEFAULT_MAYACHAIN_DECIMALS
+    } catch (error) {
+      console.warn('Failed to build decimal cache, using defaults:', error)
+    }
+
+    return decimalsMap
+  }
+
+  /**
+   * Batch lookup for multiple asset decimals - more efficient than individual calls.
+   *
+   * @param {Asset[]} assets - Array of assets to get decimals for
+   * @returns {Promise<Record<string, number>>} - Map of asset strings to decimal counts
+   */
+  public async getDecimalsForAssets(assets: Asset[]): Promise<Record<string, number>> {
+    const cachedDecimals = await this.decimalCache.getValue()
+    const result: Record<string, number> = {}
+
+    for (const asset of assets) {
+      const assetString = assetToString(asset)
+      
+      // Check override decimals first
+      if (this.overrideDecimals[assetString] !== undefined) {
+        result[assetString] = this.overrideDecimals[assetString]
+      }
+      // Then check cached decimals
+      else if (cachedDecimals[assetString] !== undefined) {
+        result[assetString] = cachedDecimals[assetString]
+      }
+      // Default fallback
+      else {
+        result[assetString] = DEFAULT_MAYACHAIN_DECIMALS
+        console.warn(`Using default decimals for ${assetString}`)
+      }
+    }
+
+    return result
+  }
+
+  /**
+   * Get decimal count for a specific asset with caching.
+   *
+   * @param {Asset} asset - The asset to get decimals for
+   * @returns {Promise<number>} - Number of decimals for the asset
+   */
+  public async getAssetDecimals(asset: Asset): Promise<number> {
+    const assetString = assetToString(asset)
+    
+    // Check override decimals first
+    if (this.overrideDecimals[assetString] !== undefined) {
+      return this.overrideDecimals[assetString]
+    }
+
+    // Get from cache
+    const cachedDecimals = await this.decimalCache.getValue()
+    if (cachedDecimals[assetString] !== undefined) {
+      return cachedDecimals[assetString]
+    }
+
+    // Default fallback
+    console.warn(`Using default decimals for ${assetString}`)
+    return DEFAULT_MAYACHAIN_DECIMALS
   }
 }

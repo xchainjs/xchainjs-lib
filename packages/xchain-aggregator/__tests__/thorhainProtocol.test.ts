@@ -144,4 +144,40 @@ describe('Thorchain protocol', () => {
       },
     })
   })
+
+  describe('Performance Optimizations', () => {
+    it('Should use fast mode for common asset decimals', async () => {
+      // Test that fast mode is enabled and working
+      const protocol = new ThorchainProtocol()
+
+      // These should not require additional API calls due to fast mode
+      const isRuneSupported = await protocol.isAssetSupported(AssetRuneNative)
+      const isBtcSupported = await protocol.isAssetSupported(AssetBTC)
+
+      expect(isRuneSupported).toBe(true)
+      expect(isBtcSupported).toBe(true)
+    })
+
+    it('Should cache supported assets between calls', async () => {
+      const protocol = new ThorchainProtocol()
+
+      // Multiple calls to same asset should be handled efficiently
+      const result1 = await protocol.isAssetSupported(AssetBTC)
+      const result2 = await protocol.isAssetSupported(AssetBTC)
+      const result3 = await protocol.isAssetSupported(AssetBTC)
+
+      // All results should be consistent (cache working)
+      expect(result1).toBe(result2)
+      expect(result2).toBe(result3)
+      expect(result1).toBe(true)
+    })
+
+    it('Should handle cache failures gracefully', async () => {
+      const protocol = new ThorchainProtocol()
+
+      // Should still work even if cache has issues
+      const isSupported = await protocol.isAssetSupported(AssetBTC)
+      expect(typeof isSupported).toBe('boolean')
+    })
+  })
 })

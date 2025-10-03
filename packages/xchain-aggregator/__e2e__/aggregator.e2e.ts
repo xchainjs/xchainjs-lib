@@ -8,6 +8,7 @@ import {
   Client as BtcClient,
   defaultBTCParams as defaultBtcParams,
 } from '@xchainjs/xchain-bitcoin'
+import { Client as ZecClient, AssetZEC, defaultZECParams } from '@xchainjs/xchain-zcash'
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
@@ -105,6 +106,7 @@ describe('Aggregator', () => {
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
       SOL: new SolClient({ ...defaultSolanaParams, phrase, network: Network.Mainnet }),
       TRON: new TronClient({ ...defaultTRONParams, phrase, network: Network.Mainnet }),
+      ZEC: new ZecClient({ ...defaultZECParams, phrase, network: Network.Mainnet }),
     })
     aggregator = new Aggregator({
       wallet,
@@ -289,5 +291,91 @@ describe('Aggregator', () => {
       amount: new CryptoAmount(assetToBase(assetAmount(100, 8)), assetFromStringEx('THOR.RUNE')),
     })
     printQuoteSwap(bestSwap(estimatedSwap))
+  })
+
+  it('Should check if ZEC and DASH are supported', async () => {
+    const zecAsset = AssetZEC
+    const dashAsset = assetFromStringEx('DASH.DASH')
+
+    console.log('Asset strings:')
+    console.log(`ZEC asset: ${assetToString(zecAsset)}`)
+    console.log(`DASH asset: ${assetToString(dashAsset)}`)
+
+    // Get mayachain protocol and check pools directly
+    const mayachainProtocol = aggregator.getProtocol('Mayachain')
+    if (mayachainProtocol) {
+      try {
+        // Debug: Get pools and check their status
+        console.log('Debug: Checking pool statuses...')
+        // Access the private mayachainQuery via any property to debug
+        const pools = await (mayachainProtocol as any).mayachainQuery.getPools()
+
+        console.log('Sample pool statuses:')
+        pools.slice(0, 3).forEach((pool: any) => {
+          console.log(`Pool ${pool.asset}: status="${pool.status}" (type: ${typeof pool.status})`)
+        })
+
+        // Check if ZEC.ZEC or DASH.DASH pools exist
+        const zecPool = pools.find((pool: any) => pool.asset === 'ZEC.ZEC')
+        const dashPool = pools.find((pool: any) => pool.asset === 'DASH.DASH')
+
+        if (zecPool) {
+          console.log(`ZEC pool found: status="${zecPool.status}" (type: ${typeof zecPool.status})`)
+        } else {
+          console.log('ZEC pool not found')
+        }
+
+        if (dashPool) {
+          console.log(`DASH pool found: status="${dashPool.status}" (type: ${typeof dashPool.status})`)
+        } else {
+          console.log('DASH pool not found')
+        }
+
+        const zecSupported = await mayachainProtocol.isAssetSupported(zecAsset)
+        const dashSupported = await mayachainProtocol.isAssetSupported(dashAsset)
+        console.log(`Mayachain - ZEC: ${zecSupported}, DASH: ${dashSupported}`)
+      } catch (e) {
+        console.log(`Mayachain error: ${e}`)
+      }
+    }
+  })
+
+  it('Should estimate swap from ZEC to DASH if supported', async () => {
+    const fromAsset = AssetZEC
+    const destinationAsset = assetFromStringEx('DASH.DASH')
+
+    try {
+      const estimatedSwap = await aggregator.estimateSwap({
+        fromAsset,
+        destinationAsset,
+        amount: new CryptoAmount(assetToBase(assetAmount(10, 8)), fromAsset),
+      })
+
+      console.log(`ZEC to DASH swap estimates:`)
+      estimatedSwap.forEach((quote, index) => {
+        console.log(`\nQuote ${index + 1}:`)
+        printQuoteSwap(quote)
+      })
+
+      const best = bestSwap(estimatedSwap)
+      console.log(`\nBest quote:`)
+      printQuoteSwap(best)
+    } catch {
+      console.log('This likely means ZEC and/or DASH are not supported by any protocol pools')
+
+      // Let's try a different approach - ZEC to BTC, then BTC to DASH conceptually
+      console.log('\nTrying ZEC to BTC as alternative:')
+      try {
+        const zecToBtc = await aggregator.estimateSwap({
+          fromAsset,
+          destinationAsset: AssetBTC,
+          amount: new CryptoAmount(assetToBase(assetAmount(1, 8)), fromAsset),
+        })
+        console.log('ZEC to BTC is supported!')
+        printQuoteSwap(bestSwap(zecToBtc))
+      } catch {
+        console.log(`ZEC to BTC also failed: `)
+      }
+    }
   })
 })

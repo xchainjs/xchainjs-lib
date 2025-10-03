@@ -17,6 +17,32 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 
+/**
+ * Common asset decimals for fast mode - avoids API calls for well-known assets
+ * This list covers all major assets supported by MAYAChain
+ */
+const COMMON_MAYACHAIN_ASSET_DECIMALS: Record<string, number> = {
+  // MAYAChain ecosystem
+  'MAYA.CACAO': 10,
+  'MAYA.MAYA': 4,
+
+  // Bitcoin ecosystem
+  'BTC.BTC': 8,
+  'DASH.DASH': 8,
+
+  // Ethereum ecosystem
+  'ETH.ETH': 18,
+  'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6, // USDT on Ethereum
+  'ETH.USDC-0xA0b86a33E6441d0075be7b17c8Cb89b91A6Db8Ed': 6, // USDC on Ethereum
+  'ARB.ETH': 18,
+
+  // Cosmos ecosystem
+  'KUJI.KUJI': 6,
+
+  // THORChain
+  'THOR.RUNE': 8,
+}
+
 import { MayachainCache } from './mayachain-cache'
 import {
   AddressTradeAccounts,
@@ -68,16 +94,18 @@ import {
  */
 export class MayachainQuery {
   private mayachainCache: MayachainCache
+  private fastMode: boolean
 
   /**
-   * Constructor to create a MayachainAMM
+   * Constructor to create a MayachainQuery
    * @param mayachainCache - an instance of the MayachainCache (could be pointing to stagenet,testnet,mainnet)
-   * @param chainAttributes - attributes used to calculate waitTime & conf counting
-   * @returns MayachainAMM
+   * @param fastMode - when true, uses fast mode for better performance (avoids some API calls)
+   * @returns MayachainQuery
    */
-  constructor(mayachainCache = new MayachainCache()) {
+  constructor(mayachainCache = new MayachainCache(), fastMode = false) {
     // Initialize MayachainCache instance
     this.mayachainCache = mayachainCache
+    this.fastMode = fastMode
   }
 
   /**
@@ -274,19 +302,35 @@ export class MayachainQuery {
   }
 
   /**
+   * Fast decimal lookup for assets, using hardcoded values when possible
+   * @param asset Asset to get decimals for
+   * @returns Number of decimals
+   */
+  private async getAssetDecimalsFast(asset: CompatibleAsset): Promise<number> {
+    const assetString = assetToString(asset)
+
+    // Return default for synth assets
+    if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
+
+    // In fast mode, try common decimals first
+    if (this.fastMode && COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]) {
+      return COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]
+    }
+
+    // Fall back to cache lookup
+    const assetsDecimals = await this.mayachainCache.getAssetDecimals()
+    if (!assetsDecimals[assetString]) throw Error(`Can not get decimals for ${assetString}`)
+    return assetsDecimals[assetString]
+  }
+
+  /**
    * Get asset decimals
    * @param {Asset} asset
    * @returns the asset decimals
    * @throws {Error} if the asset is not supported in Mayachain
    */
   public async getAssetDecimals(asset: CompatibleAsset): Promise<number> {
-    if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
-
-    const assetNotation = assetToString(asset)
-    const assetsDecimals = await this.mayachainCache.getAssetDecimals()
-    if (!assetsDecimals[assetNotation]) throw Error(`Can not get decimals for ${assetNotation}`)
-
-    return assetsDecimals[assetNotation]
+    return this.getAssetDecimalsFast(asset)
   }
 
   /**

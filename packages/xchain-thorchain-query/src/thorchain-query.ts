@@ -26,6 +26,49 @@ import BigNumber from 'bignumber.js'
 import { DefaultChainAttributes } from './chain-defaults'
 import { LiquidityPool } from './liquidity-pool'
 import { ThorchainCache } from './thorchain-cache'
+
+/**
+ * Common asset decimals for fast mode - avoids Midgard calls for well-known assets
+ * This list covers all major assets supported by xchainjs client packages
+ */
+const COMMON_ASSET_DECIMALS: Record<string, number> = {
+  // THORChain ecosystem
+  'THOR.RUNE': 8,
+  'THOR.TCY': 8, // token on THORChain
+  'THOR.RUJI': 8, // native asset
+
+  // Bitcoin ecosystem
+  'BTC.BTC': 8,
+  'LTC.LTC': 8,
+  'BCH.BCH': 8,
+  'DOGE.DOGE': 8,
+  'DASH.DASH': 8,
+  'ZEC.ZEC': 8,
+
+  // Ethereum ecosystem (18 decimals standard)
+  'ETH.ETH': 18,
+  'AVAX.AVAX': 18,
+  'ARB.ETH': 18, // Arbitrum uses ETH
+  'BASE.ETH': 18, // Base uses ETH
+
+  // BSC (BEP-20 standard - 18 decimals)
+  'BSC.BNB': 18,
+
+  // Cosmos ecosystem
+  'GAIA.ATOM': 6, // Cosmos Hub
+  'KUJI.KUJI': 6, // Kujira network
+
+  // Other networks
+  'XRP.XRP': 6, // Ripple
+  'ADA.ADA': 6, // Cardano
+  'SOL.SOL': 9, // Solana
+  'TRON.TRX': 6, // Tron
+  'XRD.XRD': 18, // Radix
+
+  // MAYAChain ecosystem
+  'MAYA.CACAO': 10,
+  'MAYA.MAYA': 4, // MAYA token has 4 decimals
+}
 import {
   AddliquidityPosition,
   AddressTradeAccounts,
@@ -95,17 +138,20 @@ const defaultCache = new ThorchainCache()
 export class ThorchainQuery {
   readonly thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
+  private fastMode: boolean
 
   /**
    * Constructor to create a ThorchainQuery
    *
    * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @param chainAttributes - attributes used to calculate waitTime & conf counting
+   * @param fastMode - when true, uses Thornode-only mode for better performance (skips some Midgard calls)
    * @returns ThorchainAMM
    */
-  constructor(thorchainCache = defaultCache, chainAttributes = DefaultChainAttributes) {
+  constructor(thorchainCache = defaultCache, chainAttributes = DefaultChainAttributes, fastMode = false) {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
+    this.fastMode = fastMode
   }
 
   /** Quote a swap transaction.
@@ -262,13 +308,30 @@ export class ThorchainQuery {
   }
 
   /**
+   * Fast decimal lookup for assets, using hardcoded values when possible
+   * @param asset Asset to get decimals for
+   * @returns Number of decimals
+   */
+  private async getDecimalForAssetFast(asset: CompatibleAsset): Promise<number> {
+    const assetString = assetToString(asset)
+
+    // In fast mode, try common decimals first
+    if (this.fastMode && COMMON_ASSET_DECIMALS[assetString]) {
+      return COMMON_ASSET_DECIMALS[assetString]
+    }
+
+    // Fall back to Midgard lookup
+    return this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
+  }
+
+  /**
    * Validate a cryptoAmount is well formed
    * @param {CryptoAmount} cryptoAmount - CryptoAmount to validate
    * @returns {void | Error} Error if the cryptoAmount is not well formed
    */
   public async validateAmount(cryptoAmount: CryptoAmount<CompatibleAsset>): Promise<Error | void> {
-    // Get the number of decimals for the asset
-    const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(cryptoAmount.asset)
+    // Get the number of decimals for the asset using fast lookup
+    const assetDecimals = await this.getDecimalForAssetFast(cryptoAmount.asset)
     // Check if the base amount decimal is equal to the asset's decimal
     if (cryptoAmount.baseAmount.decimal !== assetDecimals)
       return new Error(

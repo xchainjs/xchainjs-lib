@@ -4,6 +4,7 @@ import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-
 import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
 import {
   AnyAsset,
+  CachedValue,
   Chain,
   assetToString,
   eqAsset,
@@ -25,24 +26,35 @@ import {
 
 import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
 
+// Cache supported assets for 10 minutes - they change less frequently than pools
+const SUPPORTED_ASSETS_CACHE_TTL = 10 * 60 * 1000
+
 export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
   private thorchainAmm: ThorchainAMM
   private configuration: ProtocolConfig | undefined
   private wallet?: Wallet
+  private supportedAssetsCache: CachedValue<Set<string>>
 
   constructor(configuration?: ProtocolConfig) {
     // Use network from configuration, fallback to wallet network, or default to mainnet
     const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
 
-    // Create ThorchainQuery with proper network configuration
+    // Create ThorchainQuery with proper network configuration and fast mode for better performance
     const midgardCache = new MidgardCache(new Midgard(network))
     const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
-    this.thorchainQuery = new ThorchainQuery(thorchainCache)
+    // Use default chain attributes and enable fast mode
+    this.thorchainQuery = new ThorchainQuery(thorchainCache, undefined, true)
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
     this.wallet = configuration?.wallet
+
+    // Initialize supported assets cache
+    this.supportedAssetsCache = new CachedValue<Set<string>>(
+      () => this.buildSupportedAssetsCache(),
+      SUPPORTED_ASSETS_CACHE_TTL,
+    )
   }
 
   /**
@@ -69,17 +81,56 @@ export class ThorchainProtocol implements IProtocol {
   }
 
   /**
-   * Check if an asset is supported in the protocol
+   * Builds a cache of all supported assets from available pools.
+   * This reduces the need to query pools repeatedly for asset validation.
+   *
+   * @returns {Set<string>} - Set of supported asset strings
+   */
+  private async buildSupportedAssetsCache(): Promise<Set<string>> {
+    const supportedAssets = new Set<string>()
+
+    // Add known THORChain assets
+    supportedAssets.add(assetToString(AssetRuneNative))
+
+    try {
+      const pools = await this.thorchainQuery.thorchainCache.getPools()
+      Object.values(pools).forEach((pool) => {
+        if (pool.isAvailable()) {
+          supportedAssets.add(pool.assetString)
+          // Also add synth, trade, and secured variants
+          supportedAssets.add(pool.assetString.replace('.', '/')) // synth
+          supportedAssets.add(pool.assetString.replace('.', '~')) // trade
+          supportedAssets.add(pool.assetString.replace('.', '-')) // secured
+        }
+      })
+    } catch (error) {
+      console.warn('Failed to build supported assets cache:', error)
+    }
+
+    return supportedAssets
+  }
+
+  /**
+   * Check if an asset is supported in the protocol using cached data
    * @param {Asset} asset Asset to check if it is supported
    * @returns {boolean} True if the asset is supported, otherwise false
    */
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
+    // Fast path for known THORChain assets
     if (eqAsset(asset, AssetRuneNative) || isTradeAsset(asset) || isSynthAsset(asset) || isSecuredAsset(asset))
       return true
-    const pools = await this.thorchainQuery.thorchainCache.getPools()
-    return (
-      Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
-    )
+
+    try {
+      const supportedAssets = await this.supportedAssetsCache.getValue()
+      return supportedAssets.has(assetToString(asset))
+    } catch (error) {
+      console.warn('Failed to check supported asset from cache, falling back to direct lookup:', error)
+      // Fallback to original implementation
+      const pools = await this.thorchainQuery.thorchainCache.getPools()
+      return (
+        Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
+      )
+    }
   }
 
   /**

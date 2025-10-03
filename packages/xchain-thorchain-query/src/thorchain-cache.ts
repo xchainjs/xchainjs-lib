@@ -24,7 +24,12 @@ import { THORChain, isAssetRuneNative } from './utils'
 import { Thornode } from './utils/thornode'
 // Constants
 const SAME_ASSET_EXCHANGE_RATE = new BigNumber(1)
-const TEN_MINUTES = 10 * 60 * 1000
+
+// Optimized cache TTLs based on data volatility
+const POOLS_CACHE_TTL = 30 * 1000 // 30 seconds - pool data changes frequently due to swaps
+const INBOUND_DETAILS_CACHE_TTL = 5 * 60 * 1000 // 5 minutes - inbound addresses change less frequently
+const NETWORK_VALUES_CACHE_TTL = 30 * 60 * 1000 // 30 minutes - constants and mimir values change rarely
+
 // Default instances
 const defaultThornode = new Thornode()
 const defaultMidgardQuery = new MidgardQuery()
@@ -51,13 +56,13 @@ export class ThorchainCache {
   constructor(
     thornode = defaultThornode,
     midgardQuery = defaultMidgardQuery,
-    expirePoolCacheMillis = 6000,
-    expireInboundDetailsCacheMillis = 6000,
-    expireNetworkValuesCacheMillis = TEN_MINUTES,
+    expirePoolCacheMillis = POOLS_CACHE_TTL,
+    expireInboundDetailsCacheMillis = INBOUND_DETAILS_CACHE_TTL,
+    expireNetworkValuesCacheMillis = NETWORK_VALUES_CACHE_TTL,
   ) {
     this.thornode = thornode
     this.midgardQuery = midgardQuery
-    // Initialize cached values
+    // Initialize cached values with optimized TTLs
     this.poolCache = new CachedValue<Record<string, LiquidityPool> | undefined>(
       () => this.refreshPoolCache(),
       expirePoolCacheMillis,
