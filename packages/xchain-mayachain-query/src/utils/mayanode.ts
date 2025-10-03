@@ -6,6 +6,8 @@ import {
   MimirApi,
   MimirResponse,
   NetworkApi,
+  Pool,
+  PoolsApi,
   QuoteApi,
   QuoteSwapResponse,
   TradeAccountApi,
@@ -47,6 +49,7 @@ export class Mayanode {
   private quoteApis: QuoteApi[]
   private mimirApis: MimirApi[]
   private networkApis: NetworkApi[]
+  private poolsApis: PoolsApi[]
   private tradeUnitApis: TradeUnitApi[]
   private tradeUnitsApis: TradeUnitsApi[]
   private tradeAccountApis: TradeAccountApi[]
@@ -58,6 +61,7 @@ export class Mayanode {
     this.quoteApis = this.config.mayanodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
     this.mimirApis = this.config.mayanodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
     this.networkApis = this.config.mayanodeBaseUrls.map((url) => new NetworkApi(new Configuration({ basePath: url })))
+    this.poolsApis = this.config.mayanodeBaseUrls.map((url) => new PoolsApi(new Configuration({ basePath: url })))
     this.tradeUnitApis = this.config.mayanodeBaseUrls.map(
       (url) => new TradeUnitApi(new Configuration({ basePath: url })),
     )
@@ -225,5 +229,20 @@ export class Mayanode {
       } catch (_e) {}
     }
     throw new Error(`MAYANode not responding. Can not get trade asset accounts`)
+  }
+
+  /**
+   * Get pools from MAYANode directly
+   * @param {number} height Optional - Block height
+   * @returns Promise<Pool[]> Array of pools from MAYANode
+   */
+  public async getPools(height?: number): Promise<Pool[]> {
+    for (const api of this.poolsApis) {
+      try {
+        const resp = await api.pools(height)
+        return resp.data
+      } catch (_e) {}
+    }
+    throw new Error(`MAYANode not responding. Can not get pools`)
   }
 }

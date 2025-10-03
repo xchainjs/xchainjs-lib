@@ -48,6 +48,7 @@
     "@xchainjs/xchain-bsc": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",
     "@xchainjs/xchain-kujira": "workspace:*",
+    "@xchainjs/xchain-zcash": "workspace:*",
     "axios": "1.12.1",
     "axios-mock-adapter": "^2.1.0"
   }

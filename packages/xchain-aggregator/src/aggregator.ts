@@ -32,7 +32,9 @@ export class Aggregator {
 
     this.verifyConfig(configWithNetwork)
 
-    this.protocols = configWithNetwork.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, configWithNetwork))
+    this.protocols = configWithNetwork.protocols.map((protocol) =>
+      ProtocolFactory.getProtocol(protocol, configWithNetwork),
+    )
     this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
@@ -42,6 +44,15 @@ export class Aggregator {
    */
   public getConfiguration(): Omit<Config & { protocols: Protocol[] }, 'wallet'> {
     return { protocols: this.config.protocols, affiliate: this.config.affiliate, network: this.config.network }
+  }
+
+  /**
+   * Get a specific protocol by name
+   * @param {Protocol} protocolName - The name of the protocol to retrieve
+   * @returns {IProtocol | undefined} the protocol instance or undefined if not found
+   */
+  public getProtocol(protocolName: Protocol): IProtocol | undefined {
+    return this.protocols.find((protocol) => protocol.name === protocolName)
   }
 
   /**
@@ -60,7 +71,9 @@ export class Aggregator {
 
     this.verifyConfig(configWithNetwork)
 
-    this.protocols = configWithNetwork.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, configWithNetwork))
+    this.protocols = configWithNetwork.protocols.map((protocol) =>
+      ProtocolFactory.getProtocol(protocol, configWithNetwork),
+    )
     this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
@@ -92,7 +105,7 @@ export class Aggregator {
       }
     })
 
-    if (!successfulQuotes)
+    if (successfulQuotes.length === 0)
       throw Error(
         `Can not estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
       )
