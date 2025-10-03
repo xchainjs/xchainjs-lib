@@ -4419,7 +4419,6 @@ __metadata:
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    ripple-binary-codec: "npm:^2.5.0"
     xrpl: "npm:^4.3.0"
   languageName: unknown
   linkType: soft
@@ -11431,17 +11430,6 @@ __metadata:
     bignumber.js: "npm:^9.0.0"
     ripple-address-codec: "npm:^5.0.0"
   checksum: 10c0/0024eeee9a142f537c6cec4876bfcc95af6e33103f6c8a5805dfcd1bd2c7acafaa03805c1e17449eb97e6c51c66907481c2674ddc3d8b9017246c83887b9b065
-  languageName: node
-  linkType: hard
-
-"ripple-binary-codec@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "ripple-binary-codec@npm:2.5.0"
-  dependencies:
-    "@xrplf/isomorphic": "npm:^1.0.1"
-    bignumber.js: "npm:^9.0.0"
-    ripple-address-codec: "npm:^5.0.0"
-  checksum: 10c0/9d5087444c5cbf63f7cfc235c375c251fec3f3feb2b73d35b519f19fbd353242630b6e7d09cf0405b1310312ddffe33fb72d5f734c59c8d77f9d1b2952967756
   languageName: node
   linkType: hard
 

@@ -1,8 +1,7 @@
 import AppXrp from '@ledgerhq/hw-app-xrp'
 import { FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { encode } from 'ripple-binary-codec'
-import type { Payment } from 'xrpl'
+import { encode, type Payment } from 'xrpl'
 
 import { Client } from './client'
 import { SignedTransaction, XRPClientParams, XRPTxParams } from './types'
@@ -78,10 +77,7 @@ class ClientLedger extends Client {
       TxnSignature: signature.toUpperCase(),
     } as Payment
 
-    return {
-      tx_blob: encode(signedTx),
-      hash: undefined, // Hash will be calculated when broadcasting
-    }
+    return { tx_blob: encode(signedTx) }
   }
 
   // Transfer XRP from Ledger
@@ -94,53 +90,22 @@ class ClientLedger extends Client {
     // Build a simple transaction structure like in the Ledger examples
     const xrplClient = await this.getXrplClient()
 
-    // Ensure client is connected
-    if (!xrplClient.isConnected()) {
-      await xrplClient.connect()
-    }
-
-    // Get account info for sequence number
-    const accountInfo = await xrplClient.request({
-      command: 'account_info',
-      account: sender,
-      ledger_index: 'validated',
-    })
-
-    // Get current ledger for LastLedgerSequence
-    const ledgerInfo = await xrplClient.request({
-      command: 'ledger',
-      ledger_index: 'validated',
-    })
-
-    // Get proper fee from the base client
-    const fees = await this.getFees()
-    const fee = fees.average.amount().toString()
-
-    // Build basic transaction structure following Ledger examples
-    const transaction: Record<string, unknown> = {
+    // Build basic transaction structure for autofill
+    const baseTx: Payment = {
       TransactionType: 'Payment',
       Account: sender,
       Destination: params.recipient,
       Amount: params.amount.amount().toString(),
-      Fee: fee,
-      Sequence: accountInfo.result.account_data.Sequence,
-      LastLedgerSequence: (() => {
-        const ledgerIndex = Number(ledgerInfo.result.ledger.ledger_index)
-        if (!Number.isFinite(ledgerIndex)) {
-          throw new Error(`Invalid ledger index: ${ledgerInfo.result.ledger.ledger_index}`)
-        }
-        return ledgerIndex + 10
-      })(),
     }
 
     // Add destination tag if provided
     if (params.destinationTag !== undefined) {
-      transaction.DestinationTag = params.destinationTag
+      baseTx.DestinationTag = params.destinationTag
     }
 
     // Add memo if provided
     if (params.memo) {
-      transaction.Memos = [
+      baseTx.Memos = [
         {
           Memo: {
             MemoData: Buffer.from(params.memo, 'utf8').toString('hex').toUpperCase(),
@@ -149,7 +114,36 @@ class ClientLedger extends Client {
       ]
     }
 
-    const signed = await this.signTransaction(transaction as Payment, fromAddressIndex)
+    // Use autofill to get the required fields
+    const autofilledTx = await xrplClient.autofill(baseTx)
+
+    // Create a clean transaction object for Ledger signing with only the fields it expects
+    const ledgerTx: Record<string, unknown> = {
+      TransactionType: 'Payment',
+      Account: sender,
+      Destination: params.recipient,
+      Amount: params.amount.amount().toString(),
+      Fee: autofilledTx.Fee,
+      Sequence: autofilledTx.Sequence,
+      LastLedgerSequence: autofilledTx.LastLedgerSequence,
+    }
+
+    // Add optional fields
+    if (params.destinationTag !== undefined) {
+      ledgerTx.DestinationTag = params.destinationTag
+    }
+
+    if (params.memo) {
+      ledgerTx.Memos = [
+        {
+          Memo: {
+            MemoData: Buffer.from(params.memo, 'utf8').toString('hex').toUpperCase(),
+          },
+        },
+      ]
+    }
+
+    const signed = await this.signTransaction(ledgerTx as Payment, fromAddressIndex)
 
     // Submit the signed transaction blob
     const response = await xrplClient.request({

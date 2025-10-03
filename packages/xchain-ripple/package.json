@@ -37,7 +37,6 @@
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "ripple-binary-codec": "^2.5.0",
     "xrpl": "^4.3.0"
   },
   "publishConfig": {
