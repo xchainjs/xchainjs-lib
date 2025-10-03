@@ -1766,6 +1766,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/devices@npm:8.6.1":
+  version: 8.6.1
+  resolution: "@ledgerhq/devices@npm:8.6.1"
+  dependencies:
+    "@ledgerhq/errors": "npm:^6.26.0"
+    "@ledgerhq/logs": "npm:^6.13.0"
+    rxjs: "npm:^7.8.1"
+    semver: "npm:^7.3.5"
+  checksum: 10c0/ec5c594884091e732650fcf6bdba017ec9c5d9aa50db7ced285a73bc8cb904cde400037defe4a0c8b830a9fac61eaa70a9663ffef906a4bf93c22215030f5968
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/domain-service@npm:^1.2.35":
   version: 1.2.35
   resolution: "@ledgerhq/domain-service@npm:1.2.35"
@@ -1799,6 +1811,13 @@ __metadata:
   version: 6.22.0
   resolution: "@ledgerhq/errors@npm:6.22.0"
   checksum: 10c0/ec6b205df62bb21a509aacbc5c06011b70f5fbfa66a296aa06f71835d2d62188944a02fa252394699a2bf50cd1fe378ef19d19f3a14070f27b8c60807dac03e5
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/errors@npm:^6.26.0":
+  version: 6.26.0
+  resolution: "@ledgerhq/errors@npm:6.26.0"
+  checksum: 10c0/27e5a1dda997f3c38105b49c709aaf447e37eb27970150ece98ce81065a3bf4eb5c75d37cb91f9f874da2e69d2093395508fa08d9a293cfa6c6235b33627b983
   languageName: node
   linkType: hard
 
@@ -1869,6 +1888,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/hw-app-xrp@npm:^6.32.6":
+  version: 6.32.6
+  resolution: "@ledgerhq/hw-app-xrp@npm:6.32.6"
+  dependencies:
+    "@ledgerhq/hw-transport": "npm:^6.31.12"
+    bip32-path: "npm:0.4.2"
+  checksum: 10c0/f8396b971897927d076ae3d031d008f36e3a8f4b0484d4ae4cf63870a0eead9f6be966d2db64f6a4c556a9435139637d8e30f9f66bb7b8aa15d5034168987e3b
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/hw-transport-mocker@npm:^6.29.7":
   version: 6.29.7
   resolution: "@ledgerhq/hw-transport-mocker@npm:6.29.7"
@@ -1918,6 +1947,18 @@ __metadata:
     "@ledgerhq/logs": "npm:^6.12.0"
     events: "npm:^3.3.0"
   checksum: 10c0/033acb802d991788efcda9223356528d0987a268e94c34cbafde499541722363e7cfa6e2734365ef3282c0a80a69f4964a6d728690ff7494662a650516530b02
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport@npm:^6.31.12":
+  version: 6.31.12
+  resolution: "@ledgerhq/hw-transport@npm:6.31.12"
+  dependencies:
+    "@ledgerhq/devices": "npm:8.6.1"
+    "@ledgerhq/errors": "npm:^6.26.0"
+    "@ledgerhq/logs": "npm:^6.13.0"
+    events: "npm:^3.3.0"
+  checksum: 10c0/0e31af2f5f513a37a920fdbe77c2a66ae9773f6138b395d295653b6de2f77c60980a6cdbef8d2c848ce3fd7ebbdbbfc9460208fab6b625e65c91c4f7b61e06a8
   languageName: node
   linkType: hard
 
@@ -4374,6 +4415,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-ripple@workspace:packages/xchain-ripple"
   dependencies:
+    "@ledgerhq/hw-app-xrp": "npm:^6.32.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -5262,7 +5304,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip32-path@npm:^0.4.2":
+"bip32-path@npm:0.4.2, bip32-path@npm:^0.4.2":
   version: 0.4.2
   resolution: "bip32-path@npm:0.4.2"
   checksum: 10c0/7d4123a5393fc5b70a20d0997c2b5a77feb789b49bdc3485ff7db02f916acf0f8c5eccf659f3d5dff5e0b34f22f5681babba86eb9ad7fa1287daf31d69982d75
