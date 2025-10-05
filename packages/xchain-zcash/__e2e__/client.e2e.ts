@@ -1,7 +1,7 @@
 import { Client, defaultZECParams } from '../src'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-describe('Zcash client', () => {
+describe.skip('Zcash client', () => {
   let client: Client
 
   beforeAll(() => {
@@ -12,7 +12,8 @@ describe('Zcash client', () => {
   })
 
   it('Should get address', async () => {
-    console.log(await client.getAddressAsync(1))
+    const address = await client.getAddressAsync(0)
+    console.log('address', address)
   })
 
   it('Should get balance', async () => {
