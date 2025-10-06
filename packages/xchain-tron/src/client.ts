@@ -311,7 +311,7 @@ export abstract class Client extends BaseXChainClient {
     let feeAmount: BaseAmount
 
     // Get sender address
-    const senderAddress = this.getAddress(walletIndex)
+    const senderAddress = await this.getAddressAsync(walletIndex)
     if (!senderAddress) {
       // If no signer, return default fee
       feeAmount = isNative ? baseAmount(0.1 * 10 ** 6, TRX_DECIMAL) : baseAmount(15 * 10 ** 6, TRX_DECIMAL)
@@ -381,7 +381,7 @@ export abstract class Client extends BaseXChainClient {
     const { asset, amount: baseValue, recipient, memo, walletIndex } = params
     if (!asset) throw Error('Asset not provided')
 
-    const sender = this.getAddress(walletIndex)
+    const sender = await this.getAddressAsync(walletIndex)
     const amount = baseValue.amount().toString()
 
     if (asset.type === AssetType.NATIVE) {
@@ -446,7 +446,7 @@ export abstract class Client extends BaseXChainClient {
     if (!asset) throw Error('Asset not provided')
 
     const amount = baseValue.amount().toString()
-    const sender = this.getAddress(walletIndex)
+    const sender = await this.getAddressAsync(walletIndex)
 
     const isNative = asset.type === AssetType.NATIVE
 
@@ -505,7 +505,7 @@ export abstract class Client extends BaseXChainClient {
    * @returns {boolean} `true` if the allowance is approved, `false` otherwise.
    */
   async isApproved({ contractAddress, spenderAddress, amount, walletIndex }: IsApprovedParams): Promise<boolean> {
-    const from = this.getAddress(walletIndex)
+    const from = await this.getAddressAsync(walletIndex)
 
     const allowance = await this.getApprovedAmount({ contractAddress, from, spenderAddress })
 
@@ -529,7 +529,7 @@ export abstract class Client extends BaseXChainClient {
    * @throws Error If gas estimation fails.
    */
   public async approve({ contractAddress, spenderAddress, amount, walletIndex = 0 }: ApproveParams): Promise<string> {
-    const fromAddress = this.getAddress(walletIndex)
+    const fromAddress = await this.getAddressAsync(walletIndex)
     const approvalAmount = amount !== undefined ? amount.amount().toString() : MAX_APPROVAL
 
     // Build approve transaction using triggerSmartContract
@@ -570,7 +570,7 @@ export abstract class Client extends BaseXChainClient {
   }
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const address = params?.address || this.getAddress()
+    const address = params?.address || (await this.getAddressAsync())
     const offset = params?.offset || 0
     const limit = params?.limit || 10
 

@@ -1958,6 +1958,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/hw-app-trx@npm:^6.31.8":
+  version: 6.31.8
+  resolution: "@ledgerhq/hw-app-trx@npm:6.31.8"
+  dependencies:
+    "@ledgerhq/hw-transport": "npm:^6.31.12"
+  checksum: 10c0/b7d0faa5757706ce1d222a8a2c77efa23cc0de692dd6a578443321f757b9112d4a28b42b3face556f48db88e0fc470d6d58fb54a72a7e4bae6789db79d7ed65f
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/hw-app-xrp@npm:^6.32.6":
   version: 6.32.6
   resolution: "@ledgerhq/hw-app-xrp@npm:6.32.6"
@@ -4611,6 +4620,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-tron@workspace:packages/xchain-tron"
   dependencies:
+    "@ledgerhq/hw-app-trx": "npm:^6.31.8"
     "@scure/bip32": "npm:^1.7.0"
     "@scure/bip39": "npm:^1.6.0"
     "@xchainjs/xchain-client": "workspace:^"

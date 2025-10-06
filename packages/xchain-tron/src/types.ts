@@ -6,6 +6,12 @@ export type TRONClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
 }
 
+export type TRONClientLedgerParams = XChainClientParams & {
+  explorerProviders: ExplorerProviders
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transport: any
+}
+
 // Re-export TronWeb types for convenience
 export type TronTransaction = Types.Transaction
 export type TronContract = Contract
