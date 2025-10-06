@@ -1817,7 +1817,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/devices@npm:8.6.1, @ledgerhq/devices@npm:^8.3.0":
+"@ledgerhq/devices@npm:8.6.1":
   version: 8.6.1
   resolution: "@ledgerhq/devices@npm:8.6.1"
   dependencies:
@@ -1844,13 +1844,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/errors@npm:^6.16.4, @ledgerhq/errors@npm:^6.26.0":
-  version: 6.26.0
-  resolution: "@ledgerhq/errors@npm:6.26.0"
-  checksum: 10c0/27e5a1dda997f3c38105b49c709aaf447e37eb27970150ece98ce81065a3bf4eb5c75d37cb91f9f874da2e69d2093395508fa08d9a293cfa6c6235b33627b983
-  languageName: node
-  linkType: hard
-
 "@ledgerhq/errors@npm:^6.19.1":
   version: 6.19.1
   resolution: "@ledgerhq/errors@npm:6.19.1"
@@ -1869,6 +1862,13 @@ __metadata:
   version: 6.22.0
   resolution: "@ledgerhq/errors@npm:6.22.0"
   checksum: 10c0/ec6b205df62bb21a509aacbc5c06011b70f5fbfa66a296aa06f71835d2d62188944a02fa252394699a2bf50cd1fe378ef19d19f3a14070f27b8c60807dac03e5
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/errors@npm:^6.26.0":
+  version: 6.26.0
+  resolution: "@ledgerhq/errors@npm:6.26.0"
+  checksum: 10c0/27e5a1dda997f3c38105b49c709aaf447e37eb27970150ece98ce81065a3bf4eb5c75d37cb91f9f874da2e69d2093395508fa08d9a293cfa6c6235b33627b983
   languageName: node
   linkType: hard
 
@@ -2005,18 +2005,6 @@ __metadata:
     node-hid: "npm:2.1.2"
     usb: "npm:2.9.0"
   checksum: 10c0/68b4a41772a88d7e470ade014b5cb8952ee09a62644f7a9576f4367b3768f9eb4465e8df3d7ec670fb65954e810c47c8a150585a2e01e893f8816b12950f2550
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/hw-transport@npm:6.30.6":
-  version: 6.30.6
-  resolution: "@ledgerhq/hw-transport@npm:6.30.6"
-  dependencies:
-    "@ledgerhq/devices": "npm:^8.3.0"
-    "@ledgerhq/errors": "npm:^6.16.4"
-    "@ledgerhq/logs": "npm:^6.12.0"
-    events: "npm:^3.3.0"
-  checksum: 10c0/85dc3e4938f921996821fbb0ce65808b210823f53aeeb98fb3537348cebab0c852702dca72a3d763b58b9362257d0f16f76930bacd8cc594ee5cd3d367836fda
   languageName: node
   linkType: hard
 
@@ -4699,7 +4687,6 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
     "@xchainjs/xchain-utxo-providers": "workspace:*"
-    "@zondax/ledger-zcash": "npm:^1.0.0"
     axios-mock-adapter: "npm:^2.1.0"
     coinselect: "npm:3.1.12"
     ecpair: "npm:2.1.0"
@@ -4741,30 +4728,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zondax/ledger-js@npm:^0.10.0":
-  version: 0.10.0
-  resolution: "@zondax/ledger-js@npm:0.10.0"
-  dependencies:
-    "@ledgerhq/hw-transport": "npm:6.30.6"
-  checksum: 10c0/e96997028b25e01c945bfbba9ec70497de55a293e36e1aef58650b9cea2e9ad947125be121f5442fe6a4d919b874ad39b1db191fa5fe9c56f2db0c99c2629e8d
-  languageName: node
-  linkType: hard
-
 "@zondax/ledger-js@npm:^1.2.0":
   version: 1.2.0
   resolution: "@zondax/ledger-js@npm:1.2.0"
   dependencies:
     "@ledgerhq/hw-transport": "npm:6.31.4"
   checksum: 10c0/e7f53c82d08dfdf6108a876931e8d0736855eaec09f2f3e60cc6d4ed8f2049eb3db129d6c1bd59df8c81ed51d85389e5d2862a30e20e15053bfbf9fdbbbf80e4
-  languageName: node
-  linkType: hard
-
-"@zondax/ledger-zcash@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@zondax/ledger-zcash@npm:1.0.0"
-  dependencies:
-    "@zondax/ledger-js": "npm:^0.10.0"
-  checksum: 10c0/bdf0a42bf8b755d335d57ef88bb23eca4ba230079b019ed11f1cd7e1232b57e1e363206e2cb82df57a35ddbe6b68193f7f075603d5560209ef91e9c42f29edb1
   languageName: node
   linkType: hard
 

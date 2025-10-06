@@ -16,7 +16,7 @@ describe('Zcash Ledger Client', () => {
   })
 
   it('Should get address', async () => {
-    const address = await client.getAddressAsync(0)
+    const address = await client.getAddressAsync(0, true)
     console.log('Address:', address)
     expect(address).toBeDefined()
     expect(typeof address).toBe('string')

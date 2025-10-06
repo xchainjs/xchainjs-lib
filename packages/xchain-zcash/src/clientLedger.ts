@@ -1,34 +1,33 @@
 import { TxHash, checkFeeBounds, FeeRate, FeeOption } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 import { UtxoClientParams, TxParams, UTXO } from '@xchainjs/xchain-utxo'
-import ZcashApp from '@zondax/ledger-zcash'
+import type Transport from '@ledgerhq/hw-transport'
+import UtxoApp from '@ledgerhq/hw-app-btc'
+import type { Transaction as LedgerTransaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { bitgo, networks, address as zcashAddress } from '@bitgo/utxo-lib'
 import type { ZcashPsbt } from '@bitgo/utxo-lib/dist/src/bitgo'
-import * as Bitcoin from 'bitcoinjs-lib'
 
 import accumulative from 'coinselect/accumulative.js'
 
 import { Client } from './client'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type UtxoLedgerClientParams = UtxoClientParams & { transport: any }
+export type UtxoLedgerClientParams = UtxoClientParams & { transport: Transport }
 
 class ClientLedger extends Client {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private transport: any
-  private ledgerApp: ZcashApp | undefined
+  private transport: Transport
+  private ledgerApp: UtxoApp | undefined
 
   constructor(params: UtxoLedgerClientParams) {
     super(params)
     this.transport = params.transport
   }
 
-  public createLedgerTransport(): ZcashApp {
-    this.ledgerApp = new ZcashApp(this.transport)
+  public createLedgerTransport(): UtxoApp {
+    this.ledgerApp = new UtxoApp({ currency: 'zcash', transport: this.transport })
     return this.ledgerApp
   }
 
-  public getLedgerApp(): ZcashApp {
+  public getLedgerApp(): UtxoApp {
     if (this.ledgerApp) return this.ledgerApp
     return this.createLedgerTransport()
   }
@@ -38,10 +37,10 @@ class ClientLedger extends Client {
     throw Error('Sync method not supported for Ledger')
   }
 
-  async getAddressAsync(index = 0, verify = false): Promise<Address> {
+  async getAddressAsync(index = 0): Promise<Address> {
     const ledgerApp = this.getLedgerApp()
     const derivationPath = this.getFullDerivationPath(index)
-    const { address } = await ledgerApp.getAddressTransparent(derivationPath, verify)
+    const { bitcoinAddress: address } = await ledgerApp.getWalletPublicKey(derivationPath, { format: 'legacy' })
     return address
   }
 
@@ -161,56 +160,42 @@ class ClientLedger extends Client {
     // Prepare psbt
     const { psbt, inputs } = await this.buildTx({ ...params, sender, feeRate })
     console.log('inputs', inputs)
+    // Prepare Ledger inputs
+    const ledgerInputs: [LedgerTransaction, number, string | null, number | null][] = (inputs as UTXO[]).map(
+      ({ txHex, index }) => {
+        const splittedTx = ledgerApp.splitTransaction(
+          txHex || '',
+          false, // Zcash doesn't support segwit
+          true, // set hasExtraData: true
+          ['zcash'],
+        )
+        return [splittedTx, index, null, null]
+      },
+    )
 
+    const expiryHeight = Buffer.alloc(4)
+    expiryHeight.writeUInt32LE(0)
+
+    // Prepare associated keysets
+    const associatedKeysets = ledgerInputs.map(() => this.getFullDerivationPath(fromAddressIndex))
     // Serialize unsigned transaction
     const unsignedHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
 
-    const initNewTx = await ledgerApp.initNewTx({
-      version: 5,
-      overwintered: true,
-      versionGroupId: Buffer.from('26a7270a', 'hex'),
-      branchId: Buffer.from('c2d6d0b4', 'hex'), // NU5
+    const newTx = ledgerApp.splitTransaction(unsignedHex, false, true, ['zcash'])
+    const outputScriptHex = ledgerApp.serializeTransactionOutputs(newTx).toString('hex')
+
+    // Create payment transaction
+    const txHex = await ledgerApp.createPaymentTransaction({
+      inputs: ledgerInputs,
+      associatedKeysets,
+      outputScriptHex,
+      segwit: false,
+      useTrustedInputForSegwit: false,
       lockTime: 0,
-      expiryHeight: 0,
+      expiryHeight,
+      additionals: ['zcash'],
     })
-    console.log('initNewTx:', initNewTx)
 
-    // Each input must be sent as APDU chunks for the device to compute the sighash.
-    // For each input, we prepare its spend data (prevout, scriptPubKey, amount, etc.)
-    for (const [i, utxo] of inputs.entries()) {
-      const path = this.getFullDerivationPath(fromAddressIndex)
-
-      const spendData = {
-        prevoutHash: Buffer.from(utxo.hash, 'hex').reverse(),
-        prevoutIndex: utxo.index,
-        scriptCode: zcashAddress.toOutputScript(sender, networks.zcash),
-        value: BigInt(utxo.value),
-        sighash: 1,
-      }
-
-      // Get chunks from Ledger helper
-      const chunks = await ledgerApp.checkSpendsGetChunks(path, spendData)
-      for (let chunkIdx = 0; chunkIdx < chunks.length; chunkIdx++) {
-        await ledgerApp.signSendChunk(chunkIdx, chunks.length, chunks[chunkIdx])
-      }
-    }
-
-    // Request transparent signature(s)
-    const sigResp = await ledgerApp.extractTransparentSig()
-    const signature = sigResp.signature.toString()
-    console.log('Ledger signature:', signature)
-    const pubkey = await this.getPublicKeyAsync(fromAddressIndex)
-    const scriptSig = Bitcoin.script.compile([Buffer.from(signature, 'hex'), Buffer.from(pubkey, 'hex')])
-
-    for (let i = 0; i < psbt.txInputs.length; i++) {
-      const input = psbt.txInputs[i]
-      input.finalScriptSig = scriptSig // Assign your constructed script
-    }
-
-    // finalize (even if already fully signed)
-    const tx = psbt.extractTransaction()
-    const txHex = tx.toHex()
-    console.log('Final signed txHex:', txHex)
     console.log('signed txHex', txHex)
 
     const txId = await this.roundRobinBroadcastTx(txHex)
