@@ -3920,6 +3920,7 @@ __metadata:
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
+    "@xchainjs/xchain-zcash": "workspace:*"
     axios: "npm:1.12.1"
     axios-mock-adapter: "npm:^2.1.0"
   languageName: unknown

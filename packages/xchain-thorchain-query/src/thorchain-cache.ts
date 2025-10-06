@@ -151,26 +151,22 @@ export class ThorchainCache {
    * @returns Promise<Record<string, LiquidityPool> |
    */
   private async refreshPoolCache(): Promise<Record<string, LiquidityPool> | undefined> {
-    try {
-      const thornodePools = await this.thornode.getPools()
-      const poolMap: Record<string, LiquidityPool> = {}
+    const thornodePools = await this.thornode.getPools()
+    const poolMap: Record<string, LiquidityPool> = {}
 
-      if (thornodePools) {
-        for (const pool of thornodePools) {
-          try {
-            const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
-            if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
-            const lp = new LiquidityPool(thornodePool)
-            poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
-          } catch (error) {
-            console.log(error)
-          }
+    if (thornodePools) {
+      for (const pool of thornodePools) {
+        try {
+          const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
+          if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
+          const lp = new LiquidityPool(thornodePool)
+          poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
+        } catch (error) {
+          console.log(error)
         }
-
-        return poolMap
       }
-    } catch (error) {
-      console.error('Error refreshing pool cache:', error)
+
+      return poolMap
     }
     return undefined
   }

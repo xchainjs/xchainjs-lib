@@ -170,20 +170,55 @@ export class MidgardQuery {
     }
 
     // Try to get remaining assets from cache
+    const stillUnknownAssets: string[] = []
     if (unknownAssets.length > 0) {
       try {
         const cachedDecimals = await this.decimalCache.getValue()
         unknownAssets.forEach((assetString) => {
           if (cachedDecimals[assetString] !== undefined) {
             result[assetString] = cachedDecimals[assetString]
+          } else {
+            stillUnknownAssets.push(assetString)
           }
         })
       } catch (error) {
         console.warn('Failed to get batch decimals from cache:', error)
-        // Fallback to defaults for batch operation
-        unknownAssets.forEach((assetString) => {
+        stillUnknownAssets.push(...unknownAssets)
+      }
+    }
+
+    // Resolve remaining unknown assets via live pool lookups
+    if (stillUnknownAssets.length > 0) {
+      const resolvedDecimals: Record<string, number> = {}
+      
+      for (const assetString of stillUnknownAssets) {
+        try {
+          const pool = await this.getPool(assetString)
+          if (pool && pool.nativeDecimal) {
+            const decimals = Number(pool.nativeDecimal)
+            result[assetString] = decimals
+            resolvedDecimals[assetString] = decimals
+          } else {
+            result[assetString] = DEFAULT_THORCHAIN_DECIMALS
+          }
+        } catch (error) {
+          // Single failure doesn't drop other assets - use default for this one
           result[assetString] = DEFAULT_THORCHAIN_DECIMALS
-        })
+        }
+      }
+
+      // Optionally update the decimal cache with successfully resolved decimals
+      if (Object.keys(resolvedDecimals).length > 0) {
+        try {
+          const currentCache = await this.decimalCache.getValue()
+          const updatedCache = { ...currentCache, ...resolvedDecimals }
+          // Force cache update by setting the cached value directly
+          ;(this.decimalCache as any).cachedValue = updatedCache
+          ;(this.decimalCache as any).cacheTimestamp = new Date()
+        } catch (error) {
+          // Cache update failure is not critical - we still have the result
+          console.warn('Failed to update decimal cache with resolved decimals:', error)
+        }
       }
     }
 

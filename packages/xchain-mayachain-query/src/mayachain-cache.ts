@@ -210,7 +210,7 @@ export class MayachainCache {
       saversAPR: '0',
       saversDepth: '0',
       saversUnits: '0',
-      synthSupply: pool.synth_units || '0',
+      synthSupply: pool.synth_supply || '0',
       synthUnits: pool.synth_units || '0',
       totalCollateral: '0',
       totalDebtTor: '0',
@@ -231,7 +231,7 @@ export class MayachainCache {
       return mayanodePools.map((pool) => this.convertPoolToDetail(pool))
     } catch (error) {
       console.warn('Failed to fetch pools from Mayanode, falling back to Midgard:', error)
-      // Fallback: Use Midgard if Mayanode fails
+      // Fallback: Use Midgard if Mayanode fails - let error propagate if this also fails
       return this.midgardQuery.getPools()
     }
   }

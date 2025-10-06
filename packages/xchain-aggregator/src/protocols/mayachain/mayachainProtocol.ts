@@ -11,7 +11,6 @@ import {
   assetFromStringEx,
   assetToString,
   eqAsset,
-  isSynthAsset,
   isTradeAsset,
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
@@ -117,7 +116,7 @@ export class MayachainProtocol implements IProtocol {
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     // Fast path for known rejections and acceptances
     if (isTradeAsset(asset)) return false
-    if (eqAsset(asset, AssetCacao) || isSynthAsset(asset)) return true
+    if (eqAsset(asset, AssetCacao)) return true
 
     try {
       const supportedAssets = await this.supportedAssetsCache.getValue()
