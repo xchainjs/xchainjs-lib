@@ -33,6 +33,7 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
+    "@ledgerhq/hw-app-trx": "^6.31.8",
     "@scure/bip32": "^1.7.0",
     "@scure/bip39": "^1.6.0",
     "@xchainjs/xchain-client": "workspace:^",

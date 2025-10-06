@@ -1,6 +1,8 @@
 // Export the 'ClientKeystore' class as 'Client'
 export { ClientKeystore as Client } from './clientKeystore'
 
+export { ClientLedger } from './clientLedger'
+
 // Export the 'defaultTRONParams' constant from the 'client' file
 export { defaultTRONParams } from './client'
 
