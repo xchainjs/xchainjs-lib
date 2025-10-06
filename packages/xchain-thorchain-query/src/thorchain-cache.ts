@@ -157,9 +157,7 @@ export class ThorchainCache {
     if (thornodePools) {
       for (const pool of thornodePools) {
         try {
-          const thornodePool = thornodePools.find((p) => p.asset === pool.asset)
-          if (!thornodePool) throw Error(`Could not find thornode pool ${pool.asset}`)
-          const lp = new LiquidityPool(thornodePool)
+          const lp = new LiquidityPool(pool)
           poolMap[`${lp.asset.chain}.${lp.asset.ticker}`] = lp
         } catch (error) {
           console.log(error)

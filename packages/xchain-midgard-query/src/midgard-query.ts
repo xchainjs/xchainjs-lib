@@ -189,37 +189,33 @@ export class MidgardQuery {
 
     // Resolve remaining unknown assets via live pool lookups
     if (stillUnknownAssets.length > 0) {
-      const resolvedDecimals: Record<string, number> = {}
-      
-      for (const assetString of stillUnknownAssets) {
+      // Optimize with parallel lookups for better performance
+      const poolLookups = stillUnknownAssets.map(async (assetString) => {
         try {
           const pool = await this.getPool(assetString)
           if (pool && pool.nativeDecimal) {
             const decimals = Number(pool.nativeDecimal)
-            result[assetString] = decimals
-            resolvedDecimals[assetString] = decimals
+            // Guard against NaN values from invalid nativeDecimal
+            if (isNaN(decimals)) {
+              return { assetString, decimals: DEFAULT_THORCHAIN_DECIMALS }
+            }
+            return { assetString, decimals }
           } else {
-            result[assetString] = DEFAULT_THORCHAIN_DECIMALS
+            return { assetString, decimals: DEFAULT_THORCHAIN_DECIMALS }
           }
-        } catch (error) {
+        } catch {
           // Single failure doesn't drop other assets - use default for this one
-          result[assetString] = DEFAULT_THORCHAIN_DECIMALS
+          return { assetString, decimals: DEFAULT_THORCHAIN_DECIMALS }
         }
-      }
+      })
 
-      // Optionally update the decimal cache with successfully resolved decimals
-      if (Object.keys(resolvedDecimals).length > 0) {
-        try {
-          const currentCache = await this.decimalCache.getValue()
-          const updatedCache = { ...currentCache, ...resolvedDecimals }
-          // Force cache update by setting the cached value directly
-          ;(this.decimalCache as any).cachedValue = updatedCache
-          ;(this.decimalCache as any).cacheTimestamp = new Date()
-        } catch (error) {
-          // Cache update failure is not critical - we still have the result
-          console.warn('Failed to update decimal cache with resolved decimals:', error)
-        }
-      }
+      // Wait for all pool lookups to complete
+      const poolResults = await Promise.all(poolLookups)
+
+      // Assign results back to the result object
+      poolResults.forEach(({ assetString, decimals }) => {
+        result[assetString] = decimals
+      })
     }
 
     return result
