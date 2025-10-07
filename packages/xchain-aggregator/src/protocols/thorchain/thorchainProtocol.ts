@@ -76,10 +76,22 @@ export class ThorchainProtocol implements IProtocol {
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (eqAsset(asset, AssetRuneNative) || isTradeAsset(asset) || isSynthAsset(asset) || isSecuredAsset(asset))
       return true
-    const pools = await this.thorchainQuery.thorchainCache.getPools()
-    return (
-      Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
-    )
+
+    try {
+      const pools = await this.thorchainQuery.thorchainCache.getPools()
+      return (
+        Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
+      )
+    } catch (error) {
+      // Optimistic fallback: if Midgard is down, assume asset is supported
+      // This allows quoting to continue - if the asset isn't actually supported,
+      // the quote estimation will fail gracefully with appropriate error messages
+      console.warn(
+        `Midgard unavailable for asset validation, optimistically assuming ${assetToString(asset)} is supported:`,
+        error,
+      )
+      return true
+    }
   }
 
   /**
