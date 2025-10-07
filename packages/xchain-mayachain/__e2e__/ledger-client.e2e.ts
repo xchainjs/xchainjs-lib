@@ -54,8 +54,7 @@ describe('Mayachain Ledger', () => {
       /**
        * MAKE SURE TO TEST THIS FUNCTION WITH YOUR MAYACHAIN ADDRESS, OTHERWISE, YOU COULD LOSE FUNDS
        */
-      // const address: string = undefined || 'TO_BE_DEFINED'
-      const address: string = 'thor1gpgqucj8muqqczr0us9jthak78p2fllqn6rkh2'
+      const address: string = undefined || 'TO_BE_DEFINED'
       if (address === 'TO_BE_DEFINED') throw Error('Set an address to try the deposit e2e function')
       const memo = `=:THOR.RUNE:${address}`
 
