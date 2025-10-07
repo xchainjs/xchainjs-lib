@@ -46,6 +46,7 @@
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
+    "@xchainjs/ledger-thorchain": "workspace:*",
     "axios": "1.12.1",
     "bignumber.js": "^9.1.2",
     "cosmjs-types": "0.9.0",

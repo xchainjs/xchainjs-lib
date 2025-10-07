@@ -3,6 +3,8 @@
  */
 export * from './client'
 
+export { ClientLedger } from './clientLedger'
+
 /**
  * Export all constant values used in the application.
  */
