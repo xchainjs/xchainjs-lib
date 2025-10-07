@@ -45,7 +45,7 @@ export class ThorchainProtocol implements IProtocol {
     const midgardCache = new MidgardCache(new Midgard(network))
     const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
     // Use default chain attributes and enable fast mode
-    this.thorchainQuery = new ThorchainQuery(thorchainCache, undefined, true)
+    this.thorchainQuery = new ThorchainQuery(thorchainCache) // Fast mode now enabled by default
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
     this.wallet = configuration?.wallet

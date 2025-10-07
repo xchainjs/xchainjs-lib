@@ -11,6 +11,46 @@ import { ActionHistory, GetActionsParams, MAYANameDetails, ReverseMAYANames } fr
 const DEFAULT_MAYACHAIN_DECIMALS = 8
 
 /**
+ * Common asset decimals - avoids Midgard calls for well-known MAYAChain assets
+ */
+const COMMON_MAYACHAIN_ASSET_DECIMALS: Record<string, number> = {
+  // MAYAChain ecosystem
+  'MAYA.CACAO': 10,
+  'MAYA.MAYA': 4,
+
+  // Bitcoin ecosystem
+  'BTC.BTC': 8,
+  'DASH.DASH': 8,
+
+  // Ethereum ecosystem
+  'ETH.ETH': 18,
+  'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6, // USDT on Ethereum
+  'ETH.USDC-0xA0b86a33E6441d0075be7b17c8Cb89b91A6Db8Ed': 6, // USDC on Ethereum
+  'ARB.ETH': 18,
+
+  // Cosmos ecosystem
+  'KUJI.KUJI': 6,
+
+  // THORChain
+  'THOR.RUNE': 8,
+}
+
+/**
+ * Chain default decimals for MAYAChain supported chains
+ */
+const MAYACHAIN_CHAIN_DEFAULT_DECIMALS: Record<string, number> = {
+  MAYA: 10,
+  BTC: 8,
+  DASH: 8,
+  ZEC: 8,
+  ETH: 18,
+  ARB: 18,
+  KUJI: 6,
+  THOR: 8,
+  XRD: 18,
+}
+
+/**
  * Aggressive cache TTL for asset decimals (24 hours) - decimals rarely change
  */
 const DECIMALS_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
@@ -205,7 +245,6 @@ export class MidgardQuery {
    * @returns {Promise<Record<string, number>>} - Map of asset strings to decimal counts
    */
   public async getDecimalsForAssets(assets: Asset[]): Promise<Record<string, number>> {
-    const cachedDecimals = await this.decimalCache.getValue()
     const result: Record<string, number> = {}
 
     for (const asset of assets) {
@@ -214,23 +253,43 @@ export class MidgardQuery {
       // Check override decimals first
       if (this.overrideDecimals[assetString] !== undefined) {
         result[assetString] = this.overrideDecimals[assetString]
+        continue
       }
-      // Then check cached decimals
-      else if (cachedDecimals[assetString] !== undefined) {
-        result[assetString] = cachedDecimals[assetString]
+
+      // Second try: static decimals for well-known assets
+      if (COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]) {
+        result[assetString] = COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]
+        continue
       }
-      // Default fallback
-      else {
-        result[assetString] = DEFAULT_MAYACHAIN_DECIMALS
-        console.warn(`Using default decimals for ${assetString}`)
+
+      // Third try: cached decimals
+      try {
+        const cachedDecimals = await this.decimalCache.getValue()
+        if (cachedDecimals[assetString] !== undefined) {
+          result[assetString] = cachedDecimals[assetString]
+          continue
+        }
+      } catch (error) {
+        console.warn(`Failed to get cached decimals for ${assetString}:`, error)
       }
+
+      // Fourth try: chain-based defaults
+      const chainDefault = MAYACHAIN_CHAIN_DEFAULT_DECIMALS[asset.chain]
+      if (chainDefault !== undefined) {
+        result[assetString] = chainDefault
+        continue
+      }
+
+      // Final fallback: MAYAChain standard
+      result[assetString] = DEFAULT_MAYACHAIN_DECIMALS
+      console.warn(`Using MAYAChain default decimals for ${assetString}`)
     }
 
     return result
   }
 
   /**
-   * Get decimal count for a specific asset with caching.
+   * Get decimal count for a specific asset with robust fallback layers.
    *
    * @param {Asset} asset - The asset to get decimals for
    * @returns {Promise<number>} - Number of decimals for the asset
@@ -243,14 +302,29 @@ export class MidgardQuery {
       return this.overrideDecimals[assetString]
     }
 
-    // Get from cache
-    const cachedDecimals = await this.decimalCache.getValue()
-    if (cachedDecimals[assetString] !== undefined) {
-      return cachedDecimals[assetString]
+    // Second try: static decimals for well-known assets
+    if (COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]) {
+      return COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]
     }
 
-    // Default fallback
-    console.warn(`Using default decimals for ${assetString}`)
+    // Third try: cached decimals
+    try {
+      const cachedDecimals = await this.decimalCache.getValue()
+      if (cachedDecimals[assetString] !== undefined) {
+        return cachedDecimals[assetString]
+      }
+    } catch (error) {
+      console.warn(`Failed to get cached decimals for ${assetString}:`, error)
+    }
+
+    // Fourth try: chain-based defaults
+    const chainDefault = MAYACHAIN_CHAIN_DEFAULT_DECIMALS[asset.chain]
+    if (chainDefault !== undefined) {
+      return chainDefault
+    }
+
+    // Final fallback: MAYAChain standard
+    console.warn(`Using MAYAChain default decimals for ${assetString}`)
     return DEFAULT_MAYACHAIN_DECIMALS
   }
 }

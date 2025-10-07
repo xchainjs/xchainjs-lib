@@ -171,11 +171,12 @@ describe('Mayachain-query tests', () => {
       ),
     ).toBe(18)
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK') as TokenAsset)).toBe(6)
-    await expect(
-      mayachainQuery.getAssetDecimals(
+    // With robust fallback system, unknown ETH chain assets should return ETH chain default (18)
+    expect(
+      await mayachainQuery.getAssetDecimals(
         assetFromStringEx('ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52') as TokenAsset,
       ),
-    ).rejects.toThrow(/Can not get decimals/i)
+    ).toBe(18)
   })
 
   it('Should get swaps history', async () => {

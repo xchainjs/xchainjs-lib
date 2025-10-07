@@ -146,11 +146,11 @@ describe('Thorchain protocol', () => {
   })
 
   describe('Performance Optimizations', () => {
-    it('Should use fast mode for common asset decimals', async () => {
-      // Test that fast mode is enabled and working
+    it('Should use static decimals for common assets', async () => {
+      // Test that static decimals are working efficiently
       const protocol = new ThorchainProtocol()
 
-      // These should not require additional API calls due to fast mode
+      // These should not require additional API calls due to static decimals
       const isRuneSupported = await protocol.isAssetSupported(AssetRuneNative)
       const isBtcSupported = await protocol.isAssetSupported(AssetBTC)
 

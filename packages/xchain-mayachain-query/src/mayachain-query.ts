@@ -18,7 +18,7 @@ import {
 } from '@xchainjs/xchain-util'
 
 /**
- * Common asset decimals for fast mode - avoids API calls for well-known assets
+ * Common asset decimals - avoids API calls for well-known assets
  * This list covers all major assets supported by MAYAChain
  */
 const COMMON_MAYACHAIN_ASSET_DECIMALS: Record<string, number> = {
@@ -41,6 +41,32 @@ const COMMON_MAYACHAIN_ASSET_DECIMALS: Record<string, number> = {
 
   // THORChain
   'THOR.RUNE': 8,
+}
+
+/**
+ * Chain default decimals for MAYAChain supported chains
+ */
+const MAYACHAIN_CHAIN_DEFAULT_DECIMALS: Record<string, number> = {
+  // MAYAChain specific chains
+  MAYA: 10,
+  
+  // Bitcoin-based chains
+  BTC: 8,
+  DASH: 8,
+  ZEC: 8,
+
+  // EVM chains
+  ETH: 18,
+  ARB: 18,
+
+  // Cosmos ecosystem
+  KUJI: 6,
+
+  // THORChain
+  THOR: 8,
+
+  // Radix
+  XRD: 18,
 }
 
 import { MayachainCache } from './mayachain-cache'
@@ -94,18 +120,15 @@ import {
  */
 export class MayachainQuery {
   private mayachainCache: MayachainCache
-  private fastMode: boolean
 
   /**
    * Constructor to create a MayachainQuery
    * @param mayachainCache - an instance of the MayachainCache (could be pointing to stagenet,testnet,mainnet)
-   * @param fastMode - when true, uses fast mode for better performance (avoids some API calls)
    * @returns MayachainQuery
    */
-  constructor(mayachainCache = new MayachainCache(), fastMode = false) {
+  constructor(mayachainCache = new MayachainCache()) {
     // Initialize MayachainCache instance
     this.mayachainCache = mayachainCache
-    this.fastMode = fastMode
   }
 
   /**
@@ -302,7 +325,7 @@ export class MayachainQuery {
   }
 
   /**
-   * Fast decimal lookup for assets, using hardcoded values when possible
+   * Robust decimal lookup for assets with multiple fallback layers
    * @param asset Asset to get decimals for
    * @returns Number of decimals
    */
@@ -312,15 +335,30 @@ export class MayachainQuery {
     // Return default for synth assets
     if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
 
-    // In fast mode, try common decimals first
-    if (this.fastMode && COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]) {
+    // First try: static decimals for well-known assets (fastest, most reliable)
+    if (COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]) {
       return COMMON_MAYACHAIN_ASSET_DECIMALS[assetString]
     }
 
-    // Fall back to cache lookup
-    const assetsDecimals = await this.mayachainCache.getAssetDecimals()
-    if (!assetsDecimals[assetString]) throw Error(`Can not get decimals for ${assetString}`)
-    return assetsDecimals[assetString]
+    // Second try: cache lookup
+    try {
+      const assetsDecimals = await this.mayachainCache.getAssetDecimals()
+      if (assetsDecimals[assetString] !== undefined) {
+        return assetsDecimals[assetString]
+      }
+    } catch (error) {
+      console.warn(`Failed to get decimal from cache for ${assetString}:`, error)
+    }
+
+    // Third try: chain-based default decimals
+    const chainDefault = MAYACHAIN_CHAIN_DEFAULT_DECIMALS[asset.chain]
+    if (chainDefault !== undefined) {
+      return chainDefault
+    }
+
+    // Final fallback: MAYAChain standard
+    console.warn(`Unknown chain ${asset.chain} for asset ${assetString}, using MAYAChain default decimals`)
+    return DEFAULT_MAYACHAIN_DECIMALS
   }
 
   /**

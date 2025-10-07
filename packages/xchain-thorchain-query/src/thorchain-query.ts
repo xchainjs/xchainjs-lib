@@ -28,7 +28,7 @@ import { LiquidityPool } from './liquidity-pool'
 import { ThorchainCache } from './thorchain-cache'
 
 /**
- * Common asset decimals for fast mode - avoids Midgard calls for well-known assets
+ * Common asset decimals - avoids Midgard calls for well-known assets
  * This list covers all major assets supported by xchainjs client packages
  */
 const COMMON_ASSET_DECIMALS: Record<string, number> = {
@@ -68,6 +68,43 @@ const COMMON_ASSET_DECIMALS: Record<string, number> = {
   // MAYAChain ecosystem
   'MAYA.CACAO': 10,
   'MAYA.MAYA': 4, // MAYA token has 4 decimals
+}
+
+/**
+ * Default decimals per chain - used as fallback when asset-specific decimals are unknown
+ */
+const CHAIN_DEFAULT_DECIMALS: Record<string, number> = {
+  // Bitcoin-based chains
+  BTC: 8,
+  LTC: 8,
+  BCH: 8,
+  DOGE: 8,
+  DASH: 8,
+  ZEC: 8,
+
+  // EVM chains (18 decimals standard)
+  ETH: 18,
+  AVAX: 18,
+  ARB: 18,
+  BASE: 18,
+  BSC: 18,
+
+  // Cosmos ecosystem
+  GAIA: 6,
+  KUJI: 6,
+
+  // THORChain ecosystem
+  THOR: 8,
+
+  // MAYAChain ecosystem
+  MAYA: 10,
+
+  // Other chains
+  XRP: 6,
+  ADA: 6,
+  SOL: 9,
+  TRON: 6,
+  XRD: 18,
 }
 import {
   AddliquidityPosition,
@@ -138,20 +175,17 @@ const defaultCache = new ThorchainCache()
 export class ThorchainQuery {
   readonly thorchainCache: ThorchainCache
   private chainAttributes: Record<Chain, ChainAttributes>
-  private fastMode: boolean
 
   /**
    * Constructor to create a ThorchainQuery
    *
    * @param thorchainCache - an instance of the ThorchainCache (could be pointing to stagenet,testnet,mainnet)
    * @param chainAttributes - attributes used to calculate waitTime & conf counting
-   * @param fastMode - when true, uses Thornode-only mode for better performance (skips some Midgard calls)
-   * @returns ThorchainAMM
+   * @returns ThorchainQuery
    */
-  constructor(thorchainCache = defaultCache, chainAttributes = DefaultChainAttributes, fastMode = false) {
+  constructor(thorchainCache = defaultCache, chainAttributes = DefaultChainAttributes) {
     this.thorchainCache = thorchainCache
     this.chainAttributes = chainAttributes
-    this.fastMode = fastMode
   }
 
   /** Quote a swap transaction.
@@ -308,20 +342,34 @@ export class ThorchainQuery {
   }
 
   /**
-   * Fast decimal lookup for assets, using hardcoded values when possible
+   * Robust decimal lookup for assets with multiple fallback layers
    * @param asset Asset to get decimals for
    * @returns Number of decimals
    */
   private async getDecimalForAssetFast(asset: CompatibleAsset): Promise<number> {
     const assetString = assetToString(asset)
 
-    // In fast mode, try common decimals first
-    if (this.fastMode && COMMON_ASSET_DECIMALS[assetString]) {
+    // First try: static decimals for well-known assets (fastest, most reliable)
+    if (COMMON_ASSET_DECIMALS[assetString]) {
       return COMMON_ASSET_DECIMALS[assetString]
     }
 
-    // Fall back to Midgard lookup
-    return this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
+    // Second try: Midgard lookup (if available)
+    try {
+      return await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
+    } catch (error) {
+      console.warn(`Midgard decimal lookup failed for ${assetString}, using chain default:`, error)
+    }
+
+    // Third try: chain-based default decimals
+    const chainDefault = CHAIN_DEFAULT_DECIMALS[asset.chain]
+    if (chainDefault !== undefined) {
+      return chainDefault
+    }
+
+    // Final fallback: THORChain standard
+    console.warn(`Unknown chain ${asset.chain} for asset ${assetString}, using THORChain default decimals`)
+    return 8
   }
 
   /**

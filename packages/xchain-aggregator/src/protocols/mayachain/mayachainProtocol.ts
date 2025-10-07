@@ -46,7 +46,7 @@ export class MayachainProtocol implements IProtocol {
     // TODO: Fix MidgardQuery constructor to accept network parameter
     const midgardCache = new MidgardCache(new MidgardApi(network))
     const mayachainCache = new MayachainCache(new MidgardQuery(midgardCache), new Mayanode(network))
-    this.mayachainQuery = new MayachainQuery(mayachainCache, true) // Enable fast mode
+    this.mayachainQuery = new MayachainQuery(mayachainCache) // Fast mode now enabled by default
     this.mayachainAmm = new MayachainAMM(this.mayachainQuery, configuration?.wallet)
     this.configuration = configuration
     this.wallet = configuration?.wallet

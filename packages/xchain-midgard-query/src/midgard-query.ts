@@ -22,6 +22,74 @@ import { isAssetRuneNative } from './utils/const'
 const DEFAULT_THORCHAIN_DECIMALS = 8
 
 /**
+ * Common asset decimals - same as in thorchain-query for consistency
+ */
+const COMMON_ASSET_DECIMALS: Record<string, number> = {
+  // THORChain ecosystem
+  'THOR.RUNE': 8,
+  'THOR.TCY': 8,
+  'THOR.RUJI': 8,
+
+  // Bitcoin ecosystem
+  'BTC.BTC': 8,
+  'LTC.LTC': 8,
+  'BCH.BCH': 8,
+  'DOGE.DOGE': 8,
+  'DASH.DASH': 8,
+  'ZEC.ZEC': 8,
+
+  // Ethereum ecosystem
+  'ETH.ETH': 18,
+  'AVAX.AVAX': 18,
+  'ARB.ETH': 18,
+  'BASE.ETH': 18,
+
+  // BSC
+  'BSC.BNB': 18,
+
+  // Cosmos ecosystem
+  'GAIA.ATOM': 6,
+  'KUJI.KUJI': 6,
+
+  // Other networks
+  'XRP.XRP': 6,
+  'ADA.ADA': 6,
+  'SOL.SOL': 9,
+  'TRON.TRX': 6,
+  'XRD.XRD': 18,
+
+  // MAYAChain ecosystem
+  'MAYA.CACAO': 10,
+  'MAYA.MAYA': 4,
+}
+
+/**
+ * Chain default decimals
+ */
+const CHAIN_DEFAULT_DECIMALS: Record<string, number> = {
+  BTC: 8,
+  LTC: 8,
+  BCH: 8,
+  DOGE: 8,
+  DASH: 8,
+  ZEC: 8,
+  ETH: 18,
+  AVAX: 18,
+  ARB: 18,
+  BASE: 18,
+  BSC: 18,
+  GAIA: 6,
+  KUJI: 6,
+  THOR: 8,
+  MAYA: 10,
+  XRP: 6,
+  ADA: 6,
+  SOL: 9,
+  TRON: 6,
+  XRD: 18,
+}
+
+/**
  * Aggressive cache TTL for asset decimals (24 hours) - decimals rarely change
  */
 const DECIMALS_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
@@ -150,7 +218,7 @@ export class MidgardQuery {
     const result: Record<string, number> = {}
     const unknownAssets: string[] = []
 
-    // First, try to resolve from cache and known defaults
+    // First, try to resolve from static decimals and overrides
     for (const asset of assets) {
       const assetString = assetToString(asset)
 
@@ -163,6 +231,12 @@ export class MidgardQuery {
       // Return default for THORChain assets
       if (isAssetRuneNative(asset) || isSynthAsset(asset) || isTradeAsset(asset) || isSecuredAsset(asset)) {
         result[assetString] = DEFAULT_THORCHAIN_DECIMALS
+        continue
+      }
+
+      // Try static decimals for well-known assets
+      if (COMMON_ASSET_DECIMALS[assetString]) {
+        result[assetString] = COMMON_ASSET_DECIMALS[assetString]
         continue
       }
 
@@ -187,7 +261,7 @@ export class MidgardQuery {
       }
     }
 
-    // Resolve remaining unknown assets via live pool lookups
+    // Resolve remaining unknown assets via live pool lookups with chain fallbacks
     if (stillUnknownAssets.length > 0) {
       // Optimize with parallel lookups for better performance
       const poolLookups = stillUnknownAssets.map(async (assetString) => {
@@ -197,15 +271,23 @@ export class MidgardQuery {
             const decimals = Number(pool.nativeDecimal)
             // Guard against NaN values from invalid nativeDecimal
             if (isNaN(decimals)) {
-              return { assetString, decimals: DEFAULT_THORCHAIN_DECIMALS }
+              // Try chain default before falling back to THORChain default
+              const asset = assets.find((a) => assetToString(a) === assetString)
+              const chainDefault = asset ? CHAIN_DEFAULT_DECIMALS[asset.chain] : undefined
+              return { assetString, decimals: chainDefault ?? DEFAULT_THORCHAIN_DECIMALS }
             }
             return { assetString, decimals }
           } else {
-            return { assetString, decimals: DEFAULT_THORCHAIN_DECIMALS }
+            // Try chain default before falling back to THORChain default
+            const asset = assets.find((a) => assetToString(a) === assetString)
+            const chainDefault = asset ? CHAIN_DEFAULT_DECIMALS[asset.chain] : undefined
+            return { assetString, decimals: chainDefault ?? DEFAULT_THORCHAIN_DECIMALS }
           }
         } catch {
-          // Single failure doesn't drop other assets - use default for this one
-          return { assetString, decimals: DEFAULT_THORCHAIN_DECIMALS }
+          // Single failure doesn't drop other assets - use chain default or THORChain default
+          const asset = assets.find((a) => assetToString(a) === assetString)
+          const chainDefault = asset ? CHAIN_DEFAULT_DECIMALS[asset.chain] : undefined
+          return { assetString, decimals: chainDefault ?? DEFAULT_THORCHAIN_DECIMALS }
         }
       })
 
@@ -222,10 +304,10 @@ export class MidgardQuery {
   }
 
   /**
-   * Returns the number of decimals for a given asset with aggressive caching.
+   * Returns the number of decimals for a given asset with robust fallback layers.
    *
    * @param {Asset} asset - The asset for getting decimals.
-   * @returns {number} - Number of decimals from cached data or Midgard fallback
+   * @returns {number} - Number of decimals from static data, cache, or Midgard fallback
    */
   public async getDecimalForAsset(asset: CompatibleAsset): Promise<number> {
     const assetString = assetToString(asset)
@@ -239,7 +321,12 @@ export class MidgardQuery {
     if (isAssetRuneNative(asset) || isSynthAsset(asset) || isTradeAsset(asset) || isSecuredAsset(asset))
       return DEFAULT_THORCHAIN_DECIMALS
 
-    // Try to get from aggressive cache first
+    // First try: static decimals for well-known assets (fastest, most reliable)
+    if (COMMON_ASSET_DECIMALS[assetString]) {
+      return COMMON_ASSET_DECIMALS[assetString]
+    }
+
+    // Second try: get from cache
     try {
       const cachedDecimals = await this.decimalCache.getValue()
       if (cachedDecimals[assetString] !== undefined) {
@@ -249,14 +336,27 @@ export class MidgardQuery {
       console.warn(`Failed to get decimal from cache for ${assetString}:`, error)
     }
 
-    // Fallback to individual pool lookup
+    // Third try: individual pool lookup
     try {
       const pool = await this.getPool(assetString)
-      return Number(pool.nativeDecimal)
+      const decimals = Number(pool.nativeDecimal)
+      if (isNaN(decimals)) {
+        throw new Error(`Invalid nativeDecimal value: ${pool.nativeDecimal}`)
+      }
+      return decimals
     } catch (error) {
-      console.warn(`Failed to get decimal for ${assetString}, using default:`, error)
-      return DEFAULT_THORCHAIN_DECIMALS
+      console.warn(`Failed to get decimal for ${assetString}, using chain default:`, error)
     }
+
+    // Fourth try: chain-based default
+    const chainDefault = CHAIN_DEFAULT_DECIMALS[asset.chain]
+    if (chainDefault !== undefined) {
+      return chainDefault
+    }
+
+    // Final fallback: THORChain standard
+    console.warn(`Unknown chain ${asset.chain} for asset ${assetString}, using THORChain default decimals`)
+    return DEFAULT_THORCHAIN_DECIMALS
   }
 
   /**
