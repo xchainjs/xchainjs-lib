@@ -102,8 +102,6 @@ class ClientLedger extends Client {
 
     psbt.addUnknownKeyValToGlobal({ key: CONSENSUS_BRANCH_ID_KEY, value })
 
-    console.log('inputs', inputs)
-    console.log('outputs', outputs)
     // add inputs and outputs
     for (const utxo of inputs) {
       const witnessInfo = !!utxo.witnessUtxo && { witnessUtxo: { ...utxo.witnessUtxo, value: BigInt(utxo.value) } }
@@ -113,7 +111,6 @@ class ClientLedger extends Client {
       }
 
       const input = { hash: utxo.hash, index: utxo.index, ...witnessInfo, ...nonWitnessInfo }
-      console.log('psbt input', input)
       psbt.addInput(input)
     }
 
@@ -159,7 +156,6 @@ class ClientLedger extends Client {
 
     // Prepare psbt
     const { psbt, inputs } = await this.buildTx({ ...params, sender, feeRate })
-    console.log('inputs', inputs)
     // Prepare Ledger inputs
     const ledgerInputs: [LedgerTransaction, number, string | null, number | null][] = (inputs as UTXO[]).map(
       ({ txHex, index }) => {
@@ -195,8 +191,6 @@ class ClientLedger extends Client {
       expiryHeight,
       additionals: ['zcash'],
     })
-
-    console.log('signed txHex', txHex)
 
     const txId = await this.roundRobinBroadcastTx(txHex)
     return txId
