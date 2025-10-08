@@ -1,7 +1,7 @@
 import { Client, defaultZECParams } from '../src'
 import { assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-describe.skip('Zcash client', () => {
+describe('Zcash client', () => {
   let client: Client
 
   beforeAll(() => {
