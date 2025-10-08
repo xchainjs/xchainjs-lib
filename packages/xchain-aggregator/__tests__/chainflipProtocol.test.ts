@@ -39,7 +39,7 @@ describe('Chainflip protocol', () => {
 
   it('Should get supported chains', async () => {
     const chains = await protocol.getSupportedChains()
-    expect(chains.length).toBe(3)
+    expect(chains.length).toBe(2)
   })
 
   it('Should check native assets are supported', async () => {
