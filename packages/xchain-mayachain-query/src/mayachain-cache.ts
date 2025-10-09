@@ -152,7 +152,11 @@ export class MayachainCache {
 
       for (const pool of pools) {
         if (pool.nativeDecimal) {
-          decimals[pool.asset] = Number(pool.nativeDecimal)
+          const decimal = Number(pool.nativeDecimal)
+          // Only use the decimal value if it's a valid positive number
+          if (decimal >= 0) {
+            decimals[pool.asset] = decimal
+          }
         }
       }
 
@@ -176,6 +180,8 @@ export class MayachainCache {
       'ARB.USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831': 6,
       'ARB.USDT-0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9': 6,
       'ARB.LEO-0x5985D2Dc68E67aeE82F4e30e8e74F1ea8e532a3c': 3,
+      'ARB.TGT-0X429FED88F10285E61B12BDF00848315FBDFCC341': 18,
+      'ARB.TGT-0x429FED88F10285E61B12BDF00848315FBDFCC341': 18,
       'ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 6,
       'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
       'KUJI.KUJI': 6,
@@ -224,12 +230,16 @@ export class MayachainCache {
       const fallbackDecimals = this.getFallbackAssetDecimals()
       const nativeDecimal = fallbackDecimals[pool.asset]?.toString() || '8'
 
+      // Calculate units from liquidityUnits and synthUnits
+      const liquidityUnits = pool.LP_units
+      const synthUnits = '0'
+
       return {
         // Core pool data from Mayanode
         asset: pool.asset,
         assetDepth: pool.balance_asset,
         runeDepth: pool.balance_cacao,
-        liquidityUnits: pool.LP_units,
+        liquidityUnits,
         status: 'available', // Assume available if returned by Mayanode
 
         // Calculated fields
@@ -247,8 +257,11 @@ export class MayachainCache {
         saversDepth: '0',
         saversUnits: '0',
         synthSupply: '0',
-        synthUnits: '0',
+        synthUnits,
         totalCollateral: '0',
+        totalDebtTor: '0',
+        units: (parseFloat(liquidityUnits) + parseFloat(synthUnits)).toString(),
+        volume24h: '0',
       } as PoolDetail
     })
   }

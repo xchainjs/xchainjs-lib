@@ -283,6 +283,7 @@ export class MayachainQuery {
     if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
 
     const assetNotation = assetToString(asset)
+
     try {
       const assetsDecimals = await this.mayachainCache.getAssetDecimals()
       if (assetsDecimals[assetNotation]) {
@@ -348,10 +349,12 @@ export class MayachainQuery {
       amount: string,
     ): CryptoAmount<CompatibleAsset> => {
       const decimals = asset in assetDecimals ? assetDecimals[asset] : DEFAULT_MAYACHAIN_DECIMALS
+      // Ensure decimals is valid (not negative or undefined)
+      const validDecimals = decimals && decimals >= 0 ? decimals : DEFAULT_MAYACHAIN_DECIMALS
       const assetFormatted = assetFromStringEx(asset) as CompatibleAsset
-      return decimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
-        ? new CryptoAmount(baseAmount(amount, decimals), assetFormatted)
-        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFormatted), decimals)
+      return validDecimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
+        ? new CryptoAmount(baseAmount(amount, validDecimals), assetFormatted)
+        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFormatted), validDecimals)
     }
 
     return {
