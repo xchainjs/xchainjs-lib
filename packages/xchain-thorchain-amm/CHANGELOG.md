@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.23
+
+### Patch Changes
+
+- Updated dependencies [11a8634]
+- Updated dependencies [1581839]
+  - @xchainjs/xchain-tron@3.0.0
+  - @xchainjs/xchain-ripple@1.0.11
+  - @xchainjs/xchain-thorchain-query@2.0.14
+
 ## 3.0.22
 
 ### Patch Changes
