@@ -260,7 +260,7 @@ export class MayachainCache {
         synthUnits,
         totalCollateral: '0',
         totalDebtTor: '0',
-        units: (parseFloat(liquidityUnits) + parseFloat(synthUnits)).toString(),
+        units: new BigNumber(liquidityUnits || '0').plus(new BigNumber(synthUnits || '0')).toString(),
         volume24h: '0',
       } as PoolDetail
     })

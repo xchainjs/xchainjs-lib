@@ -350,7 +350,7 @@ export class MayachainQuery {
     ): CryptoAmount<CompatibleAsset> => {
       const decimals = asset in assetDecimals ? assetDecimals[asset] : DEFAULT_MAYACHAIN_DECIMALS
       // Ensure decimals is valid (not negative or undefined)
-      const validDecimals = decimals && decimals >= 0 ? decimals : DEFAULT_MAYACHAIN_DECIMALS
+      const validDecimals = typeof decimals === 'number' && decimals >= 0 ? decimals : DEFAULT_MAYACHAIN_DECIMALS
       const assetFormatted = assetFromStringEx(asset) as CompatibleAsset
       return validDecimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
         ? new CryptoAmount(baseAmount(amount, validDecimals), assetFormatted)
