@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.26
+
+### Patch Changes
+
+- bee3ad7: Added broker url and affilates to chainflip
+- f908f2d: Add pools api to mayachain query and updated decimal cache
+- Updated dependencies [f908f2d]
+  - @xchainjs/xchain-mayachain-query@2.1.2
+  - @xchainjs/xchain-mayachain-amm@4.1.2
+  - @xchainjs/xchain-thorchain-query@2.0.14
+  - @xchainjs/xchain-thorchain-amm@3.0.23
+
 ## 2.0.25
 
 ### Patch Changes

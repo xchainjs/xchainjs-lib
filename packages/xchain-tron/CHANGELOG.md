@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.0
+
+### Major Changes
+
+- 11a8634: add tron ledger client
+
 ## 2.0.0
 
 ### Major Changes
