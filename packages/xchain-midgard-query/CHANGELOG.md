@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.10
+
+### Patch Changes
+
+- f908f2d: Add pools api to mayachain query and updated decimal cache
+
 ## 2.0.9
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.14
+
+### Patch Changes
+
+- Updated dependencies [f908f2d]
+  - @xchainjs/xchain-midgard-query@2.0.10
+
 ## 2.0.13
 
 ### Patch Changes
