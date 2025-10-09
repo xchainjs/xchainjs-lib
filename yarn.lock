@@ -4438,6 +4438,7 @@ __metadata:
     "@cosmjs/stargate": "npm:0.34.0"
     "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"
+    "@xchainjs/ledger-thorchain": "npm:^0.3.1"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
