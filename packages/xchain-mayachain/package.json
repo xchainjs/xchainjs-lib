@@ -42,6 +42,7 @@
     "@cosmjs/stargate": "0.34.0",
     "@scure/base": "^1.2.6",
     "@scure/bip32": "^1.7.0",
+    "@xchainjs/ledger-thorchain": "^0.3.1",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
