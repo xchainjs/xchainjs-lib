@@ -32,7 +32,9 @@ export class Aggregator {
 
     this.verifyConfig(configWithNetwork)
 
-    this.protocols = configWithNetwork.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, configWithNetwork))
+    this.protocols = configWithNetwork.protocols.map((protocol) =>
+      ProtocolFactory.getProtocol(protocol, configWithNetwork),
+    )
     this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
@@ -60,7 +62,9 @@ export class Aggregator {
 
     this.verifyConfig(configWithNetwork)
 
-    this.protocols = configWithNetwork.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, configWithNetwork))
+    this.protocols = configWithNetwork.protocols.map((protocol) =>
+      ProtocolFactory.getProtocol(protocol, configWithNetwork),
+    )
     this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 

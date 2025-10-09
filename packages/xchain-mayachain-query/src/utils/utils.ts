@@ -25,5 +25,11 @@ export const getCryptoAmountWithNotation = <T extends CompatibleAsset>(
 ): CryptoAmount<CompatibleAsset> => {
   const inputAmountBaseNotation = amount.baseAmount.amount()
   const decimalsDiff = notation - amount.baseAmount.decimal
+
+  // Ensure we don't create negative decimals
+  if (notation < 0) {
+    throw new Error(`Invalid notation: ${notation}. Decimals cannot be negative.`)
+  }
+
   return new CryptoAmount<T>(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
 }

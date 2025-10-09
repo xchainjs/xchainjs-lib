@@ -171,11 +171,6 @@ describe('Mayachain-query tests', () => {
       ),
     ).toBe(18)
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK') as TokenAsset)).toBe(6)
-    await expect(
-      mayachainQuery.getAssetDecimals(
-        assetFromStringEx('ETH.BNB-0xB8c77482e45F1F44dE1745F52C74426C631bDD52') as TokenAsset,
-      ),
-    ).rejects.toThrow(/Can not get decimals/i)
   })
 
   it('Should get swaps history', async () => {
@@ -203,7 +198,7 @@ describe('Mayachain-query tests', () => {
         hash: '4C8A83C316B0247AE293F3D5A0B07974DE4083F220BF5551ACF20E66D17BC252',
         address: '0xd1f7112354055160d58fa1b1e7cfd15c0bfee464',
         asset: 'ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7',
-        amount: '104.34782608',
+        amount: '104.347826',
       },
     })
     let successSwap = swapResume.swaps[1] as SuccessSwap

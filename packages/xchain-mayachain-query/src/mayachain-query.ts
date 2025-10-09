@@ -283,10 +283,42 @@ export class MayachainQuery {
     if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
 
     const assetNotation = assetToString(asset)
-    const assetsDecimals = await this.mayachainCache.getAssetDecimals()
-    if (!assetsDecimals[assetNotation]) throw Error(`Can not get decimals for ${assetNotation}`)
 
-    return assetsDecimals[assetNotation]
+    try {
+      const assetsDecimals = await this.mayachainCache.getAssetDecimals()
+      if (assetsDecimals[assetNotation]) {
+        return assetsDecimals[assetNotation]
+      }
+
+      // Fallback for unknown assets: use chain defaults
+      console.warn(`No decimal mapping found for ${assetNotation}, using chain default`)
+      return this.getChainDefaultDecimals(asset.chain)
+    } catch (error) {
+      // Fallback if asset decimals cache fails entirely
+      console.warn(`Failed to get asset decimals for ${assetNotation}, using chain default:`, error)
+      return this.getChainDefaultDecimals(asset.chain)
+    }
+  }
+
+  /**
+   * Get default decimal places for a chain when specific asset data is unavailable
+   * @param chain - The chain to get default decimals for
+   * @returns Default decimal places for the chain
+   */
+  private getChainDefaultDecimals(chain: string): number {
+    const chainDefaults: Record<string, number> = {
+      BTC: 8,
+      ETH: 18,
+      ARB: 18,
+      KUJI: 6,
+      THOR: 8,
+      MAYA: 10,
+      DASH: 8,
+      XDR: 18,
+      ZEC: 8,
+    }
+
+    return chainDefaults[chain] || 8 // Ultimate fallback to 8 decimals
   }
 
   /**
@@ -317,10 +349,12 @@ export class MayachainQuery {
       amount: string,
     ): CryptoAmount<CompatibleAsset> => {
       const decimals = asset in assetDecimals ? assetDecimals[asset] : DEFAULT_MAYACHAIN_DECIMALS
+      // Ensure decimals is valid (not negative or undefined)
+      const validDecimals = typeof decimals === 'number' && decimals >= 0 ? decimals : DEFAULT_MAYACHAIN_DECIMALS
       const assetFormatted = assetFromStringEx(asset) as CompatibleAsset
-      return decimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
-        ? new CryptoAmount(baseAmount(amount, decimals), assetFormatted)
-        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFormatted), decimals)
+      return validDecimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
+        ? new CryptoAmount(baseAmount(amount, validDecimals), assetFormatted)
+        : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFormatted), validDecimals)
     }
 
     return {

@@ -77,10 +77,22 @@ export class MayachainProtocol implements IProtocol {
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (isTradeAsset(asset)) return false
     if (eqAsset(asset, AssetCacao) || isSynthAsset(asset)) return true
-    const pools = await this.mayachainQuery.getPools()
-    return (
-      pools.findIndex((pool) => pool.status === 'available' && eqAsset(asset, assetFromStringEx(pool.asset))) !== -1
-    )
+
+    try {
+      const pools = await this.mayachainQuery.getPools()
+      return (
+        pools.findIndex((pool) => pool.status === 'available' && eqAsset(asset, assetFromStringEx(pool.asset))) !== -1
+      )
+    } catch (error) {
+      // Optimistic fallback: if Mayamidgard is down, assume asset is supported
+      // This allows quoting to continue - if the asset isn't actually supported,
+      // the quote estimation will fail gracefully with appropriate error messages
+      console.warn(
+        `Mayamidgard unavailable for asset validation, optimistically assuming ${asset.chain}.${asset.symbol} is supported:`,
+        error,
+      )
+      return true
+    }
   }
 
   /**

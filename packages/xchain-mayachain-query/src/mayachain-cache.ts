@@ -1,4 +1,5 @@
 import { PoolDetail } from '@xchainjs/xchain-mayamidgard'
+import { Pool } from '@xchainjs/xchain-mayanode'
 import { MidgardQuery } from '@xchainjs/xchain-mayamidgard-query'
 import { CachedValue } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
@@ -66,12 +67,25 @@ export class MayachainCache {
    */
   public async getAssetDecimals(): Promise<Record<string, number>> {
     if (!this.assetDecimalsCache) throw Error(`Could not refresh assets decimals`)
-    return await this.assetDecimalsCache.getValue()
+    try {
+      return await this.assetDecimalsCache.getValue()
+    } catch (error) {
+      // Fallback: if cache refresh fails (e.g., Mayamidgard is down), use static fallback
+      console.warn('Maya asset decimals cache refresh failed, using static fallback:', error)
+      return this.getFallbackAssetDecimals()
+    }
   }
 
   public async getPools(): Promise<PoolDetail[]> {
     if (!this.poolsCache) throw Error(`Could not refresh pools cache`)
-    return await this.poolsCache.getValue()
+    try {
+      return await this.poolsCache.getValue()
+    } catch (error) {
+      // If pools cache fails to refresh (e.g., Mayamidgard is down), throw the error
+      // The calling code should handle this gracefully with optimistic fallbacks
+      console.warn('Maya pools cache refresh failed:', error)
+      throw error
+    }
   }
 
   /**
@@ -131,19 +145,61 @@ export class MayachainCache {
    * Refreshes the number of decimals of the supported Mayachain tokens.
    */
   private async refreshAssetDecimalsCache(): Promise<Record<string, number>> {
-    // Implementation details for refreshing the asset decimals cache
-    // TODO: As soon as Mayachain returns native decimals from any endpoint of its API, refactor the function
+    try {
+      // Try to get pool data and extract decimals if available
+      const pools = await this.midgardQuery.getPools()
+      const decimals: Record<string, number> = {}
+
+      for (const pool of pools) {
+        if (pool.nativeDecimal) {
+          const decimal = Number(pool.nativeDecimal)
+          // Only use the decimal value if it's a valid positive number
+          if (decimal >= 0) {
+            decimals[pool.asset] = decimal
+          }
+        }
+      }
+
+      // Merge with fallback data for assets that don't have native decimals specified
+      return { ...this.getFallbackAssetDecimals(), ...decimals }
+    } catch (error) {
+      console.warn('Failed to refresh Maya asset decimals from pools, using fallback:', error)
+      return this.getFallbackAssetDecimals()
+    }
+  }
+
+  /**
+   * Provides fallback decimal values for Maya assets when Mayamidgard is unavailable.
+   * Data sourced from https://mayanode.mayachain.info/mayachain/pools
+   * Updated with live pool data as of latest fetch
+   */
+  private getFallbackAssetDecimals(): Record<string, number> {
     return {
+      // Current Maya pools with verified decimals from Mayanode
       'BTC.BTC': 8,
-      'ETH.ETH': 18,
-      'DASH.DASH': 8,
-      'KUJI.KUJI': 6,
-      'THOR.RUNE': 8,
-      'MAYA.CACAO': 10,
-      'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
+      'ARB.USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831': 6,
+      'ARB.USDT-0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9': 6,
+      'ARB.LEO-0x5985D2Dc68E67aeE82F4e30e8e74F1ea8e532a3c': 3,
+      'ARB.TGT-0X429FED88F10285E61B12BDF00848315FBDFCC341': 18,
+      'ARB.TGT-0x429FED88F10285E61B12BDF00848315FBDFCC341': 18,
       'ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 6,
-      'ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0': 18,
+      'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
+      'KUJI.KUJI': 6,
       'KUJI.USK': 6,
+      'THOR.RUNE': 8,
+
+      // Chain defaults for native assets
+      'ETH.ETH': 18,
+      'ARB.ETH': 18,
+      'MAYA.CACAO': 10,
+
+      // Additional pool assets (using chain defaults where decimals not specified)
+      'DASH.DASH': 8,
+      'XDR.XDR': 18,
+      'ZEC.ZEC': 8,
+
+      // Legacy mappings for backward compatibility
+      'ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0': 18,
     }
   }
 
@@ -152,6 +208,61 @@ export class MayachainCache {
    * @returns {PoolDetail[]} the list of pools
    */
   private async refreshPoolsCache(): Promise<PoolDetail[]> {
-    return this.midgardQuery.getPools()
+    try {
+      // Try Mayanode first (like THORChain uses Thornode first)
+      const mayanodePools = await this.mayanode.getPools()
+      return this.convertMayanodePoolsToMidgardFormat(mayanodePools)
+    } catch (error) {
+      console.warn('Mayanode pools unavailable, falling back to Mayamidgard:', error)
+      // Fallback to Midgard like before
+      return this.midgardQuery.getPools()
+    }
+  }
+
+  /**
+   * Convert Mayanode pool format to Midgard PoolDetail format
+   * @param pools - Pools from Mayanode API
+   * @returns PoolDetail array compatible with Midgard format
+   */
+  private convertMayanodePoolsToMidgardFormat(pools: Pool[]): PoolDetail[] {
+    return pools.map((pool): PoolDetail => {
+      // Get the fallback decimal for this asset if available
+      const fallbackDecimals = this.getFallbackAssetDecimals()
+      const nativeDecimal = fallbackDecimals[pool.asset]?.toString() || '8'
+
+      // Calculate units from liquidityUnits and synthUnits
+      const liquidityUnits = pool.LP_units
+      const synthUnits = '0'
+
+      return {
+        // Core pool data from Mayanode
+        asset: pool.asset,
+        assetDepth: pool.balance_asset,
+        runeDepth: pool.balance_cacao,
+        liquidityUnits,
+        status: 'available', // Assume available if returned by Mayanode
+
+        // Calculated fields
+        assetPrice:
+          pool.balance_cacao && pool.balance_asset
+            ? (parseFloat(pool.balance_cacao) / parseFloat(pool.balance_asset)).toString()
+            : '0',
+
+        // Required fields with appropriate defaults
+        annualPercentageRate: '0',
+        assetPriceUSD: '0',
+        nativeDecimal,
+        poolAPY: '0',
+        saversAPR: '0',
+        saversDepth: '0',
+        saversUnits: '0',
+        synthSupply: '0',
+        synthUnits,
+        totalCollateral: '0',
+        totalDebtTor: '0',
+        units: new BigNumber(liquidityUnits || '0').plus(new BigNumber(synthUnits || '0')).toString(),
+        volume24h: '0',
+      } as PoolDetail
+    })
   }
 }
