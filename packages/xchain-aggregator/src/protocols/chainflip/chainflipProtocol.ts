@@ -29,7 +29,10 @@ export class ChainflipProtocol implements IProtocol {
   private sdk: SwapSDK
   private wallet?: Wallet
   private assetsData: CachedValue<AssetData[]>
-  private brokerCommissionBps?: number
+  private affiliateBrokers?: {
+    account: `cF${string}` | `0x${string}`
+    commissionBps: number
+  }[]
 
   constructor(configuration?: ProtocolConfig) {
     this.sdk = new SwapSDK({
@@ -37,9 +40,10 @@ export class ChainflipProtocol implements IProtocol {
       enabledFeatures: {
         dca: true,
       },
+      broker: configuration?.brokerUrl ? { url: configuration.brokerUrl } : undefined,
     })
     this.wallet = configuration?.wallet
-    this.brokerCommissionBps = configuration?.affiliateBps
+    this.affiliateBrokers = configuration?.affiliateBrokers
     this.assetsData = new CachedValue(() => {
       return this.sdk.getAssets()
     }, 24 * 60 * 60 * 1000)
@@ -98,6 +102,7 @@ export class ChainflipProtocol implements IProtocol {
         destChain: destAssetData.chain,
         destAsset: destAssetData.asset,
         amount: params.amount.baseAmount.amount().toString(),
+        affiliateBrokers: this.affiliateBrokers,
       })
       // Find either DCA or REGULAR quote, prioritizing DCA
       const selectedQuote =
@@ -113,7 +118,7 @@ export class ChainflipProtocol implements IProtocol {
             refundAddress: params.fromAddress,
             retryDurationBlocks: 100,
           },
-          brokerCommissionBps: this.brokerCommissionBps,
+          affiliateBrokers: this.affiliateBrokers,
         })
         toAddress = resp.depositAddress
         depositChannelId = resp.depositChannelId
@@ -127,7 +132,7 @@ export class ChainflipProtocol implements IProtocol {
             refundAddress: params.fromAddress,
             retryDurationBlocks: 100,
           },
-          brokerCommissionBps: this.brokerCommissionBps,
+          affiliateBrokers: this.affiliateBrokers,
         })
         toAddress = resp.depositAddress
         depositChannelId = resp.depositChannelId

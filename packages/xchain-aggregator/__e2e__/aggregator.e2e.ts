@@ -290,4 +290,32 @@ describe('Aggregator', () => {
     })
     printQuoteSwap(bestSwap(estimatedSwap))
   })
+
+  it('Should use Chainflip protocol with affiliateBrokers and brokerUrl', async () => {
+    const aggregatorWithAffiliateBrokers = new Aggregator({
+      wallet,
+      protocols: ['Chainflip'],
+      affiliateBrokers: [
+        {
+          account: 'cFJdAjJmZqHim5F3GvywoNxxtmzhYGRVnuzfbvGNv13gk7fXN',
+          commissionBps: 30,
+        },
+      ],
+      brokerUrl: 'https://api.broker.example.com',
+    })
+
+    const estimatedSwap = await aggregatorWithAffiliateBrokers.estimateSwap({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      fromAddress: await wallet.getAddress(ETHChain),
+      destinationAddress: await wallet.getAddress(BTCChain),
+      amount: new CryptoAmount(assetToBase(assetAmount(0.1, 18)), AssetETH),
+    })
+    console.log(estimatedSwap)
+    const chainflipQuote = estimatedSwap.find((quote) => quote.protocol === 'Chainflip')
+    expect(chainflipQuote).toBeDefined()
+    expect(chainflipQuote?.canSwap).toBe(true)
+
+    console.log('Chainflip quote with affiliate brokers:', chainflipQuote)
+  })
 })

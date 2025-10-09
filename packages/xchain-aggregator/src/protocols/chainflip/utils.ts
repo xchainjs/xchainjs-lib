@@ -7,8 +7,6 @@ export const cChainToXChain = (chain: CChain): XChain | null => {
       return 'BTC'
     case 'Ethereum':
       return 'ETH'
-    case 'Polkadot':
-      return 'POL'
     case 'Arbitrum':
       return 'ARB'
     case 'Solana':
@@ -24,8 +22,6 @@ export const xChainToCChain = (chain: XChain): CChain | null => {
       return Chains.Bitcoin
     case 'ETH':
       return Chains.Ethereum
-    case 'POL':
-      return Chains.Polkadot
     case 'ARB':
       return Chains.Arbitrum
     case 'SOL':
