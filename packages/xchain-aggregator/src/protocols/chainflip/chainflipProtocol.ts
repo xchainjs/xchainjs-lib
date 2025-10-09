@@ -102,6 +102,7 @@ export class ChainflipProtocol implements IProtocol {
         destChain: destAssetData.chain,
         destAsset: destAssetData.asset,
         amount: params.amount.baseAmount.amount().toString(),
+        affiliateBrokers: this.affiliateBrokers,
       })
       // Find either DCA or REGULAR quote, prioritizing DCA
       const selectedQuote =
