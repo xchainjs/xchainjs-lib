@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.0
+
+### Minor Changes
+
+- b155e18: Added ledger client bump minor
+
 ## 4.0.1
 
 ### Patch Changes
