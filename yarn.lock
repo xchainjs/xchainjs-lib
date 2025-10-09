@@ -509,55 +509,66 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainflip/rpc@npm:~1.11.0-beta.3":
-  version: 1.11.0-beta.11
-  resolution: "@chainflip/rpc@npm:1.11.0-beta.11"
+"@chainflip/rpc@npm:~1.11.0":
+  version: 1.11.5
+  resolution: "@chainflip/rpc@npm:1.11.5"
   dependencies:
-    "@chainflip/utils": "npm:0.8.18"
+    "@chainflip/utils": "npm:0.11.0"
     zod: "npm:^3.25.75"
-  checksum: 10c0/d671b2b3899bc6620923f6cd365e68023d8bdc1f7b782421cb0736f9f3bea7fab2ba84ef288713eece5aaebedd9708ed1e110fd7a86b2187c37bf7b1b01cce22
+  checksum: 10c0/64c1fd38e24c3543db7058fab54cdf294a5b8bf963194784d1c0c330d26ff481ad6a90fe253a18cb4f98b74d1e762b9ca283f8b62faf9b16d792faa94e815132
   languageName: node
   linkType: hard
 
-"@chainflip/scale@npm:^1.8.0":
-  version: 1.8.0
-  resolution: "@chainflip/scale@npm:1.8.0"
+"@chainflip/scale@npm:^1.11.0":
+  version: 1.11.0
+  resolution: "@chainflip/scale@npm:1.11.0"
   dependencies:
-    "@chainflip/utils": "npm:^0.6.0"
+    "@chainflip/utils": "npm:^0.8.22"
     scale-ts: "npm:^1.6.1"
-  checksum: 10c0/37cb0f7d8c31d5536d09f1eb09155049ca30b5a478eea2232a6f0b9ba381bd0a02d209191524a7b3099fe55443ca41856eb4b747d2bc69f5111540020ac3d552
+  checksum: 10c0/d90ab2ad0d609f6c416995d31b9fa11d7cc5bc79e95ebc5a0ca1354048683d3dff59bb8a185c63a4d53e8ec09435395de622a1ad67be5ce176c173b00b1ac6cb
   languageName: node
   linkType: hard
 
-"@chainflip/sdk@npm:^1.10.1":
-  version: 1.10.1
-  resolution: "@chainflip/sdk@npm:1.10.1"
+"@chainflip/sdk@npm:1.11.0":
+  version: 1.11.0
+  resolution: "@chainflip/sdk@npm:1.11.0"
   dependencies:
-    "@chainflip/bitcoin": "npm:^1.2.6"
-    "@chainflip/rpc": "npm:~1.11.0-beta.3"
-    "@chainflip/solana": "npm:^2.1.9"
-    "@chainflip/utils": "npm:^0.8.11"
+    "@chainflip/bitcoin": "npm:^1.2.7"
+    "@chainflip/rpc": "npm:~1.11.0"
+    "@chainflip/solana": "npm:^2.2.0"
+    "@chainflip/utils": "npm:^0.11.1"
     "@ts-rest/core": "npm:^3.52.1"
     axios: "npm:^1.10.0"
     bignumber.js: "npm:^9.3.0"
     ethers: "npm:^6.14.4"
     zod: "npm:^3.25.76"
-  checksum: 10c0/2b6410af1ab76136997a3ef97d514b1dd1af8c980cda2181c8367f91d627111771df8934a289ea9b94a6af5d464d055015f8da0abf0f01fe1ae696ac16a53ebc
+  checksum: 10c0/f1ba50339b66c58f834f61d8804af1e41468bf99db6f98f497426b90c3d93371c691359f50f4460f31416509f11a0b058c17405983d7f5a54a1077dfbe422512
   languageName: node
   linkType: hard
 
-"@chainflip/solana@npm:^2.1.9":
-  version: 2.1.9
-  resolution: "@chainflip/solana@npm:2.1.9"
+"@chainflip/solana@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@chainflip/solana@npm:2.2.0"
   dependencies:
-    "@chainflip/scale": "npm:^1.8.0"
-    "@chainflip/utils": "npm:0.8.6"
+    "@chainflip/scale": "npm:^1.11.0"
+    "@chainflip/utils": "npm:^0.8.22"
     "@coral-xyz/anchor": "npm:^0.31.1"
-    "@solana/web3.js": "npm:^1.98.2"
+    "@solana/web3.js": "npm:^1.98.4"
     bn.js: "npm:^5.2.2"
     scale-ts: "npm:^1.6.1"
-    zod: "npm:^3.24.4"
-  checksum: 10c0/4019b765f694173df48e602e75ac4b43c265d0bda7daebcddc59691d87ae4797f5d3801460ce3cb1e774679b93e6066192588dadb700391acc78fef79b5ad2e5
+    zod: "npm:^3.25.75"
+  checksum: 10c0/ffd8e387eee36f93f6401592aa9dfb8597093873843736c8868ccb323e8361f494e4d4070e9d317c73a70743e2d7ae9cbadf3e7d70d9ccf1de3c15563187c1cc
+  languageName: node
+  linkType: hard
+
+"@chainflip/utils@npm:0.11.0":
+  version: 0.11.0
+  resolution: "@chainflip/utils@npm:0.11.0"
+  dependencies:
+    "@date-fns/utc": "npm:^2.1.1"
+    bignumber.js: "npm:^9.3.1"
+    date-fns: "npm:4.1.0"
+  checksum: 10c0/1e2f63b423538d7e61d81da201d35a84991ad0892438b14bdbeb2a95107205717a5c8288a20dbea5573cc860e6209090b19fedf1aa5308b4ade8d39395dc8232
   languageName: node
   linkType: hard
 
@@ -572,36 +583,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainflip/utils@npm:0.8.6":
-  version: 0.8.6
-  resolution: "@chainflip/utils@npm:0.8.6"
-  dependencies:
-    "@date-fns/utc": "npm:^2.1.0"
-    bignumber.js: "npm:^9.2.0"
-    date-fns: "npm:4.1.0"
-  checksum: 10c0/9a80aee6571ce1b5abb7e942bdd708348dcb29c071692ee93736e4450d225ec758c0e1a81eb2b2787a0b5826a7d49684f6e5439a07c9f0335f84633ee8673a83
-  languageName: node
-  linkType: hard
-
-"@chainflip/utils@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "@chainflip/utils@npm:0.6.0"
-  dependencies:
-    "@date-fns/utc": "npm:^2.1.0"
-    bignumber.js: "npm:^9.1.2"
-    date-fns: "npm:4.1.0"
-  checksum: 10c0/59efa3ed184f7cd5157ee04da5884e83d258c0bf0da197e3b2747ac44285236f4359eabb93b4723b0189b68bda4c435e261949d7c023fca16d17e1b64afb76e9
-  languageName: node
-  linkType: hard
-
-"@chainflip/utils@npm:^0.8.11":
-  version: 0.8.20
-  resolution: "@chainflip/utils@npm:0.8.20"
+"@chainflip/utils@npm:^0.11.1":
+  version: 0.11.1
+  resolution: "@chainflip/utils@npm:0.11.1"
   dependencies:
     "@date-fns/utc": "npm:^2.1.1"
     bignumber.js: "npm:^9.3.1"
     date-fns: "npm:4.1.0"
-  checksum: 10c0/24cb15eda9ea1b6b836d4f517d4008589cec4556b4c8d6ca23d3f3693979d5eda13b2b3899e62a76cb4aaa6a7f730586579189fc7885769a11a1a3a8f6948713
+  checksum: 10c0/56116dd87da9ac47bc4b9fae085d207aebf2068691ccfdb810c1cbbd734ef13bb81188f8dc5abfce141f6e0827b5b16119cb8b1188a37f19900d53453630d1ba
+  languageName: node
+  linkType: hard
+
+"@chainflip/utils@npm:^0.8.22":
+  version: 0.8.22
+  resolution: "@chainflip/utils@npm:0.8.22"
+  dependencies:
+    "@date-fns/utc": "npm:^2.1.1"
+    bignumber.js: "npm:^9.3.1"
+    date-fns: "npm:4.1.0"
+  checksum: 10c0/50117b2aa9082f20db66ae60daf97aa7d9c1cf9d0ab9d6b6332e4ade9827f65f030f2a7bf68777aa2753e407da1444b712ff4db05ea2e095d998bca7a4111d86
   languageName: node
   linkType: hard
 
@@ -1069,13 +1069,6 @@ __metadata:
   version: 1.0.2
   resolution: "@dashevo/x11-hash-js@npm:1.0.2"
   checksum: 10c0/15db742306647f670defc1e6fe6bd751fc4128985c84cd733f61bd0a02cf35a34e8a57638286c8f7c424789d0fafbc80f472309bd1720b0c681dc55c2a74435f
-  languageName: node
-  linkType: hard
-
-"@date-fns/utc@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "@date-fns/utc@npm:2.1.0"
-  checksum: 10c0/3f093e0f748b6e8c3df434e42e168b31762e1674b8313d43907c6a85c6540138a0bec01826eb998142e08a8839d3190a776e4e6bba41fe29073f6a3de206e365
   languageName: node
   linkType: hard
 
@@ -3343,6 +3336,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@solana/web3.js@npm:^1.98.4":
+  version: 1.98.4
+  resolution: "@solana/web3.js@npm:1.98.4"
+  dependencies:
+    "@babel/runtime": "npm:^7.25.0"
+    "@noble/curves": "npm:^1.4.2"
+    "@noble/hashes": "npm:^1.4.0"
+    "@solana/buffer-layout": "npm:^4.0.1"
+    "@solana/codecs-numbers": "npm:^2.1.0"
+    agentkeepalive: "npm:^4.5.0"
+    bn.js: "npm:^5.2.1"
+    borsh: "npm:^0.7.0"
+    bs58: "npm:^4.0.1"
+    buffer: "npm:6.0.3"
+    fast-stable-stringify: "npm:^1.0.0"
+    jayson: "npm:^4.1.1"
+    node-fetch: "npm:^2.7.0"
+    rpc-websockets: "npm:^9.0.2"
+    superstruct: "npm:^2.0.2"
+  checksum: 10c0/73bf7b6b5b65c7f264587182bbfd65327775b4f3e4831750de6356f58858e57d49213098eec671650940bb7a9bbaa1f352e0710c4075f126d903d72ddddcbdbc
+  languageName: node
+  linkType: hard
+
 "@supercharge/promise-pool@npm:2.4.0":
   version: 2.4.0
   resolution: "@supercharge/promise-pool@npm:2.4.0"
@@ -4039,7 +4055,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
   dependencies:
-    "@chainflip/sdk": "npm:^1.10.1"
+    "@chainflip/sdk": "npm:1.11.0"
     "@trpc/server": "npm:^10.45.2"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-base": "workspace:*"
@@ -5357,7 +5373,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:^9.0.1, bignumber.js@npm:^9.2.0, bignumber.js@npm:^9.3.0":
+"bignumber.js@npm:^9.0.1, bignumber.js@npm:^9.3.0":
   version: 9.3.0
   resolution: "bignumber.js@npm:9.3.0"
   checksum: 10c0/f54a79cd6fc98552ac0510c1cd9381650870ae443bdb20ba9b98e3548188d941506ac3c22a9f9c69b2cc60da9be5700e87d3f54d2825310a8b2ae999dfd6d99d
@@ -14041,13 +14057,6 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10c0/dceb44c28578b31641e13695d200d34ec4ab3966a5729814d5445b194933c096b7ced71494ce53a0e8820685d1d010df8b2422e5bf2cdea7e469d97ffbea306f
-  languageName: node
-  linkType: hard
-
-"zod@npm:^3.24.4":
-  version: 3.25.16
-  resolution: "zod@npm:3.25.16"
-  checksum: 10c0/c2d687097d8c1e9ad160f719ef1e8dcd7df4b21662478514b52fa703aa9b3f32cd5ef8a2c4cbae8c63d349b0fbd6014bbc8b6994a2632ec6df101bd622295c19
   languageName: node
   linkType: hard
 

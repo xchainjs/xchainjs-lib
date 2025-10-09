@@ -1,6 +1,24 @@
-import { Asset, AssetData, ChainData, Chains, DepositAddressRequestV2, QuoteRequest } from '@chainflip/sdk/swap'
+import { AssetData, ChainData, Chains, DepositAddressRequestV2, QuoteRequest } from '@chainflip/sdk/swap'
+
+interface SwapSDKConfig {
+  network?: string
+  enabledFeatures?: {
+    dca?: boolean
+  }
+  broker?: {
+    url: string
+    commissionBps?: number
+  }
+}
 
 class SwapSDK {
+  constructor(_config?: SwapSDKConfig) {
+    // Mock constructor for Chainflip SwapSDK
+    // Accepts optional config with network, DCA features, and broker URL
+    // In a real implementation, this would initialize the SDK with the provided configuration
+    // Config parameter is prefixed with underscore to indicate it's intentionally unused in the mock
+  }
+
   async getChains(): Promise<ChainData[]> {
     return [
       {
@@ -9,14 +27,6 @@ class SwapSDK {
         evmChainId: 11155111,
         isMainnet: false,
         requiredBlockConfirmations: 7,
-        maxRetryDurationBlocks: undefined,
-      },
-      {
-        chain: 'Polkadot',
-        name: 'Polkadot',
-        evmChainId: undefined,
-        isMainnet: false,
-        requiredBlockConfirmations: undefined,
         maxRetryDurationBlocks: undefined,
       },
       {
@@ -85,19 +95,6 @@ class SwapSDK {
         minimumEgressAmount: '1',
       },
       {
-        chainflipId: 'Dot',
-        asset: 'DOT',
-        chain: 'Polkadot',
-        contractAddress: undefined,
-        decimals: 10,
-        name: 'Polkadot',
-        symbol: 'DOT',
-        isMainnet: true,
-        minimumSwapAmount: '40000000000',
-        maximumSwapAmount: null,
-        minimumEgressAmount: '1',
-      },
-      {
         chainflipId: 'Btc',
         asset: 'BTC',
         chain: 'Bitcoin',
@@ -125,7 +122,7 @@ class SwapSDK {
         depositAddress: 'BITCOINfakeaddress',
         depositChannelId: 'bitcoin-channel-id',
         brokerCommissionBps: 0,
-        affiliateBrokers: [],
+        affiliateBrokers: params.affiliateBrokers || [],
         depositChannelExpiryBlock: BigInt(10000),
         estimatedDepositChannelExpiryTime: 1716889354,
         channelOpeningFee: BigInt(100),
@@ -141,24 +138,8 @@ class SwapSDK {
         depositAddress: 'ETHEREUMfakeaddress',
         depositChannelId: 'ethereum-channel-id',
         brokerCommissionBps: 0,
-        affiliateBrokers: [],
+        affiliateBrokers: params.affiliateBrokers || [],
         depositChannelExpiryBlock: BigInt(20000),
-        estimatedDepositChannelExpiryTime: 1716889354,
-        channelOpeningFee: BigInt(100),
-      }
-    if (params.quote.srcAsset.chain === 'Polkadot')
-      return {
-        amount: params.quote.depositAmount,
-        srcAsset: params.quote.srcAsset.asset,
-        srcChain: params.quote.srcAsset.chain,
-        destAddress: params.destAddress,
-        destAsset: params.quote.destAsset.asset,
-        destChain: params.quote.destAsset.chain,
-        depositAddress: 'POLKADOTfakeaddress',
-        depositChannelId: 'polkadot-channel-id',
-        brokerCommissionBps: 0,
-        affiliateBrokers: [],
-        depositChannelExpiryBlock: BigInt(30000),
         estimatedDepositChannelExpiryTime: 1716889354,
         channelOpeningFee: BigInt(100),
       }
@@ -337,4 +318,4 @@ class SwapSDK {
     throw Error('Quote not mocked')
   }
 }
-export { SwapSDK, Asset, AssetData, Chains }
+export { SwapSDK, Chains }

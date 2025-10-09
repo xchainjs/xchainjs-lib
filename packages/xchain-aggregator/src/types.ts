@@ -68,6 +68,17 @@ export type Config = Partial<{
    * Network to use for protocols. If not specified, will be inferred from wallet or default to mainnet
    */
   network: Network
+  /**
+   * Affiliate brokers configuration for Chainflip protocol
+   */
+  affiliateBrokers: {
+    account: `cF${string}` | `0x${string}`
+    commissionBps: number
+  }[]
+  /**
+   * Broker URL for Chainflip protocol
+   */
+  brokerUrl: string
 }>
 
 /**
@@ -78,6 +89,11 @@ export type ProtocolConfig = Partial<{
   affiliateBps: number
   affiliateAddress: string
   network: Network
+  affiliateBrokers: {
+    account: `cF${string}` | `0x${string}`
+    commissionBps: number
+  }[]
+  brokerUrl: string
 }>
 
 /**
