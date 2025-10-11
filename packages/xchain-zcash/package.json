@@ -48,6 +48,7 @@
     "directory": "release/package"
   },
   "devDependencies": {
+    "@ledgerhq/hw-transport-node-hid": "^6.28.6",
     "@types/blake2b-wasm": "^2.4.3",
     "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.17.13",
