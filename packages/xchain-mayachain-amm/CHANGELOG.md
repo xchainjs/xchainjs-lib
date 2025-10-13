@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [b155e18]
+  - @xchainjs/xchain-mayachain@4.1.0
+  - @xchainjs/xchain-wallet@2.0.18
+
 ## 4.1.2
 
 ### Patch Changes
