@@ -4700,7 +4700,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-zcash@workspace:packages/xchain-zcash"
   dependencies:
-    "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
     "@bitgo/utxo-lib": "npm:^11.11.0"
     "@ledgerhq/hw-app-btc": "npm:^10.11.2"
     "@ledgerhq/hw-transport": "npm:^6.31.12"
@@ -5634,7 +5633,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bn.js@npm:^4.11.8, bn.js@npm:^4.11.9":
+"bn.js@npm:^4.11.9":
   version: 4.12.0
   resolution: "bn.js@npm:4.12.0"
   checksum: 10c0/9736aaa317421b6b3ed038ff3d4491935a01419ac2d83ddcfebc5717385295fcfcf0c57311d90fe49926d0abbd7a9dbefdd8861e6129939177f7e67ebc645b21
@@ -10370,15 +10369,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.13.2":
-  version: 2.17.0
-  resolution: "nan@npm:2.17.0"
-  dependencies:
-    node-gyp: "npm:latest"
-  checksum: 10c0/4a231a62dba025f4c4fa814c1e6ffeb450c5cd0852b780f19fe4ea22b86ba0f1f394406dfd628c67fb7f0987e982fa230da1fbd3632258f927b8defd7046c1ad
-  languageName: node
-  linkType: hard
-
 "nanoassert@npm:^1.0.0":
   version: 1.1.0
   resolution: "nanoassert@npm:1.1.0"
@@ -12622,17 +12612,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tiny-secp256k1@npm:1.1.6, tiny-secp256k1@npm:^1.1.1, tiny-secp256k1@npm:^1.1.3":
-  version: 1.1.6
-  resolution: "tiny-secp256k1@npm:1.1.6"
+"tiny-secp256k1@npm:^2.2.4":
+  version: 2.2.4
+  resolution: "tiny-secp256k1@npm:2.2.4"
   dependencies:
-    bindings: "npm:^1.3.0"
-    bn.js: "npm:^4.11.8"
-    create-hmac: "npm:^1.1.7"
-    elliptic: "npm:^6.4.0"
-    nan: "npm:^2.13.2"
-    node-gyp: "npm:latest"
-  checksum: 10c0/b47ceada38f6fa65190906e8a98b58d1584b0640383f04db8196a7098c726e926cfba6271a53e97d98d4c67e2b364618d7b3d7e402f63e44f0e07a4aca82ac8b
+    uint8array-tools: "npm:0.0.7"
+  checksum: 10c0/51645e9f5e45ea8d1a160eb18dc63375359d32390bdeadb33e3e17779c2cde05f69b7a92533e69f6c6138dd48c07c2bff198c23721d5084924336e6c1ebe1f04
   languageName: node
   linkType: hard
 
