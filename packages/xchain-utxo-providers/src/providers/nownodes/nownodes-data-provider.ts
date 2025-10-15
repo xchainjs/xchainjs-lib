@@ -118,15 +118,24 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
   }
 
   private async mapUTXOs(utxos: AddressUTXO[]): Promise<UTXO[]> {
-    return utxos.flatMap((currentUtxo) => {
-      return [
-        {
-          hash: currentUtxo.txid,
-          index: currentUtxo.vout,
-          value: Number(currentUtxo.value),
-        },
-      ]
-    })
+    const result: UTXO[] = []
+
+    for (const { txid, vout, value } of utxos) {
+      const rawTx = await nownodes.getTx({
+        apiKey: this._apiKey,
+        baseUrl: this.baseUrl,
+        hash: txid,
+      })
+
+      result.push({
+        txHex: rawTx.hex,
+        hash: txid,
+        index: vout,
+        value: Number(value),
+      })
+    }
+
+    return result
   }
 
   private async getRawTransactions(params?: TxHistoryParams): Promise<Transaction[]> {
