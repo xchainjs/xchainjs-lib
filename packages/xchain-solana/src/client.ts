@@ -63,7 +63,7 @@ type Providers = {
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
-  private providers: Providers[]
+  protected providers: Providers[]
   private clientUrls?: Record<Network, string[]>
 
   constructor(params: SOLClientParams = defaultSolanaParams) {
@@ -809,7 +809,9 @@ export class Client extends BaseXChainClient {
 
         return { rawUnsignedTx: bs58.encode(transaction.serialize({ verifySignatures: false })) }
       }
-    } catch {}
+    } catch (error) {
+      console.log('prepareTx error', error)
+    }
 
     throw Error('No provider able to prepare transaction')
   }

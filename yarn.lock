@@ -1881,6 +1881,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/hw-app-solana@npm:^7.5.5":
+  version: 7.5.5
+  resolution: "@ledgerhq/hw-app-solana@npm:7.5.5"
+  dependencies:
+    "@ledgerhq/errors": "npm:^6.26.0"
+    "@ledgerhq/hw-transport": "npm:^6.31.12"
+    bip32-path: "npm:^0.4.2"
+  checksum: 10c0/2275297a3cbbd64ddc759e9f60b09059b71ccaa7066de094ffe2491786e292bd941eecf71da830f751a72d68bbf4a797d315b4a6f2d76ce10f3a459cd48208f0
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/hw-app-trx@npm:^6.31.8":
   version: 6.31.8
   resolution: "@ledgerhq/hw-app-trx@npm:6.31.8"
@@ -4453,6 +4464,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-solana@workspace:packages/xchain-solana"
   dependencies:
+    "@ledgerhq/hw-app-solana": "npm:^7.5.5"
     "@metaplex-foundation/mpl-token-metadata": "npm:^3.2.1"
     "@metaplex-foundation/umi": "npm:0.9.2"
     "@metaplex-foundation/umi-bundle-defaults": "npm:0.9.2"
