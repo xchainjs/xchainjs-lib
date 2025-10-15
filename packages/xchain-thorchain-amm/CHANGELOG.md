@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.25
+
+### Patch Changes
+
+- Updated dependencies [494e60b]
+  - @xchainjs/xchain-solana@1.1.0
+
 ## 3.0.24
 
 ### Patch Changes

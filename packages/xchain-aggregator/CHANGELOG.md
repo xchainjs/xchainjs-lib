@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.28
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@3.0.25
+
 ## 2.0.27
 
 ### Patch Changes
