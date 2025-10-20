@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.28
+
+### Patch Changes
+
+- 76dfcb8: Add params liquidity tolerance bps to swap params
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-mayachain-query@2.1.3
+  - @xchainjs/xchain-thorchain-query@2.0.15
+  - @xchainjs/xchain-mayachain-amm@4.1.4
+  - @xchainjs/xchain-thorchain-amm@3.0.25
+
 ## 2.0.27
 
 ### Patch Changes

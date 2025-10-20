@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.3
+
+### Patch Changes
+
+- 76dfcb8: Add params liquidity tolerance bps to swap params
+
 ## 2.1.2
 
 ### Patch Changes
