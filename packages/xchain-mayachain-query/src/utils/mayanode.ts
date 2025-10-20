@@ -99,6 +99,7 @@ export class Mayanode {
     destinationAddress?: string,
     streamingInterval?: number,
     streamingQuantity?: number,
+    liquidityToleranceBps?: number,
     toleranceBps?: number,
     affiliateBps?: number,
     affiliate?: string,
@@ -113,11 +114,11 @@ export class Mayanode {
             toAsset,
             amount,
             destinationAddress,
-            undefined, // refundAddress
+            undefined, //refund address
             streamingInterval,
             streamingQuantity,
             toleranceBps,
-            undefined, // liquidityToleranceBps
+            liquidityToleranceBps,
             affiliateBps?.toString(),
             affiliate,
           )

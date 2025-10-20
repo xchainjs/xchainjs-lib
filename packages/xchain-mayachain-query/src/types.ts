@@ -93,6 +93,7 @@ export type QuoteSwapParams = {
   fromAddress?: string // The source address for the swap
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap
+  liquidityToleranceBps?: number
   toleranceBps?: number // The tolerance basis points for the swap
   affiliateBps?: number // The affiliate basis points for the swap
   affiliateAddress?: string // The affiliate address for the swap

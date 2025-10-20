@@ -11,7 +11,7 @@ import {
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
-import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
+import { Client as ThorClient, THORChain, AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Client as SolClient, SOLAsset, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import { AssetTRX, Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
 import {
@@ -119,14 +119,16 @@ describe('Aggregator', () => {
     console.log(aggregator.getConfiguration())
   })
 
-  it('Should find swap with greatest expected amount', async () => {
+  it('Should find swap with greatest expected amount 1', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
-      destinationAsset: SOLAsset,
+      destinationAsset: AssetRuneNative,
       fromAddress: await wallet.getAddress(BTCChain),
-      destinationAddress: 'FakeSolAddress',
+      destinationAddress: 'fakeruneAddress',
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
+      liquidityToleranceBps: 50,
     })
+    console.log(estimatedSwap)
     printQuoteSwap(bestSwap(estimatedSwap))
   })
   it('Should find swap on CF with usdt', async () => {
