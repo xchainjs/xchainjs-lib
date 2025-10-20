@@ -123,7 +123,7 @@ type QuoteSwapParams = {
   fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset to swap from
   destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset to swap to
   amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The amount to swap
-  fromAddress?: string // The source address for the swap
+  fromAddress?: string // The source address for the swap (also used as refund address)
   destinationAddress?: string // The destination address for the swap
   height?: number // The block height for the swap
   toleranceBps?: number // The tolerance basis points for the swap

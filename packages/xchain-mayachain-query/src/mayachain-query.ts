@@ -106,6 +106,7 @@ export class MayachainQuery {
     destinationAsset,
     amount,
     destinationAddress,
+    liquidityToleranceBps,
     toleranceBps,
     affiliateBps,
     affiliateAddress,
@@ -116,10 +117,9 @@ export class MayachainQuery {
     const fromAssetString = assetToString(fromAsset)
     const toAssetString = assetToString(destinationAsset)
     // Endpoint allows 10 decimals for Cacao, 8 for the rest of assets
-    const inputAmount =
-      fromAssetString === assetToString(CacaoAsset)
-        ? amount.baseAmount.amount()
-        : getBaseAmountWithDiffDecimals(amount, 8)
+    const inputAmount = eqAsset(fromAsset, CacaoAsset)
+      ? amount.baseAmount.amount()
+      : getBaseAmountWithDiffDecimals(amount, this.getQuoteAssetDecimals(fromAsset))
 
     const swapQuote: QuoteSwapResponse = await this.mayachainCache.mayanode.getSwapQuote(
       fromAssetString,
@@ -128,12 +128,14 @@ export class MayachainQuery {
       destinationAddress,
       streamingInterval,
       streamingQuantity,
+      liquidityToleranceBps,
       toleranceBps,
       affiliateBps,
       affiliateAddress,
       height,
     )
 
+    // Check if the response indicates an error by examining memo and other required field
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) {
       return {
@@ -167,27 +169,36 @@ export class MayachainQuery {
     const feeAsset = assetFromStringEx(swapQuote.fees.asset) as CompatibleAsset
 
     const errors: string[] = []
-    if (swapQuote.memo === undefined) errors.push(`Error parsing swap quote: Memo is ${swapQuote.memo}`)
+    if (swapQuote.memo === undefined || swapQuote.memo === '')
+      errors.push(`Error parsing swap quote: Memo is ${swapQuote.memo}`)
 
-    const isFeeAssetCacao = swapQuote.fees.asset === assetToString(CacaoAsset)
     return {
       toAddress: swapQuote.inbound_address || '',
       memo: swapQuote.memo || '',
       expectedAmount: new CryptoAmount(
-        baseAmount(swapQuote.expected_amount_out, toAssetString === assetToString(CacaoAsset) ? 10 : 8),
+        baseAmount(swapQuote.expected_amount_out, this.getQuoteAssetDecimals(destinationAsset)),
         destinationAsset,
       ),
       dustThreshold: this.getChainDustValue(fromAsset.chain),
       fees: {
         asset: feeAsset,
-        affiliateFee: new CryptoAmount(baseAmount(swapQuote.fees.affiliate, isFeeAssetCacao ? 10 : 8), feeAsset),
-        outboundFee: new CryptoAmount(baseAmount(swapQuote.fees.outbound, isFeeAssetCacao ? 10 : 8), feeAsset),
-        liquidityFee: new CryptoAmount(baseAmount(swapQuote.fees.liquidity, isFeeAssetCacao ? 10 : 8), feeAsset),
-        totalFee: new CryptoAmount(baseAmount(swapQuote.fees.total, isFeeAssetCacao ? 10 : 8), feeAsset),
+        affiliateFee: new CryptoAmount(
+          baseAmount(swapQuote.fees.affiliate, this.getQuoteAssetDecimals(feeAsset)),
+          feeAsset,
+        ),
+        outboundFee: new CryptoAmount(
+          baseAmount(swapQuote.fees.outbound, this.getQuoteAssetDecimals(feeAsset)),
+          feeAsset,
+        ),
+        liquidityFee: new CryptoAmount(
+          baseAmount(swapQuote.fees.liquidity, this.getQuoteAssetDecimals(feeAsset)),
+          feeAsset,
+        ),
+        totalFee: new CryptoAmount(baseAmount(swapQuote.fees.total, this.getQuoteAssetDecimals(feeAsset)), feeAsset),
       },
       expiry: swapQuote.expiry,
       recommendedMinAmountIn: new CryptoAmount(
-        baseAmount(swapQuote.recommended_min_amount_in || '0', eqAsset(fromAsset, CacaoAsset) ? 10 : 8),
+        baseAmount(swapQuote.recommended_min_amount_in || '0', this.getQuoteAssetDecimals(fromAsset)),
         fromAsset,
       ),
       router: swapQuote.router,
@@ -587,5 +598,14 @@ export class MayachainQuery {
         lastWithdrawHeight: item.last_withdraw_height,
       }
     })
+  }
+
+  /**
+   * Get the hardcoded decimal precision for quote calculations
+   * @param asset The asset to get decimals for
+   * @returns 10 for Cacao, 8 for other assets (used in quote calculations)
+   */
+  private getQuoteAssetDecimals(asset: CompatibleAsset): number {
+    return eqAsset(asset, CacaoAsset) ? 10 : 8
   }
 }
