@@ -135,9 +135,9 @@ export class MayachainQuery {
       height,
     )
 
-    // Check if the response indicates an error by examining memo and other required fields
-    if (!swapQuote.memo || !swapQuote.inbound_address) {
-      const errorMsg = swapQuote.warning || swapQuote.notes || 'Unknown error from Mayanode'
+    // Check if the response indicates an error by examining memo and other required field
+    const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
+    if (response.error) {
       return {
         toAddress: ``,
         memo: ``,
@@ -155,7 +155,7 @@ export class MayachainQuery {
         inboundConfirmationSeconds: 0,
         inboundConfirmationBlocks: 0,
         canSwap: false,
-        errors: [`Mayanode request quote: ${errorMsg}`],
+        errors: [`Mayanode request quote: ${response.error}`],
         expiry: 0,
         slipBasisPoints: 0,
         totalSwapSeconds: 0,
@@ -169,7 +169,8 @@ export class MayachainQuery {
     const feeAsset = assetFromStringEx(swapQuote.fees.asset) as CompatibleAsset
 
     const errors: string[] = []
-    if (!swapQuote.memo) errors.push(`Error parsing swap quote: Missing or invalid memo`)
+    if (swapQuote.memo === undefined || swapQuote.memo === '')
+      errors.push(`Error parsing swap quote: Memo is ${swapQuote.memo}`)
 
     return {
       toAddress: swapQuote.inbound_address || '',
