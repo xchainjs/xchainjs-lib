@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- 494e60b: add ledger client for solana
+
 ## 1.0.9
 
 ### Patch Changes

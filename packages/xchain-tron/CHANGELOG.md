@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1
+
+### Patch Changes
+
+- f9f62d2: Fix token balance metadata error
+
 ## 3.0.0
 
 ### Major Changes

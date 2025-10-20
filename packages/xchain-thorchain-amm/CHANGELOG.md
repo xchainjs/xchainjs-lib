@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.25
+
+### Patch Changes
+
+- Updated dependencies [f9f62d2]
+- Updated dependencies [494e60b]
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-tron@3.0.1
+  - @xchainjs/xchain-solana@1.1.0
+  - @xchainjs/xchain-thorchain-query@2.0.15
+
 ## 3.0.24
 
 ### Patch Changes
