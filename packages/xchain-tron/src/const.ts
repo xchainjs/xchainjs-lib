@@ -52,3 +52,15 @@ export const TRON_USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 
 export const MAX_APPROVAL = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 export const TRX_FEE_LIMIT = 100_000_000
+
+export interface TokenMetadata {
+  symbol: string
+  decimals: number
+}
+
+export const TRON_TOKEN_WHITELIST: Record<string, TokenMetadata> = {
+  [TRON_USDT_CONTRACT]: {
+    symbol: 'USDT',
+    decimals: 6,
+  },
+}

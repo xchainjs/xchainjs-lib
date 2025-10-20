@@ -31,6 +31,8 @@ import {
   TRC20_TRANSFER_BANDWIDTH,
   TRX_FEE_LIMIT,
   MAX_APPROVAL,
+  TRON_TOKEN_WHITELIST,
+  TokenMetadata,
 } from './const'
 import { validateAddress, getTRC20AssetContractAddress } from './utils'
 import trc20ABI from './utils/trc20.json'
@@ -121,23 +123,45 @@ export abstract class Client extends BaseXChainClient {
   }
 
   /**
+   * Get token metadata from whitelist if available
+   */
+  private getTokenFromWhitelist(contractAddress: string): TokenMetadata | null {
+    return TRON_TOKEN_WHITELIST[contractAddress] || null
+  }
+
+  /**
    * Get token balance and info directly from contract
    */
   public fetchTokenMetadata = async ({ contractAddress }: { contractAddress: string }) => {
-    const contract = this.tronWeb.contract(trc20ABI, contractAddress)
+    // First check whitelist for known tokens - faster and more reliable
+    const whitelistData = this.getTokenFromWhitelist(contractAddress)
+    if (whitelistData) {
+      return whitelistData
+    }
 
-    const [symbolRaw, decimalsRaw] = await Promise.all([
-      contract
-        .symbol()
-        .call()
-        .catch(() => 'UNKNOWN'),
-      contract
-        .decimals()
-        .call()
-        .catch(() => '18'),
-    ])
+    // Try contract calls for unknown tokens
+    try {
+      // Set address if available to avoid owner_address error
+      const address = await this.getAddressAsync().catch(() => null)
+      if (address) {
+        this.tronWeb.setAddress(address)
+      }
 
-    return { decimals: Number(decimalsRaw ?? 18), symbol: symbolRaw ?? 'UNKNOWN' }
+      const contract = this.tronWeb.contract(trc20ABI, contractAddress)
+
+      const [symbolRaw, decimalsRaw] = await Promise.all([
+        contract.methods.symbol().call(),
+        contract.methods.decimals().call(),
+      ])
+
+      return { decimals: Number(decimalsRaw ?? 18), symbol: symbolRaw ?? 'UNKNOWN' }
+    } catch (error) {
+      console.warn(
+        `Contract call failed for ${contractAddress}:`,
+        error instanceof Error ? error.message : String(error),
+      )
+      return { decimals: 18, symbol: 'UNKNOWN' }
+    }
   }
 
   /**

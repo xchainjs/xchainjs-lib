@@ -34,7 +34,7 @@ describe('TRON client e2e test', () => {
   })
 
   it('Should get balance', async () => {
-    const address = client.getAddress()
+    const address = await client.getAddressAsync()
     const balance = await client.getBalance(address)
     console.log(`Balance: ${balance[0].amount.amount().toString()} ${balance[0].asset.symbol}`)
     if (balance.length > 1) {
