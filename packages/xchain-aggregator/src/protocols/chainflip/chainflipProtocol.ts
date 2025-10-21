@@ -166,7 +166,7 @@ export class ChainflipProtocol implements IProtocol {
         errors: [],
         slipBasisPoints: 0,
         fees: {
-          asset: params.destinationAsset,
+          asset: assetUSDC, // neworkFee & broker fee paid in usdc
           networkFee: new CryptoAmount(baseAmount(networkFee ? networkFee.amount : 0, 6), assetUSDC),
           outboundFee: new CryptoAmount(
             baseAmount(outboundFee ? outboundFee.amount : 0, destAssetData.decimals),
