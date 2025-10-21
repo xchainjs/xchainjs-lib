@@ -20,7 +20,7 @@ import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxS
 
 import { CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
-import { assetUSDC } from '@xchainjs/xchain-thorchain-query/lib'
+import { assetUSDC } from '@xchainjs/xchain-thorchain-query'
 
 /**
  * Chainflip protocol
