@@ -100,7 +100,7 @@ describe('Chainflip protocol', () => {
     expect(assetToString(estimatedSwap.dustThreshold.asset)).toBe('ETH.ETH')
     expect(estimatedSwap.dustThreshold.baseAmount.amount().toString()).toBe('10000000000000000')
     expect(estimatedSwap.dustThreshold.baseAmount.decimal).toBe(18)
-    expect(assetToString(estimatedSwap.fees.asset)).toBe('BTC.BTC')
+    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
     expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe(
       'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
     )
@@ -137,7 +137,7 @@ describe('Chainflip protocol', () => {
     expect(assetToString(estimatedSwap.dustThreshold.asset)).toBe('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')
     expect(estimatedSwap.dustThreshold.baseAmount.amount().toString()).toBe('20000000')
     expect(estimatedSwap.dustThreshold.baseAmount.decimal).toBe(6)
-    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.ETH')
+    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
     expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe(
       'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
     )
@@ -176,7 +176,7 @@ describe('Chainflip protocol', () => {
     expect(assetToString(estimatedSwap.dustThreshold.asset)).toBe('ETH.ETH')
     expect(estimatedSwap.dustThreshold.baseAmount.amount().toString()).toBe('10000000000000000')
     expect(estimatedSwap.dustThreshold.baseAmount.decimal).toBe(18)
-    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')
+    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
     expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe(
       'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
     )
