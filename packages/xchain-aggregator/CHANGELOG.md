@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.29
+
+### Patch Changes
+
+- f040892: Chainflip to return network fee & affiliate fee
+
 ## 2.0.28
 
 ### Patch Changes
