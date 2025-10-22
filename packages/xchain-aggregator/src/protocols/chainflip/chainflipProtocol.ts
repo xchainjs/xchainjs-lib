@@ -20,6 +20,7 @@ import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxS
 
 import { CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
+import { assetUSDC } from '@xchainjs/xchain-thorchain-query'
 
 /**
  * Chainflip protocol
@@ -142,6 +143,7 @@ export class ChainflipProtocol implements IProtocol {
 
       const outboundFee = selectedQuote?.includedFees.find((fee) => fee.type === 'EGRESS')
       const brokerFee = selectedQuote?.includedFees.find((fee) => fee.type === 'BROKER')
+      const networkFee = selectedQuote?.includedFees.find((fee) => fee.type === 'NETWORK')
 
       return {
         protocol: this.name,
@@ -164,15 +166,13 @@ export class ChainflipProtocol implements IProtocol {
         errors: [],
         slipBasisPoints: 0,
         fees: {
-          asset: params.destinationAsset,
+          asset: assetUSDC, // neworkFee & broker fee paid in usdc
+          networkFee: new CryptoAmount(baseAmount(networkFee ? networkFee.amount : 0, 6), assetUSDC),
           outboundFee: new CryptoAmount(
             baseAmount(outboundFee ? outboundFee.amount : 0, destAssetData.decimals),
             params.destinationAsset,
           ),
-          affiliateFee: new CryptoAmount(
-            baseAmount(brokerFee ? brokerFee.amount : 0, destAssetData.decimals),
-            params.destinationAsset,
-          ),
+          affiliateFee: new CryptoAmount(baseAmount(brokerFee ? brokerFee.amount : 0, 6), assetUSDC),
         },
         depositChannelId,
       }
@@ -195,7 +195,8 @@ export class ChainflipProtocol implements IProtocol {
         fees: {
           asset: params.destinationAsset,
           outboundFee: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
-          affiliateFee: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
+          networkFee: new CryptoAmount(baseAmount(0, 6), assetUSDC),
+          affiliateFee: new CryptoAmount(baseAmount(0, 6), assetUSDC),
         },
         depositChannelId: undefined,
       }

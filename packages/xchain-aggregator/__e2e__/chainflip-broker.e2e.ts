@@ -90,11 +90,12 @@ describe('Chainflip protocol with broker - E2E', () => {
       destinationAddress: await wallet.getAddress(AssetBTC.chain),
     })
 
-    const brokerAffiliateFee = estimatedSwapWithBroker.fees.affiliateFee.baseAmount.amount()
-    const noBrokerAffiliateFee = estimatedSwapWithoutBroker.fees.affiliateFee.baseAmount.amount()
-
-    console.log('Broker affiliate fee:', brokerAffiliateFee.toString())
-    console.log('Non-broker affiliate fee:', noBrokerAffiliateFee.toString())
+    console.log('Broker affiliate fee:', estimatedSwapWithBroker.fees.affiliateFee.formatedAssetString())
+    console.log('Non-broker affiliate fee:', estimatedSwapWithoutBroker.fees.affiliateFee.formatedAssetString())
+    console.log(
+      'Network fee:',
+      estimatedSwapWithoutBroker.fees.networkFee ? estimatedSwapWithoutBroker.fees.networkFee.formatedAssetString() : 0,
+    )
 
     // With broker configuration, affiliate fees should be higher (broker takes commission)
     // This test might need adjustment based on actual broker behavior

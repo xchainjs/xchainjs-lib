@@ -27,6 +27,7 @@ type Fees = {
   asset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset for which fees are calculated
   affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The affiliate fee amount
   outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The outbound fee amount
+  networkFee?: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The network fee amount
 }
 
 /**
