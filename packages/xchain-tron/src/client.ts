@@ -476,15 +476,20 @@ export abstract class Client extends BaseXChainClient {
 
     if (isNative) {
       const transaction = await this.tronWeb.transactionBuilder.sendTrx(recipient, Number(amount), sender)
-
+  
+      let finalTransaction = transaction
       if (memo) {
-        const transactionWithMemo = await this.tronWeb.transactionBuilder.addUpdateData(transaction, memo, 'utf8')
-        const signedTx = await this.signTransaction(transactionWithMemo, walletIndex)
-        const { result, txid, message } = await this.tronWeb.trx.sendRawTransaction(signedTx)
+        finalTransaction = await this.tronWeb.transactionBuilder.addUpdateData(transaction, memo, 'utf8')
       }
-
-      const signedTx = await this.signTransaction(transaction, walletIndex)
+      
+      const signedTx = await this.signTransaction(finalTransaction, walletIndex)
       const { result, txid, message } = await this.tronWeb.trx.sendRawTransaction(signedTx)
+      
+      if (!result) {
+        throw new Error(Buffer.from(message, 'hex').toString('utf8'))
+      }
+      
+      return txid
     }
 
     // TRC20 Token Transfer - always use createTransaction + sign pattern
