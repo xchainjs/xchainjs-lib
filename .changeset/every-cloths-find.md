@@ -2,4 +2,4 @@
 '@xchainjs/xchain-aggregator': patch
 ---
 
-Fix quoted slip & add booste quote options
+Fix quoted slip & add boost quote options
