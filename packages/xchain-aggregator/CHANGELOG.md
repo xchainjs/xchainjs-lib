@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.30
+
+### Patch Changes
+
+- 0074eea: Fix quoted slip & add boost quote options
+
 ## 2.0.29
 
 ### Patch Changes
