@@ -12,7 +12,7 @@ import {
 } from '@xchainjs/xchain-util'
 import type BigNumber from 'bignumber.js'
 
-export type CompatibleAsset = Asset | TokenAsset | SynthAsset
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset
 
 /**
  * Represents fees associated with a swap.
