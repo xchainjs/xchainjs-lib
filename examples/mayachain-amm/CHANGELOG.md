@@ -1,5 +1,13 @@
 # xchainjs-maya-do-swap
 
+## 2.0.23
+
+### Patch Changes
+
+- Updated dependencies [8df7c54]
+  - @xchainjs/xchain-mayachain-query@2.1.4
+  - @xchainjs/xchain-mayachain-amm@4.1.5
+
 ## 2.0.22
 
 ### Patch Changes
