@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.4
+
+### Patch Changes
+
+- 8df7c54: Add type TradeAsset to Compatible Asset types
+
 ## 2.1.3
 
 ### Patch Changes
