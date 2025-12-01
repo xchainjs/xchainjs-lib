@@ -1,5 +1,18 @@
 # xchainjs-do-swap
 
+## 2.0.26
+
+### Patch Changes
+
+- Updated dependencies [cb963d7]
+  - @xchainjs/xchain-evm-providers@2.0.12
+  - @xchainjs/xchain-avax@2.0.13
+  - @xchainjs/xchain-bsc@2.0.14
+  - @xchainjs/xchain-ethereum@2.0.14
+  - @xchainjs/xchain-evm@2.0.13
+  - @xchainjs/xchain-thorchain-amm@3.0.26
+  - @xchainjs/xchain-wallet@2.0.19
+
 ## 2.0.25
 
 ### Patch Changes

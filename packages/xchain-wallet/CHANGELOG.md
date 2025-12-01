@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.19
+
+### Patch Changes
+
+- @xchainjs/xchain-evm@2.0.13
+
 ## 2.0.18
 
 ### Patch Changes
