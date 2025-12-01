@@ -1,7 +1,7 @@
 // Import necessary modules and classes from external packages and files
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
-import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
+import { RoutescanProvider } from '@xchainjs/xchain-evm-providers'
 import { Asset, AssetType, TokenAsset } from '@xchainjs/xchain-util'
 import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
@@ -24,7 +24,6 @@ export const AssetARB: TokenAsset = {
 }
 
 // Define JSON-RPC providers for mainnet and testnet
-// Ankr api key
 const ARBITRUM_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider('https://arb1.arbitrum.io/rpc')
 const ARBITRUM_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://goerli-rollup.arbitrum.io/rpc')
 
@@ -35,32 +34,29 @@ const ethersJSProviders = {
   [Network.Stagenet]: ARBITRUM_MAINNET_ETHERS_PROVIDER,
 }
 
-// Define online providers (Etherscan) for mainnet and testnet
-const ARB_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
+// Etherscan providers removed - Etherscan's gas oracle doesn't support Arbitrum
+
+const ROUTESCAN_PROVIDER_MAINNET = new RoutescanProvider(
   ARBITRUM_MAINNET_ETHERS_PROVIDER,
-  'https://api.etherscan.io/v2',
-  process.env.ETHERSCAN_API_KEY || '',
-  ARBChain,
-  AssetAETH,
-  18,
+  'https://api.routescan.io',
   42161,
-)
-
-const ARB_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
-  ARBITRUM_TESTNET_ETHERS_PROVIDER,
-  'https://api.etherscan.io/v2',
-  process.env.ETHERSCAN_API_KEY || '',
-  ARBChain,
   AssetAETH,
-  18,
-  421614,
+  ARB_DECIMAL,
 )
 
-// Define providers for different networks
-const arbProviders = {
-  [Network.Mainnet]: ARB_ONLINE_PROVIDER_MAINNET,
-  [Network.Testnet]: ARB_ONLINE_PROVIDER_TESTNET,
-  [Network.Stagenet]: ARB_ONLINE_PROVIDER_MAINNET,
+const ROUTESCAN_PROVIDER_TESTNET = new RoutescanProvider(
+  ARBITRUM_TESTNET_ETHERS_PROVIDER,
+  'https://api.routescan.io',
+  421614,
+  AssetAETH,
+  ARB_DECIMAL,
+  true,
+)
+
+const routescanProviders = {
+  [Network.Mainnet]: ROUTESCAN_PROVIDER_MAINNET,
+  [Network.Testnet]: ROUTESCAN_PROVIDER_TESTNET,
+  [Network.Stagenet]: ROUTESCAN_PROVIDER_MAINNET,
 }
 
 // Define explorer providers for mainnet and testnet
@@ -120,7 +116,7 @@ export const defaultArbParams: EVMClientParams = {
   defaults,
   providers: ethersJSProviders,
   explorerProviders: arbExplorerProviders,
-  dataProviders: [arbProviders],
+  dataProviders: [routescanProviders],
   network: Network.Mainnet,
   feeBounds: {
     lower: LOWER_FEE_BOUND,

@@ -1,5 +1,5 @@
 import { Provider } from 'ethers'
-import { TxHistoryParams } from '@xchainjs/xchain-client'
+import { FeeOption, FeeRates, TxHistoryParams } from '@xchainjs/xchain-client'
 import { Asset } from '@xchainjs/xchain-util'
 
 import { Tx, TxsPage } from '../../types'
@@ -77,6 +77,22 @@ export class RoutescanProvider extends EtherscanProvider {
     return {
       total: transactions.length,
       txs: transactions.filter((_, index) => index >= offset && index < offset + limit),
+    }
+  }
+
+  /**
+   * Override getFeeRates to handle Routescan's API response format correctly.
+   * Routescan returns gas prices in wei (not gwei), so we don't multiply by 10^9.
+   *
+   * @returns {Promise<FeeRates>} The fee rates in wei
+   */
+  async getFeeRates(): Promise<FeeRates> {
+    const gasOracleResponse = await etherscanAPI.getGasOracle(this.baseUrl, this.apiKey)
+
+    return {
+      [FeeOption.Average]: Number(gasOracleResponse.SafeGasPrice),
+      [FeeOption.Fast]: Number(gasOracleResponse.ProposeGasPrice),
+      [FeeOption.Fastest]: Number(gasOracleResponse.FastGasPrice),
     }
   }
 }
