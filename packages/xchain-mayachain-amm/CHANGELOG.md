@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.6
+
+### Patch Changes
+
+- Updated dependencies [cb963d7]
+  - @xchainjs/xchain-arbitrum@2.0.13
+  - @xchainjs/xchain-ethereum@2.0.14
+  - @xchainjs/xchain-evm@2.0.13
+  - @xchainjs/xchain-wallet@2.0.19
+
 ## 4.1.5
 
 ### Patch Changes

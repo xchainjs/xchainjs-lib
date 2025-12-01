@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.12
+
+### Patch Changes
+
+- cb963d7: Routescan returns gas prices in wei (not gwei) and should not inherit parent function
+
 ## 2.0.11
 
 ### Patch Changes
