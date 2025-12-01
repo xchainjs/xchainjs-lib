@@ -47,7 +47,7 @@ const ROUTESCAN_PROVIDER_MAINNET = new RoutescanProvider(
 const ROUTESCAN_PROVIDER_TESTNET = new RoutescanProvider(
   ARBITRUM_TESTNET_ETHERS_PROVIDER,
   'https://api.routescan.io',
-  421614,
+  421613,
   AssetAETH,
   ARB_DECIMAL,
   true,
