@@ -33,7 +33,9 @@
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
-    "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
+    "@bitgo/utxo-lib": "^11.11.0",
+    "@ledgerhq/hw-app-btc": "^10.11.2",
+    "@ledgerhq/hw-transport": "^6.31.12",
     "@mayaprotocol/zcash-js": "1.0.7",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/xchain-client": "workspace:*",
@@ -41,6 +43,7 @@
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-utxo": "workspace:*",
     "@xchainjs/xchain-utxo-providers": "workspace:*",
+    "coinselect": "3.1.12",
     "ecpair": "2.1.0"
   },
   "publishConfig": {

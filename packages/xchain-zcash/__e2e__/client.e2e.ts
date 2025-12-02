@@ -12,7 +12,8 @@ describe('Zcash client', () => {
   })
 
   it('Should get address', async () => {
-    console.log(await client.getAddressAsync(1))
+    const address = await client.getAddressAsync(0)
+    console.log('address', address)
   })
 
   it('Should get balance', async () => {
