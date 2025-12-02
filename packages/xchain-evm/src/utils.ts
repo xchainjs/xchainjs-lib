@@ -3,6 +3,7 @@ import { Signer, Contract, Provider, getAddress, InterfaceAbi, BaseContract } fr
 import BigNumber from 'bignumber.js'
 
 import erc20ABI from './data/erc20.json'
+import { getCachedContract, getCachedBigNumber } from './cache'
 /**
  * Maximum approval amount possible, set to 2^256 - 1.
  */
@@ -93,7 +94,7 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
  * @returns {ethers.BigNumber} The approval amount.
  */
 export const getApprovalAmount = (amount?: BaseAmount): BigNumber =>
-  amount && amount.gt(baseAmount(0, amount.decimal)) ? new BigNumber(amount.amount().toFixed()) : MAX_APPROVAL
+  amount && amount.gt(baseAmount(0, amount.decimal)) ? getCachedBigNumber(amount.amount().toFixed()) : MAX_APPROVAL
 
 /**
  * Estimate gas required for calling a contract function.
@@ -119,9 +120,9 @@ export const estimateCall = async ({
   funcName: string
   funcParams?: unknown[]
 }): Promise<BigNumber> => {
-  const contract = new Contract(contractAddress, abi, provider)
+  const contract = getCachedContract(contractAddress, abi, provider)
   const estiamtion = await contract.getFunction(funcName).estimateGas(...funcParams)
-  return new BigNumber(estiamtion.toString())
+  return getCachedBigNumber(estiamtion.toString())
 }
 /**
  * Calls a contract function.
@@ -149,7 +150,7 @@ export const call = async <T>({
   funcName: string
   funcParams?: unknown[]
 }): Promise<T> => {
-  let contract: BaseContract = new Contract(contractAddress, abi, provider)
+  let contract: BaseContract = getCachedContract(contractAddress, abi, provider)
   if (signer) {
     // For sending transactions, a signer is needed
     contract = contract.connect(signer)
@@ -175,7 +176,7 @@ export const getContract = async ({
   contractAddress: Address
   abi: InterfaceAbi
 }): Promise<Contract> => {
-  return new Contract(contractAddress, abi, provider)
+  return getCachedContract(contractAddress, abi, provider)
 }
 
 /**
@@ -238,10 +239,10 @@ export async function isApproved({
   fromAddress: Address
   amount?: BaseAmount
 }): Promise<boolean> {
-  const txAmount = new BigNumber(amount?.amount().toFixed() ?? 1)
-  const contract: Contract = new Contract(contractAddress, erc20ABI, provider)
+  const txAmount = getCachedBigNumber(amount?.amount().toFixed() ?? '1')
+  const contract = getCachedContract(contractAddress, erc20ABI, provider)
   const allowanceResponse = await contract.allowance(fromAddress, spenderAddress)
-  const allowance: BigNumber = new BigNumber(allowanceResponse.toString())
+  const allowance = getCachedBigNumber(allowanceResponse.toString())
 
   return txAmount.lte(allowance)
 }
