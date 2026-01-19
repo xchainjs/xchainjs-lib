@@ -359,18 +359,26 @@ export const assetFromStringEx = (s: string): AnyAsset => {
  * @returns {string} The string from the given asset.
  */
 export const assetToString = ({ chain, symbol, type }: AnyAsset) => {
+  let delimiter = NATIVE_ASSET_DELIMITER;
+  
   switch (type) {
     case AssetType.SYNTH:
-      return `${chain}${SYNTH_ASSET_DELIMITER}${symbol}`
+      delimiter = SYNTH_ASSET_DELIMITER;
+      break;
     case AssetType.TOKEN:
-      return `${chain}${TOKEN_ASSET_DELIMITER}${symbol}`
+      delimiter = TOKEN_ASSET_DELIMITER;
+      break;
     case AssetType.TRADE:
-      return `${chain}${TRADE_ASSET_DELIMITER}${symbol}`
+      delimiter = TRADE_ASSET_DELIMITER;
+      break;
     case AssetType.SECURED:
-      return `${chain}${SECURED_ASSET_DELIMITER}${symbol}`
+      delimiter = SECURED_ASSET_DELIMITER;
+      break;
     default:
-      return `${chain}${NATIVE_ASSET_DELIMITER}${symbol}`
+      break;
   }
+
+  return `${chain}${delimiter}${symbol}`;
 }
 
 /**
