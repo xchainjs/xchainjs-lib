@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@chainflip/sdk": "1.11.2",
-    "@trpc/server": "^10.45.2",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-mayachain": "workspace:*",
     "@xchainjs/xchain-mayachain-amm": "workspace:*",
