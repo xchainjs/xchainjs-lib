@@ -1,3 +1,4 @@
+import { Network } from '@xchainjs/xchain-client'
 import { assetToString, isTokenAsset } from '@xchainjs/xchain-util'
 
 import { DEFAULT_CONFIG } from './const'
@@ -22,10 +23,19 @@ export class Aggregator {
   constructor(config?: Config) {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
 
-    this.verifyConfig(fConfig)
+    // Determine network: explicit config.network > wallet network > default
+    let network = config?.network || Network.Mainnet
+    if (!config?.network && config?.wallet) {
+      network = config.wallet.getNetwork()
+    }
+    const configWithNetwork = { ...fConfig, network }
 
-    this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
-    this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
+    this.verifyConfig(configWithNetwork)
+
+    this.protocols = configWithNetwork.protocols.map((protocol) =>
+      ProtocolFactory.getProtocol(protocol, configWithNetwork),
+    )
+    this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
   /**
@@ -33,20 +43,29 @@ export class Aggregator {
    * @returns {Omit<Config, 'wallet'>} the current Aggregator configuration
    */
   public getConfiguration(): Omit<Config & { protocols: Protocol[] }, 'wallet'> {
-    return { protocols: this.config.protocols, affiliate: this.config.affiliate }
+    return { protocols: this.config.protocols, affiliate: this.config.affiliate, network: this.config.network }
   }
 
   /**
    * Update the Aggregator configuration
-   * @param {Configuration} config
+   * @param {Config} config
    */
   public setConfiguration(config: Config) {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
 
-    this.verifyConfig(fConfig)
+    // Determine network: explicit config.network > wallet network > mainnet default
+    let network = config.network || Network.Mainnet
+    if (!config.network && config.wallet) {
+      network = config.wallet.getNetwork()
+    }
+    const configWithNetwork = { ...fConfig, network }
 
-    this.protocols = fConfig.protocols.map((protocol) => ProtocolFactory.getProtocol(protocol, fConfig))
-    this.config = { ...fConfig, protocols: this.protocols.map((protocol) => protocol.name) }
+    this.verifyConfig(configWithNetwork)
+
+    this.protocols = configWithNetwork.protocols.map((protocol) =>
+      ProtocolFactory.getProtocol(protocol, configWithNetwork),
+    )
+    this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
   /**

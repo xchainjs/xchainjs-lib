@@ -255,7 +255,7 @@ export class Client extends BaseXChainClient {
   }
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const address = params?.address || (await this.getAddress())
+    const address = params?.address || (await this.getAddressAsync())
     const offset = params?.offset || 0
 
     if (params?.limit && params.limit > 10) {

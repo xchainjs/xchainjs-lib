@@ -1,7 +1,7 @@
 import { Tx } from '@xchainjs/xchain-client'
 import { assetAmount, assetToBase, assetToString, baseToAsset } from '@xchainjs/xchain-util'
 
-import { AssetCacao, CACAO_DECIMAL, Client, DepositTx } from '..'
+import { AssetCacao, CACAO_DECIMAL, Client, DepositTx } from '../src'
 
 const getPrintableTx = (tx: Tx) => {
   return {

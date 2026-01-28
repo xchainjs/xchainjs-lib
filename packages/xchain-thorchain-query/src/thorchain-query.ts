@@ -144,8 +144,8 @@ export class ThorchainQuery {
       destinationAddress,
       streamingInterval,
       streamingQuantity,
-      liquidityToleranceBps,
       toleranceBps,
+      liquidityToleranceBps,
       affiliateBps,
       affiliateAddress,
       height,
@@ -467,7 +467,7 @@ export class ThorchainQuery {
     assetOrRuneAddress?: string,
   ): Promise<LiquidityPosition> {
     const poolAsset = await this.thorchainCache.getPoolForAsset(asset)
-    if (!poolAsset) throw Error(`Could not find pool for ${asset}`)
+    if (!poolAsset) throw Error(`Could not find pool for ${assetToString(asset)}`)
     if (!assetOrRuneAddress) throw Error(`No address provided ${assetOrRuneAddress}`)
     // Get the current block number for that chain
     const liquidityProvider = await this.thorchainCache.thornode.getLiquidityProvider(
@@ -1293,7 +1293,7 @@ export class ThorchainQuery {
         aliases: thornameAliases || [],
       }
       return thornameDetails
-    } catch (e) {
+    } catch (_e) {
       // If an error occurs during the process, return an object with error details
       const errorResp: ThornameDetails = {
         name: '',

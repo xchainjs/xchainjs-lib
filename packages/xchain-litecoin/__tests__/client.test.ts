@@ -87,7 +87,7 @@ describe('LitecoinClient Test', () => {
   })
 
   it('should not throw an error for setting a good phrase', () => {
-    expect(ltcClient.setPhrase(phraseOne)).toBeUndefined
+    expect(ltcClient.setPhrase(phraseOne)).toBeTruthy()
   })
 
   it('should not throw on a client without a phrase', () => {

@@ -1,5 +1,75 @@
 # txJammer
 
+## 1.0.67
+
+### Patch Changes
+
+- @xchainjs/xchain-avax@2.0.13
+- @xchainjs/xchain-bsc@2.0.14
+- @xchainjs/xchain-ethereum@2.0.14
+- @xchainjs/xchain-thorchain-amm@3.0.26
+- @xchainjs/xchain-wallet@2.0.19
+
+## 1.0.66
+
+### Patch Changes
+
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-thorchain-query@2.0.15
+  - @xchainjs/xchain-thorchain-amm@3.0.25
+
+## 1.0.65
+
+### Patch Changes
+
+- @xchainjs/xchain-wallet@2.0.18
+- @xchainjs/xchain-thorchain-amm@3.0.24
+
+## 1.0.64
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-query@2.0.14
+- @xchainjs/xchain-thorchain-amm@3.0.23
+
+## 1.0.63
+
+### Patch Changes
+
+- Updated dependencies [c7e4405]
+  - @xchainjs/xchain-thorchain-amm@3.0.22
+
+## 1.0.62
+
+### Patch Changes
+
+- Updated dependencies [ff17bc1]
+- Updated dependencies [d6c3f36]
+  - @xchainjs/xchain-thorchain-amm@3.0.21
+  - @xchainjs/xchain-thorchain-query@2.0.13
+
+## 1.0.61
+
+### Patch Changes
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-cosmos@3.0.9
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-thorchain-query@2.0.12
+  - @xchainjs/xchain-ethereum@2.0.13
+  - @xchainjs/xchain-litecoin@2.0.9
+  - @xchainjs/xchain-bitcoin@2.0.9
+  - @xchainjs/xchain-wallet@2.0.17
+  - @xchainjs/xchain-avax@2.0.12
+  - @xchainjs/xchain-doge@2.0.9
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-bsc@2.0.13
+  - @xchainjs/xchain-thorchain-amm@3.0.20
+  - @xchainjs/xchain-bitcoincash@2.0.10
+
 ## 1.0.60
 
 ### Patch Changes

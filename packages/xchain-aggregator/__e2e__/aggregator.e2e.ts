@@ -11,8 +11,9 @@ import {
 import { Network } from '@xchainjs/xchain-client'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { AssetKUJI } from '@xchainjs/xchain-kujira'
-import { Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
+import { Client as ThorClient, THORChain, AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Client as SolClient, SOLAsset, defaultSolanaParams } from '@xchainjs/xchain-solana'
+import { AssetTRX, Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
 import {
   AssetType,
   CryptoAmount,
@@ -103,22 +104,31 @@ describe('Aggregator', () => {
       BNB: new BscClient({ ...defaultBscParams, phrase, network: Network.Mainnet }),
       THOR: new ThorClient({ phrase, network: Network.Mainnet }),
       SOL: new SolClient({ ...defaultSolanaParams, phrase, network: Network.Mainnet }),
+      TRON: new TronClient({ ...defaultTRONParams, phrase, network: Network.Mainnet }),
     })
-    aggregator = new Aggregator({ wallet })
+    aggregator = new Aggregator({
+      wallet,
+      affiliate: {
+        basisPoints: 30,
+        affiliates: { Thorchain: 'dx', Mayachain: 'dx' },
+      },
+    })
   })
 
   it('Should get configuration', () => {
     console.log(aggregator.getConfiguration())
   })
 
-  it('Should find swap with greatest expected amount', async () => {
+  it('Should find swap with greatest expected amount 1', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
-      destinationAsset: SOLAsset,
+      destinationAsset: AssetRuneNative,
       fromAddress: await wallet.getAddress(BTCChain),
-      destinationAddress: 'FakeSolAddress',
+      destinationAddress: 'fakeruneAddress',
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
+      liquidityToleranceBps: 50,
     })
+    console.log(estimatedSwap)
     printQuoteSwap(bestSwap(estimatedSwap))
   })
   it('Should find swap on CF with usdt', async () => {
@@ -259,5 +269,55 @@ describe('Aggregator', () => {
     })
 
     console.log(txSubmitted)
+  })
+
+  it('Should estimate swap from TRON.TRX to THOR.RUNE', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: AssetTRX,
+      destinationAsset: assetFromStringEx('THOR.RUNE'),
+      fromAddress: await wallet.getAddress(AssetTRX.chain),
+      destinationAddress: await wallet.getAddress(THORChain),
+      amount: new CryptoAmount(assetToBase(assetAmount(1000, 6)), AssetTRX),
+    })
+    printQuoteSwap(bestSwap(estimatedSwap))
+  })
+
+  it('Should estimate swap from THOR.RUNE to TRON.TRX', async () => {
+    const estimatedSwap = await aggregator.estimateSwap({
+      fromAsset: assetFromStringEx('THOR.RUNE'),
+      destinationAsset: AssetTRX,
+      fromAddress: await wallet.getAddress(THORChain),
+      destinationAddress: await wallet.getAddress(AssetTRX.chain),
+      amount: new CryptoAmount(assetToBase(assetAmount(100, 8)), assetFromStringEx('THOR.RUNE')),
+    })
+    printQuoteSwap(bestSwap(estimatedSwap))
+  })
+
+  it('Should use Chainflip protocol with affiliateBrokers and brokerUrl', async () => {
+    const aggregatorWithAffiliateBrokers = new Aggregator({
+      wallet,
+      protocols: ['Chainflip'],
+      affiliateBrokers: [
+        {
+          account: 'cFJdAjJmZqHim5F3GvywoNxxtmzhYGRVnuzfbvGNv13gk7fXN',
+          commissionBps: 30,
+        },
+      ],
+      brokerUrl: 'https://api.broker.example.com',
+    })
+
+    const estimatedSwap = await aggregatorWithAffiliateBrokers.estimateSwap({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      fromAddress: await wallet.getAddress(ETHChain),
+      destinationAddress: await wallet.getAddress(BTCChain),
+      amount: new CryptoAmount(assetToBase(assetAmount(0.1, 18)), AssetETH),
+    })
+    console.log(estimatedSwap)
+    const chainflipQuote = estimatedSwap.find((quote) => quote.protocol === 'Chainflip')
+    expect(chainflipQuote).toBeDefined()
+    expect(chainflipQuote?.canSwap).toBe(true)
+
+    console.log('Chainflip quote with affiliate brokers:', chainflipQuote)
   })
 })

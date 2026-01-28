@@ -7,8 +7,8 @@ import THORChainApp, { extractSignatureFromTLV } from '@xchainjs/ledger-thorchai
 import { CompatibleAsset, base64ToBech32, bech32ToBase64 } from '@xchainjs/xchain-cosmos-sdk'
 import { assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
-import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing'
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { SignMode } from 'cosmjs-types/cosmos/tx/signing/v1beta1/signing.js'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 
 import { Client, ThorchainClientParams } from './client'
 import { AssetRuneNative, DEPOSIT_GAS_LIMIT_VALUE, defaultClientConfig } from './const'
@@ -135,7 +135,7 @@ export class ClientLedger extends Client {
     const aminoTypes = this.getProtocolAminoMessages()
 
     const rawTx = TxRaw.fromPartial({
-      bodyBytes: await this.registry.encodeTxBody({
+      bodyBytes: this.registry.encodeTxBody({
         memo,
         messages: msgs.map((msg: AminoMsg) => aminoTypes.fromAmino(msg)),
       }),
@@ -220,7 +220,7 @@ export class ClientLedger extends Client {
     const aminoTypes = this.getProtocolAminoMessages()
 
     const rawTx = TxRaw.fromPartial({
-      bodyBytes: await this.registry.encodeTxBody({
+      bodyBytes: this.registry.encodeTxBody({
         messages: msgs.map((msg: AminoMsg) => aminoTypes.fromAmino(msg)),
         memo: params.memo,
       }),

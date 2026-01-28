@@ -1,6 +1,7 @@
+import { Network } from '@xchainjs/xchain-client'
 import { AssetRuneNative, THORChain } from '@xchainjs/xchain-thorchain'
 import { ApproveParams, IsApprovedParams, ThorchainAMM } from '@xchainjs/xchain-thorchain-amm'
-import { ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { ThorchainCache, ThorchainQuery, Thornode } from '@xchainjs/xchain-thorchain-query'
 import {
   AnyAsset,
   Chain,
@@ -22,6 +23,8 @@ import {
   TxSubmitted,
 } from '../../types'
 
+import { Midgard, MidgardCache, MidgardQuery } from '@xchainjs/xchain-midgard-query'
+
 export class ThorchainProtocol implements IProtocol {
   public readonly name = 'Thorchain'
   private thorchainQuery: ThorchainQuery
@@ -30,7 +33,13 @@ export class ThorchainProtocol implements IProtocol {
   private wallet?: Wallet
 
   constructor(configuration?: ProtocolConfig) {
-    this.thorchainQuery = new ThorchainQuery()
+    // Use network from configuration, fallback to wallet network, or default to mainnet
+    const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
+
+    // Create ThorchainQuery with proper network configuration
+    const midgardCache = new MidgardCache(new Midgard(network))
+    const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
+    this.thorchainQuery = new ThorchainQuery(thorchainCache)
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration
     this.wallet = configuration?.wallet
@@ -67,10 +76,22 @@ export class ThorchainProtocol implements IProtocol {
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (eqAsset(asset, AssetRuneNative) || isTradeAsset(asset) || isSynthAsset(asset) || isSecuredAsset(asset))
       return true
-    const pools = await this.thorchainQuery.thorchainCache.getPools()
-    return (
-      Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
-    )
+
+    try {
+      const pools = await this.thorchainQuery.thorchainCache.getPools()
+      return (
+        Object.values(pools).findIndex((pool) => pool.isAvailable() && assetToString(asset) === pool.assetString) !== -1
+      )
+    } catch (error) {
+      // Optimistic fallback: if Midgard is down, assume asset is supported
+      // This allows quoting to continue - if the asset isn't actually supported,
+      // the quote estimation will fail gracefully with appropriate error messages
+      console.warn(
+        `Midgard unavailable for asset validation, optimistically assuming ${assetToString(asset)} is supported:`,
+        error,
+      )
+      return true
+    }
   }
 
   /**

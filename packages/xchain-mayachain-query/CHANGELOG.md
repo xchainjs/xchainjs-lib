@@ -1,5 +1,45 @@
 # Changelog
 
+## 2.1.4
+
+### Patch Changes
+
+- 8df7c54: Add type TradeAsset to Compatible Asset types
+
+## 2.1.3
+
+### Patch Changes
+
+- 76dfcb8: Add params liquidity tolerance bps to swap params
+
+## 2.1.2
+
+### Patch Changes
+
+- f908f2d: Add pools api to mayachain query and updated decimal cache
+
+## 2.1.1
+
+### Patch Changes
+
+- 63ec81f: Fix ESM (ECMAScript Module) compatibility issues
+
+  - Update bignumber.js to 9.1.2 for proper ESM support
+  - Change bitcore-lib-cash imports from namespace to default imports for ESM compatibility
+  - Change @dashevo/dashcore-lib imports from namespace to default imports for ESM compatibility
+  - Add .js extensions to coinselect/accumulative imports for ESM
+  - Add .js extensions to cosmjs-types imports for ESM
+  - Update module type declarations for ESM compatibility
+  - Regenerate protobuf files with correct ESM import patterns
+
+  This enables the library to work properly in ESM environments (Node.js type: "module", modern bundlers, etc.)
+
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-mayamidgard-query@1.0.10
+
 ## 2.1.0
 
 ### Minor Changes

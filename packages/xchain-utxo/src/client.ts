@@ -78,7 +78,7 @@ export abstract class Client extends BaseXChainClient {
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     // Filter the parameters for transaction history
     const filteredParams: TxHistoryParams = {
-      address: params?.address || (await this.getAddress()),
+      address: params?.address || (await this.getAddressAsync()),
       offset: params?.offset,
       limit: params?.limit,
       startTime: params?.startTime,
@@ -109,10 +109,10 @@ export abstract class Client extends BaseXChainClient {
    */
   // TODO (@xchain-team|@veado) Change params to be an object to be extendable more easily
   // see changes for `xchain-bitcoin` https://github.com/xchainjs/xchainjs-lib/pull/490
-  async getBalance(address: Address, _assets?: Asset[] /* not used */, confirmedOnly?: boolean): Promise<Balance[]> {
+  async getBalance(address: Address, _assets?: Asset[] /* not used */, _confirmedOnly?: boolean): Promise<Balance[]> {
     // The actual logic for getting balances
     // TODO: Use confirmedOnly parameter to filter balances
-    void confirmedOnly
+    void _confirmedOnly
     return await this.roundRobinGetBalance(address)
   }
   /**
@@ -179,7 +179,7 @@ export abstract class Client extends BaseXChainClient {
       }
     }
 
-    if (!protocol || Protocol.THORCHAIN) {
+    if (!protocol || protocol === Protocol.THORCHAIN) {
       try {
         const feeRate = await this.getFeeRateFromThorchain()
         return standardFeeRates(feeRate)
@@ -187,6 +187,16 @@ export abstract class Client extends BaseXChainClient {
         console.warn(`Can not retrieve fee rates from Thorchain`)
       }
     }
+
+    if (protocol === Protocol.MAYACHAIN) {
+      try {
+        const feeRate = await this.getFeeRateFromMayachain()
+        return standardFeeRates(feeRate)
+      } catch (_error) {
+        console.warn(`Can not retrieve fee rates from Mayachain`)
+      }
+    }
+
     // TODO: Return default value
     throw Error('Can not retrieve fee rates')
   }

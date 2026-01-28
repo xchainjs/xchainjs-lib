@@ -1,5 +1,85 @@
 # Changelog
 
+## 3.0.26
+
+### Patch Changes
+
+- @xchainjs/xchain-avax@2.0.13
+- @xchainjs/xchain-base@1.0.13
+- @xchainjs/xchain-bsc@2.0.14
+- @xchainjs/xchain-ethereum@2.0.14
+- @xchainjs/xchain-evm@2.0.13
+- @xchainjs/xchain-wallet@2.0.19
+
+## 3.0.25
+
+### Patch Changes
+
+- Updated dependencies [f9f62d2]
+- Updated dependencies [494e60b]
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-tron@3.0.1
+  - @xchainjs/xchain-solana@1.1.0
+  - @xchainjs/xchain-thorchain-query@2.0.15
+
+## 3.0.24
+
+### Patch Changes
+
+- @xchainjs/xchain-wallet@2.0.18
+
+## 3.0.23
+
+### Patch Changes
+
+- Updated dependencies [11a8634]
+- Updated dependencies [1581839]
+  - @xchainjs/xchain-tron@3.0.0
+  - @xchainjs/xchain-ripple@1.0.11
+  - @xchainjs/xchain-thorchain-query@2.0.14
+
+## 3.0.22
+
+### Patch Changes
+
+- c7e4405: fix unsupported chain issue
+
+## 3.0.21
+
+### Patch Changes
+
+- ff17bc1: Added Tron to TC AMM
+- Updated dependencies [d6c3f36]
+- Updated dependencies [713ba6f]
+  - @xchainjs/xchain-thorchain-query@2.0.13
+  - @xchainjs/xchain-tron@2.0.0
+
+## 3.0.20
+
+### Patch Changes
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+- Updated dependencies [3825976]
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-cosmos@3.0.9
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-evm@2.0.12
+  - @xchainjs/xchain-thorchain-query@2.0.12
+  - @xchainjs/xchain-ethereum@2.0.13
+  - @xchainjs/xchain-litecoin@2.0.9
+  - @xchainjs/xchain-bitcoin@2.0.9
+  - @xchainjs/xchain-wallet@2.0.17
+  - @xchainjs/xchain-avax@2.0.12
+  - @xchainjs/xchain-base@1.0.12
+  - @xchainjs/xchain-doge@2.0.9
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-bsc@2.0.13
+  - @xchainjs/xchain-ripple@1.0.10
+  - @xchainjs/xchain-bitcoincash@2.0.10
+  - @xchainjs/xchain-solana@1.0.9
+
 ## 3.0.19
 
 ### Patch Changes

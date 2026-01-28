@@ -1,5 +1,45 @@
 # Changelog
 
+## 2.0.19
+
+### Patch Changes
+
+- @xchainjs/xchain-evm@2.0.13
+
+## 2.0.18
+
+### Patch Changes
+
+- Updated dependencies [b155e18]
+  - @xchainjs/xchain-mayachain@4.1.0
+
+## 2.0.17
+
+### Patch Changes
+
+- 63ec81f: Fix ESM (ECMAScript Module) compatibility issues
+
+  - Update bignumber.js to 9.1.2 for proper ESM support
+  - Change bitcore-lib-cash imports from namespace to default imports for ESM compatibility
+  - Change @dashevo/dashcore-lib imports from namespace to default imports for ESM compatibility
+  - Add .js extensions to coinselect/accumulative imports for ESM
+  - Add .js extensions to cosmjs-types imports for ESM
+  - Update module type declarations for ESM compatibility
+  - Regenerate protobuf files with correct ESM import patterns
+
+  This enables the library to work properly in ESM environments (Node.js type: "module", modern bundlers, etc.)
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-mayachain@4.0.1
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-utxo@2.0.9
+  - @xchainjs/xchain-evm@2.0.12
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-radix@2.0.9
+
 ## 2.0.16
 
 ### Patch Changes

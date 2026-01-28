@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-dash",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "Custom Dash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -29,7 +29,7 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.mjs",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
-    "axios": "^1.8.4",
+    "axios": "1.12.1",
     "axios-mock-adapter": "^2.1.0"
   },
   "publishConfig": {

@@ -1,7 +1,7 @@
 {
   "name": "xchainjs-estimate-swap",
   "private": true,
-  "version": "2.0.11",
+  "version": "2.0.15",
   "scripts": {
     "listPools": "npx ts-node listPools.ts",
     "estimateSwap": "npx ts-node estimateSwap.ts",
@@ -20,9 +20,9 @@
     "@xchainjs/xchain-thorchain-query": "workspace:*",
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.8.4",
+    "axios": "1.12.1",
     "axios-retry": "^3.2.5",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^9.1.2",
     "rimraf": "~3.0.2"
   },
   "devDependencies": {

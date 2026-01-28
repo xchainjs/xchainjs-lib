@@ -22,7 +22,7 @@ import { Address, BaseAmount, assetFromString, eqAsset, isSynthAsset } from '@xc
 import { bech32 } from '@scure/base'
 import BigNumber from 'bignumber.js'
 import { HDKey } from '@scure/bip32'
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 import { createHash } from 'crypto'
 import * as secp from '@bitcoin-js/tiny-secp256k1-asmjs'
 
@@ -112,7 +112,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
    * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
    * @returns {string} The user address at the specified walletIndex.
    */
-  public getAddress(walletIndex?: number | undefined): string {
+  public getAddress(walletIndex?: number): string {
     const seed = getSeed(this.phrase)
     const node = HDKey.fromMasterSeed(seed)
     const child = node.derive(this.getFullDerivationPath(walletIndex || 0))
@@ -434,7 +434,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
     try {
       return createHash('rmd160').update(sha256Hash).digest()
-    } catch (err) {
+    } catch (_err) {
       return createHash('ripemd160').update(sha256Hash).digest()
     }
   }

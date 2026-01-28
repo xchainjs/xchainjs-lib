@@ -11,6 +11,7 @@ import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
+import { Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
 import {
   AssetRuneNative,
   Client as ThorClient,
@@ -102,6 +103,7 @@ export class ThorchainAMM {
       BASE: new BaseClient({ ...defaultBaseParams, network: Network.Mainnet }),
       XRP: new XRPClient({ ...defaultXRPParams, network: Network.Mainnet }),
       SOL: new SOLClient({ ...defaultSolanaParams, network: Network.Mainnet }),
+      TRON: new TronClient({ ...defaultTRONParams, network: Network.Mainnet }),
     }),
   ) {
     this.thorchainQuery = thorchainQuery
@@ -360,7 +362,7 @@ export class ThorchainAMM {
   public async addLiquidityPosition(params: AddliquidityPosition): Promise<TxSubmitted[]> {
     // Check amounts are greater than fees and use return estimated wait
     const checkLPAdd = await this.thorchainQuery.estimateAddLP(params)
-    if (!checkLPAdd.canAdd) throw Error(`${checkLPAdd.errors}`)
+    if (!checkLPAdd.canAdd) throw Error(`${checkLPAdd.errors.join(', ')}`)
 
     const inboundAsgard = (await this.thorchainQuery.thorchainCache.getInboundDetails())[params.asset.asset.chain]
       .address
@@ -539,7 +541,7 @@ export class ThorchainAMM {
    */
   public async withdrawSaver(withdrawParams: SaversWithdraw): Promise<TxSubmitted> {
     const withdrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
-    if (withdrawEstimate.errors.length > 0) throw Error(`${withdrawEstimate.errors}`)
+    if (withdrawEstimate.errors.length > 0) throw Error(withdrawEstimate.errors.join(', '))
 
     return ThorchainAction.makeAction({
       wallet: this.wallet,
@@ -574,7 +576,7 @@ export class ThorchainAMM {
    */
   public async addLoan(loanOpenParams: LoanOpenParams): Promise<TxSubmitted> {
     const loanOpen: LoanOpenQuote = await this.thorchainQuery.getLoanQuoteOpen(loanOpenParams)
-    if (loanOpen.errors.length > 0) throw Error(`${loanOpen.errors}`)
+    if (loanOpen.errors.length > 0) throw Error(loanOpen.errors.join(', '))
 
     return ThorchainAction.makeAction({
       wallet: this.wallet,
@@ -592,7 +594,7 @@ export class ThorchainAMM {
   public async withdrawLoan(loanCloseParams: LoanCloseParams): Promise<TxSubmitted> {
     const withdrawLoan = await this.thorchainQuery.getLoanQuoteClose(loanCloseParams)
     // Checks if there are any errors in the quote
-    if (withdrawLoan.errors.length > 0) throw Error(`${withdrawLoan.errors}`)
+    if (withdrawLoan.errors.length > 0) throw Error(withdrawLoan.errors.join(', '))
 
     return ThorchainAction.makeAction({
       wallet: this.wallet,

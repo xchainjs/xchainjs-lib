@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-amm",
-  "version": "3.0.19",
+  "version": "3.0.26",
   "description": "module that exposes estimating & swappping cryptocurrency assets on thorchain",
   "keywords": [
     "THORChain",
@@ -29,7 +29,7 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.mjs",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
   "bugs": {
@@ -51,13 +51,14 @@
     "@xchainjs/xchain-solana": "workspace:*",
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-thorchain-query": "workspace:*",
+    "@xchainjs/xchain-tron": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
     "ethers": "^6.14.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
-    "axios": "^1.8.4",
+    "axios": "1.12.1",
     "axios-mock-adapter": "^2.1.0"
   },
   "publishConfig": {

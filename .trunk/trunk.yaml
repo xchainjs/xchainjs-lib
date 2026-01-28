@@ -25,9 +25,9 @@ lint:
   enabled:
     # 🧹 General Code Quality & Formatting
     # JS/TS linting
-    - eslint@8.57.0:
+    - eslint@8.57.1:
         use_project_eslint: true
-        config: .eslintrc
+        config: eslint.config.mjs
     - prettier@2.8.8: # Code formatting
         config: .prettierrc
     #- codespell@2.4.1           # Spell-checking
@@ -62,7 +62,7 @@ lint:
       commands:
         - name: linting
           output: pass_fail
-          run: eslint --fix --max-warnings 0 ${target}
+          run: eslint --fix --max-warnings 0 --no-warn-ignored ${target}
           success_codes: [0, 1]
 
     - name: prettier

@@ -21,7 +21,7 @@ import { ERC20Tx, GetERC20TxsResponse } from './types'
 
 export class EtherscanProvider implements EvmOnlineDataProvider {
   private provider: Provider
-  private apiKey: string
+  protected apiKey: string
   protected baseUrl: string
   protected chain: Chain
   protected nativeAsset: Asset
@@ -41,8 +41,6 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     this.chain = chain
     this.nativeAsset = nativeAsset
     this.nativeAssetDecimals = nativeAssetDecimals
-    this.nativeAsset
-    this.chain
   }
   async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
     //validate assets are for the correct chain

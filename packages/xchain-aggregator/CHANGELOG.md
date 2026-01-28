@@ -1,5 +1,107 @@
 # Changelog
 
+## 2.0.32
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.6
+- @xchainjs/xchain-thorchain-amm@3.0.26
+- @xchainjs/xchain-wallet@2.0.19
+
+## 2.0.31
+
+### Patch Changes
+
+- Updated dependencies [8df7c54]
+  - @xchainjs/xchain-mayachain-query@2.1.4
+  - @xchainjs/xchain-mayachain-amm@4.1.5
+
+## 2.0.30
+
+### Patch Changes
+
+- 0074eea: Fix quoted slip & add boost quote options
+
+## 2.0.29
+
+### Patch Changes
+
+- f040892: Chainflip to return network fee & affiliate fee
+
+## 2.0.28
+
+### Patch Changes
+
+- 76dfcb8: Add params liquidity tolerance bps to swap params
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-mayachain-query@2.1.3
+  - @xchainjs/xchain-thorchain-query@2.0.15
+  - @xchainjs/xchain-mayachain-amm@4.1.4
+  - @xchainjs/xchain-thorchain-amm@3.0.25
+
+## 2.0.27
+
+### Patch Changes
+
+- Updated dependencies [b155e18]
+  - @xchainjs/xchain-mayachain@4.1.0
+  - @xchainjs/xchain-mayachain-amm@4.1.3
+  - @xchainjs/xchain-wallet@2.0.18
+  - @xchainjs/xchain-thorchain-amm@3.0.24
+
+## 2.0.26
+
+### Patch Changes
+
+- bee3ad7: Added broker url and affilates to chainflip
+- f908f2d: Add pools api to mayachain query and updated decimal cache
+- Updated dependencies [f908f2d]
+  - @xchainjs/xchain-mayachain-query@2.1.2
+  - @xchainjs/xchain-mayachain-amm@4.1.2
+  - @xchainjs/xchain-thorchain-query@2.0.14
+  - @xchainjs/xchain-thorchain-amm@3.0.23
+
+## 2.0.25
+
+### Patch Changes
+
+- c7e4405: fix unsupported chain issue
+- Updated dependencies [c7e4405]
+  - @xchainjs/xchain-thorchain-amm@3.0.22
+
+## 2.0.24
+
+### Patch Changes
+
+- c9b188c: Added network param to aggregator config
+
+## 2.0.23
+
+### Patch Changes
+
+- 67b9d17: Update chainflip/sdk
+- Updated dependencies [ff17bc1]
+- Updated dependencies [d6c3f36]
+  - @xchainjs/xchain-thorchain-amm@3.0.21
+  - @xchainjs/xchain-thorchain-query@2.0.13
+
+## 2.0.22
+
+### Patch Changes
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-mayachain@4.0.1
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-mayachain-query@2.1.1
+  - @xchainjs/xchain-thorchain-query@2.0.12
+  - @xchainjs/xchain-wallet@2.0.17
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-mayachain-amm@4.1.1
+  - @xchainjs/xchain-thorchain-amm@3.0.20
+
 ## 2.0.21
 
 ### Patch Changes

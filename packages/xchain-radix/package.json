@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-radix",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "Custom Radix client and utilities used by XChainJS clients",
   "keywords": [
     "XRD",
@@ -30,7 +30,7 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "compile": "tsc -p tsconfig.build.json",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "fund": "ts-node src/utils.ts"
   },
   "publishConfig": {

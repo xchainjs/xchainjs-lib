@@ -1,5 +1,88 @@
 # xchainjs-do-swap
 
+## 2.0.26
+
+### Patch Changes
+
+- Updated dependencies [cb963d7]
+  - @xchainjs/xchain-evm-providers@2.0.12
+  - @xchainjs/xchain-avax@2.0.13
+  - @xchainjs/xchain-bsc@2.0.14
+  - @xchainjs/xchain-ethereum@2.0.14
+  - @xchainjs/xchain-evm@2.0.13
+  - @xchainjs/xchain-thorchain-amm@3.0.26
+  - @xchainjs/xchain-wallet@2.0.19
+
+## 2.0.25
+
+### Patch Changes
+
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-thorchain-query@2.0.15
+  - @xchainjs/xchain-thorchain-amm@3.0.25
+
+## 2.0.24
+
+### Patch Changes
+
+- @xchainjs/xchain-wallet@2.0.18
+- @xchainjs/xchain-thorchain-amm@3.0.24
+
+## 2.0.23
+
+### Patch Changes
+
+- Updated dependencies [f908f2d]
+  - @xchainjs/xchain-midgard-query@2.0.10
+  - @xchainjs/xchain-thorchain-query@2.0.14
+  - @xchainjs/xchain-thorchain-amm@3.0.23
+
+## 2.0.22
+
+### Patch Changes
+
+- Updated dependencies [c7e4405]
+  - @xchainjs/xchain-thorchain-amm@3.0.22
+
+## 2.0.21
+
+### Patch Changes
+
+- Updated dependencies [ff17bc1]
+- Updated dependencies [d6c3f36]
+  - @xchainjs/xchain-thorchain-amm@3.0.21
+  - @xchainjs/xchain-thorchain-query@2.0.13
+
+## 2.0.20
+
+### Patch Changes
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+- Updated dependencies [fe9b9be]
+  - @xchainjs/xchain-cosmos-sdk@2.0.9
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-cosmos@3.0.9
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-utxo@2.0.9
+  - @xchainjs/xchain-evm@2.0.12
+  - @xchainjs/xchain-thorchain-query@2.0.12
+  - @xchainjs/xchain-ethereum@2.0.13
+  - @xchainjs/xchain-litecoin@2.0.9
+  - @xchainjs/xchain-bitcoin@2.0.9
+  - @xchainjs/xchain-wallet@2.0.17
+  - @xchainjs/xchain-avax@2.0.12
+  - @xchainjs/xchain-doge@2.0.9
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-bsc@2.0.13
+  - @xchainjs/xchain-midgard-query@2.0.9
+  - @xchainjs/xchain-thorchain-amm@3.0.20
+  - @xchainjs/xchain-bitcoincash@2.0.10
+  - @xchainjs/xchain-dash@2.0.9
+  - @xchainjs/xchain-evm-providers@2.0.11
+  - @xchainjs/xchain-utxo-providers@2.0.9
+
 ## 2.0.19
 
 ### Patch Changes

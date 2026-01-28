@@ -1,6 +1,6 @@
 {
   "name": "xchainjs-liquidity",
-  "version": "2.0.19",
+  "version": "2.0.26",
   "private": true,
   "scripts": {
     "checkLiquidity": "npx ts-node check-liquidity.ts",
@@ -28,9 +28,9 @@
     "@xchainjs/xchain-thorchain-query": "workspace:*",
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.8.4",
+    "axios": "1.12.1",
     "axios-retry": "^3.2.5",
-    "bignumber.js": "^9.0.0",
+    "bignumber.js": "^9.1.2",
     "rimraf": "~3.0.2"
   },
   "devDependencies": {

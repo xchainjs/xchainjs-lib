@@ -1,4 +1,4 @@
-import fs = require('fs')
+import fs from 'node:fs'
 
 import { Client as AvaxClient, defaultAvaxParams } from '@xchainjs/xchain-avax'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
@@ -182,7 +182,7 @@ export class TxJammer {
 
   private async setupWeightedChoices() {
     const assetsIncludingSynths: string[] = []
-    const assets = await this.getAvailablePoolAssets()
+    const assets = this.getAvailablePoolAssets()
     for (const asset of assets) {
       const synth = assetFromStringEx(asset)
       synth.type = AssetType.SYNTH
@@ -190,10 +190,10 @@ export class TxJammer {
       assetsIncludingSynths.push(assetToString(synth))
     }
     assetsIncludingSynths.push('THOR.RUNE') // add rune to the list of assets
-    this.setupWeightedSwaps(assetsIncludingSynths)
-    this.setupWeightedTransfers(assetsIncludingSynths)
-    this.setupWeightedAddLps(assets)
-    this.setupWeightedWithdrawLps(assets)
+    await this.setupWeightedSwaps(assetsIncludingSynths)
+    await this.setupWeightedTransfers(assetsIncludingSynths)
+    await this.setupWeightedAddLps(assets)
+    await this.setupWeightedWithdrawLps(assets)
   }
   private async setupWeightedTransfers(assetStrings: string[]) {
     for (const asset of assetStrings) {
@@ -563,13 +563,13 @@ export class TxJammer {
     let runePosition = true
     try {
       await this.thorchainQuery.checkLiquidityPosition(asset, runeAddress)
-    } catch (error) {
+    } catch (_error) {
       runePosition = false
     }
     let assetPosition = true
     try {
       await this.thorchainQuery.checkLiquidityPosition(asset, sourceAddress)
-    } catch (error) {
+    } catch (_error) {
       assetPosition = false
     }
     return [runePosition, assetPosition]

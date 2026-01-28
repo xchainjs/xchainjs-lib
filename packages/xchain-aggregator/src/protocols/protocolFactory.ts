@@ -9,6 +9,9 @@ const getProtocolConfig = (name: Protocol, configuration: Config): ProtocolConfi
     wallet: configuration.wallet,
     affiliateAddress: configuration.affiliate?.affiliates[name],
     affiliateBps: configuration.affiliate?.affiliates[name] ? configuration.affiliate.basisPoints : undefined,
+    network: configuration.network,
+    affiliateBrokers: configuration.affiliateBrokers,
+    brokerUrl: configuration.brokerUrl,
   }
 }
 

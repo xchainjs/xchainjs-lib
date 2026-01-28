@@ -1,4 +1,4 @@
-import * as dashcore from '@dashevo/dashcore-lib'
+import dashcore from '@dashevo/dashcore-lib'
 import { AssetInfo, FeeRate, Network, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
 import { Address, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
 import { Balance, Client as UTXOClient, Tx, TxParams, TxsPage, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
@@ -221,6 +221,9 @@ abstract class Client extends UTXOClient {
       network: this.network,
     })
     // Return the raw unsigned transaction and UTXOs
+    // ESLint disabled: Dash transaction has proper toString() method that returns hex string
+    // Left as-is during ESLint 8 upgrade as this core crypto functionality is tested and working
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return { rawUnsignedTx: tx.toString(), utxos, inputs }
   }
   /**

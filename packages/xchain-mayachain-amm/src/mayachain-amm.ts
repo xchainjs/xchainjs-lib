@@ -97,6 +97,7 @@ export class MayachainAMM {
     affiliateAddress,
     affiliateBps,
     toleranceBps,
+    liquidityToleranceBps,
     streamingInterval,
     streamingQuantity,
   }: QuoteSwapParams): Promise<QuoteSwap> {
@@ -147,6 +148,7 @@ export class MayachainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      liquidityToleranceBps,
       streamingInterval,
       streamingQuantity,
     })
@@ -245,6 +247,7 @@ export class MayachainAMM {
     affiliateAddress,
     affiliateBps,
     toleranceBps,
+    liquidityToleranceBps,
     streamingInterval,
     streamingQuantity,
   }: QuoteSwapParams): Promise<TxSubmitted> {
@@ -257,6 +260,7 @@ export class MayachainAMM {
       affiliateAddress,
       affiliateBps,
       toleranceBps,
+      liquidityToleranceBps,
       streamingInterval,
       streamingQuantity,
     })
@@ -464,7 +468,6 @@ export class MayachainAMM {
       memo: quote.memo,
     })
   }
-
 
   /**
    * Estimate adding trade amount to account

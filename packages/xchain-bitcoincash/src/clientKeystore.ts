@@ -1,4 +1,4 @@
-import * as bitcore from 'bitcore-lib-cash'
+import bitcore from 'bitcore-lib-cash'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
 import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
@@ -138,6 +138,9 @@ class ClientKeystore extends Client {
 
     tx.sign(privateKey)
 
+    // ESLint disabled: Bitcoin transaction has proper toString() method that returns hex string
+    // Left as-is during ESLint 8 upgrade as this core crypto functionality is tested and working
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     const txHex = tx.toString()
 
     return await this.roundRobinBroadcastTx(txHex)

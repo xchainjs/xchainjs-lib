@@ -13,7 +13,7 @@ import { BaseAmount } from '@xchainjs/xchain-util'
 import { bech32 } from '@scure/base'
 import BigNumber from 'bignumber.js'
 import { HDKey } from '@scure/bip32'
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 import { createHash } from 'crypto'
 import * as secp from '@bitcoin-js/tiny-secp256k1-asmjs'
 
@@ -210,7 +210,7 @@ export class ClientKeystore extends Client {
     const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
     try {
       return createHash('rmd160').update(sha256Hash).digest()
-    } catch (err) {
+    } catch (_err) {
       return createHash('ripemd160').update(sha256Hash).digest()
     }
   }

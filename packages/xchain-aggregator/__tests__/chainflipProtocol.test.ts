@@ -39,7 +39,7 @@ describe('Chainflip protocol', () => {
 
   it('Should get supported chains', async () => {
     const chains = await protocol.getSupportedChains()
-    expect(chains.length).toBe(3)
+    expect(chains.length).toBe(2)
   })
 
   it('Should check native assets are supported', async () => {
@@ -78,7 +78,7 @@ describe('Chainflip protocol', () => {
   })
 
   it('Should not get swap history', async () => {
-    expect(async () => {
+    await expect(async () => {
       await protocol.getSwapHistory()
     }).rejects.toThrow(/Method not implemented./)
   })
@@ -100,15 +100,17 @@ describe('Chainflip protocol', () => {
     expect(assetToString(estimatedSwap.dustThreshold.asset)).toBe('ETH.ETH')
     expect(estimatedSwap.dustThreshold.baseAmount.amount().toString()).toBe('10000000000000000')
     expect(estimatedSwap.dustThreshold.baseAmount.decimal).toBe(18)
-    expect(assetToString(estimatedSwap.fees.asset)).toBe('BTC.BTC')
-    expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe('BTC.BTC')
+    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+    expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe(
+      'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
+    )
     expect(estimatedSwap.fees.affiliateFee.baseAmount.amount().toString()).toBe('0')
-    expect(estimatedSwap.fees.affiliateFee.baseAmount.decimal).toBe(8)
+    expect(estimatedSwap.fees.affiliateFee.baseAmount.decimal).toBe(6)
     expect(assetToString(estimatedSwap.fees.outboundFee.asset)).toBe('BTC.BTC')
     expect(estimatedSwap.fees.outboundFee.baseAmount.amount().toString()).toBe('1599')
     expect(estimatedSwap.fees.outboundFee.baseAmount.decimal).toBe(8)
     expect(estimatedSwap.totalSwapSeconds).toBe(702)
-    expect(estimatedSwap.slipBasisPoints).toBe(0)
+    expect(estimatedSwap.slipBasisPoints).toBe(100)
     expect(estimatedSwap.canSwap).toBe(true)
     expect(estimatedSwap.errors.length).toBe(0)
     expect(estimatedSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
@@ -135,15 +137,17 @@ describe('Chainflip protocol', () => {
     expect(assetToString(estimatedSwap.dustThreshold.asset)).toBe('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')
     expect(estimatedSwap.dustThreshold.baseAmount.amount().toString()).toBe('20000000')
     expect(estimatedSwap.dustThreshold.baseAmount.decimal).toBe(6)
-    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.ETH')
-    expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe('ETH.ETH')
+    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
+    expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe(
+      'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
+    )
     expect(estimatedSwap.fees.affiliateFee.baseAmount.amount().toString()).toBe('0')
-    expect(estimatedSwap.fees.affiliateFee.baseAmount.decimal).toBe(18)
+    expect(estimatedSwap.fees.affiliateFee.baseAmount.decimal).toBe(6)
     expect(assetToString(estimatedSwap.fees.outboundFee.asset)).toBe('ETH.ETH')
     expect(estimatedSwap.fees.outboundFee.baseAmount.amount().toString()).toBe('1447621978320000')
     expect(estimatedSwap.fees.outboundFee.baseAmount.decimal).toBe(18)
     expect(estimatedSwap.totalSwapSeconds).toBe(114)
-    expect(estimatedSwap.slipBasisPoints).toBe(0)
+    expect(estimatedSwap.slipBasisPoints).toBe(100)
     expect(estimatedSwap.canSwap).toBe(true)
     expect(estimatedSwap.errors.length).toBe(0)
     expect(estimatedSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
@@ -172,9 +176,9 @@ describe('Chainflip protocol', () => {
     expect(assetToString(estimatedSwap.dustThreshold.asset)).toBe('ETH.ETH')
     expect(estimatedSwap.dustThreshold.baseAmount.amount().toString()).toBe('10000000000000000')
     expect(estimatedSwap.dustThreshold.baseAmount.decimal).toBe(18)
-    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')
+    expect(assetToString(estimatedSwap.fees.asset)).toBe('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
     expect(assetToString(estimatedSwap.fees.affiliateFee.asset)).toBe(
-      'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7',
+      'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48',
     )
     expect(estimatedSwap.fees.affiliateFee.baseAmount.amount().toString()).toBe('0')
     expect(estimatedSwap.fees.affiliateFee.baseAmount.decimal).toBe(6)
@@ -184,7 +188,7 @@ describe('Chainflip protocol', () => {
     expect(estimatedSwap.fees.outboundFee.baseAmount.amount().toString()).toBe('8988369')
     expect(estimatedSwap.fees.outboundFee.baseAmount.decimal).toBe(6)
     expect(estimatedSwap.totalSwapSeconds).toBe(114)
-    expect(estimatedSwap.slipBasisPoints).toBe(0)
+    expect(estimatedSwap.slipBasisPoints).toBe(100)
     expect(estimatedSwap.canSwap).toBe(true)
     expect(estimatedSwap.errors.length).toBe(0)
     expect(estimatedSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')

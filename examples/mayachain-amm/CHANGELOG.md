@@ -1,5 +1,67 @@
 # xchainjs-maya-do-swap
 
+## 2.0.24
+
+### Patch Changes
+
+- @xchainjs/xchain-ethereum@2.0.14
+- @xchainjs/xchain-mayachain-amm@4.1.6
+- @xchainjs/xchain-wallet@2.0.19
+
+## 2.0.23
+
+### Patch Changes
+
+- Updated dependencies [8df7c54]
+  - @xchainjs/xchain-mayachain-query@2.1.4
+  - @xchainjs/xchain-mayachain-amm@4.1.5
+
+## 2.0.22
+
+### Patch Changes
+
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-mayachain-query@2.1.3
+  - @xchainjs/xchain-mayachain-amm@4.1.4
+
+## 2.0.21
+
+### Patch Changes
+
+- Updated dependencies [b155e18]
+  - @xchainjs/xchain-mayachain@4.1.0
+  - @xchainjs/xchain-mayachain-amm@4.1.3
+  - @xchainjs/xchain-wallet@2.0.18
+
+## 2.0.20
+
+### Patch Changes
+
+- Updated dependencies [f908f2d]
+  - @xchainjs/xchain-mayachain-query@2.1.2
+  - @xchainjs/xchain-mayachain-amm@4.1.2
+
+## 2.0.19
+
+### Patch Changes
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-mayachain@4.0.1
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-cosmos@3.0.9
+  - @xchainjs/xchain-kujira@2.0.9
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-mayachain-query@2.1.1
+  - @xchainjs/xchain-ethereum@2.0.13
+  - @xchainjs/xchain-bitcoin@2.0.9
+  - @xchainjs/xchain-wallet@2.0.17
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-mayachain-amm@4.1.1
+  - @xchainjs/xchain-dash@2.0.9
+  - @xchainjs/xchain-mayamidgard-query@1.0.10
+
 ## 2.0.18
 
 ### Patch Changes

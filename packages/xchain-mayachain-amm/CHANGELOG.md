@@ -1,5 +1,67 @@
 # Changelog
 
+## 4.1.6
+
+### Patch Changes
+
+- Updated dependencies [cb963d7]
+  - @xchainjs/xchain-arbitrum@2.0.13
+  - @xchainjs/xchain-ethereum@2.0.14
+  - @xchainjs/xchain-evm@2.0.13
+  - @xchainjs/xchain-wallet@2.0.19
+
+## 4.1.5
+
+### Patch Changes
+
+- Updated dependencies [8df7c54]
+  - @xchainjs/xchain-mayachain-query@2.1.4
+
+## 4.1.4
+
+### Patch Changes
+
+- 76dfcb8: Add params liquidity tolerance bps to swap params
+- Updated dependencies [76dfcb8]
+  - @xchainjs/xchain-mayachain-query@2.1.3
+
+## 4.1.3
+
+### Patch Changes
+
+- Updated dependencies [b155e18]
+  - @xchainjs/xchain-mayachain@4.1.0
+  - @xchainjs/xchain-wallet@2.0.18
+
+## 4.1.2
+
+### Patch Changes
+
+- Updated dependencies [f908f2d]
+  - @xchainjs/xchain-mayachain-query@2.1.2
+
+## 4.1.1
+
+### Patch Changes
+
+- Updated dependencies [e458a3e]
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+  - @xchainjs/xchain-mayachain@4.0.1
+  - @xchainjs/xchain-thorchain@3.0.13
+  - @xchainjs/xchain-kujira@2.0.9
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-evm@2.0.12
+  - @xchainjs/xchain-mayachain-query@2.1.1
+  - @xchainjs/xchain-arbitrum@2.0.12
+  - @xchainjs/xchain-ethereum@2.0.13
+  - @xchainjs/xchain-bitcoin@2.0.9
+  - @xchainjs/xchain-wallet@2.0.17
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-dash@2.0.9
+  - @xchainjs/xchain-radix@2.0.9
+  - @xchainjs/xchain-zcash@1.0.10
+
 ## 4.1.0
 
 ### Minor Changes

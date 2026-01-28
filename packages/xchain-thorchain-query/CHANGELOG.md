@@ -1,5 +1,47 @@
 # Changelog
 
+## 2.0.15
+
+### Patch Changes
+
+- 76dfcb8: Add params liquidity tolerance bps to swap params
+
+## 2.0.14
+
+### Patch Changes
+
+- Updated dependencies [f908f2d]
+  - @xchainjs/xchain-midgard-query@2.0.10
+
+## 2.0.13
+
+### Patch Changes
+
+- d6c3f36: add tron support to tc query
+
+## 2.0.12
+
+### Patch Changes
+
+- 63ec81f: Fix ESM (ECMAScript Module) compatibility issues
+
+  - Update bignumber.js to 9.1.2 for proper ESM support
+  - Change bitcore-lib-cash imports from namespace to default imports for ESM compatibility
+  - Change @dashevo/dashcore-lib imports from namespace to default imports for ESM compatibility
+  - Add .js extensions to coinselect/accumulative imports for ESM
+  - Add .js extensions to cosmjs-types imports for ESM
+  - Update module type declarations for ESM compatibility
+  - Regenerate protobuf files with correct ESM import patterns
+
+  This enables the library to work properly in ESM environments (Node.js type: "module", modern bundlers, etc.)
+
+- Updated dependencies [b1c99c8]
+- Updated dependencies [63ec81f]
+- Updated dependencies [fe9b9be]
+  - @xchainjs/xchain-client@2.0.9
+  - @xchainjs/xchain-util@2.0.5
+  - @xchainjs/xchain-midgard-query@2.0.9
+
 ## 2.0.11
 
 ### Patch Changes

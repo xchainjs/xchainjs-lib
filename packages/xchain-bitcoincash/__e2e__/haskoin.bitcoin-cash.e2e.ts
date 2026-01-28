@@ -75,11 +75,11 @@ describe('Bitcoincash Integration Tests for Haskoin', () => {
     try {
       txHistory = await bchClient.getTransactions({ address, offset: -0, limit: 10 })
       fail()
-    } catch (error) {}
+    } catch (_error) {}
     try {
       txHistory = await bchClient.getTransactions({ address, offset: 0, limit: -10 })
       fail()
-    } catch (error) {}
+    } catch (_error) {}
 
     // for (const tx of txHistory.txs) {
     //   console.log(tx.hash, tx.date)

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-util",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Helper utilities for XChain clients",
   "keywords": [
     "THORChain",
@@ -28,10 +28,10 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "bignumber.js": "^9.0.0"
+    "bignumber.js": "^9.1.2"
   },
   "publishConfig": {
     "access": "public",

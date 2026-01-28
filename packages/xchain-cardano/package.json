@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-cardano",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "Cardano client for XChainJS",
   "keywords": [
     "Cardano",
@@ -29,7 +29,7 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.mjs",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
     "@emurgo/cardano-serialization-lib-browser": "^14.1.2",

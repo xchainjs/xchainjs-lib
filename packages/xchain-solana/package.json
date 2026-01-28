@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-solana",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Solana client for XChainJS",
   "keywords": [
     "Solana",
@@ -29,9 +29,10 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
     "e2e": "jest --config jest.config.e2e.mjs",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
+    "@ledgerhq/hw-app-solana": "^7.5.5",
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
     "@metaplex-foundation/umi": "0.9.2",
     "@metaplex-foundation/umi-bundle-defaults": "0.9.2",

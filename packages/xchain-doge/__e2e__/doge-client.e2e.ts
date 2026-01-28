@@ -69,11 +69,11 @@ describe('Dogecoin Integration Tests', () => {
     try {
       txHistory = await dogeClient.getTransactions({ address, offset: -1, limit: 10 })
       fail()
-    } catch (error) {}
+    } catch (_error) {}
     try {
       txHistory = await dogeClient.getTransactions({ address, offset: 0, limit: -10 })
       fail()
-    } catch (error) {}
+    } catch (_error) {}
 
     // for (const tx of txHistory.txs) {
     //   console.log(tx.hash, tx.date)

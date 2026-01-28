@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-ripple",
-  "version": "1.0.9",
+  "version": "1.0.11",
   "description": "Custom Ripple client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -29,10 +29,11 @@
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest --passWithNoTests",
     "e2e": "jest --config jest.config.e2e.mjs",
-    "lint": "eslint \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0",
     "postversion": "git push --follow-tags"
   },
   "dependencies": {
+    "@ledgerhq/hw-app-xrp": "^6.32.6",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
