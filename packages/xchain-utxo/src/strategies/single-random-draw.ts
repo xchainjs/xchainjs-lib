@@ -14,8 +14,12 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
   private static readonly BASE_TX_SIZE = TX_SIZE_CONSTANTS.BASE_TX_SIZE
 
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
-    // Shuffle UTXOs for randomness
-    const shuffledUtxos = [...utxos].sort(() => Math.random() - 0.5)
+    // Shuffle UTXOs using Fisher-Yates for unbiased randomness
+    const shuffledUtxos = [...utxos]
+    for (let i = shuffledUtxos.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffledUtxos[i], shuffledUtxos[j]] = [shuffledUtxos[j], shuffledUtxos[i]]
+    }
 
     for (const utxo of shuffledUtxos) {
       const fee = this.calculateFee(1, extraOutputs, feeRate)

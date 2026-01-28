@@ -111,7 +111,7 @@ export class UtxoTransactionValidator {
       } else if (params.walletIndex < 0) {
         errors.push('Wallet index must be non-negative')
       } else if (params.walletIndex > 2147483647) {
-        errors.push('Wallet index exceeds BIP32 hardened key limit')
+        errors.push('Wallet index exceeds maximum non-hardened index (2^31-1)')
       }
     }
 

@@ -173,24 +173,29 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
       expect(enhancedTx.inputs.length).toBeGreaterThan(0)
       expect(enhancedTx.utxos.length).toBeGreaterThan(0)
 
-      // Actually send the prepared enhanced transaction
-      const txHash = await btcClient.transfer({
-        asset: AssetBTC,
-        recipient: to,
-        amount,
-        memo: 'enhanced-test-broadcast',
-        feeRate: feeRate.rates.fast,
-      })
+      // Only broadcast if explicitly enabled (costs real fees on mainnet)
+      if (process.env.ALLOW_MAINNET_TXS === 'true') {
+        // Actually send the prepared enhanced transaction
+        const txHash = await btcClient.transfer({
+          asset: AssetBTC,
+          recipient: to,
+          amount,
+          memo: 'enhanced-test-broadcast',
+          feeRate: feeRate.rates.fast,
+        })
 
-      console.log('Enhanced TX broadcast successful!')
-      console.log('Transaction hash:', txHash)
+        console.log('Enhanced TX broadcast successful!')
+        console.log('Transaction hash:', txHash)
 
-      // Verify transaction hash format
-      expect(txHash).toBeDefined()
-      expect(typeof txHash).toBe('string')
-      expect(txHash.length).toBeGreaterThan(0)
+        // Verify transaction hash format
+        expect(txHash).toBeDefined()
+        expect(typeof txHash).toBe('string')
+        expect(txHash.length).toBeGreaterThan(0)
+      } else {
+        console.log('[E2E] Skipping mainnet broadcast; set ALLOW_MAINNET_TXS=true to enable')
+      }
 
-      console.log('✅ Enhanced transaction preparation and broadcast verified successfully!')
+      console.log('✅ Enhanced transaction preparation verified successfully!')
     } catch (err) {
       console.error('ERR running enhanced prepare test:', err)
       if (err instanceof Error) {

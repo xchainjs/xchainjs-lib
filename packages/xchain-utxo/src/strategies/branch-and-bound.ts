@@ -18,12 +18,8 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     // Sort UTXOs by descending value for better branch and bound performance
     const sortedUtxos = [...utxos].sort((a, b) => b.value - a.value)
 
-    // Calculate the target including fee with no change output
-    const noChangeFee = this.calculateFee(1, extraOutputs, feeRate)
-    const exactTarget = targetValue + noChangeFee
-
-    // Try to find exact match first
-    const exactResult = this.findExactMatch(sortedUtxos, exactTarget, feeRate, extraOutputs)
+    // Try to find exact match first (pass targetValue, not target+fee to avoid double counting)
+    const exactResult = this.findExactMatch(sortedUtxos, targetValue, feeRate, extraOutputs)
     if (exactResult) return exactResult
 
     // Run branch and bound algorithm
@@ -32,13 +28,13 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
 
   private findExactMatch(
     utxos: UTXO[],
-    target: number,
+    targetValue: number,
     feeRate: number,
     extraOutputs: number,
   ): UtxoSelectionResult | null {
-    // Calculate fee for single input
+    // Calculate fee for single input (no change output)
     const singleInputFee = this.calculateFee(1, extraOutputs, feeRate)
-    const requiredWithFee = target + singleInputFee
+    const requiredWithFee = targetValue + singleInputFee
 
     // Sort by how close they are to the exact target
     const sortedByExactness = [...utxos].sort((a, b) => {
@@ -63,10 +59,10 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
       }
 
       // If we have reasonable change (not too much excess)
-      if (change > BranchAndBoundStrategy.DUST_THRESHOLD && change < target * 0.1) {
+      if (change > BranchAndBoundStrategy.DUST_THRESHOLD && change < targetValue * 0.1) {
         // Add change output fee
         const feeWithChange = this.calculateFee(1, extraOutputs + 1, feeRate)
-        const finalChange = utxo.value - target - feeWithChange
+        const finalChange = utxo.value - targetValue - feeWithChange
 
         if (finalChange > BranchAndBoundStrategy.DUST_THRESHOLD) {
           return {

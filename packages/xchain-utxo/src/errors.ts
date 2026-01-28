@@ -205,6 +205,12 @@ export class UtxoError extends Error {
       case UtxoErrorCode.INVALID_FEE_RATE:
         return 'The fee rate is not valid. Please provide a fee rate between 1 and 1000 sat/byte.'
 
+      case UtxoErrorCode.INVALID_UTXO:
+        return 'One or more UTXOs are invalid or inconsistent. Please refresh UTXOs and try again.'
+
+      case UtxoErrorCode.UTXO_SELECTION_FAILED:
+        return 'Could not select UTXOs for this transaction. You may have insufficient funds or too many small UTXOs.'
+
       case UtxoErrorCode.NETWORK_ERROR:
         return 'Network error occurred. Please check your connection and try again.'
 
