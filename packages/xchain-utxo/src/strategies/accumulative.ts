@@ -24,21 +24,37 @@ export class AccumulativeStrategy implements UtxoSelectionStrategy {
       selectedInputs.push(utxo)
       currentValue += utxo.value
 
-      const fee = this.calculateFee(selectedInputs.length, extraOutputs + 1, feeRate) // Assume change output
-      const required = targetValue + fee
+      // First check with no change output (minimum fee)
+      const feeNoChange = this.calculateFee(selectedInputs.length, extraOutputs, feeRate)
+      const requiredNoChange = targetValue + feeNoChange
 
-      if (currentValue >= required) {
-        const change = currentValue - required
-        const hasChange = change > AccumulativeStrategy.DUST_THRESHOLD
-        const finalOutputs = hasChange ? extraOutputs + 1 : extraOutputs
-        const finalFee = this.calculateFee(selectedInputs.length, finalOutputs, feeRate)
-        const finalChange = currentValue - targetValue - finalFee
+      if (currentValue >= requiredNoChange) {
+        const potentialChange = currentValue - requiredNoChange
 
+        // Check if we need a change output
+        if (potentialChange > AccumulativeStrategy.DUST_THRESHOLD) {
+          // Recalculate with change output
+          const feeWithChange = this.calculateFee(selectedInputs.length, extraOutputs + 1, feeRate)
+          const finalChange = currentValue - targetValue - feeWithChange
+
+          // Verify change is still above dust after recalculation
+          if (finalChange > AccumulativeStrategy.DUST_THRESHOLD) {
+            return {
+              inputs: [...selectedInputs],
+              changeAmount: finalChange,
+              fee: feeWithChange,
+              efficiency: targetValue / currentValue,
+              strategy: this.name,
+            }
+          }
+        }
+
+        // No change output - absorb dust into fee
         return {
           inputs: [...selectedInputs],
-          changeAmount: finalChange > AccumulativeStrategy.DUST_THRESHOLD ? finalChange : 0,
-          fee: finalChange > AccumulativeStrategy.DUST_THRESHOLD ? finalFee : finalFee + finalChange,
-          efficiency: targetValue / (currentValue + finalFee),
+          changeAmount: 0,
+          fee: feeNoChange + potentialChange,
+          efficiency: targetValue / currentValue,
           strategy: this.name,
         }
       }

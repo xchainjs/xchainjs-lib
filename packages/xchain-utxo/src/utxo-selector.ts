@@ -53,7 +53,7 @@ export class UtxoSelector {
 
     // Filter out dust UTXOs if requested
     const filteredUtxos = preferences.avoidDust
-      ? utxos.filter((utxo) => utxo.value > UtxoSelector.DUST_THRESHOLD)
+      ? utxos.filter((utxo) => utxo.value >= UtxoSelector.DUST_THRESHOLD)
       : utxos
 
     if (filteredUtxos.length === 0) {

@@ -191,13 +191,19 @@ abstract class Client extends UTXOClient {
 
       // Add inputs based on selection
       if (this.addressFormat === AddressFormat.P2WPKH) {
-        selectionResult.inputs.forEach((utxo: UTXO) =>
+        selectionResult.inputs.forEach((utxo: UTXO) => {
+          if (!utxo.witnessUtxo) {
+            throw UtxoError.fromUnknown(
+              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
+              'buildTxPsbt',
+            )
+          }
           psbt.addInput({
             hash: utxo.hash,
             index: utxo.index,
             witnessUtxo: utxo.witnessUtxo,
-          }),
-        )
+          })
+        })
       } else {
         const { pubkey, output } = Bitcoin.payments.p2tr({
           address: sender,

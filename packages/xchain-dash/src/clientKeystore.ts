@@ -140,4 +140,73 @@ export class ClientKeystore extends Client {
       auth: this.nodeAuth,
     })
   }
+
+  /**
+   * Transfer the maximum amount of DASH (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'average' rate.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
+    checkFeeBounds(this.feeBounds, feeRate)
+
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { rawUnsignedTx, utxos, maxAmount, fee } = await this.prepareMaxTx({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+    })
+
+    const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    tx.inputs.forEach((input: any, index: number) => {
+      const insightUtxo = utxos.find((utxo) => {
+        return utxo.hash === input.prevTxId.toString('hex') && utxo.index == input.outputIndex
+      })
+      if (!insightUtxo) {
+        throw new Error('Unable to match accumulative inputs with insight utxos')
+      }
+      const scriptBuffer: Buffer = Buffer.from(insightUtxo.scriptPubKey || '', 'hex')
+      const script = new dashcore.Script(scriptBuffer)
+      tx.inputs[index] = new dashcore.Transaction.Input.PublicKeyHash({
+        prevTxId: Buffer.from(insightUtxo.hash, 'hex'),
+        outputIndex: insightUtxo.index,
+        script: '',
+        output: new dashcore.Transaction.Output({
+          satoshis: insightUtxo.value,
+          script,
+        }),
+      })
+    })
+
+    const dashKeys = this.getDashKeys(this.phrase, fromAddressIndex)
+    tx.sign(`${dashKeys.privateKey?.toString('hex')}`)
+
+    const txHex = tx.checkedSerialize({})
+    const hash = await nodeApi.broadcastTx({
+      txHex,
+      nodeUrl: this.nodeUrls[this.network],
+      auth: this.nodeAuth,
+    })
+
+    return { hash, maxAmount, fee }
+  }
 }

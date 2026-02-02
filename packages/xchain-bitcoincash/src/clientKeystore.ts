@@ -156,6 +156,80 @@ class ClientKeystore extends Client {
 
     return await this.roundRobinBroadcastTx(txHex)
   }
+
+  /**
+   * Transfer the maximum amount of BCH (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { rawUnsignedTx, inputs, maxAmount, fee } = await this.prepareMaxTx({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+    })
+
+    // Get key from mnemonic and path
+    const derivationPath = this.getFullDerivationPath(fromAddressIndex)
+    const privateKey = this.getBCHKeys(this.phrase, derivationPath)
+
+    // Recreate the transaction from rawUnsignedTx
+    const unsignedTx = new bitcore.Transaction(rawUnsignedTx)
+
+    // Rebuild the transaction with inputs enriched with UTXO values and scripts
+    const tx = new bitcore.Transaction()
+
+    tx.from(
+      inputs.map(
+        (input) =>
+          new bitcore.Transaction.UnspentOutput({
+            txId: input.hash,
+            outputIndex: input.index,
+            address: sender,
+            script: bitcore.Script.fromHex(input.witnessUtxo?.script.toString('hex') || ''),
+            satoshis: input.value,
+          }),
+      ),
+    )
+
+    unsignedTx.outputs.forEach((out) => {
+      tx.addOutput(
+        new bitcore.Transaction.Output({
+          script: out.script,
+          satoshis: out.satoshis,
+        }),
+      )
+    })
+
+    tx.sign(privateKey)
+
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    const txHex = tx.toString()
+    const hash = await this.roundRobinBroadcastTx(txHex)
+
+    return { hash, maxAmount, fee }
+  }
 }
 
 export { ClientKeystore }

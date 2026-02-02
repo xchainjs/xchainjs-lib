@@ -105,7 +105,7 @@ class ClientKeystore extends Client {
    * Transfer BTC.
    *
    * @param {TxParams&FeeRate} params The transfer options including the fee rate.
-   * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
+   * @returns {Promise<TxHash>} A promise that resolves to the transaction hash.
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
   async transfer(
@@ -155,20 +155,8 @@ class ClientKeystore extends Client {
     // Extract the transaction hex
     const txHex = psbt.extractTransaction().toHex()
 
-    // Extract the transaction hash
-    const txHash = psbt.extractTransaction().getId()
-
-    try {
-      // Broadcast the transaction and return the transaction hash
-      const txId = await this.roundRobinBroadcastTx(txHex)
-      return txId
-    } catch {
-      // If broadcasting fails, return an error message with a link to the explorer
-      const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
-        this.network
-      ].getExplorerTxUrl(txHash)}`
-      return error
-    }
+    // Broadcast the transaction and return the transaction hash
+    return await this.roundRobinBroadcastTx(txHex)
   }
 
   /**

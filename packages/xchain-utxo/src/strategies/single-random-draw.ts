@@ -22,19 +22,38 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
     }
 
     for (const utxo of shuffledUtxos) {
-      const fee = this.calculateFee(1, extraOutputs, feeRate)
-      const required = targetValue + fee
+      // Calculate fee without change output first
+      const feeNoChange = this.calculateFee(1, extraOutputs, feeRate)
+      const requiredNoChange = targetValue + feeNoChange
 
-      if (utxo.value >= required) {
-        const change = utxo.value - required
-        const hasChange = change > SingleRandomDrawStrategy.DUST_THRESHOLD
-        const finalFee = hasChange ? fee : fee + change
+      if (utxo.value >= requiredNoChange) {
+        const potentialChange = utxo.value - requiredNoChange
 
+        // Check if change would be above dust threshold
+        if (potentialChange > SingleRandomDrawStrategy.DUST_THRESHOLD) {
+          // Recalculate fee WITH change output
+          const feeWithChange = this.calculateFee(1, extraOutputs + 1, feeRate)
+          const requiredWithChange = targetValue + feeWithChange
+          const actualChange = utxo.value - requiredWithChange
+
+          // Verify change is still above dust after recalculation
+          if (actualChange > SingleRandomDrawStrategy.DUST_THRESHOLD) {
+            return {
+              inputs: [utxo],
+              changeAmount: actualChange,
+              fee: feeWithChange,
+              efficiency: targetValue / utxo.value,
+              strategy: this.name,
+            }
+          }
+        }
+
+        // No change output - add dust to fee
         return {
           inputs: [utxo],
-          changeAmount: hasChange ? change : 0,
-          fee: finalFee,
-          efficiency: targetValue / (utxo.value + finalFee),
+          changeAmount: 0,
+          fee: feeNoChange + potentialChange,
+          efficiency: targetValue / utxo.value,
           strategy: this.name,
         }
       }

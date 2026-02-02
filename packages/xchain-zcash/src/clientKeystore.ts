@@ -127,6 +127,62 @@ class ClientKeystore extends Client {
 
     return txId
   }
+
+  /**
+   * Transfer the maximum amount of ZEC (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * Note: Zcash uses flat fees, so feeRate is ignored.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    walletIndex?: number
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { maxAmount, fee } = await this.prepareMaxTx({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+    })
+
+    const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
+    if (!zecKeys.privateKey) {
+      throw Error('Error getting private key')
+    }
+
+    const utxos = await this.scanUTXOs(sender, true)
+    const zcashUtxos = utxos.map((utxo) => ({
+      address: sender,
+      txid: utxo.hash,
+      outputIndex: utxo.index,
+      satoshis: utxo.value,
+    }))
+
+    const tx = await buildTx(
+      0,
+      sender,
+      params.recipient,
+      maxAmount,
+      zcashUtxos,
+      this.network === Network.Testnet ? false : true,
+      params.memo,
+    )
+
+    checkFeeBounds(this.feeBounds, tx.fee)
+
+    const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
+    const hash = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
+
+    return { hash, maxAmount, fee }
+  }
 }
 
 export { ClientKeystore }

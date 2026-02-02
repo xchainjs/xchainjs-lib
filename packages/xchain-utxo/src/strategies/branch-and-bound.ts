@@ -130,7 +130,7 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
 
       // Pruning conditions
       if (index >= utxos.length) return
-      if (depth > 20) return // Prevent too deep recursion
+      if (depth > 50) return // Prevent too deep recursion (supports wallets with many UTXOs)
 
       const remainingValue = utxos.slice(index).reduce((sum, utxo) => sum + utxo.value, 0)
       if (currentValue + remainingValue < required) return // Not enough remaining value
