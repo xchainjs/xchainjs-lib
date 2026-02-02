@@ -127,7 +127,7 @@ describe('Dogecoin Integration Tests', () => {
         network: Network.Mainnet,
       })
 
-      const recipient = 'D7uXFPYxDhhSdgMCzkB7cj1Gzj5ZbUDVPg'
+      const recipient = 'testaddress'
 
       // Use transferMax - handles signing and broadcasting internally
       const { hash, maxAmount, fee } = await dogeclient.transferMax({
