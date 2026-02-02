@@ -4,7 +4,7 @@ import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transacti
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import * as Dash from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
@@ -80,18 +80,30 @@ export class ClientKeystore extends Client {
 
   /**
    * Asynchronously transfers assets between addresses.
-   * @param {TxParams & { feeRate?: FeeRate }} params - Parameters for the transfer.
+   * @param {TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences }} params - Parameters for the transfer.
    * @returns {Promise<TxHash>} A promise resolving to the transaction hash.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+  async transfer(
+    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+  ): Promise<TxHash> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
     checkFeeBounds(this.feeBounds, feeRate)
 
     const fromAddressIndex = params.walletIndex || 0
-    const { rawUnsignedTx, utxos } = await this.prepareTx({
+
+    // Merge default preferences
+    const mergedPreferences: UtxoSelectionPreferences = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+      ...params.utxoSelectionPreferences,
+    }
+
+    const { rawUnsignedTx, utxos } = await this.prepareTxEnhanced({
       ...params,
       feeRate,
       sender: await this.getAddressAsync(fromAddressIndex),
+      utxoSelectionPreferences: mergedPreferences,
     })
 
     const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)

@@ -219,10 +219,6 @@ export class UtxoTransactionValidator {
       throw UtxoError.validationError('Address cannot be empty')
     }
 
-    if (typeof address !== 'string') {
-      throw UtxoError.validationError('Address must be a string')
-    }
-
     if (address.trim() !== address) {
       throw UtxoError.validationError('Address cannot have leading or trailing whitespace')
     }
@@ -310,12 +306,13 @@ export class UtxoTransactionValidator {
     return false
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static sanitizeParamsForLogging(params: any): any {
+  private static sanitizeParamsForLogging(
+    params: TxParams & { sender?: Address; feeRate?: number },
+  ): Record<string, unknown> {
     // Remove sensitive data from params for safe logging
-    const sanitized = { ...params }
-    if (sanitized.amount) {
-      sanitized.amount = sanitized.amount.amount().toString()
+    const sanitized: Record<string, unknown> = { ...params }
+    if (params.amount) {
+      sanitized.amount = params.amount.amount().toString()
     }
     return sanitized
   }

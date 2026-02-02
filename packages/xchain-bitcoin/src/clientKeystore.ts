@@ -170,6 +170,53 @@ class ClientKeystore extends Client {
       return error
     }
   }
+
+  /**
+   * Transfer the maximum amount of Bitcoin (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { psbt, maxAmount, fee } = await this.sendMax({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+    })
+
+    const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
+    psbt.signAllInputs(
+      this.addressFormat === AddressFormat.P2WPKH
+        ? btcKeys
+        : btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey))),
+    )
+    psbt.finalizeAllInputs()
+
+    const txHex = psbt.extractTransaction().toHex()
+    const hash = await this.roundRobinBroadcastTx(txHex)
+
+    return { hash, maxAmount, fee }
+  }
 }
 
 export { ClientKeystore }

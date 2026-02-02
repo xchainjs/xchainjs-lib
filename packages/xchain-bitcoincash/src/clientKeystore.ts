@@ -2,7 +2,7 @@ import bitcore from 'bitcore-lib-cash'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
 import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
-import { TxParams } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
+import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 
 import { Client } from './client' // Importing the base BitcoinCash client
 import * as Utils from './utils'
@@ -83,10 +83,12 @@ class ClientKeystore extends Client {
 
   /**
    * Transfer BCH.
-   * @param {TxParams & { feeRate?: FeeRate }} params - The transfer options.
+   * @param {TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences }} params - The transfer options.
    * @returns {Promise<TxHash>} A promise that resolves with the transaction hash.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+  async transfer(
+    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+  ): Promise<TxHash> {
     // Set the default fee rate to 'fast'
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     // Check if the fee rate is within the specified bounds
@@ -95,11 +97,20 @@ class ClientKeystore extends Client {
     // Get the index of the address to send funds from
     const fromAddressIndex = params.walletIndex || 0
 
-    // Prepare the transaction by gathering necessary data
-    const { rawUnsignedTx, inputs } = await this.prepareTx({
+    // Merge default preferences
+    const mergedPreferences: UtxoSelectionPreferences = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+      ...params.utxoSelectionPreferences,
+    }
+
+    // Prepare the transaction using enhanced UTXO selection
+    const { rawUnsignedTx, inputs } = await this.prepareTxEnhanced({
       ...params,
       feeRate,
       sender: await this.getAddressAsync(fromAddressIndex),
+      utxoSelectionPreferences: mergedPreferences,
     })
 
     // Get key from mnemonic and path

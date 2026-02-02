@@ -15,7 +15,11 @@ import {
 import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import { UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
-import { Balance, Tx, TxParams, TxsPage, UTXO, UtxoClientParams } from './types'
+import { Balance, PreparedTx, Tx, TxParams, TxsPage, UTXO, UtxoClientParams } from './types'
+import { UtxoError } from './errors'
+import { UtxoTransactionValidator } from './validators'
+import { UtxoSelector } from './utxo-selector'
+import { UtxoSelectionPreferences, UtxoSelectionResult } from './strategies'
 /**
  * Abstract base class for creating blockchain clients in the UTXO model.
  */
@@ -306,18 +310,328 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to BroadcastTx')
   }
+  // ==================== Enhanced UTXO Selection Methods ====================
+
+  /**
+   * Enhanced UTXO selection using the UtxoSelector with multiple strategies.
+   * This method is available to all UTXO chain implementations.
+   *
+   * @param utxos Available UTXOs to select from
+   * @param targetValue Target amount in satoshis
+   * @param feeRate Fee rate in satoshis per byte
+   * @param extraOutputs Number of extra outputs (default: 2 for recipient + change)
+   * @param preferences Selection preferences
+   * @returns Selection result with inputs, change, and fee
+   */
+  protected selectUtxosForTransaction(
+    utxos: UTXO[],
+    targetValue: number,
+    feeRate: number,
+    extraOutputs: number = 2,
+    preferences?: UtxoSelectionPreferences,
+  ): UtxoSelectionResult {
+    const selector = new UtxoSelector()
+
+    const defaultPreferences: UtxoSelectionPreferences = {
+      minimizeFee: true,
+      minimizeInputs: true,
+      avoidDust: true,
+      ...preferences,
+    }
+
+    try {
+      return selector.selectOptimal(utxos, targetValue, feeRate, defaultPreferences, extraOutputs)
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'UTXO selection')
+    }
+  }
+
+  /**
+   * Validate transaction inputs using comprehensive validation.
+   * Chain implementations can override to add chain-specific validation.
+   *
+   * @param params Transaction parameters including sender and feeRate
+   */
+  protected validateTransactionInputs(
+    params: TxParams & {
+      sender: Address
+      feeRate: FeeRate
+    },
+  ): void {
+    // Use comprehensive validator
+    UtxoTransactionValidator.validateTransferParams(params, this.feeBounds)
+
+    // Chain-specific address validation (uses abstract validateAddress)
+    if (!this.validateAddress(params.recipient)) {
+      throw UtxoError.invalidAddress(params.recipient, this.network)
+    }
+    if (params.sender && !this.validateAddress(params.sender)) {
+      throw UtxoError.invalidAddress(params.sender, this.network)
+    }
+  }
+
+  /**
+   * Calculate maximum sendable amount using binary search.
+   *
+   * @param utxos Available UTXOs
+   * @param feeRate Fee rate in satoshis per byte
+   * @param hasMemo Whether transaction has a memo
+   * @param preferences UTXO selection preferences
+   * @returns Maximum sendable amount, fee, and selected inputs
+   */
+  protected calculateMaxSendableAmount(
+    utxos: UTXO[],
+    feeRate: number,
+    hasMemo: boolean,
+    preferences?: UtxoSelectionPreferences,
+  ): { amount: number; fee: number; inputs: UTXO[] } {
+    const selector = new UtxoSelector()
+    const extraOutputs = hasMemo ? 2 : 1 // recipient + optional memo (no change for max send)
+
+    const totalBalance = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
+
+    // Binary search for maximum sendable amount
+    let low = UtxoSelector.DUST_THRESHOLD
+    let high = totalBalance
+    let bestResult: UtxoSelectionResult | null = null
+
+    while (high - low > 1) {
+      const mid = Math.floor((low + high) / 2)
+
+      try {
+        const result = selector.selectOptimal(utxos, mid, feeRate, { ...preferences, minimizeFee: true }, extraOutputs)
+
+        // For max send, we want to use all selected inputs
+        const totalInput = result.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
+        const maxSendable = totalInput - result.fee
+
+        if (maxSendable >= mid) {
+          bestResult = {
+            ...result,
+            changeAmount: 0, // No change for max send
+          }
+          low = mid
+        } else {
+          high = mid - 1
+        }
+      } catch {
+        high = mid - 1
+      }
+    }
+
+    if (!bestResult) {
+      throw UtxoError.insufficientBalance('max', totalBalance.toString(), this.chain)
+    }
+
+    // Calculate the actual maximum we can send
+    const totalInput = bestResult.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
+    const maxAmount = totalInput - bestResult.fee
+
+    return {
+      amount: maxAmount,
+      fee: bestResult.fee,
+      inputs: bestResult.inputs,
+    }
+  }
+
+  /**
+   * Get and validate UTXOs for transaction building.
+   *
+   * @param sender Sender address
+   * @param confirmedOnly Whether to only use confirmed UTXOs
+   * @returns Validated UTXO array
+   */
+  protected async getValidatedUtxos(sender: Address, confirmedOnly: boolean): Promise<UTXO[]> {
+    const utxos = await this.scanUTXOs(sender, confirmedOnly)
+
+    if (utxos.length === 0) {
+      throw UtxoError.insufficientBalance('any', '0', this.chain)
+    }
+
+    // Validate UTXO set integrity
+    UtxoTransactionValidator.validateUtxoSet(utxos)
+
+    return utxos
+  }
+
+  /**
+   * Prepare transaction with enhanced UTXO selection.
+   * Chain implementations should override buildTxPsbt to provide chain-specific PSBT construction.
+   *
+   * @param params Transaction parameters
+   * @returns Prepared transaction with UTXO details
+   */
+  async prepareTxEnhanced({
+    sender,
+    memo,
+    amount,
+    recipient,
+    spendPendingUTXO = true,
+    feeRate,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx> {
+    try {
+      // Comprehensive input validation
+      this.validateTransactionInputs({
+        amount,
+        recipient,
+        memo,
+        sender,
+        feeRate,
+      })
+
+      // Get validated UTXOs
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const targetValue = amount.amount().toNumber()
+      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
+
+      // Enhanced UTXO selection
+      const selectionResult = this.selectUtxosForTransaction(
+        utxos,
+        targetValue,
+        Math.ceil(feeRate),
+        extraOutputs,
+        utxoSelectionPreferences,
+      )
+
+      // Build PSBT using chain-specific implementation
+      const rawUnsignedTx = await this.buildTxPsbt({
+        inputs: selectionResult.inputs,
+        recipient,
+        amount: targetValue,
+        changeAmount: selectionResult.changeAmount,
+        changeAddress: sender,
+        memo: compiledMemo,
+      })
+
+      return { rawUnsignedTx, utxos, inputs: selectionResult.inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareTxEnhanced')
+    }
+  }
+
+  /**
+   * Prepare maximum amount transfer (sweep transaction).
+   *
+   * @param params Send max parameters
+   * @returns Prepared transaction with maximum sendable amount
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      // Basic validation
+      if (!recipient?.trim()) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Get validated UTXOs
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      // Calculate maximum sendable amount
+      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      // Build PSBT using chain-specific implementation (no change for max send)
+      const rawUnsignedTx = await this.buildTxPsbt({
+        inputs: maxCalc.inputs,
+        recipient,
+        amount: maxCalc.amount,
+        changeAmount: 0,
+        changeAddress: sender,
+        memo: compiledMemo,
+      })
+
+      return {
+        rawUnsignedTx,
+        utxos,
+        inputs: maxCalc.inputs,
+        maxAmount: maxCalc.amount,
+        fee: maxCalc.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
+    }
+  }
+
+  // ==================== Abstract Methods ====================
+
+  /**
+   * Abstract method to validate an address for this chain.
+   * @param address The address to validate
+   * @returns true if valid, false otherwise
+   */
+  abstract validateAddress(address: string): boolean
+
   /**
    * Abstract method to compile a memo.
-   * @param {string} memo The memo string to compile.
-   * @returns {Buffer} The compiled memo.
+   * @param memo The memo string to compile.
+   * @returns The compiled memo.
    */
   protected abstract compileMemo(memo: string): Buffer
+
+  /**
+   * Build a PSBT for this chain.
+   * Chain implementations should override this to provide chain-specific PSBT construction.
+   * Default implementation throws - override in chain client to enable enhanced methods.
+   *
+   * @param params PSBT build parameters
+   * @returns Base64-encoded PSBT string
+   */
+  protected buildTxPsbt(_params: {
+    inputs: UTXO[]
+    recipient: Address
+    amount: number
+    changeAmount: number
+    changeAddress: Address
+    memo: Buffer | null
+  }): Promise<string> {
+    throw new Error(`buildTxPsbt not implemented for ${this.chain}. Override in chain client to use enhanced methods.`)
+  }
+
   /**
    * Abstract method to calculate the fee from a list of UTXOs.
-   * @param {UTXO[]} inputs The list of UTXOs.
-   * @param {FeeRate} feeRate The fee rate.
-   * @param {Buffer | null} data Optional data buffer.
-   * @returns {number} The calculated fee.
+   * @param inputs The list of UTXOs.
+   * @param feeRate The fee rate.
+   * @param data Optional data buffer.
+   * @returns The calculated fee.
    */
   protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
   /**

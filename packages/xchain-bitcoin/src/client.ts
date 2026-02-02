@@ -8,10 +8,7 @@ import {
   UTXO,
   UtxoClientParams,
   UtxoError,
-  UtxoTransactionValidator,
-  UtxoSelector,
   UtxoSelectionPreferences,
-  UtxoSelectionResult,
 } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
@@ -121,138 +118,6 @@ abstract class Client extends UTXOClient {
    * @param {Buffer | null} data Compiled memo (Optional).
    * @returns {number} Transaction fee.
    */
-  /**
-   * Enhanced UTXO selection using the new UtxoSelector with multiple strategies
-   */
-  private selectUtxosForTransaction(
-    utxos: UTXO[],
-    targetValue: number,
-    feeRate: number,
-    extraOutputs: number = 2, // recipient + change by default
-    preferences?: UtxoSelectionPreferences,
-  ): UtxoSelectionResult {
-    const selector = new UtxoSelector()
-
-    const defaultPreferences: UtxoSelectionPreferences = {
-      minimizeFee: true,
-      minimizeInputs: true,
-      avoidDust: true,
-      ...preferences,
-    }
-
-    try {
-      return selector.selectOptimal(utxos, targetValue, feeRate, defaultPreferences, extraOutputs)
-    } catch (error) {
-      if (UtxoError.isUtxoError(error)) {
-        throw error // Re-throw typed errors
-      }
-      throw UtxoError.fromUnknown(error, 'UTXO selection')
-    }
-  }
-
-  /**
-   * Validate transaction inputs using comprehensive validation
-   */
-  private validateTransactionInputs(
-    params: TxParams & {
-      sender: Address
-      feeRate: FeeRate
-    },
-  ): void {
-    // Use comprehensive validator with Bitcoin's fee bounds
-    UtxoTransactionValidator.validateTransferParams(params, this.feeBounds)
-
-    // Bitcoin-specific address validation
-    if (!this.validateAddress(params.recipient)) {
-      throw UtxoError.invalidAddress(params.recipient, this.network)
-    }
-    if (params.sender && !this.validateAddress(params.sender)) {
-      throw UtxoError.invalidAddress(params.sender, this.network)
-    }
-
-    // Fee rate validation with Bitcoin network conditions
-    const networkConditions = {
-      minFeeRate: 1,
-      maxFeeRate: 1000,
-      recommendedRange: [5, 100] as [number, number],
-    }
-    UtxoTransactionValidator.validateFeeRate(params.feeRate, networkConditions)
-  }
-
-  /**
-   * Calculate maximum sendable amount by trying different amounts until optimal
-   */
-  private calculateMaxSendableAmount(
-    utxos: UTXO[],
-    feeRate: number,
-    hasMemo: boolean,
-    preferences?: UtxoSelectionPreferences,
-  ): { amount: number; fee: number; inputs: UTXO[] } {
-    const selector = new UtxoSelector()
-    const extraOutputs = hasMemo ? 2 : 1 // recipient + optional memo (no change for max send)
-
-    const totalBalance = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
-
-    // Binary search for maximum sendable amount
-    let low = UtxoSelector.DUST_THRESHOLD
-    let high = totalBalance
-    let bestResult: UtxoSelectionResult | null = null
-
-    while (high - low > 1) {
-      const mid = Math.floor((low + high) / 2)
-
-      try {
-        const result = selector.selectOptimal(utxos, mid, feeRate, { ...preferences, minimizeFee: true }, extraOutputs)
-
-        // For max send, we don't want change - the goal is to send everything
-        const totalInput = result.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
-        const maxSendable = totalInput - result.fee
-
-        if (maxSendable >= mid) {
-          bestResult = {
-            ...result,
-            changeAmount: 0, // No change for max send
-          }
-          low = mid
-        } else {
-          high = mid - 1
-        }
-      } catch {
-        high = mid - 1
-      }
-    }
-
-    if (!bestResult) {
-      throw UtxoError.insufficientBalance('max', totalBalance.toString(), 'BTC')
-    }
-
-    // Calculate the actual maximum we can send
-    const totalInput = bestResult.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
-    const maxAmount = totalInput - bestResult.fee
-
-    return {
-      amount: maxAmount,
-      fee: bestResult.fee,
-      inputs: bestResult.inputs,
-    }
-  }
-
-  /**
-   * Get and validate UTXOs for transaction building
-   */
-  private async getValidatedUtxos(sender: Address, confirmedOnly: boolean): Promise<UTXO[]> {
-    const utxos = await this.scanUTXOs(sender, confirmedOnly)
-
-    if (utxos.length === 0) {
-      throw UtxoError.insufficientBalance('any', '0', 'BTC')
-    }
-
-    // Validate UTXO set integrity
-    UtxoTransactionValidator.validateUtxoSet(utxos)
-
-    return utxos
-  }
-
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
     // Calculate input size based on inputs
     const inputSizeBasedOnInputs =
@@ -595,6 +460,7 @@ abstract class Client extends UTXOClient {
    * Prepare transfer with enhanced validation and performance.
    * Now uses the enhanced logic internally while maintaining the same API.
    *
+   * @deprecated Use `prepareTxEnhanced` directly for explicit enhanced UTXO selection.
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
    */

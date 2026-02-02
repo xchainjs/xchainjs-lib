@@ -163,7 +163,8 @@ describe('DogecoinClient Test', () => {
   it('should broadcast a normal transfer without feeRate', async () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
-    const amount = baseAmount(100)
+    // Use amount above dust threshold (546 satoshis for legacy chains)
+    const amount = baseAmount(100000)
     const txid = await dogeClient.transfer({ recipient: testnet_address_path0, amount })
     expect(txid).toEqual(mocktxId.tx_hex)
   })
@@ -201,7 +202,7 @@ describe('DogecoinClient Test', () => {
         amount,
         feeRate: LOWER_FEE_BOUND,
       }),
-    ).rejects.toThrow('Balance insufficient for transaction')
+    ).rejects.toThrow('UTXO selection failed')
   })
 
   it('returns fees and rates of a normal tx', async () => {
