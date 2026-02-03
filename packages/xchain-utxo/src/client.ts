@@ -485,7 +485,8 @@ export abstract class Client extends BaseXChainClient {
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
-      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
+      // Output count: recipient + change + optional memo
+      const extraOutputs = 2 + (compiledMemo ? 1 : 0)
 
       // Enhanced UTXO selection
       const selectionResult = this.selectUtxosForTransaction(
@@ -548,12 +549,18 @@ export abstract class Client extends BaseXChainClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
+      // Validate fee rate
+      if (typeof feeRate !== 'number' || !isFinite(feeRate) || feeRate <= 0) {
+        throw UtxoError.invalidFeeRate(feeRate, 'Fee rate must be a positive finite number')
+      }
+      const validatedFeeRate = Math.ceil(feeRate)
+
       // Get validated UTXOs
       const confirmedOnly = !spendPendingUTXO
       const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
 
       // Calculate maximum sendable amount
-      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+      const maxCalc = this.calculateMaxSendableAmount(utxos, validatedFeeRate, !!memo, utxoSelectionPreferences)
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
 
