@@ -1,6 +1,14 @@
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoSelectionPreferences,
+} from '@xchainjs/xchain-utxo'
 import * as Litecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative.js'
 
@@ -169,6 +177,7 @@ abstract class Client extends UTXOClient {
   /**
    * Prepares a Litecoin (LTC) transaction.
    *
+   * @deprecated Use `prepareTxEnhanced` instead for better UTXO selection and error handling.
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} A promise that resolves to the raw unsigned transaction.
    */
@@ -233,6 +242,249 @@ abstract class Client extends UTXOClient {
     // Calculate fee
     const fee = sum * feeRate
     return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
+  }
+
+  // ==================== Enhanced Transaction Methods ====================
+
+  /**
+   * Build transaction with enhanced UTXO selection
+   */
+  async buildTxEnhanced({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+    try {
+      // Validate inputs using base class method
+      this.validateTransactionInputs({
+        amount,
+        recipient,
+        memo,
+        sender,
+        feeRate,
+      })
+
+      // Get validated UTXOs using base class method
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const targetValue = amount.amount().toNumber()
+      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
+
+      // Use base class UTXO selection
+      const selectionResult = this.selectUtxosForTransaction(
+        utxos,
+        targetValue,
+        Math.ceil(feeRate),
+        extraOutputs,
+        utxoSelectionPreferences,
+      )
+
+      const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) })
+
+      // Add inputs
+      selectionResult.inputs.forEach((utxo: UTXO) =>
+        psbt.addInput({
+          hash: utxo.hash,
+          index: utxo.index,
+          witnessUtxo: utxo.witnessUtxo,
+        }),
+      )
+
+      // Add recipient output
+      psbt.addOutput({
+        address: recipient,
+        value: targetValue,
+      })
+
+      // Add change output if needed
+      if (selectionResult.changeAmount > 0) {
+        psbt.addOutput({
+          address: sender,
+          value: selectionResult.changeAmount,
+        })
+      }
+
+      // Add memo output if present
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return { psbt, utxos, inputs: selectionResult.inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'buildTxEnhanced')
+    }
+  }
+
+  /**
+   * Prepare transaction with enhanced UTXO selection
+   */
+  async prepareTxEnhanced({
+    sender,
+    memo,
+    amount,
+    recipient,
+    spendPendingUTXO = true,
+    feeRate,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx> {
+    try {
+      const { psbt, utxos, inputs } = await this.buildTxEnhanced({
+        sender,
+        recipient,
+        amount,
+        feeRate,
+        memo,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareTxEnhanced')
+    }
+  }
+
+  /**
+   * Send maximum possible amount (sweep)
+   */
+  async sendMax({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{
+    psbt: Litecoin.Psbt
+    utxos: UTXO[]
+    inputs: UTXO[]
+    maxAmount: number
+    fee: number
+  }> {
+    try {
+      // Validate addresses
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Get validated UTXOs using base class method
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      // Calculate max using base class method
+      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) })
+
+      // Add inputs
+      maxCalc.inputs.forEach((utxo: UTXO) =>
+        psbt.addInput({
+          hash: utxo.hash,
+          index: utxo.index,
+          witnessUtxo: utxo.witnessUtxo,
+        }),
+      )
+
+      // Add recipient output (max amount - no change)
+      psbt.addOutput({
+        address: recipient,
+        value: maxCalc.amount,
+      })
+
+      // Add memo output if present
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return {
+        psbt,
+        utxos,
+        inputs: maxCalc.inputs,
+        maxAmount: maxCalc.amount,
+        fee: maxCalc.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'sendMax')
+    }
+  }
+
+  /**
+   * Prepare max send transaction
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      const { psbt, utxos, inputs, maxAmount, fee } = await this.sendMax({
+        sender,
+        recipient,
+        memo,
+        feeRate,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return {
+        rawUnsignedTx: psbt.toBase64(),
+        utxos,
+        inputs,
+        maxAmount,
+        fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
+    }
   }
 }
 

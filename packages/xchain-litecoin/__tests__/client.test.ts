@@ -201,7 +201,7 @@ describe('LitecoinClient Test', () => {
     const amount = baseAmount(9999999999)
     return expect(
       ltcClient.transfer({ walletIndex: 0, asset, recipient: addyTwo, amount, feeRate: 1 }),
-    ).rejects.toThrow('Insufficient Balance for transaction')
+    ).rejects.toThrow('Insufficient balance')
   })
 
   it('returns fees and rates of a normal tx', async () => {

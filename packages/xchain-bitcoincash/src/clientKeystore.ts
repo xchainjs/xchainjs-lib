@@ -2,7 +2,7 @@ import bitcore from 'bitcore-lib-cash'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
 import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
-import { TxParams } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
+import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 
 import { Client } from './client' // Importing the base BitcoinCash client
 import * as Utils from './utils'
@@ -83,10 +83,12 @@ class ClientKeystore extends Client {
 
   /**
    * Transfer BCH.
-   * @param {TxParams & { feeRate?: FeeRate }} params - The transfer options.
+   * @param {TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences }} params - The transfer options.
    * @returns {Promise<TxHash>} A promise that resolves with the transaction hash.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+  async transfer(
+    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+  ): Promise<TxHash> {
     // Set the default fee rate to 'fast'
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     // Check if the fee rate is within the specified bounds
@@ -95,11 +97,20 @@ class ClientKeystore extends Client {
     // Get the index of the address to send funds from
     const fromAddressIndex = params.walletIndex || 0
 
-    // Prepare the transaction by gathering necessary data
-    const { rawUnsignedTx, inputs } = await this.prepareTx({
+    // Merge default preferences
+    const mergedPreferences: UtxoSelectionPreferences = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+      ...params.utxoSelectionPreferences,
+    }
+
+    // Prepare the transaction using enhanced UTXO selection
+    const { rawUnsignedTx, inputs } = await this.prepareTxEnhanced({
       ...params,
       feeRate,
       sender: await this.getAddressAsync(fromAddressIndex),
+      utxoSelectionPreferences: mergedPreferences,
     })
 
     // Get key from mnemonic and path
@@ -144,6 +155,80 @@ class ClientKeystore extends Client {
     const txHex = tx.toString()
 
     return await this.roundRobinBroadcastTx(txHex)
+  }
+
+  /**
+   * Transfer the maximum amount of BCH (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { rawUnsignedTx, inputs, maxAmount, fee } = await this.prepareMaxTx({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+    })
+
+    // Get key from mnemonic and path
+    const derivationPath = this.getFullDerivationPath(fromAddressIndex)
+    const privateKey = this.getBCHKeys(this.phrase, derivationPath)
+
+    // Recreate the transaction from rawUnsignedTx
+    const unsignedTx = new bitcore.Transaction(rawUnsignedTx)
+
+    // Rebuild the transaction with inputs enriched with UTXO values and scripts
+    const tx = new bitcore.Transaction()
+
+    tx.from(
+      inputs.map(
+        (input) =>
+          new bitcore.Transaction.UnspentOutput({
+            txId: input.hash,
+            outputIndex: input.index,
+            address: sender,
+            script: bitcore.Script.fromHex(input.witnessUtxo?.script.toString('hex') || ''),
+            satoshis: input.value,
+          }),
+      ),
+    )
+
+    unsignedTx.outputs.forEach((out) => {
+      tx.addOutput(
+        new bitcore.Transaction.Output({
+          script: out.script,
+          satoshis: out.satoshis,
+        }),
+      )
+    })
+
+    tx.sign(privateKey)
+
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
+    const txHex = tx.toString()
+    const hash = await this.roundRobinBroadcastTx(txHex)
+
+    return { hash, maxAmount, fee }
   }
 }
 
