@@ -426,8 +426,8 @@ abstract class Client extends UTXOClient {
       }
 
       // ESLint disabled: Bitcoin Cash transaction builder has proper toString() method
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       return {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         rawUnsignedTx: tx.toString(),
         utxos,
         inputs: maxCalc.inputs,
