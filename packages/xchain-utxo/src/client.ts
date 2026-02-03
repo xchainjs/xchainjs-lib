@@ -374,7 +374,10 @@ export abstract class Client extends BaseXChainClient {
   }
 
   /**
-   * Calculate maximum sendable amount using binary search.
+   * Calculate maximum sendable amount by using ALL available UTXOs.
+   *
+   * For a true sweep operation, we use all UTXOs to maximize the sent amount.
+   * This is simpler and more correct than binary search with UTXO selection.
    *
    * @param utxos Available UTXOs
    * @param feeRate Fee rate in satoshis per byte
@@ -388,52 +391,40 @@ export abstract class Client extends BaseXChainClient {
     hasMemo: boolean,
     preferences?: UtxoSelectionPreferences,
   ): { amount: number; fee: number; inputs: UTXO[] } {
-    const selector = new UtxoSelector()
-    const extraOutputs = hasMemo ? 2 : 1 // recipient + optional memo (no change for max send)
+    // For sweep, use ALL UTXOs (optionally filter dust if preference set)
+    const inputUtxos = preferences?.avoidDust
+      ? utxos.filter((utxo) => utxo.value >= UtxoSelector.DUST_THRESHOLD)
+      : utxos
 
-    const totalBalance = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
-
-    // Binary search for maximum sendable amount
-    let low = UtxoSelector.DUST_THRESHOLD
-    let high = totalBalance
-    let bestResult: UtxoSelectionResult | null = null
-
-    while (high - low > 1) {
-      const mid = Math.floor((low + high) / 2)
-
-      try {
-        const result = selector.selectOptimal(utxos, mid, feeRate, { ...preferences, minimizeFee: true }, extraOutputs)
-
-        // For max send, we want to use all selected inputs
-        const totalInput = result.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
-        const maxSendable = totalInput - result.fee
-
-        if (maxSendable >= mid) {
-          bestResult = {
-            ...result,
-            changeAmount: 0, // No change for max send
-          }
-          low = mid
-        } else {
-          high = mid - 1
-        }
-      } catch {
-        high = mid - 1
-      }
+    if (inputUtxos.length === 0) {
+      throw UtxoError.insufficientBalance('max', '0', this.chain)
     }
 
-    if (!bestResult) {
-      throw UtxoError.insufficientBalance('max', totalBalance.toString(), this.chain)
+    // Calculate total value of all inputs
+    const totalValue = inputUtxos.reduce((sum, utxo) => sum + utxo.value, 0)
+
+    // For max send: 1 output (recipient) + optional memo output, NO change output
+    const outputCount = hasMemo ? 2 : 1
+
+    // Calculate fee for using all inputs
+    const fee = UtxoSelector.calculateFee(inputUtxos.length, outputCount, feeRate)
+
+    // Maximum sendable is total minus fee
+    const maxAmount = totalValue - fee
+
+    if (maxAmount <= 0) {
+      throw UtxoError.insufficientBalance('max', totalValue.toString(), this.chain)
     }
 
-    // Calculate the actual maximum we can send
-    const totalInput = bestResult.inputs.reduce((sum, utxo) => sum + utxo.value, 0)
-    const maxAmount = totalInput - bestResult.fee
+    // Verify amount is above dust threshold
+    if (maxAmount < UtxoSelector.DUST_THRESHOLD) {
+      throw UtxoError.invalidAmount(maxAmount, `below dust threshold of ${UtxoSelector.DUST_THRESHOLD} satoshis`)
+    }
 
     return {
       amount: maxAmount,
-      fee: bestResult.fee,
-      inputs: bestResult.inputs,
+      fee,
+      inputs: inputUtxos,
     }
   }
 
