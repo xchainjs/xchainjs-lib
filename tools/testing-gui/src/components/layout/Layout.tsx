@@ -4,7 +4,7 @@ import { Header } from './Header'
 
 export function Layout() {
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-950">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />

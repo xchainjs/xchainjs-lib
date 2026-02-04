@@ -21,7 +21,8 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
       if (!client) {
         throw new Error('Client not available. Please connect wallet first.')
       }
-      const address = client.getAddress(walletIndex)
+      // Use getAddressAsync for chains that don't support sync getAddress (SOL, XRD, ADA)
+      const address = await client.getAddressAsync(walletIndex)
       return { address }
     })
   }
@@ -33,8 +34,8 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Get Address</h3>
-        <p className="text-sm text-gray-500 mb-4">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Get Address</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Derive an address from the connected wallet for {chainId}.
         </p>
       </div>
@@ -43,7 +44,7 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
         <div>
           <label
             htmlFor="walletIndex"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Wallet Index
           </label>
@@ -53,9 +54,9 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
             min={0}
             value={walletIndex}
             onChange={(e) => setWalletIndex(parseInt(e.target.value, 10) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             HD derivation index (default: 0)
           </p>
         </div>
@@ -74,13 +75,13 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
       <ResultPanel loading={loading} error={error} duration={duration}>
         {result && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-              <code className="text-sm font-mono break-all">
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+              <code className="text-sm font-mono break-all text-gray-900 dark:text-gray-100">
                 {result.address}
               </code>
               <button
                 onClick={() => copyToClipboard(result.address)}
-                className="ml-4 p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                className="ml-4 p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 title="Copy to clipboard"
               >
                 <svg

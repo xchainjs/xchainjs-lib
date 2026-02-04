@@ -31,18 +31,18 @@ export function ChainPage() {
 
   if (!chainId) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-500">No chain selected</p>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <p className="text-gray-500 dark:text-gray-400">No chain selected</p>
       </div>
     )
   }
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <div className="flex items-center gap-3">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-          <p className="text-gray-600">Loading {chainId} client...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading {chainId} client...</p>
         </div>
       </div>
     )
@@ -50,8 +50,8 @@ export function ChainPage() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-red-600">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div className="text-red-600 dark:text-red-400">
           <p className="font-medium">Failed to load {chainId} client</p>
           <p className="text-sm mt-1">{error.message}</p>
         </div>
@@ -80,15 +80,15 @@ export function ChainPage() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow">
-        <div className="border-b border-gray-200 px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-800">{chainId}</h2>
-          <p className="text-sm text-gray-500 mt-1">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{chainId}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Test chain operations and view results
           </p>
         </div>
 
-        <div className="border-b border-gray-200">
+        <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="flex -mb-px px-6" aria-label="Tabs">
             {TABS.map((tab) => (
               <button
@@ -96,8 +96,8 @@ export function ChainPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`py-4 px-4 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 {tab.label}

@@ -41,10 +41,10 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
           Validate Address
         </h3>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Check if an address is valid for {chainId}.
         </p>
       </div>
@@ -52,7 +52,7 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
       <div>
         <label
           htmlFor="validateAddress"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
         >
           Address
         </label>
@@ -63,7 +63,7 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder={`Enter ${chainId} address to validate`}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono pr-10"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono pr-10 placeholder-gray-400 dark:placeholder-gray-500"
           />
           {isChecking && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -74,8 +74,8 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
       </div>
 
       {!client && (
-        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-          <p className="text-sm text-amber-800">
+        <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
             Connect wallet to validate addresses
           </p>
         </div>
@@ -84,14 +84,14 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
       {client && address.trim() && !isChecking && isValid !== null && (
         <div
           className={`p-4 rounded-lg ${
-            isValid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+            isValid ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700' : 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700'
           }`}
         >
           <div className="flex items-center gap-3">
             {isValid ? (
               <>
                 <svg
-                  className="w-6 h-6 text-green-600"
+                  className="w-6 h-6 text-green-600 dark:text-green-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -104,8 +104,8 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
                   />
                 </svg>
                 <div>
-                  <p className="font-medium text-green-800">Valid Address</p>
-                  <p className="text-sm text-green-600">
+                  <p className="font-medium text-green-800 dark:text-green-200">Valid Address</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">
                     This address is valid for {chainId}
                   </p>
                 </div>
@@ -113,7 +113,7 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
             ) : (
               <>
                 <svg
-                  className="w-6 h-6 text-red-600"
+                  className="w-6 h-6 text-red-600 dark:text-red-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -126,8 +126,8 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
                   />
                 </svg>
                 <div>
-                  <p className="font-medium text-red-800">Invalid Address</p>
-                  <p className="text-sm text-red-600">
+                  <p className="font-medium text-red-800 dark:text-red-200">Invalid Address</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">
                     This address is not valid for {chainId}
                   </p>
                 </div>

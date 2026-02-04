@@ -66,8 +66,8 @@ export function Transfer({ chainId, client }: TransferProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Transfer</h3>
-        <p className="text-sm text-gray-500 mb-4">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Transfer</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Send tokens on {chainId}. Double-check all inputs before confirming.
         </p>
       </div>
@@ -76,7 +76,7 @@ export function Transfer({ chainId, client }: TransferProps) {
         <div>
           <label
             htmlFor="recipient"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Recipient Address
           </label>
@@ -86,14 +86,14 @@ export function Transfer({ chainId, client }: TransferProps) {
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder={`Enter ${chainId} address`}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
         <div>
           <label
             htmlFor="amount"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Amount
           </label>
@@ -103,14 +103,14 @@ export function Transfer({ chainId, client }: TransferProps) {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="0.0"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
         <div>
           <label
             htmlFor="memo"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
           >
             Memo (optional)
           </label>
@@ -120,7 +120,7 @@ export function Transfer({ chainId, client }: TransferProps) {
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
             placeholder="Optional memo"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
       </div>
@@ -137,28 +137,28 @@ export function Transfer({ chainId, client }: TransferProps) {
 
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
               Confirm Transfer
             </h4>
             <div className="space-y-3 mb-6">
               <div>
-                <p className="text-xs text-gray-500">Recipient</p>
-                <p className="text-sm font-mono break-all">{recipient}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Recipient</p>
+                <p className="text-sm font-mono break-all text-gray-900 dark:text-gray-100">{recipient}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Amount</p>
-                <p className="text-sm font-mono">{amount}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Amount</p>
+                <p className="text-sm font-mono text-gray-900 dark:text-gray-100">{amount}</p>
               </div>
               {memo && (
                 <div>
-                  <p className="text-xs text-gray-500">Memo</p>
-                  <p className="text-sm">{memo}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Memo</p>
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{memo}</p>
                 </div>
               )}
             </div>
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-md mb-6">
-              <p className="text-sm text-amber-800">
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-md mb-6">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
                 This action cannot be undone. Please verify all details before
                 confirming.
               </p>
@@ -166,7 +166,7 @@ export function Transfer({ chainId, client }: TransferProps) {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>
@@ -185,10 +185,10 @@ export function Transfer({ chainId, client }: TransferProps) {
         {result && (
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                 Transaction Hash
               </p>
-              <code className="text-sm font-mono break-all">
+              <code className="text-sm font-mono break-all text-gray-900 dark:text-gray-100">
                 {result.txHash}
               </code>
             </div>
@@ -197,7 +197,7 @@ export function Transfer({ chainId, client }: TransferProps) {
                 href={explorerUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+                className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
                 View on Explorer
                 <svg

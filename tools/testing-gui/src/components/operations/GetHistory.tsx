@@ -72,10 +72,10 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
           Transaction History
         </h3>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
           View recent transactions for an address on {chainId}. Leave empty to use wallet address.
         </p>
       </div>
@@ -83,7 +83,7 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
       <div>
         <label
           htmlFor="historyAddress"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
         >
           Address (optional)
         </label>
@@ -93,7 +93,7 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           placeholder={`Enter ${chainId} address or leave empty for wallet address`}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono placeholder-gray-400 dark:placeholder-gray-500"
         />
       </div>
 
@@ -110,27 +110,27 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
       <ResultPanel loading={loading} error={error} duration={duration}>
         {result && (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Hash
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Type
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     From
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     To
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Amount
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {result.transactions.map((tx, index) => (
                   <tr key={index}>
                     <td className="px-4 py-3 text-sm">
@@ -138,21 +138,21 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
                         href={getExplorerUrl(tx.hash) || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-700 font-mono"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-mono"
                       >
                         {truncateHash(tx.hash)}
                       </a>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                       {tx.type || 'transfer'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 font-mono">
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
                       {tx.from[0] ? truncateHash(tx.from[0].from) : '-'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 font-mono">
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
                       {tx.to[0] ? truncateHash(tx.to[0].to) : '-'}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 text-right font-mono">
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-mono">
                       {formatAmount(tx)}
                     </td>
                   </tr>
@@ -161,7 +161,7 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-4 py-3 text-sm text-gray-500 text-center"
+                      className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center"
                     >
                       No transactions found
                     </td>
