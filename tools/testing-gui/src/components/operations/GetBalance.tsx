@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useOperation } from '../../hooks/useOperation'
+import { usePrices, formatUsdValue } from '../../hooks/usePrices'
 import { ResultPanel } from '../ui/ResultPanel'
 import type { XChainClient, Balance } from '@xchainjs/xchain-client'
 import { assetToString, baseToAsset, formatAssetAmountCurrency, baseAmount } from '@xchainjs/xchain-util'
@@ -19,36 +20,41 @@ const EVM_CHAINS = ['ETH', 'AVAX', 'BSC', 'ARB']
 export function GetBalance({ chainId, client }: GetBalanceProps) {
   const [address, setAddress] = useState('')
   const { execute, result, error, loading, duration } = useOperation<BalanceResult>()
+  const prices = usePrices()
 
   const handleExecute = async () => {
-    await execute(async () => {
-      if (!client) {
-        throw new Error('Client not available. Please connect wallet first.')
-      }
-      const targetAddress = address.trim() || await client.getAddressAsync(0)
+    const targetAddress = address.trim()
+    await execute(
+      async () => {
+        if (!client) {
+          throw new Error('Client not available. Please connect wallet first.')
+        }
+        const queryAddress = targetAddress || await client.getAddressAsync(0)
 
-      try {
-        const balances = await client.getBalance(targetAddress)
-        return { balances }
-      } catch (e) {
-        // For EVM chains, try direct RPC balance if dataProvider fails (CORS issues)
-        if (EVM_CHAINS.includes(chainId)) {
-          const evmClient = client as unknown as { getProvider: () => { getBalance: (addr: string) => Promise<bigint> }; getAssetInfo: () => { asset: Balance['asset'] } }
-          if (evmClient.getProvider) {
-            const provider = evmClient.getProvider()
-            const rawBalance = await provider.getBalance(targetAddress)
-            const asset = evmClient.getAssetInfo().asset
-            return {
-              balances: [{
-                asset,
-                amount: baseAmount(rawBalance.toString(), 18)
-              }]
+        try {
+          const balances = await client.getBalance(queryAddress)
+          return { balances }
+        } catch (e) {
+          // For EVM chains, try direct RPC balance if dataProvider fails (CORS issues)
+          if (EVM_CHAINS.includes(chainId)) {
+            const evmClient = client as unknown as { getProvider: () => { getBalance: (addr: string) => Promise<bigint> }; getAssetInfo: () => { asset: Balance['asset'] } }
+            if (evmClient.getProvider) {
+              const provider = evmClient.getProvider()
+              const rawBalance = await provider.getBalance(queryAddress)
+              const asset = evmClient.getAssetInfo().asset
+              return {
+                balances: [{
+                  asset,
+                  amount: baseAmount(rawBalance.toString(), 18)
+                }]
+              }
             }
           }
+          throw e
         }
-        throw e
-      }
-    })
+      },
+      { chainId, operation: 'getBalance', params: { address: targetAddress || '(wallet)' } }
+    )
   }
 
   const formatBalance = (balance: Balance): string => {
@@ -108,23 +114,33 @@ export function GetBalance({ chainId, client }: GetBalanceProps) {
                   <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Amount
                   </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    USD Value
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {result.balances.map((balance, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
-                      {assetToString(balance.asset)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-mono">
-                      {formatBalance(balance)}
-                    </td>
-                  </tr>
-                ))}
+                {result.balances.map((balance, index) => {
+                  const assetAmount = baseToAsset(balance.amount).amount().toNumber()
+                  const usdValue = prices.calculateValue(assetAmount, balance.asset)
+                  return (
+                    <tr key={index}>
+                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                        {assetToString(balance.asset)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 text-right font-mono">
+                        {formatBalance(balance)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-right">
+                        {usdValue !== null ? formatUsdValue(usdValue) : '-'}
+                      </td>
+                    </tr>
+                  )
+                })}
                 {result.balances.length === 0 && (
                   <tr>
                     <td
-                      colSpan={2}
+                      colSpan={3}
                       className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center"
                     >
                       No balances found

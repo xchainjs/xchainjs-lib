@@ -17,14 +17,17 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
   const { execute, result, error, loading, duration } = useOperation<AddressResult>()
 
   const handleExecute = async () => {
-    await execute(async () => {
-      if (!client) {
-        throw new Error('Client not available. Please connect wallet first.')
-      }
-      // Use getAddressAsync for chains that don't support sync getAddress (SOL, XRD, ADA)
-      const address = await client.getAddressAsync(walletIndex)
-      return { address }
-    })
+    await execute(
+      async () => {
+        if (!client) {
+          throw new Error('Client not available. Please connect wallet first.')
+        }
+        // Use getAddressAsync for chains that don't support sync getAddress (SOL, XRD, ADA)
+        const address = await client.getAddressAsync(walletIndex)
+        return { address }
+      },
+      { chainId, operation: 'getAddress', params: { walletIndex } }
+    )
   }
 
   const copyToClipboard = (text: string) => {

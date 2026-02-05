@@ -9,7 +9,9 @@ export function Layout() {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
         <main className="flex-1 overflow-auto p-6">
-          <Outlet />
+          <div className="mx-auto max-w-2xl">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

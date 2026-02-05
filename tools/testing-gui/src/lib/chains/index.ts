@@ -30,6 +30,7 @@ export const SUPPORTED_CHAINS: ChainConfig[] = [
   { id: 'SOL', name: 'Solana', symbol: 'SOL', category: 'other', decimals: 9 },
   { id: 'XRD', name: 'Radix', symbol: 'XRD', category: 'other', decimals: 18 },
   { id: 'ADA', name: 'Cardano', symbol: 'ADA', category: 'other', decimals: 6 },
+  { id: 'XRP', name: 'Ripple', symbol: 'XRP', category: 'other', decimals: 6 },
 ]
 
 export const getChainById = (id: string): ChainConfig | undefined => SUPPORTED_CHAINS.find((c) => c.id === id)

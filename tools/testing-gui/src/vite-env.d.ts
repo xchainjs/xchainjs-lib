@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
 
+declare module 'vite-plugin-node-stdlib-browser' {
+  import type { Plugin } from 'vite'
+  export default function nodePolyfills(): Plugin
+}
+
 interface ImportMetaEnv {
   readonly VITE_ANKR_API_KEY?: string
   readonly VITE_INFURA_API_KEY?: string

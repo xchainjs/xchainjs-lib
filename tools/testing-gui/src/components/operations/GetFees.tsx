@@ -1,6 +1,6 @@
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
-import type { XChainClient, Fees } from '@xchainjs/xchain-client'
+import { FeeType, type XChainClient, type Fees } from '@xchainjs/xchain-client'
 import { baseToAsset, formatAssetAmountCurrency, baseAmount } from '@xchainjs/xchain-util'
 import type { BaseAmount } from '@xchainjs/xchain-util'
 
@@ -42,7 +42,7 @@ export function GetFees({ chainId, client }: GetFeesProps) {
               average: fee,
               fast: baseAmount((baseFee * BigInt(12) / BigInt(10)).toString(), 18), // 1.2x
               fastest: baseAmount((baseFee * BigInt(15) / BigInt(10)).toString(), 18), // 1.5x
-              type: 'byte' as const,
+              type: FeeType.PerByte,
             }
           }
         }

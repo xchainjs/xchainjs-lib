@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { ArrowRightLeft } from 'lucide-react'
 
 interface ChainGroup {
   name: string
@@ -41,6 +42,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { id: 'SOL', name: 'Solana' },
       { id: 'XRD', name: 'Radix' },
       { id: 'ADA', name: 'Cardano' },
+      { id: 'XRP', name: 'Ripple' },
     ],
   },
 ]
@@ -53,6 +55,24 @@ export function Sidebar() {
         <p className="text-sm text-gray-400 mt-1">Chain Testing GUI</p>
       </div>
       <nav className="p-4">
+        {/* Swap Link */}
+        <div className="mb-6">
+          <NavLink
+            to="/swap"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <ArrowRightLeft className="w-4 h-4" />
+            Swap
+          </NavLink>
+        </div>
+
+        {/* Chain Groups */}
         {CHAIN_GROUPS.map((group) => (
           <div key={group.name} className="mb-6">
             <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">

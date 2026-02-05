@@ -65,7 +65,7 @@ function createAvaxParams(network: Network, phrase: string) {
     dataProviders,
     network,
     phrase,
-    feeBounds: { lower: 1_000_000_000, upper: 1_000_000_000_000 },
+    feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
     rootDerivationPaths: { [Network.Mainnet]: "m/44'/60'/0'/0/", [Network.Testnet]: "m/44'/60'/0'/0/", [Network.Stagenet]: "m/44'/60'/0'/0/" },
   }
 }
@@ -114,7 +114,7 @@ function createBscParams(network: Network, phrase: string) {
     dataProviders,
     network,
     phrase,
-    feeBounds: { lower: 99_000_000, upper: 1_000_000_000_000 },
+    feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
     rootDerivationPaths: { [Network.Mainnet]: "m/44'/60'/0'/0/", [Network.Testnet]: "m/44'/60'/0'/0/", [Network.Stagenet]: "m/44'/60'/0'/0/" },
   }
 }
@@ -129,6 +129,7 @@ import { Client as KujiClient, defaultKujiParams } from '@xchainjs/xchain-kujira
 import { Client as SolClient, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import { Client as XrdClient } from '@xchainjs/xchain-radix'
 import { Client as AdaClient, defaultAdaParams } from '@xchainjs/xchain-cardano'
+import { Client as XrpClient, defaultXRPParams } from '@xchainjs/xchain-ripple'
 
 export interface ClientConfig {
   phrase: string
@@ -154,15 +155,15 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     // case 'ZEC':
     //   return new ZecClient({ ...defaultZECParams, network, phrase })
 
-    // EVM Chains
+    // EVM Chains - use wide fee bounds to accommodate varying gas prices
     case 'ETH':
-      return new EthClient({ ...defaultEthParams, network, phrase })
+      return new EthClient({ ...defaultEthParams, network, phrase, feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 } })
     case 'AVAX':
       return new AvaxClient(createAvaxParams(network, phrase))
     case 'BSC':
       return new BscClient(createBscParams(network, phrase))
     case 'ARB':
-      return new ArbClient({ ...defaultArbParams, network, phrase })
+      return new ArbClient({ ...defaultArbParams, network, phrase, feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 } })
 
     // Cosmos Chains
     case 'GAIA':
@@ -181,6 +182,8 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       return new XrdClient({ network, phrase })
     case 'ADA':
       return new AdaClient({ ...defaultAdaParams, network, phrase })
+    case 'XRP':
+      return new XrpClient({ ...defaultXRPParams, network, phrase })
 
     default:
       throw new Error(`Unsupported chain: ${chainId}`)

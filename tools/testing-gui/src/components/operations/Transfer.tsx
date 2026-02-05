@@ -3,6 +3,7 @@ import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import type { XChainClient } from '@xchainjs/xchain-client'
 import { assetToBase, assetAmount } from '@xchainjs/xchain-util'
+import { getChainById } from '../../lib/chains'
 
 interface TransferProps {
   chainId: string
@@ -45,8 +46,9 @@ export function Transfer({ chainId, client }: TransferProps) {
       if (!client) {
         throw new Error('Client not available. Please connect wallet first.')
       }
-      const asset = client.getAssetInfo().asset
-      const baseAmt = assetToBase(assetAmount(amount, asset.decimal || 8))
+      const chainInfo = getChainById(chainId)
+      const decimals = chainInfo?.decimals ?? 8
+      const baseAmt = assetToBase(assetAmount(amount, decimals))
       const txHash = await client.transfer({
         recipient,
         amount: baseAmt,

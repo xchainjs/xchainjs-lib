@@ -1,16 +1,11 @@
 import { useState } from 'react'
 import { useWallet } from '../../contexts/WalletContext'
 import { WalletConnect } from '../wallet/WalletConnect'
+import { Wallet } from 'lucide-react'
 
 export function Header() {
-  const { isConnected, phrase, disconnect } = useWallet()
+  const { isConnected, activeWalletName, disconnect } = useWallet()
   const [showConnectModal, setShowConnectModal] = useState(false)
-
-  const truncatePhrase = (p: string) => {
-    const words = p.split(' ')
-    if (words.length <= 2) return p
-    return `${words[0]} ${words[1]} ... ${words[words.length - 1]}`
-  }
 
   return (
     <>
@@ -24,17 +19,23 @@ export function Header() {
           <div className="flex items-center gap-4">
             {isConnected ? (
               <>
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    {phrase ? truncatePhrase(phrase) : 'Connected'}
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-full">
+                  <Wallet className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                    {activeWalletName || 'Connected'}
                   </span>
                 </div>
                 <button
-                  onClick={disconnect}
+                  onClick={() => setShowConnectModal(true)}
                   className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
-                  Disconnect
+                  Switch
+                </button>
+                <button
+                  onClick={disconnect}
+                  className="px-4 py-2 text-sm font-medium text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 rounded-md hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors"
+                >
+                  Lock
                 </button>
               </>
             ) : (
