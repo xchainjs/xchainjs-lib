@@ -163,19 +163,21 @@ export async function signAndFinalize(
   offset = 0
   for (const output of outputs) {
     switch (output.type) {
-      case 'pkh':
+      case 'pkh': {
         buf.writeUIntLE((output as OutputPKH).amount, offset, 6) // 6 is the max
         offset += 8
         const pkhscript = addressToScript((output as OutputPKH).address)
         pkhscript.copy(buf, offset)
         offset += 26
         break
-      case 'op_return':
+      }
+      case 'op_return': {
         offset += 8
         const oprscript = memoToScript((output as OutputMemo).memo)
         oprscript.copy(buf, offset)
         offset += oprscript.length
         break
+      }
     }
   }
 
@@ -255,8 +257,27 @@ export async function signAndFinalize(
     signatures.push(signatureDER)
   }
 
-  // Build final transaction
-  buf = Buffer.alloc(2000)
+  // Build final transaction - calculate required buffer size dynamically
+  // Header: 20 bytes (version + versionGroupId + consensusBranchId + lockTime + expiryHeight)
+  // Per input: 32 (txid) + 4 (vout) + ~1 (compactInt) + ~110 (sigScript: 5 + ~72 sig + 33 pubkey) + 4 (sequence) = ~151 bytes
+  // Per output: 8 (amount) + ~26-80 (script) = ~34-88 bytes
+  // Trailing: 3 bytes (empty sapling/orchard bundles)
+  const maxSigScriptSize = 5 + 73 + 33 // overhead + max DER sig + compressed pubkey
+  const perInputSize = 32 + 4 + 3 + maxSigScriptSize + 4 // txid + vout + compactInt + sigScript + sequence
+  const perOutputSize = 8 + 80 // amount + max script size (memo can be up to 80 chars)
+  const headerSize = 20
+  const trailingSize = 3
+  const compactIntSize = 3 // max for reasonable counts
+
+  const txBufferSize =
+    headerSize +
+    compactIntSize +
+    utxos.length * perInputSize +
+    compactIntSize +
+    outputs.length * perOutputSize +
+    trailingSize
+
+  buf = Buffer.alloc(txBufferSize)
   offset = 0
   buf.writeUInt32LE(TX_VERSION, offset) // Transaction version
   offset += 4

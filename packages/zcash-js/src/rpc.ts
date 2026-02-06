@@ -3,6 +3,8 @@ import { JSONRPCClient } from 'json-rpc-2.0'
 
 import { Config, UTXO } from './types'
 
+const RPC_TIMEOUT = 30_000 // 30 seconds
+
 function makeClient(config: Config): JSONRPCClient {
   const client = new JSONRPCClient(async (jsonRPCRequest) => {
     const response = await axios.post(config.server.host, jsonRPCRequest, {
@@ -11,6 +13,7 @@ function makeClient(config: Config): JSONRPCClient {
         username: config.server.user,
         password: config.server.password,
       },
+      timeout: RPC_TIMEOUT,
     })
     client.receive(response.data)
   })
@@ -56,6 +59,7 @@ export async function sendRawTransaction(txb: Buffer, config: Config): Promise<s
           username: config.server.user,
           password: config.server.password,
         },
+        timeout: RPC_TIMEOUT,
       },
     )
     if (response.data.error) {

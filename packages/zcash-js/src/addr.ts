@@ -6,7 +6,7 @@ import bs58check from 'bs58check'
 export const testnetPrefix = [0x1d, 0x25]
 export const mainnetPrefix = [0x1c, 0xb8]
 
-export function isValidAddr(address: string, prefix: Buffer | Uint8Array): boolean {
+export function isValidAddr(address: string, prefix: number[] | Buffer | Uint8Array): boolean {
   try {
     const addrb = bs58check.decode(address)
     if (Buffer.from(addrb.slice(0, 2)).compare(Buffer.from(prefix)) != 0) {
