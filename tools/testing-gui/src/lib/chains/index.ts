@@ -15,7 +15,7 @@ export const SUPPORTED_CHAINS: ChainConfig[] = [
   { id: 'LTC', name: 'Litecoin', symbol: 'LTC', category: 'utxo', decimals: 8 },
   { id: 'DOGE', name: 'Dogecoin', symbol: 'DOGE', category: 'utxo', decimals: 8 },
   { id: 'DASH', name: 'Dash', symbol: 'DASH', category: 'utxo', decimals: 8 },
-  // { id: 'ZEC', name: 'Zcash', symbol: 'ZEC', category: 'utxo', decimals: 8 }, // Temporarily disabled
+  { id: 'ZEC', name: 'Zcash', symbol: 'ZEC', category: 'utxo', decimals: 8 },
   // EVM Chains
   { id: 'ETH', name: 'Ethereum', symbol: 'ETH', category: 'evm', decimals: 18 },
   { id: 'AVAX', name: 'Avalanche', symbol: 'AVAX', category: 'evm', decimals: 18 },

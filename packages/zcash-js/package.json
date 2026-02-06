@@ -1,0 +1,48 @@
+{
+  "name": "@xchainjs/zcash-js",
+  "version": "1.0.0",
+  "description": "Zcash JavaScript library - Fork of @mayaprotocol/zcash-js with NU6.1 support and browser compatibility",
+  "keywords": [
+    "zcash",
+    "cryptocurrency",
+    "blockchain",
+    "xchainjs",
+    "transaction",
+    "NU6.1"
+  ],
+  "author": "XChainJS",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:xchainjs/xchainjs-lib.git"
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo && rm -rf lib",
+    "build": "yarn clean && rollup -c --bundleConfigAsCjs",
+    "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
+    "test": "jest",
+    "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
+  },
+  "dependencies": {
+    "@noble/curves": "^1.7.0",
+    "@noble/hashes": "^1.6.1",
+    "axios": "1.12.1",
+    "bs58check": "^4.0.0",
+    "buffer": "^6.0.3",
+    "json-rpc-2.0": "^1.7.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.13"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "release/package"
+  }
+}

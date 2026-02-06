@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr } from '@mayaprotocol/zcash-js'
+import { buildTx, signAndFinalize, skToAddr } from '@xchainjs/zcash-js'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'

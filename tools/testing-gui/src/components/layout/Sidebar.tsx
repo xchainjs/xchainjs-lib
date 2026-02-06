@@ -15,7 +15,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { id: 'LTC', name: 'Litecoin' },
       { id: 'DOGE', name: 'Dogecoin' },
       { id: 'DASH', name: 'Dash' },
-      // { id: 'ZEC', name: 'Zcash' }, // Temporarily disabled
+      { id: 'ZEC', name: 'Zcash' },
     ],
   },
   {

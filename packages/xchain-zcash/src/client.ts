@@ -1,4 +1,4 @@
-import { buildTx, getFee, memoToScript } from '@mayaprotocol/zcash-js'
+import { buildTx, getFee, memoToScript } from '@xchainjs/zcash-js'
 import {
   AssetInfo,
   FeeEstimateOptions,

@@ -11,9 +11,7 @@ import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoinc
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
-// TODO: ZCash disabled - @mayaprotocol/zcash-js has Node.js dependencies incompatible with browser
-// Causes white screen on load. Need to investigate polyfills or make zcash-js browser-compatible.
-// import { Client as ZecClient, defaultZECParams } from '@xchainjs/xchain-zcash'
+import { Client as ZecClient, defaultZECParams } from '@xchainjs/xchain-zcash'
 
 // EVM Chains - import only the Client classes, not the default params (they trigger broken module-level code)
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -151,9 +149,8 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       return new DogeClient({ ...defaultDogeParams, network, phrase })
     case 'DASH':
       return new DashClient({ ...defaultDashParams, network, phrase })
-    // ZCash temporarily disabled
-    // case 'ZEC':
-    //   return new ZecClient({ ...defaultZECParams, network, phrase })
+    case 'ZEC':
+      return new ZecClient({ ...defaultZECParams, network, phrase })
 
     // EVM Chains - use wide fee bounds to accommodate varying gas prices
     case 'ETH':
