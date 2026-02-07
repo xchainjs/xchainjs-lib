@@ -18,11 +18,6 @@ export function isValidAddr(address: string, prefix: number[] | Buffer | Uint8Ar
   }
 }
 
-export function skToAddr(sk: Uint8Array, prefix: number[] | Uint8Array): string {
-  const pk = secp256k1.getPublicKey(sk, true)
-  return pkToAddr(pk, prefix)
-}
-
 export function pkToAddr(pk: Uint8Array, prefix: number[] | Uint8Array): string {
   const hash = sha256(pk)
   const pkh = ripemd160(hash)
@@ -31,4 +26,9 @@ export function pkToAddr(pk: Uint8Array, prefix: number[] | Uint8Array): string 
   Buffer.from(pkh).copy(addrb, 2)
   const addr = bs58check.encode(addrb)
   return addr
+}
+
+export function skToAddr(sk: Uint8Array, prefix: number[] | Uint8Array): string {
+  const pk = secp256k1.getPublicKey(sk, true)
+  return pkToAddr(pk, prefix)
 }

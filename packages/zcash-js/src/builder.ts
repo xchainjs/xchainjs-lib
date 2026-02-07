@@ -112,12 +112,7 @@ export async function buildTx(
   }
 }
 
-export async function signAndFinalize(
-  height: number,
-  skb: string,
-  utxos: UTXO[],
-  outputs: Output[],
-): Promise<Buffer> {
+export async function signAndFinalize(height: number, skb: string, utxos: UTXO[], outputs: Output[]): Promise<Buffer> {
   const sk = new Uint8Array(Buffer.from(skb, 'hex'))
   const pk = secp256k1.getPublicKey(sk, true)
   let offset = 0
@@ -252,7 +247,7 @@ export async function signAndFinalize(
     personal.writeUInt32LE(NU6_1_CONSENSUS_BRANCH_ID, 12) // NU6.1 consensus branch ID (FIXED!)
 
     const sigHash = blake2bWithPersonal(buf, personal)
-    const signature = await secp256k1.sign(sigHash, sk, { lowS: true, prehash: false })
+    const signature = secp256k1.sign(sigHash, sk, { lowS: true, prehash: false })
     const signatureDER = signature.toDERRawBytes()
     signatures.push(signatureDER)
   }
