@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.33
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.7
+
 ## 2.0.32
 
 ### Patch Changes
