@@ -1,4 +1,4 @@
-import { isValidAddr, mainnetPrefix, testnetPrefix } from '@mayaprotocol/zcash-js' // Importing the Network type from xchain-client module
+import { isValidAddr, mainnetPrefix, testnetPrefix } from '@xchainjs/zcash-js'
 import { Network } from '@xchainjs/xchain-client' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util'
 

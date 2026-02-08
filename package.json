@@ -18,7 +18,7 @@
     "build": "turbo run build --cache-dir=.turbo --filter='./packages/*'",
     "build:release": "turbo run build:release --cache-dir=.turbo --filter='./packages/*'",
     "build:examples": "turbo run build --cache-dir=.turbo --filter='./examples/*'",
-    "build:tools": "turbo run build --cache-dir=.turbo --filter='./tools/*'",
+    "build:tools": "turbo run build --cache-dir=.turbo --filter='./tools/*' --filter='!testing-gui'",
     "test": "turbo run test --cache-dir=.turbo",
     "pub": "turbo publish",
     "e2e": "turbo run e2e",

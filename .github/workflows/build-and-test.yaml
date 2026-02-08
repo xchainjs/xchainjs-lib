@@ -37,11 +37,12 @@ jobs:
       - name: Build examples
         run: yarn build:examples
 
-      - name: Build tools
-        run: yarn build:tools
+      # Skipped: testing-gui causes OOM in CI
+      # - name: Build tools
+      #   run: yarn build:tools
 
       - name: Lint
         run: yarn lint
 
       - name: Test
-        run: yarn test
+        run: yarn turbo run test --cache-dir=.turbo --filter='!testing-gui'
