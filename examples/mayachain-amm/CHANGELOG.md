@@ -1,5 +1,11 @@
 # xchainjs-maya-do-swap
 
+## 2.0.25
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.7
+
 ## 2.0.24
 
 ### Patch Changes

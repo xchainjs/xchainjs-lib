@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.1.7
+
+### Patch Changes
+
+- Updated dependencies [080e2f2]
+  - @xchainjs/xchain-zcash@1.1.0
+
 ## 4.1.6
 
 ### Patch Changes
