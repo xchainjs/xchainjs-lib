@@ -534,7 +534,7 @@ export class TransactionStage {
       const asset = assetFromStringEx(txData.tx.tx.coins[0].asset)
       const toAddress = `${txData.tx.tx.to_address}`
       const currentHeight = lastBlockObj.find((obj) => obj.chain === asset.chain)
-      console.log(currentHeight)
+
       // Extract relevant block heights and calculate estimated wait time
       const outboundBlock = Number(`${currentHeight?.last_observed_in}`)
       const finalisedHeight = Number(txData.finalised_height)
