@@ -6100,6 +6100,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:1.13.5":
+  version: 1.13.5
+  resolution: "axios@npm:1.13.5"
+  dependencies:
+    follow-redirects: "npm:^1.15.11"
+    form-data: "npm:^4.0.5"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/abf468c34f2d145f3dc7dbc0f1be67e520630624307bda69a41bbe8d386bd672d87b4405c4ee77f9ff54b235ab02f96a9968fb00e75b13ce64706e352a3068fd
+  languageName: node
+  linkType: hard
+
 "axios@npm:1.7.7":
   version: 1.7.7
   resolution: "axios@npm:1.7.7"
@@ -9155,6 +9166,16 @@ __metadata:
   version: 3.2.7
   resolution: "flatted@npm:3.2.7"
   checksum: 10c0/207a87c7abfc1ea6928ea16bac84f9eaa6d44d365620ece419e5c41cf44a5e9902b4c1f59c9605771b10e4565a0cb46e99d78e0464e8aabb42c97de880642257
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.15.11":
+  version: 1.15.11
+  resolution: "follow-redirects@npm:1.15.11"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: 10c0/d301f430542520a54058d4aeeb453233c564aaccac835d29d15e050beb33f339ad67d9bddbce01739c5dc46a6716dbe3d9d0d5134b1ca203effa11a7ef092343
   languageName: node
   linkType: hard
 
@@ -16665,7 +16686,7 @@ __metadata:
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.12.1"
+    axios: "npm:1.13.5"
     axios-retry: "npm:^3.2.5"
     bignumber.js: "npm:^9.1.2"
     rimraf: "npm:~3.0.2"
