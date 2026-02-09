@@ -126,7 +126,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
           ticker: 'ETH',
           type: AssetType.TRADE,
         }),
-        destinationAddress: await wallet.getAddress(MAYAChain, 0),
+        destinationAddress: await wallet.getAddress(MAYAChain),
         destinationAsset: {
           chain: DASHChain,
           symbol: 'DASH',
@@ -144,7 +144,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
       const txSubmitted = await mayaAMM.doSwap({
         fromAsset: AssetCacao,
         amount: new AssetCryptoAmount(assetToBase(assetAmount('10')), AssetCacao),
-        destinationAddress: await wallet.getAddress(MAYAChain, 0),
+        destinationAddress: await wallet.getAddress(MAYAChain),
         destinationAsset: {
           chain: DASHChain,
           symbol: 'DASH',
