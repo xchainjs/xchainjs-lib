@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import type { XChainClient } from '@xchainjs/xchain-client'
-import { assetToBase, assetAmount } from '@xchainjs/xchain-util'
+import { assetToBase, assetAmount, baseToAsset } from '@xchainjs/xchain-util'
 import { getChainById } from '../../lib/chains'
 
 interface TransferProps {
@@ -38,7 +38,44 @@ export function Transfer({ chainId, client }: TransferProps) {
   const [amount, setAmount] = useState('')
   const [memo, setMemo] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
+  const [maxBalance, setMaxBalance] = useState<string | null>(null)
+  const [loadingBalance, setLoadingBalance] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<TransferResult>()
+
+  // Fetch balance when client is available
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!client) {
+        setMaxBalance(null)
+        return
+      }
+      setLoadingBalance(true)
+      try {
+        const address = await client.getAddressAsync(0)
+        const balances = await client.getBalance(address)
+        if (balances.length > 0) {
+          const chainInfo = getChainById(chainId)
+          const decimals = chainInfo?.decimals ?? 8
+          const assetAmt = baseToAsset(balances[0].amount)
+          setMaxBalance(assetAmt.amount().toFixed(decimals))
+        } else {
+          setMaxBalance('0')
+        }
+      } catch (e) {
+        console.error('Failed to fetch balance for max:', e)
+        setMaxBalance(null)
+      } finally {
+        setLoadingBalance(false)
+      }
+    }
+    fetchBalance()
+  }, [client, chainId])
+
+  const handleMax = () => {
+    if (maxBalance) {
+      setAmount(maxBalance)
+    }
+  }
 
   const handleExecute = async () => {
     setShowConfirm(false)
@@ -93,20 +130,37 @@ export function Transfer({ chainId, client }: TransferProps) {
         </div>
 
         <div>
-          <label
-            htmlFor="amount"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            Amount
-          </label>
-          <input
-            type="text"
-            id="amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.0"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono placeholder-gray-400 dark:placeholder-gray-500"
-          />
+          <div className="flex items-center justify-between mb-1">
+            <label
+              htmlFor="amount"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Amount
+            </label>
+            {maxBalance !== null && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Available: {maxBalance}
+              </span>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              id="amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.0"
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono placeholder-gray-400 dark:placeholder-gray-500"
+            />
+            <button
+              type="button"
+              onClick={handleMax}
+              disabled={!maxBalance || loadingBalance}
+              className="px-3 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loadingBalance ? '...' : 'Max'}
+            </button>
+          </div>
         </div>
 
         <div>
