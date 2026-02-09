@@ -3,6 +3,7 @@ import { Asset, assetFromStringEx } from '@xchainjs/xchain-util'
 export const BtcAsset = assetFromStringEx('BTC.BTC') as Asset
 export const EthAsset = assetFromStringEx('ETH.ETH') as Asset
 export const CacaoAsset = assetFromStringEx('MAYA.CACAO') as Asset
+export const MayaAsset = assetFromStringEx('MAYA.MAYA') as Asset
 export const RuneAsset = assetFromStringEx('THOR.RUNE') as Asset
 export const DashAsset = assetFromStringEx('DASH.DASH') as Asset
 export const KujiraAsset = assetFromStringEx('KUJI.KUJI') as Asset
@@ -21,3 +22,5 @@ export const XdrChain = 'XRD'
 export const ZecChain = 'ZEC'
 
 export const DEFAULT_MAYACHAIN_DECIMALS = 8
+export const MAYA_DECIMAL = 4
+export const CACAO_DECIMAL = 10
