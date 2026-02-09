@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.5
+
+### Patch Changes
+
+- 4f7a881: Fix MAYA.MAYA swap quote decimal handling - amounts were inflated 10,000x because getQuoteAssetDecimals returned 8 instead of 4 for MAYA.MAYA
+
 ## 2.1.4
 
 ### Patch Changes
