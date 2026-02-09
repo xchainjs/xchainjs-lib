@@ -11,7 +11,8 @@ import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoinc
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
-import { Client as ZecClient, defaultZECParams } from '@xchainjs/xchain-zcash'
+import { Client as ZecClient, defaultZECParams, AssetZEC, ZEC_DECIMAL, zcashExplorerProviders } from '@xchainjs/xchain-zcash'
+import { NownodesProvider } from '@xchainjs/xchain-utxo-providers'
 
 // EVM Chains - import only the Client classes, not the default params (they trigger broken module-level code)
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -117,6 +118,33 @@ function createBscParams(network: Network, phrase: string) {
   }
 }
 
+// Lazy creation of ZCash config to use Vite env var for NowNodes API key
+function createZecParams(network: Network, phrase: string) {
+  const nownodesApiKey = import.meta.env.VITE_NOWNODES_API_KEY || ''
+
+  const mainnetNownodesProvider = new NownodesProvider(
+    'https://zecbook.nownodes.io/api/v2',
+    'ZEC',
+    AssetZEC,
+    ZEC_DECIMAL,
+    nownodesApiKey,
+  )
+
+  const dataProviders = [{
+    [Network.Testnet]: undefined,
+    [Network.Stagenet]: mainnetNownodesProvider,
+    [Network.Mainnet]: mainnetNownodesProvider,
+  }]
+
+  return {
+    ...defaultZECParams,
+    network,
+    phrase,
+    explorerProviders: zcashExplorerProviders,
+    dataProviders,
+  }
+}
+
 // Cosmos Chains
 import { Client as GaiaClient, defaultClientConfig as defaultGaiaParams } from '@xchainjs/xchain-cosmos'
 import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
@@ -150,7 +178,7 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     case 'DASH':
       return new DashClient({ ...defaultDashParams, network, phrase })
     case 'ZEC':
-      return new ZecClient({ ...defaultZECParams, network, phrase })
+      return new ZecClient(createZecParams(network, phrase))
 
     // EVM Chains - use wide fee bounds to accommodate varying gas prices
     case 'ETH':
