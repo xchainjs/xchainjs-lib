@@ -39,7 +39,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
     it('Should estimate add to trade account', async () => {
       const quote = await mayaAMM.estimateAddToTradeAccount({
         amount: new AssetCryptoAmount(assetToBase(assetAmount(0.1, 18)), AssetETH),
-        address: await wallet.getAddress(MAYAChain, 0),
+        address: await wallet.getAddress(MAYAChain),
       })
 
       console.log({
@@ -62,7 +62,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
     it('Should add to trade account', async () => {
       const txSubmitted = await mayaAMM.addToTradeAccount({
         amount: new AssetCryptoAmount(assetToBase(assetAmount(0.1, 18)), AssetETH),
-        address: await wallet.getAddress(MAYAChain, 0),
+        address: await wallet.getAddress(MAYAChain),
       })
 
       console.log(txSubmitted)
@@ -78,7 +78,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
           ticker: 'ETH',
           type: AssetType.TRADE,
         }),
-        address: await wallet.getAddress(ETHChain, 0),
+        address: await wallet.getAddress(ETHChain),
       })
 
       console.log({
@@ -104,7 +104,7 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
           ticker: 'ETH',
           type: AssetType.TRADE,
         }),
-        address: await wallet.getAddress(ETHChain, 0),
+        address: await wallet.getAddress(ETHChain),
       })
 
       console.log(txSubmitted)
@@ -159,4 +159,3 @@ describe('MayachainAMM e2e tests for Trade Accounts', () => {
     })
   })
 })
-

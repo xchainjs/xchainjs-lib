@@ -108,11 +108,11 @@ describe('Estimate swap e2e tests', () => {
       console.log({
         name: mayaName.name,
         owner: mayaName.owner,
-        expire: mayaName.expire,
-        entries: mayaName.entries.map((entry) => {
+        expireBlockHeight: mayaName.expireBlockHeight,
+        aliases: mayaName.aliases.map((alias) => {
           return {
-            address: entry.address,
-            chain: entry.chain,
+            address: alias.address,
+            chain: alias.chain,
           }
         }),
       })
