@@ -18,14 +18,18 @@ export function LeaveNode({ thorClient, walletConnected }: LeaveNodeProps) {
   const [showConfirm, setShowConfirm] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<LeaveResult>()
 
+  // Validate inputs
+  const trimmedNodeAddress = nodeAddress.trim()
+  const isFormValid = !!trimmedNodeAddress
+
   const handleLeave = async () => {
-    if (!thorClient || !nodeAddress) return
+    if (!thorClient || !isFormValid) return
 
     setShowConfirm(false)
 
     await execute(async () => {
       // Build memo: LEAVE:<node_address>
-      const memo = `LEAVE:${nodeAddress.trim()}`
+      const memo = `LEAVE:${trimmedNodeAddress}`
 
       // Leave requires a small deposit (just for the memo)
       const minAmount = assetToBase(assetAmount('0.00000001', 8))
@@ -123,7 +127,7 @@ console.log('Leave Transaction:', txHash)
 
       <button
         onClick={() => setShowConfirm(true)}
-        disabled={loading || !thorClient || !nodeAddress}
+        disabled={loading || !thorClient || !isFormValid}
         className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Requesting Leave...' : 'Request Node Leave'}

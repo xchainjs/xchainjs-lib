@@ -44,19 +44,26 @@ export function BondNode({ thorClient, walletConnected }: BondNodeProps) {
     fetchBalance()
   }, [thorClient])
 
+  // Validate inputs
+  const trimmedNodeAddress = nodeAddress.trim()
+  const parsedAmount = Number(amount)
+  const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0
+  const isOperatorFeeValid = !operatorFee || /^\d+$/.test(operatorFee.trim())
+  const isFormValid = trimmedNodeAddress && isAmountValid && isOperatorFeeValid
+
   const handleBond = async () => {
-    if (!thorClient || !nodeAddress || !amount) return
+    if (!thorClient || !isFormValid) return
 
     setShowConfirm(false)
 
     await execute(async () => {
       // Build memo: BOND:<node_address> or BOND:<node_address>:<provider_address>:<operator_fee>
-      let memo = `BOND:${nodeAddress.trim()}`
+      let memo = `BOND:${trimmedNodeAddress}`
 
       // If operator fee is specified, include provider address and fee
-      if (operatorFee) {
+      if (operatorFee && isOperatorFeeValid) {
         const senderAddress = await thorClient.getAddressAsync()
-        memo = `BOND:${nodeAddress.trim()}:${senderAddress}:${operatorFee}`
+        memo = `BOND:${trimmedNodeAddress}:${senderAddress}:${operatorFee.trim()}`
       }
 
       const amountToSend = assetToBase(assetAmount(amount, 8))
@@ -181,7 +188,7 @@ console.log('Bond Transaction:', txHash)`
 
       <button
         onClick={() => setShowConfirm(true)}
-        disabled={loading || !thorClient || !nodeAddress || !amount}
+        disabled={loading || !thorClient || !isFormValid}
         className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Bonding...' : 'Bond RUNE'}

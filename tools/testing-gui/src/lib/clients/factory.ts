@@ -203,10 +203,10 @@ function createLtcParams(network: Network, phrase: string) {
     blockcypherApiKey,
   )
 
-  // BlockCypher doesn't have LTC testnet, use mainnet provider
+  // BlockCypher doesn't have LTC testnet, preserve default testnet provider
   const dataProviders = [{
     [Network.Mainnet]: mainnetBlockcypherProvider,
-    [Network.Testnet]: undefined,
+    [Network.Testnet]: defaultLtcParams.dataProviders?.[0]?.[Network.Testnet],
     [Network.Stagenet]: mainnetBlockcypherProvider,
   }]
 
@@ -236,10 +236,10 @@ function createDogeParams(network: Network, phrase: string) {
     blockcypherApiKey,
   )
 
-  // BlockCypher doesn't have DOGE testnet, use mainnet provider
+  // BlockCypher doesn't have DOGE testnet, preserve default testnet provider
   const dataProviders = [{
     [Network.Mainnet]: mainnetBlockcypherProvider,
-    [Network.Testnet]: undefined,
+    [Network.Testnet]: defaultDogeParams.dataProviders?.[0]?.[Network.Testnet],
     [Network.Stagenet]: mainnetBlockcypherProvider,
   }]
 
@@ -269,10 +269,10 @@ function createDashParams(network: Network, phrase: string) {
     blockcypherApiKey,
   )
 
-  // BlockCypher doesn't have DASH testnet, use mainnet provider
+  // BlockCypher doesn't have DASH testnet, preserve default testnet provider
   const dataProviders = [{
     [Network.Mainnet]: mainnetBlockcypherProvider,
-    [Network.Testnet]: undefined,
+    [Network.Testnet]: defaultDashParams.dataProviders?.[0]?.[Network.Testnet],
     [Network.Stagenet]: mainnetBlockcypherProvider,
   }]
 

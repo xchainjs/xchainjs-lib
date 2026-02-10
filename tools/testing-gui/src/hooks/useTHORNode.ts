@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { Network } from '@xchainjs/xchain-client'
 import { useWallet } from '../contexts/WalletContext'
 import { useConfig } from '../contexts/ConfigContext'
@@ -13,13 +13,14 @@ interface THORNodeConfig {
 }
 
 export function useTHORNode(): THORNodeConfig {
-  const { phrase } = useWallet()
   const { network } = useConfig()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [apis, setApis] = useState<{ nodesApi: any; networkApi: any; mimirApi: any } | null>(null)
 
   useEffect(() => {
+    let cancelled = false
+
     const initApis = async () => {
       setLoading(true)
       setError(null)
@@ -40,20 +41,27 @@ export function useTHORNode(): THORNodeConfig {
 
         const config = new Configuration({ basePath: baseUrl })
 
+        if (cancelled) return
+
         setApis({
           nodesApi: new NodesApi(config),
           networkApi: new NetworkApi(config),
           mimirApi: new MimirApi(config),
         })
       } catch (err) {
+        if (cancelled) return
         console.error('Failed to initialize THORNode APIs:', err)
         setError(err instanceof Error ? err.message : 'Failed to initialize THORNode APIs')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     initApis()
+
+    return () => {
+      cancelled = true
+    }
   }, [network])
 
   return {
@@ -79,6 +87,8 @@ export function useTHORChainClient() {
       return
     }
 
+    let cancelled = false
+
     const initClient = async () => {
       setLoading(true)
       setError(null)
@@ -86,16 +96,24 @@ export function useTHORChainClient() {
       try {
         const { Client, defaultClientConfig } = await import('@xchainjs/xchain-thorchain')
         const thorClient = new Client({ ...defaultClientConfig, network, phrase })
+
+        if (cancelled) return
+
         setClient(thorClient)
       } catch (err) {
+        if (cancelled) return
         console.error('Failed to initialize THORChain client:', err)
         setError(err instanceof Error ? err.message : 'Failed to initialize THORChain client')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
     initClient()
+
+    return () => {
+      cancelled = true
+    }
   }, [phrase, network])
 
   return { client, loading, error }

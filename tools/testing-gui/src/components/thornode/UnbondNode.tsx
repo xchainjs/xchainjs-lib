@@ -20,8 +20,15 @@ export function UnbondNode({ thorClient, walletConnected }: UnbondNodeProps) {
   const [showConfirm, setShowConfirm] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<UnbondResult>()
 
+  // Validate inputs
+  const trimmedNodeAddress = nodeAddress.trim()
+  const trimmedProviderAddress = providerAddress.trim()
+  const parsedAmount = Number(amount)
+  const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0
+  const isFormValid = trimmedNodeAddress && isAmountValid
+
   const handleUnbond = async () => {
-    if (!thorClient || !nodeAddress || !amount) return
+    if (!thorClient || !isFormValid) return
 
     setShowConfirm(false)
 
@@ -30,10 +37,10 @@ export function UnbondNode({ thorClient, walletConnected }: UnbondNodeProps) {
       const amountBase = assetToBase(assetAmount(amount, 8)).amount().toString()
 
       // Build memo: UNBOND:<node_address>:<amount> or UNBOND:<node_address>:<amount>:<provider_address>
-      let memo = `UNBOND:${nodeAddress.trim()}:${amountBase}`
+      let memo = `UNBOND:${trimmedNodeAddress}:${amountBase}`
 
-      if (providerAddress.trim()) {
-        memo = `UNBOND:${nodeAddress.trim()}:${amountBase}:${providerAddress.trim()}`
+      if (trimmedProviderAddress) {
+        memo = `UNBOND:${trimmedNodeAddress}:${amountBase}:${trimmedProviderAddress}`
       }
 
       // Unbond requires a small deposit (just for the memo, amount is in memo)
@@ -165,7 +172,7 @@ console.log('Unbond Transaction:', txHash)`
 
       <button
         onClick={() => setShowConfirm(true)}
-        disabled={loading || !thorClient || !nodeAddress || !amount}
+        disabled={loading || !thorClient || !isFormValid}
         className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Unbonding...' : 'Unbond RUNE'}

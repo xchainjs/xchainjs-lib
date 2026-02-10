@@ -1,6 +1,11 @@
 // Code example generators for each operation
 // These generate copy-paste ready code snippets showing how to use xchainjs
 
+// Escape single quotes in user input to prevent broken code syntax
+function escapeForString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
+}
+
 interface ChainConfig {
   packageName: string
   clientImport: string
@@ -156,7 +161,7 @@ console.log('Address:', address)`
 }
 
 export function generateGetBalanceCode(chainId: string, address?: string): string {
-  const addressParam = address ? `'${address}'` : 'await client.getAddressAsync()'
+  const addressParam = address ? `'${escapeForString(address)}'` : 'await client.getAddressAsync()'
 
   return `${generateImports(chainId, ['baseToAsset', 'assetToString'])}
 
@@ -192,7 +197,7 @@ export function generateTransferCode(
   amount: string,
   memo?: string
 ): string {
-  const memoLine = memo ? `\n  memo: '${memo}',` : ''
+  const memoLine = memo ? `\n  memo: '${escapeForString(memo)}',` : ''
 
   return `${generateImports(chainId, ['assetAmount', 'assetToBase'])}
 
@@ -200,7 +205,7 @@ ${generateClientSetup(chainId)}
 
 // Transfer funds
 const txHash = await client.transfer({
-  recipient: '${recipient}',
+  recipient: '${escapeForString(recipient)}',
   amount: assetToBase(assetAmount(${amount})),${memoLine}
 })
 
@@ -217,14 +222,14 @@ export function generateValidateAddressCode(chainId: string, address: string): s
 ${generateClientSetup(chainId)}
 
 // Validate an address
-const address = '${address}'
+const address = '${escapeForString(address)}'
 const isValid = client.validateAddress(address)
 
 console.log(\`Address \${address} is \${isValid ? 'valid' : 'invalid'}\`)`
 }
 
 export function generateGetHistoryCode(chainId: string, address?: string): string {
-  const addressParam = address ? `'${address}'` : 'await client.getAddressAsync()'
+  const addressParam = address ? `'${escapeForString(address)}'` : 'await client.getAddressAsync()'
 
   return `${generateImports(chainId, ['baseToAsset', 'assetToString'])}
 
