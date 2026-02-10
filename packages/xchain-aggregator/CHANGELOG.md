@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.0.35
+
+### Patch Changes
+
+- 3ea213e: Upgrade axios to 1.13.5 to fix security vulnerability (GHSA-43fc-jf86-j433)
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-mayachain@4.1.1
+  - @xchainjs/xchain-mayachain-amm@4.1.9
+  - @xchainjs/xchain-mayachain-query@2.1.6
+  - @xchainjs/xchain-thorchain@3.0.14
+  - @xchainjs/xchain-thorchain-amm@3.0.27
+  - @xchainjs/xchain-thorchain-query@2.0.16
+  - @xchainjs/xchain-wallet@2.0.20
+
 ## 2.0.34
 
 ### Patch Changes

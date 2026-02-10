@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.0.27
+
+### Patch Changes
+
+- 3ea213e: Upgrade axios to 1.13.5 to fix security vulnerability (GHSA-43fc-jf86-j433)
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-bitcoin@2.0.10
+  - @xchainjs/xchain-bitcoincash@2.0.11
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-cosmos@3.0.10
+  - @xchainjs/xchain-doge@2.0.10
+  - @xchainjs/xchain-evm@2.0.14
+  - @xchainjs/xchain-litecoin@2.0.10
+  - @xchainjs/xchain-thorchain@3.0.14
+  - @xchainjs/xchain-thorchain-query@2.0.16
+  - @xchainjs/xchain-wallet@2.0.20
+  - @xchainjs/xchain-avax@2.0.14
+  - @xchainjs/xchain-base@1.0.14
+  - @xchainjs/xchain-bsc@2.0.15
+  - @xchainjs/xchain-ethereum@2.0.15
+  - @xchainjs/xchain-ripple@1.0.12
+  - @xchainjs/xchain-solana@1.1.1
+  - @xchainjs/xchain-tron@3.0.2
+
 ## 3.0.26
 
 ### Patch Changes
