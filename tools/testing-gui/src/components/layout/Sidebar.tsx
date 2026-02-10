@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { ArrowRightLeft, Droplets } from 'lucide-react'
+import { ArrowRightLeft, Droplets, Server } from 'lucide-react'
 
 interface ChainGroup {
   name: string
@@ -82,6 +82,19 @@ export function Sidebar() {
           >
             <Droplets className="w-4 h-4" />
             Liquidity
+          </NavLink>
+          <NavLink
+            to="/thornode"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <Server className="w-4 h-4" />
+            THORNode
           </NavLink>
         </div>
 

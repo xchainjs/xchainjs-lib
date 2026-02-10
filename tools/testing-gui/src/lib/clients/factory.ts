@@ -6,13 +6,13 @@ import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
 
 // UTXO Chains
-import { Client as BtcClient, defaultBTCParams } from '@xchainjs/xchain-bitcoin'
+import { Client as BtcClient, defaultBTCParams, AssetBTC, BTC_DECIMAL, BTCChain } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
-import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
-import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
-import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
+import { Client as LtcClient, defaultLtcParams, AssetLTC, LTC_DECIMAL, LTCChain } from '@xchainjs/xchain-litecoin'
+import { Client as DogeClient, defaultDogeParams, AssetDOGE, DOGE_DECIMAL, DOGEChain } from '@xchainjs/xchain-doge'
+import { Client as DashClient, defaultDashParams, AssetDASH, DASH_DECIMAL, DASHChain } from '@xchainjs/xchain-dash'
 import { Client as ZecClient, defaultZECParams, AssetZEC, ZEC_DECIMAL, zcashExplorerProviders } from '@xchainjs/xchain-zcash'
-import { NownodesProvider } from '@xchainjs/xchain-utxo-providers'
+import { NownodesProvider, BlockcypherProvider, BlockcypherNetwork } from '@xchainjs/xchain-utxo-providers'
 
 // EVM Chains - import only the Client classes, not the default params (they trigger broken module-level code)
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
@@ -145,6 +145,145 @@ function createZecParams(network: Network, phrase: string) {
   }
 }
 
+// Lazy creation of BTC config to use BlockCypher API key
+function createBtcParams(network: Network, phrase: string) {
+  const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
+
+  // If no API key, use default params
+  if (!blockcypherApiKey) {
+    return { ...defaultBTCParams, network, phrase }
+  }
+
+  const mainnetBlockcypherProvider = new BlockcypherProvider(
+    'https://api.blockcypher.com/v1',
+    BTCChain,
+    AssetBTC,
+    BTC_DECIMAL,
+    BlockcypherNetwork.BTC,
+    blockcypherApiKey,
+  )
+  const testnetBlockcypherProvider = new BlockcypherProvider(
+    'https://api.blockcypher.com/v1',
+    BTCChain,
+    AssetBTC,
+    BTC_DECIMAL,
+    BlockcypherNetwork.BTCTEST,
+    blockcypherApiKey,
+  )
+
+  const dataProviders = [{
+    [Network.Mainnet]: mainnetBlockcypherProvider,
+    [Network.Testnet]: testnetBlockcypherProvider,
+    [Network.Stagenet]: mainnetBlockcypherProvider,
+  }]
+
+  return {
+    ...defaultBTCParams,
+    network,
+    phrase,
+    dataProviders,
+  }
+}
+
+// Lazy creation of LTC config to use BlockCypher API key
+function createLtcParams(network: Network, phrase: string) {
+  const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
+
+  // If no API key, use default params
+  if (!blockcypherApiKey) {
+    return { ...defaultLtcParams, network, phrase }
+  }
+
+  const mainnetBlockcypherProvider = new BlockcypherProvider(
+    'https://api.blockcypher.com/v1',
+    LTCChain,
+    AssetLTC,
+    LTC_DECIMAL,
+    BlockcypherNetwork.LTC,
+    blockcypherApiKey,
+  )
+
+  // BlockCypher doesn't have LTC testnet, use mainnet provider
+  const dataProviders = [{
+    [Network.Mainnet]: mainnetBlockcypherProvider,
+    [Network.Testnet]: undefined,
+    [Network.Stagenet]: mainnetBlockcypherProvider,
+  }]
+
+  return {
+    ...defaultLtcParams,
+    network,
+    phrase,
+    dataProviders,
+  }
+}
+
+// Lazy creation of DOGE config to use BlockCypher API key
+function createDogeParams(network: Network, phrase: string) {
+  const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
+
+  // If no API key, use default params
+  if (!blockcypherApiKey) {
+    return { ...defaultDogeParams, network, phrase }
+  }
+
+  const mainnetBlockcypherProvider = new BlockcypherProvider(
+    'https://api.blockcypher.com/v1',
+    DOGEChain,
+    AssetDOGE,
+    DOGE_DECIMAL,
+    BlockcypherNetwork.DOGE,
+    blockcypherApiKey,
+  )
+
+  // BlockCypher doesn't have DOGE testnet, use mainnet provider
+  const dataProviders = [{
+    [Network.Mainnet]: mainnetBlockcypherProvider,
+    [Network.Testnet]: undefined,
+    [Network.Stagenet]: mainnetBlockcypherProvider,
+  }]
+
+  return {
+    ...defaultDogeParams,
+    network,
+    phrase,
+    dataProviders,
+  }
+}
+
+// Lazy creation of DASH config to use BlockCypher API key
+function createDashParams(network: Network, phrase: string) {
+  const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
+
+  // If no API key, use default params
+  if (!blockcypherApiKey) {
+    return { ...defaultDashParams, network, phrase }
+  }
+
+  const mainnetBlockcypherProvider = new BlockcypherProvider(
+    'https://api.blockcypher.com/v1',
+    DASHChain,
+    AssetDASH,
+    DASH_DECIMAL,
+    BlockcypherNetwork.DASH,
+    blockcypherApiKey,
+  )
+
+  // BlockCypher doesn't have DASH testnet, use mainnet provider
+  const dataProviders = [{
+    [Network.Mainnet]: mainnetBlockcypherProvider,
+    [Network.Testnet]: undefined,
+    [Network.Stagenet]: mainnetBlockcypherProvider,
+  }]
+
+  return {
+    ...defaultDashParams,
+    network,
+    phrase,
+    dataProviders,
+  }
+}
+
 // Cosmos Chains
 import { Client as GaiaClient, defaultClientConfig as defaultGaiaParams } from '@xchainjs/xchain-cosmos'
 import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
@@ -166,17 +305,17 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
   const { phrase, network } = config
 
   switch (chainId) {
-    // UTXO Chains
+    // UTXO Chains - use BlockCypher API key if available
     case 'BTC':
-      return new BtcClient({ ...defaultBTCParams, network, phrase })
+      return new BtcClient(createBtcParams(network, phrase))
     case 'BCH':
       return new BchClient({ ...defaultBchParams, network, phrase })
     case 'LTC':
-      return new LtcClient({ ...defaultLtcParams, network, phrase })
+      return new LtcClient(createLtcParams(network, phrase))
     case 'DOGE':
-      return new DogeClient({ ...defaultDogeParams, network, phrase })
+      return new DogeClient(createDogeParams(network, phrase))
     case 'DASH':
-      return new DashClient({ ...defaultDashParams, network, phrase })
+      return new DashClient(createDashParams(network, phrase))
     case 'ZEC':
       return new ZecClient(createZecParams(network, phrase))
 
