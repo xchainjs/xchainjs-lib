@@ -9,6 +9,8 @@ import { QuoteCard } from '../components/swap/QuoteCard'
 import { SwapConfirmModal } from '../components/swap/SwapConfirmModal'
 import { SwapTrackingModal } from '../components/swap/SwapTrackingModal'
 import { ResultPanel } from '../components/ui/ResultPanel'
+import { CodePreview } from '../components/ui/CodePreview'
+import { generateSwapEstimateCode, generateSwapExecuteCode } from '../lib/codeExamples'
 import { getChainById } from '../lib/chains'
 import {
   assetAmount,
@@ -480,6 +482,31 @@ export default function SwapPage() {
           protocol={trackingProtocol}
           explorerUrl={trackingExplorerUrl}
         />
+      )}
+
+      {/* Code Examples */}
+      {fromAsset && toAsset && amount && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Code Examples</h3>
+          <CodePreview
+            code={generateSwapEstimateCode(
+              fromAsset.chainId,
+              toAsset.chainId,
+              amount,
+              selectedQuote?.protocol === 'Mayachain' ? 'MAYAChain' : 'THORChain'
+            )}
+            title="Get Swap Quote"
+          />
+          <CodePreview
+            code={generateSwapExecuteCode(
+              fromAsset.chainId,
+              toAsset.chainId,
+              amount,
+              selectedQuote?.protocol === 'Mayachain' ? 'MAYAChain' : 'THORChain'
+            )}
+            title="Execute Swap"
+          />
+        </div>
       )}
     </div>
   )

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { XChainClient } from '@xchainjs/xchain-client'
+import { CodePreview } from '../ui/CodePreview'
+import { generateValidateAddressCode } from '../../lib/codeExamples'
 
 interface ValidateAddressProps {
   chainId: string
@@ -135,6 +137,13 @@ export function ValidateAddress({ chainId, client }: ValidateAddressProps) {
             )}
           </div>
         </div>
+      )}
+
+      {address.trim() && (
+        <CodePreview
+          code={generateValidateAddressCode(chainId, address)}
+          title="Code Example"
+        />
       )}
     </div>
   )

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
+import { CodePreview } from '../ui/CodePreview'
+import { generateGetAddressCode } from '../../lib/codeExamples'
 import type { XChainClient } from '@xchainjs/xchain-client'
 
 interface GetAddressProps {
@@ -105,6 +107,11 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
           </div>
         )}
       </ResultPanel>
+
+      <CodePreview
+        code={generateGetAddressCode(chainId)}
+        title="Code Example"
+      />
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
+import { CodePreview } from '../ui/CodePreview'
+import { generateGetHistoryCode } from '../../lib/codeExamples'
 import type { XChainClient, Tx } from '@xchainjs/xchain-client'
 import { baseToAsset, formatAssetAmountCurrency } from '@xchainjs/xchain-util'
 
@@ -172,6 +174,11 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
           </div>
         )}
       </ResultPanel>
+
+      <CodePreview
+        code={generateGetHistoryCode(chainId, address.trim() || undefined)}
+        title="Code Example"
+      />
     </div>
   )
 }

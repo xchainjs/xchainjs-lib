@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useOperation } from '../../hooks/useOperation'
 import { usePrices, formatUsdValue } from '../../hooks/usePrices'
 import { ResultPanel } from '../ui/ResultPanel'
+import { CodePreview } from '../ui/CodePreview'
+import { generateGetBalanceCode } from '../../lib/codeExamples'
 import type { XChainClient, Balance } from '@xchainjs/xchain-client'
 import { assetToString, baseToAsset, formatAssetAmountCurrency, baseAmount } from '@xchainjs/xchain-util'
 
@@ -152,6 +154,11 @@ export function GetBalance({ chainId, client }: GetBalanceProps) {
           </div>
         )}
       </ResultPanel>
+
+      <CodePreview
+        code={generateGetBalanceCode(chainId, address.trim() || undefined)}
+        title="Code Example"
+      />
     </div>
   )
 }
