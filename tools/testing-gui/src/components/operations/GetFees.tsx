@@ -1,5 +1,7 @@
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
+import { CodePreview } from '../ui/CodePreview'
+import { generateGetFeesCode } from '../../lib/codeExamples'
 import { FeeType, type XChainClient, type Fees } from '@xchainjs/xchain-client'
 import { baseToAsset, formatAssetAmountCurrency, baseAmount } from '@xchainjs/xchain-util'
 import type { BaseAmount } from '@xchainjs/xchain-util'
@@ -111,6 +113,11 @@ export function GetFees({ chainId, client }: GetFeesProps) {
           </div>
         )}
       </ResultPanel>
+
+      <CodePreview
+        code={generateGetFeesCode(chainId)}
+        title="Code Example"
+      />
     </div>
   )
 }

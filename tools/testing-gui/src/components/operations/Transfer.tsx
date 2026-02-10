@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
+import { CodePreview } from '../ui/CodePreview'
+import { generateTransferCode } from '../../lib/codeExamples'
 import type { XChainClient } from '@xchainjs/xchain-client'
 import { assetToBase, assetAmount, baseToAsset } from '@xchainjs/xchain-util'
 import { getChainById } from '../../lib/chains'
@@ -274,6 +276,13 @@ export function Transfer({ chainId, client }: TransferProps) {
           </div>
         )}
       </ResultPanel>
+
+      {recipient.trim() && amount.trim() && (
+        <CodePreview
+          code={generateTransferCode(chainId, recipient, amount, memo || undefined)}
+          title="Code Example"
+        />
+      )}
     </div>
   )
 }
