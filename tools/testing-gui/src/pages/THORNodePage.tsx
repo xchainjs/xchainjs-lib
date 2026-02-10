@@ -25,8 +25,8 @@ const TABS: Tab[] = [
 
 export default function THORNodePage() {
   const [activeTab, setActiveTab] = useState<TabId>('list')
-  const { nodesApi, networkApi, mimirApi, loading: apiLoading, error: apiError } = useTHORNode()
-  const { client: thorClient, loading: clientLoading, error: clientError } = useTHORChainClient()
+  const { nodesApi, loading: apiLoading, error: apiError } = useTHORNode()
+  const { client: thorClient } = useTHORChainClient()
   const { phrase } = useWallet()
 
   const walletConnected = !!phrase && !!thorClient

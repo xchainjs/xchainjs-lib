@@ -106,13 +106,14 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
   ADA: {
     packageName: '@xchainjs/xchain-cardano',
     clientImport: 'Client',
-    paramsImport: 'defaultCardanoParams',
-    clientInit: 'new Client({ ...defaultCardanoParams, network: Network.Mainnet, phrase })',
+    paramsImport: 'defaultAdaParams',
+    clientInit: 'new Client({ ...defaultAdaParams, network: Network.Mainnet, phrase })',
   },
   XRP: {
     packageName: '@xchainjs/xchain-ripple',
     clientImport: 'Client',
-    clientInit: 'new Client({ network: Network.Mainnet, phrase })',
+    paramsImport: 'defaultXRPParams',
+    clientInit: 'new Client({ ...defaultXRPParams, network: Network.Mainnet, phrase })',
   },
 }
 
