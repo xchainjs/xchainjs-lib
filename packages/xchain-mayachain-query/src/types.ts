@@ -5,6 +5,7 @@ import {
   AssetCryptoAmount,
   Chain,
   CryptoAmount,
+  SecuredAsset,
   SynthAsset,
   TokenAsset,
   TradeAsset,
@@ -12,7 +13,7 @@ import {
 } from '@xchainjs/xchain-util'
 import type BigNumber from 'bignumber.js'
 
-export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset
+export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
 
 /**
  * Represents fees associated with a swap.
