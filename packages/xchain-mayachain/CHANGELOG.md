@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.1.1
+
+### Patch Changes
+
+- 3ea213e: Upgrade axios to 1.13.5 to fix security vulnerability (GHSA-43fc-jf86-j433)
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-cosmos-sdk@2.0.10
+
 ## 4.1.0
 
 ### Minor Changes

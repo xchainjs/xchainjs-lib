@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoin",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "Custom Bitcoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
-    "axios": "1.12.1",
+    "axios": "1.13.5",
     "axios-mock-adapter": "^2.1.0"
   },
   "publishConfig": {

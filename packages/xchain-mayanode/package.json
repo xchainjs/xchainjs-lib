@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayanode",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "license": "MIT",
   "description": "Mayanode module that exposes all mayanode functions using openapi-generator-cli",
   "keywords": [
@@ -34,7 +34,7 @@
     "clean:types:mayanode": "rimraf ./src/generated/mayanodeApi"
   },
   "dependencies": {
-    "axios": "1.12.1"
+    "axios": "1.13.5"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.20.2",

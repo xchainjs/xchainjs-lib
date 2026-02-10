@@ -26,7 +26,7 @@
     "check:trunk": "./scripts/trunk-check.sh",
     "update-packages": "yarn changeset",
     "increase-packages": "yarn changeset version",
-    "publish-packages": "turbo run build:release test --cache-dir=.turbo && yarn increase-packages && yarn changeset publish",
+    "publish-packages": "turbo run build:release test --cache-dir=.turbo --filter='./packages/*' && yarn increase-packages && yarn changeset publish",
     "notification:prepare": "ts-node scripts/notification.ts",
     "analyze-bundles": "turbo run build --cache-dir=.turbo --filter='./packages/*' && echo \"Bundle analysis files (stats.html) have been generated in each package's dist directory\""
   },

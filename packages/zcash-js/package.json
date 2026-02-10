@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/zcash-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Zcash JavaScript library - Fork of @mayaprotocol/zcash-js with NU6.1 support and browser compatibility",
   "keywords": [
     "zcash",
@@ -32,7 +32,7 @@
   "dependencies": {
     "@noble/curves": "^1.7.0",
     "@noble/hashes": "^1.6.1",
-    "axios": "1.12.1",
+    "axios": "1.13.5",
     "bs58check": "^4.0.0",
     "buffer": "^6.0.3",
     "json-rpc-2.0": "^1.7.0",

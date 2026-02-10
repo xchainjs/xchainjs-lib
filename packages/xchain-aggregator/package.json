@@ -1,7 +1,7 @@
 {
   "name": "@xchainjs/xchain-aggregator",
   "description": "Protocol aggregator to make actions in different protocols",
-  "version": "2.0.33",
+  "version": "2.0.35",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -47,7 +47,7 @@
     "@xchainjs/xchain-bsc": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",
     "@xchainjs/xchain-kujira": "workspace:*",
-    "axios": "1.12.1",
+    "axios": "1.13.5",
     "axios-mock-adapter": "^2.1.0"
   }
 }

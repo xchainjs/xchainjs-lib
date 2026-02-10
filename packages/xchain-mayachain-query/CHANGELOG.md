@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.1.6
+
+### Patch Changes
+
+- 3ea213e: Upgrade axios to 1.13.5 to fix security vulnerability (GHSA-43fc-jf86-j433)
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-mayamidgard@1.0.5
+  - @xchainjs/xchain-mayamidgard-query@1.0.11
+  - @xchainjs/xchain-mayanode@1.1.1
+
+## 2.1.5
+
+### Patch Changes
+
+- 4f7a881: Fix MAYA.MAYA swap quote decimal handling - amounts were inflated 10,000x because getQuoteAssetDecimals returned 8 instead of 4 for MAYA.MAYA
+
 ## 2.1.4
 
 ### Patch Changes

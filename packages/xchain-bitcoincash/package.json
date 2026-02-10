@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoincash",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Custom bitcoincash client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
@@ -50,7 +50,7 @@
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
     "@types/bitcore-lib-cash": "^8.23.8",
     "@types/cashaddrjs": "^0",
-    "axios": "1.12.1",
+    "axios": "1.13.5",
     "axios-mock-adapter": "^2.1.0"
   },
   "publishConfig": {

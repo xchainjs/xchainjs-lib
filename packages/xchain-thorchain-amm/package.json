@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-thorchain-amm",
-  "version": "3.0.26",
+  "version": "3.0.27",
   "description": "module that exposes estimating & swappping cryptocurrency assets on thorchain",
   "keywords": [
     "THORChain",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
-    "axios": "1.12.1",
+    "axios": "1.13.5",
     "axios-mock-adapter": "^2.1.0"
   },
   "publishConfig": {
