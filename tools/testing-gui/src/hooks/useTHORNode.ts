@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react'
 import { Network } from '@xchainjs/xchain-client'
+import type { NodesApi, NetworkApi, MimirApi } from '@xchainjs/xchain-thornode'
+import type { ClientKeystore as ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { useWallet } from '../contexts/WalletContext'
-import { useConfig } from '../contexts/ConfigContext'
 
 // THORNode API types and configuration
 interface THORNodeConfig {
-  nodesApi: any
-  networkApi: any
-  mimirApi: any
+  nodesApi: NodesApi | null
+  networkApi: NetworkApi | null
+  mimirApi: MimirApi | null
   loading: boolean
   error: string | null
 }
 
+interface THORNodeApis {
+  nodesApi: NodesApi
+  networkApi: NetworkApi
+  mimirApi: MimirApi
+}
+
 export function useTHORNode(): THORNodeConfig {
-  const { network } = useConfig()
+  const { network } = useWallet()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [apis, setApis] = useState<{ nodesApi: any; networkApi: any; mimirApi: any } | null>(null)
+  const [apis, setApis] = useState<THORNodeApis | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -57,7 +64,7 @@ export function useTHORNode(): THORNodeConfig {
       }
     }
 
-    initApis()
+    void initApis()
 
     return () => {
       cancelled = true
@@ -75,9 +82,8 @@ export function useTHORNode(): THORNodeConfig {
 
 // Hook to get THORChain client for deposit operations
 export function useTHORChainClient() {
-  const { phrase } = useWallet()
-  const { network } = useConfig()
-  const [client, setClient] = useState<any>(null)
+  const { phrase, network } = useWallet()
+  const [client, setClient] = useState<ThorchainClient | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -109,7 +115,7 @@ export function useTHORChainClient() {
       }
     }
 
-    initClient()
+    void initClient()
 
     return () => {
       cancelled = true
