@@ -10,6 +10,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 const SwapPage = lazy(() => import('./pages/SwapPage'))
 const LiquidityPage = lazy(() => import('./pages/LiquidityPage'))
 const THORNodePage = lazy(() => import('./pages/THORNodePage'))
+const MAYANodePage = lazy(() => import('./pages/MAYANodePage'))
 
 function SwapPageLoader() {
   return (
@@ -39,6 +40,17 @@ function THORNodePageLoader() {
       <div className="flex items-center gap-3">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
         <p className="text-gray-600 dark:text-gray-300">Loading THORNode interface...</p>
+      </div>
+    </div>
+  )
+}
+
+function MAYANodePageLoader() {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="flex items-center gap-3">
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+        <p className="text-gray-600 dark:text-gray-300">Loading MAYANode interface...</p>
       </div>
     </div>
   )
@@ -74,6 +86,14 @@ export default function App() {
                   element={
                     <Suspense fallback={<THORNodePageLoader />}>
                       <THORNodePage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/mayanode"
+                  element={
+                    <Suspense fallback={<MAYANodePageLoader />}>
+                      <MAYANodePage />
                     </Suspense>
                   }
                 />

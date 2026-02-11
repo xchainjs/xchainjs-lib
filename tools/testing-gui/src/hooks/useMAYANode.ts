@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Network } from '@xchainjs/xchain-client'
-import type { NodesApi, NetworkApi, MimirApi } from '@xchainjs/xchain-thornode'
-import type { Client as ThorchainClient } from '@xchainjs/xchain-thorchain'
+import type { NodesApi, NetworkApi, MimirApi } from '@xchainjs/xchain-mayanode'
+import type { Client as MayachainClient } from '@xchainjs/xchain-mayachain'
 import { useWallet } from '../contexts/WalletContext'
 
-// THORNode API types and configuration
-interface THORNodeConfig {
+// MAYANode API types and configuration
+interface MAYANodeConfig {
   nodesApi: NodesApi | null
   networkApi: NetworkApi | null
   mimirApi: MimirApi | null
@@ -13,17 +13,23 @@ interface THORNodeConfig {
   error: string | null
 }
 
-interface THORNodeApis {
+interface MAYANodeApis {
   nodesApi: NodesApi
   networkApi: NetworkApi
   mimirApi: MimirApi
 }
 
-export function useTHORNode(): THORNodeConfig {
+const MAYANODE_URLS: Record<Network, string> = {
+  [Network.Mainnet]: 'https://mayanode.mayachain.info',
+  [Network.Stagenet]: 'https://stagenet.mayanode.mayachain.info',
+  [Network.Testnet]: 'https://stagenet.mayanode.mayachain.info',
+}
+
+export function useMAYANode(): MAYANodeConfig {
   const { network } = useWallet()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [apis, setApis] = useState<THORNodeApis | null>(null)
+  const [apis, setApis] = useState<MAYANodeApis | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -33,19 +39,9 @@ export function useTHORNode(): THORNodeConfig {
       setError(null)
 
       try {
-        // Dynamically import thornode to avoid SSR issues
-        const { NodesApi, NetworkApi, MimirApi, Configuration, THORNODE_API_9R_URL } = await import(
-          '@xchainjs/xchain-thornode'
-        )
+        const { NodesApi, NetworkApi, MimirApi, Configuration } = await import('@xchainjs/xchain-mayanode')
 
-        // Use appropriate endpoint based on network
-        let baseUrl = THORNODE_API_9R_URL
-        if (network === Network.Stagenet) {
-          baseUrl = 'https://stagenet-thornode.ninerealms.com/'
-        } else if (network === Network.Testnet) {
-          baseUrl = 'https://testnet-thornode.ninerealms.com/'
-        }
-
+        const baseUrl = MAYANODE_URLS[network]
         const config = new Configuration({ basePath: baseUrl })
 
         if (cancelled) return
@@ -57,8 +53,8 @@ export function useTHORNode(): THORNodeConfig {
         })
       } catch (err) {
         if (cancelled) return
-        console.error('Failed to initialize THORNode APIs:', err)
-        setError(err instanceof Error ? err.message : 'Failed to initialize THORNode APIs')
+        console.error('Failed to initialize MAYANode APIs:', err)
+        setError(err instanceof Error ? err.message : 'Failed to initialize MAYANode APIs')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -80,10 +76,10 @@ export function useTHORNode(): THORNodeConfig {
   }
 }
 
-// Hook to get THORChain client for deposit operations
-export function useTHORChainClient() {
+// Hook to get MAYAChain client for deposit operations
+export function useMAYAChainClient() {
   const { phrase, network } = useWallet()
-  const [client, setClient] = useState<ThorchainClient | null>(null)
+  const [client, setClient] = useState<MayachainClient | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -100,16 +96,16 @@ export function useTHORChainClient() {
       setError(null)
 
       try {
-        const { Client, defaultClientConfig } = await import('@xchainjs/xchain-thorchain')
-        const thorClient = new Client({ ...defaultClientConfig, network, phrase })
+        const { Client, defaultClientConfig } = await import('@xchainjs/xchain-mayachain')
+        const mayaClient = new Client({ ...defaultClientConfig, network, phrase })
 
         if (cancelled) return
 
-        setClient(thorClient)
+        setClient(mayaClient)
       } catch (err) {
         if (cancelled) return
-        console.error('Failed to initialize THORChain client:', err)
-        setError(err instanceof Error ? err.message : 'Failed to initialize THORChain client')
+        console.error('Failed to initialize MAYAChain client:', err)
+        setError(err instanceof Error ? err.message : 'Failed to initialize MAYAChain client')
       } finally {
         if (!cancelled) setLoading(false)
       }

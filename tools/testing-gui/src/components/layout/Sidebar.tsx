@@ -96,6 +96,19 @@ export function Sidebar() {
             <Server className="w-4 h-4" />
             THORNode
           </NavLink>
+          <NavLink
+            to="/mayanode"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <Server className="w-4 h-4" />
+            MAYANode
+          </NavLink>
         </div>
 
         {/* Chain Groups */}
