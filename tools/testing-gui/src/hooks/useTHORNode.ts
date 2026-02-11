@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Network } from '@xchainjs/xchain-client'
 import type { NodesApi, NetworkApi, MimirApi } from '@xchainjs/xchain-thornode'
-import type { ClientKeystore as ThorchainClient } from '@xchainjs/xchain-thorchain'
+import type { Client as ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { useWallet } from '../contexts/WalletContext'
 
 // THORNode API types and configuration

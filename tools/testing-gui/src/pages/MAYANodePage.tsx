@@ -18,8 +18,8 @@ interface Tab {
 const TABS: Tab[] = [
   { id: 'list', name: 'Node List', description: 'View all MAYAChain validator nodes' },
   { id: 'details', name: 'Node Details', description: 'Get detailed info for a specific node' },
-  { id: 'bond', name: 'Bond', description: 'Bond CACAO to a validator node' },
-  { id: 'unbond', name: 'Unbond', description: 'Unbond CACAO from a validator node' },
+  { id: 'bond', name: 'Bond', description: 'Bond LP units to a validator node' },
+  { id: 'unbond', name: 'Unbond', description: 'Unbond LP units from a validator node' },
   { id: 'leave', name: 'Leave', description: 'Request a node to leave the network' },
 ]
 

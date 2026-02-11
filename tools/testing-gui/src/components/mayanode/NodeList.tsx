@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { NodesApi } from '@xchainjs/xchain-mayanode'
+import type { NodesApi, Node } from '@xchainjs/xchain-mayanode'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import { CodePreview } from '../ui/CodePreview'
@@ -28,14 +28,14 @@ export function NodeList({ nodesApi }: NodeListProps) {
 
     await execute(async () => {
       const response = await nodesApi.nodes()
-      const nodes = response.data as any[]
+      const nodes = response.data as Node[]
 
       // Filter by status if needed
       const filtered = statusFilter === 'all'
         ? nodes
-        : nodes.filter((n: any) => n.status === statusFilter)
+        : nodes.filter((n) => n.status === statusFilter)
 
-      return filtered.map((node: any) => ({
+      return filtered.map((node) => ({
         address: node.node_address,
         status: node.status,
         bond: baseToAsset(baseAmount(node.bond, 10)).amount().toFormat(2) + ' CACAO',

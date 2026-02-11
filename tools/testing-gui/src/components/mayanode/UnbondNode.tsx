@@ -69,7 +69,10 @@ export function UnbondNode({ mayaClient, walletConnected }: UnbondNodeProps) {
         txHash,
         explorerUrl: mayaClient.getExplorerTxUrl(txHash),
       }
-    }, { operation: 'unbond', params: { unbondType, assetPool, lpUnits, nodeAddress } })
+    }, { operation: 'unbond', params: unbondType === 'lp'
+      ? { unbondType, assetPool, lpUnits, nodeAddress }
+      : { unbondType, unwhitelistNodeAddress, providerAddress }
+    })
   }
 
   const isLpFormValid = unbondType === 'lp' &&

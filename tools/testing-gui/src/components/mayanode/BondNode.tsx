@@ -71,7 +71,10 @@ export function BondNode({ mayaClient, walletConnected }: BondNodeProps) {
         txHash,
         explorerUrl: mayaClient.getExplorerTxUrl(txHash),
       }
-    }, { operation: 'bond', params: { bondType, assetPool, lpUnits, nodeAddress } })
+    }, { operation: 'bond', params: bondType === 'lp'
+      ? { bondType, assetPool, lpUnits, nodeAddress }
+      : { bondType, whitelistNodeAddress, providerAddress, operatorFee }
+    })
   }
 
   const isLpFormValid = bondType === 'lp' &&

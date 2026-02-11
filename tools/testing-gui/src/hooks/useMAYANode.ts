@@ -20,9 +20,9 @@ interface MAYANodeApis {
 }
 
 const MAYANODE_URLS: Record<Network, string> = {
-  [Network.Mainnet]: 'https://mayanode.mayachain.info/',
-  [Network.Stagenet]: 'https://stagenet.mayanode.mayachain.info/',
-  [Network.Testnet]: 'https://stagenet.mayanode.mayachain.info/',
+  [Network.Mainnet]: 'https://mayanode.mayachain.info',
+  [Network.Stagenet]: 'https://stagenet.mayanode.mayachain.info',
+  [Network.Testnet]: 'https://stagenet.mayanode.mayachain.info',
 }
 
 export function useMAYANode(): MAYANodeConfig {
