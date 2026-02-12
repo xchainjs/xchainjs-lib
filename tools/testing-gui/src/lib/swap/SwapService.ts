@@ -149,6 +149,9 @@ export class SwapService {
         destinationAddress: params.destinationAddress,
         affiliateAddress: 'dx',
         affiliateBps: 0,
+        // Streaming swap parameters
+        ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
+        ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
       })
       console.log('[SwapService] MAYAChain estimate:', estimate)
 
@@ -214,6 +217,9 @@ export class SwapService {
           destinationAddress: params.destinationAddress,
           affiliateAddress: 'dx',
           affiliateBps: 0,
+          // Streaming swap parameters
+          ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
+          ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
         })
         console.log('[SwapService] MAYAChain swap result:', result)
         return result

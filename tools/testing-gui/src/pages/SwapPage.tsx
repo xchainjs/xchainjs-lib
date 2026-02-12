@@ -226,8 +226,8 @@ export default function SwapPage() {
           fromAddress,
           destinationAddress,
           protocol: selectedQuote.protocol,
-          // Streaming swap parameters (THORChain only)
-          ...(isStreaming && selectedQuote.protocol === 'Thorchain' && {
+          // Streaming swap parameters
+          ...(isStreaming && {
             streamingInterval: parseInt(streamingInterval) || 1,
             streamingQuantity: parseInt(streamingQuantity) || 0,
           }),
@@ -391,7 +391,7 @@ export default function SwapPage() {
                   Streaming Swap
                 </label>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Split large swaps into smaller sub-swaps for better prices (THORChain only)
+                  Split large swaps into smaller sub-swaps for better prices
                 </p>
               </div>
               <button
