@@ -40,7 +40,7 @@
     "@cosmjs/crypto": "0.34.0",
     "@cosmjs/encoding": "0.34.0",
     "@cosmjs/proto-signing": "0.34.0",
-    "@cosmjs/stargate": "0.34.0",
+    "@cosmjs/stargate": "0.37.0",
     "@scure/base": "1.1.5",
     "@scure/bip32": "^1.7.0",
     "@xchainjs/xchain-client": "workspace:*",
