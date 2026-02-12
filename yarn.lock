@@ -2484,20 +2484,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/types-cryptoassets@npm:^7.23.0":
-  version: 7.23.0
-  resolution: "@ledgerhq/types-cryptoassets@npm:7.23.0"
-  checksum: 10c0/47a0d6cc0647a74adc905884e8e4ae4e0c4c627b382b5c15e05cd4fcaedbc9b078b8ba107c00ef328720fc0b2586013e0469c76f70ee4ee8c50fb4521fc8b35d
-  languageName: node
-  linkType: hard
-
-"@ledgerhq/types-devices@npm:^6.25.3":
-  version: 6.25.3
-  resolution: "@ledgerhq/types-devices@npm:6.25.3"
-  checksum: 10c0/bbddd449f2f8ed5b1c983fd9ea6d90eb8181ba5699eea8dababa5f1e9d4a804af527c9526e50437be230a1daded86562eb4ade1aa2493246cda3e520b32f9ac3
-  languageName: node
-  linkType: hard
-
 "@ledgerhq/types-live@npm:^6.76.0":
   version: 6.76.0
   resolution: "@ledgerhq/types-live@npm:6.76.0"
@@ -4407,7 +4393,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:22.7.5, @types/node@npm:>=13.7.0, @types/node@npm:>=22.7.5, @types/node@npm:^22.7.5":
+"@types/node@npm:*, @types/node@npm:22.7.5, @types/node@npm:>=13.7.0, @types/node@npm:^22.7.5":
   version: 22.7.5
   resolution: "@types/node@npm:22.7.5"
   dependencies:
@@ -4905,7 +4891,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xchainjs/xchain-aggregator@workspace:*, @xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator":
+"@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
   dependencies:
@@ -6068,7 +6054,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-retry@npm:^3.2.5, axios-retry@npm:^3.3.1, axios-retry@npm:^3.9.1":
+"axios-retry@npm:^3.9.1":
   version: 3.9.1
   resolution: "axios-retry@npm:3.9.1"
   dependencies:
@@ -6261,13 +6247,6 @@ __metadata:
   version: 5.0.5
   resolution: "basic-ftp@npm:5.0.5"
   checksum: 10c0/be983a3997749856da87b839ffce6b8ed6c7dbf91ea991d5c980d8add275f9f2926c19f80217ac3e7f353815be879371d636407ca72b038cea8cab30e53928a6
-  languageName: node
-  linkType: hard
-
-"bech32-buffer@npm:^0.2.0":
-  version: 0.2.1
-  resolution: "bech32-buffer@npm:0.2.1"
-  checksum: 10c0/e5a4e2db51280e697e182b5da657d70484a7f8c4709c498c7d948f1df3017a8b72cb46a5d91eb5445420580ade9266e452f8077104f0c117dc98da6f402ecbc7
   languageName: node
   linkType: hard
 
@@ -8022,7 +8001,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.0.0, dotenv@npm:^16.0.3":
+"dotenv@npm:^16.0.3":
   version: 16.0.3
   resolution: "dotenv@npm:16.0.3"
   checksum: 10c0/109457ac5f9e930ca8066ea33887b6f839ab24d647a7a8b49ddcd1f32662e2c35591c5e5b9819063e430148a664d0927f0cbe60cf9575d89bc524f47ff7e78f0
@@ -13756,7 +13735,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^3.0.2, rimraf@npm:~3.0.2":
+"rimraf@npm:^3.0.2":
   version: 3.0.2
   resolution: "rimraf@npm:3.0.2"
   dependencies:
@@ -15051,65 +15030,6 @@ __metadata:
   checksum: 10c0/019d33d81adff3f9f1bfcff18125fb2d3c65564f437d9be539270ee74b994986abb8260c7c2ce90e8f30162178b09dbbce33c6389273afac4f36069c48521f57
   languageName: node
   linkType: hard
-
-"testing-gui@workspace:tools/testing-gui":
-  version: 0.0.0-use.local
-  resolution: "testing-gui@workspace:tools/testing-gui"
-  dependencies:
-    "@testing-library/jest-dom": "npm:^6.2.0"
-    "@testing-library/react": "npm:^14.1.0"
-    "@types/react": "npm:^18.2.0"
-    "@types/react-dom": "npm:^18.2.0"
-    "@vitejs/plugin-react": "npm:^4.2.0"
-    "@xchainjs/xchain-arbitrum": "workspace:*"
-    "@xchainjs/xchain-avax": "workspace:*"
-    "@xchainjs/xchain-bitcoin": "workspace:*"
-    "@xchainjs/xchain-bitcoincash": "workspace:*"
-    "@xchainjs/xchain-bsc": "workspace:*"
-    "@xchainjs/xchain-cardano": "workspace:*"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-cosmos": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-dash": "workspace:*"
-    "@xchainjs/xchain-doge": "workspace:*"
-    "@xchainjs/xchain-ethereum": "workspace:*"
-    "@xchainjs/xchain-evm-providers": "workspace:*"
-    "@xchainjs/xchain-kujira": "workspace:*"
-    "@xchainjs/xchain-litecoin": "workspace:*"
-    "@xchainjs/xchain-mayachain": "workspace:*"
-    "@xchainjs/xchain-mayachain-amm": "workspace:*"
-    "@xchainjs/xchain-mayachain-query": "workspace:*"
-    "@xchainjs/xchain-mayamidgard-query": "workspace:*"
-    "@xchainjs/xchain-mayanode": "workspace:*"
-    "@xchainjs/xchain-midgard-query": "workspace:*"
-    "@xchainjs/xchain-radix": "workspace:*"
-    "@xchainjs/xchain-ripple": "workspace:*"
-    "@xchainjs/xchain-solana": "workspace:*"
-    "@xchainjs/xchain-thorchain": "workspace:*"
-    "@xchainjs/xchain-thorchain-amm": "workspace:*"
-    "@xchainjs/xchain-thorchain-query": "workspace:*"
-    "@xchainjs/xchain-thornode": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-wallet": "workspace:*"
-    "@xchainjs/xchain-zcash": "workspace:*"
-    autoprefixer: "npm:^10.4.17"
-    buffer: "npm:^6.0.3"
-    jsdom: "npm:^24.0.0"
-    lucide-react: "npm:^0.330.0"
-    node-stdlib-browser: "npm:^1.2.0"
-    postcss: "npm:^8.4.35"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-router-dom: "npm:^6.22.0"
-    tailwindcss: "npm:^3.4.0"
-    typescript: "npm:^5.3.0"
-    vite: "npm:^5.1.0"
-    vite-plugin-node-stdlib-browser: "npm:^0.2.1"
-    vite-plugin-top-level-await: "npm:^1.6.0"
-    vite-plugin-wasm: "npm:^3.5.0"
-    vitest: "npm:^1.2.0"
-  languageName: unknown
-  linkType: soft
 
 "text-encoding-utf-8@npm:^1.0.2":
   version: 1.0.2
@@ -16636,258 +16556,62 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xchainjs-aggregator@workspace:examples/aggregator":
+"xchain-suite@workspace:tools/xchain-suite":
   version: 0.0.0-use.local
-  resolution: "xchainjs-aggregator@workspace:examples/aggregator"
+  resolution: "xchain-suite@workspace:tools/xchain-suite"
   dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-aggregator": "workspace:*"
-    "@xchainjs/xchain-bitcoin": "workspace:*"
-    "@xchainjs/xchain-ethereum": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-wallet": "workspace:*"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-bitcoin@workspace:examples/bitcoin":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-bitcoin@workspace:examples/bitcoin"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-bitcoin": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-check-tx@workspace:examples/check-tx":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-check-tx@workspace:examples/check-tx"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-midgard": "workspace:*"
-    "@xchainjs/xchain-midgard-query": "workspace:*"
-    "@xchainjs/xchain-thorchain-query": "workspace:*"
-    "@xchainjs/xchain-thornode": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.13.5"
-    axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:^9.1.2"
-    rimraf: "npm:~3.0.2"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-do-swap@workspace:examples/do-swap":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-do-swap@workspace:examples/do-swap"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
+    "@testing-library/jest-dom": "npm:^6.2.0"
+    "@testing-library/react": "npm:^14.1.0"
+    "@types/react": "npm:^18.2.0"
+    "@types/react-dom": "npm:^18.2.0"
+    "@vitejs/plugin-react": "npm:^4.2.0"
+    "@xchainjs/xchain-arbitrum": "workspace:*"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
     "@xchainjs/xchain-bitcoincash": "workspace:*"
     "@xchainjs/xchain-bsc": "workspace:*"
+    "@xchainjs/xchain-cardano": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-cosmos": "workspace:*"
-    "@xchainjs/xchain-cosmos-sdk": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-dash": "workspace:*"
     "@xchainjs/xchain-doge": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
-    "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
-    "@xchainjs/xchain-litecoin": "workspace:*"
-    "@xchainjs/xchain-midgard": "workspace:*"
-    "@xchainjs/xchain-midgard-query": "workspace:*"
-    "@xchainjs/xchain-thorchain": "workspace:*"
-    "@xchainjs/xchain-thorchain-amm": "workspace:*"
-    "@xchainjs/xchain-thorchain-query": "workspace:*"
-    "@xchainjs/xchain-thornode": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-utxo": "workspace:*"
-    "@xchainjs/xchain-utxo-providers": "workspace:*"
-    "@xchainjs/xchain-wallet": "workspace:*"
-    axios: "npm:1.13.5"
-    axios-retry: "npm:^3.3.1"
-    bech32-buffer: "npm:^0.2.0"
-    bitcoinjs-lib: "npm:^6.1.7"
-    dotenv: "npm:^16.0.0"
-    ethers: "npm:^6.14.3"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-estimate-swap@workspace:examples/estimate-swap":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-estimate-swap@workspace:examples/estimate-swap"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-midgard": "workspace:*"
-    "@xchainjs/xchain-midgard-query": "workspace:*"
-    "@xchainjs/xchain-thorchain-query": "workspace:*"
-    "@xchainjs/xchain-thornode": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.13.5"
-    axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:^9.1.2"
-    rimraf: "npm:~3.0.2"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-liquidity@workspace:examples/liquidity":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-liquidity@workspace:examples/liquidity"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-midgard": "workspace:*"
-    "@xchainjs/xchain-midgard-query": "workspace:*"
-    "@xchainjs/xchain-thorchain-amm": "workspace:*"
-    "@xchainjs/xchain-thorchain-query": "workspace:*"
-    "@xchainjs/xchain-thornode": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    axios: "npm:1.13.5"
-    axios-retry: "npm:^3.2.5"
-    bignumber.js: "npm:^9.1.2"
-    rimraf: "npm:~3.0.2"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-mayachain-amm@workspace:examples/mayachain-amm":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-mayachain-amm@workspace:examples/mayachain-amm"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-bitcoin": "workspace:*"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-cosmos": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-dash": "workspace:*"
-    "@xchainjs/xchain-ethereum": "workspace:*"
     "@xchainjs/xchain-kujira": "workspace:*"
+    "@xchainjs/xchain-litecoin": "workspace:*"
     "@xchainjs/xchain-mayachain": "workspace:*"
     "@xchainjs/xchain-mayachain-amm": "workspace:*"
     "@xchainjs/xchain-mayachain-query": "workspace:*"
-    "@xchainjs/xchain-mayamidgard": "workspace:*"
     "@xchainjs/xchain-mayamidgard-query": "workspace:*"
     "@xchainjs/xchain-mayanode": "workspace:*"
-    "@xchainjs/xchain-thorchain": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-wallet": "workspace:*"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-prepare-tx@workspace:examples/prepareTx":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-prepare-tx@workspace:examples/prepareTx"
-  dependencies:
-    "@ledgerhq/types-cryptoassets": "npm:^7.23.0"
-    "@ledgerhq/types-devices": "npm:^6.25.3"
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-bitcoin": "workspace:*"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-ethereum": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-solana@workspace:examples/solana":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-solana@workspace:examples/solana"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
+    "@xchainjs/xchain-midgard-query": "workspace:*"
+    "@xchainjs/xchain-radix": "workspace:*"
+    "@xchainjs/xchain-ripple": "workspace:*"
     "@xchainjs/xchain-solana": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-thorchain-amm@workspace:examples/thorchain-amm":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-thorchain-amm@workspace:examples/thorchain-amm"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-avax": "workspace:*"
-    "@xchainjs/xchain-bitcoin": "workspace:*"
-    "@xchainjs/xchain-bitcoincash": "workspace:*"
-    "@xchainjs/xchain-bsc": "workspace:*"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-cosmos": "workspace:*"
-    "@xchainjs/xchain-cosmos-sdk": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-dash": "workspace:*"
-    "@xchainjs/xchain-doge": "workspace:*"
-    "@xchainjs/xchain-ethereum": "workspace:*"
-    "@xchainjs/xchain-litecoin": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-thorchain-amm": "workspace:*"
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-thornode": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-thorchain@workspace:examples/thorchain":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-thorchain@workspace:examples/thorchain"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-thorchain": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"xchainjs-wallet@workspace:examples/wallet":
-  version: 0.0.0-use.local
-  resolution: "xchainjs-wallet@workspace:examples/wallet"
-  dependencies:
-    "@types/node": "npm:>=22.7.5"
-    "@xchainjs/xchain-bitcoin": "workspace:*"
-    "@xchainjs/xchain-client": "workspace:*"
-    "@xchainjs/xchain-cosmos": "workspace:*"
-    "@xchainjs/xchain-crypto": "workspace:*"
-    "@xchainjs/xchain-dash": "workspace:*"
-    "@xchainjs/xchain-ethereum": "workspace:*"
-    "@xchainjs/xchain-kujira": "workspace:*"
-    "@xchainjs/xchain-mayachain": "workspace:*"
-    "@xchainjs/xchain-mayamidgard": "workspace:*"
-    "@xchainjs/xchain-mayamidgard-query": "workspace:*"
-    "@xchainjs/xchain-mayanode": "workspace:*"
-    "@xchainjs/xchain-thorchain": "workspace:*"
-    "@xchainjs/xchain-util": "workspace:*"
-    "@xchainjs/xchain-wallet": "workspace:*"
-    axios: "npm:1.13.5"
-    axios-retry: "npm:^3.3.1"
-    bech32-buffer: "npm:^0.2.0"
-    bitcoinjs-lib: "npm:^6.1.7"
-    dotenv: "npm:^16.0.0"
-    ethers: "npm:^6.14.3"
-    ts-node: "npm:10.9.2"
-    typescript: "npm:^5.8.3"
+    "@xchainjs/xchain-zcash": "workspace:*"
+    autoprefixer: "npm:^10.4.17"
+    buffer: "npm:^6.0.3"
+    jsdom: "npm:^24.0.0"
+    lucide-react: "npm:^0.330.0"
+    node-stdlib-browser: "npm:^1.2.0"
+    postcss: "npm:^8.4.35"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-router-dom: "npm:^6.22.0"
+    tailwindcss: "npm:^3.4.0"
+    typescript: "npm:^5.3.0"
+    vite: "npm:^5.1.0"
+    vite-plugin-node-stdlib-browser: "npm:^0.2.1"
+    vite-plugin-top-level-await: "npm:^1.6.0"
+    vite-plugin-wasm: "npm:^3.5.0"
+    vitest: "npm:^1.2.0"
   languageName: unknown
   linkType: soft
 
