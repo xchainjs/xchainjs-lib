@@ -1,5 +1,5 @@
 {
-  "name": "testing-gui",
+  "name": "xchain-suite",
   "version": "1.0.3",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "echo 'Skipped - testing-gui requires browser environment'",
+    "test": "echo 'Skipped - xchain-suite requires browser environment'",
     "test:run": "vitest run"
   },
   "dependencies": {

@@ -51,8 +51,8 @@ export function Sidebar() {
   return (
     <aside className="w-64 bg-gray-900 text-white overflow-y-auto">
       <div className="p-4 border-b border-gray-700">
-        <h1 className="text-xl font-bold">XChainJS Tester</h1>
-        <p className="text-sm text-gray-400 mt-1">Chain Testing GUI</p>
+        <h1 className="text-xl font-bold">XChain Suite</h1>
+        <p className="text-sm text-gray-400 mt-1">Developer Tools</p>
       </div>
       <nav className="p-4">
         {/* DeFi Links */}

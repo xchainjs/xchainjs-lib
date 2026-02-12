@@ -1,6 +1,6 @@
-# XChainJS Testing GUI
+# XChain Suite
 
-A browser-based testing interface for XChainJS packages. Test chain clients, execute swaps, manage liquidity, and interact with THORChain/MAYAChain protocols.
+A browser-based developer suite for XChainJS packages. Test chain clients, execute swaps, manage liquidity, and interact with THORChain/MAYAChain protocols.
 
 ## Features
 
@@ -53,8 +53,8 @@ A browser-based testing interface for XChainJS packages. Test chain clients, exe
 # From the xchainjs-lib root directory
 pnpm install
 
-# Navigate to testing-gui
-cd tools/testing-gui
+# Navigate to xchain-suite
+cd tools/xchain-suite
 
 # Start development server
 pnpm dev
