@@ -49,6 +49,11 @@ export default function SwapPage() {
   const [amount, setAmount] = useState('')
   const [balance, setBalance] = useState<string | null>(null)
 
+  // Streaming swap state (enabled by default for better prices on large swaps)
+  const [isStreaming, setIsStreaming] = useState(true)
+  const [streamingInterval, setStreamingInterval] = useState('1')
+  const [streamingQuantity, setStreamingQuantity] = useState('0') // 0 = automatic
+
   // Build Asset object for price lookup
   const fromAssetObj = fromAsset ? buildAsset(fromAsset) : null
   const toAssetObj = toAsset ? buildAsset(toAsset) : null
@@ -168,6 +173,11 @@ export default function SwapPage() {
           amount: cryptoAmount,
           fromAddress,
           destinationAddress,
+          // Streaming swap parameters (THORChain only)
+          ...(isStreaming && {
+            streamingInterval: parseInt(streamingInterval) || 1,
+            streamingQuantity: parseInt(streamingQuantity) || 0,
+          }),
         })
         console.log('[SwapPage] estimateSwap result:', result)
         setQuotes(result)
@@ -216,6 +226,11 @@ export default function SwapPage() {
           fromAddress,
           destinationAddress,
           protocol: selectedQuote.protocol,
+          // Streaming swap parameters
+          ...(isStreaming && {
+            streamingInterval: parseInt(streamingInterval) || 1,
+            streamingQuantity: parseInt(streamingQuantity) || 0,
+          }),
         })
 
         // Open tracking modal on success
@@ -277,15 +292,16 @@ export default function SwapPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        {/* Header */}
-        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Swap</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Cross-chain swaps via THORChain and MAYAChain
-          </p>
-        </div>
+    <div className="p-6">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+          {/* Header */}
+          <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Swap</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Cross-chain swaps via THORChain and MAYAChain
+            </p>
+          </div>
 
         <div className="p-6 space-y-6">
           {/* Asset Selection */}
@@ -366,6 +382,62 @@ export default function SwapPage() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Streaming Swap Options */}
+          <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Streaming Swap
+                </label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  Split large swaps into smaller sub-swaps for better prices
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsStreaming(!isStreaming)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  isStreaming ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    isStreaming ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {isStreaming && (
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Interval (blocks)
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={streamingInterval}
+                    onChange={(e) => setStreamingInterval(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                    Quantity (0 = auto)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={streamingQuantity}
+                    onChange={(e) => setStreamingQuantity(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Get Quote Button */}
@@ -508,6 +580,7 @@ export default function SwapPage() {
           />
         </div>
       )}
+      </div>
     </div>
   )
 }

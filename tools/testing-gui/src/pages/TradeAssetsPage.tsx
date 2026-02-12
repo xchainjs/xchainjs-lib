@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { useWallet } from '../contexts/WalletContext'
 import { useLiquidity } from '../hooks/useLiquidity'
-import { CheckPosition } from '../components/liquidity/CheckPosition'
-import { AddLiquidity } from '../components/liquidity/AddLiquidity'
-import { WithdrawLiquidity } from '../components/liquidity/WithdrawLiquidity'
+import { DepositTradeAsset } from '../components/tradeassets/DepositTradeAsset'
+import { WithdrawTradeAsset } from '../components/tradeassets/WithdrawTradeAsset'
 
-type Tab = 'check' | 'add' | 'withdraw'
+type Tab = 'deposit' | 'withdraw'
 
-export default function LiquidityPage() {
+export default function TradeAssetsPage() {
   const { isConnected } = useWallet()
-  const { thorchainAmm, thorchainQuery, wallet, loading, error, supportedChains } = useLiquidity()
-  const [activeTab, setActiveTab] = useState<Tab>('check')
+  const { thorchainAmm, wallet, loading, error, supportedChains } = useLiquidity()
+  const [activeTab, setActiveTab] = useState<Tab>('deposit')
 
   if (!isConnected) {
     return (
@@ -22,7 +21,7 @@ export default function LiquidityPage() {
                 Connect Wallet
               </h2>
               <p className="text-gray-500 dark:text-gray-400">
-                Please connect your wallet to manage liquidity positions.
+                Please connect your wallet to manage trade asset positions.
               </p>
             </div>
           </div>
@@ -38,7 +37,7 @@ export default function LiquidityPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="flex items-center gap-3">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <p className="text-gray-600 dark:text-gray-300">Initializing liquidity service...</p>
+              <p className="text-gray-600 dark:text-gray-300">Initializing trade assets service...</p>
             </div>
           </div>
         </div>
@@ -52,7 +51,7 @@ export default function LiquidityPage() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <div className="text-red-600 dark:text-red-400">
-              <p className="font-medium">Failed to initialize liquidity service</p>
+              <p className="font-medium">Failed to initialize trade assets service</p>
               <p className="text-sm mt-1">{error.message}</p>
             </div>
           </div>
@@ -62,8 +61,7 @@ export default function LiquidityPage() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'check', label: 'Check Position' },
-    { id: 'add', label: 'Add Liquidity' },
+    { id: 'deposit', label: 'Deposit' },
     { id: 'withdraw', label: 'Withdraw' },
   ]
 
@@ -74,14 +72,23 @@ export default function LiquidityPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             {/* Header */}
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Liquidity</h2>
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Trade Assets</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Manage liquidity positions on THORChain pools
+                Deposit and withdraw from THORChain trade asset accounts
+              </p>
+            </div>
+
+            {/* Info Banner */}
+            <div className="mx-6 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">What are Trade Assets?</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                Trade assets allow you to hold L1 assets on THORChain for faster swaps with zero slippage.
+                Deposit assets to receive trade assets (e.g., BTC becomes THOR~BTC), then withdraw to get your L1 assets back.
               </p>
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200 dark:border-gray-700">
+            <div className="border-b border-gray-200 dark:border-gray-700 mt-4">
               <nav className="flex -mb-px">
                 {tabs.map((tab) => (
                   <button
@@ -101,25 +108,17 @@ export default function LiquidityPage() {
 
             {/* Tab Content */}
             <div className="p-6">
-              {activeTab === 'check' && (
-                <CheckPosition
-                  thorchainQuery={thorchainQuery}
-                  wallet={wallet}
-                  supportedChains={supportedChains}
-                />
-              )}
-              {activeTab === 'add' && (
-                <AddLiquidity
+              {activeTab === 'deposit' && (
+                <DepositTradeAsset
                   thorchainAmm={thorchainAmm}
                   wallet={wallet}
                   supportedChains={supportedChains}
                 />
               )}
               {activeTab === 'withdraw' && (
-                <WithdrawLiquidity
+                <WithdrawTradeAsset
                   thorchainAmm={thorchainAmm}
                   wallet={wallet}
-                  supportedChains={supportedChains}
                 />
               )}
             </div>
