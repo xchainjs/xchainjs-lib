@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { ArrowRightLeft, Droplets, Server } from 'lucide-react'
+import { ArrowRightLeft, Droplets, Server, Repeat, Coins, AtSign, Shield } from 'lucide-react'
 
 interface ChainGroup {
   name: string
@@ -84,6 +84,32 @@ export function Sidebar() {
             Liquidity
           </NavLink>
           <NavLink
+            to="/trade-assets"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <Repeat className="w-4 h-4" />
+            Trade Assets
+          </NavLink>
+          <NavLink
+            to="/runepool"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <Coins className="w-4 h-4" />
+            RUNEPool
+          </NavLink>
+          <NavLink
             to="/thornode"
             className={({ isActive }) =>
               `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
@@ -108,6 +134,32 @@ export function Sidebar() {
           >
             <Server className="w-4 h-4" />
             MAYANode
+          </NavLink>
+          <NavLink
+            to="/mayaname"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <AtSign className="w-4 h-4" />
+            MAYAName
+          </NavLink>
+          <NavLink
+            to="/router-approval"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <Shield className="w-4 h-4" />
+            Router Approval
           </NavLink>
         </div>
 

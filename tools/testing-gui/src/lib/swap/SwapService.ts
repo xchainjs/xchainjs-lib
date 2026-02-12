@@ -31,6 +31,9 @@ export interface SwapParams {
   amount: CryptoAmount
   fromAddress: string
   destinationAddress: string
+  // Streaming swap parameters (THORChain only)
+  streamingInterval?: number // Interval in blocks between sub-swaps
+  streamingQuantity?: number // Number of sub-swaps (0 = automatic)
 }
 
 export interface SwapResult {
@@ -108,6 +111,9 @@ export class SwapService {
         destinationAddress: params.destinationAddress,
         affiliateAddress: 'dx',
         affiliateBps: 0,
+        // Streaming swap parameters
+        ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
+        ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
       })
       console.log('[SwapService] THORChain estimate:', estimate)
 
@@ -191,6 +197,9 @@ export class SwapService {
           destinationAddress: params.destinationAddress,
           affiliateAddress: 'dx',
           affiliateBps: 0,
+          // Streaming swap parameters
+          ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
+          ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
         })
         console.log('[SwapService] THORChain swap result:', result)
         return result

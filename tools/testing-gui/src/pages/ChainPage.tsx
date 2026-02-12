@@ -7,8 +7,9 @@ import { GetFees } from '../components/operations/GetFees'
 import { Transfer } from '../components/operations/Transfer'
 import { GetHistory } from '../components/operations/GetHistory'
 import { ValidateAddress } from '../components/operations/ValidateAddress'
+import { PrepareTx } from '../components/operations/PrepareTx'
 
-type TabId = 'address' | 'balance' | 'fees' | 'transfer' | 'history' | 'validate'
+type TabId = 'address' | 'balance' | 'fees' | 'transfer' | 'history' | 'validate' | 'prepare'
 
 interface Tab {
   id: TabId
@@ -22,6 +23,7 @@ const TABS: Tab[] = [
   { id: 'transfer', label: 'Transfer' },
   { id: 'history', label: 'History' },
   { id: 'validate', label: 'Validate' },
+  { id: 'prepare', label: 'Prepare Tx' },
 ]
 
 export function ChainPage() {
@@ -73,6 +75,8 @@ export function ChainPage() {
         return <GetHistory chainId={chainId} client={client} />
       case 'validate':
         return <ValidateAddress chainId={chainId} client={client} />
+      case 'prepare':
+        return <PrepareTx chainId={chainId} client={client} />
       default:
         return null
     }

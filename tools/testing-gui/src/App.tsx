@@ -9,8 +9,12 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 // Lazy load pages to avoid loading dependencies on initial load
 const SwapPage = lazy(() => import('./pages/SwapPage'))
 const LiquidityPage = lazy(() => import('./pages/LiquidityPage'))
+const TradeAssetsPage = lazy(() => import('./pages/TradeAssetsPage'))
+const RunePoolPage = lazy(() => import('./pages/RunePoolPage'))
 const THORNodePage = lazy(() => import('./pages/THORNodePage'))
 const MAYANodePage = lazy(() => import('./pages/MAYANodePage'))
+const MAYANamePage = lazy(() => import('./pages/MAYANamePage'))
+const RouterApprovalPage = lazy(() => import('./pages/RouterApprovalPage'))
 
 function SwapPageLoader() {
   return (
@@ -34,6 +38,28 @@ function LiquidityPageLoader() {
   )
 }
 
+function TradeAssetsPageLoader() {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="flex items-center gap-3">
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+        <p className="text-gray-600 dark:text-gray-300">Loading trade assets interface...</p>
+      </div>
+    </div>
+  )
+}
+
+function RunePoolPageLoader() {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="flex items-center gap-3">
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+        <p className="text-gray-600 dark:text-gray-300">Loading RUNEPool interface...</p>
+      </div>
+    </div>
+  )
+}
+
 function THORNodePageLoader() {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -51,6 +77,28 @@ function MAYANodePageLoader() {
       <div className="flex items-center gap-3">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
         <p className="text-gray-600 dark:text-gray-300">Loading MAYANode interface...</p>
+      </div>
+    </div>
+  )
+}
+
+function MAYANamePageLoader() {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="flex items-center gap-3">
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+        <p className="text-gray-600 dark:text-gray-300">Loading MAYAName interface...</p>
+      </div>
+    </div>
+  )
+}
+
+function RouterApprovalPageLoader() {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="flex items-center gap-3">
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+        <p className="text-gray-600 dark:text-gray-300">Loading router approval interface...</p>
       </div>
     </div>
   )
@@ -82,6 +130,22 @@ export default function App() {
                   }
                 />
                 <Route
+                  path="/trade-assets"
+                  element={
+                    <Suspense fallback={<TradeAssetsPageLoader />}>
+                      <TradeAssetsPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/runepool"
+                  element={
+                    <Suspense fallback={<RunePoolPageLoader />}>
+                      <RunePoolPage />
+                    </Suspense>
+                  }
+                />
+                <Route
                   path="/thornode"
                   element={
                     <Suspense fallback={<THORNodePageLoader />}>
@@ -94,6 +158,22 @@ export default function App() {
                   element={
                     <Suspense fallback={<MAYANodePageLoader />}>
                       <MAYANodePage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/mayaname"
+                  element={
+                    <Suspense fallback={<MAYANamePageLoader />}>
+                      <MAYANamePage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/router-approval"
+                  element={
+                    <Suspense fallback={<RouterApprovalPageLoader />}>
+                      <RouterApprovalPage />
                     </Suspense>
                   }
                 />
