@@ -49,8 +49,8 @@ export default function SwapPage() {
   const [amount, setAmount] = useState('')
   const [balance, setBalance] = useState<string | null>(null)
 
-  // Streaming swap state
-  const [isStreaming, setIsStreaming] = useState(false)
+  // Streaming swap state (enabled by default for better prices on large swaps)
+  const [isStreaming, setIsStreaming] = useState(true)
   const [streamingInterval, setStreamingInterval] = useState('1')
   const [streamingQuantity, setStreamingQuantity] = useState('0') // 0 = automatic
 
