@@ -155,19 +155,20 @@ export class SwapService {
       })
       console.log('[SwapService] MAYAChain estimate:', estimate)
 
+      // MAYAChain returns flat QuoteSwap structure (not nested like THORChain's TxDetails)
       quotes.push({
         protocol: 'Mayachain',
         toAddress: estimate.toAddress,
         memo: estimate.memo,
-        expectedAmount: estimate.txEstimate.netOutput,
-        totalSwapSeconds: (estimate.txEstimate.inboundConfirmationSeconds || 0) + estimate.txEstimate.outboundDelaySeconds,
-        slipBasisPoints: estimate.txEstimate.slipBasisPoints,
-        canSwap: estimate.txEstimate.canSwap,
-        errors: estimate.txEstimate.errors,
-        warning: estimate.txEstimate.warning,
+        expectedAmount: estimate.expectedAmount,
+        totalSwapSeconds: estimate.totalSwapSeconds || ((estimate.inboundConfirmationSeconds || 0) + estimate.outboundDelaySeconds),
+        slipBasisPoints: estimate.slipBasisPoints,
+        canSwap: estimate.canSwap,
+        errors: estimate.errors,
+        warning: estimate.warning,
         fees: {
-          affiliateFee: estimate.txEstimate.totalFees.affiliateFee,
-          outboundFee: estimate.txEstimate.totalFees.outboundFee,
+          affiliateFee: estimate.fees.affiliateFee,
+          outboundFee: estimate.fees.outboundFee,
         },
       })
     } catch (e) {
