@@ -1,173 +1,159 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, Droplets, DollarSign, Activity, RefreshCw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { RefreshCw, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Clock, Pause, ArrowRightLeft, Droplets } from 'lucide-react'
 
 type Protocol = 'thorchain' | 'mayachain'
+type SortKey = 'tvl' | 'apy' | 'volume' | 'price'
 
-interface Pool {
+// Pool data from THORNode/MAYANode endpoints
+interface NodePool {
   asset: string
   status: string
-  assetDepth: string
-  runeDepth: string
+  balance_asset: string
+  balance_rune?: string      // THORChain
+  balance_cacao?: string     // MAYAChain
+  asset_tor_price?: string   // THORChain only
+  trading_halted?: boolean   // THORChain only
+  synth_mint_paused?: boolean
+}
+
+// Midgard pool data for additional metrics
+interface MidgardPool {
+  asset: string
   assetPriceUSD: string
   poolAPY: string
   volume24h: string
-  liquidityUnits: string
 }
 
-const ENDPOINTS = {
+// THORNode/MAYANode endpoints for pool status
+const NODE_ENDPOINTS = {
+  thorchain: 'https://thornode.ninerealms.com/thorchain/pools',
+  mayachain: 'https://mayanode.mayachain.info/mayachain/pools',
+}
+
+// Midgard endpoints for price/volume data
+const MIDGARD_ENDPOINTS = {
   thorchain: 'https://midgard.ninerealms.com/v2/pools',
   mayachain: 'https://midgard.mayachain.info/v2/pools',
 }
 
-const NATIVE_ASSET = {
-  thorchain: 'RUNE',
-  mayachain: 'CACAO',
+// Format large numbers with appropriate suffix
+function formatCompact(num: number): string {
+  if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`
+  if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`
+  if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`
+  return `$${num.toFixed(2)}`
 }
 
-function formatNumber(value: string | number, decimals = 2): string {
-  const num = typeof value === 'string' ? parseFloat(value) : value
-  if (isNaN(num)) return '0'
-
-  if (num >= 1e12) return `${(num / 1e12).toFixed(decimals)}T`
-  if (num >= 1e9) return `${(num / 1e9).toFixed(decimals)}B`
-  if (num >= 1e6) return `${(num / 1e6).toFixed(decimals)}M`
-  if (num >= 1e3) return `${(num / 1e3).toFixed(decimals)}K`
-  return num.toFixed(decimals)
-}
-
-function formatUSD(value: string | number): string {
-  const num = typeof value === 'string' ? parseFloat(value) : value
-  if (isNaN(num)) return '$0.00'
-  return `$${formatNumber(num)}`
+function formatPrice(num: number): string {
+  if (num >= 1000) return `$${num.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+  if (num >= 1) return `$${num.toFixed(2)}`
+  if (num >= 0.01) return `$${num.toFixed(4)}`
+  return `$${num.toFixed(6)}`
 }
 
 function formatPercent(value: string | number): string {
   const num = typeof value === 'string' ? parseFloat(value) : value
-  if (isNaN(num) || num === 0) return '0%'
+  if (isNaN(num) || num === 0) return '—'
   return `${num.toFixed(2)}%`
 }
 
-// Convert base amount to display amount (8 decimals for most chains)
-function toDisplayAmount(baseAmount: string, decimals = 8): number {
-  return parseFloat(baseAmount) / Math.pow(10, decimals)
+// All THORChain/MAYAChain amounts are normalized to 8 decimals
+function fromBaseAmount(value: string): number {
+  return parseFloat(value) / 1e8
 }
 
-function getAssetName(asset: string): string {
-  // Extract just the asset name without contract address
-  const parts = asset.split('.')
-  if (parts.length < 2) return asset
-  const assetPart = parts[1].split('-')[0]
-  return `${parts[0]}.${assetPart}`
+function getAssetDisplay(asset: string): { chain: string; symbol: string } {
+  const [chain, rest] = asset.split('.')
+  const symbol = rest?.split('-')[0] || rest || chain
+  return { chain, symbol }
 }
 
-function getStatusColor(status: string): string {
-  switch (status.toLowerCase()) {
-    case 'available':
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-    case 'staged':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-    case 'suspended':
-      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+function getChainColor(chain: string): string {
+  const colors: Record<string, string> = {
+    BTC: 'bg-orange-500',
+    ETH: 'bg-blue-500',
+    AVAX: 'bg-red-500',
+    BSC: 'bg-yellow-500',
+    GAIA: 'bg-purple-500',
+    DOGE: 'bg-amber-400',
+    LTC: 'bg-gray-400',
+    BCH: 'bg-green-500',
+    THOR: 'bg-cyan-500',
+    MAYA: 'bg-blue-600',
+    KUJI: 'bg-red-600',
+    DASH: 'bg-blue-400',
+    ARB: 'bg-blue-700',
+    XRD: 'bg-green-600',
+    ZEC: 'bg-yellow-600',
   }
+  return colors[chain] || 'bg-gray-500'
 }
 
-function PoolCard({ pool, nativeAsset }: { pool: Pool; nativeAsset: string }) {
-  const assetDepthDisplay = toDisplayAmount(pool.assetDepth)
-  const runeDepthDisplay = toDisplayAmount(pool.runeDepth)
-  const volume24hDisplay = toDisplayAmount(pool.volume24h)
-  const tvlUSD = assetDepthDisplay * parseFloat(pool.assetPriceUSD) * 2 // Total pool value
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg transition-shadow">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {getAssetName(pool.asset)}
-          </h3>
-          <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(pool.status)}`}>
-            {pool.status}
-          </span>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {formatUSD(parseFloat(pool.assetPriceUSD))}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Price</p>
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* APY */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mb-1">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-xs font-medium">APY</span>
-          </div>
-          <p className="text-xl font-bold text-green-700 dark:text-green-300">
-            {formatPercent(pool.poolAPY)}
-          </p>
-        </div>
-
-        {/* TVL */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-1">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-xs font-medium">TVL</span>
-          </div>
-          <p className="text-xl font-bold text-blue-700 dark:text-blue-300">
-            {formatUSD(tvlUSD)}
-          </p>
-        </div>
-
-        {/* Volume 24h */}
-        <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-1">
-            <Activity className="w-4 h-4" />
-            <span className="text-xs font-medium">24h Volume</span>
-          </div>
-          <p className="text-xl font-bold text-purple-700 dark:text-purple-300">
-            {formatUSD(volume24hDisplay * parseFloat(pool.assetPriceUSD))}
-          </p>
-        </div>
-
-        {/* Depth */}
-        <div className="bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-lg p-3">
-          <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 mb-1">
-            <Droplets className="w-4 h-4" />
-            <span className="text-xs font-medium">Depth</span>
-          </div>
-          <p className="text-sm font-semibold text-cyan-700 dark:text-cyan-300">
-            {formatNumber(assetDepthDisplay)} / {formatNumber(runeDepthDisplay)}
-          </p>
-          <p className="text-xs text-cyan-600 dark:text-cyan-400">
-            Asset / {nativeAsset}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
+interface CombinedPool {
+  asset: string
+  status: string
+  tradingHalted: boolean
+  synthMintPaused: boolean
+  balanceAsset: number
+  balanceNative: number  // RUNE or CACAO
+  price: number
+  apy: number
+  volume: number
+  tvl: number
 }
 
 export default function PoolsPage() {
+  const navigate = useNavigate()
   const [protocol, setProtocol] = useState<Protocol>('thorchain')
-  const [pools, setPools] = useState<Pool[]>([])
+  const [pools, setPools] = useState<CombinedPool[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState<'tvl' | 'apy' | 'volume'>('tvl')
+  const [sortBy, setSortBy] = useState<SortKey>('tvl')
+  const [sortDesc, setSortDesc] = useState(true)
+  const [showAllStatuses, setShowAllStatuses] = useState(false)
 
   const fetchPools = async () => {
     setLoading(true)
     setError(null)
-
     try {
-      const response = await fetch(ENDPOINTS[protocol])
-      if (!response.ok) throw new Error('Failed to fetch pools')
-      const data = await response.json()
-      setPools(data)
+      // Fetch from both node and midgard endpoints
+      const [nodeResponse, midgardResponse] = await Promise.all([
+        fetch(NODE_ENDPOINTS[protocol]),
+        fetch(MIDGARD_ENDPOINTS[protocol]),
+      ])
+
+      if (!nodeResponse.ok) throw new Error('Failed to fetch pool status')
+      if (!midgardResponse.ok) throw new Error('Failed to fetch pool metrics')
+
+      const nodePools: NodePool[] = await nodeResponse.json()
+      const midgardPools: MidgardPool[] = await midgardResponse.json()
+
+      // Create a map of midgard data by asset
+      const midgardMap = new Map(midgardPools.map(p => [p.asset, p]))
+
+      // Combine data from both sources
+      const combined: CombinedPool[] = nodePools.map(nodePool => {
+        const midgardPool = midgardMap.get(nodePool.asset)
+        const balanceAsset = fromBaseAmount(nodePool.balance_asset)
+        const price = midgardPool ? parseFloat(midgardPool.assetPriceUSD) || 0 : 0
+        const tvl = balanceAsset * price * 2
+
+        return {
+          asset: nodePool.asset,
+          status: nodePool.status,
+          tradingHalted: nodePool.trading_halted || false,
+          synthMintPaused: nodePool.synth_mint_paused || false,
+          balanceAsset,
+          balanceNative: fromBaseAmount(nodePool.balance_rune || nodePool.balance_cacao || '0'),
+          price,
+          apy: midgardPool ? parseFloat(midgardPool.poolAPY) || 0 : 0,
+          volume: midgardPool ? fromBaseAmount(midgardPool.volume24h) * price : 0,
+          tvl,
+        }
+      })
+
+      setPools(combined)
     } catch (e: any) {
       setError(e.message || 'Failed to fetch pools')
     } finally {
@@ -179,142 +165,297 @@ export default function PoolsPage() {
     fetchPools()
   }, [protocol])
 
-  // Sort pools
-  const sortedPools = [...pools]
-    .filter(p => p.status.toLowerCase() === 'available')
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'apy':
-          return parseFloat(b.poolAPY || '0') - parseFloat(a.poolAPY || '0')
-        case 'volume':
-          return parseFloat(b.volume24h || '0') - parseFloat(a.volume24h || '0')
-        case 'tvl':
-        default:
-          const tvlA = toDisplayAmount(a.assetDepth) * parseFloat(a.assetPriceUSD) * 2
-          const tvlB = toDisplayAmount(b.assetDepth) * parseFloat(b.assetPriceUSD) * 2
-          return tvlB - tvlA
+  // Filter and sort pools
+  const filteredPools = showAllStatuses
+    ? pools
+    : pools.filter(p => p.status.toLowerCase() === 'available')
+
+  const sortedPools = [...filteredPools].sort((a, b) => {
+    let comparison = 0
+    switch (sortBy) {
+      case 'tvl': comparison = a.tvl - b.tvl; break
+      case 'volume': comparison = a.volume - b.volume; break
+      case 'apy': comparison = a.apy - b.apy; break
+      case 'price': comparison = a.price - b.price; break
+    }
+    return sortDesc ? -comparison : comparison
+  })
+
+  // Calculate totals from filtered pools
+  const totalTVL = filteredPools.reduce((sum, p) => sum + p.tvl, 0)
+  const totalVolume = filteredPools.reduce((sum, p) => sum + p.volume, 0)
+
+  // Get status badge styling
+  const getStatusBadge = (pool: CombinedPool) => {
+    const status = pool.status.toLowerCase()
+    if (pool.tradingHalted) {
+      return {
+        icon: Pause,
+        text: 'Halted',
+        className: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
       }
-    })
+    }
+    switch (status) {
+      case 'available':
+        return {
+          icon: CheckCircle,
+          text: 'Available',
+          className: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
+        }
+      case 'staged':
+        return {
+          icon: Clock,
+          text: 'Staged',
+          className: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
+        }
+      case 'suspended':
+        return {
+          icon: AlertTriangle,
+          text: 'Suspended',
+          className: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
+        }
+      default:
+        return {
+          icon: AlertTriangle,
+          text: pool.status,
+          className: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400',
+        }
+    }
+  }
 
-  // Calculate totals
-  const totalTVL = sortedPools.reduce((sum, p) => {
-    return sum + toDisplayAmount(p.assetDepth) * parseFloat(p.assetPriceUSD) * 2
-  }, 0)
+  const handleSort = (key: SortKey) => {
+    if (sortBy === key) {
+      setSortDesc(!sortDesc)
+    } else {
+      setSortBy(key)
+      setSortDesc(true)
+    }
+  }
 
-  const totalVolume = sortedPools.reduce((sum, p) => {
-    return sum + toDisplayAmount(p.volume24h) * parseFloat(p.assetPriceUSD)
-  }, 0)
+  const SortHeader = ({ label, sortKey }: { label: string; sortKey: SortKey }) => (
+    <button
+      onClick={() => handleSort(sortKey)}
+      className={`flex items-center gap-1 text-xs font-semibold uppercase tracking-wider hover:text-gray-900 dark:hover:text-white transition-colors ${
+        sortBy === sortKey ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+      }`}
+    >
+      {label}
+      {sortBy === sortKey && (
+        <ChevronDown className={`w-3 h-3 transition-transform ${sortDesc ? '' : 'rotate-180'}`} />
+      )}
+    </button>
+  )
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Liquidity Pools</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              View pools on THORChain and MAYAChain
-            </p>
+    <div className="h-full">
+      {/* Header Bar */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pools</h1>
+
+            {/* Protocol Toggle */}
+            <div className="flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+              <button
+                onClick={() => setProtocol('thorchain')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  protocol === 'thorchain'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                }`}
+              >
+                THORChain
+              </button>
+              <button
+                onClick={() => setProtocol('mayachain')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  protocol === 'mayachain'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                }`}
+              >
+                MAYAChain
+              </button>
+            </div>
           </div>
 
-          {/* Protocol Toggle */}
-          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <div className="flex items-center gap-6">
+            {/* Stats */}
+            {!loading && pools.length > 0 && (
+              <div className="flex items-center gap-6 text-sm">
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">TVL </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">{formatCompact(totalTVL)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">24h Vol </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">{formatCompact(totalVolume)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Pools </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {filteredPools.length}{!showAllStatuses && pools.length !== filteredPools.length ? ` / ${pools.length}` : ''}
+                  </span>
+                </div>
+                {/* Show All Toggle */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showAllStatuses}
+                    onChange={(e) => setShowAllStatuses(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-gray-600 dark:text-gray-300">Show All</span>
+                </label>
+              </div>
+            )}
+
             <button
-              onClick={() => setProtocol('thorchain')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                protocol === 'thorchain'
-                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
+              onClick={fetchPools}
+              disabled={loading}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             >
-              THORChain
-            </button>
-            <button
-              onClick={() => setProtocol('mayachain')}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                protocol === 'mayachain'
-                  ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              MAYAChain
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Summary Stats */}
-        {!loading && !error && pools.length > 0 && (
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-              <p className="text-sm opacity-80">Total Value Locked</p>
-              <p className="text-2xl font-bold">{formatUSD(totalTVL)}</p>
+      {/* Main Content */}
+      <div className="p-6">
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <p className="text-red-700 dark:text-red-300">{error}</p>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-blue-600"></div>
+          </div>
+        ) : (
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            {/* Table Header */}
+            <div className="flex items-center px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+              <div className="w-48 shrink-0">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Pool</span>
+              </div>
+              <div className="w-28 shrink-0">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</span>
+              </div>
+              <div className="flex-1 flex justify-end pr-6">
+                <SortHeader label="Price" sortKey="price" />
+              </div>
+              <div className="flex-1 flex justify-end pr-6">
+                <SortHeader label="TVL" sortKey="tvl" />
+              </div>
+              <div className="flex-1 flex justify-end pr-6">
+                <SortHeader label="Volume" sortKey="volume" />
+              </div>
+              <div className="w-24 flex justify-end">
+                <SortHeader label="APY" sortKey="apy" />
+              </div>
+              <div className="w-36 shrink-0 flex justify-end">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</span>
+              </div>
             </div>
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
-              <p className="text-sm opacity-80">24h Volume</p>
-              <p className="text-2xl font-bold">{formatUSD(totalVolume)}</p>
+
+            {/* Table Body */}
+            <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
+              {sortedPools.map((pool, index) => {
+                const { chain, symbol } = getAssetDisplay(pool.asset)
+                const statusBadge = getStatusBadge(pool)
+                const StatusIcon = statusBadge.icon
+                return (
+                  <div
+                    key={pool.asset}
+                    className="flex items-center px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                  >
+                    {/* Pool Info */}
+                    <div className="w-48 shrink-0 flex items-center gap-3">
+                      <span className="text-gray-400 dark:text-gray-500 text-sm w-6">{index + 1}</span>
+                      <div className={`w-8 h-8 rounded-full ${getChainColor(chain)} flex items-center justify-center shrink-0`}>
+                        <span className="text-white text-xs font-bold">{chain.slice(0, 2)}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-gray-900 dark:text-white truncate">{symbol}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">{chain}</div>
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div className="w-28 shrink-0 flex items-center">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusBadge.className}`}>
+                        <StatusIcon className="w-3 h-3" />
+                        {statusBadge.text}
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex-1 flex items-center justify-end pr-6">
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {formatPrice(pool.price)}
+                      </span>
+                    </div>
+
+                    {/* TVL */}
+                    <div className="flex-1 flex items-center justify-end pr-6">
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {formatCompact(pool.tvl)}
+                      </span>
+                    </div>
+
+                    {/* Volume */}
+                    <div className="flex-1 flex items-center justify-end pr-6">
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {formatCompact(pool.volume)}
+                      </span>
+                    </div>
+
+                    {/* APY */}
+                    <div className="w-24 flex items-center justify-end">
+                      {pool.apy > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium">
+                          <TrendingUp className="w-3 h-3" />
+                          {formatPercent(pool.apy)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500">—</span>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="w-36 shrink-0 flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => navigate(`/swap?from=${pool.asset}`)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
+                        title="Swap"
+                      >
+                        <ArrowRightLeft className="w-3.5 h-3.5" />
+                        Swap
+                      </button>
+                      <button
+                        onClick={() => navigate(`/liquidity?asset=${pool.asset}&protocol=${protocol}`)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg transition-colors"
+                        title="Add Liquidity"
+                      >
+                        <Droplets className="w-3.5 h-3.5" />
+                        LP
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 text-white">
-              <p className="text-sm opacity-80">Active Pools</p>
-              <p className="text-2xl font-bold">{sortedPools.length}</p>
-            </div>
+
+            {sortedPools.length === 0 && !loading && (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                No pools available
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {/* Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500 dark:text-gray-400">Sort by:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="tvl">TVL</option>
-            <option value="apy">APY</option>
-            <option value="volume">24h Volume</option>
-          </select>
-        </div>
-        <button
-          onClick={fetchPools}
-          disabled={loading}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
-
-      {/* Loading State */}
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-red-700 dark:text-red-300">{error}</p>
-        </div>
-      )}
-
-      {/* Pool Grid */}
-      {!loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sortedPools.map((pool) => (
-            <PoolCard key={pool.asset} pool={pool} nativeAsset={NATIVE_ASSET[protocol]} />
-          ))}
-        </div>
-      )}
-
-      {/* Empty State */}
-      {!loading && !error && sortedPools.length === 0 && (
-        <div className="text-center py-12">
-          <Droplets className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">No pools found</p>
-        </div>
-      )}
     </div>
   )
 }

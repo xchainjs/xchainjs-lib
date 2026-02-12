@@ -138,14 +138,18 @@ console.log('Approval TX:', result.hash)`
 
   if (!isConnected) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="text-center py-8">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">
-            Connect Wallet
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            Please connect your wallet to approve router spending.
-          </p>
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="text-center py-8">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                Connect Wallet
+              </h2>
+              <p className="text-gray-500 dark:text-gray-400">
+                Please connect your wallet to approve router spending.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -153,10 +157,14 @@ console.log('Approval TX:', result.hash)`
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="flex items-center gap-3">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-          <p className="text-gray-600 dark:text-gray-300">Initializing...</p>
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <p className="text-gray-600 dark:text-gray-300">Initializing...</p>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -164,25 +172,31 @@ console.log('Approval TX:', result.hash)`
 
   if (error) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="text-red-600 dark:text-red-400">
-          <p className="font-medium">Failed to initialize</p>
-          <p className="text-sm mt-1">{error.message}</p>
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <div className="text-red-600 dark:text-red-400">
+              <p className="font-medium">Failed to initialize</p>
+              <p className="text-sm mt-1">{error.message}</p>
+            </div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        {/* Header */}
-        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Router Approval</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Approve THORChain or MAYAChain router to spend ERC-20 tokens
-          </p>
-        </div>
+    <div className="p-6">
+      <div className="max-w-2xl mx-auto">
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            {/* Header */}
+            <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Router Approval</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Approve THORChain or MAYAChain router to spend ERC-20 tokens
+              </p>
+            </div>
 
         {/* Info Banner */}
         <div className="mx-6 mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -338,5 +352,7 @@ console.log('Approval TX:', result.hash)`
         </div>
       </div>
     </div>
+  </div>
+</div>
   )
 }

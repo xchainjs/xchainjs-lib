@@ -292,15 +292,16 @@ export default function SwapPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        {/* Header */}
-        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Swap</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Cross-chain swaps via THORChain and MAYAChain
-          </p>
-        </div>
+    <div className="p-6">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+          {/* Header */}
+          <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Swap</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Cross-chain swaps via THORChain and MAYAChain
+            </p>
+          </div>
 
         <div className="p-6 space-y-6">
           {/* Asset Selection */}
@@ -579,6 +580,7 @@ export default function SwapPage() {
           />
         </div>
       )}
+      </div>
     </div>
   )
 }

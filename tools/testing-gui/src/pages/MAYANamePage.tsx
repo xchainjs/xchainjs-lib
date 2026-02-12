@@ -10,8 +10,14 @@ interface MAYANameDetails {
   name: string
   owner: string
   expireBlockHeight: number
+  currentBlockHeight?: number
+  estimatedExpiry?: Date | null
   aliases: { address: string; chain: string }[]
 }
+
+// MAYAChain block time constants
+const BLOCKS_PER_YEAR = 5_256_000
+const SECONDS_PER_BLOCK = (365.25 * 24 * 60 * 60) / BLOCKS_PER_YEAR // ~6 seconds
 
 export default function MAYANamePage() {
   const [activeTab, setActiveTab] = useState<Tab>('lookup')
@@ -27,11 +33,32 @@ export default function MAYANamePage() {
       async () => {
         const { MayachainAMM } = await import('@xchainjs/xchain-mayachain-amm')
         const mayachainAmm = new MayachainAMM()
-        const details = await mayachainAmm.getMAYANameDetails(mayaName)
+
+        // Fetch MAYAName details and current block height in parallel
+        const [details, lastBlock] = await Promise.all([
+          mayachainAmm.getMAYANameDetails(mayaName),
+          fetch('https://mayanode.mayachain.info/mayachain/lastblock').then(r => r.json()),
+        ])
+
         if (!details) {
           throw new Error(`MAYAName "${mayaName}" not found`)
         }
-        return details
+
+        // Calculate estimated expiry date
+        const currentBlockHeight = lastBlock[0]?.mayachain || 0
+        const blocksRemaining = details.expireBlockHeight - currentBlockHeight
+        let estimatedExpiry: Date | null = null
+
+        if (blocksRemaining > 0) {
+          const secondsRemaining = blocksRemaining * SECONDS_PER_BLOCK
+          estimatedExpiry = new Date(Date.now() + secondsRemaining * 1000)
+        }
+
+        return {
+          ...details,
+          currentBlockHeight,
+          estimatedExpiry,
+        }
       },
       { operation: 'getMAYANameDetails', params: { name: mayaName } }
     )
@@ -117,15 +144,17 @@ mayaNames.forEach(mayaName => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        {/* Header */}
-        <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">MAYAName</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Lookup MAYAName registrations and aliases
-          </p>
-        </div>
+    <div className="p-6">
+      <div className="max-w-2xl mx-auto">
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+            {/* Header */}
+            <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">MAYAName</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Lookup MAYAName registrations and aliases
+              </p>
+            </div>
 
         {/* Info Banner */}
         <div className="mx-6 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -207,9 +236,27 @@ mayaNames.forEach(mayaName => {
                         </p>
                       </div>
                       <div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Expires at Block</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Expiry</span>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {lookupOp.result.expireBlockHeight.toLocaleString()}
+                          {lookupOp.result.estimatedExpiry && lookupOp.result.currentBlockHeight ? (
+                            <>
+                              {lookupOp.result.estimatedExpiry.toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                              <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                                (~{Math.ceil((lookupOp.result.expireBlockHeight - lookupOp.result.currentBlockHeight) / (BLOCKS_PER_YEAR / 365))} days)
+                              </span>
+                            </>
+                          ) : lookupOp.result.currentBlockHeight && lookupOp.result.expireBlockHeight <= lookupOp.result.currentBlockHeight ? (
+                            <span className="text-red-500">Expired</span>
+                          ) : (
+                            <span>{lookupOp.result.expireBlockHeight.toLocaleString()}</span>
+                          )}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          Block {lookupOp.result.expireBlockHeight.toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -313,5 +360,7 @@ mayaNames.forEach(mayaName => {
         </div>
       </div>
     </div>
+  </div>
+</div>
   )
 }
