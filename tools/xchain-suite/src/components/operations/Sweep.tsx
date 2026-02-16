@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import { getChainById } from '../../lib/chains'
+import { getExplorerTxUrl } from './constants'
 import type { FeeRates } from '@xchainjs/xchain-client'
 import { baseToAsset, baseAmount } from '@xchainjs/xchain-util'
 
@@ -28,15 +29,6 @@ interface SweepResult {
   fee: string
 }
 
-const EXPLORER_TX_URLS: Record<string, string> = {
-  BTC: 'https://blockstream.info/tx/',
-  BCH: 'https://blockchair.com/bitcoin-cash/transaction/',
-  LTC: 'https://blockchair.com/litecoin/transaction/',
-  DOGE: 'https://blockchair.com/dogecoin/transaction/',
-  DASH: 'https://blockchair.com/dash/transaction/',
-  ZEC: 'https://blockchair.com/zcash/transaction/',
-}
-
 export function Sweep({ chainId, client }: SweepProps) {
   const [recipient, setRecipient] = useState('')
   const [memo, setMemo] = useState('')
@@ -50,6 +42,27 @@ export function Sweep({ chainId, client }: SweepProps) {
   const decimals = chainInfo?.decimals ?? 8
   const symbol = chainInfo?.symbol ?? chainId
 
+  // Fetch balance - extracted as callback so it can be reused after sweep
+  const fetchBalance = useCallback(async () => {
+    if (!client) {
+      setBalance(null)
+      return
+    }
+    try {
+      const address = await client.getAddressAsync(0)
+      const balances = await client.getBalance(address)
+      if (balances.length > 0) {
+        const assetAmt = baseToAsset(baseAmount(balances[0].amount.amount().toString(), decimals))
+        setBalance(assetAmt.amount().toFixed(decimals))
+      } else {
+        setBalance('0')
+      }
+    } catch (e) {
+      console.error('Failed to fetch balance:', e)
+      setBalance(null)
+    }
+  }, [client, decimals])
+
   // Fetch balance and fee rate when client is available
   useEffect(() => {
     const fetchInfo = async () => {
@@ -61,19 +74,7 @@ export function Sweep({ chainId, client }: SweepProps) {
       setLoadingInfo(true)
 
       // Fetch balance
-      try {
-        const address = await client.getAddressAsync(0)
-        const balances = await client.getBalance(address)
-        if (balances.length > 0) {
-          const assetAmt = baseToAsset(baseAmount(balances[0].amount.amount().toString(), decimals))
-          setBalance(assetAmt.amount().toFixed(decimals))
-        } else {
-          setBalance('0')
-        }
-      } catch (e) {
-        console.error('Failed to fetch balance:', e)
-        setBalance(null)
-      }
+      await fetchBalance()
 
       // Fetch fee rate separately so balance still shows if this fails
       try {
@@ -87,7 +88,14 @@ export function Sweep({ chainId, client }: SweepProps) {
       setLoadingInfo(false)
     }
     fetchInfo()
-  }, [client, chainId, decimals])
+  }, [client, chainId, fetchBalance])
+
+  // Reset balance to 0 after successful sweep
+  useEffect(() => {
+    if (result) {
+      setBalance('0')
+    }
+  }, [result])
 
   const handleExecute = async () => {
     setShowConfirm(false)
@@ -96,30 +104,25 @@ export function Sweep({ chainId, client }: SweepProps) {
         throw new Error('Client not available. Please connect wallet first.')
       }
 
-      const result = await client.transferMax({
+      const txResult = await client.transferMax({
         recipient,
         memo: memo || undefined,
-        feeRate: feeRate || undefined,
+        feeRate: feeRate ?? undefined,
       })
 
       // Convert satoshis to asset amount for display
-      const amountAsset = baseToAsset(baseAmount(result.maxAmount, decimals))
-      const feeAsset = baseToAsset(baseAmount(result.fee, decimals))
+      const amountAsset = baseToAsset(baseAmount(txResult.maxAmount, decimals))
+      const feeAsset = baseToAsset(baseAmount(txResult.fee, decimals))
 
       return {
-        txHash: result.hash,
+        txHash: txResult.hash,
         amountSent: amountAsset.amount().toFixed(decimals),
         fee: feeAsset.amount().toFixed(decimals),
       }
     })
   }
 
-  const getExplorerUrl = (txHash: string): string | null => {
-    const baseUrl = EXPLORER_TX_URLS[chainId]
-    return baseUrl ? `${baseUrl}${txHash}` : null
-  }
-
-  const explorerUrl = result ? getExplorerUrl(result.txHash) : null
+  const explorerUrl = result ? getExplorerTxUrl(chainId, result.txHash) : null
 
   return (
     <div className="space-y-4">

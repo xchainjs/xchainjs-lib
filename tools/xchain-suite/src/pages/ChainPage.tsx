@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useChainClient } from '../hooks/useChainClient'
 import { GetAddress } from '../components/operations/GetAddress'
@@ -37,6 +37,11 @@ export function ChainPage() {
   const { chainId } = useParams<{ chainId: string }>()
   const [activeTab, setActiveTab] = useState<TabId>('address')
   const { client, loading, error } = useChainClient(chainId || '')
+
+  // Reset activeTab when switching chains (prevents showing unavailable tabs)
+  useEffect(() => {
+    setActiveTab('address')
+  }, [chainId])
 
   if (!chainId) {
     return (
