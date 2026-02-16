@@ -6,11 +6,14 @@ import { GetBalance } from '../components/operations/GetBalance'
 import { GetFees } from '../components/operations/GetFees'
 import { Transfer } from '../components/operations/Transfer'
 import { Deposit } from '../components/operations/Deposit'
+import { Sweep } from '../components/operations/Sweep'
 import { GetHistory } from '../components/operations/GetHistory'
 import { ValidateAddress } from '../components/operations/ValidateAddress'
 import { PrepareTx } from '../components/operations/PrepareTx'
 
-type TabId = 'address' | 'balance' | 'fees' | 'transfer' | 'deposit' | 'history' | 'validate' | 'prepare'
+type TabId = 'address' | 'balance' | 'fees' | 'transfer' | 'sweep' | 'deposit' | 'history' | 'validate' | 'prepare'
+
+const UTXO_CHAINS = ['BTC', 'BCH', 'LTC', 'DOGE', 'DASH', 'ZEC']
 
 interface Tab {
   id: TabId
@@ -23,6 +26,7 @@ const TABS: Tab[] = [
   { id: 'balance', label: 'Balance' },
   { id: 'fees', label: 'Fees' },
   { id: 'transfer', label: 'Transfer' },
+  { id: 'sweep', label: 'Sweep', chains: UTXO_CHAINS },
   { id: 'deposit', label: 'Deposit', chains: ['THOR', 'MAYA'] },
   { id: 'history', label: 'History' },
   { id: 'validate', label: 'Validate' },
@@ -89,6 +93,9 @@ export function ChainPage() {
         return <GetFees chainId={chainId} client={client} />
       case 'transfer':
         return <Transfer chainId={chainId} client={client} />
+      case 'sweep':
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return <Sweep chainId={chainId} client={client as any} />
       case 'deposit':
         return <Deposit chainId={chainId} client={client} />
       case 'history':
