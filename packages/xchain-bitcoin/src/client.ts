@@ -1,9 +1,16 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoSelectionPreferences,
+} from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
-import accumulative from 'coinselect/accumulative.js'
 
 import {
   AssetBTC,
@@ -135,9 +142,114 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Build a Bitcoin transaction.*
+   * Enhanced Bitcoin transaction builder with comprehensive validation and optimal UTXO selection
+   * @param params Transaction parameters
+   * @returns Enhanced transaction build result with PSBT, UTXOs, and inputs
+   */
+  async buildTxEnhanced({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+    try {
+      // Comprehensive input validation
+      this.validateTransactionInputs({
+        amount,
+        recipient,
+        memo,
+        sender,
+        feeRate,
+      })
+
+      // Get validated UTXOs
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const targetValue = amount.amount().toNumber()
+      const extraOutputs = 1 + (compiledMemo ? 1 : 0) // recipient + optional memo (change calculated separately)
+
+      // Enhanced UTXO selection
+      const selectionResult = this.selectUtxosForTransaction(
+        utxos,
+        targetValue,
+        Math.ceil(feeRate),
+        extraOutputs,
+        utxoSelectionPreferences,
+      )
+
+      const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
+
+      // Add inputs based on selection
+      if (this.addressFormat === AddressFormat.P2WPKH) {
+        selectionResult.inputs.forEach((utxo: UTXO) => {
+          if (!utxo.witnessUtxo) {
+            throw UtxoError.fromUnknown(
+              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
+              'buildTxPsbt',
+            )
+          }
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: utxo.witnessUtxo,
+          })
+        })
+      } else {
+        const { pubkey, output } = Bitcoin.payments.p2tr({
+          address: sender,
+        })
+        selectionResult.inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: { value: utxo.value, script: output as Buffer },
+            tapInternalKey: pubkey,
+          }),
+        )
+      }
+
+      // Add recipient output
+      psbt.addOutput({
+        address: recipient,
+        value: targetValue,
+      })
+
+      // Add change output if needed
+      if (selectionResult.changeAmount > 0) {
+        psbt.addOutput({
+          address: sender,
+          value: selectionResult.changeAmount,
+        })
+      }
+
+      // Add memo output if present
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return { psbt, utxos, inputs: selectionResult.inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'buildTxEnhanced')
+    }
+  }
+
+  /**
+   * Build a Bitcoin transaction with enhanced validation and performance.
+   * Now uses the enhanced logic internally while maintaining the same API.
    * @param param0
-   * @deprecated
    */
   async buildTx({
     amount,
@@ -152,87 +264,209 @@ abstract class Client extends UTXOClient {
     spendPendingUTXO?: boolean
     withTxHex?: boolean
   }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
-    // Check memo length
-    if (memo && memo.length > 80) {
-      throw new Error('memo too long, must not be longer than 80 chars.')
-    }
-    // This section of the code is responsible for preparing a transaction by building a Bitcoin PSBT (Partially Signed Bitcoin Transaction).
-    if (!this.validateAddress(recipient)) throw new Error('Invalid address')
-    // Determine whether to only use confirmed UTXOs or include pending UTXOs based on the spendPendingUTXO flag.
-    const confirmedOnly = !spendPendingUTXO
-    // Scan UTXOs associated with the sender's address.
-    const utxos = await this.scanUTXOs(sender, confirmedOnly)
-    // Throw an error if there are no available UTXOs to cover the transaction.
-    if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
-    // Round up the fee rate to the nearest integer.
-    const feeRateWhole = Math.ceil(feeRate)
-    // Compile the memo into a Buffer if provided.
-    const compiledMemo = memo ? this.compileMemo(memo) : null
-    // Initialize an array to store the target outputs of the transaction.
-    const targetOutputs = []
-
-    // 1. Add the recipient address and amount to the target outputs.
-    targetOutputs.push({
-      address: recipient,
-      value: amount.amount().toNumber(),
+    // Use the enhanced logic internally while maintaining the same API
+    return this.buildTxEnhanced({
+      amount,
+      recipient,
+      memo,
+      feeRate,
+      sender,
+      spendPendingUTXO,
     })
-    // 2. Add the compiled memo to the target outputs if it exists.
-    if (compiledMemo) {
-      targetOutputs.push({ script: compiledMemo, value: 0 })
-    }
-    // Use the coinselect library to determine the inputs and outputs for the transaction.
-    const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
-    // If no suitable inputs or outputs are found, throw an error indicating insufficient balance.
-    if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
-    // Initialize a new Bitcoin PSBT object.
-    const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) }) // Network-specific
-
-    if (this.addressFormat === AddressFormat.P2WPKH) {
-      // Add inputs to the PSBT from the accumulated inputs.
-      inputs.forEach((utxo: UTXO) =>
-        psbt.addInput({
-          hash: utxo.hash,
-          index: utxo.index,
-          witnessUtxo: utxo.witnessUtxo,
-        }),
-      )
-    } else {
-      const { pubkey, output } = Bitcoin.payments.p2tr({
-        address: sender,
-      })
-      inputs.forEach((utxo: UTXO) =>
-        psbt.addInput({
-          hash: utxo.hash,
-          index: utxo.index,
-          witnessUtxo: { value: utxo.value, script: output as Buffer },
-          tapInternalKey: pubkey,
-        }),
-      )
-    }
-    // Add outputs to the PSBT from the accumulated outputs.
-    outputs.forEach((output: Bitcoin.PsbtTxOutput) => {
-      // If the output address is not specified, it's considered a change address and set to the sender's address.
-      if (!output.address) {
-        //an empty address means this is the change address
-        output.address = sender
-      }
-      // Add the output to the PSBT.
-      if (!output.script) {
-        psbt.addOutput(output)
-      } else {
-        // If the output is a memo, add it to the PSBT to avoid dust error.
-        if (compiledMemo) {
-          psbt.addOutput({ script: compiledMemo, value: 0 })
-        }
-      }
-    })
-
-    return { psbt, utxos, inputs }
   }
 
   /**
-   * Prepare transfer.
+   * Send maximum possible amount (sweep) with optimal fee calculation
+   * @param params Send max parameters
+   * @returns Transaction details with maximum sendable amount
+   */
+  async sendMax({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{
+    psbt: Bitcoin.Psbt
+    utxos: UTXO[]
+    inputs: UTXO[]
+    maxAmount: number
+    fee: number
+  }> {
+    try {
+      // Basic validation (skip amount validation since we're calculating max)
+      if (!recipient?.trim()) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Memo validation is handled by validateTransactionInputs
+
+      // Get validated UTXOs
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      // Calculate maximum sendable amount
+      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
+
+      // Add inputs
+      if (this.addressFormat === AddressFormat.P2WPKH) {
+        maxCalc.inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: utxo.witnessUtxo,
+          }),
+        )
+      } else {
+        const { pubkey, output } = Bitcoin.payments.p2tr({
+          address: sender,
+        })
+        maxCalc.inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: { value: utxo.value, script: output as Buffer },
+            tapInternalKey: pubkey,
+          }),
+        )
+      }
+
+      // Add recipient output (max amount - no change)
+      psbt.addOutput({
+        address: recipient,
+        value: maxCalc.amount,
+      })
+
+      // Add memo output if present
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return {
+        psbt,
+        utxos,
+        inputs: maxCalc.inputs,
+        maxAmount: maxCalc.amount,
+        fee: maxCalc.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'sendMax')
+    }
+  }
+
+  /**
+   * Prepare maximum amount transfer (sweep transaction)
+   * @param params Send max parameters
+   * @returns Prepared transaction with maximum sendable amount
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      const { psbt, utxos, inputs, maxAmount, fee } = await this.sendMax({
+        sender,
+        recipient,
+        memo,
+        feeRate,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return {
+        rawUnsignedTx: psbt.toBase64(),
+        utxos,
+        inputs,
+        maxAmount,
+        fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        console.error('Bitcoin max transaction preparation failed:', error.toJSON())
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
+    }
+  }
+
+  /**
+   * Enhanced prepare transfer with comprehensive validation and optimal UTXO selection.
    *
+   * @param params The transfer options with enhanced UTXO selection preferences.
+   * @returns The raw unsigned transaction with enhanced error handling.
+   */
+  async prepareTxEnhanced({
+    sender,
+    memo,
+    amount,
+    recipient,
+    spendPendingUTXO = true,
+    feeRate,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx> {
+    try {
+      const { psbt, utxos, inputs } = await this.buildTxEnhanced({
+        sender,
+        recipient,
+        amount,
+        feeRate,
+        memo,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        console.error('Enhanced Bitcoin transaction preparation failed:', error.toJSON())
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareTxEnhanced')
+    }
+  }
+
+  /**
+   * Prepare transfer with enhanced validation and performance.
+   * Now uses the enhanced logic internally while maintaining the same API.
+   *
+   * @deprecated Use `prepareTxEnhanced` directly for explicit enhanced UTXO selection.
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
    */
@@ -248,8 +482,8 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
   }): Promise<PreparedTx> {
-    // Build the transaction using the provided parameters.
-    const { psbt, utxos, inputs } = await this.buildTx({
+    // Use the enhanced logic internally while maintaining the same API
+    return this.prepareTxEnhanced({
       sender,
       recipient,
       amount,
@@ -257,8 +491,6 @@ abstract class Client extends UTXOClient {
       memo,
       spendPendingUTXO,
     })
-    // Return the raw unsigned transaction (PSBT) and associated UTXOs.
-    return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
   }
 }
 

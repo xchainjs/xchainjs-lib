@@ -139,30 +139,181 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
       fail()
     }
   })
-  it('Try to send max amount', async () => {
+  it('should prepare transaction with enhanced UTXO selection', async () => {
     try {
-      const firstAddress = await btcClient.getAddressAsync(0)
-      const address = await btcClient.getAddressAsync(1)
-      console.log('address', address)
-      const balance = await btcClient.getBalance(address)
-      console.log(balance[0].amount.amount().toString())
-      const fee = await btcClient.getFees({
-        memo: address,
-        sender: address,
-      })
-      console.log(fee.fast.amount().toString())
-      const txid = await btcClient.transfer({
-        walletIndex: 1,
-        asset: AssetBTC,
-        recipient: firstAddress,
-        amount: balance[0].amount.minus(fee.fast),
+      const from = await btcClient.getAddressAsync(0)
+      const to = await btcClient.getAddressAsync(1)
+      console.log('From:', from)
+      console.log('To:', to)
+
+      const amount = assetToBase(assetAmount('0.00119375'))
+      const feeRate = await btcClient.getFeesWithRates()
+
+      // Test enhanced transaction preparation
+      const enhancedTx = await btcClient.prepareTxEnhanced({
+        sender: from,
+        recipient: to,
+        amount,
         memo: 'test',
-        feeRate: 1,
+        feeRate: feeRate.rates.fast,
+        utxoSelectionPreferences: {
+          minimizeFee: true,
+          avoidDust: true,
+          minimizeInputs: false,
+        },
       })
-      console.log('txid', txid)
+
+      console.log('Enhanced TX prepared:', {
+        rawTxLength: enhancedTx.rawUnsignedTx.length,
+        inputCount: enhancedTx.inputs.length,
+        utxoCount: enhancedTx.utxos.length,
+      })
+
+      expect(enhancedTx.rawUnsignedTx).toBeDefined()
+      expect(enhancedTx.inputs.length).toBeGreaterThan(0)
+      expect(enhancedTx.utxos.length).toBeGreaterThan(0)
+
+      // Only broadcast if explicitly enabled (costs real fees on mainnet)
+      if (process.env.ALLOW_MAINNET_TXS === 'true') {
+        // Actually send the prepared enhanced transaction
+        const txHash = await btcClient.transfer({
+          asset: AssetBTC,
+          recipient: to,
+          amount,
+          memo: 'enhanced-test-broadcast',
+          feeRate: feeRate.rates.fast,
+        })
+
+        console.log('Enhanced TX broadcast successful!')
+        console.log('Transaction hash:', txHash)
+
+        // Verify transaction hash format
+        expect(txHash).toBeDefined()
+        expect(typeof txHash).toBe('string')
+        expect(txHash.length).toBeGreaterThan(0)
+      } else {
+        console.log('[E2E] Skipping mainnet broadcast; set ALLOW_MAINNET_TXS=true to enable')
+      }
+
+      console.log('✅ Enhanced transaction preparation verified successfully!')
     } catch (err) {
-      console.error('ERR running test', err)
-      fail()
+      console.error('ERR running enhanced prepare test:', err)
+      if (err instanceof Error) {
+        console.error('Error message:', err.message)
+        console.error('Error stack:', err.stack)
+      }
+      fail(err instanceof Error ? err.message : 'Enhanced prepare test failed')
+    }
+  })
+  it('Send max amount with enhanced UTXO selection', async () => {
+    try {
+      const senderAddress = await btcClient.getAddressAsync(0)
+      const recipientAddress = await btcClient.getAddressAsync(1)
+
+      console.log('Sender address:', senderAddress)
+      console.log('Recipient address:', recipientAddress)
+
+      // Get current balance before send max
+      const balance = await btcClient.getBalance(senderAddress)
+      if (!balance || balance.length === 0) {
+        console.log('No balance found for sender address, skipping test')
+        return
+      }
+
+      const currentBalance = balance[0].amount.amount().toNumber()
+      console.log('Current balance (satoshis):', currentBalance)
+
+      if (currentBalance < 1000) {
+        console.log('Balance too low for meaningful test, skipping')
+        return
+      }
+
+      // Get fee rates
+      const feeRates = await btcClient.getFeesWithRates()
+      const feeRate = feeRates.rates.average
+      console.log('Using fee rate:', feeRate, 'sat/byte')
+
+      // Calculate max sendable amount using enhanced method
+      const maxTxData = await btcClient.prepareMaxTx({
+        sender: senderAddress,
+        recipient: recipientAddress,
+        feeRate: feeRate,
+        memo: 'sendmax-test',
+        utxoSelectionPreferences: {
+          minimizeFee: true,
+          avoidDust: true,
+          minimizeInputs: false, // Allow more inputs for max send
+        },
+      })
+
+      console.log('Max sendable amount (satoshis):', maxTxData.maxAmount)
+      console.log('Estimated fee (satoshis):', maxTxData.fee)
+      console.log('UTXOs to use:', maxTxData.inputs.length)
+      console.log(
+        'Total input value:',
+        maxTxData.inputs.reduce((sum, utxo) => sum + utxo.value, 0),
+      )
+
+      // Verify calculations
+      expect(maxTxData.maxAmount).toBeGreaterThan(0)
+      expect(maxTxData.fee).toBeGreaterThan(0)
+      expect(maxTxData.maxAmount + maxTxData.fee).toBeLessThanOrEqual(currentBalance)
+      expect(maxTxData.inputs.length).toBeGreaterThan(0)
+
+      // Test the actual send max transaction building
+      const sendMaxResult = await btcClient.sendMax({
+        sender: senderAddress,
+        recipient: recipientAddress,
+        feeRate: feeRate,
+        memo: 'sendmax-test',
+        utxoSelectionPreferences: {
+          minimizeFee: true,
+          avoidDust: true,
+          minimizeInputs: false,
+        },
+      })
+
+      console.log('Send max result:', {
+        maxAmount: sendMaxResult.maxAmount,
+        fee: sendMaxResult.fee,
+        inputCount: sendMaxResult.inputs.length,
+        psbtBase64: sendMaxResult.psbt.toBase64().substring(0, 100) + '...',
+      })
+
+      // Verify send max result matches preparation
+      expect(sendMaxResult.maxAmount).toBe(maxTxData.maxAmount)
+      expect(sendMaxResult.fee).toBe(maxTxData.fee)
+      expect(sendMaxResult.inputs.length).toBe(maxTxData.inputs.length)
+      expect(sendMaxResult.psbt).toBeDefined()
+
+      // Verify PSBT structure
+      const psbtInputs = sendMaxResult.psbt.data.inputs
+      const psbtOutputs = sendMaxResult.psbt.txOutputs
+      expect(psbtInputs.length).toBe(sendMaxResult.inputs.length)
+      expect(psbtOutputs.length).toBeGreaterThanOrEqual(1) // At least recipient output
+
+      console.log('✅ Send max calculations and PSBT generation verified successfully!')
+
+      // Optional: Actually broadcast the transaction (commented out for safety)
+      // Uncomment the following to actually send the transaction
+      // console.log('Broadcasting transaction...')
+      // const txHash = await btcClient.transfer({
+      //   walletIndex: 0,
+      //   asset: AssetBTC,
+      //   recipient: recipientAddress,
+      //   amount: baseAmount(sendMaxResult.maxAmount, BTC_DECIMAL),
+      //   memo: 'max',
+      //   feeRate: feeRate,
+      // })
+      // console.log('✅ Transaction broadcast successfully!')
+      // console.log('Transaction hash:', txHash)
+    } catch (err) {
+      console.error('ERR running send max test:', err)
+      if (err instanceof Error) {
+        console.error('Error message:', err.message)
+        console.error('Error stack:', err.stack)
+      }
+      fail(err instanceof Error ? err.message : 'Send max test failed')
     }
   })
 })

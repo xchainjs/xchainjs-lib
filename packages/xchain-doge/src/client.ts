@@ -1,6 +1,14 @@
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoSelectionPreferences,
+} from '@xchainjs/xchain-utxo'
 import * as Dogecoin from 'bitcoinjs-lib'
 import accumulative from 'coinselect/accumulative.js'
 
@@ -185,6 +193,7 @@ abstract class Client extends UTXOClient {
    * Asynchronously prepares a transaction for transfer.
    *
    * Builds a transaction (PSBT) with the specified transfer options.
+   * @deprecated Use `prepareTxEnhanced` instead for better UTXO selection and error handling.
    * @param {TxParams & { sender: Address; feeRate: FeeRate; spendPendingUTXO?: boolean }} params The transfer options including sender address, fee rate, and optional flag for spending pending UTXOs.
    * @returns {Promise<PreparedTx>} A promise that resolves to the raw unsigned transaction (PSBT).
    */
@@ -256,6 +265,243 @@ abstract class Client extends UTXOClient {
     const fee = sum * feeRate
     // Ensure the fee is not less than the minimum transaction fee
     return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
+  }
+
+  // ==================== Enhanced Transaction Methods ====================
+
+  /**
+   * Build transaction with enhanced UTXO selection
+   * Note: Doge uses legacy P2PKH addresses (nonWitnessUtxo)
+   */
+  async buildTxEnhanced({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ psbt: Dogecoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
+    try {
+      this.validateTransactionInputs({
+        amount,
+        recipient,
+        memo,
+        sender,
+        feeRate,
+      })
+
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const targetValue = amount.amount().toNumber()
+      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
+
+      const selectionResult = this.selectUtxosForTransaction(
+        utxos,
+        targetValue,
+        Math.ceil(feeRate),
+        extraOutputs,
+        utxoSelectionPreferences,
+      )
+
+      const psbt = new Dogecoin.Psbt({ network: Utils.dogeNetwork(this.network) })
+      psbt.setMaximumFeeRate(7500000)
+
+      // Add inputs - Doge uses nonWitnessUtxo (legacy P2PKH)
+      for (const utxo of selectionResult.inputs) {
+        psbt.addInput({
+          hash: utxo.hash,
+          index: utxo.index,
+          nonWitnessUtxo: Buffer.from(utxo.txHex || '', 'hex'),
+        })
+      }
+
+      // Add recipient output
+      psbt.addOutput({
+        address: recipient,
+        value: targetValue,
+      })
+
+      // Add change output if needed
+      if (selectionResult.changeAmount > 0) {
+        psbt.addOutput({
+          address: sender,
+          value: selectionResult.changeAmount,
+        })
+      }
+
+      // Add memo output if present
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return { psbt, utxos, inputs: selectionResult.inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'buildTxEnhanced')
+    }
+  }
+
+  /**
+   * Prepare transaction with enhanced UTXO selection
+   */
+  async prepareTxEnhanced({
+    sender,
+    memo,
+    amount,
+    recipient,
+    spendPendingUTXO = true,
+    feeRate,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx> {
+    try {
+      const { psbt, utxos, inputs } = await this.buildTxEnhanced({
+        sender,
+        recipient,
+        amount,
+        feeRate,
+        memo,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareTxEnhanced')
+    }
+  }
+
+  /**
+   * Send maximum possible amount (sweep)
+   */
+  async sendMax({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{
+    psbt: Dogecoin.Psbt
+    utxos: UTXO[]
+    inputs: UTXO[]
+    maxAmount: number
+    fee: number
+  }> {
+    try {
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const psbt = new Dogecoin.Psbt({ network: Utils.dogeNetwork(this.network) })
+      psbt.setMaximumFeeRate(7500000)
+
+      // Add inputs - Doge uses nonWitnessUtxo
+      for (const utxo of maxCalc.inputs) {
+        psbt.addInput({
+          hash: utxo.hash,
+          index: utxo.index,
+          nonWitnessUtxo: Buffer.from(utxo.txHex || '', 'hex'),
+        })
+      }
+
+      psbt.addOutput({
+        address: recipient,
+        value: maxCalc.amount,
+      })
+
+      if (compiledMemo) {
+        psbt.addOutput({ script: compiledMemo, value: 0 })
+      }
+
+      return {
+        psbt,
+        utxos,
+        inputs: maxCalc.inputs,
+        maxAmount: maxCalc.amount,
+        fee: maxCalc.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'sendMax')
+    }
+  }
+
+  /**
+   * Prepare max send transaction
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      const { psbt, utxos, inputs, maxAmount, fee } = await this.sendMax({
+        sender,
+        recipient,
+        memo,
+        feeRate,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+      })
+
+      return {
+        rawUnsignedTx: psbt.toBase64(),
+        utxos,
+        inputs,
+        maxAmount,
+        fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
+    }
   }
 }
 

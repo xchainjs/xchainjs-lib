@@ -1,7 +1,18 @@
 import dashcore from '@dashevo/dashcore-lib'
 import { AssetInfo, FeeRate, Network, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
 import { Address, assetAmount, assetToBase, baseAmount } from '@xchainjs/xchain-util'
-import { Balance, Client as UTXOClient, Tx, TxParams, TxsPage, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import {
+  Balance,
+  Client as UTXOClient,
+  PreparedTx,
+  Tx,
+  TxParams,
+  TxsPage,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoSelectionPreferences,
+} from '@xchainjs/xchain-utxo'
 
 import {
   AssetDASH,
@@ -198,6 +209,7 @@ abstract class Client extends UTXOClient {
 
   /**
    * Asynchronously prepares a transaction for sending assets.
+   * @deprecated Use `prepareTxEnhanced` instead for better UTXO selection and error handling.
    * @param {TxParams&Address&FeeRate} params - Parameters for the transaction preparation.
    * @returns {string} A promise resolving to the prepared transaction data.
    */
@@ -272,6 +284,167 @@ abstract class Client extends UTXOClient {
     const fee = sum * feeRate
     // Ensure fee meets minimum requirement
     return fee > Utils.TX_MIN_FEE ? fee : Utils.TX_MIN_FEE
+  }
+
+  // ==================== Enhanced Transaction Methods ====================
+
+  /**
+   * Prepare transaction with enhanced UTXO selection.
+   * Uses base class UTXO selection logic with dashcore-lib transaction building.
+   */
+  async prepareTxEnhanced({
+    sender,
+    memo,
+    amount,
+    recipient,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx> {
+    try {
+      // Validate inputs using base class method
+      this.validateTransactionInputs({
+        amount,
+        recipient,
+        memo,
+        sender,
+        feeRate,
+      })
+
+      // Get validated UTXOs using base class method
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const targetValue = amount.amount().toNumber()
+      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
+
+      // Use base class UTXO selection
+      const selectionResult = this.selectUtxosForTransaction(
+        utxos,
+        targetValue,
+        Math.ceil(feeRate),
+        extraOutputs,
+        utxoSelectionPreferences,
+      )
+
+      // Build transaction using dashcore-lib
+      const tx = new dashcore.Transaction().to(recipient, targetValue)
+
+      // Add selected inputs
+      for (const utxo of selectionResult.inputs) {
+        const scriptBuffer: Buffer = Buffer.from(utxo.scriptPubKey || '', 'hex')
+        const script = new dashcore.Script(scriptBuffer)
+        const input = new dashcore.Transaction.Input.PublicKeyHash({
+          prevTxId: Buffer.from(utxo.hash, 'hex'),
+          outputIndex: utxo.index,
+          script: '',
+          output: new dashcore.Transaction.Output({
+            satoshis: utxo.value,
+            script,
+          }),
+        })
+        tx.uncheckedAddInput(input)
+      }
+
+      // Set change address
+      const senderAddress = dashcore.Address.fromString(sender, this.network)
+      tx.change(senderAddress)
+
+      // Add memo if provided
+      if (memo) {
+        tx.addData(memo)
+      }
+
+      // ESLint disabled: Dash transaction has proper toString() method that returns hex string
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      return { rawUnsignedTx: tx.toString(), utxos, inputs: selectionResult.inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareTxEnhanced')
+    }
+  }
+
+  /**
+   * Prepare max send transaction
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      // Validate addresses
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Get validated UTXOs
+      const confirmedOnly = !spendPendingUTXO
+      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+
+      // Calculate max using base class method
+      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+
+      // Build transaction using dashcore-lib
+      const tx = new dashcore.Transaction().to(recipient, maxCalc.amount)
+
+      // Add inputs
+      for (const utxo of maxCalc.inputs) {
+        const scriptBuffer: Buffer = Buffer.from(utxo.scriptPubKey || '', 'hex')
+        const script = new dashcore.Script(scriptBuffer)
+        const input = new dashcore.Transaction.Input.PublicKeyHash({
+          prevTxId: Buffer.from(utxo.hash, 'hex'),
+          outputIndex: utxo.index,
+          script: '',
+          output: new dashcore.Transaction.Output({
+            satoshis: utxo.value,
+            script,
+          }),
+        })
+        tx.uncheckedAddInput(input)
+      }
+
+      // Add memo if provided
+      if (memo) {
+        tx.addData(memo)
+      }
+
+      // ESLint disabled: Dash transaction has proper toString() method that returns hex string
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      return {
+        rawUnsignedTx: tx.toString(),
+        utxos,
+        inputs: maxCalc.inputs,
+        maxAmount: maxCalc.amount,
+        fee: maxCalc.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
+    }
   }
 }
 

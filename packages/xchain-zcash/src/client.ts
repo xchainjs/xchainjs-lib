@@ -10,7 +10,7 @@ import {
   Network,
 } from '@xchainjs/xchain-client'
 import { Address, baseAmount } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams, UtxoError } from '@xchainjs/xchain-utxo'
 
 import {
   AssetZEC,
@@ -110,6 +110,7 @@ abstract class Client extends UTXOClient {
   /**
    * Prepare transfer.
    *
+   * @deprecated Use `prepareMaxTx` for sweep transactions. Zcash uses flat fees.
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
    */
@@ -195,6 +196,97 @@ abstract class Client extends UTXOClient {
       fast: baseAmount(flatFee, ZEC_DECIMAL),
       fastest: baseAmount(flatFee, ZEC_DECIMAL),
       type: FeeType.FlatFee,
+    }
+  }
+
+  // ==================== Enhanced Transaction Methods ====================
+
+  /**
+   * Prepare max send transaction (sweep) for Zcash.
+   * Since Zcash uses flat fees, this calculates the maximum sendable amount
+   * after deducting the required fee.
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    spendPendingUTXO = true,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    spendPendingUTXO?: boolean
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      // Validate addresses
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Get UTXOs for sender
+      const utxos = await this.scanUTXOs(sender, spendPendingUTXO)
+      if (utxos.length === 0) {
+        throw UtxoError.insufficientBalance('1', '0', this.network)
+      }
+
+      // Calculate total value of all UTXOs
+      const totalValue = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
+
+      // Calculate flat fee for this transaction (2 outputs: recipient + potential memo)
+      const fee = getFee(utxos.length, memo ? 2 : 1, memo)
+
+      // Calculate max sendable amount
+      const maxAmount = totalValue - fee
+      if (maxAmount <= 0) {
+        throw UtxoError.insufficientBalance(String(fee), String(totalValue), this.network)
+      }
+
+      // Convert UTXOs to zcash-js format
+      const zcashUtxos = utxos.map((utxo) => ({
+        address: sender,
+        txid: utxo.hash,
+        outputIndex: utxo.index,
+        satoshis: utxo.value,
+      }))
+
+      // Build unsigned transaction with max amount
+      const unsignedTx = await buildTx(
+        0,
+        sender,
+        recipient,
+        maxAmount,
+        zcashUtxos,
+        this.network === Network.Testnet ? false : true,
+        memo,
+      )
+
+      // For Zcash, we return the transaction data as JSON string
+      const rawUnsignedTx = JSON.stringify({
+        height: 0,
+        from: sender,
+        to: recipient,
+        amount: maxAmount,
+        utxos: zcashUtxos,
+        isMainnet: this.network === Network.Testnet ? false : true,
+        memo,
+        fee: unsignedTx.fee,
+      })
+
+      return {
+        rawUnsignedTx,
+        utxos,
+        inputs: utxos,
+        maxAmount,
+        fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
     }
   }
 }

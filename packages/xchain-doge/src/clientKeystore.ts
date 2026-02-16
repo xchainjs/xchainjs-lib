@@ -2,7 +2,7 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import * as Dogecoin from 'bitcoinjs-lib' // Importing the base Doge client
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 import { HDKey } from '@scure/bip32'
@@ -89,35 +89,86 @@ class ClientKeystore extends Client {
    * Asynchronously transfers Dogecoin.
    *
    * Builds, signs, and broadcasts a Dogecoin transaction with the specified parameters.
-   * @param {TxParams & { feeRate?: FeeRate }} params The transfer parameters including transaction details and optional fee rate.
-   * @returns {TxHash} A promise that resolves to the transaction hash once the transfer is completed.
+   *
+   * @param {Object} params The transfer parameters.
+   * @returns {Promise<TxHash>} The transaction hash.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    // Determine the fee rate for the transaction, using provided fee rate or fetching it from the network
+  async transfer(
+    params: TxParams & {
+      feeRate?: FeeRate
+      utxoSelectionPreferences?: UtxoSelectionPreferences
+    },
+  ): Promise<TxHash> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
-    // Check if the fee rate is within the specified fee bounds
     checkFeeBounds(this.feeBounds, feeRate)
 
-    // Get the index of the sender's address or use the default index (0)
     const fromAddressIndex = params?.walletIndex || 0
-    // Prepare the transaction by building it with the specified parameters
-    const { rawUnsignedTx } = await this.prepareTx({
+    const sender = await this.getAddressAsync(fromAddressIndex)
+    const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)
+
+    const mergedPreferences: UtxoSelectionPreferences = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+      ...params.utxoSelectionPreferences,
+    }
+
+    const { rawUnsignedTx } = await this.prepareTxEnhanced({
       ...params,
       feeRate,
-      sender: await this.getAddressAsync(fromAddressIndex),
+      sender,
+      utxoSelectionPreferences: mergedPreferences,
     })
-    // Get the Dogecoin keys for signing the transaction
-    const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)
-    // Create a Partially Signed Bitcoin Transaction (PSBT) from the raw unsigned transaction
+
     const psbt = Dogecoin.Psbt.fromBase64(rawUnsignedTx, { maximumFeeRate: 7500000 })
-    // Sign all inputs of the transaction with the Dogecoin keys
     psbt.signAllInputs(dogeKeys)
-    // Finalize all inputs of the transaction
     psbt.finalizeAllInputs()
-    // Extract the signed transaction and format it to hexadecimal
     const txHex = psbt.extractTransaction().toHex()
-    // Broadcast the signed transaction to the Dogecoin network and return the transaction hash
+
     return await this.roundRobinBroadcastTx(txHex)
+  }
+
+  /**
+   * Transfer the maximum amount of Dogecoin (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { psbt, maxAmount, fee } = await this.sendMax({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+    })
+
+    const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)
+    psbt.signAllInputs(dogeKeys)
+    psbt.finalizeAllInputs()
+
+    const txHex = psbt.extractTransaction().toHex()
+    const hash = await this.roundRobinBroadcastTx(txHex)
+
+    return { hash, maxAmount, fee }
   }
 }
 export { ClientKeystore }

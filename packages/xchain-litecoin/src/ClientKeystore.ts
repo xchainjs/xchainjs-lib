@@ -2,7 +2,7 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import * as Litecoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
@@ -61,34 +61,93 @@ export class ClientKeystore extends Client {
   /**
    * Transfers Litecoin (LTC) from one address to another.
    *
-   * @param {TxParams & { feeRate?: FeeRate }} params The transfer options.
-   * @returns {Promise<TxHash>} A promise that resolves to the transaction hash.
+   * @param {Object} params The transfer options.
+   * @returns {Promise<TxHash>} The transaction hash.
    */
-  public async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
-    // set the default fee rate to `fast`
+  public async transfer(
+    params: TxParams & {
+      feeRate?: FeeRate
+      utxoSelectionPreferences?: UtxoSelectionPreferences
+    },
+  ): Promise<TxHash> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
 
     const fromAddressIndex = params.walletIndex || 0
-    const { rawUnsignedTx } = await this.prepareTx({
+    const sender = await this.getAddressAsync(fromAddressIndex)
+    const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
+
+    const mergedPreferences: UtxoSelectionPreferences = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+      ...params.utxoSelectionPreferences,
+    }
+
+    const { rawUnsignedTx } = await this.prepareTxEnhanced({
       ...params,
       feeRate,
-      sender: await this.getAddressAsync(fromAddressIndex),
+      sender,
+      utxoSelectionPreferences: mergedPreferences,
     })
 
     const psbt = Litecoin.Psbt.fromBase64(rawUnsignedTx)
-    const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
-
-    psbt.signAllInputs(ltcKeys) // Sign all inputs
-    psbt.finalizeAllInputs() // Finalise inputs
-
-    const txHex = psbt.extractTransaction().toHex() // TX extracted and formatted to hex
+    psbt.signAllInputs(ltcKeys)
+    psbt.finalizeAllInputs()
+    const txHex = psbt.extractTransaction().toHex()
 
     return await Utils.broadcastTx({
       txHex,
       nodeUrl: this.nodeUrls[this.network],
       auth: this.nodeAuth,
     })
+  }
+
+  /**
+   * Transfer the maximum amount of Litecoin (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  public async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { psbt, maxAmount, fee } = await this.sendMax({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+    })
+
+    const ltcKeys = this.getLtcKeys(this.phrase, fromAddressIndex)
+    psbt.signAllInputs(ltcKeys)
+    psbt.finalizeAllInputs()
+
+    const txHex = psbt.extractTransaction().toHex()
+    const hash = await Utils.broadcastTx({
+      txHex,
+      nodeUrl: this.nodeUrls[this.network],
+      auth: this.nodeAuth,
+    })
+
+    return { hash, maxAmount, fee }
   }
 
   /**

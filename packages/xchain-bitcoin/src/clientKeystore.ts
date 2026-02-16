@@ -2,7 +2,7 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import * as Bitcoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
@@ -105,10 +105,12 @@ class ClientKeystore extends Client {
    * Transfer BTC.
    *
    * @param {TxParams&FeeRate} params The transfer options including the fee rate.
-   * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
+   * @returns {Promise<TxHash>} A promise that resolves to the transaction hash.
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+  async transfer(
+    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+  ): Promise<TxHash> {
     // Set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
 
@@ -121,11 +123,20 @@ class ClientKeystore extends Client {
     // Get the Bitcoin keys
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
 
+    // Merge default preferences with caller-provided preferences
+    const mergedUtxoSelectionPreferences = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+      ...params.utxoSelectionPreferences,
+    }
+
     // Prepare the transaction
-    const { rawUnsignedTx } = await this.prepareTx({
+    const { rawUnsignedTx } = await this.prepareTxEnhanced({
       ...params,
       sender: this.getAddress(fromAddressIndex),
       feeRate,
+      utxoSelectionPreferences: mergedUtxoSelectionPreferences,
     })
 
     // Build the PSBT
@@ -144,20 +155,55 @@ class ClientKeystore extends Client {
     // Extract the transaction hex
     const txHex = psbt.extractTransaction().toHex()
 
-    // Extract the transaction hash
-    const txHash = psbt.extractTransaction().getId()
+    // Broadcast the transaction and return the transaction hash
+    return await this.roundRobinBroadcastTx(txHex)
+  }
 
-    try {
-      // Broadcast the transaction and return the transaction hash
-      const txId = await this.roundRobinBroadcastTx(txHex)
-      return txId
-    } catch (_err) {
-      // If broadcasting fails, return an error message with a link to the explorer
-      const error = `Server error, please check explorer for tx confirmation ${this.explorerProviders[
-        this.network
-      ].getExplorerTxUrl(txHash)}`
-      return error
-    }
+  /**
+   * Transfer the maximum amount of Bitcoin (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { psbt, maxAmount, fee } = await this.sendMax({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+    })
+
+    const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
+    psbt.signAllInputs(
+      this.addressFormat === AddressFormat.P2WPKH
+        ? btcKeys
+        : btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey))),
+    )
+    psbt.finalizeAllInputs()
+
+    const txHex = psbt.extractTransaction().toHex()
+    const hash = await this.roundRobinBroadcastTx(txHex)
+
+    return { hash, maxAmount, fee }
   }
 }
 

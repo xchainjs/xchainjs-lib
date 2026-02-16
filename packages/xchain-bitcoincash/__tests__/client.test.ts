@@ -174,10 +174,11 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork(Network.Testnet)
     bchClient.setPhrase(phrase)
 
+    // Use amount above dust threshold (546 satoshis)
     const txId = await bchClient.transfer({
       walletIndex: 0,
       recipient: 'bchtest:qzt6sz836wdwscld0pgq2prcpck2pssmwge9q87pe9',
-      amount: baseAmount(100, BCH_DECIMAL),
+      amount: baseAmount(100000, BCH_DECIMAL),
       feeRate: 1,
     })
     expect(txId).toEqual('mock-txid-haskoin')
@@ -187,10 +188,11 @@ describe('BCHClient Test', () => {
     bchClient.setNetwork(Network.Testnet)
     bchClient.setPhrase(phrase)
 
+    // Use amount above dust threshold (546 satoshis)
     const txId = await bchClient.transfer({
       walletIndex: 0,
       recipient: '2N3oefVeg6stiTb5Kh3ozCSkaqmx91FDbsm',
-      amount: baseAmount(100, BCH_DECIMAL),
+      amount: baseAmount(100000, BCH_DECIMAL),
       feeRate: 1,
     })
     expect(txId).toEqual('mock-txid-haskoin')
