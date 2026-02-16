@@ -21,6 +21,18 @@ const PKH_OUTPUT_SIZE = 34
 const MARGINAL_FEE = 5000
 const GRACE_ACTIONS = 2
 
+/**
+ * Write a 64-bit unsigned integer as little-endian.
+ * Browser-compatible alternative to Buffer.writeBigInt64LE
+ */
+function writeUInt64LE(buf: Buffer, value: number | bigint, offset: number): void {
+  const bigValue = typeof value === 'bigint' ? value : BigInt(value)
+  const low = Number(bigValue & BigInt(0xffffffff))
+  const high = Number((bigValue >> BigInt(32)) & BigInt(0xffffffff))
+  buf.writeUInt32LE(low, offset)
+  buf.writeUInt32LE(high, offset + 4)
+}
+
 function calculateFee(inCount: number, outCount: number): number {
   const logicalActions = inCount + outCount
   return MARGINAL_FEE * Math.max(GRACE_ACTIONS, logicalActions)
@@ -313,7 +325,7 @@ export async function signAndFinalize(height: number, skb: string, utxos: UTXO[]
   for (const out of outputs) {
     switch (out.type) {
       case 'pkh': {
-        buf.writeBigInt64LE(BigInt((out as OutputPKH).amount), offset)
+        writeUInt64LE(buf, (out as OutputPKH).amount, offset)
         offset += 8
         const pkhscript = addressToScript((out as OutputPKH).address)
         pkhscript.copy(buf, offset)
