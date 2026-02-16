@@ -26,6 +26,18 @@ function calculateFee(inCount: number, outCount: number): number {
   return MARGINAL_FEE * Math.max(GRACE_ACTIONS, logicalActions)
 }
 
+/**
+ * Write a 64-bit unsigned integer as little-endian.
+ * Browser-compatible alternative to Buffer.writeBigInt64LE
+ */
+function writeUInt64LE(buf: Buffer, value: number | bigint, offset: number): void {
+  const bigValue = typeof value === 'bigint' ? value : BigInt(value)
+  const low = Number(bigValue & BigInt(0xffffffff))
+  const high = Number((bigValue >> BigInt(32)) & BigInt(0xffffffff))
+  buf.writeUInt32LE(low, offset)
+  buf.writeUInt32LE(high, offset + 4)
+}
+
 export function getFee(inCount: number, outCount: number, memo?: string): number {
   if (memo && memo.length > 0) {
     const memoLenWithOverhead = memo.length + 2
@@ -62,6 +74,65 @@ function blake2bWithPersonal(data: Uint8Array, personal: string | Uint8Array): U
   paddedPersonal.set(personalBytes.slice(0, 16))
 
   return blake2b(data, { dkLen: 32, personalization: paddedPersonal })
+}
+
+/**
+ * Build a max/sweep transaction that uses ALL UTXOs and creates NO change output.
+ * This is used for sweep transactions where you want to send the maximum possible amount.
+ *
+ * @param height - Block height for expiry
+ * @param from - Sender address
+ * @param to - Recipient address
+ * @param utxos - ALL UTXOs to spend (will use all of them)
+ * @param isMainnet - Whether on mainnet
+ * @param memo - Optional memo
+ * @returns Transaction with maxAmount calculated
+ */
+export async function buildMaxTx(
+  height: number,
+  from: string,
+  to: string,
+  utxos: UTXO[],
+  isMainnet: boolean,
+  memo?: string,
+): Promise<Tx & { maxAmount: number }> {
+  const prefixb = isMainnet ? mainnetPrefix : testnetPrefix
+  const prefix = Buffer.from(prefixb)
+  if (!isValidAddr(from, prefix)) throw new Error('Invalid "from" address')
+  if (!isValidAddr(to, prefix)) throw new Error('Invalid "to" address')
+  if (memo && memo.length > 80) throw new Error('Memo too long')
+  if (utxos.length === 0) throw new Error('No UTXOs provided')
+
+  // For max tx: NO change output, just recipient + optional memo
+  const outputCount = memo ? 2 : 1
+  const fee = calculateFee(utxos.length, outputCount)
+
+  // Calculate total value and max sendable amount
+  const totalValue = sumBy(utxos, (u: UTXO) => u.satoshis)
+  const maxAmount = totalValue - fee
+  if (maxAmount <= 0) throw new Error('Not enough funds')
+
+  const outputs: Output[] = []
+  // Only recipient output (NO change output for sweep)
+  outputs.push({
+    type: 'pkh',
+    address: to,
+    amount: maxAmount,
+  })
+  if (memo) {
+    outputs.push({
+      type: 'op_return',
+      memo: memo,
+    })
+  }
+
+  return {
+    height: height,
+    inputs: utxos, // Use ALL UTXOs
+    outputs: outputs,
+    fee: fee,
+    maxAmount: maxAmount,
+  }
 }
 
 export async function buildTx(
@@ -313,7 +384,7 @@ export async function signAndFinalize(height: number, skb: string, utxos: UTXO[]
   for (const out of outputs) {
     switch (out.type) {
       case 'pkh': {
-        buf.writeBigInt64LE(BigInt((out as OutputPKH).amount), offset)
+        writeUInt64LE(buf, (out as OutputPKH).amount, offset)
         offset += 8
         const pkhscript = addressToScript((out as OutputPKH).address)
         pkhscript.copy(buf, offset)
