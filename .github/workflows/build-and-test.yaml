@@ -32,7 +32,7 @@ jobs:
         run: yarn install --immutable && yarn npm audit --all --severity high
 
       - name: Build packages
-        run: yarn build
+        run: yarn turbo run build --cache-dir=.turbo --filter='!xchain-suite'
 
       - name: Build examples
         run: yarn build:examples
