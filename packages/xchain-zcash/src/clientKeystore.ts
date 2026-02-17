@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr } from '@xchainjs/zcash-js'
+import { buildMaxTx, buildTx, signAndFinalize, skToAddr } from '@xchainjs/zcash-js'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
@@ -147,18 +147,14 @@ class ClientKeystore extends Client {
     const fromAddressIndex = params.walletIndex || 0
     const sender = await this.getAddressAsync(fromAddressIndex)
 
-    const { maxAmount, fee } = await this.prepareMaxTx({
-      sender,
-      recipient: params.recipient,
-      memo: params.memo,
-    })
-
     const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
     if (!zecKeys.privateKey) {
       throw Error('Error getting private key')
     }
 
     const utxos = await this.scanUTXOs(sender, true)
+    if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
+
     const zcashUtxos = utxos.map((utxo) => ({
       address: sender,
       txid: utxo.hash,
@@ -166,13 +162,13 @@ class ClientKeystore extends Client {
       satoshis: utxo.value,
     }))
 
-    const tx = await buildTx(
+    // Use buildMaxTx which creates NO change output (sweep transaction)
+    const tx = await buildMaxTx(
       0,
       sender,
       params.recipient,
-      maxAmount,
       zcashUtxos,
-      this.network === Network.Testnet ? false : true,
+      this.network !== Network.Testnet,
       params.memo,
     )
 
@@ -181,7 +177,7 @@ class ClientKeystore extends Client {
     const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
     const hash = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
 
-    return { hash, maxAmount, fee }
+    return { hash, maxAmount: tx.maxAmount, fee: tx.fee }
   }
 }
 

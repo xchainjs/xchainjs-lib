@@ -1,4 +1,4 @@
-import { buildTx, getFee, memoToScript } from '@xchainjs/zcash-js'
+import { buildMaxTx, buildTx, getFee, memoToScript } from '@xchainjs/zcash-js'
 import {
   AssetInfo,
   FeeEstimateOptions,
@@ -252,14 +252,13 @@ abstract class Client extends UTXOClient {
         satoshis: utxo.value,
       }))
 
-      // Build unsigned transaction with max amount
-      const unsignedTx = await buildTx(
+      // Build max transaction (no change output) using buildMaxTx
+      const maxTx = await buildMaxTx(
         0,
         sender,
         recipient,
-        maxAmount,
         zcashUtxos,
-        this.network === Network.Testnet ? false : true,
+        this.network !== Network.Testnet,
         memo,
       )
 
@@ -268,19 +267,20 @@ abstract class Client extends UTXOClient {
         height: 0,
         from: sender,
         to: recipient,
-        amount: maxAmount,
+        amount: maxTx.maxAmount,
         utxos: zcashUtxos,
-        isMainnet: this.network === Network.Testnet ? false : true,
+        isMainnet: this.network !== Network.Testnet,
         memo,
-        fee: unsignedTx.fee,
+        fee: maxTx.fee,
+        isMaxTx: true, // Flag to indicate this is a sweep transaction
       })
 
       return {
         rawUnsignedTx,
         utxos,
         inputs: utxos,
-        maxAmount,
-        fee,
+        maxAmount: maxTx.maxAmount,
+        fee: maxTx.fee,
       }
     } catch (error) {
       if (UtxoError.isUtxoError(error)) {
