@@ -3,6 +3,7 @@ import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import { CodePreview } from '../ui/CodePreview'
 import { generateTransferCode } from '../../lib/codeExamples'
+import { getExplorerTxUrl } from './constants'
 import type { XChainClient } from '@xchainjs/xchain-client'
 import { assetToBase, assetAmount, baseToAsset } from '@xchainjs/xchain-util'
 import { getChainById } from '../../lib/chains'
@@ -14,25 +15,6 @@ interface TransferProps {
 
 interface TransferResult {
   txHash: string
-}
-
-const EXPLORER_TX_URLS: Record<string, string> = {
-  BTC: 'https://blockstream.info/tx/',
-  BCH: 'https://blockchair.com/bitcoin-cash/transaction/',
-  LTC: 'https://blockchair.com/litecoin/transaction/',
-  DOGE: 'https://blockchair.com/dogecoin/transaction/',
-  DASH: 'https://blockchair.com/dash/transaction/',
-  ETH: 'https://etherscan.io/tx/',
-  AVAX: 'https://snowtrace.io/tx/',
-  BSC: 'https://bscscan.com/tx/',
-  ARB: 'https://arbiscan.io/tx/',
-  GAIA: 'https://www.mintscan.io/cosmos/txs/',
-  THOR: 'https://runescan.io/tx/',
-  MAYA: 'https://www.mayascan.org/tx/',
-  KUJI: 'https://finder.kujira.network/kaiyo-1/tx/',
-  SOL: 'https://solscan.io/tx/',
-  XRD: 'https://dashboard.radixdlt.com/transaction/',
-  ADA: 'https://cardanoscan.io/transaction/',
 }
 
 export function Transfer({ chainId, client }: TransferProps) {
@@ -97,12 +79,7 @@ export function Transfer({ chainId, client }: TransferProps) {
     })
   }
 
-  const getExplorerUrl = (txHash: string): string | null => {
-    const baseUrl = EXPLORER_TX_URLS[chainId]
-    return baseUrl ? `${baseUrl}${txHash}` : null
-  }
-
-  const explorerUrl = result ? getExplorerUrl(result.txHash) : null
+  const explorerUrl = result ? getExplorerTxUrl(chainId, result.txHash) : null
 
   return (
     <div className="space-y-4">

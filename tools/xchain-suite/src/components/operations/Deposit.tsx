@@ -3,6 +3,7 @@ import { ChevronDown, ExternalLink } from 'lucide-react'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import { CodePreview } from '../ui/CodePreview'
+import { getExplorerTxUrl } from './constants'
 import type { XChainClient } from '@xchainjs/xchain-client'
 import { assetToBase, assetAmount, baseToAsset } from '@xchainjs/xchain-util'
 import { getChainById } from '../../lib/chains'
@@ -54,11 +55,6 @@ const MEMO_TEMPLATES: Record<string, { label: string; template: string; descript
     { label: 'Trade- Withdraw', template: 'TRADE-:{address}', description: 'Withdraw from Trade Account' },
     { label: 'NoOp (Refund)', template: 'NOOP:NOVAULT', description: 'No operation, triggers refund' },
   ],
-}
-
-const EXPLORER_TX_URLS: Record<string, string> = {
-  THOR: 'https://runescan.io/tx/',
-  MAYA: 'https://www.mayascan.org/tx/',
 }
 
 export function Deposit({ chainId, client }: DepositProps) {
@@ -135,11 +131,6 @@ export function Deposit({ chainId, client }: DepositProps) {
       })
       return { txHash }
     })
-  }
-
-  const getExplorerUrl = (txHash: string): string | null => {
-    const baseUrl = EXPLORER_TX_URLS[chainId]
-    return baseUrl ? `${baseUrl}${txHash}` : null
   }
 
   const generateDepositCode = (): string => {
@@ -319,9 +310,9 @@ console.log('Deposit tx:', txHash)`
                 {result.txHash}
               </p>
             </div>
-            {getExplorerUrl(result.txHash) && (
+            {getExplorerTxUrl(chainId, result.txHash) && (
               <a
-                href={getExplorerUrl(result.txHash)!}
+                href={getExplorerTxUrl(chainId, result.txHash)!}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline"

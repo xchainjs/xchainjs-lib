@@ -3,6 +3,7 @@ import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import { CodePreview } from '../ui/CodePreview'
 import { generateGetHistoryCode } from '../../lib/codeExamples'
+import { getExplorerTxUrl } from './constants'
 import type { XChainClient, Tx } from '@xchainjs/xchain-client'
 import { baseToAsset, formatAssetAmountCurrency } from '@xchainjs/xchain-util'
 
@@ -13,25 +14,6 @@ interface GetHistoryProps {
 
 interface HistoryResult {
   transactions: Tx[]
-}
-
-const EXPLORER_TX_URLS: Record<string, string> = {
-  BTC: 'https://blockstream.info/tx/',
-  BCH: 'https://blockchair.com/bitcoin-cash/transaction/',
-  LTC: 'https://blockchair.com/litecoin/transaction/',
-  DOGE: 'https://blockchair.com/dogecoin/transaction/',
-  DASH: 'https://blockchair.com/dash/transaction/',
-  ETH: 'https://etherscan.io/tx/',
-  AVAX: 'https://snowtrace.io/tx/',
-  BSC: 'https://bscscan.com/tx/',
-  ARB: 'https://arbiscan.io/tx/',
-  GAIA: 'https://www.mintscan.io/cosmos/txs/',
-  THOR: 'https://runescan.io/tx/',
-  MAYA: 'https://www.mayascan.org/tx/',
-  KUJI: 'https://finder.kujira.network/kaiyo-1/tx/',
-  SOL: 'https://solscan.io/tx/',
-  XRD: 'https://dashboard.radixdlt.com/transaction/',
-  ADA: 'https://cardanoscan.io/transaction/',
 }
 
 export function GetHistory({ chainId, client }: GetHistoryProps) {
@@ -52,11 +34,6 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
   const truncateHash = (hash: string) => {
     if (hash.length <= 16) return hash
     return `${hash.slice(0, 8)}...${hash.slice(-8)}`
-  }
-
-  const getExplorerUrl = (txHash: string): string | null => {
-    const baseUrl = EXPLORER_TX_URLS[chainId]
-    return baseUrl ? `${baseUrl}${txHash}` : null
   }
 
   const formatAmount = (tx: Tx): string => {
@@ -137,7 +114,7 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
                   <tr key={index}>
                     <td className="px-4 py-3 text-sm">
                       <a
-                        href={getExplorerUrl(tx.hash) || '#'}
+                        href={getExplorerTxUrl(chainId, tx.hash) || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-mono"
