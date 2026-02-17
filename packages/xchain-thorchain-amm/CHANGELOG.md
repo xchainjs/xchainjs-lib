@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.0.28
+
+### Patch Changes
+
+- Updated dependencies [2ffbecd]
+- Updated dependencies [267a677]
+- Updated dependencies [83f553b]
+  - @xchainjs/xchain-tron@3.0.3
+  - @xchainjs/xchain-bitcoincash@2.1.0
+  - @xchainjs/xchain-litecoin@2.1.0
+  - @xchainjs/xchain-bitcoin@2.1.0
+  - @xchainjs/xchain-doge@2.1.0
+  - @xchainjs/xchain-wallet@2.0.21
+
 ## 3.0.27
 
 ### Patch Changes
