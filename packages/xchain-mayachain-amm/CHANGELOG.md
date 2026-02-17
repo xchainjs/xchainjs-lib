@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.1.10
+
+### Patch Changes
+
+- Updated dependencies [a047560]
+- Updated dependencies [267a677]
+- Updated dependencies [83f553b]
+  - @xchainjs/xchain-zcash@1.2.0
+  - @xchainjs/xchain-bitcoin@2.1.0
+  - @xchainjs/xchain-dash@2.1.0
+  - @xchainjs/xchain-wallet@2.0.21
+
 ## 4.1.9
 
 ### Patch Changes

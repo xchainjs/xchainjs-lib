@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- 267a677: Update to utxo selection algorithm & add prepareTxEnhanced
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.10
+- @xchainjs/xchain-thorchain-amm@3.0.28
+- @xchainjs/xchain-wallet@2.0.21
+
 ## 2.0.35
 
 ### Patch Changes

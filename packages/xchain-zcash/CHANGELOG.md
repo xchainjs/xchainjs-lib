@@ -1,5 +1,20 @@
 # @xchainjs/xchain-zcash
 
+## 1.2.0
+
+### Minor Changes
+
+- a047560: Add buildMaxTx function for sweep/max-send transactions that use all UTXOs with no change output. Also fixes browser compatibility by replacing Buffer.writeBigInt64LE with a browser-compatible helper function.
+- 267a677: Update to utxo selection algorithm & add prepareTxEnhanced
+
+### Patch Changes
+
+- Updated dependencies [a047560]
+- Updated dependencies [267a677]
+- Updated dependencies [83f553b]
+  - @xchainjs/zcash-js@1.1.0
+  - @xchainjs/xchain-utxo@2.1.0
+
 ## 1.1.1
 
 ### Patch Changes

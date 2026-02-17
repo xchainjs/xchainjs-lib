@@ -1,5 +1,22 @@
 # testing-gui
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [a047560]
+- Updated dependencies [267a677]
+- Updated dependencies [83f553b]
+  - @xchainjs/xchain-zcash@1.2.0
+  - @xchainjs/xchain-bitcoincash@2.1.0
+  - @xchainjs/xchain-litecoin@2.1.0
+  - @xchainjs/xchain-bitcoin@2.1.0
+  - @xchainjs/xchain-dash@2.1.0
+  - @xchainjs/xchain-doge@2.1.0
+  - @xchainjs/xchain-mayachain-amm@4.1.10
+  - @xchainjs/xchain-thorchain-amm@3.0.28
+  - @xchainjs/xchain-wallet@2.0.21
+
 ## 1.0.3
 
 ### Patch Changes

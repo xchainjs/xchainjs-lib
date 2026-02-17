@@ -1,5 +1,29 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- 267a677: Update to utxo selection algorithm & add prepareTxEnhanced
+
+### Patch Changes
+
+- 83f553b: Add enhanced tx building and new function `sendMax()`.
+
+  @xchainjs/xchain-bitcoin
+
+  - New APIs: `prepareTxEnhanced`, `buildTxEnhanced`, `prepareMaxTx`, `sendMax`.
+  - `ClientKeystore.transfer` and `ClientLedger.transfer` now use `prepareTxEnhanced` with default UTXO preferences (minimizeFee=true, avoidDust=true, minimizeInputs=false).
+  - Deprecate `buildTx` and `prepareTx` (backward compatible for now).
+
+  @xchainjs/xchain-utxo
+
+  - New modules exported: `UtxoError`, `UtxoErrorCode`, `UtxoTransactionValidator`, `UtxoSelector` (+ related types).
+
+- Updated dependencies [267a677]
+- Updated dependencies [83f553b]
+  - @xchainjs/xchain-utxo@2.1.0
+
 ## 2.0.10
 
 ### Patch Changes
