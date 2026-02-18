@@ -3,7 +3,7 @@ import { buildMaxTx, buildTx, signAndFinalize, skToAddr } from '@xchainjs/zcash-
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 
@@ -88,14 +88,17 @@ class ClientKeystore extends Client {
    * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
-  async transfer(params: TxParams): Promise<TxHash> {
+  async transfer(params: TxParams & { selectedUtxos?: UTXO[] }): Promise<TxHash> {
     // Get the address index from the parameters or use the default value
     const fromAddressIndex = params?.walletIndex || 0
 
     const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
     const sender = await this.getAddressAsync(fromAddressIndex)
 
-    const utxos = await this.scanUTXOs(sender, true)
+    const utxos =
+      params.selectedUtxos && params.selectedUtxos.length > 0
+        ? params.selectedUtxos
+        : await this.scanUTXOs(sender, true)
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
 
     const zcashUtxos = utxos.map((utxo) => ({
@@ -143,6 +146,7 @@ class ClientKeystore extends Client {
     recipient: Address
     memo?: string
     walletIndex?: number
+    selectedUtxos?: UTXO[]
   }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
     const fromAddressIndex = params.walletIndex || 0
     const sender = await this.getAddressAsync(fromAddressIndex)
@@ -152,7 +156,10 @@ class ClientKeystore extends Client {
       throw Error('Error getting private key')
     }
 
-    const utxos = await this.scanUTXOs(sender, true)
+    const utxos =
+      params.selectedUtxos && params.selectedUtxos.length > 0
+        ? params.selectedUtxos
+        : await this.scanUTXOs(sender, true)
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
 
     const zcashUtxos = utxos.map((utxo) => ({
@@ -163,14 +170,7 @@ class ClientKeystore extends Client {
     }))
 
     // Use buildMaxTx which creates NO change output (sweep transaction)
-    const tx = await buildMaxTx(
-      0,
-      sender,
-      params.recipient,
-      zcashUtxos,
-      this.network !== Network.Testnet,
-      params.memo,
-    )
+    const tx = await buildMaxTx(0, sender, params.recipient, zcashUtxos, this.network !== Network.Testnet, params.memo)
 
     checkFeeBounds(this.feeBounds, tx.fee)
 

@@ -2,7 +2,7 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import * as Dogecoin from 'bitcoinjs-lib' // Importing the base Doge client
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 import { HDKey } from '@scure/bip32'
@@ -97,6 +97,7 @@ class ClientKeystore extends Client {
     params: TxParams & {
       feeRate?: FeeRate
       utxoSelectionPreferences?: UtxoSelectionPreferences
+      selectedUtxos?: UTXO[]
     },
   ): Promise<TxHash> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
@@ -118,6 +119,7 @@ class ClientKeystore extends Client {
       feeRate,
       sender,
       utxoSelectionPreferences: mergedPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     const psbt = Dogecoin.Psbt.fromBase64(rawUnsignedTx, { maximumFeeRate: 7500000 })
@@ -146,6 +148,7 @@ class ClientKeystore extends Client {
     feeRate?: FeeRate
     walletIndex?: number
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
@@ -159,6 +162,7 @@ class ClientKeystore extends Client {
       memo: params.memo,
       feeRate,
       utxoSelectionPreferences: params.utxoSelectionPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     const dogeKeys = this.getDogeKeys(this.phrase, fromAddressIndex)

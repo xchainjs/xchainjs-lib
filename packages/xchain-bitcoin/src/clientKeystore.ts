@@ -2,7 +2,7 @@ import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import * as Bitcoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
@@ -109,7 +109,11 @@ class ClientKeystore extends Client {
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
   async transfer(
-    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+    params: TxParams & {
+      feeRate?: FeeRate
+      utxoSelectionPreferences?: UtxoSelectionPreferences
+      selectedUtxos?: UTXO[]
+    },
   ): Promise<TxHash> {
     // Set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
@@ -137,6 +141,7 @@ class ClientKeystore extends Client {
       sender: this.getAddress(fromAddressIndex),
       feeRate,
       utxoSelectionPreferences: mergedUtxoSelectionPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     // Build the PSBT
@@ -177,6 +182,7 @@ class ClientKeystore extends Client {
     feeRate?: FeeRate
     walletIndex?: number
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
@@ -190,6 +196,7 @@ class ClientKeystore extends Client {
       memo: params.memo,
       feeRate,
       utxoSelectionPreferences: params.utxoSelectionPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)

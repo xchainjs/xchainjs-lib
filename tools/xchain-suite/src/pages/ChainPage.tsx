@@ -7,11 +7,22 @@ import { GetFees } from '../components/operations/GetFees'
 import { Transfer } from '../components/operations/Transfer'
 import { Deposit } from '../components/operations/Deposit'
 import { Sweep } from '../components/operations/Sweep'
+import { CoinControl } from '../components/operations/CoinControl'
 import { GetHistory } from '../components/operations/GetHistory'
 import { ValidateAddress } from '../components/operations/ValidateAddress'
 import { PrepareTx } from '../components/operations/PrepareTx'
 
-type TabId = 'address' | 'balance' | 'fees' | 'transfer' | 'sweep' | 'deposit' | 'history' | 'validate' | 'prepare'
+type TabId =
+  | 'address'
+  | 'balance'
+  | 'fees'
+  | 'transfer'
+  | 'sweep'
+  | 'coin-control'
+  | 'deposit'
+  | 'history'
+  | 'validate'
+  | 'prepare'
 
 const UTXO_CHAINS = ['BTC', 'BCH', 'LTC', 'DOGE', 'DASH', 'ZEC']
 
@@ -27,6 +38,7 @@ const TABS: Tab[] = [
   { id: 'fees', label: 'Fees' },
   { id: 'transfer', label: 'Transfer' },
   { id: 'sweep', label: 'Sweep', chains: UTXO_CHAINS },
+  { id: 'coin-control', label: 'Coin Control', chains: UTXO_CHAINS },
   { id: 'deposit', label: 'Deposit', chains: ['THOR', 'MAYA'] },
   { id: 'history', label: 'History' },
   { id: 'validate', label: 'Validate' },
@@ -86,7 +98,7 @@ export function ChainPage() {
   }
 
   // Filter tabs based on chain
-  const availableTabs = TABS.filter(tab => !tab.chains || tab.chains.includes(chainId))
+  const availableTabs = TABS.filter((tab) => !tab.chains || tab.chains.includes(chainId))
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -101,6 +113,9 @@ export function ChainPage() {
       case 'sweep':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return <Sweep chainId={chainId} client={client as any} />
+      case 'coin-control':
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return <CoinControl chainId={chainId} client={client as any} />
       case 'deposit':
         return <Deposit chainId={chainId} client={client} />
       case 'history':
@@ -121,9 +136,7 @@ export function ChainPage() {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{chainId}</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Test chain operations and view results
-              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Test chain operations and view results</p>
             </div>
 
             <div className="border-b border-gray-200 dark:border-gray-700">

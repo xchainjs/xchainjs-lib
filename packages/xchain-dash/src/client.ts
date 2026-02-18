@@ -12,6 +12,7 @@ import {
   UtxoClientParams,
   UtxoError,
   UtxoSelectionPreferences,
+  UtxoTransactionValidator,
 } from '@xchainjs/xchain-utxo'
 
 import {
@@ -300,11 +301,13 @@ abstract class Client extends UTXOClient {
     feeRate,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: TxParams & {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx> {
     try {
       // Validate inputs using base class method
@@ -316,9 +319,15 @@ abstract class Client extends UTXOClient {
         feeRate,
       })
 
-      // Get validated UTXOs using base class method
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
@@ -382,6 +391,7 @@ abstract class Client extends UTXOClient {
     feeRate,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: {
     sender: Address
     recipient: Address
@@ -389,6 +399,7 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
     try {
       // Validate addresses
@@ -399,9 +410,15 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
-      // Get validated UTXOs
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       // Calculate max using base class method
       const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
