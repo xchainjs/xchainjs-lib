@@ -3,7 +3,7 @@ import AppBtc from '@ledgerhq/hw-app-btc'
 import type { Transaction as LedgerTransaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 
 import { Client } from './client'
 import { getRawTx } from './insight-api'
@@ -108,6 +108,71 @@ class ClientLedger extends Client {
     }
 
     return txHash
+  }
+
+  // Transfer max DASH from Ledger (sweep transaction)
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const app = await this.getApp()
+    const fromAddressIndex = params?.walletIndex || 0
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { rawUnsignedTx, inputs, maxAmount, fee } = await this.prepareMaxTx({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+      selectedUtxos: params.selectedUtxos,
+    })
+
+    const tx = new dashcore.Transaction(rawUnsignedTx)
+
+    const ledgerInputs: [LedgerTransaction, number, string | null, number | null][] = []
+
+    for (const input of tx.inputs) {
+      const insightUtxo = inputs.find((utxo) => {
+        return utxo.hash === input.prevTxId.toString('hex') && utxo.index == input.outputIndex
+      })
+      if (!insightUtxo) {
+        throw new Error('Unable to match accumulative inputs with insight utxos')
+      }
+      const txHex = await getRawTx({ txid: insightUtxo.hash, network: this.network })
+      const utxoTx = new dashcore.Transaction(txHex)
+      const splittedTx = app.splitTransaction(utxoTx.toString())
+      ledgerInputs.push([splittedTx, input.outputIndex, null, null])
+    }
+
+    const associatedKeysets = tx.inputs.map(() => this.getFullDerivationPath(fromAddressIndex))
+    const newTx = app.splitTransaction(tx.toString(), true)
+    const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
+    const txHex = await app.createPaymentTransaction({
+      inputs: ledgerInputs,
+      associatedKeysets,
+      outputScriptHex,
+      segwit: false,
+      useTrustedInputForSegwit: false,
+      additionals: [],
+    })
+
+    const hash = await nodeApi.broadcastTx({
+      txHex,
+      nodeUrl: this.nodeUrls[this.network],
+      auth: this.nodeAuth,
+    })
+    if (!hash) {
+      throw Error('No Tx hash')
+    }
+
+    return { hash, maxAmount, fee }
   }
 }
 
