@@ -100,7 +100,11 @@ export function CoinControl({ chainId, client }: CoinControlProps) {
   const deselectAll = () => setSelectedIndices(new Set())
 
   const fillMax = () => {
-    setAmount(baseToAsset(baseAmount(selectedTotal, decimals)).amount().toFixed(decimals))
+    // Estimate fee: ~148 bytes per input + ~34 per output (1 recipient + potential memo) + 10 overhead
+    const estimatedVsize = selectedUtxos.length * 148 + 2 * 34 + 10
+    const estimatedFee = feeRate ? Math.ceil(estimatedVsize * feeRate) : 0
+    const maxSendable = Math.max(0, selectedTotal - estimatedFee)
+    setAmount(baseToAsset(baseAmount(maxSendable, decimals)).amount().toFixed(decimals))
   }
 
   const handleExecute = async () => {
@@ -209,7 +213,10 @@ export function CoinControl({ chainId, client }: CoinControlProps) {
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => toggleUtxo(idx)}
+                          onChange={(e) => {
+                            e.stopPropagation()
+                            toggleUtxo(idx)
+                          }}
                           className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                         />
                       </td>

@@ -3,7 +3,7 @@ import { buildMaxTx, buildTx, signAndFinalize, skToAddr } from '@xchainjs/zcash-
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoClientParams, UtxoTransactionValidator } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 
@@ -95,10 +95,13 @@ class ClientKeystore extends Client {
     const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
     const sender = await this.getAddressAsync(fromAddressIndex)
 
-    const utxos =
-      params.selectedUtxos && params.selectedUtxos.length > 0
-        ? params.selectedUtxos
-        : await this.scanUTXOs(sender, true)
+    let utxos: UTXO[]
+    if (params.selectedUtxos && params.selectedUtxos.length > 0) {
+      UtxoTransactionValidator.validateUtxoSet(params.selectedUtxos)
+      utxos = params.selectedUtxos
+    } else {
+      utxos = await this.scanUTXOs(sender, true)
+    }
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
 
     const zcashUtxos = utxos.map((utxo) => ({
@@ -156,10 +159,13 @@ class ClientKeystore extends Client {
       throw Error('Error getting private key')
     }
 
-    const utxos =
-      params.selectedUtxos && params.selectedUtxos.length > 0
-        ? params.selectedUtxos
-        : await this.scanUTXOs(sender, true)
+    let utxos: UTXO[]
+    if (params.selectedUtxos && params.selectedUtxos.length > 0) {
+      UtxoTransactionValidator.validateUtxoSet(params.selectedUtxos)
+      utxos = params.selectedUtxos
+    } else {
+      utxos = await this.scanUTXOs(sender, true)
+    }
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
 
     const zcashUtxos = utxos.map((utxo) => ({

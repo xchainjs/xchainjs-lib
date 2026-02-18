@@ -10,7 +10,15 @@ import {
   Network,
 } from '@xchainjs/xchain-client'
 import { Address, baseAmount } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams, UtxoError } from '@xchainjs/xchain-utxo'
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoTransactionValidator,
+} from '@xchainjs/xchain-utxo'
 
 import {
   AssetZEC,
@@ -229,8 +237,13 @@ abstract class Client extends UTXOClient {
       }
 
       // Use provided UTXOs (coin control) or fetch from chain
-      const utxos =
-        selectedUtxos && selectedUtxos.length > 0 ? selectedUtxos : await this.scanUTXOs(sender, spendPendingUTXO)
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        utxos = await this.scanUTXOs(sender, spendPendingUTXO)
+      }
       if (utxos.length === 0) {
         throw UtxoError.insufficientBalance('1', '0', this.network)
       }

@@ -345,13 +345,19 @@ abstract class Client extends UTXOClient {
 
       // Add inputs
       if (this.addressFormat === AddressFormat.P2WPKH) {
-        maxCalc.inputs.forEach((utxo: UTXO) =>
+        maxCalc.inputs.forEach((utxo: UTXO) => {
+          if (!utxo.witnessUtxo) {
+            throw UtxoError.fromUnknown(
+              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
+              'sendMax',
+            )
+          }
           psbt.addInput({
             hash: utxo.hash,
             index: utxo.index,
             witnessUtxo: utxo.witnessUtxo,
-          }),
-        )
+          })
+        })
       } else {
         const { pubkey, output } = Bitcoin.payments.p2tr({
           address: sender,
