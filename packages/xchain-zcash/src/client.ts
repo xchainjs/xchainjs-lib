@@ -10,7 +10,15 @@ import {
   Network,
 } from '@xchainjs/xchain-client'
 import { Address, baseAmount } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams, UtxoError } from '@xchainjs/xchain-utxo'
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoTransactionValidator,
+} from '@xchainjs/xchain-utxo'
 
 import {
   AssetZEC,
@@ -211,11 +219,13 @@ abstract class Client extends UTXOClient {
     recipient,
     memo,
     spendPendingUTXO = true,
+    selectedUtxos,
   }: {
     sender: Address
     recipient: Address
     memo?: string
     spendPendingUTXO?: boolean
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
     try {
       // Validate addresses
@@ -226,8 +236,14 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
-      // Get UTXOs for sender
-      const utxos = await this.scanUTXOs(sender, spendPendingUTXO)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        utxos = await this.scanUTXOs(sender, spendPendingUTXO)
+      }
       if (utxos.length === 0) {
         throw UtxoError.insufficientBalance('1', '0', this.network)
       }
@@ -253,14 +269,7 @@ abstract class Client extends UTXOClient {
       }))
 
       // Build max transaction (no change output) using buildMaxTx
-      const maxTx = await buildMaxTx(
-        0,
-        sender,
-        recipient,
-        zcashUtxos,
-        this.network !== Network.Testnet,
-        memo,
-      )
+      const maxTx = await buildMaxTx(0, sender, recipient, zcashUtxos, this.network !== Network.Testnet, memo)
 
       // For Zcash, we return the transaction data as JSON string
       const rawUnsignedTx = JSON.stringify({

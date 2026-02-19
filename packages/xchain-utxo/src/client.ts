@@ -132,6 +132,18 @@ export abstract class Client extends BaseXChainClient {
   ): Promise<UTXO[]> {
     return this.roundRobinGetUnspentTxs(address, confirmedOnly)
   }
+
+  /**
+   * Get UTXOs for a given address.
+   * Public wrapper around the protected scanUTXOs method for coin control.
+   *
+   * @param {string} address The address to get UTXOs for.
+   * @param {boolean} confirmedOnly Whether to only return confirmed UTXOs. Default: true.
+   * @returns {Promise<UTXO[]>} The UTXOs for the address.
+   */
+  async getUTXOs(address: string, confirmedOnly = true): Promise<UTXO[]> {
+    return this.scanUTXOs(address, confirmedOnly)
+  }
   /**
    * Get estimated fees with fee rates.
    *
@@ -463,11 +475,13 @@ export abstract class Client extends BaseXChainClient {
     spendPendingUTXO = true,
     feeRate,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: TxParams & {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx> {
     try {
       // Comprehensive input validation
@@ -479,9 +493,15 @@ export abstract class Client extends BaseXChainClient {
         feeRate,
       })
 
-      // Get validated UTXOs
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
@@ -529,6 +549,7 @@ export abstract class Client extends BaseXChainClient {
     feeRate,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: {
     sender: Address
     recipient: Address
@@ -536,6 +557,7 @@ export abstract class Client extends BaseXChainClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
     try {
       // Basic validation
@@ -555,9 +577,15 @@ export abstract class Client extends BaseXChainClient {
       }
       const validatedFeeRate = Math.ceil(feeRate)
 
-      // Get validated UTXOs
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       // Calculate maximum sendable amount
       const maxCalc = this.calculateMaxSendableAmount(utxos, validatedFeeRate, !!memo, utxoSelectionPreferences)

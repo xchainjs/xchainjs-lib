@@ -10,6 +10,7 @@ import {
   UtxoClientParams,
   UtxoError,
   UtxoSelectionPreferences,
+  UtxoTransactionValidator,
 } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 import accumulative from 'coinselect/accumulative.js' // Importing accumulative function from coinselect/accumulative.js module
 
@@ -238,11 +239,13 @@ abstract class Client extends UTXOClient {
     sender,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<{
     builder: bitcore.Transaction
     utxos: UTXO[]
@@ -264,9 +267,15 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(recipient, this.network)
       }
 
-      // Get validated UTXOs using base class method
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
@@ -333,11 +342,13 @@ abstract class Client extends UTXOClient {
     spendPendingUTXO = true,
     feeRate,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: TxParams & {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx> {
     try {
       const { builder, utxos, inputs } = await this.buildTxEnhanced({
@@ -348,6 +359,7 @@ abstract class Client extends UTXOClient {
         memo,
         spendPendingUTXO,
         utxoSelectionPreferences,
+        selectedUtxos,
       })
 
       // ESLint disabled: Bitcoin Cash transaction builder has proper toString() method
@@ -371,6 +383,7 @@ abstract class Client extends UTXOClient {
     feeRate,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: {
     sender: Address
     recipient: Address
@@ -378,6 +391,7 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
     try {
       // Validate addresses
@@ -389,9 +403,15 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
-      // Get validated UTXOs
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       // Calculate max using base class method
       const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)

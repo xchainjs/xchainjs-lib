@@ -2,7 +2,7 @@ import bitcore from 'bitcore-lib-cash'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
 import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
 import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
-import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
+import { TxParams, UTXO, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 
 import { Client } from './client' // Importing the base BitcoinCash client
 import * as Utils from './utils'
@@ -87,7 +87,11 @@ class ClientKeystore extends Client {
    * @returns {Promise<TxHash>} A promise that resolves with the transaction hash.
    */
   async transfer(
-    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+    params: TxParams & {
+      feeRate?: FeeRate
+      utxoSelectionPreferences?: UtxoSelectionPreferences
+      selectedUtxos?: UTXO[]
+    },
   ): Promise<TxHash> {
     // Set the default fee rate to 'fast'
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
@@ -111,6 +115,7 @@ class ClientKeystore extends Client {
       feeRate,
       sender: await this.getAddressAsync(fromAddressIndex),
       utxoSelectionPreferences: mergedPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     // Get key from mnemonic and path
@@ -175,6 +180,7 @@ class ClientKeystore extends Client {
     feeRate?: FeeRate
     walletIndex?: number
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
@@ -188,6 +194,7 @@ class ClientKeystore extends Client {
       memo: params.memo,
       feeRate,
       utxoSelectionPreferences: params.utxoSelectionPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     // Get key from mnemonic and path

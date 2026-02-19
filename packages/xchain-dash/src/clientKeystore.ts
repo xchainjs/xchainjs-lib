@@ -4,7 +4,7 @@ import { Transaction } from '@dashevo/dashcore-lib/typings/transaction/Transacti
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import * as Dash from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
@@ -84,7 +84,11 @@ export class ClientKeystore extends Client {
    * @returns {Promise<TxHash>} A promise resolving to the transaction hash.
    */
   async transfer(
-    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+    params: TxParams & {
+      feeRate?: FeeRate
+      utxoSelectionPreferences?: UtxoSelectionPreferences
+      selectedUtxos?: UTXO[]
+    },
   ): Promise<TxHash> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
     checkFeeBounds(this.feeBounds, feeRate)
@@ -104,6 +108,7 @@ export class ClientKeystore extends Client {
       feeRate,
       sender: await this.getAddressAsync(fromAddressIndex),
       utxoSelectionPreferences: mergedPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)
@@ -159,6 +164,7 @@ export class ClientKeystore extends Client {
     feeRate?: FeeRate
     walletIndex?: number
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Average]
     checkFeeBounds(this.feeBounds, feeRate)
@@ -172,6 +178,7 @@ export class ClientKeystore extends Client {
       memo: params.memo,
       feeRate,
       utxoSelectionPreferences: params.utxoSelectionPreferences,
+      selectedUtxos: params.selectedUtxos,
     })
 
     const tx: Transaction = new dashcore.Transaction(rawUnsignedTx)

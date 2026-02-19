@@ -9,6 +9,7 @@ import {
   UtxoClientParams,
   UtxoError,
   UtxoSelectionPreferences,
+  UtxoTransactionValidator,
 } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
@@ -154,11 +155,13 @@ abstract class Client extends UTXOClient {
     sender,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: TxParams & {
     feeRate: FeeRate
     sender: Address
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
     try {
       // Comprehensive input validation
@@ -170,9 +173,15 @@ abstract class Client extends UTXOClient {
         feeRate,
       })
 
-      // Get validated UTXOs
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
@@ -287,6 +296,7 @@ abstract class Client extends UTXOClient {
     feeRate,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: {
     sender: Address
     recipient: Address
@@ -294,6 +304,7 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<{
     psbt: Bitcoin.Psbt
     utxos: UTXO[]
@@ -316,9 +327,15 @@ abstract class Client extends UTXOClient {
 
       // Memo validation is handled by validateTransactionInputs
 
-      // Get validated UTXOs
-      const confirmedOnly = !spendPendingUTXO
-      const utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
 
       // Calculate maximum sendable amount
       const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
@@ -328,13 +345,19 @@ abstract class Client extends UTXOClient {
 
       // Add inputs
       if (this.addressFormat === AddressFormat.P2WPKH) {
-        maxCalc.inputs.forEach((utxo: UTXO) =>
+        maxCalc.inputs.forEach((utxo: UTXO) => {
+          if (!utxo.witnessUtxo) {
+            throw UtxoError.fromUnknown(
+              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
+              'sendMax',
+            )
+          }
           psbt.addInput({
             hash: utxo.hash,
             index: utxo.index,
             witnessUtxo: utxo.witnessUtxo,
-          }),
-        )
+          })
+        })
       } else {
         const { pubkey, output } = Bitcoin.payments.p2tr({
           address: sender,
@@ -387,6 +410,7 @@ abstract class Client extends UTXOClient {
     feeRate,
     spendPendingUTXO = true,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: {
     sender: Address
     recipient: Address
@@ -394,6 +418,7 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
     try {
       const { psbt, utxos, inputs, maxAmount, fee } = await this.sendMax({
@@ -403,6 +428,7 @@ abstract class Client extends UTXOClient {
         feeRate,
         spendPendingUTXO,
         utxoSelectionPreferences,
+        selectedUtxos,
       })
 
       return {
@@ -435,11 +461,13 @@ abstract class Client extends UTXOClient {
     spendPendingUTXO = true,
     feeRate,
     utxoSelectionPreferences,
+    selectedUtxos,
   }: TxParams & {
     sender: Address
     feeRate: FeeRate
     spendPendingUTXO?: boolean
     utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
   }): Promise<PreparedTx> {
     try {
       const { psbt, utxos, inputs } = await this.buildTxEnhanced({
@@ -450,6 +478,7 @@ abstract class Client extends UTXOClient {
         memo,
         spendPendingUTXO,
         utxoSelectionPreferences,
+        selectedUtxos,
       })
 
       return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
