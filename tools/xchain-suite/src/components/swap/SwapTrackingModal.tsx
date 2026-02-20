@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Check, Loader2, ExternalLink, AlertCircle, Copy, CheckCheck } from 'lucide-react'
 import { transactionTracker, type TxStatus, type TxStage } from '../../lib/swap/TransactionTracker'
+import { getChainflipSdk } from '../../lib/swap/SwapService'
 
 interface SwapTrackingModalProps {
   isOpen: boolean
@@ -191,22 +192,23 @@ export function SwapTrackingModal({
 
     const poll = async () => {
       try {
-        const { SwapSDK } = await import('@chainflip/sdk/swap')
-        const sdk = new SwapSDK({ network: 'mainnet' })
+        const sdk = await getChainflipSdk()
         const result = await sdk.getStatusV2({ id: depositChannelId })
 
         if (cancelled) return
 
-        const state = result.state || 'WAITING'
+        const rawState = result.state || 'WAITING'
+        // Normalize 'SENT' to 'COMPLETED' so CF_STAGE_ORDER.indexOf works correctly
+        const state = rawState === 'SENT' ? 'COMPLETED' : rawState
         setCfStatus({
           state,
-          isComplete: state === 'COMPLETED' || state === 'SENT',
+          isComplete: state === 'COMPLETED',
           isFailed: state === 'FAILED',
           error: state === 'FAILED' ? 'Swap failed' : undefined,
         })
 
         // Stop polling on terminal states
-        if (state === 'COMPLETED' || state === 'SENT' || state === 'FAILED') {
+        if (state === 'COMPLETED' || state === 'FAILED') {
           clearInterval(timer)
         }
       } catch (e: any) {
@@ -232,9 +234,14 @@ export function SwapTrackingModal({
   }, [isOpen, protocol, depositChannelId])
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(txHash)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    const textToCopy = protocol === 'Chainflip' && depositChannelId ? depositChannelId : txHash
+    try {
+      await navigator.clipboard.writeText(textToCopy)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      console.warn('Clipboard write failed')
+    }
   }
 
   if (!isOpen) return null

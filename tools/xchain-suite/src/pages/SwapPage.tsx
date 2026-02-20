@@ -253,11 +253,6 @@ export default function SwapPage() {
             streamingInterval: parseInt(streamingInterval) || 1,
             streamingQuantity: parseInt(streamingQuantity) || 0,
           }),
-          // Chainflip-specific params
-          ...(selectedQuote.protocol === 'Chainflip' && {
-            chainflipDepositAddress: selectedQuote.chainflipDepositAddress,
-            chainflipDepositChannelId: selectedQuote.depositChannelId,
-          }),
         })
 
         // Open tracking modal on success
@@ -586,7 +581,7 @@ export default function SwapPage() {
       )}
 
       {/* Code Examples */}
-      {fromAsset && toAsset && amount && (
+      {fromAsset && toAsset && amount && selectedQuote?.protocol !== 'Chainflip' && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Code Examples</h3>
           <CodePreview

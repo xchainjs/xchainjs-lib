@@ -33,10 +33,14 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
     )
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      console.warn('Clipboard write failed')
+    }
   }
 
   return (
