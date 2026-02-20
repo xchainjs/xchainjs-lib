@@ -675,13 +675,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainflip/rpc@npm:~1.11.7":
-  version: 1.11.8
-  resolution: "@chainflip/rpc@npm:1.11.8"
+"@chainflip/rpc@npm:~2.0.1":
+  version: 2.0.7
+  resolution: "@chainflip/rpc@npm:2.0.7"
   dependencies:
     "@chainflip/utils": "npm:0.11.0"
     zod: "npm:^3.25.75"
-  checksum: 10c0/08641c78dd25f0fc5b8ea73237cc497bb3660bf188fe0de6c3e1014120f76a557793e042388e756812796c431be2d870d01c29449c7b633a1ff379c4ecc796e1
+  checksum: 10c0/009f31535f3a79c8f4a7c977c722b54a3dda08114112bf2152e0100e1ddbf68d6638fe3afc8bb813c7a8c0b9eea1b6dc96069f6bbc7feb35970be56eedc9f827
   languageName: node
   linkType: hard
 
@@ -695,12 +695,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainflip/sdk@npm:1.11.2":
-  version: 1.11.2
-  resolution: "@chainflip/sdk@npm:1.11.2"
+"@chainflip/sdk@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@chainflip/sdk@npm:2.0.3"
   dependencies:
     "@chainflip/bitcoin": "npm:^1.2.7"
-    "@chainflip/rpc": "npm:~1.11.7"
+    "@chainflip/rpc": "npm:~2.0.1"
     "@chainflip/solana": "npm:^2.2.0"
     "@chainflip/utils": "npm:^0.11.1"
     "@ts-rest/core": "npm:^3.52.1"
@@ -708,7 +708,7 @@ __metadata:
     bignumber.js: "npm:^9.3.0"
     ethers: "npm:^6.14.4"
     zod: "npm:^3.25.76"
-  checksum: 10c0/87afde203eaf74d1331d60d54bd9fd2bb92bd5d1eb4ca094786c7c2eb3c7c4577b1309d94fa2d7fcb3b14f4d7534821123a9c0344fc6ee81b206fc829cf0a51f
+  checksum: 10c0/3ff3023d14e109dd52c4ea5df58ebfc1daea8ebfc68724d7e498f9bbc27da18f70033e774e2564bdb68cd776027c8eb3a3a0e3c4d66b0c46f9db8599ae8ffdf0
   languageName: node
   linkType: hard
 
@@ -4895,7 +4895,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-aggregator@workspace:packages/xchain-aggregator"
   dependencies:
-    "@chainflip/sdk": "npm:1.11.2"
+    "@chainflip/sdk": "npm:2.0.3"
     "@xchainjs/xchain-avax": "workspace:*"
     "@xchainjs/xchain-base": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"

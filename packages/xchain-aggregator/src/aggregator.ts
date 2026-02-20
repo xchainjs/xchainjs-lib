@@ -96,7 +96,7 @@ export class Aggregator {
       }
     })
 
-    if (!successfulQuotes)
+    if (successfulQuotes.length === 0)
       throw Error(
         `Can not estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
       )

@@ -123,7 +123,7 @@ export class ThorchainProtocol implements IProtocol {
       dustThreshold: estimatedSwap.dustThreshold,
       fees: estimatedSwap.txEstimate.totalFees,
       totalSwapSeconds:
-        estimatedSwap.txEstimate.inboundConfirmationSeconds || 0 + estimatedSwap.txEstimate.outboundDelaySeconds,
+        (estimatedSwap.txEstimate.inboundConfirmationSeconds || 0) + estimatedSwap.txEstimate.outboundDelaySeconds,
       slipBasisPoints: estimatedSwap.txEstimate.slipBasisPoints,
       maxStreamingQuantity: estimatedSwap.txEstimate.maxStreamingQuantity,
       canSwap: estimatedSwap.txEstimate.canSwap,
