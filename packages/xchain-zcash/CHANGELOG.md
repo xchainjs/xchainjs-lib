@@ -1,5 +1,21 @@
 # @xchainjs/xchain-zcash
 
+## 1.3.0
+
+### Minor Changes
+
+- 1c73ad6: Add coin control support to all UTXO chains
+
+  - Add public `getUTXOs()` method to base UTXO client for listing unspent outputs
+  - Add optional `selectedUtxos` parameter to `transfer`, `transferMax`, `prepareTxEnhanced`, `prepareMaxTx`, and related methods across all UTXO chain clients
+  - When `selectedUtxos` is provided, the specified UTXOs are used directly instead of fetching from chain, enabling manual coin selection
+  - Add Coin Control UI component in xchain-suite for browsing and selecting UTXOs
+
+### Patch Changes
+
+- Updated dependencies [1c73ad6]
+  - @xchainjs/xchain-utxo@2.2.0
+
 ## 1.2.0
 
 ### Minor Changes

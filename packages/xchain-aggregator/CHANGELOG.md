@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.2.0
+
+### Minor Changes
+
+- c5bfc15: Bump @chainflip/sdk from 1.11.2 to 2.0.3 and fix aggregator bugs
+
+  - Bump @chainflip/sdk to 2.0.3
+  - Fix operator precedence bug in totalSwapSeconds calculation for Thorchain and Mayachain protocols
+  - Fix empty quotes check in Aggregator.estimateSwap()
+  - Map config.network to Chainflip network instead of hardcoding mainnet
+  - Deduplicate identical DCA/REGULAR deposit address request branches
+
+### Patch Changes
+
+- @xchainjs/xchain-wallet@2.0.22
+- @xchainjs/xchain-mayachain-amm@4.1.11
+- @xchainjs/xchain-thorchain-amm@3.0.29
+
 ## 2.1.0
 
 ### Minor Changes
