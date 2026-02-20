@@ -1,8 +1,7 @@
 /**
  * Simplified Swap Service for Testing GUI
  *
- * Uses THORChain and MAYAChain AMM directly, bypassing the aggregator
- * to avoid Chainflip SDK browser compatibility issues.
+ * Uses THORChain AMM, MAYAChain AMM, and Chainflip SDK directly.
  */
 
 import type { Network } from '@xchainjs/xchain-client'
@@ -10,7 +9,7 @@ import type { Asset, CryptoAmount, Chain } from '@xchainjs/xchain-util'
 
 // Types for swap quotes
 export interface SwapQuote {
-  protocol: 'Thorchain' | 'Mayachain'
+  protocol: 'Thorchain' | 'Mayachain' | 'Chainflip'
   toAddress: string
   memo: string
   expectedAmount: CryptoAmount
@@ -23,6 +22,9 @@ export interface SwapQuote {
     affiliateFee: CryptoAmount
     outboundFee: CryptoAmount
   }
+  // Chainflip-specific fields
+  depositChannelId?: string
+  chainflipDepositAddress?: string
 }
 
 export interface SwapParams {
@@ -34,16 +36,33 @@ export interface SwapParams {
   // Streaming swap parameters (THORChain only)
   streamingInterval?: number // Interval in blocks between sub-swaps
   streamingQuantity?: number // Number of sub-swaps (0 = automatic)
+  // Chainflip-specific params (for doSwap)
+  chainflipDepositAddress?: string
+  chainflipDepositChannelId?: string
 }
 
 export interface SwapResult {
   hash: string
   url: string
+  depositChannelId?: string
+}
+
+// Chainflip chain mapping
+const CHAINFLIP_CHAINS: Record<string, string> = {
+  BTC: 'Bitcoin',
+  ETH: 'Ethereum',
+  ARB: 'Arbitrum',
+  SOL: 'Solana',
+}
+
+function isChainflipCompatible(chain: string): boolean {
+  return chain in CHAINFLIP_CHAINS
 }
 
 // Lazy-loaded AMM instances
 let thorchainAmmPromise: Promise<any> | null = null
 let mayachainAmmPromise: Promise<any> | null = null
+let chainflipSdkPromise: Promise<any> | null = null
 
 async function getThorchainAmm(wallet: any) {
   if (!thorchainAmmPromise) {
@@ -79,6 +98,23 @@ async function getMayachainAmm(wallet: any) {
   }
   return mayachainAmmPromise
 }
+
+async function getChainflipSdk() {
+  if (!chainflipSdkPromise) {
+    chainflipSdkPromise = (async () => {
+      const { SwapSDK } = await import('@chainflip/sdk/swap')
+      const brokerUrl = import.meta.env.VITE_ASGARDEX_BROKER_URL
+      return new SwapSDK({
+        network: 'mainnet',
+        broker: brokerUrl ? { url: brokerUrl } : undefined,
+      })
+    })()
+  }
+  return chainflipSdkPromise
+}
+
+// Exported for use by PoolsPage and SwapTrackingModal
+export { getChainflipSdk }
 
 export class SwapService {
   private wallet: any
@@ -175,11 +211,112 @@ export class SwapService {
       console.error('[SwapService] MAYAChain estimate failed:', e)
     }
 
+    // Try Chainflip (only if both chains are supported)
+    const srcChain = params.fromAsset.chain
+    const destChain = params.destinationAsset.chain
+    if (isChainflipCompatible(srcChain) && isChainflipCompatible(destChain)) {
+      try {
+        console.log('[SwapService] Getting Chainflip SDK...')
+        const sdk = await getChainflipSdk()
+
+        const srcChainName = CHAINFLIP_CHAINS[srcChain]
+        const destChainName = CHAINFLIP_CHAINS[destChain]
+        const srcAsset = params.fromAsset.ticker
+        const destAsset = params.destinationAsset.ticker
+
+        // Amount in base units as string
+        const amountStr = params.amount.baseAmount.amount().toFixed(0)
+
+        // Build affiliate brokers from env if configured
+        const affiliateAddress = import.meta.env.VITE_ASGARDEX_AFFILIATE_BROKERS_ADDRESS
+        const affiliateBrokers = affiliateAddress
+          ? [{ account: affiliateAddress as `cF${string}` | `0x${string}`, commissionBps: 0 }]
+          : undefined
+
+        console.log('[SwapService] Calling Chainflip getQuoteV2...', {
+          srcChain: srcChainName, srcAsset, destChain: destChainName, destAsset, amount: amountStr,
+        })
+
+        const quoteResponse = await sdk.getQuoteV2({
+          srcChain: srcChainName,
+          srcAsset,
+          destChain: destChainName,
+          destAsset,
+          amount: amountStr,
+          ...(affiliateBrokers && { affiliateBrokers }),
+        })
+
+        console.log('[SwapService] Chainflip quote response:', quoteResponse)
+
+        // Pick the best quote (prefer REGULAR, fallback to DCA)
+        const cfQuotes = quoteResponse.quotes || []
+        const bestQuote = cfQuotes.find((q: any) => q.type === 'REGULAR') || cfQuotes[0]
+
+        if (bestQuote) {
+          // Request deposit address to get the deposit channel
+          console.log('[SwapService] Requesting Chainflip deposit address...')
+          const depositResponse = await sdk.requestDepositAddressV2({
+            quote: bestQuote,
+            destAddress: params.destinationAddress,
+            fillOrKillParams: {
+              slippageTolerancePercent: bestQuote.recommendedSlippageTolerancePercent || 2,
+              refundAddress: params.fromAddress,
+              retryDurationBlocks: 100,
+            },
+            ...(affiliateBrokers && { affiliateBrokers }),
+          })
+
+          console.log('[SwapService] Chainflip deposit response:', depositResponse)
+
+          // Build CryptoAmount for expected output
+          const { assetAmount: assetAmountFn, assetToBase: assetToBaseFn, CryptoAmount: CryptoAmountClass, baseAmount: baseAmountFn } =
+            await import('@xchainjs/xchain-util')
+
+          // Chainflip egressAmount is in base units with native decimals per chain
+          const CF_DECIMALS: Record<string, number> = { BTC: 8, ETH: 18, ARB: 18, SOL: 9 }
+          const destDecimals = CF_DECIMALS[params.destinationAsset.chain] || 18
+          const expectedCrypto = new CryptoAmountClass(
+            baseAmountFn(bestQuote.egressAmount, destDecimals),
+            params.destinationAsset,
+          )
+
+          // Zero-value amount for fee placeholders (Chainflip fees are included in the quote)
+          const zeroFee = new CryptoAmountClass(
+            baseAmountFn(0, destDecimals),
+            params.destinationAsset,
+          )
+
+          // Use recommended slippage tolerance as the price impact estimate
+          const slipBps = Math.round((bestQuote.recommendedSlippageTolerancePercent || 0) * 100)
+
+          quotes.push({
+            protocol: 'Chainflip',
+            toAddress: depositResponse.depositAddress,
+            memo: '',
+            expectedAmount: expectedCrypto,
+            totalSwapSeconds: bestQuote.estimatedDurationSeconds || 0,
+            slipBasisPoints: Math.max(0, slipBps),
+            canSwap: true,
+            errors: [],
+            warning: bestQuote.lowLiquidityWarning ? 'Low liquidity - price impact may be high' : '',
+            fees: {
+              affiliateFee: zeroFee,
+              outboundFee: zeroFee,
+            },
+            depositChannelId: depositResponse.depositChannelId,
+            chainflipDepositAddress: depositResponse.depositAddress,
+          })
+        }
+      } catch (e) {
+        console.error('[SwapService] Chainflip estimate failed:', e)
+      }
+    }
+
     console.log('[SwapService] Returning quotes:', quotes.length)
     return quotes
   }
 
-  async doSwap(params: SwapParams & { protocol: 'Thorchain' | 'Mayachain' }): Promise<SwapResult> {
+  async doSwap(params: SwapParams & { protocol: 'Thorchain' | 'Mayachain' | 'Chainflip' }): Promise<SwapResult> {
     console.log('[SwapService] doSwap called with:', {
       protocol: params.protocol,
       fromAsset: params.fromAsset,
@@ -190,7 +327,25 @@ export class SwapService {
     })
 
     try {
-      if (params.protocol === 'Thorchain') {
+      if (params.protocol === 'Chainflip') {
+        // For Chainflip, we just transfer to the deposit address
+        console.log('[SwapService] Executing Chainflip swap (transfer to deposit address)...')
+        const depositAddress = params.chainflipDepositAddress
+        if (!depositAddress) throw new Error('Missing Chainflip deposit address')
+
+        const result = await this.wallet.transfer({
+          asset: params.fromAsset,
+          amount: params.amount.baseAmount,
+          recipient: depositAddress,
+        })
+        console.log('[SwapService] Chainflip transfer result:', result)
+
+        return {
+          hash: result,
+          url: `https://scan.chainflip.io/channels/${params.chainflipDepositChannelId || ''}`,
+          depositChannelId: params.chainflipDepositChannelId,
+        }
+      } else if (params.protocol === 'Thorchain') {
         console.log('[SwapService] Executing THORChain swap...')
         const thorchainAmm = await getThorchainAmm(this.wallet)
         const result = await thorchainAmm.doSwap({
