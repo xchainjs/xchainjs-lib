@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.29
+
+### Patch Changes
+
+- Updated dependencies [1c73ad6]
+  - @xchainjs/xchain-bitcoin@2.2.0
+  - @xchainjs/xchain-litecoin@2.2.0
+  - @xchainjs/xchain-doge@2.2.0
+  - @xchainjs/xchain-bitcoincash@2.2.0
+  - @xchainjs/xchain-wallet@2.0.22
+
 ## 3.0.28
 
 ### Patch Changes

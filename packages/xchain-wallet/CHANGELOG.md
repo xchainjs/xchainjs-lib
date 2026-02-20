@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.22
+
+### Patch Changes
+
+- Updated dependencies [1c73ad6]
+  - @xchainjs/xchain-utxo@2.2.0
+
 ## 2.0.21
 
 ### Patch Changes

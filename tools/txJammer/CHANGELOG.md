@@ -1,5 +1,17 @@
 # txJammer
 
+## 1.0.70
+
+### Patch Changes
+
+- Updated dependencies [1c73ad6]
+  - @xchainjs/xchain-bitcoin@2.2.0
+  - @xchainjs/xchain-litecoin@2.2.0
+  - @xchainjs/xchain-doge@2.2.0
+  - @xchainjs/xchain-bitcoincash@2.2.0
+  - @xchainjs/xchain-wallet@2.0.22
+  - @xchainjs/xchain-thorchain-amm@3.0.29
+
 ## 1.0.69
 
 ### Patch Changes
