@@ -126,7 +126,7 @@ export class MayachainProtocol implements IProtocol {
       expectedAmount: estimatedSwap.expectedAmount,
       dustThreshold: estimatedSwap.dustThreshold,
       fees: estimatedSwap.fees,
-      totalSwapSeconds: estimatedSwap.inboundConfirmationSeconds || 0 + estimatedSwap.outboundDelaySeconds,
+      totalSwapSeconds: (estimatedSwap.inboundConfirmationSeconds || 0) + estimatedSwap.outboundDelaySeconds,
       slipBasisPoints: estimatedSwap.slipBasisPoints,
       maxStreamingQuantity: estimatedSwap.maxStreamingQuantity,
       canSwap: estimatedSwap.canSwap,

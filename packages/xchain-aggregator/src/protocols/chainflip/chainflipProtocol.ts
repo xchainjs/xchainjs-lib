@@ -1,4 +1,5 @@
 import { AssetData, SwapSDK, Quote } from '@chainflip/sdk/swap'
+import { Network } from '@xchainjs/xchain-client'
 import {
   AnyAsset,
   Asset,
@@ -22,6 +23,16 @@ import { CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
 import { assetUSDC } from '@xchainjs/xchain-thorchain-query'
 
+const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
+  switch (network) {
+    case Network.Stagenet:
+      return 'perseverance'
+    case Network.Mainnet:
+    default:
+      return 'mainnet'
+  }
+}
+
 /**
  * Chainflip protocol
  */
@@ -37,7 +48,7 @@ export class ChainflipProtocol implements IProtocol {
 
   constructor(configuration?: ProtocolConfig) {
     this.sdk = new SwapSDK({
-      network: 'mainnet',
+      network: networkToChainflip(configuration?.network),
       enabledFeatures: {
         dca: true,
       },
@@ -120,24 +131,7 @@ export class ChainflipProtocol implements IProtocol {
         selectedQuote = quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
       }
 
-      if (params.destinationAddress && selectedQuote?.type === 'DCA' && params.fromAddress) {
-        // Use boost quote only if user enabled boost and it's available
-        const quoteToUse = params.enableBoost && selectedQuote.boostQuote ? selectedQuote.boostQuote : selectedQuote
-        const resp = await this.sdk.requestDepositAddressV2({
-          quote: quoteToUse,
-          destAddress: params.destinationAddress,
-          srcAddress: params.fromAddress,
-          fillOrKillParams: {
-            slippageTolerancePercent: selectedQuote.recommendedSlippageTolerancePercent,
-            refundAddress: params.fromAddress,
-            retryDurationBlocks: 100,
-          },
-          affiliateBrokers: this.affiliateBrokers,
-        })
-        toAddress = resp.depositAddress
-        depositChannelId = resp.depositChannelId
-      } else if (params.destinationAddress && selectedQuote?.type === 'REGULAR' && params.fromAddress) {
-        // Use boost quote only if user enabled boost and it's available
+      if (params.destinationAddress && selectedQuote && params.fromAddress) {
         const quoteToUse = params.enableBoost && selectedQuote.boostQuote ? selectedQuote.boostQuote : selectedQuote
         const resp = await this.sdk.requestDepositAddressV2({
           quote: quoteToUse,
