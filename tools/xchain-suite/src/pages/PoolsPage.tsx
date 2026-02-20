@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RefreshCw, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Clock, Pause, ArrowRightLeft, Droplets } from 'lucide-react'
 
-type Protocol = 'thorchain' | 'mayachain'
+type Protocol = 'thorchain' | 'mayachain' | 'chainflip'
 type SortKey = 'tvl' | 'apy' | 'volume' | 'price'
 
 // Pool data from THORNode/MAYANode endpoints
@@ -23,6 +23,27 @@ interface MidgardPool {
   assetPriceUSD: string
   poolAPY: string
   volume24h: string
+}
+
+// Chainflip asset data
+interface ChainflipAsset {
+  asset: string
+  chain: string
+  name: string
+  symbol: string
+  decimals: number
+  minimumSwapAmount: string
+  maximumSwapAmount: string | null
+  contractAddress?: string
+}
+
+// Chainflip boost liquidity data
+interface ChainflipBoost {
+  chainflipId: string
+  asset: string
+  chain: string
+  availableAmount: string
+  feeTierBps: number
 }
 
 // THORNode/MAYANode endpoints for pool status
@@ -86,6 +107,12 @@ function getChainColor(chain: string): string {
     ARB: 'bg-blue-700',
     XRD: 'bg-green-600',
     ZEC: 'bg-yellow-600',
+    Bitcoin: 'bg-orange-500',
+    Ethereum: 'bg-blue-500',
+    Arbitrum: 'bg-blue-700',
+    Solana: 'bg-purple-600',
+    Assethub: 'bg-pink-500',
+    SOL: 'bg-purple-600',
   }
   return colors[chain] || 'bg-gray-500'
 }
@@ -113,49 +140,83 @@ export default function PoolsPage() {
   const [sortDesc, setSortDesc] = useState(true)
   const [showAllStatuses, setShowAllStatuses] = useState(false)
 
+  // Chainflip-specific state
+  const [cfAssets, setCfAssets] = useState<ChainflipAsset[]>([])
+  const [cfBoost, setCfBoost] = useState<Map<string, string>>(new Map())
+
   const fetchPools = async () => {
     setLoading(true)
     setError(null)
     try {
-      // Fetch from both node and midgard endpoints
-      const [nodeResponse, midgardResponse] = await Promise.all([
-        fetch(NODE_ENDPOINTS[protocol]),
-        fetch(MIDGARD_ENDPOINTS[protocol]),
-      ])
+      if (protocol === 'chainflip') {
+        // Fetch from Chainflip SDK
+        const { SwapSDK } = await import('@chainflip/sdk/swap')
+        const sdk = new SwapSDK({ network: 'mainnet' })
 
-      if (!nodeResponse.ok) throw new Error('Failed to fetch pool status')
-      if (!midgardResponse.ok) throw new Error('Failed to fetch pool metrics')
+        const [assets, boostLiquidity] = await Promise.all([
+          sdk.getAssets(),
+          sdk.getBoostLiquidity().catch(() => []),
+        ])
 
-      const nodePools: NodePool[] = await nodeResponse.json()
-      const midgardPools: MidgardPool[] = await midgardResponse.json()
+        setCfAssets(assets)
 
-      // Create a map of midgard data by asset
-      const midgardMap = new Map(midgardPools.map(p => [p.asset, p]))
-
-      // Combine data from both sources
-      const combined: CombinedPool[] = nodePools.map(nodePool => {
-        const midgardPool = midgardMap.get(nodePool.asset)
-        const balanceAsset = fromBaseAmount(nodePool.balance_asset)
-        const price = midgardPool ? parseFloat(midgardPool.assetPriceUSD) || 0 : 0
-        const tvl = balanceAsset * price * 2
-
-        return {
-          asset: nodePool.asset,
-          status: nodePool.status,
-          tradingHalted: nodePool.trading_halted || false,
-          synthMintPaused: nodePool.synth_mint_paused || false,
-          balanceAsset,
-          balanceNative: fromBaseAmount(nodePool.balance_rune || nodePool.balance_cacao || '0'),
-          price,
-          apy: midgardPool ? parseFloat(midgardPool.poolAPY) || 0 : 0,
-          volume: midgardPool ? fromBaseAmount(midgardPool.volume24h) * price : 0,
-          tvl,
+        // Build boost map keyed by `chain:asset`
+        const boostMap = new Map<string, string>()
+        for (const b of boostLiquidity) {
+          const key = `${(b as any).chain}:${(b as any).asset}`
+          const raw = (b as any).availableAmount ?? '0'
+          const amountStr = String(raw)
+          const amount = parseFloat(amountStr)
+          const existing = boostMap.get(key)
+          if (!existing || amount > parseFloat(existing)) {
+            boostMap.set(key, amountStr)
+          }
         }
-      })
+        setCfBoost(boostMap)
+        setPools([]) // Clear DEX pool data
+      } else {
+        // Fetch from both node and midgard endpoints
+        const [nodeResponse, midgardResponse] = await Promise.all([
+          fetch(NODE_ENDPOINTS[protocol]),
+          fetch(MIDGARD_ENDPOINTS[protocol]),
+        ])
 
-      setPools(combined)
+        if (!nodeResponse.ok) throw new Error('Failed to fetch pool status')
+        if (!midgardResponse.ok) throw new Error('Failed to fetch pool metrics')
+
+        const nodePools: NodePool[] = await nodeResponse.json()
+        const midgardPools: MidgardPool[] = await midgardResponse.json()
+
+        // Create a map of midgard data by asset
+        const midgardMap = new Map(midgardPools.map(p => [p.asset, p]))
+
+        // Combine data from both sources
+        const combined: CombinedPool[] = nodePools.map(nodePool => {
+          const midgardPool = midgardMap.get(nodePool.asset)
+          const balanceAsset = fromBaseAmount(nodePool.balance_asset)
+          const price = midgardPool ? parseFloat(midgardPool.assetPriceUSD) || 0 : 0
+          const tvl = balanceAsset * price * 2
+
+          return {
+            asset: nodePool.asset,
+            status: nodePool.status,
+            tradingHalted: nodePool.trading_halted || false,
+            synthMintPaused: nodePool.synth_mint_paused || false,
+            balanceAsset,
+            balanceNative: fromBaseAmount(nodePool.balance_rune || nodePool.balance_cacao || '0'),
+            price,
+            apy: midgardPool ? parseFloat(midgardPool.poolAPY) || 0 : 0,
+            volume: midgardPool ? fromBaseAmount(midgardPool.volume24h) * price : 0,
+            tvl,
+          }
+        })
+
+        setPools(combined)
+        setCfAssets([])
+        setCfBoost(new Map())
+      }
     } catch (e: any) {
-      setError(e.message || 'Failed to fetch pools')
+      setError(e.message || 'Failed to fetch data')
     } finally {
       setLoading(false)
     }
@@ -165,7 +226,7 @@ export default function PoolsPage() {
     fetchPools()
   }, [protocol])
 
-  // Filter and sort pools
+  // Filter and sort pools (THORChain/MAYAChain only)
   const filteredPools = showAllStatuses
     ? pools
     : pools.filter(p => p.status.toLowerCase() === 'available')
@@ -184,6 +245,10 @@ export default function PoolsPage() {
   // Calculate totals from filtered pools
   const totalTVL = filteredPools.reduce((sum, p) => sum + p.tvl, 0)
   const totalVolume = filteredPools.reduce((sum, p) => sum + p.volume, 0)
+
+  // Chainflip stats
+  const cfChainCount = new Set(cfAssets.map(a => a.chain)).size
+  const cfAssetCount = cfAssets.length
 
   // Get status badge styling
   const getStatusBadge = (pool: CombinedPool) => {
@@ -276,12 +341,35 @@ export default function PoolsPage() {
               >
                 MAYAChain
               </button>
+              <button
+                onClick={() => setProtocol('chainflip')}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  protocol === 'chainflip'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                }`}
+              >
+                Chainflip
+              </button>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
             {/* Stats */}
-            {!loading && pools.length > 0 && (
+            {!loading && protocol === 'chainflip' && cfAssets.length > 0 && (
+              <div className="flex items-center gap-6 text-sm">
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Assets </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">{cfAssetCount}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 dark:text-gray-400">Chains </span>
+                  <span className="font-semibold text-gray-900 dark:text-white">{cfChainCount}</span>
+                </div>
+              </div>
+            )}
+
+            {!loading && protocol !== 'chainflip' && pools.length > 0 && (
               <div className="flex items-center gap-6 text-sm">
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">TVL </span>
@@ -333,7 +421,108 @@ export default function PoolsPage() {
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-300 border-t-blue-600"></div>
           </div>
+        ) : protocol === 'chainflip' ? (
+          /* Chainflip Assets Table */
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            {/* Table Header */}
+            <div className="flex items-center px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+              <div className="w-48 shrink-0">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Asset</span>
+              </div>
+              <div className="w-28 shrink-0">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Chain</span>
+              </div>
+              <div className="flex-1 flex justify-end pr-6">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Decimals</span>
+              </div>
+              <div className="flex-1 flex justify-end pr-6">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Min Swap</span>
+              </div>
+              <div className="flex-1 flex justify-end pr-6">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Max Swap</span>
+              </div>
+              <div className="w-32 flex justify-end">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Boost Liq.</span>
+              </div>
+            </div>
+
+            {/* Table Body */}
+            <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
+              {cfAssets.map((asset, index) => {
+                const boostKey = `${asset.chain}:${asset.asset}`
+                const boostAmount = cfBoost.get(boostKey)
+                const minSwap = parseFloat(asset.minimumSwapAmount) / Math.pow(10, asset.decimals)
+                const maxSwap = asset.maximumSwapAmount
+                  ? parseFloat(asset.maximumSwapAmount) / Math.pow(10, asset.decimals)
+                  : null
+
+                return (
+                  <div
+                    key={`${asset.chain}-${asset.asset}-${index}`}
+                    className="flex items-center px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                  >
+                    {/* Asset Info */}
+                    <div className="w-48 shrink-0 flex items-center gap-3">
+                      <span className="text-gray-400 dark:text-gray-500 text-sm w-6">{index + 1}</span>
+                      <div className={`w-8 h-8 rounded-full ${getChainColor(asset.chain)} flex items-center justify-center shrink-0`}>
+                        <span className="text-white text-xs font-bold">{asset.symbol.slice(0, 2)}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold text-gray-900 dark:text-white truncate">{asset.symbol}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{asset.name}</div>
+                      </div>
+                    </div>
+
+                    {/* Chain */}
+                    <div className="w-28 shrink-0">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        {asset.chain}
+                      </span>
+                    </div>
+
+                    {/* Decimals */}
+                    <div className="flex-1 flex items-center justify-end pr-6">
+                      <span className="font-medium text-gray-900 dark:text-white">{asset.decimals}</span>
+                    </div>
+
+                    {/* Min Swap */}
+                    <div className="flex-1 flex items-center justify-end pr-6">
+                      <span className="font-mono text-sm text-gray-900 dark:text-white">
+                        {minSwap > 0 ? minSwap.toFixed(asset.decimals > 4 ? 6 : 4) : '—'}
+                      </span>
+                    </div>
+
+                    {/* Max Swap */}
+                    <div className="flex-1 flex items-center justify-end pr-6">
+                      <span className="font-mono text-sm text-gray-900 dark:text-white">
+                        {maxSwap !== null ? maxSwap.toLocaleString(undefined, { maximumFractionDigits: 2 }) : 'No limit'}
+                      </span>
+                    </div>
+
+                    {/* Boost Liquidity */}
+                    <div className="w-32 flex items-center justify-end">
+                      {boostAmount ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-sm font-medium">
+                          <TrendingUp className="w-3 h-3" />
+                          {(parseFloat(boostAmount) / Math.pow(10, asset.decimals)).toFixed(2)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 dark:text-gray-500">—</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {cfAssets.length === 0 && !loading && (
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                No assets available
+              </div>
+            )}
+          </div>
         ) : (
+          /* THORChain / MAYAChain Pools Table */
           <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             {/* Table Header */}
             <div className="flex items-center px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">

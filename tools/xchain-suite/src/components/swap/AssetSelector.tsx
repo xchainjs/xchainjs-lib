@@ -51,6 +51,12 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { chainId: 'KUJI', chainName: 'Kujira', symbol: 'KUJI' },
     ],
   },
+  {
+    name: 'Other',
+    chains: [
+      { chainId: 'SOL', chainName: 'Solana', symbol: 'SOL' },
+    ],
+  },
 ]
 
 export function AssetSelector({

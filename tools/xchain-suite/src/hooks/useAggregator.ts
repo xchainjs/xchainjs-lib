@@ -5,7 +5,7 @@ import type { XChainClient } from '@xchainjs/xchain-client'
 import type { Chain } from '@xchainjs/xchain-util'
 import { SwapService, type SwapQuote } from '../lib/swap/SwapService'
 
-// Chains supported by THORChain and MAYAChain for swaps
+// Chains supported by THORChain, MAYAChain, and Chainflip for swaps
 const SWAP_SUPPORTED_CHAINS: string[] = [
   'BTC',
   'BCH',
@@ -20,6 +20,7 @@ const SWAP_SUPPORTED_CHAINS: string[] = [
   'THOR',
   'MAYA',
   'KUJI',
+  'SOL',
 ]
 
 interface UseSwapResult {
@@ -33,7 +34,7 @@ interface UseSwapResult {
 
 /**
  * Hook that creates a SwapService with a Wallet instance for cross-chain swaps.
- * Uses THORChain and MAYAChain AMM directly (bypasses aggregator to avoid Chainflip issues).
+ * Uses THORChain AMM, MAYAChain AMM, and Chainflip SDK directly.
  */
 export function useAggregator(): UseSwapResult {
   const { phrase, isConnected, network } = useWallet()

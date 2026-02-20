@@ -16,6 +16,7 @@ interface AddressResult {
 
 export function GetAddress({ chainId, client }: GetAddressProps) {
   const [walletIndex, setWalletIndex] = useState(0)
+  const [copied, setCopied] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<AddressResult>()
 
   const handleExecute = async () => {
@@ -34,6 +35,8 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
@@ -89,21 +92,25 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
                 className="ml-4 p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                 title="Copy to clipboard"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  />
-                </svg>
+                {copied ? (
+                  <svg className="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
+            {copied && (
+              <p className="text-xs text-green-600 dark:text-green-400">Copied to clipboard!</p>
+            )}
           </div>
         )}
       </ResultPanel>

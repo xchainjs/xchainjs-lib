@@ -72,8 +72,9 @@ export default function SwapPage() {
   // Tracking state
   const [isTrackingOpen, setIsTrackingOpen] = useState(false)
   const [trackingTxHash, setTrackingTxHash] = useState<string | null>(null)
-  const [trackingProtocol, setTrackingProtocol] = useState<'Thorchain' | 'Mayachain'>('Thorchain')
+  const [trackingProtocol, setTrackingProtocol] = useState<'Thorchain' | 'Mayachain' | 'Chainflip'>('Thorchain')
   const [trackingExplorerUrl, setTrackingExplorerUrl] = useState<string | undefined>()
+  const [trackingDepositChannelId, setTrackingDepositChannelId] = useState<string | undefined>()
 
   // Operations
   const quoteOp = useOperation<SwapQuote[]>()
@@ -122,11 +123,32 @@ export default function SwapPage() {
     setToAsset(temp)
   }
 
+  // Fee reserves for chains where native asset pays gas (applied at 100%)
+  const FEE_RESERVES: Record<string, number> = {
+    SOL: 0.001,
+    ETH: 0.002,
+    AVAX: 0.01,
+    BSC: 0.001,
+    ARB: 0.0001,
+    GAIA: 0.01,
+    THOR: 0.02,
+    MAYA: 0.02,
+    KUJI: 0.01,
+  }
+
   // Set amount to percentage of balance
   const handleSetPercentage = (pct: number) => {
-    if (balance) {
+    if (balance && fromAsset) {
       const balanceNum = parseFloat(balance)
-      setAmount((balanceNum * pct).toFixed(6))
+      let amt = balanceNum * pct
+      // Reserve fee buffer at 100% for chains that pay gas with native asset
+      if (pct === 1) {
+        const reserve = FEE_RESERVES[fromAsset.chainId] || 0
+        if (reserve > 0 && amt > reserve) {
+          amt = amt - reserve
+        }
+      }
+      setAmount(Math.max(0, amt).toFixed(6))
     }
   }
 
@@ -226,10 +248,15 @@ export default function SwapPage() {
           fromAddress,
           destinationAddress,
           protocol: selectedQuote.protocol,
-          // Streaming swap parameters
-          ...(isStreaming && {
+          // Streaming swap parameters (not applicable for Chainflip)
+          ...(isStreaming && selectedQuote.protocol !== 'Chainflip' && {
             streamingInterval: parseInt(streamingInterval) || 1,
             streamingQuantity: parseInt(streamingQuantity) || 0,
+          }),
+          // Chainflip-specific params
+          ...(selectedQuote.protocol === 'Chainflip' && {
+            chainflipDepositAddress: selectedQuote.chainflipDepositAddress,
+            chainflipDepositChannelId: selectedQuote.depositChannelId,
           }),
         })
 
@@ -238,6 +265,7 @@ export default function SwapPage() {
           setTrackingTxHash(result.hash)
           setTrackingProtocol(selectedQuote.protocol)
           setTrackingExplorerUrl(result.url)
+          setTrackingDepositChannelId(result.depositChannelId)
           setIsTrackingOpen(true)
         }
 
@@ -299,7 +327,7 @@ export default function SwapPage() {
           <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Swap</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Cross-chain swaps via THORChain and MAYAChain
+              Cross-chain swaps via THORChain, MAYAChain, and Chainflip
             </p>
           </div>
 
@@ -553,6 +581,7 @@ export default function SwapPage() {
           txHash={trackingTxHash}
           protocol={trackingProtocol}
           explorerUrl={trackingExplorerUrl}
+          depositChannelId={trackingDepositChannelId}
         />
       )}
 

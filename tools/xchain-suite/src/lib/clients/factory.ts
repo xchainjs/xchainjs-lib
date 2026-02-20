@@ -340,8 +340,21 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       return new KujiClient({ ...defaultKujiParams, network, phrase })
 
     // Other Chains
-    case 'SOL':
-      return new SolClient({ ...defaultSolanaParams, network, phrase })
+    case 'SOL': {
+      const solApiKey = import.meta.env.VITE_SOL_API_KEY
+      return new SolClient({
+        ...defaultSolanaParams,
+        network,
+        phrase,
+        ...(solApiKey && {
+          clientUrls: {
+            [Network.Mainnet]: [`https://mainnet.helius-rpc.com/?api-key=${solApiKey}`],
+            [Network.Stagenet]: [`https://devnet.helius-rpc.com/?api-key=${solApiKey}`],
+            [Network.Testnet]: ['https://api.testnet.solana.com'],
+          },
+        }),
+      })
+    }
     case 'XRD':
       return new XrdClient({ network, phrase })
     case 'ADA':
