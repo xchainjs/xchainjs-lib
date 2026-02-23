@@ -349,7 +349,7 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
         ...(solApiKey && {
           clientUrls: {
             [Network.Mainnet]: [`https://mainnet.helius-rpc.com/?api-key=${solApiKey}`],
-            [Network.Stagenet]: [`https://devnet.helius-rpc.com/?api-key=${solApiKey}`],
+            [Network.Stagenet]: [`https://mainnet.helius-rpc.com/?api-key=${solApiKey}`],
             [Network.Testnet]: ['https://api.testnet.solana.com'],
           },
         }),
