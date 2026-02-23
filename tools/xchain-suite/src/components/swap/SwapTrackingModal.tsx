@@ -301,7 +301,7 @@ export function SwapTrackingModal({
               <button
                 onClick={handleCopy}
                 className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                title="Copy hash"
+                title={protocol === 'Chainflip' && depositChannelId ? 'Copy deposit channel ID' : 'Copy tx hash'}
               >
                 {copied ? (
                   <CheckCheck className="w-4 h-4 text-green-500" />

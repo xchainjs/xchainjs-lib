@@ -53,6 +53,41 @@ function isChainflipCompatible(chain: string): boolean {
   return chain in CHAINFLIP_CHAINS
 }
 
+// Fetch best Chainflip quote for a given swap params
+async function fetchBestChainflipQuote(params: SwapParams) {
+  const srcChain = params.fromAsset.chain
+  const destChain = params.destinationAsset.chain
+  if (!isChainflipCompatible(srcChain) || !isChainflipCompatible(destChain)) {
+    throw new Error(`Chainflip does not support chain pair: ${srcChain} → ${destChain}`)
+  }
+
+  const sdk = await getChainflipSdk()
+  const srcChainName = CHAINFLIP_CHAINS[srcChain]
+  const destChainName = CHAINFLIP_CHAINS[destChain]
+  const srcAsset = params.fromAsset.ticker
+  const destAsset = params.destinationAsset.ticker
+  const amountStr = params.amount.baseAmount.amount().toFixed(0)
+
+  const affiliateAddress = import.meta.env.VITE_ASGARDEX_AFFILIATE_BROKERS_ADDRESS
+  const affiliateBrokers = affiliateAddress
+    ? [{ account: affiliateAddress as `cF${string}` | `0x${string}`, commissionBps: 0 }]
+    : undefined
+
+  const quoteResponse = await sdk.getQuoteV2({
+    srcChain: srcChainName,
+    srcAsset,
+    destChain: destChainName,
+    destAsset,
+    amount: amountStr,
+    ...(affiliateBrokers && { affiliateBrokers }),
+  })
+
+  const cfQuotes = quoteResponse.quotes || []
+  const bestQuote = cfQuotes.find((q: any) => q.type === 'REGULAR') || cfQuotes[0]
+
+  return { sdk, bestQuote, affiliateBrokers }
+}
+
 // Lazy-loaded AMM instances
 let thorchainAmmPromise: Promise<any> | null = null
 let mayachainAmmPromise: Promise<any> | null = null
@@ -206,45 +241,10 @@ export class SwapService {
     }
 
     // Try Chainflip (only if both chains are supported)
-    const srcChain = params.fromAsset.chain
-    const destChain = params.destinationAsset.chain
-    if (isChainflipCompatible(srcChain) && isChainflipCompatible(destChain)) {
+    if (isChainflipCompatible(params.fromAsset.chain) && isChainflipCompatible(params.destinationAsset.chain)) {
       try {
-        console.log('[SwapService] Getting Chainflip SDK...')
-        const sdk = await getChainflipSdk()
-
-        const srcChainName = CHAINFLIP_CHAINS[srcChain]
-        const destChainName = CHAINFLIP_CHAINS[destChain]
-        const srcAsset = params.fromAsset.ticker
-        const destAsset = params.destinationAsset.ticker
-
-        // Amount in base units as string
-        const amountStr = params.amount.baseAmount.amount().toFixed(0)
-
-        // Build affiliate brokers from env if configured
-        const affiliateAddress = import.meta.env.VITE_ASGARDEX_AFFILIATE_BROKERS_ADDRESS
-        const affiliateBrokers = affiliateAddress
-          ? [{ account: affiliateAddress as `cF${string}` | `0x${string}`, commissionBps: 0 }]
-          : undefined
-
-        console.log('[SwapService] Calling Chainflip getQuoteV2...', {
-          srcChain: srcChainName, srcAsset, destChain: destChainName, destAsset, amount: amountStr,
-        })
-
-        const quoteResponse = await sdk.getQuoteV2({
-          srcChain: srcChainName,
-          srcAsset,
-          destChain: destChainName,
-          destAsset,
-          amount: amountStr,
-          ...(affiliateBrokers && { affiliateBrokers }),
-        })
-
-        console.log('[SwapService] Chainflip quote response:', quoteResponse)
-
-        // Pick the best quote (prefer REGULAR, fallback to DCA)
-        const cfQuotes = quoteResponse.quotes || []
-        const bestQuote = cfQuotes.find((q: any) => q.type === 'REGULAR') || cfQuotes[0]
+        console.log('[SwapService] Getting Chainflip quote...')
+        const { bestQuote } = await fetchBestChainflipQuote(params)
 
         if (bestQuote) {
           // Chainflip egressAmount is in base units with native decimals per chain
@@ -302,31 +302,7 @@ export class SwapService {
     try {
       if (params.protocol === 'Chainflip') {
         console.log('[SwapService] Requesting Chainflip deposit channel...')
-        const sdk = await getChainflipSdk()
-
-        const srcChainName = CHAINFLIP_CHAINS[params.fromAsset.chain]
-        const destChainName = CHAINFLIP_CHAINS[params.destinationAsset.chain]
-        const srcAsset = params.fromAsset.ticker
-        const destAsset = params.destinationAsset.ticker
-        const amountStr = params.amount.baseAmount.amount().toFixed(0)
-
-        const affiliateAddress = import.meta.env.VITE_ASGARDEX_AFFILIATE_BROKERS_ADDRESS
-        const affiliateBrokers = affiliateAddress
-          ? [{ account: affiliateAddress as `cF${string}` | `0x${string}`, commissionBps: 0 }]
-          : undefined
-
-        // Get a fresh quote and request deposit address
-        const quoteResponse = await sdk.getQuoteV2({
-          srcChain: srcChainName,
-          srcAsset,
-          destChain: destChainName,
-          destAsset,
-          amount: amountStr,
-          ...(affiliateBrokers && { affiliateBrokers }),
-        })
-
-        const cfQuotes = quoteResponse.quotes || []
-        const bestQuote = cfQuotes.find((q: any) => q.type === 'REGULAR') || cfQuotes[0]
+        const { sdk, bestQuote, affiliateBrokers } = await fetchBestChainflipQuote(params)
         if (!bestQuote) throw new Error('No Chainflip quote available')
 
         const depositResponse = await sdk.requestDepositAddressV2({
