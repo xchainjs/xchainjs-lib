@@ -265,6 +265,8 @@ export class MayachainQuery {
       name: MAYAName,
       owner: details.owner,
       expireBlockHeight: Number(details.expire),
+      preferredAsset: details.preferred_asset || '',
+      affiliateCollectorCacao: '0',
       aliases: details.entries,
     }
   }
@@ -487,6 +489,7 @@ export class MayachainQuery {
     expiry,
     chain,
     chainAddress,
+    preferredAsset,
   }: QuoteMAYANameParams): Promise<QuoteMAYAName> {
     const details = await this.getMAYANameDetails(name)
 
@@ -514,7 +517,7 @@ export class MayachainQuery {
       ? baseAmount(0, assetDecimals[assetToString(CacaoAsset)])
       : baseAmount(constantsDetails['TNSREGISTERFEE'], assetDecimals[assetToString(CacaoAsset)])
 
-    const totalFeePerBlock = baseAmount(constantsDetails['TNSFEEPERBLOCK']).times(
+    const totalFeePerBlock = baseAmount(constantsDetails['TNSFEEPERBLOCK'], assetDecimals[assetToString(CacaoAsset)]).times(
       numberOfBlocksToAddToExpiry > 0 ? numberOfBlocksToAddToExpiry : 0,
     )
 
@@ -524,7 +527,7 @@ export class MayachainQuery {
       value: new AssetCryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), CacaoAsset),
       memo: `~:${name}:${isUpdate ? chain || details?.aliases[0].chain : chain}:${
         isUpdate ? chainAddress || details?.aliases[0].address : chainAddress
-      }:${isUpdate ? owner || details?.owner : owner}:MAYA.CACAO`,
+      }:${isUpdate ? owner || details?.owner : owner}:${preferredAsset ? assetToString(preferredAsset) : 'MAYA.CACAO'}`,
     }
   }
 

@@ -13,10 +13,6 @@ import {
   QueueApi,
   QueueResponse,
   QuoteApi,
-  QuoteLoanCloseResponse,
-  QuoteLoanOpenResponse,
-  QuoteSaverDepositResponse,
-  QuoteSaverWithdrawResponse,
   QuoteSwapResponse,
   RUNEPoolApi,
   RUNEPoolResponse,
@@ -43,7 +39,6 @@ import { Address } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
-import { SaversWithdraw } from '../types'
 
 export type ThornodeConfig = {
   apiRetries: number
@@ -372,50 +367,6 @@ export class Thornode {
 
   /**
    *
-   * @param asset - asset to add to savers
-   * @param amount - amount to deposit
-   * @param height - block height
-   * @returns quotes deposit object response
-   */
-  async getSaversDepositQuote(asset: string, amount: number, height?: number): Promise<QuoteSaverDepositResponse> {
-    for (const api of this.quoteApi) {
-      try {
-        const resp = (await api.quotesaverdeposit(height, asset, amount)).data
-        return resp
-      } catch (_e) {
-        //console.error(_e)
-      }
-    }
-    throw new Error(`THORNode not responding`)
-  }
-
-  /**
-   *
-   * @param asset - asset to withdraw
-   * @param address - savers address
-   * @param height - block height
-   * @param withdrawBps - withddraw percent
-   * @returns quotes withdraw object response
-   */
-  async getSaversWithdrawQuote(withdrawParams: SaversWithdraw): Promise<QuoteSaverWithdrawResponse> {
-    for (const api of this.quoteApi) {
-      try {
-        const resp = await api.quotesaverwithdraw(
-          withdrawParams.height,
-          `${withdrawParams.asset.chain}.${withdrawParams.asset.symbol}`,
-          withdrawParams.address,
-          withdrawParams.withdrawBps,
-        )
-        return resp.data
-      } catch (_e) {
-        //console.error(_e)
-      }
-    }
-    throw new Error(`THORNode not responding`)
-  }
-
-  /**
-   *
    * @param fromAsset - input asset
    * @param toAsset - output asset
    * @param amount - amount to swap
@@ -464,72 +415,6 @@ export class Thornode {
       }
     }
     throw new Error(`THORNode not responding`)
-  }
-
-  /**
-   *
-   * @param height
-   * @param asset
-   * @param amount
-   * @param targetAsset
-   * @param destination
-   * @param minOut
-   * @param affiliateBps
-   * @param affiliate
-   * @returns
-   */
-  async getLoanQuoteOpen(
-    asset: string,
-    amount: number,
-    targetAsset: string,
-    destination: string,
-    minOut?: string,
-    affiliateBps?: number,
-    affiliate?: string,
-    height?: number,
-  ): Promise<QuoteLoanOpenResponse> {
-    for (const api of this.quoteApi) {
-      try {
-        const resp = (
-          await api.quoteloanopen(height, asset, amount, targetAsset, destination, minOut, affiliateBps, affiliate)
-        ).data
-        return resp
-      } catch (_e) {
-        //console.log(_e)
-      }
-    }
-    throw new Error(`THORNode is not responding`)
-  }
-
-  /**
-   *
-   * @param height
-   * @param asset
-   * @param amount
-   * @param targetAsset
-   * @param destination
-   * @param minOut
-   * @param affiliateBps
-   * @param affiliate
-   * @returns
-   */
-  async getLoanQuoteClose(
-    asset: string,
-    amount: number,
-    loanAsset: string,
-    loanOwner: string,
-    minOut?: string,
-    height?: number,
-  ): Promise<QuoteLoanCloseResponse> {
-    for (const api of this.quoteApi) {
-      try {
-        const resp = (await api.quoteloanclose(height, asset, amount, loanAsset, loanOwner, minOut)).data
-        return resp
-      } catch (_e) {
-        // console.log(_e)
-      }
-    }
-    throw new Error(`THORNode is not responding`)
   }
 
   async getThornameDetails(thorname: string, height?: number): Promise<Thorname> {
