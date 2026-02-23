@@ -168,7 +168,7 @@ export const getUnspentTxs = async ({ haskoinUrl, network, address }: AddressPar
 
   // Set limit to the transaction count to be all the utxos.
   const result: TxUnspent[] | ErrorResponse = (
-    await axios.get(`${haskoinUrl}/${network}/address/${address}/unspent?limit${account?.utxo}`)
+    await axios.get(`${haskoinUrl}/${network}/address/${address}/unspent?limit=${account?.utxo}`)
   ).data
   if (!result || isErrorResponse(result)) throw new Error('failed to query unspent transactions')
   return result
@@ -294,7 +294,7 @@ export const getUnspentTransactions = async ({ haskoinUrl, network, address }: A
 
   // Set limit to the transaction count to be all the utxos.
   const result: TxUnspent[] | ErrorResponse = (
-    await axios.get(`${haskoinUrl}/${network}/address/${address}/unspent?limit${account?.utxo}`)
+    await axios.get(`${haskoinUrl}/${network}/address/${address}/unspent?limit=${account?.utxo}`)
   ).data
   if (!result || isErrorResponse(result)) throw new Error('failed to query unspent transactions')
   return result
