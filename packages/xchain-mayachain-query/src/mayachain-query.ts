@@ -517,9 +517,10 @@ export class MayachainQuery {
       ? baseAmount(0, assetDecimals[assetToString(CacaoAsset)])
       : baseAmount(constantsDetails['TNSREGISTERFEE'], assetDecimals[assetToString(CacaoAsset)])
 
-    const totalFeePerBlock = baseAmount(constantsDetails['TNSFEEPERBLOCK'], assetDecimals[assetToString(CacaoAsset)]).times(
-      numberOfBlocksToAddToExpiry > 0 ? numberOfBlocksToAddToExpiry : 0,
-    )
+    const totalFeePerBlock = baseAmount(
+      constantsDetails['TNSFEEPERBLOCK'],
+      assetDecimals[assetToString(CacaoAsset)],
+    ).times(numberOfBlocksToAddToExpiry > 0 ? numberOfBlocksToAddToExpiry : 0)
 
     const txFee = baseAmount(constantsDetails['NATIVETRANSACTIONFEE'], assetDecimals[assetToString(CacaoAsset)])
 

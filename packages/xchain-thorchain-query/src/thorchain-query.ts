@@ -696,14 +696,18 @@ export class ThorchainQuery {
    * @deprecated Saver quote endpoints were removed from THORNode API in v3.15.0
    */
   public async estimateAddSaver(_addAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
-    throw new Error('Saver deposit quotes are no longer available. THORNode removed the /quote/saver/deposit endpoint in API v3.15.0.')
+    throw new Error(
+      'Saver deposit quotes are no longer available. THORNode removed the /quote/saver/deposit endpoint in API v3.15.0.',
+    )
   }
 
   /**
    * @deprecated Saver quote endpoints were removed from THORNode API in v3.15.0
    */
   public async estimateWithdrawSaver(_withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
-    throw new Error('Saver withdraw quotes are no longer available. THORNode removed the /quote/saver/withdraw endpoint in API v3.15.0.')
+    throw new Error(
+      'Saver withdraw quotes are no longer available. THORNode removed the /quote/saver/withdraw endpoint in API v3.15.0.',
+    )
   }
 
   /**
@@ -784,14 +788,18 @@ export class ThorchainQuery {
    * @deprecated Loan endpoints were removed from THORNode API in v3.15.0
    */
   public async getLoanQuoteOpen(_params: LoanOpenParams): Promise<LoanOpenQuote> {
-    throw new Error('Loan quotes are no longer available. THORNode removed the /quote/loan/open endpoint in API v3.15.0.')
+    throw new Error(
+      'Loan quotes are no longer available. THORNode removed the /quote/loan/open endpoint in API v3.15.0.',
+    )
   }
 
   /**
    * @deprecated Loan endpoints were removed from THORNode API in v3.15.0
    */
   public async getLoanQuoteClose(_params: LoanCloseParams): Promise<LoanCloseQuote> {
-    throw new Error('Loan quotes are no longer available. THORNode removed the /quote/loan/close endpoint in API v3.15.0.')
+    throw new Error(
+      'Loan quotes are no longer available. THORNode removed the /quote/loan/close endpoint in API v3.15.0.',
+    )
   }
 
   /**

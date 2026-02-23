@@ -194,11 +194,11 @@ export type MAYANameDetails = {
   /**
    * The preferred asset
    */
-  preferredAsset: string
+  preferredAsset?: string
   /**
    * The affiliate collector CACAO
    */
-  affiliateCollectorCacao: string
+  affiliateCollectorCacao?: string
   /**
    * List of MAYAName aliases
    */
