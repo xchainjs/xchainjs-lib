@@ -119,6 +119,34 @@ describe('Dogecoin Integration Tests', () => {
       fail()
     }
   })
+  it('Should send max doge from index 0', async () => {
+    try {
+      const dogeclient = new Client({
+        ...defaultDogeParams,
+        phrase: process.env.MAINNET_PHRASE,
+        network: Network.Mainnet,
+      })
+
+      const recipient = 'testaddress'
+
+      // Use transferMax - handles signing and broadcasting internally
+      const { hash, maxAmount, fee } = await dogeclient.transferMax({
+        recipient,
+        memo: 'sweep',
+        walletIndex: 0,
+      })
+
+      console.log('Max amount (satoshis):', maxAmount)
+      console.log('Max amount (DOGE):', maxAmount / 100000000)
+      console.log('Fee (satoshis):', fee)
+      console.log('TX Hash:', hash)
+
+      expect(hash).toBeDefined()
+    } catch (err) {
+      console.error('ERR running test', err)
+      fail()
+    }
+  })
   it('Should fetch fee rates from provider', async () => {
     try {
       const feeRates = await dogeClient.getFeeRates()

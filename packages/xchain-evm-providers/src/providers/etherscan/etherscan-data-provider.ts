@@ -21,7 +21,7 @@ import { ERC20Tx, GetERC20TxsResponse } from './types'
 
 export class EtherscanProvider implements EvmOnlineDataProvider {
   private provider: Provider
-  private apiKey: string
+  protected apiKey: string
   protected baseUrl: string
   protected chain: Chain
   protected nativeAsset: Asset

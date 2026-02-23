@@ -1,5 +1,44 @@
 # Changelog
 
+## 2.2.0
+
+### Minor Changes
+
+- 1c73ad6: Add coin control support to all UTXO chains
+
+  - Add public `getUTXOs()` method to base UTXO client for listing unspent outputs
+  - Add optional `selectedUtxos` parameter to `transfer`, `transferMax`, `prepareTxEnhanced`, `prepareMaxTx`, and related methods across all UTXO chain clients
+  - When `selectedUtxos` is provided, the specified UTXOs are used directly instead of fetching from chain, enabling manual coin selection
+  - Add Coin Control UI component in xchain-suite for browsing and selecting UTXOs
+
+## 2.1.0
+
+### Minor Changes
+
+- 267a677: Update to utxo selection algorithm & add prepareTxEnhanced
+
+### Patch Changes
+
+- 83f553b: Add enhanced tx building and new function `sendMax()`.
+
+  @xchainjs/xchain-bitcoin
+
+  - New APIs: `prepareTxEnhanced`, `buildTxEnhanced`, `prepareMaxTx`, `sendMax`.
+  - `ClientKeystore.transfer` and `ClientLedger.transfer` now use `prepareTxEnhanced` with default UTXO preferences (minimizeFee=true, avoidDust=true, minimizeInputs=false).
+  - Deprecate `buildTx` and `prepareTx` (backward compatible for now).
+
+  @xchainjs/xchain-utxo
+
+  - New modules exported: `UtxoError`, `UtxoErrorCode`, `UtxoTransactionValidator`, `UtxoSelector` (+ related types).
+
+## 2.0.10
+
+### Patch Changes
+
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-utxo-providers@2.0.10
+
 ## 2.0.9
 
 ### Patch Changes

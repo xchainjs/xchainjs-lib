@@ -7,3 +7,10 @@ import { Balance, PreparedTx, Tx, TxFrom, TxParams, TxTo, TxsPage, UTXO, UtxoCli
  */
 export { Client, toBitcoinJS }
 export type { UTXO, UtxoClientParams, Witness, PreparedTx, Balance, Tx, TxsPage, TxParams, TxTo, TxFrom }
+
+// Export new enhancement modules
+export { UtxoError, UtxoErrorCode } from './errors'
+export { UtxoTransactionValidator } from './validators'
+export { UtxoSelector } from './utxo-selector'
+export * from './strategies'
+export * from './constants'

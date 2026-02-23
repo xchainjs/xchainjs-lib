@@ -31,3 +31,5 @@ packages/*/release/package
 !.yarn/versions
 
 stats.html
+
+docs/

@@ -461,6 +461,20 @@ export abstract class Client extends BaseXChainClient {
   abstract signTransaction(transaction: TronTransaction, walletIndex?: number): Promise<TronSignedTransaction>
 
   /**
+   * Decode TRON error message from hex to UTF-8
+   * @param message Hex-encoded error message from TRON node
+   * @returns Decoded error message or fallback
+   */
+  private decodeTronError(message?: string): string {
+    if (!message) return 'Transaction failed'
+    try {
+      return Buffer.from(message, 'hex').toString('utf8')
+    } catch {
+      return message
+    }
+  }
+
+  /**
    * Transfer TRON Asset
    * @param {TxParams} params The transfer options.
    * @returns {TxHash} The transaction hash.
@@ -480,12 +494,18 @@ export abstract class Client extends BaseXChainClient {
       if (memo) {
         const transactionWithMemo = await this.tronWeb.transactionBuilder.addUpdateData(transaction, memo, 'utf8')
         const signedTx = await this.signTransaction(transactionWithMemo, walletIndex)
-        const { txid } = await this.tronWeb.trx.sendRawTransaction(signedTx)
+        const { result, txid, message } = await this.tronWeb.trx.sendRawTransaction(signedTx)
+        if (!result) {
+          throw new Error(this.decodeTronError(message))
+        }
         return txid
       }
 
       const signedTx = await this.signTransaction(transaction, walletIndex)
-      const { txid } = await this.tronWeb.trx.sendRawTransaction(signedTx)
+      const { result, txid, message } = await this.tronWeb.trx.sendRawTransaction(signedTx)
+      if (!result) {
+        throw new Error(this.decodeTronError(message))
+      }
       return txid
     }
 
@@ -493,12 +513,10 @@ export abstract class Client extends BaseXChainClient {
     const transaction = await this.createTransaction(params)
 
     const signedTx = await this.signTransaction(transaction, walletIndex)
-    const { txid } = await this.tronWeb.trx.sendRawTransaction(signedTx)
-
-    if (!txid) {
-      throw new Error('TRON Transfer falied')
+    const { result, txid, message } = await this.tronWeb.trx.sendRawTransaction(signedTx)
+    if (!result) {
+      throw new Error(this.decodeTronError(message))
     }
-
     return txid
   }
 

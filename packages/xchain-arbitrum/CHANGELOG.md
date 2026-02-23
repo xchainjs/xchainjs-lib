@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.0.14
+
+### Patch Changes
+
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-evm@2.0.14
+  - @xchainjs/xchain-evm-providers@2.0.13
+
+## 2.0.13
+
+### Patch Changes
+
+- cb963d7: Routescan returns gas prices in wei (not gwei) and should not inherit parent function
+- Updated dependencies [cb963d7]
+  - @xchainjs/xchain-evm-providers@2.0.12
+  - @xchainjs/xchain-evm@2.0.13
+
 ## 2.0.12
 
 ### Patch Changes

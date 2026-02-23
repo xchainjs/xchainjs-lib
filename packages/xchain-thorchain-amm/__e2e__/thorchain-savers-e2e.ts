@@ -8,7 +8,7 @@ import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
-import { SaversPosition, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
+import { AssetBNB, SaversPosition, ThorchainQuery } from '@xchainjs/xchain-thorchain-query'
 import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
@@ -56,7 +56,7 @@ describe('ThorchainAmm e2e tests', () => {
 
     it(`Should add BNB savers position`, async () => {
       try {
-        const hash = await thorchainAmm.addSaver(new CryptoAmount(assetToBase(assetAmount(0.01, 8)), AssetBNB))
+        const hash = await thorchainAmm.addSaver(new CryptoAmount(assetToBase(assetAmount(0.01, 18)), AssetBNB))
         console.log(hash)
       } catch (error) {
         console.error(error)

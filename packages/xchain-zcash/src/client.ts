@@ -1,4 +1,4 @@
-import { buildTx, getFee, memoToScript } from '@mayaprotocol/zcash-js'
+import { buildMaxTx, buildTx, getFee, memoToScript } from '@xchainjs/zcash-js'
 import {
   AssetInfo,
   FeeEstimateOptions,
@@ -10,7 +10,15 @@ import {
   Network,
 } from '@xchainjs/xchain-client'
 import { Address, baseAmount } from '@xchainjs/xchain-util'
-import { Client as UTXOClient, PreparedTx, TxParams, UTXO, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoTransactionValidator,
+} from '@xchainjs/xchain-utxo'
 
 import {
   AssetZEC,
@@ -110,6 +118,7 @@ abstract class Client extends UTXOClient {
   /**
    * Prepare transfer.
    *
+   * @deprecated Use `prepareMaxTx` for sweep transactions. Zcash uses flat fees.
    * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
    * @returns {PreparedTx} The raw unsigned transaction.
    */
@@ -195,6 +204,98 @@ abstract class Client extends UTXOClient {
       fast: baseAmount(flatFee, ZEC_DECIMAL),
       fastest: baseAmount(flatFee, ZEC_DECIMAL),
       type: FeeType.FlatFee,
+    }
+  }
+
+  // ==================== Enhanced Transaction Methods ====================
+
+  /**
+   * Prepare max send transaction (sweep) for Zcash.
+   * Since Zcash uses flat fees, this calculates the maximum sendable amount
+   * after deducting the required fee.
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    spendPendingUTXO = true,
+    selectedUtxos,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    spendPendingUTXO?: boolean
+    selectedUtxos?: UTXO[]
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      // Validate addresses
+      if (!this.validateAddress(recipient)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(sender)) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        utxos = await this.scanUTXOs(sender, spendPendingUTXO)
+      }
+      if (utxos.length === 0) {
+        throw UtxoError.insufficientBalance('1', '0', this.network)
+      }
+
+      // Calculate total value of all UTXOs
+      const totalValue = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
+
+      // Calculate flat fee for this transaction (2 outputs: recipient + potential memo)
+      const fee = getFee(utxos.length, memo ? 2 : 1, memo)
+
+      // Calculate max sendable amount
+      const maxAmount = totalValue - fee
+      if (maxAmount <= 0) {
+        throw UtxoError.insufficientBalance(String(fee), String(totalValue), this.network)
+      }
+
+      // Convert UTXOs to zcash-js format
+      const zcashUtxos = utxos.map((utxo) => ({
+        address: sender,
+        txid: utxo.hash,
+        outputIndex: utxo.index,
+        satoshis: utxo.value,
+      }))
+
+      // Build max transaction (no change output) using buildMaxTx
+      const maxTx = await buildMaxTx(0, sender, recipient, zcashUtxos, this.network !== Network.Testnet, memo)
+
+      // For Zcash, we return the transaction data as JSON string
+      const rawUnsignedTx = JSON.stringify({
+        height: 0,
+        from: sender,
+        to: recipient,
+        amount: maxTx.maxAmount,
+        utxos: zcashUtxos,
+        isMainnet: this.network !== Network.Testnet,
+        memo,
+        fee: maxTx.fee,
+        isMaxTx: true, // Flag to indicate this is a sweep transaction
+      })
+
+      return {
+        rawUnsignedTx,
+        utxos,
+        inputs: utxos,
+        maxAmount: maxTx.maxAmount,
+        fee: maxTx.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
     }
   }
 }

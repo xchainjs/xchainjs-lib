@@ -2,7 +2,16 @@
 import bitcore from 'bitcore-lib-cash'
 import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client' // Importing various types and constants from xchain-client module
 import { Address } from '@xchainjs/xchain-util' // Importing the Address type from xchain-util module
-import { Client as UTXOClient, TxParams, UtxoClientParams, UTXO } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
+import {
+  Client as UTXOClient,
+  PreparedTx,
+  TxParams,
+  UTXO,
+  UtxoClientParams,
+  UtxoError,
+  UtxoSelectionPreferences,
+  UtxoTransactionValidator,
+} from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
 import accumulative from 'coinselect/accumulative.js' // Importing accumulative function from coinselect/accumulative.js module
 
 import {
@@ -162,6 +171,7 @@ abstract class Client extends UTXOClient {
   }
   /**
    * Prepare a BCH transaction.
+   * @deprecated Use `prepareTxEnhanced` instead for better UTXO selection and error handling.
    * @param {TxParams&Address&FeeRate} params - The transaction preparation options.
    * @returns {PreparedTx} A promise that resolves with the prepared transaction and UTXOs.
    */
@@ -214,6 +224,242 @@ abstract class Client extends UTXOClient {
       totalWeight += 9 + data.length
     }
     return Math.ceil(totalWeight * feeRate)
+  }
+
+  // ==================== Enhanced Transaction Methods ====================
+
+  /**
+   * Build transaction with enhanced UTXO selection
+   */
+  async buildTxEnhanced({
+    amount,
+    recipient,
+    memo,
+    feeRate,
+    sender,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+    selectedUtxos,
+  }: TxParams & {
+    feeRate: FeeRate
+    sender: Address
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
+  }): Promise<{
+    builder: bitcore.Transaction
+    utxos: UTXO[]
+    inputs: UTXO[]
+  }> {
+    try {
+      // Validate inputs using base class method
+      this.validateTransactionInputs({
+        amount,
+        recipient,
+        memo,
+        sender,
+        feeRate,
+      })
+
+      // Convert recipient address to CashAddress format
+      const recipientCashAddress = Utils.toCashAddress(recipient)
+      if (!this.validateAddress(recipientCashAddress)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+      const targetValue = amount.amount().toNumber()
+      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
+
+      // Use base class UTXO selection
+      const selectionResult = this.selectUtxosForTransaction(
+        utxos,
+        targetValue,
+        Math.ceil(feeRate),
+        extraOutputs,
+        utxoSelectionPreferences,
+      )
+
+      // Build transaction using bitcore-lib-cash
+      const tx = new bitcore.Transaction().from(
+        selectionResult.inputs.map(
+          (utxo: UTXO) =>
+            new bitcore.Transaction.UnspentOutput({
+              txId: utxo.hash,
+              outputIndex: utxo.index,
+              address: sender,
+              script: bitcore.Script.fromHex(utxo.witnessUtxo?.script.toString('hex') || ''),
+              satoshis: utxo.value,
+            }),
+        ),
+      )
+
+      // Add recipient output
+      tx.to(recipient, targetValue)
+
+      // Add change output if needed
+      if (selectionResult.changeAmount > 0) {
+        tx.to(sender, selectionResult.changeAmount)
+      }
+
+      // Add memo output if present
+      if (compiledMemo) {
+        tx.addOutput(
+          new bitcore.Transaction.Output({
+            script: compiledMemo,
+            satoshis: 0,
+          }),
+        )
+      }
+
+      return { builder: tx, utxos, inputs: selectionResult.inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'buildTxEnhanced')
+    }
+  }
+
+  /**
+   * Prepare transaction with enhanced UTXO selection
+   */
+  async prepareTxEnhanced({
+    sender,
+    memo,
+    amount,
+    recipient,
+    spendPendingUTXO = true,
+    feeRate,
+    utxoSelectionPreferences,
+    selectedUtxos,
+  }: TxParams & {
+    sender: Address
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
+  }): Promise<PreparedTx> {
+    try {
+      const { builder, utxos, inputs } = await this.buildTxEnhanced({
+        sender,
+        recipient,
+        amount,
+        feeRate,
+        memo,
+        spendPendingUTXO,
+        utxoSelectionPreferences,
+        selectedUtxos,
+      })
+
+      // ESLint disabled: Bitcoin Cash transaction builder has proper toString() method
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      return { rawUnsignedTx: builder.toString(), utxos, inputs }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareTxEnhanced')
+    }
+  }
+
+  /**
+   * Prepare max send transaction
+   */
+  async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+    feeRate,
+    spendPendingUTXO = true,
+    utxoSelectionPreferences,
+    selectedUtxos,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+    feeRate: FeeRate
+    spendPendingUTXO?: boolean
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
+  }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
+    try {
+      // Validate addresses
+      const recipientCashAddress = Utils.toCashAddress(recipient)
+      if (!this.validateAddress(recipientCashAddress)) {
+        throw UtxoError.invalidAddress(recipient, this.network)
+      }
+      if (!this.validateAddress(Utils.toCashAddress(sender))) {
+        throw UtxoError.invalidAddress(sender, this.network)
+      }
+
+      // Use provided UTXOs (coin control) or fetch from chain
+      let utxos: UTXO[]
+      if (selectedUtxos && selectedUtxos.length > 0) {
+        UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
+        utxos = selectedUtxos
+      } else {
+        const confirmedOnly = !spendPendingUTXO
+        utxos = await this.getValidatedUtxos(sender, confirmedOnly)
+      }
+
+      // Calculate max using base class method
+      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      // Build transaction using bitcore-lib-cash
+      const tx = new bitcore.Transaction().from(
+        maxCalc.inputs.map(
+          (utxo: UTXO) =>
+            new bitcore.Transaction.UnspentOutput({
+              txId: utxo.hash,
+              outputIndex: utxo.index,
+              address: sender,
+              script: bitcore.Script.fromHex(utxo.witnessUtxo?.script.toString('hex') || ''),
+              satoshis: utxo.value,
+            }),
+        ),
+      )
+
+      // Add recipient output (max amount - no change)
+      tx.to(recipient, maxCalc.amount)
+
+      // Add memo output if present
+      if (compiledMemo) {
+        tx.addOutput(
+          new bitcore.Transaction.Output({
+            script: compiledMemo,
+            satoshis: 0,
+          }),
+        )
+      }
+
+      // ESLint disabled: Bitcoin Cash transaction builder has proper toString() method
+      return {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        rawUnsignedTx: tx.toString(),
+        utxos,
+        inputs: maxCalc.inputs,
+        maxAmount: maxCalc.amount,
+        fee: maxCalc.fee,
+      }
+    } catch (error) {
+      if (UtxoError.isUtxoError(error)) {
+        throw error
+      }
+      throw UtxoError.fromUnknown(error, 'prepareMaxTx')
+    }
   }
 }
 

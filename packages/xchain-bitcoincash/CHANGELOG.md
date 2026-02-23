@@ -1,5 +1,43 @@
 # Changelog
 
+## 2.2.0
+
+### Minor Changes
+
+- 1c73ad6: Add coin control support to all UTXO chains
+
+  - Add public `getUTXOs()` method to base UTXO client for listing unspent outputs
+  - Add optional `selectedUtxos` parameter to `transfer`, `transferMax`, `prepareTxEnhanced`, `prepareMaxTx`, and related methods across all UTXO chain clients
+  - When `selectedUtxos` is provided, the specified UTXOs are used directly instead of fetching from chain, enabling manual coin selection
+  - Add Coin Control UI component in xchain-suite for browsing and selecting UTXOs
+
+### Patch Changes
+
+- Updated dependencies [1c73ad6]
+  - @xchainjs/xchain-utxo@2.2.0
+
+## 2.1.0
+
+### Minor Changes
+
+- 267a677: Update to utxo selection algorithm & add prepareTxEnhanced
+
+### Patch Changes
+
+- Updated dependencies [267a677]
+- Updated dependencies [83f553b]
+  - @xchainjs/xchain-utxo@2.1.0
+
+## 2.0.11
+
+### Patch Changes
+
+- 3ea213e: Upgrade axios to 1.13.5 to fix security vulnerability (GHSA-43fc-jf86-j433)
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-utxo-providers@2.0.10
+  - @xchainjs/xchain-utxo@2.0.10
+
 ## 2.0.10
 
 ### Patch Changes

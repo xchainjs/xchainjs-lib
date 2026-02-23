@@ -7,7 +7,7 @@ type MockConfig = {
 
 const axiosMockAdapter = new MockAdapter(axios)
 
-const importjson = async (file) => (await import(file, { with: { type: 'json' } })).default
+const importjson = async (file: string) => (await import(file, { with: { type: 'json' } })).default
 
 const mocks = {
   restore: axiosMockAdapter.restore,

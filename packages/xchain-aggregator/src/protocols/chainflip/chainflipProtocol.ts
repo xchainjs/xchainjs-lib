@@ -1,4 +1,5 @@
-import { AssetData, SwapSDK } from '@chainflip/sdk/swap'
+import { AssetData, SwapSDK, Quote } from '@chainflip/sdk/swap'
+import { Network } from '@xchainjs/xchain-client'
 import {
   AnyAsset,
   Asset,
@@ -22,6 +23,16 @@ import { CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
 import { assetUSDC } from '@xchainjs/xchain-thorchain-query'
 
+const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
+  switch (network) {
+    case Network.Stagenet:
+      return 'perseverance'
+    case Network.Mainnet:
+    default:
+      return 'mainnet'
+  }
+}
+
 /**
  * Chainflip protocol
  */
@@ -37,7 +48,7 @@ export class ChainflipProtocol implements IProtocol {
 
   constructor(configuration?: ProtocolConfig) {
     this.sdk = new SwapSDK({
-      network: 'mainnet',
+      network: networkToChainflip(configuration?.network),
       enabledFeatures: {
         dca: true,
       },
@@ -105,27 +116,25 @@ export class ChainflipProtocol implements IProtocol {
         amount: params.amount.baseAmount.amount().toString(),
         affiliateBrokers: this.affiliateBrokers,
       })
-      // Find either DCA or REGULAR quote, prioritizing DCA
-      const selectedQuote =
-        quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
+      // Find quote based on user preference for boost
+      let selectedQuote: Quote | undefined
 
-      if (params.destinationAddress && selectedQuote?.type === 'DCA' && params.fromAddress) {
+      if (params.enableBoost) {
+        // User wants boost - prioritize DCA with boost > REGULAR with boost > DCA > REGULAR
+        selectedQuote =
+          quotes.find((quote) => quote.type === 'DCA' && quote.boostQuote) ||
+          quotes.find((quote) => quote.type === 'REGULAR' && quote.boostQuote) ||
+          quotes.find((quote) => quote.type === 'DCA') ||
+          quotes.find((quote) => quote.type === 'REGULAR')
+      } else {
+        // User wants regular quotes - prioritize DCA > REGULAR (ignore boost quotes)
+        selectedQuote = quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
+      }
+
+      if (params.destinationAddress && selectedQuote && params.fromAddress) {
+        const quoteToUse = params.enableBoost && selectedQuote.boostQuote ? selectedQuote.boostQuote : selectedQuote
         const resp = await this.sdk.requestDepositAddressV2({
-          quote: selectedQuote,
-          destAddress: params.destinationAddress,
-          srcAddress: params.fromAddress,
-          fillOrKillParams: {
-            slippageTolerancePercent: selectedQuote.recommendedSlippageTolerancePercent,
-            refundAddress: params.fromAddress,
-            retryDurationBlocks: 100,
-          },
-          affiliateBrokers: this.affiliateBrokers,
-        })
-        toAddress = resp.depositAddress
-        depositChannelId = resp.depositChannelId
-      } else if (params.destinationAddress && selectedQuote?.type === 'REGULAR' && params.fromAddress) {
-        const resp = await this.sdk.requestDepositAddressV2({
-          quote: selectedQuote,
+          quote: quoteToUse,
           destAddress: params.destinationAddress,
           srcAddress: params.fromAddress,
           fillOrKillParams: {
@@ -141,33 +150,51 @@ export class ChainflipProtocol implements IProtocol {
         console.error('No suitable quote found or destination/refund address missing')
       }
 
-      const outboundFee = selectedQuote?.includedFees.find((fee) => fee.type === 'EGRESS')
-      const brokerFee = selectedQuote?.includedFees.find((fee) => fee.type === 'BROKER')
-      const networkFee = selectedQuote?.includedFees.find((fee) => fee.type === 'NETWORK')
+      // Determine which quote to use for fee calculations
+      const actualQuote = params.enableBoost && selectedQuote?.boostQuote ? selectedQuote.boostQuote : selectedQuote
+
+      const outboundFee = actualQuote?.includedFees.find((fee) => fee.type === 'EGRESS')
+      const brokerFee = actualQuote?.includedFees.find((fee) => fee.type === 'BROKER')
+      const networkFee = actualQuote?.includedFees.find((fee) => fee.type === 'NETWORK')
+      const boostFee = actualQuote?.includedFees.find((fee) => fee.type === 'BOOST')
+
+      // Check if boost is actually being used
+      const isUsingBoost = params.enableBoost && selectedQuote?.boostQuote && actualQuote === selectedQuote.boostQuote
 
       return {
         protocol: this.name,
         toAddress,
         memo: '',
         expectedAmount: new CryptoAmount(
-          baseAmount(selectedQuote?.egressAmount, destAssetData.decimals),
+          baseAmount(actualQuote?.egressAmount, destAssetData.decimals),
           params.destinationAsset,
         ),
         dustThreshold: new CryptoAmount(
           baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
           params.fromAsset,
         ),
-        totalSwapSeconds: selectedQuote?.estimatedDurationSeconds ? selectedQuote.estimatedDurationSeconds : 0,
+        totalSwapSeconds: actualQuote?.estimatedDurationSeconds ? actualQuote.estimatedDurationSeconds : 0,
         maxStreamingQuantity: undefined,
         canSwap: toAddress !== '',
-        warning: selectedQuote?.lowLiquidityWarning
+        warning: actualQuote?.lowLiquidityWarning
           ? 'Do not cache this response. Do not send funds after the expiry. The difference in the chainflip swap rate (excluding fees) is lower than the global index rate of the swap by more than a certain threshold (currently set to 5%)'
+          : isUsingBoost
+          ? 'Do not cache this response. Do not send funds after the expiry. Boost enabled for faster processing.'
           : 'Do not cache this response. Do not send funds after the expiry.',
         errors: [],
-        slipBasisPoints: 0,
+        slipBasisPoints: actualQuote?.recommendedSlippageTolerancePercent
+          ? actualQuote?.recommendedSlippageTolerancePercent * 100
+          : 0,
         fees: {
-          asset: assetUSDC, // neworkFee & broker fee paid in usdc
-          networkFee: new CryptoAmount(baseAmount(networkFee ? networkFee.amount : 0, 6), assetUSDC),
+          asset: assetUSDC, // networkFee & broker fee paid in usdc
+          networkFee: new CryptoAmount(
+            baseAmount(
+              (networkFee ? parseInt(networkFee.amount) : 0) +
+                (isUsingBoost && boostFee ? parseInt(boostFee.amount) : 0),
+              isUsingBoost && boostFee ? srcAssetData.decimals : 6,
+            ),
+            isUsingBoost && boostFee ? params.fromAsset : assetUSDC,
+          ),
           outboundFee: new CryptoAmount(
             baseAmount(outboundFee ? outboundFee.amount : 0, destAssetData.decimals),
             params.destinationAsset,
@@ -205,7 +232,7 @@ export class ChainflipProtocol implements IProtocol {
 
   /**
    * Perform a swap operation between assets.
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
+   * @param {QuoteSwapParams} params Swap parameters
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {

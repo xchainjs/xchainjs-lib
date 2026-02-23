@@ -5,4 +5,4 @@ const mock = new MockAdapter(axios)
 
 export default mock
 
-export const importjson = async (file) => (await import(file, { with: { type: 'json' } })).default
+export const importjson = async (file: string) => (await import(file, { with: { type: 'json' } })).default

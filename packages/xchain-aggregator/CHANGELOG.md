@@ -1,5 +1,86 @@
 # Changelog
 
+## 2.2.0
+
+### Minor Changes
+
+- c5bfc15: Bump @chainflip/sdk from 1.11.2 to 2.0.3 and fix aggregator bugs
+
+  - Bump @chainflip/sdk to 2.0.3
+  - Fix operator precedence bug in totalSwapSeconds calculation for Thorchain and Mayachain protocols
+  - Fix empty quotes check in Aggregator.estimateSwap()
+  - Map config.network to Chainflip network instead of hardcoding mainnet
+  - Deduplicate identical DCA/REGULAR deposit address request branches
+
+### Patch Changes
+
+- @xchainjs/xchain-wallet@2.0.22
+- @xchainjs/xchain-mayachain-amm@4.1.11
+- @xchainjs/xchain-thorchain-amm@3.0.29
+
+## 2.1.0
+
+### Minor Changes
+
+- 267a677: Update to utxo selection algorithm & add prepareTxEnhanced
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.10
+- @xchainjs/xchain-thorchain-amm@3.0.28
+- @xchainjs/xchain-wallet@2.0.21
+
+## 2.0.35
+
+### Patch Changes
+
+- 3ea213e: Upgrade axios to 1.13.5 to fix security vulnerability (GHSA-43fc-jf86-j433)
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-mayachain@4.1.1
+  - @xchainjs/xchain-mayachain-amm@4.1.9
+  - @xchainjs/xchain-mayachain-query@2.1.6
+  - @xchainjs/xchain-thorchain@3.0.14
+  - @xchainjs/xchain-thorchain-amm@3.0.27
+  - @xchainjs/xchain-thorchain-query@2.0.16
+  - @xchainjs/xchain-wallet@2.0.20
+
+## 2.0.34
+
+### Patch Changes
+
+- Updated dependencies [4f7a881]
+  - @xchainjs/xchain-mayachain-query@2.1.5
+  - @xchainjs/xchain-mayachain-amm@4.1.8
+
+## 2.0.33
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.7
+
+## 2.0.32
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.6
+- @xchainjs/xchain-thorchain-amm@3.0.26
+- @xchainjs/xchain-wallet@2.0.19
+
+## 2.0.31
+
+### Patch Changes
+
+- Updated dependencies [8df7c54]
+  - @xchainjs/xchain-mayachain-query@2.1.4
+  - @xchainjs/xchain-mayachain-amm@4.1.5
+
+## 2.0.30
+
+### Patch Changes
+
+- 0074eea: Fix quoted slip & add boost quote options
+
 ## 2.0.29
 
 ### Patch Changes

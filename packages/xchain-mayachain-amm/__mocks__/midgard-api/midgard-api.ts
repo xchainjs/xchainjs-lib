@@ -4,7 +4,7 @@ type MockConfig = {
   url?: string
 }
 
-const importjson = async (file) => (await import(file, { with: { type: 'json' } })).default
+const importjson = async (file: string) => (await import(file, { with: { type: 'json' } })).default
 
 export default {
   restore: mock.restore,

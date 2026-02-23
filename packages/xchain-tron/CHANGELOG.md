@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.0.3
+
+### Patch Changes
+
+- 2ffbecd: Fix TRON transaction error handling - properly check result field from sendRawTransaction and decode hex error messages
+
+## 3.0.2
+
+### Patch Changes
+
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-client@2.0.10
+
 ## 3.0.1
 
 ### Patch Changes

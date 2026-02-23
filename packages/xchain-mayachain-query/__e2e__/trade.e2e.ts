@@ -1,13 +1,20 @@
 import { Network } from '@xchainjs/xchain-client'
+import { MidgardApi, MidgardCache, MidgardQuery } from '@xchainjs/xchain-mayamidgard-query'
 import { assetFromStringEx, assetToString, TradeAsset } from '@xchainjs/xchain-util'
 
-import { MayachainQuery } from '../src'
+import { MayachainCache, MayachainQuery, Mayanode } from '../src'
 
 describe('MayachainQuery Trade E2E Tests', () => {
   let mayachainQuery: MayachainQuery
 
   beforeAll(() => {
-    mayachainQuery = new MayachainQuery({ network: Network.Stagenet })
+    // Proper instantiation for stagenet
+    const midgardApi = new MidgardApi(Network.Stagenet)
+    const midgardCache = new MidgardCache(midgardApi)
+    const midgardQuery = new MidgardQuery(midgardCache)
+    const mayanode = new Mayanode(Network.Stagenet)
+    const mayachainCache = new MayachainCache(midgardQuery, mayanode)
+    mayachainQuery = new MayachainQuery(mayachainCache)
   })
 
   describe('Trade Asset Units', () => {

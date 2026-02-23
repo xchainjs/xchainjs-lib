@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-client",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "license": "MIT",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.12.1"
+    "axios": "1.13.5"
   },
   "publishConfig": {
     "access": "public",

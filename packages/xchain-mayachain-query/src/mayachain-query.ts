@@ -43,6 +43,7 @@ import {
   BtcAsset,
   BtcChain,
   CacaoAsset,
+  CACAO_DECIMAL,
   DEFAULT_MAYACHAIN_DECIMALS,
   DashAsset,
   DashChain,
@@ -50,7 +51,9 @@ import {
   EthChain,
   KujiraAsset,
   KujiraChain,
+  MayaAsset,
   MayaChain,
+  MAYA_DECIMAL,
   RuneAsset,
   ThorChain,
   XdrAsset,
@@ -603,9 +606,11 @@ export class MayachainQuery {
   /**
    * Get the hardcoded decimal precision for quote calculations
    * @param asset The asset to get decimals for
-   * @returns 10 for Cacao, 8 for other assets (used in quote calculations)
+   * @returns 10 for Cacao, 4 for Maya, 8 for other assets (used in quote calculations)
    */
   private getQuoteAssetDecimals(asset: CompatibleAsset): number {
-    return eqAsset(asset, CacaoAsset) ? 10 : 8
+    if (eqAsset(asset, CacaoAsset)) return CACAO_DECIMAL
+    if (eqAsset(asset, MayaAsset)) return MAYA_DECIMAL
+    return DEFAULT_MAYACHAIN_DECIMALS
   }
 }

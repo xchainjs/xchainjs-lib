@@ -1,9 +1,9 @@
 import * as ecc from '@bitcoin-js/tiny-secp256k1-asmjs'
-import { buildTx, signAndFinalize, skToAddr } from '@mayaprotocol/zcash-js'
+import { buildMaxTx, buildTx, signAndFinalize, skToAddr } from '@xchainjs/zcash-js'
 import { Network, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoClientParams, UtxoTransactionValidator } from '@xchainjs/xchain-utxo'
 import { HDKey } from '@scure/bip32'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 
@@ -88,14 +88,20 @@ class ClientKeystore extends Client {
    * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
    * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
    */
-  async transfer(params: TxParams): Promise<TxHash> {
+  async transfer(params: TxParams & { selectedUtxos?: UTXO[] }): Promise<TxHash> {
     // Get the address index from the parameters or use the default value
     const fromAddressIndex = params?.walletIndex || 0
 
     const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
     const sender = await this.getAddressAsync(fromAddressIndex)
 
-    const utxos = await this.scanUTXOs(sender, true)
+    let utxos: UTXO[]
+    if (params.selectedUtxos && params.selectedUtxos.length > 0) {
+      UtxoTransactionValidator.validateUtxoSet(params.selectedUtxos)
+      utxos = params.selectedUtxos
+    } else {
+      utxos = await this.scanUTXOs(sender, true)
+    }
     if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
 
     const zcashUtxos = utxos.map((utxo) => ({
@@ -126,6 +132,58 @@ class ClientKeystore extends Client {
     const txId = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
 
     return txId
+  }
+
+  /**
+   * Transfer the maximum amount of ZEC (sweep).
+   *
+   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
+   * Note: Zcash uses flat fees, so feeRate is ignored.
+   * @param {Object} params The transfer parameters.
+   * @param {string} params.recipient The recipient address.
+   * @param {string} [params.memo] Optional memo for the transaction.
+   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
+   */
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    walletIndex?: number
+    selectedUtxos?: UTXO[]
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const fromAddressIndex = params.walletIndex || 0
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
+    if (!zecKeys.privateKey) {
+      throw Error('Error getting private key')
+    }
+
+    let utxos: UTXO[]
+    if (params.selectedUtxos && params.selectedUtxos.length > 0) {
+      UtxoTransactionValidator.validateUtxoSet(params.selectedUtxos)
+      utxos = params.selectedUtxos
+    } else {
+      utxos = await this.scanUTXOs(sender, true)
+    }
+    if (utxos.length === 0) throw new Error('Insufficient Balance for transaction')
+
+    const zcashUtxos = utxos.map((utxo) => ({
+      address: sender,
+      txid: utxo.hash,
+      outputIndex: utxo.index,
+      satoshis: utxo.value,
+    }))
+
+    // Use buildMaxTx which creates NO change output (sweep transaction)
+    const tx = await buildMaxTx(0, sender, params.recipient, zcashUtxos, this.network !== Network.Testnet, params.memo)
+
+    checkFeeBounds(this.feeBounds, tx.fee)
+
+    const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
+    const hash = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
+
+    return { hash, maxAmount: tx.maxAmount, fee: tx.fee }
   }
 }
 

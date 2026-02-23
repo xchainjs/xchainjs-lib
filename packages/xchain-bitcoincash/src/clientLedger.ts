@@ -2,7 +2,7 @@ import AppBtc from '@ledgerhq/hw-app-btc'
 import type { Transaction } from '@ledgerhq/hw-app-btc/lib/types'
 import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { TxParams, UtxoClientParams } from '@xchainjs/xchain-utxo'
+import { TxParams, UTXO, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 
 import { Client } from './client'
 
@@ -92,6 +92,59 @@ class ClientLedger extends Client {
     }
 
     return txHash
+  }
+
+  // Transfer max BCH from Ledger (sweep transaction)
+  async transferMax(params: {
+    recipient: Address
+    memo?: string
+    feeRate?: FeeRate
+    walletIndex?: number
+    utxoSelectionPreferences?: UtxoSelectionPreferences
+    selectedUtxos?: UTXO[]
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const app = await this.getApp()
+    const fromAddressIndex = params?.walletIndex || 0
+    const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
+    checkFeeBounds(this.feeBounds, feeRate)
+    const sender = await this.getAddressAsync(fromAddressIndex)
+
+    const { rawUnsignedTx, inputs, maxAmount, fee } = await this.prepareMaxTx({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+      feeRate,
+      utxoSelectionPreferences: params.utxoSelectionPreferences,
+      selectedUtxos: params.selectedUtxos,
+    })
+
+    const ledgerInputs: Array<[Transaction, number, string | null, number | null]> = inputs.map(
+      ({ txHex, hash, index }) => {
+        if (!txHex) {
+          throw Error(`Missing 'txHex' for UTXO (txHash ${hash})`)
+        }
+        const splittedTx = app.splitTransaction(txHex, false)
+        return [splittedTx, index, null, null]
+      },
+    )
+
+    const associatedKeysets = ledgerInputs.map(() => this.getFullDerivationPath(fromAddressIndex))
+    const newTx: Transaction = app.splitTransaction(rawUnsignedTx)
+    const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
+    const txHex = await app.createPaymentTransaction({
+      inputs: ledgerInputs,
+      associatedKeysets,
+      outputScriptHex,
+      additionals: ['abc'],
+      sigHashType: 0x41,
+    })
+
+    const hash = await this.broadcastTx(txHex)
+    if (!hash) {
+      throw Error('No Tx hash')
+    }
+
+    return { hash, maxAmount, fee }
   }
 }
 

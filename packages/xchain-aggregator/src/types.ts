@@ -131,6 +131,7 @@ type QuoteSwapParams = {
   liquidityToleranceBps?: number // The pool swing tolerance points (optional)
   streamingQuantity?: number // The streaming quantity for the swap
   streamingInterval?: number // The streaming interval for the swap
+  enableBoost?: boolean // Enable boost for faster processing (Chainflip only)
 }
 
 type SwapHistoryParams = {

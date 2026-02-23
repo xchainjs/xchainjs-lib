@@ -1,5 +1,78 @@
 # Changelog
 
+## 4.1.11
+
+### Patch Changes
+
+- Updated dependencies [1c73ad6]
+  - @xchainjs/xchain-bitcoin@2.2.0
+  - @xchainjs/xchain-dash@2.2.0
+  - @xchainjs/xchain-zcash@1.3.0
+  - @xchainjs/xchain-wallet@2.0.22
+
+## 4.1.10
+
+### Patch Changes
+
+- Updated dependencies [a047560]
+- Updated dependencies [267a677]
+- Updated dependencies [83f553b]
+  - @xchainjs/xchain-zcash@1.2.0
+  - @xchainjs/xchain-bitcoin@2.1.0
+  - @xchainjs/xchain-dash@2.1.0
+  - @xchainjs/xchain-wallet@2.0.21
+
+## 4.1.9
+
+### Patch Changes
+
+- 3ea213e: Upgrade axios to 1.13.5 to fix security vulnerability (GHSA-43fc-jf86-j433)
+- Updated dependencies [3ea213e]
+  - @xchainjs/xchain-bitcoin@2.0.10
+  - @xchainjs/xchain-client@2.0.10
+  - @xchainjs/xchain-dash@2.0.10
+  - @xchainjs/xchain-evm@2.0.14
+  - @xchainjs/xchain-mayachain@4.1.1
+  - @xchainjs/xchain-mayachain-query@2.1.6
+  - @xchainjs/xchain-thorchain@3.0.14
+  - @xchainjs/xchain-zcash@1.1.1
+  - @xchainjs/xchain-wallet@2.0.20
+  - @xchainjs/xchain-arbitrum@2.0.14
+  - @xchainjs/xchain-ethereum@2.0.15
+  - @xchainjs/xchain-kujira@2.0.10
+  - @xchainjs/xchain-radix@2.0.10
+
+## 4.1.8
+
+### Patch Changes
+
+- Updated dependencies [4f7a881]
+  - @xchainjs/xchain-mayachain-query@2.1.5
+
+## 4.1.7
+
+### Patch Changes
+
+- Updated dependencies [080e2f2]
+  - @xchainjs/xchain-zcash@1.1.0
+
+## 4.1.6
+
+### Patch Changes
+
+- Updated dependencies [cb963d7]
+  - @xchainjs/xchain-arbitrum@2.0.13
+  - @xchainjs/xchain-ethereum@2.0.14
+  - @xchainjs/xchain-evm@2.0.13
+  - @xchainjs/xchain-wallet@2.0.19
+
+## 4.1.5
+
+### Patch Changes
+
+- Updated dependencies [8df7c54]
+  - @xchainjs/xchain-mayachain-query@2.1.4
+
 ## 4.1.4
 
 ### Patch Changes

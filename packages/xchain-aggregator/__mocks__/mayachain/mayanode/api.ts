@@ -1,6 +1,6 @@
 import mock from '../../axios-adapter'
 
-const importjson = async (file) => (await import(file, { with: { type: 'json' } })).default
+const importjson = async (file: string) => (await import(file, { with: { type: 'json' } })).default
 
 export default {
   reset: mock.reset,
