@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RefreshCw, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Clock, Pause, ArrowRightLeft, Droplets } from 'lucide-react'
 import { getChainflipSdk } from '../lib/swap/SwapService'
+import { AssetIcon } from '../components/swap/assetIcons'
 
 type Protocol = 'thorchain' | 'mayachain' | 'chainflip'
 type SortKey = 'tvl' | 'apy' | 'volume' | 'price'
@@ -21,6 +22,7 @@ interface NodePool {
 // Midgard pool data for additional metrics
 interface MidgardPool {
   asset: string
+  assetPrice: string
   assetPriceUSD: string
   poolAPY: string
   volume24h: string
@@ -91,32 +93,6 @@ function getAssetDisplay(asset: string): { chain: string; symbol: string } {
   return { chain, symbol }
 }
 
-function getChainColor(chain: string): string {
-  const colors: Record<string, string> = {
-    BTC: 'bg-orange-500',
-    ETH: 'bg-blue-500',
-    AVAX: 'bg-red-500',
-    BSC: 'bg-yellow-500',
-    GAIA: 'bg-purple-500',
-    DOGE: 'bg-amber-400',
-    LTC: 'bg-gray-400',
-    BCH: 'bg-green-500',
-    THOR: 'bg-cyan-500',
-    MAYA: 'bg-blue-600',
-    KUJI: 'bg-red-600',
-    DASH: 'bg-blue-400',
-    ARB: 'bg-blue-700',
-    XRD: 'bg-green-600',
-    ZEC: 'bg-yellow-600',
-    Bitcoin: 'bg-orange-500',
-    Ethereum: 'bg-blue-500',
-    Arbitrum: 'bg-blue-700',
-    Solana: 'bg-purple-600',
-    Assethub: 'bg-pink-500',
-    SOL: 'bg-purple-600',
-  }
-  return colors[chain] || 'bg-gray-500'
-}
 
 interface CombinedPool {
   asset: string
@@ -190,6 +166,18 @@ export default function PoolsPage() {
         // Create a map of midgard data by asset
         const midgardMap = new Map(midgardPools.map(p => [p.asset, p]))
 
+        // Derive RUNE/CACAO USD price: assetPriceUSD / assetPrice (which is in RUNE)
+        // volume24h is denominated in RUNE base units, so we need RUNE's USD price
+        let nativeUsdPrice = 0
+        for (const mp of midgardPools) {
+          const assetPriceInNative = parseFloat(mp.assetPrice)
+          const assetPriceUSD = parseFloat(mp.assetPriceUSD)
+          if (assetPriceInNative > 0 && assetPriceUSD > 0) {
+            nativeUsdPrice = assetPriceUSD / assetPriceInNative
+            break
+          }
+        }
+
         // Combine data from both sources
         const combined: CombinedPool[] = nodePools.map(nodePool => {
           const midgardPool = midgardMap.get(nodePool.asset)
@@ -206,7 +194,7 @@ export default function PoolsPage() {
             balanceNative: fromBaseAmount(nodePool.balance_rune || nodePool.balance_cacao || '0'),
             price,
             apy: midgardPool ? parseFloat(midgardPool.poolAPY) || 0 : 0,
-            volume: midgardPool ? fromBaseAmount(midgardPool.volume24h) * price : 0,
+            volume: midgardPool ? fromBaseAmount(midgardPool.volume24h) * nativeUsdPrice : 0,
             tvl,
           }
         })
@@ -464,9 +452,7 @@ export default function PoolsPage() {
                     {/* Asset Info */}
                     <div className="w-48 shrink-0 flex items-center gap-3">
                       <span className="text-gray-400 dark:text-gray-500 text-sm w-6">{index + 1}</span>
-                      <div className={`w-8 h-8 rounded-full ${getChainColor(asset.chain)} flex items-center justify-center shrink-0`}>
-                        <span className="text-white text-xs font-bold">{asset.symbol.slice(0, 2)}</span>
-                      </div>
+                      <AssetIcon chainId={asset.symbol} symbol={asset.symbol} size={32} className="shrink-0" />
                       <div className="min-w-0">
                         <div className="font-semibold text-gray-900 dark:text-white truncate">{asset.symbol}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{asset.name}</div>
@@ -563,9 +549,7 @@ export default function PoolsPage() {
                     {/* Pool Info */}
                     <div className="w-48 shrink-0 flex items-center gap-3">
                       <span className="text-gray-400 dark:text-gray-500 text-sm w-6">{index + 1}</span>
-                      <div className={`w-8 h-8 rounded-full ${getChainColor(chain)} flex items-center justify-center shrink-0`}>
-                        <span className="text-white text-xs font-bold">{chain.slice(0, 2)}</span>
-                      </div>
+                      <AssetIcon chainId={chain} symbol={symbol} size={32} className="shrink-0" />
                       <div className="min-w-0">
                         <div className="font-semibold text-gray-900 dark:text-white truncate">{symbol}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">{chain}</div>
