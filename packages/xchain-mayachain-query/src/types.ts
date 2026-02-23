@@ -192,6 +192,14 @@ export type MAYANameDetails = {
    */
   owner: string
   /**
+   * The preferred asset
+   */
+  preferredAsset?: string
+  /**
+   * The affiliate collector CACAO
+   */
+  affiliateCollectorCacao?: string
+  /**
    * List of MAYAName aliases
    */
   aliases: MAYANameAlias[]
@@ -221,6 +229,10 @@ export type RegisterMAYAName = {
    * Address of the chain provided to create the alias of the MAYAName
    */
   chainAddress: Address
+  /**
+   * Preferred asset for the MAYAName owner to receive fees in
+   */
+  preferredAsset?: Asset
 }
 
 /**
@@ -247,6 +259,10 @@ export type UpdateMAYAName = {
    * Address of the chain provided to update the alias of the MAYAName, if not provided, memo response will have the address of the chain returned
    */
   chainAddress?: Address
+  /**
+   * Preferred asset for the MAYAName owner to receive fees in
+   */
+  preferredAsset?: Asset
 }
 
 export type QuoteMAYANameParams = (RegisterMAYAName & { isUpdate?: false }) | (UpdateMAYAName & { isUpdate: true })

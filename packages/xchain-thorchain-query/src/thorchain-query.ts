@@ -54,7 +54,6 @@ import {
   RunePoolProvider,
   RunePoolProviderParams,
   RunePoolProvidersParams,
-  SaverFees,
   SaversPosition,
   SaversWithdraw,
   SwapHistoryParams,
@@ -693,272 +692,22 @@ export class ThorchainQuery {
   }
 
   // Savers Queries
-  // Derrived from https://dev.thorchain.org/thorchain-dev/connection-guide/savers-guide
   /**
-   * Estimates the result of adding to a saver
-   * @param addAmount - The amount to be added to the saver
-   * @returns - Object of type EstimateAddSaver
+   * @deprecated Saver quote endpoints were removed from THORNode API in v3.15.0
    */
-  public async estimateAddSaver(addAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
-    let errors: string[] = [] // Initialize errors array
-    // Check for errors before sending quote
-    errors = await this.getAddSaversEstimateErrors(addAmount)
-    // Request parameter amount should always be in 1e8
-    // Adjust decimals if chain decimals != 8
-    const newAddAmount =
-      addAmount.baseAmount.decimal != 8 ? getBaseAmountWithDiffDecimals(addAmount, 8) : addAmount.baseAmount.amount()
-    // Fetch quote
-    const depositQuote = await this.thorchainCache.thornode.getSaversDepositQuote(
-      assetToString(addAmount.asset), // Convert asset to string
-      newAddAmount.toNumber(), // Convert new amount to number
+  public async estimateAddSaver(_addAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
+    throw new Error(
+      'Saver deposit quotes are no longer available. THORNode removed the /quote/saver/deposit endpoint in API v3.15.0.',
     )
-
-    // Error handling
-    const response: { error?: string } = JSON.parse(JSON.stringify(depositQuote))
-    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`) // Push error to array if exists
-
-    // The recommended minimum inbound amount for this transaction type & inbound asset.
-    // Sending less than this amount could result in failed refunds
-    if (
-      depositQuote.recommended_min_amount_in &&
-      addAmount.baseAmount.amount().toNumber() < Number(depositQuote.recommended_min_amount_in)
-    )
-      errors.push(
-        `Error amount in: ${addAmount.baseAmount.amount().toNumber()} is less than recommended Min Amount: ${
-          depositQuote.recommended_min_amount_in
-        }`,
-      )
-    // Return errors if there is any
-    if (errors.length > 0) {
-      // Return an object with default values and errors
-      return {
-        assetAmount: addAmount,
-        estimatedDepositValue: new CryptoAmount(baseAmount(0), addAmount.asset),
-        fee: {
-          affiliate: new CryptoAmount(baseAmount(0), addAmount.asset),
-          asset: addAmount.asset,
-          outbound: new CryptoAmount(baseAmount(0), addAmount.asset),
-          liquidity: new CryptoAmount(baseAmount(0), addAmount.asset),
-          totalBps: depositQuote.fees.total_bps || 0,
-        },
-        expiry: new Date(0),
-        toAddress: '',
-        memo: '',
-        saverCapFilledPercent: -1,
-        estimatedWaitTime: -1,
-        slipBasisPoints: -1,
-        recommendedMinAmountIn: depositQuote.recommended_min_amount_in,
-        canAddSaver: false,
-        errors, // Errors
-      }
-    }
-
-    // Get pool details
-    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).thornodeDetails
-    // Get asset decimals
-    const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(addAmount.asset)
-    // Get fee asset decimals
-    const feeAssetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(addAmount.asset)
-    // Organize fees
-
-    const feeAsset = assetFromStringEx(depositQuote.fees.asset) as Asset | TokenAsset
-
-    const saverFees: SaverFees = {
-      affiliate: getCryptoAmountWithNotation(
-        // Affiliate fee
-        new CryptoAmount(baseAmount(depositQuote.fees.affiliate), addAmount.asset), // Convert to base amount
-        assetDecimals, // Asset decimals
-      ),
-      asset: feeAsset, // Asset fee
-      outbound: getCryptoAmountWithNotation(
-        // Outbound fee
-        new CryptoAmount(baseAmount(depositQuote.fees.outbound), feeAsset), // Convert to base amount
-        feeAssetDecimals, // Fee asset decimals
-      ),
-      liquidity: getCryptoAmountWithNotation(
-        // Liquidity fee
-        new CryptoAmount(baseAmount(depositQuote.fees.liquidity), feeAsset), // Convert to base amount
-        feeAssetDecimals, // Fee asset decimals
-      ),
-      totalBps: depositQuote.fees.total_bps || 0, // Total basis points
-    }
-
-    // Define saver filled capacity
-    const saverCapFilledPercent = (Number(pool.synth_supply) / Number(pool.balance_asset)) * 100
-
-    // Return object
-    const estimateAddSaver: EstimateAddSaver = {
-      assetAmount: getCryptoAmountWithNotation(
-        // Asset amount
-        new CryptoAmount(baseAmount(depositQuote.expected_amount_out), addAmount.asset), // Convert to base amount
-        assetDecimals, // Asset decimals
-      ),
-      estimatedDepositValue: getCryptoAmountWithNotation(
-        // Estimated deposit value
-        new CryptoAmount(baseAmount(depositQuote.expected_amount_deposit), addAmount.asset), // Convert to base amount
-        assetDecimals, // Asset decimals
-      ),
-      fee: saverFees, // Fees
-      expiry: new Date(depositQuote.expiry), // Expiry date
-      toAddress: depositQuote.inbound_address, // Recipient address
-      memo: depositQuote.memo, // Memo
-      estimatedWaitTime: depositQuote.inbound_confirmation_seconds || 0, // Estimated wait time
-      canAddSaver: errors.length === 0, // Can add saver flag
-      slipBasisPoints: depositQuote.fees.slippage_bps, // Slip basis points
-      saverCapFilledPercent, // Saver filled capacity
-      recommendedMinAmountIn: depositQuote.recommended_min_amount_in, // Recommended minimum amount in
-      errors, // Errors
-    }
-    return estimateAddSaver // Return the EstimateAddSaver object
   }
 
   /**
-   * Estimates the result of withdrawing from a saver
-   * @param withdrawParams - Withdrawal parameters including height, asset, address, and withdrawal basis points
-   * @returns - Object of type EstimateWithdrawSaver
+   * @deprecated Saver quote endpoints were removed from THORNode API in v3.15.0
    */
-  public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
-    const errors: string[] = [] // Initialize errors array
-
-    // Return error if asset in is incorrect
-    if (isAssetRuneNative(withdrawParams.asset) || isSynthAsset(withdrawParams.asset))
-      errors.push(`Native Rune and synth assets are not supported only L1's`)
-
-    // Get inbound details
-    const inboundDetails = await this.thorchainCache.getInboundDetails()
-
-    // Check if there is a position before calling withdraw quote
-    const checkPositon = await this.getSaverPosition(withdrawParams)
-
-    // If there are errors in the position, return those errors
-    if (checkPositon.errors.length > 0) {
-      for (let i = 0; i < checkPositon.errors.length; i++) {
-        errors.push(checkPositon.errors[i])
-      }
-      return {
-        dustAmount: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)), // Dust amount
-        dustThreshold: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)), // Dust threshold
-        expectedAssetAmount: new CryptoAmount( // Expected asset amount
-          assetToBase(assetAmount(checkPositon.redeemableValue.assetAmount.amount())), // Convert to base amount
-          withdrawParams.asset, // Asset
-        ),
-        fee: {
-          affiliate: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset), // Affiliate fee
-          asset: withdrawParams.asset, // Asset
-          liquidity: new CryptoAmount(baseAmount(0), withdrawParams.asset), // Liquidity fee
-          outbound: new CryptoAmount( // Outbound fee
-            assetToBase(
-              assetAmount(
-                calcOutboundFee(withdrawParams.asset, inboundDetails[withdrawParams.asset.chain]).assetAmount.amount(),
-              ),
-            ),
-            withdrawParams.asset,
-          ),
-          totalBps: 0, // Total basis points
-        },
-        expiry: new Date(0), // Expiry date
-        toAddress: '', // Recipient address
-        memo: '', // Memo
-        inboundDelayBlocks: 0, // Number of blocks for inbound delay
-        inboundDelaySeconds: 0, // Number of seconds for inbound delay
-        outBoundDelayBlocks: 0, // Number of blocks for outbound delay
-        outBoundDelaySeconds: 0, // Number of seconds for outbound delay
-        slipBasisPoints: -1, // Slip basis points (negative value indicates no slip)
-        errors, // Errors array
-      }
-    }
-    // Request withdraw quote
-    const withdrawQuote = await this.thorchainCache.thornode.getSaversWithdrawQuote(withdrawParams)
-
-    // error handling
-    const response: { error?: string } = JSON.parse(JSON.stringify(withdrawQuote))
-    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
-    if (errors.length > 0) {
-      // Return default values and errors if there are any errors
-      return {
-        dustAmount: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
-        dustThreshold: new AssetCryptoAmount(baseAmount(0), getChainAsset(withdrawParams.asset.chain)),
-        expectedAssetAmount: new CryptoAmount(assetToBase(assetAmount(0)), withdrawParams.asset),
-        fee: {
-          affiliate: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-          asset: withdrawParams.asset,
-          liquidity: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-          outbound: new CryptoAmount(baseAmount(0), withdrawParams.asset),
-          totalBps: 0,
-        },
-        expiry: new Date(0),
-        toAddress: '',
-        memo: '',
-        inboundDelayBlocks: 0,
-        inboundDelaySeconds: 0,
-        outBoundDelayBlocks: 0,
-        outBoundDelaySeconds: 0,
-        slipBasisPoints: -1,
-        errors,
-      }
-    }
-    // Extract the withdraw asset and chain asset from the withdraw quote
-    const withdrawAsset = assetFromStringEx(withdrawQuote.fees.asset) as Asset | TokenAsset
-    const chainAsset = getChainAsset(withdrawParams.asset.chain)
-    // Get the decimals for the withdraw asset and chain asset
-    const withdrawAssetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(withdrawAsset)
-    const chainAssetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(chainAsset)
-    // Create an EstimateWithdrawSaver object with the necessary data
-    const estimateWithdrawSaver: EstimateWithdrawSaver = {
-      // Format the dust amount with appropriate notation and decimals
-      dustAmount: getCryptoAmountWithNotation(
-        new AssetCryptoAmount(baseAmount(withdrawQuote.dust_amount), chainAsset),
-        chainAssetDecimals,
-      ),
-      // Format the dust threshold with appropriate notation and decimals
-      dustThreshold: getCryptoAmountWithNotation(
-        new AssetCryptoAmount(baseAmount(withdrawQuote.dust_threshold), chainAsset),
-        chainAssetDecimals,
-      ),
-      // Format the expected asset amount with appropriate notation and decimals
-      expectedAssetAmount: getCryptoAmountWithNotation(
-        new CryptoAmount(baseAmount(withdrawQuote.expected_amount_out), withdrawParams.asset),
-        withdrawAssetDecimals,
-      ),
-      // Format the withdrawal fees with appropriate notation and decimals
-      fee: {
-        affiliate: getCryptoAmountWithNotation(
-          new CryptoAmount(baseAmount(withdrawQuote.fees.affiliate), withdrawAsset),
-          withdrawAssetDecimals,
-        ),
-        asset: withdrawAsset,
-        liquidity: getCryptoAmountWithNotation(
-          new CryptoAmount(baseAmount(withdrawQuote.fees.liquidity), withdrawAsset),
-          withdrawAssetDecimals,
-        ),
-        outbound: getCryptoAmountWithNotation(
-          new CryptoAmount(baseAmount(withdrawQuote.fees.outbound), withdrawAsset),
-          withdrawAssetDecimals,
-        ),
-        totalBps: withdrawQuote.fees.total_bps || 0,
-      },
-      // Set the expiry date
-      expiry: new Date(withdrawQuote.expiry),
-      // Set the recipient address
-      toAddress: withdrawQuote.inbound_address,
-      // Set the memo
-      memo: withdrawQuote.memo,
-      // Set the inbound delay blocks
-      inboundDelayBlocks: withdrawQuote.inbound_confirmation_blocks || 0,
-      // Set the inbound delay seconds
-      inboundDelaySeconds: withdrawQuote.inbound_confirmation_seconds || 0,
-      // Set the outbound delay blocks
-      outBoundDelayBlocks: withdrawQuote.outbound_delay_blocks || 0,
-      // Set the outbound delay seconds
-      outBoundDelaySeconds: withdrawQuote.outbound_delay_seconds || 0,
-      // Set the slip basis points
-      slipBasisPoints: withdrawQuote.fees.slippage_bps,
-      // Set the errors
-      errors,
-    }
-
-    // Return the withdrawal estimation object
-    return estimateWithdrawSaver
+  public async estimateWithdrawSaver(_withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
+    throw new Error(
+      'Saver withdraw quotes are no longer available. THORNode removed the /quote/saver/withdraw endpoint in API v3.15.0.',
+    )
   }
 
   /**
@@ -1036,218 +785,21 @@ export class ThorchainQuery {
   }
 
   /**
-   * Get errors related to estimating the addition of funds to a saver's pool.
-   * @param addAmount - Amount of funds to be added to the saver's pool.
-   * @returns An array of strings representing any errors encountered during the estimation process.
+   * @deprecated Loan endpoints were removed from THORNode API in v3.15.0
    */
-  private async getAddSaversEstimateErrors(addAmount: CryptoAmount<Asset | TokenAsset>): Promise<string[]> {
-    const errors = []
-    // Retrieve all pools
-    const pools = await this.thorchainCache.getPools()
-    // Filter out saver's pools with non-zero depth
-    const saversPools = Object.values(pools).filter((i) => i.thornodeDetails.savers_depth !== '0')
-    // Retrieve inbound details
-    const inboundDetails = await this.thorchainCache.getInboundDetails()
-    // Find the saver's pool corresponding to the provided asset
-    const saverPool = saversPools.find((i) => assetToString(i.asset) === assetToString(addAmount.asset))
-    // Check if a saver's pool exists for the provided asset
-    if (!saverPool) errors.push(` ${assetToString(addAmount.asset)} does not have a saver's pool`)
-    // Check if the chain for the provided asset is halted
-    if (inboundDetails[addAmount.asset.chain].haltedChain) errors.push(`${addAmount.asset.chain} is halted, cannot add`)
-    // Get details of the pool for the provided asset
-    const pool = (await this.thorchainCache.getPoolForAsset(addAmount.asset)).thornodeDetails
-    // Check if the pool for the provided asset is available
-    if (pool.status.toLowerCase() !== 'available')
-      errors.push(`Pool is not available for this asset ${assetToString(addAmount.asset)}`)
-    // Calculate inbound fee for the provided asset
-    const inboundFee = new CryptoAmount(baseAmount(inboundDetails[addAmount.asset.chain].gasRate), addAmount.asset)
-    // Convert inbound fee to the same asset as the addAmount to ensure consistency in calculations
-    const inboundFeeInAddAmountAsset = (await this.convert(inboundFee, addAmount.asset)) as CryptoAmount<
-      Asset | TokenAsset
-    >
-    // Check if the addAmount covers the inbound fees
-    if (addAmount.lte(inboundFeeInAddAmountAsset)) errors.push(`Add amount does not cover fees`)
-    // Return array of errors encountered during estimation
-    return errors
+  public async getLoanQuoteOpen(_params: LoanOpenParams): Promise<LoanOpenQuote> {
+    throw new Error(
+      'Loan quotes are no longer available. THORNode removed the /quote/loan/open endpoint in API v3.15.0.',
+    )
   }
 
   /**
-   *
-   * @param loanOpenParams - params needed for the end Point
-   * @returns
+   * @deprecated Loan endpoints were removed from THORNode API in v3.15.0
    */
-  public async getLoanQuoteOpen({
-    asset,
-    amount,
-    targetAsset,
-    destination,
-    minOut,
-    affiliateBps,
-    affiliate,
-    height,
-  }: LoanOpenParams): Promise<LoanOpenQuote> {
-    const errors: string[] = []
-    const loanOpenResp = await this.thorchainCache.thornode.getLoanQuoteOpen(
-      `${asset.chain}.${asset.symbol}`,
-      amount.baseAmount.amount().toNumber(),
-      `${targetAsset.chain}.${targetAsset.symbol}`,
-      destination,
-      minOut,
-      affiliateBps,
-      affiliate,
-      height,
+  public async getLoanQuoteClose(_params: LoanCloseParams): Promise<LoanCloseQuote> {
+    throw new Error(
+      'Loan quotes are no longer available. THORNode removed the /quote/loan/close endpoint in API v3.15.0.',
     )
-    const response: { error?: string } = JSON.parse(JSON.stringify(loanOpenResp))
-    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
-    if (
-      loanOpenResp.recommended_min_amount_in &&
-      amount.baseAmount.amount().toNumber() < Number(loanOpenResp.recommended_min_amount_in)
-    )
-      errors.push(
-        `Error amount in: ${amount.baseAmount.amount().toNumber()} is less than reccommended Min Amount: ${
-          loanOpenResp.recommended_min_amount_in
-        }`,
-      )
-    if (errors.length > 0) {
-      return {
-        inboundAddress: '',
-        expectedWaitTime: {
-          outboundDelayBlocks: undefined,
-          outbondDelaySeconds: undefined,
-        },
-        fees: {
-          asset: '',
-          liquidity: undefined,
-          outbound: undefined,
-          total_bps: undefined,
-        },
-        slippageBps: undefined,
-        router: undefined,
-        expiry: 0,
-        warning: '',
-        notes: '',
-        dustThreshold: undefined,
-        recommendedMinAmountIn: loanOpenResp.recommended_min_amount_in,
-        memo: undefined,
-        expectedAmountOut: '',
-        expectedCollateralizationRatio: '',
-        expectedCollateralDeposited: '',
-        expectedDebtIssued: '',
-        errors: errors,
-      }
-    }
-    const loanOpenQuote: LoanOpenQuote = {
-      inboundAddress: loanOpenResp.inbound_address,
-      expectedWaitTime: {
-        outboundDelayBlocks: loanOpenResp.outbound_delay_blocks,
-        outbondDelaySeconds: loanOpenResp.outbound_delay_seconds,
-      },
-      fees: {
-        asset: loanOpenResp.fees.asset,
-        liquidity: loanOpenResp.fees.liquidity,
-        outbound: loanOpenResp.fees.outbound,
-        total_bps: loanOpenResp.fees.total_bps,
-      },
-      slippageBps: loanOpenResp.fees.slippage_bps,
-      router: loanOpenResp.router,
-      expiry: loanOpenResp.expiry,
-      warning: loanOpenResp.warning,
-      notes: loanOpenResp.notes,
-      dustThreshold: loanOpenResp.dust_threshold,
-      recommendedMinAmountIn: loanOpenResp.recommended_min_amount_in,
-      memo: loanOpenResp.memo,
-      expectedAmountOut: loanOpenResp.expected_amount_out,
-      expectedCollateralizationRatio: loanOpenResp.expected_collateralization_ratio,
-      expectedCollateralDeposited: loanOpenResp.expected_collateral_deposited,
-      expectedDebtIssued: loanOpenResp.expected_debt_issued,
-      errors: errors,
-    }
-    return loanOpenQuote
-  }
-
-  /**
-   * Get a quote for opening a loan.
-   * @param loanOpenParams - Parameters needed for the endpoint.
-   * @returns A Promise resolving to a LoanOpenQuote.
-   */
-  public async getLoanQuoteClose({
-    asset,
-    amount,
-    loanAsset,
-    loanOwner,
-    minOut,
-    height,
-  }: LoanCloseParams): Promise<LoanCloseQuote> {
-    const errors: string[] = []
-    // Retrieve loan open response from ThorNode API
-    const loanCloseResp = await this.thorchainCache.thornode.getLoanQuoteClose(
-      `${asset.chain}.${asset.symbol}`,
-      amount.baseAmount.amount().toNumber(),
-      `${loanAsset.chain}.${loanAsset.symbol}`,
-      loanOwner,
-      minOut,
-      height,
-    )
-    // Parse loan open response
-    const response: { error?: string } = JSON.parse(JSON.stringify(loanCloseResp))
-    // Check for errors in response
-    if (response.error) errors.push(`Thornode request quote failed: ${response.error}`)
-    // If errors exist, return an object with error details
-    if (errors.length > 0) {
-      return {
-        inboundAddress: '',
-        expectedWaitTime: {
-          outboundDelayBlocks: undefined,
-          outbondDelaySeconds: undefined,
-        },
-        fees: {
-          asset: '',
-          liquidity: undefined,
-          outbound: undefined,
-          total_bps: undefined,
-        },
-        slippageBps: undefined,
-        router: undefined,
-        expiry: 0,
-        warning: '',
-        notes: '',
-        dustThreshold: undefined,
-        recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
-        memo: undefined,
-        expectedAmountOut: '',
-        expectedCollateralWithdrawn: '',
-        expectedDebtRepaid: '',
-        errors: errors,
-      }
-    }
-    // Construct loan open quote object
-    const loanCloseQuote: LoanCloseQuote = {
-      inboundAddress: loanCloseResp.inbound_address,
-      expectedWaitTime: {
-        outboundDelayBlocks: loanCloseResp.outbound_delay_blocks,
-        outbondDelaySeconds: loanCloseResp.outbound_delay_seconds,
-      },
-      fees: {
-        asset: loanCloseResp.fees.asset,
-        liquidity: loanCloseResp.fees.liquidity,
-        outbound: loanCloseResp.fees.outbound,
-        total_bps: loanCloseResp.fees.total_bps,
-      },
-      slippageBps: loanCloseResp.fees.slippage_bps,
-      router: loanCloseResp.router,
-      expiry: loanCloseResp.expiry,
-      warning: loanCloseResp.warning,
-      notes: loanCloseResp.notes,
-      dustThreshold: loanCloseResp.dust_threshold,
-      recommendedMinAmountIn: loanCloseResp.recommended_min_amount_in,
-      memo: loanCloseResp.memo,
-      expectedAmountOut: loanCloseResp.expected_amount_out,
-      expectedCollateralWithdrawn: loanCloseResp.expected_collateral_withdrawn,
-      expectedDebtRepaid: loanCloseResp.expected_debt_repaid,
-      errors: errors,
-    }
-
-    return loanCloseQuote
   }
 
   /**
