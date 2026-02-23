@@ -3,6 +3,7 @@ import { baseToAsset, formatAssetAmountCurrency, assetToString, AssetType, type 
 import type { ChainAsset } from './AssetSelector'
 import type { SwapQuote } from '../../lib/swap/SwapService'
 import { usePrices, formatUsdValue } from '../../hooks/usePrices'
+import { AssetIcon } from './assetIcons'
 
 interface SwapConfirmModalProps {
   isOpen: boolean
@@ -72,9 +73,7 @@ export function SwapConfirmModal({
           {/* Swap Visual */}
           <div className="flex items-center justify-center gap-4">
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                {fromAsset.symbol.slice(0, 2)}
-              </div>
+              <AssetIcon chainId={fromAsset.chainId} symbol={fromAsset.symbol} size={48} className="mx-auto" />
               <div className="mt-2 font-medium text-gray-900 dark:text-gray-100">{amount}</div>
               <div className="text-sm text-gray-500 dark:text-gray-400">{fromAsset.symbol}</div>
               {inputUsdValue !== null && (
@@ -85,9 +84,7 @@ export function SwapConfirmModal({
             <ArrowRight className="w-6 h-6 text-gray-400" />
 
             <div className="text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center text-white font-bold">
-                {toAsset.symbol.slice(0, 2)}
-              </div>
+              <AssetIcon chainId={toAsset.chainId} symbol={toAsset.symbol} size={48} className="mx-auto" />
               <div className="mt-2 font-medium text-gray-900 dark:text-gray-100">
                 {expectedOutput}
               </div>
