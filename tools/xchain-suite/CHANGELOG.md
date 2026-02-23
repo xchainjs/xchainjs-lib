@@ -1,5 +1,26 @@
 # testing-gui
 
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [773e77f]
+  - @xchainjs/xchain-thornode@1.1.0
+  - @xchainjs/xchain-mayanode@1.2.0
+  - @xchainjs/xchain-thorchain-query@3.0.0
+  - @xchainjs/xchain-mayachain-query@2.1.7
+  - @xchainjs/xchain-bitcoin@2.2.1
+  - @xchainjs/xchain-bitcoincash@2.2.1
+  - @xchainjs/xchain-dash@2.2.1
+  - @xchainjs/xchain-doge@2.2.1
+  - @xchainjs/xchain-litecoin@2.2.1
+  - @xchainjs/xchain-zcash@1.3.1
+  - @xchainjs/xchain-midgard-query@2.0.12
+  - @xchainjs/xchain-mayamidgard-query@1.0.12
+  - @xchainjs/xchain-thorchain-amm@3.0.30
+  - @xchainjs/xchain-mayachain-amm@4.1.12
+  - @xchainjs/xchain-wallet@2.0.23
+
 ## 1.0.5
 
 ### Patch Changes

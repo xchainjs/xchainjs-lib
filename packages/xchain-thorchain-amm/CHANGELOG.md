@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.30
+
+### Patch Changes
+
+- Updated dependencies [773e77f]
+  - @xchainjs/xchain-thorchain-query@3.0.0
+  - @xchainjs/xchain-bitcoin@2.2.1
+  - @xchainjs/xchain-bitcoincash@2.2.1
+  - @xchainjs/xchain-doge@2.2.1
+  - @xchainjs/xchain-litecoin@2.2.1
+  - @xchainjs/xchain-wallet@2.0.23
+
 ## 3.0.29
 
 ### Patch Changes

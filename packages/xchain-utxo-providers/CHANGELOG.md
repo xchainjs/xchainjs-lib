@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- cd3abad: Fix missing `=` in Haskoin unspent transactions query parameter (`?limit${count}` → `?limit=${count}`)
+
 ## 2.0.10
 
 ### Patch Changes
