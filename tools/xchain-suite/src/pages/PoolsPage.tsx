@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RefreshCw, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Clock, Pause, ArrowRightLeft, Droplets } from 'lucide-react'
+import { getChainflipSdk } from '../lib/swap/SwapService'
 
 type Protocol = 'thorchain' | 'mayachain' | 'chainflip'
 type SortKey = 'tvl' | 'apy' | 'volume' | 'price'
@@ -150,8 +151,7 @@ export default function PoolsPage() {
     try {
       if (protocol === 'chainflip') {
         // Fetch from Chainflip SDK
-        const { SwapSDK } = await import('@chainflip/sdk/swap')
-        const sdk = new SwapSDK({ network: 'mainnet' })
+        const sdk = await getChainflipSdk()
 
         const [assets, boostLiquidity] = await Promise.all([
           sdk.getAssets(),
@@ -162,9 +162,9 @@ export default function PoolsPage() {
 
         // Build boost map keyed by `chain:asset`
         const boostMap = new Map<string, string>()
-        for (const b of boostLiquidity) {
-          const key = `${(b as any).chain}:${(b as any).asset}`
-          const raw = (b as any).availableAmount ?? '0'
+        for (const b of boostLiquidity as ChainflipBoost[]) {
+          const key = `${b.chain}:${b.asset}`
+          const raw = b.availableAmount ?? '0'
           const amountStr = String(raw)
           const amount = parseFloat(amountStr)
           const existing = boostMap.get(key)

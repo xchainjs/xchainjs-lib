@@ -5,7 +5,7 @@
  */
 
 import type { Network } from '@xchainjs/xchain-client'
-import type { Asset, CryptoAmount, Chain } from '@xchainjs/xchain-util'
+import { type Asset, type CryptoAmount, type Chain, CryptoAmount as CryptoAmountClass, baseAmount as baseAmountFn } from '@xchainjs/xchain-util'
 
 // Types for swap quotes
 export interface SwapQuote {
@@ -22,9 +22,6 @@ export interface SwapQuote {
     affiliateFee: CryptoAmount
     outboundFee: CryptoAmount
   }
-  // Chainflip-specific fields
-  depositChannelId?: string
-  chainflipDepositAddress?: string
 }
 
 export interface SwapParams {
@@ -36,9 +33,6 @@ export interface SwapParams {
   // Streaming swap parameters (THORChain only)
   streamingInterval?: number // Interval in blocks between sub-swaps
   streamingQuantity?: number // Number of sub-swaps (0 = automatic)
-  // Chainflip-specific params (for doSwap)
-  chainflipDepositAddress?: string
-  chainflipDepositChannelId?: string
 }
 
 export interface SwapResult {
@@ -57,6 +51,41 @@ const CHAINFLIP_CHAINS: Record<string, string> = {
 
 function isChainflipCompatible(chain: string): boolean {
   return chain in CHAINFLIP_CHAINS
+}
+
+// Fetch best Chainflip quote for a given swap params
+async function fetchBestChainflipQuote(params: SwapParams) {
+  const srcChain = params.fromAsset.chain
+  const destChain = params.destinationAsset.chain
+  if (!isChainflipCompatible(srcChain) || !isChainflipCompatible(destChain)) {
+    throw new Error(`Chainflip does not support chain pair: ${srcChain} → ${destChain}`)
+  }
+
+  const sdk = await getChainflipSdk()
+  const srcChainName = CHAINFLIP_CHAINS[srcChain]
+  const destChainName = CHAINFLIP_CHAINS[destChain]
+  const srcAsset = params.fromAsset.ticker
+  const destAsset = params.destinationAsset.ticker
+  const amountStr = params.amount.baseAmount.amount().toFixed(0)
+
+  const affiliateAddress = import.meta.env.VITE_ASGARDEX_AFFILIATE_BROKERS_ADDRESS
+  const affiliateBrokers = affiliateAddress
+    ? [{ account: affiliateAddress as `cF${string}` | `0x${string}`, commissionBps: 0 }]
+    : undefined
+
+  const quoteResponse = await sdk.getQuoteV2({
+    srcChain: srcChainName,
+    srcAsset,
+    destChain: destChainName,
+    destAsset,
+    amount: amountStr,
+    ...(affiliateBrokers && { affiliateBrokers }),
+  })
+
+  const cfQuotes = quoteResponse.quotes || []
+  const bestQuote = cfQuotes.find((q: any) => q.type === 'REGULAR') || cfQuotes[0]
+
+  return { sdk, bestQuote, affiliateBrokers }
 }
 
 // Lazy-loaded AMM instances
@@ -212,66 +241,12 @@ export class SwapService {
     }
 
     // Try Chainflip (only if both chains are supported)
-    const srcChain = params.fromAsset.chain
-    const destChain = params.destinationAsset.chain
-    if (isChainflipCompatible(srcChain) && isChainflipCompatible(destChain)) {
+    if (isChainflipCompatible(params.fromAsset.chain) && isChainflipCompatible(params.destinationAsset.chain)) {
       try {
-        console.log('[SwapService] Getting Chainflip SDK...')
-        const sdk = await getChainflipSdk()
-
-        const srcChainName = CHAINFLIP_CHAINS[srcChain]
-        const destChainName = CHAINFLIP_CHAINS[destChain]
-        const srcAsset = params.fromAsset.ticker
-        const destAsset = params.destinationAsset.ticker
-
-        // Amount in base units as string
-        const amountStr = params.amount.baseAmount.amount().toFixed(0)
-
-        // Build affiliate brokers from env if configured
-        const affiliateAddress = import.meta.env.VITE_ASGARDEX_AFFILIATE_BROKERS_ADDRESS
-        const affiliateBrokers = affiliateAddress
-          ? [{ account: affiliateAddress as `cF${string}` | `0x${string}`, commissionBps: 0 }]
-          : undefined
-
-        console.log('[SwapService] Calling Chainflip getQuoteV2...', {
-          srcChain: srcChainName, srcAsset, destChain: destChainName, destAsset, amount: amountStr,
-        })
-
-        const quoteResponse = await sdk.getQuoteV2({
-          srcChain: srcChainName,
-          srcAsset,
-          destChain: destChainName,
-          destAsset,
-          amount: amountStr,
-          ...(affiliateBrokers && { affiliateBrokers }),
-        })
-
-        console.log('[SwapService] Chainflip quote response:', quoteResponse)
-
-        // Pick the best quote (prefer REGULAR, fallback to DCA)
-        const cfQuotes = quoteResponse.quotes || []
-        const bestQuote = cfQuotes.find((q: any) => q.type === 'REGULAR') || cfQuotes[0]
+        console.log('[SwapService] Getting Chainflip quote...')
+        const { bestQuote } = await fetchBestChainflipQuote(params)
 
         if (bestQuote) {
-          // Request deposit address to get the deposit channel
-          console.log('[SwapService] Requesting Chainflip deposit address...')
-          const depositResponse = await sdk.requestDepositAddressV2({
-            quote: bestQuote,
-            destAddress: params.destinationAddress,
-            fillOrKillParams: {
-              slippageTolerancePercent: bestQuote.recommendedSlippageTolerancePercent || 2,
-              refundAddress: params.fromAddress,
-              retryDurationBlocks: 100,
-            },
-            ...(affiliateBrokers && { affiliateBrokers }),
-          })
-
-          console.log('[SwapService] Chainflip deposit response:', depositResponse)
-
-          // Build CryptoAmount for expected output
-          const { assetAmount: assetAmountFn, assetToBase: assetToBaseFn, CryptoAmount: CryptoAmountClass, baseAmount: baseAmountFn } =
-            await import('@xchainjs/xchain-util')
-
           // Chainflip egressAmount is in base units with native decimals per chain
           const CF_DECIMALS: Record<string, number> = { BTC: 8, ETH: 18, ARB: 18, SOL: 9 }
           const destDecimals = CF_DECIMALS[params.destinationAsset.chain] || 18
@@ -291,7 +266,7 @@ export class SwapService {
 
           quotes.push({
             protocol: 'Chainflip',
-            toAddress: depositResponse.depositAddress,
+            toAddress: '',
             memo: '',
             expectedAmount: expectedCrypto,
             totalSwapSeconds: bestQuote.estimatedDurationSeconds || 0,
@@ -303,8 +278,6 @@ export class SwapService {
               affiliateFee: zeroFee,
               outboundFee: zeroFee,
             },
-            depositChannelId: depositResponse.depositChannelId,
-            chainflipDepositAddress: depositResponse.depositAddress,
           })
         }
       } catch (e) {
@@ -328,22 +301,34 @@ export class SwapService {
 
     try {
       if (params.protocol === 'Chainflip') {
-        // For Chainflip, we just transfer to the deposit address
-        console.log('[SwapService] Executing Chainflip swap (transfer to deposit address)...')
-        const depositAddress = params.chainflipDepositAddress
-        if (!depositAddress) throw new Error('Missing Chainflip deposit address')
+        console.log('[SwapService] Requesting Chainflip deposit channel...')
+        const { sdk, bestQuote, affiliateBrokers } = await fetchBestChainflipQuote(params)
+        if (!bestQuote) throw new Error('No Chainflip quote available')
+
+        const depositResponse = await sdk.requestDepositAddressV2({
+          quote: bestQuote,
+          destAddress: params.destinationAddress,
+          fillOrKillParams: {
+            slippageTolerancePercent: bestQuote.recommendedSlippageTolerancePercent || 2,
+            refundAddress: params.fromAddress,
+            retryDurationBlocks: 100,
+          },
+          ...(affiliateBrokers && { affiliateBrokers }),
+        })
+
+        console.log('[SwapService] Chainflip deposit response:', depositResponse)
 
         const result = await this.wallet.transfer({
           asset: params.fromAsset,
           amount: params.amount.baseAmount,
-          recipient: depositAddress,
+          recipient: depositResponse.depositAddress,
         })
         console.log('[SwapService] Chainflip transfer result:', result)
 
         return {
           hash: result,
-          url: `https://scan.chainflip.io/channels/${params.chainflipDepositChannelId || ''}`,
-          depositChannelId: params.chainflipDepositChannelId,
+          url: `https://scan.chainflip.io/channels/${depositResponse.depositChannelId}`,
+          depositChannelId: depositResponse.depositChannelId,
         }
       } else if (params.protocol === 'Thorchain') {
         console.log('[SwapService] Executing THORChain swap...')
