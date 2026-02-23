@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.23
+
+### Patch Changes
+
+- @xchainjs/xchain-utxo@2.2.1
+
 ## 2.0.22
 
 ### Patch Changes

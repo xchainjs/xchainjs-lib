@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.12
+
+### Patch Changes
+
+- Updated dependencies [773e77f]
+  - @xchainjs/xchain-midgard@1.1.0
+
 ## 2.0.11
 
 ### Patch Changes

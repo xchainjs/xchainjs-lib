@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.2.1
+
+### Patch Changes
+
+- Updated dependencies [cd3abad]
+  - @xchainjs/xchain-utxo-providers@2.0.11
+
 ## 2.2.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.1.12
+
+### Patch Changes
+
+- Updated dependencies [773e77f]
+  - @xchainjs/xchain-mayachain-query@2.1.7
+  - @xchainjs/xchain-bitcoin@2.2.1
+  - @xchainjs/xchain-dash@2.2.1
+  - @xchainjs/xchain-zcash@1.3.1
+  - @xchainjs/xchain-wallet@2.0.23
+
 ## 4.1.11
 
 ### Patch Changes
