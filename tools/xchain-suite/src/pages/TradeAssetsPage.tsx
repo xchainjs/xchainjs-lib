@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { useWallet } from '../contexts/WalletContext'
-import { useLiquidity } from '../hooks/useLiquidity'
+import { useTradeAssets } from '../hooks/useTradeAssets'
+import { TradeBalances } from '../components/tradeassets/TradeBalances'
+import { SwapTradeAsset } from '../components/tradeassets/SwapTradeAsset'
 import { DepositTradeAsset } from '../components/tradeassets/DepositTradeAsset'
 import { WithdrawTradeAsset } from '../components/tradeassets/WithdrawTradeAsset'
 
-type Tab = 'deposit' | 'withdraw'
+type Tab = 'balances' | 'swap' | 'deposit' | 'withdraw'
 
 export default function TradeAssetsPage() {
   const { isConnected } = useWallet()
-  const { thorchainAmm, wallet, loading, error, supportedChains } = useLiquidity()
-  const [activeTab, setActiveTab] = useState<Tab>('deposit')
+  const { thorchainAmm, thorchainQuery, mayachainAmm, mayachainQuery, wallet, loading, error, supportedChains } = useTradeAssets()
+  const [activeTab, setActiveTab] = useState<Tab>('balances')
 
   if (!isConnected) {
     return (
@@ -61,6 +63,8 @@ export default function TradeAssetsPage() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
+    { id: 'balances', label: 'Balances' },
+    { id: 'swap', label: 'Swap' },
     { id: 'deposit', label: 'Deposit' },
     { id: 'withdraw', label: 'Withdraw' },
   ]
@@ -74,7 +78,7 @@ export default function TradeAssetsPage() {
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Trade Assets</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Deposit and withdraw from THORChain trade asset accounts
+                Manage trade assets on THORChain and MAYAChain
               </p>
             </div>
 
@@ -82,8 +86,8 @@ export default function TradeAssetsPage() {
             <div className="mx-6 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">What are Trade Assets?</h3>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                Trade assets allow you to hold L1 assets on THORChain for faster swaps with zero slippage.
-                Deposit assets to receive trade assets (e.g., BTC becomes THOR~BTC), then withdraw to get your L1 assets back.
+                Trade assets allow you to hold L1 assets on THORChain/MAYAChain for faster swaps with zero slippage.
+                Deposit assets to receive trade assets (e.g., BTC becomes BTC~BTC), swap between them instantly, then withdraw to get your L1 assets back.
               </p>
             </div>
 
@@ -108,9 +112,24 @@ export default function TradeAssetsPage() {
 
             {/* Tab Content */}
             <div className="p-6">
+              {activeTab === 'balances' && (
+                <TradeBalances
+                  thorchainQuery={thorchainQuery}
+                  mayachainQuery={mayachainQuery}
+                  wallet={wallet}
+                />
+              )}
+              {activeTab === 'swap' && (
+                <SwapTradeAsset
+                  thorchainAmm={thorchainAmm}
+                  mayachainAmm={mayachainAmm}
+                  wallet={wallet}
+                />
+              )}
               {activeTab === 'deposit' && (
                 <DepositTradeAsset
                   thorchainAmm={thorchainAmm}
+                  mayachainAmm={mayachainAmm}
                   wallet={wallet}
                   supportedChains={supportedChains}
                 />
@@ -118,6 +137,7 @@ export default function TradeAssetsPage() {
               {activeTab === 'withdraw' && (
                 <WithdrawTradeAsset
                   thorchainAmm={thorchainAmm}
+                  mayachainAmm={mayachainAmm}
                   wallet={wallet}
                 />
               )}
