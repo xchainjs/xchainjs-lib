@@ -174,7 +174,7 @@ export class SwapService {
         amount: params.amount,
         fromAddress: params.fromAddress,
         destinationAddress: params.destinationAddress,
-        affiliateAddress: 'dx',
+        affiliateAddress: 'xc',
         affiliateBps: 0,
         // Streaming swap parameters
         ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
@@ -212,7 +212,7 @@ export class SwapService {
         amount: params.amount,
         fromAddress: params.fromAddress,
         destinationAddress: params.destinationAddress,
-        affiliateAddress: 'dx',
+        affiliateAddress: 'xc',
         affiliateBps: 0,
         // Streaming swap parameters
         ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
@@ -339,7 +339,7 @@ export class SwapService {
           amount: params.amount,
           fromAddress: params.fromAddress,
           destinationAddress: params.destinationAddress,
-          affiliateAddress: 'dx',
+          affiliateAddress: 'xc',
           affiliateBps: 0,
           // Streaming swap parameters
           ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
@@ -356,7 +356,7 @@ export class SwapService {
           amount: params.amount,
           fromAddress: params.fromAddress,
           destinationAddress: params.destinationAddress,
-          affiliateAddress: 'dx',
+          affiliateAddress: 'xc',
           affiliateBps: 0,
           // Streaming swap parameters
           ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
