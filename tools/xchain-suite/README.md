@@ -176,6 +176,10 @@ src/
 - **React Router** - Navigation
 - **Lucide React** - Icons
 
+## Affiliate
+
+Swap and quote operations use `xc` as the affiliate address with `0` basis points. This is used for quoting/tracking purposes only and does not charge any fee.
+
 ## Browser Compatibility
 
 This app runs entirely in the browser. Some notes:
