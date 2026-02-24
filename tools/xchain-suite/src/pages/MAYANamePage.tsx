@@ -1,10 +1,12 @@
-import { useState } from 'react'
-import { Search, User } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, User, PenLine } from 'lucide-react'
 import { useOperation } from '../hooks/useOperation'
 import { ResultPanel } from '../components/ui/ResultPanel'
 import { CodePreview } from '../components/ui/CodePreview'
+import { useWallet } from '../contexts/WalletContext'
+import { useAggregator } from '../hooks/useAggregator'
 
-type Tab = 'lookup' | 'owned'
+type Tab = 'lookup' | 'owned' | 'register'
 
 interface MAYANameDetails {
   name: string
@@ -19,12 +21,52 @@ interface MAYANameDetails {
 const BLOCKS_PER_YEAR = 5_256_000
 const SECONDS_PER_BLOCK = (365.25 * 24 * 60 * 60) / BLOCKS_PER_YEAR // ~6 seconds
 
+const ALIAS_CHAINS = ['BTC', 'ETH', 'AVAX', 'BSC', 'GAIA', 'THOR', 'MAYA', 'DOGE', 'LTC', 'BCH', 'DASH', 'ARB', 'SOL', 'KUJI']
+
+const EXPIRY_OPTIONS = [
+  { label: '1 year', years: 1 },
+  { label: '2 years', years: 2 },
+  { label: '5 years', years: 5 },
+  { label: '10 years', years: 10 },
+]
+
+interface NameQuote {
+  memo: string
+  value: string
+  allowed: boolean
+  errors: string[]
+}
+
+interface NameTxResult {
+  hash: string
+  url: string
+}
+
 export default function MAYANamePage() {
   const [activeTab, setActiveTab] = useState<Tab>('lookup')
   const [mayaName, setMayaName] = useState('')
   const [ownerAddress, setOwnerAddress] = useState('')
   const lookupOp = useOperation<MAYANameDetails>()
   const ownedOp = useOperation<MAYANameDetails[]>()
+
+  // Register tab state
+  const [regMode, setRegMode] = useState<'register' | 'update'>('register')
+  const [regName, setRegName] = useState('')
+  const [regChain, setRegChain] = useState('BTC')
+  const [regChainAddress, setRegChainAddress] = useState('')
+  const [regOwner, setRegOwner] = useState('')
+  const [regExpiry, setRegExpiry] = useState(1)
+  const quoteOp = useOperation<NameQuote>()
+  const registerOp = useOperation<NameTxResult>()
+  const { wallet } = useAggregator()
+  const { isConnected } = useWallet()
+
+  // Auto-populate owner address from wallet
+  useEffect(() => {
+    if (wallet && !regOwner) {
+      wallet.getAddress('MAYA').then((addr: string) => setRegOwner(addr)).catch(() => {})
+    }
+  }, [wallet])
 
   const handleLookup = async () => {
     if (!mayaName) return
@@ -115,9 +157,150 @@ mayaNames.forEach(mayaName => {
 })`
   }
 
+  const handleGetQuote = async () => {
+    if (!regName) return
+
+    await quoteOp.execute(
+      async () => {
+        registerOp.reset()
+        const { MayachainAMM } = await import('@xchainjs/xchain-mayachain-amm')
+        const mayachainAmm = new MayachainAMM()
+        const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
+
+        if (regMode === 'register') {
+          if (!regChain || !regChainAddress || !regOwner) {
+            throw new Error('All fields are required for registration')
+          }
+          const quote = await mayachainAmm.estimateMAYANameRegistration({
+            name: regName,
+            owner: regOwner,
+            chain: regChain,
+            chainAddress: regChainAddress,
+            expiry,
+          })
+          return {
+            memo: quote.memo,
+            value: `${quote.value.assetAmount.amount().toFixed(4)} ${quote.value.asset.ticker}`,
+            allowed: quote.allowed,
+            errors: quote.errors,
+          }
+        } else {
+          const quote = await mayachainAmm.estimateMAYANameUpdate({
+            name: regName,
+            ...(regOwner && { owner: regOwner }),
+            ...(regChain && regChainAddress && { chain: regChain, chainAddress: regChainAddress }),
+            expiry,
+          })
+          return {
+            memo: quote.memo,
+            value: `${quote.value.assetAmount.amount().toFixed(4)} ${quote.value.asset.ticker}`,
+            allowed: quote.allowed,
+            errors: quote.errors,
+          }
+        }
+      },
+      { operation: regMode === 'register' ? 'estimateMAYANameRegistration' : 'estimateMAYANameUpdate', params: { name: regName } }
+    )
+  }
+
+  const handleRegister = async () => {
+    if (!wallet) return
+
+    await registerOp.execute(
+      async () => {
+        const { MayachainAMM } = await import('@xchainjs/xchain-mayachain-amm')
+        const { MayachainQuery, MayachainCache, Mayanode } = await import('@xchainjs/xchain-mayachain-query')
+
+        const network = wallet.getNetwork()
+        const mayachainCache = new MayachainCache(undefined, new Mayanode(network))
+        const mayachainQuery = new MayachainQuery(mayachainCache)
+        const mayachainAmm = new MayachainAMM(mayachainQuery, wallet)
+        const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
+
+        if (regMode === 'register') {
+          return await mayachainAmm.registerMAYAName({
+            name: regName,
+            owner: regOwner,
+            chain: regChain,
+            chainAddress: regChainAddress,
+            expiry,
+          })
+        } else {
+          return await mayachainAmm.updateMAYAName({
+            name: regName,
+            ...(regOwner && { owner: regOwner }),
+            ...(regChain && regChainAddress && { chain: regChain, chainAddress: regChainAddress }),
+            expiry,
+          })
+        }
+      },
+      { operation: regMode === 'register' ? 'registerMAYAName' : 'updateMAYAName', params: { name: regName } }
+    )
+  }
+
+  const generateRegisterCode = () => {
+    if (regMode === 'register') {
+      return `import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
+import { Wallet } from '@xchainjs/xchain-wallet'
+
+// Create wallet with chain clients
+const wallet = new Wallet({ /* chain clients */ })
+const mayachainAmm = new MayachainAMM(undefined, wallet)
+
+// Estimate registration cost
+const quote = await mayachainAmm.estimateMAYANameRegistration({
+  name: '${regName || 'myname'}',
+  owner: '${regOwner || 'maya1...'}',
+  chain: '${regChain}',
+  chainAddress: '${regChainAddress || '...'}',
+  expiry: new Date(Date.now() + ${regExpiry} * 365.25 * 24 * 60 * 60 * 1000),
+})
+
+console.log('Cost:', quote.value.assetAmount.amount().toFixed(4), quote.value.asset.ticker)
+console.log('Memo:', quote.memo)
+
+// Execute registration
+if (quote.allowed) {
+  const tx = await mayachainAmm.registerMAYAName({
+    name: '${regName || 'myname'}',
+    owner: '${regOwner || 'maya1...'}',
+    chain: '${regChain}',
+    chainAddress: '${regChainAddress || '...'}',
+    expiry: new Date(Date.now() + ${regExpiry} * 365.25 * 24 * 60 * 60 * 1000),
+  })
+  console.log('Tx hash:', tx.hash)
+  console.log('Explorer:', tx.url)
+}`
+    } else {
+      return `import { MayachainAMM } from '@xchainjs/xchain-mayachain-amm'
+import { Wallet } from '@xchainjs/xchain-wallet'
+
+// Create wallet with chain clients
+const wallet = new Wallet({ /* chain clients */ })
+const mayachainAmm = new MayachainAMM(undefined, wallet)
+
+// Estimate update cost
+const quote = await mayachainAmm.estimateMAYANameUpdate({
+  name: '${regName || 'myname'}',${regOwner ? `\n  owner: '${regOwner}',` : ''}${regChain && regChainAddress ? `\n  chain: '${regChain}',\n  chainAddress: '${regChainAddress}',` : ''}
+  expiry: new Date(Date.now() + ${regExpiry} * 365.25 * 24 * 60 * 60 * 1000),
+})
+
+// Execute update
+if (quote.allowed) {
+  const tx = await mayachainAmm.updateMAYAName({
+    name: '${regName || 'myname'}',${regOwner ? `\n    owner: '${regOwner}',` : ''}${regChain && regChainAddress ? `\n    chain: '${regChain}',\n    chainAddress: '${regChainAddress}',` : ''}
+    expiry: new Date(Date.now() + ${regExpiry} * 365.25 * 24 * 60 * 60 * 1000),
+  })
+  console.log('Tx hash:', tx.hash)
+  console.log('Explorer:', tx.url)
+}`
+    }
+  }
+
   const tabs: { id: Tab; label: string; icon: typeof Search }[] = [
     { id: 'lookup', label: 'Lookup Name', icon: Search },
     { id: 'owned', label: 'Names by Owner', icon: User },
+    { id: 'register', label: 'Register', icon: PenLine },
   ]
 
   const renderAliases = (aliases: { address: string; chain: string }[]) => {
@@ -355,6 +538,219 @@ mayaNames.forEach(mayaName => {
 
               {/* Code Example */}
               <CodePreview code={generateOwnedCode()} title="Get MAYANames by Owner" />
+            </div>
+          )}
+
+          {activeTab === 'register' && (
+            <div className="space-y-6">
+              {/* Mode Toggle */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setRegMode('register'); quoteOp.reset(); registerOp.reset() }}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    regMode === 'register'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Register New
+                </button>
+                <button
+                  onClick={() => { setRegMode('update'); quoteOp.reset(); registerOp.reset() }}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    regMode === 'update'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  Update Existing
+                </button>
+              </div>
+
+              {!isConnected && (
+                <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Connect a wallet to register or update MAYANames. A wallet with CACAO is required to pay fees.
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    MAYAName
+                  </label>
+                  <input
+                    type="text"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value.toLowerCase())}
+                    placeholder="Enter name to register"
+                    disabled={!isConnected}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  />
+                </div>
+
+                {/* Chain */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Chain {regMode === 'update' && <span className="text-gray-400">(optional)</span>}
+                  </label>
+                  <select
+                    value={regChain}
+                    onChange={(e) => setRegChain(e.target.value)}
+                    disabled={!isConnected}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    {ALIAS_CHAINS.map((chain) => (
+                      <option key={chain} value={chain}>{chain}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Chain Address */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Chain Address {regMode === 'update' && <span className="text-gray-400">(optional)</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={regChainAddress}
+                    onChange={(e) => setRegChainAddress(e.target.value)}
+                    placeholder={`Address on ${regChain}`}
+                    disabled={!isConnected}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono disabled:opacity-50"
+                  />
+                </div>
+
+                {/* Owner */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Owner {regMode === 'update' && <span className="text-gray-400">(optional)</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={regOwner}
+                    onChange={(e) => setRegOwner(e.target.value)}
+                    placeholder="maya1... (auto-filled from wallet)"
+                    disabled={!isConnected}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono disabled:opacity-50"
+                  />
+                </div>
+
+                {/* Expiry */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Expiry
+                  </label>
+                  <select
+                    value={regExpiry}
+                    onChange={(e) => setRegExpiry(Number(e.target.value))}
+                    disabled={!isConnected}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    {EXPIRY_OPTIONS.map((opt) => (
+                      <option key={opt.years} value={opt.years}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Get Quote Button */}
+                <button
+                  onClick={handleGetQuote}
+                  disabled={!regName || quoteOp.loading || !isConnected}
+                  className="w-full px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {quoteOp.loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Getting Quote...
+                    </>
+                  ) : (
+                    'Get Quote'
+                  )}
+                </button>
+              </div>
+
+              {/* Quote Result */}
+              <ResultPanel loading={quoteOp.loading} error={quoteOp.error} duration={quoteOp.duration}>
+                {quoteOp.result && (
+                  <div className="space-y-4">
+                    {!quoteOp.result.allowed && quoteOp.result.errors.length > 0 && (
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        {quoteOp.result.errors.map((err, i) => (
+                          <p key={i} className="text-sm text-red-700 dark:text-red-300">{err}</p>
+                        ))}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Cost</span>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                          {quoteOp.result.value}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Allowed</span>
+                        <p className={`font-medium ${quoteOp.result.allowed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {quoteOp.result.allowed ? 'Yes' : 'No'}
+                        </p>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Memo</span>
+                      <p className="font-mono text-xs text-gray-900 dark:text-gray-100 break-all bg-gray-50 dark:bg-gray-700/50 p-2 rounded-md mt-1">
+                        {quoteOp.result.memo}
+                      </p>
+                    </div>
+
+                    {quoteOp.result.allowed && (
+                      <button
+                        onClick={handleRegister}
+                        disabled={!wallet || registerOp.loading}
+                        className="w-full px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {registerOp.loading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            {regMode === 'register' ? 'Registering...' : 'Updating...'}
+                          </>
+                        ) : (
+                          regMode === 'register' ? 'Register MAYAName' : 'Update MAYAName'
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </ResultPanel>
+
+              {/* Tx Result */}
+              <ResultPanel loading={registerOp.loading} error={registerOp.error} duration={registerOp.duration}>
+                {registerOp.result && (
+                  <div className="space-y-3">
+                    <span className="text-green-600 dark:text-green-400 font-medium">Success</span>
+                    <div>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">Transaction Hash</span>
+                      <p className="font-mono text-sm text-gray-900 dark:text-gray-100 break-all">
+                        {registerOp.result.hash}
+                      </p>
+                    </div>
+                    {registerOp.result.url && (
+                      <a
+                        href={registerOp.result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        View on Explorer
+                      </a>
+                    )}
+                  </div>
+                )}
+              </ResultPanel>
+
+              {/* Code Example */}
+              <CodePreview code={generateRegisterCode()} title={`${regMode === 'register' ? 'Register' : 'Update'} MAYAName`} />
             </div>
           )}
         </div>
