@@ -211,7 +211,8 @@ mayaNames.forEach(mayaName => {
         const { MayachainAMM } = await import('@xchainjs/xchain-mayachain-amm')
         const { MayachainQuery, MayachainCache, Mayanode } = await import('@xchainjs/xchain-mayachain-query')
 
-        const mayachainCache = new MayachainCache(undefined, new Mayanode())
+        const network = wallet.getNetwork()
+        const mayachainCache = new MayachainCache(undefined, new Mayanode(network))
         const mayachainQuery = new MayachainQuery(mayachainCache)
         const mayachainAmm = new MayachainAMM(mayachainQuery, wallet)
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)

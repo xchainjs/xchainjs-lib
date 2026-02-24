@@ -47,7 +47,6 @@ export function WithdrawTradeAsset({ thorchainAmm, mayachainAmm, wallet }: Withd
     if (!wallet || !amm) return
     setLoadingBalance(true)
     try {
-      const { assetToString: ats } = await import('@xchainjs/xchain-util')
       const address = await wallet.getAddress(protocolPrefix)
 
       const queryMod = protocol === 'thorchain'
@@ -60,7 +59,7 @@ export function WithdrawTradeAsset({ thorchainAmm, mayachainAmm, wallet }: Withd
       const accounts = await query.getAddressTradeAccounts({ address })
       const match = (accounts || []).find((a: any) => {
         const bal = a.balance || a.units
-        const assetStr = bal ? ats(bal.asset) : ''
+        const assetStr = bal ? assetToString(bal.asset) : ''
         return assetStr.includes(selectedAsset.tradeSymbol)
       })
       if (match) {

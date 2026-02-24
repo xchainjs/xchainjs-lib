@@ -61,7 +61,10 @@ export function DepositTradeAsset({ thorchainAmm, mayachainAmm, wallet, supporte
     try {
       const address = await wallet.getAddress(selectedAsset.chain)
       const balances = await wallet.getBalance(selectedAsset.chain, address)
-      if (balances && balances.length > 0) {
+      const native = balances?.find((b: any) => b.asset?.symbol === selectedAsset.symbol && b.asset?.chain === selectedAsset.chain)
+      if (native) {
+        setMaxBalance(baseToAsset(native.amount).amount().toFixed(selectedAsset.decimals))
+      } else if (balances && balances.length > 0) {
         setMaxBalance(baseToAsset(balances[0].amount).amount().toFixed(selectedAsset.decimals))
       } else {
         setMaxBalance('0')
@@ -230,7 +233,7 @@ console.log('Deposit TX:', result.hash)`
         <div className="flex items-center gap-3">
           <TradeAssetIcon chainId={selectedAsset.chain} symbol={selectedAsset.symbol} size={28} />
           <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-            {selectedAsset.symbol}~{selectedAsset.symbol === 'ATOM' ? 'ATOM' : selectedAsset.symbol}
+            {selectedAsset.chain}~{selectedAsset.symbol}
           </span>
           <span className="ml-auto text-lg font-mono text-gray-900 dark:text-gray-100 pr-3">
             {amount || '—'}

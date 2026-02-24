@@ -244,7 +244,7 @@ export function SwapTradeAsset({ thorchainAmm, mayachainAmm, wallet }: SwapTrade
     const toLabel = toIsNative ? native.key : TRADE_ASSET_OPTIONS[toIndex].tradeSymbol
     return `import { ${ammClass} } from '@xchainjs/${ammPkg}'
 import { ${queryClass} } from '@xchainjs/${queryPkg}'
-import { TradeCryptoAmount, assetAmount, assetToBase, assetFromStringEx } from '@xchainjs/xchain-util'
+import { ${fromIsNative ? 'CryptoAmount' : 'TradeCryptoAmount'}, assetAmount, assetToBase, assetFromStringEx } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
 const wallet = new Wallet({ /* chain clients */ })
@@ -253,7 +253,7 @@ const amm = new ${ammClass}(new ${queryClass}(), wallet)
 // Swap ${amount || '0.1'} ${fromLabel} -> ${toLabel}
 const fromAsset = assetFromStringEx('${fromIsNative ? `${protocolPrefix}.${fromLabel}` : fromLabel}')
 const toAsset = assetFromStringEx('${toIsNative ? `${protocolPrefix}.${toLabel}` : toLabel}')
-const amount = new TradeCryptoAmount(assetToBase(assetAmount(${amount || '0.1'}, 8)), fromAsset)
+const amount = new ${fromIsNative ? 'CryptoAmount' : 'TradeCryptoAmount'}(assetToBase(assetAmount(${amount || '0.1'}, ${fromIsNative ? (protocol === 'thorchain' ? 8 : 10) : 8})), fromAsset)
 
 const quote = await amm.estimateSwap({
   fromAsset, destinationAsset: toAsset, amount,

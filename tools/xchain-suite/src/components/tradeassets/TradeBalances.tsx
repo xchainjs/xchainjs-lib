@@ -54,31 +54,39 @@ export function TradeBalances({ thorchainQuery, mayachainQuery, wallet }: TradeB
 
         if (thorResult.status === 'fulfilled' && Array.isArray(thorResult.value)) {
           for (const account of thorResult.value) {
-            const bal = account.balance || account.units
-            const assetStr = assetToString(bal?.asset || account.asset)
-            const { chainId, symbol } = parseChainFromAsset(assetStr)
-            results.push({
-              protocol: 'THORChain',
-              asset: assetStr,
-              chainId,
-              symbol,
-              balance: baseToAsset(bal?.baseAmount || bal?.amount?.baseAmount).amount().toFixed(8),
-            })
+            try {
+              const bal = account.balance || account.units
+              const assetStr = assetToString(bal?.asset || account.asset)
+              const { chainId, symbol } = parseChainFromAsset(assetStr)
+              results.push({
+                protocol: 'THORChain',
+                asset: assetStr,
+                chainId,
+                symbol,
+                balance: baseToAsset(bal?.baseAmount || bal?.amount?.baseAmount).amount().toFixed(8),
+              })
+            } catch (e) {
+              console.warn('[TradeBalances] Failed to parse THORChain account:', e)
+            }
           }
         }
 
         if (mayaResult.status === 'fulfilled' && Array.isArray(mayaResult.value)) {
           for (const account of mayaResult.value) {
-            const bal = account.units || account.balance
-            const assetStr = assetToString(bal?.asset || account.asset)
-            const { chainId, symbol } = parseChainFromAsset(assetStr)
-            results.push({
-              protocol: 'MAYAChain',
-              asset: assetStr,
-              chainId,
-              symbol,
-              balance: baseToAsset(bal?.baseAmount || bal?.amount?.baseAmount).amount().toFixed(8),
-            })
+            try {
+              const bal = account.units || account.balance
+              const assetStr = assetToString(bal?.asset || account.asset)
+              const { chainId, symbol } = parseChainFromAsset(assetStr)
+              results.push({
+                protocol: 'MAYAChain',
+                asset: assetStr,
+                chainId,
+                symbol,
+                balance: baseToAsset(bal?.baseAmount || bal?.amount?.baseAmount).amount().toFixed(8),
+              })
+            } catch (e) {
+              console.warn('[TradeBalances] Failed to parse MAYAChain account:', e)
+            }
           }
         }
 

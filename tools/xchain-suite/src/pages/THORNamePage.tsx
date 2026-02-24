@@ -216,8 +216,9 @@ thorNames.forEach(name => {
         const { ThorchainQuery, ThorchainCache, Thornode } = await import('@xchainjs/xchain-thorchain-query')
         const { MidgardQuery, MidgardCache, Midgard } = await import('@xchainjs/xchain-midgard-query')
 
-        const midgardCache = new MidgardCache(new Midgard())
-        const thorchainCache = new ThorchainCache(new Thornode(), new MidgardQuery(midgardCache))
+        const network = wallet.getNetwork()
+        const midgardCache = new MidgardCache(new Midgard(network))
+        const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
         const thorchainQuery = new ThorchainQuery(thorchainCache)
         const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
