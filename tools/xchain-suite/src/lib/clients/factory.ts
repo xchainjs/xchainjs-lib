@@ -15,10 +15,39 @@ import { Client as ZecClient, defaultZECParams, AssetZEC, ZEC_DECIMAL, zcashExpl
 import { NownodesProvider, BlockcypherProvider, BlockcypherNetwork } from '@xchainjs/xchain-utxo-providers'
 
 // EVM Chains - import only the Client classes, not the default params (they trigger broken module-level code)
-import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
+import { Client as EthClient, defaultEthParams, AssetETH, ETHChain, ETH_GAS_ASSET_DECIMAL } from '@xchainjs/xchain-ethereum'
 import { Client as AvaxClient } from '@xchainjs/xchain-avax'
 import { Client as BscClient } from '@xchainjs/xchain-bsc'
 import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
+
+// Lazy creation of ETH config to use Vite env var for Etherscan API key
+function createEthParams(network: Network, phrase: string) {
+  const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
+
+  const mainnetProvider = new JsonRpcProvider('https://eth.llamarpc.com', 'homestead')
+  const testnetProvider = new JsonRpcProvider('https://ethereum-sepolia-rpc.publicnode.com', { name: 'sepolia', chainId: 11155111 })
+
+  const providers = {
+    [Network.Mainnet]: mainnetProvider,
+    [Network.Testnet]: testnetProvider,
+    [Network.Stagenet]: mainnetProvider,
+  }
+
+  const dataProviders = [{
+    [Network.Mainnet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, ETHChain, AssetETH, ETH_GAS_ASSET_DECIMAL, 1),
+    [Network.Testnet]: new EtherscanProviderV2(testnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, ETHChain, AssetETH, ETH_GAS_ASSET_DECIMAL, 11155111),
+    [Network.Stagenet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, ETHChain, AssetETH, ETH_GAS_ASSET_DECIMAL, 1),
+  }]
+
+  return {
+    ...defaultEthParams,
+    network,
+    phrase,
+    providers,
+    dataProviders,
+    feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
+  }
+}
 
 // Lazy creation of AVAX config to avoid module-level provider instantiation with undefined env vars
 function createAvaxParams(network: Network, phrase: string) {
@@ -321,7 +350,7 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
 
     // EVM Chains - use wide fee bounds to accommodate varying gas prices
     case 'ETH':
-      return new EthClient({ ...defaultEthParams, network, phrase, feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 } })
+      return new EthClient(createEthParams(network, phrase))
     case 'AVAX':
       return new AvaxClient(createAvaxParams(network, phrase))
     case 'BSC':

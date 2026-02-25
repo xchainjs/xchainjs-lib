@@ -5,7 +5,7 @@
  */
 
 import type { Network } from '@xchainjs/xchain-client'
-import { type Asset, type CryptoAmount, type Chain, CryptoAmount as CryptoAmountClass, baseAmount as baseAmountFn } from '@xchainjs/xchain-util'
+import { type AnyAsset, type CryptoAmount, type Chain, CryptoAmount as CryptoAmountClass, baseAmount as baseAmountFn } from '@xchainjs/xchain-util'
 
 // Types for swap quotes
 export interface SwapQuote {
@@ -25,8 +25,8 @@ export interface SwapQuote {
 }
 
 export interface SwapParams {
-  fromAsset: Asset
-  destinationAsset: Asset
+  fromAsset: AnyAsset
+  destinationAsset: AnyAsset
   amount: CryptoAmount
   fromAddress: string
   destinationAddress: string
@@ -212,7 +212,7 @@ export class SwapService {
         amount: params.amount,
         fromAddress: params.fromAddress,
         destinationAddress: params.destinationAddress,
-        affiliateAddress: 'xc',
+        affiliateAddress: 'dx',
         affiliateBps: 0,
         // Streaming swap parameters
         ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
@@ -356,7 +356,7 @@ export class SwapService {
           amount: params.amount,
           fromAddress: params.fromAddress,
           destinationAddress: params.destinationAddress,
-          affiliateAddress: 'xc',
+          affiliateAddress: 'dx',
           affiliateBps: 0,
           // Streaming swap parameters
           ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),

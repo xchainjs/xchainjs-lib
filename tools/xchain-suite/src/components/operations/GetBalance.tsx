@@ -5,7 +5,7 @@ import { ResultPanel } from '../ui/ResultPanel'
 import { CodePreview } from '../ui/CodePreview'
 import { generateGetBalanceCode } from '../../lib/codeExamples'
 import type { XChainClient, Balance } from '@xchainjs/xchain-client'
-import { assetToString, baseToAsset, formatAssetAmountCurrency, baseAmount } from '@xchainjs/xchain-util'
+import { assetToString, baseToAsset, formatAssetAmountCurrency, AssetType, type TokenAsset } from '@xchainjs/xchain-util'
 
 interface GetBalanceProps {
   chainId: string
@@ -16,8 +16,28 @@ interface BalanceResult {
   balances: Balance[]
 }
 
-// EVM chains that may need RPC fallback for balance
-const EVM_CHAINS = ['ETH', 'AVAX', 'BSC', 'ARB']
+// Known pool tokens per EVM chain — pass these explicitly so the provider
+// calls balanceOf() directly instead of relying on Etherscan tokentx discovery
+const EVM_POOL_TOKENS: Record<string, TokenAsset[]> = {
+  ETH: [
+    { chain: 'ETH', symbol: 'USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7', ticker: 'USDT', type: AssetType.TOKEN },
+    { chain: 'ETH', symbol: 'USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', ticker: 'USDC', type: AssetType.TOKEN },
+    { chain: 'ETH', symbol: 'DAI-0x6B175474E89094C44Da98b954EedeAC495271d0F', ticker: 'DAI', type: AssetType.TOKEN },
+    { chain: 'ETH', symbol: 'WBTC-0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', ticker: 'WBTC', type: AssetType.TOKEN },
+  ],
+  AVAX: [
+    { chain: 'AVAX', symbol: 'USDC-0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E', ticker: 'USDC', type: AssetType.TOKEN },
+    { chain: 'AVAX', symbol: 'USDT-0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', ticker: 'USDT', type: AssetType.TOKEN },
+  ],
+  BSC: [
+    { chain: 'BSC', symbol: 'USDT-0x55d398326f99059fF775485246999027B3197955', ticker: 'USDT', type: AssetType.TOKEN },
+    { chain: 'BSC', symbol: 'USDC-0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', ticker: 'USDC', type: AssetType.TOKEN },
+  ],
+  ARB: [
+    { chain: 'ARB', symbol: 'USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831', ticker: 'USDC', type: AssetType.TOKEN },
+    { chain: 'ARB', symbol: 'USDT-0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', ticker: 'USDT', type: AssetType.TOKEN },
+  ],
+}
 
 export function GetBalance({ chainId, client }: GetBalanceProps) {
   const [address, setAddress] = useState('')
@@ -33,27 +53,11 @@ export function GetBalance({ chainId, client }: GetBalanceProps) {
         }
         const queryAddress = targetAddress || await client.getAddressAsync(0)
 
-        try {
-          const balances = await client.getBalance(queryAddress)
-          return { balances }
-        } catch (e) {
-          // For EVM chains, try direct RPC balance if dataProvider fails (CORS issues)
-          if (EVM_CHAINS.includes(chainId)) {
-            const evmClient = client as unknown as { getProvider: () => { getBalance: (addr: string) => Promise<bigint> }; getAssetInfo: () => { asset: Balance['asset'] } }
-            if (evmClient.getProvider) {
-              const provider = evmClient.getProvider()
-              const rawBalance = await provider.getBalance(queryAddress)
-              const asset = evmClient.getAssetInfo().asset
-              return {
-                balances: [{
-                  asset,
-                  amount: baseAmount(rawBalance.toString(), 18)
-                }]
-              }
-            }
-          }
-          throw e
-        }
+        // For EVM chains, pass known pool tokens so the provider uses
+        // direct contract.balanceOf() instead of Etherscan tokentx discovery
+        const tokens = EVM_POOL_TOKENS[chainId]
+        const balances = await client.getBalance(queryAddress, tokens)
+        return { balances }
       },
       { chainId, operation: 'getBalance', params: { address: targetAddress || '(wallet)' } }
     )
