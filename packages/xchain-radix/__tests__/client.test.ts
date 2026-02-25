@@ -441,7 +441,6 @@ describe('RadixClient Test', () => {
     }
     const transactionId = await client.transfer(txParams)
 
-    await new Promise((resolve) => setTimeout(resolve, 5000))
     const NetworkConfiguration = {
       gatewayBaseUrl: 'https://stokenet.radixdlt.com',
       networkId: 0x02,
@@ -450,7 +449,15 @@ describe('RadixClient Test', () => {
       basePath: NetworkConfiguration.gatewayBaseUrl,
     })
     const transactionApi = new TransactionApi(apiConfiguration)
-    const transactionStatus = await getTransactionStatus(transactionApi, transactionId)
-    expect(transactionStatus.status).toBe(TransactionStatus.CommittedSuccess)
-  })
+
+    // Poll for transaction confirmation instead of a fixed sleep
+    const maxAttempts = 12
+    let transactionStatus: TransactionStatusResponse | undefined
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 5000))
+      transactionStatus = await getTransactionStatus(transactionApi, transactionId)
+      if (transactionStatus.status === TransactionStatus.CommittedSuccess) break
+    }
+    expect(transactionStatus?.status).toBe(TransactionStatus.CommittedSuccess)
+  }, 90000)
 })
