@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- 71adc43: Add Ledger hardware wallet support for Arbitrum chain
+
 ## 2.0.14
 
 ### Patch Changes

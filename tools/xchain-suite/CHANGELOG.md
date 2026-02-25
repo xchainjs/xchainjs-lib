@@ -1,5 +1,17 @@
 # testing-gui
 
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [71adc43]
+- Updated dependencies [65d0cb1]
+  - @xchainjs/xchain-arbitrum@2.1.0
+  - @xchainjs/xchain-midgard-query@2.0.13
+  - @xchainjs/xchain-thorchain-amm@3.0.31
+  - @xchainjs/xchain-mayachain-amm@4.1.13
+  - @xchainjs/xchain-thorchain-query@3.0.1
+
 ## 1.0.6
 
 ### Patch Changes
