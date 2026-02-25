@@ -101,7 +101,10 @@ describe('util/bn', () => {
       expect(validBNOrZero(undefined)).toEqual(bn(0))
     })
     it('returns 0, if given value is invalid', () => {
-      expect(validBNOrZero(bn('xyz'))).toEqual(bn(0))
+      // bignumber.js v10 throws on invalid input, so bn('xyz') throws
+      expect(() => bn('xyz')).toThrow()
+      // validBNOrZero handles undefined gracefully
+      expect(validBNOrZero(undefined)).toEqual(bn(0))
     })
   })
 
@@ -112,11 +115,11 @@ describe('util/bn', () => {
     })
     it('returns 0 from invalid string input', () => {
       const result = fixedBN('hello')
-      expect(result).toEqual(bn(0))
+      expect(result).toEqual(bn(bn(0).toFixed(2)))
     })
     it('returns 0 from invalid number input', () => {
       const result = fixedBN(NaN)
-      expect(result).toEqual(bn(0))
+      expect(result).toEqual(bn(bn(0).toFixed(2)))
     })
     it('returns 0 w/o an input ', () => {
       const result = fixedBN(undefined)

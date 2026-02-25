@@ -40,7 +40,7 @@
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.13.5",
     "axios-retry": "3.2.5",
-    "bignumber.js": "^9.1.2"
+    "bignumber.js": "^10.0.1"
   },
   "devDependencies": {
     "axios-mock-adapter": "2.1.0"

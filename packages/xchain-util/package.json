@@ -31,7 +31,7 @@
     "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "bignumber.js": "^9.1.2"
+    "bignumber.js": "^10.0.1"
   },
   "publishConfig": {
     "access": "public",
