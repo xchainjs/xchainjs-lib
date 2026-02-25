@@ -1,7 +1,7 @@
 import { Balance, FeeOption, Network, TxType } from '@xchainjs/xchain-client'
 import { AssetType, TokenAsset, assetAmount, assetToBase, assetToString } from '@xchainjs/xchain-util'
 
-import { Client as ArbClient } from '../src/client'
+import { Client as ArbClient } from '../src'
 import { ARBChain, AssetARB, defaultArbParams } from '../src/const'
 
 const mainnetClient = new ArbClient({
