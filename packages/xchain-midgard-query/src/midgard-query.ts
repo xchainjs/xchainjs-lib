@@ -107,6 +107,9 @@ export class MidgardQuery {
 
       // XRP
       'XRP.XRP': 6,
+
+      // Solana
+      'SOL.SOL': 9,
     }
 
     // Return specific fallback or use chain-based defaults
@@ -128,6 +131,7 @@ export class MidgardQuery {
       BASE: 18,
       TRON: 6,
       XRP: 6,
+      SOL: 9,
       THOR: DEFAULT_THORCHAIN_DECIMALS,
     }
 
@@ -201,7 +205,11 @@ export class MidgardQuery {
 
     try {
       const pool = await this.getPool(assetToString(asset))
-      return Number(pool.nativeDecimal)
+      const decimals = Number(pool.nativeDecimal)
+      if (decimals >= 0) return decimals
+      // Midgard returns -1 for chains where decimals are not yet configured
+      console.warn(`Midgard returned -1 decimals for ${assetToString(asset)}, using fallback`)
+      return this.getFallbackDecimals(asset)
     } catch (error) {
       // Fallback: if Midgard is down, use standard decimal values for common assets
       console.warn(`Midgard unavailable for decimal lookup, using fallback for ${assetToString(asset)}:`, error)

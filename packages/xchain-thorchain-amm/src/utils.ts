@@ -63,7 +63,7 @@ export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCrypto
  * @returns true if chain is EVM, otherwise, false
  */
 export const isProtocolBFTChain = (chain: Chain): boolean => {
-  return [AssetATOM.chain].includes(chain)
+  return [AssetATOM.chain, SOLChain].includes(chain)
 }
 
 export const validateAddress = (network: Network, chain: Chain, address: Address): boolean => {
