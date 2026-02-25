@@ -1,7 +1,8 @@
 import type { SwapService, SwapQuote, SwapParams } from './SwapService'
-import type { ChainAsset } from '../../components/swap/AssetSelector'
-import { AssetType, CryptoAmount, assetAmount, assetToBase, type AnyAsset } from '@xchainjs/xchain-util'
-import { getChainById, CHAIN_MIN_SWAP_AMOUNT } from '../chains'
+import type { ChainAsset } from '../types'
+import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { CHAIN_MIN_SWAP_AMOUNT } from '../chains'
+import { buildAsset, getDecimals } from '../assetUtils'
 
 export type RecurringInterval = 'every_minute' | 'every_5min' | 'every_15min' | 'every_30min' | 'every_hour' | 'every_4h' | 'every_day' | 'every_week'
 export type ScheduleStatus = 'active' | 'paused' | 'cancelled'
@@ -106,8 +107,10 @@ export class RecurringSwapScheduler {
       throw new Error('Recurring swap amount must be a positive number')
     }
     const slippage = Math.max(1, Math.min(config.maxSlippageBps, 10000))
-    const streamingInterval = config.streamingInterval ?? 1
-    const streamingQuantity = config.streamingQuantity ?? 0
+    const rawInterval = config.streamingInterval ?? 1
+    const rawQuantity = config.streamingQuantity ?? 0
+    const streamingInterval = Number.isInteger(rawInterval) && rawInterval > 0 ? rawInterval : 1
+    const streamingQuantity = Number.isInteger(rawQuantity) && rawQuantity >= 0 ? rawQuantity : 0
 
     const schedule: RecurringSchedule = {
       id: crypto.randomUUID(),
@@ -209,33 +212,9 @@ export class RecurringSwapScheduler {
     }
 
     try {
-      const fromAssetObj: AnyAsset = schedule.fromAsset.contractAddress
-        ? {
-            chain: schedule.fromAsset.chainId,
-            symbol: `${schedule.fromAsset.symbol}-${schedule.fromAsset.contractAddress}`,
-            ticker: schedule.fromAsset.symbol,
-            type: AssetType.TOKEN,
-          }
-        : {
-            chain: schedule.fromAsset.chainId,
-            symbol: schedule.fromAsset.symbol,
-            ticker: schedule.fromAsset.symbol,
-            type: AssetType.NATIVE,
-          }
-      const toAssetObj: AnyAsset = schedule.toAsset.contractAddress
-        ? {
-            chain: schedule.toAsset.chainId,
-            symbol: `${schedule.toAsset.symbol}-${schedule.toAsset.contractAddress}`,
-            ticker: schedule.toAsset.symbol,
-            type: AssetType.TOKEN,
-          }
-        : {
-            chain: schedule.toAsset.chainId,
-            symbol: schedule.toAsset.symbol,
-            ticker: schedule.toAsset.symbol,
-            type: AssetType.NATIVE,
-          }
-      const decimals = schedule.fromAsset.decimals ?? getChainById(schedule.fromAsset.chainId)?.decimals ?? 8
+      const fromAssetObj = buildAsset(schedule.fromAsset)
+      const toAssetObj = buildAsset(schedule.toAsset)
+      const decimals = getDecimals(schedule.fromAsset)
       const amountNum = parseFloat(schedule.amount)
       const cryptoAmount = new CryptoAmount(assetToBase(assetAmount(amountNum, decimals)), fromAssetObj)
 
@@ -362,6 +341,18 @@ export class RecurringSwapScheduler {
       if (!raw) return
       const data: RecurringSchedule[] = JSON.parse(raw)
       for (const schedule of data) {
+        // Validate critical numeric fields
+        const amount = Number(schedule.amount)
+        if (!schedule.id || !Number.isFinite(amount) || amount <= 0) continue
+        if (!INTERVAL_MS[schedule.interval]) continue
+
+        // Sanitize numeric fields
+        schedule.consecutiveFailures = Math.max(0, Number(schedule.consecutiveFailures) || 0)
+        schedule.totalExecutions = Math.max(0, Number(schedule.totalExecutions) || 0)
+        schedule.maxSlippageBps = Math.max(1, Math.min(Number(schedule.maxSlippageBps) || 300, 10000))
+        schedule.streamingInterval = Number.isInteger(schedule.streamingInterval) && schedule.streamingInterval > 0 ? schedule.streamingInterval : 1
+        schedule.streamingQuantity = Number.isInteger(schedule.streamingQuantity) && schedule.streamingQuantity >= 0 ? schedule.streamingQuantity : 0
+
         // All schedules start paused on app restart
         schedule.status = schedule.status === 'cancelled' ? 'cancelled' : 'paused'
         schedule.nextExecutionAt = null

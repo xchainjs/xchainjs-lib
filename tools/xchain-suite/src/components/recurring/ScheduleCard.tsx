@@ -31,10 +31,12 @@ function Countdown({ targetMs }: { targetMs: number }) {
   const [remaining, setRemaining] = useState('')
 
   useEffect(() => {
+    let id: ReturnType<typeof setInterval> | null = null
     const update = () => {
       const diff = Math.max(0, targetMs - Date.now())
       if (diff === 0) {
         setRemaining('Executing...')
+        if (id) clearInterval(id)
         return
       }
       const s = Math.floor(diff / 1000)
@@ -45,8 +47,8 @@ function Countdown({ targetMs }: { targetMs: number }) {
       else setRemaining(`${s}s`)
     }
     update()
-    const id = setInterval(update, 1000)
-    return () => clearInterval(id)
+    id = setInterval(update, 1000)
+    return () => { if (id) clearInterval(id) }
   }, [targetMs])
 
   return <span className="font-mono text-sm">{remaining}</span>

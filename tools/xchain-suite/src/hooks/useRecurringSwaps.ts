@@ -5,7 +5,7 @@ import {
   type ExecutionRecord,
   type RecurringInterval,
 } from '../lib/swap/RecurringSwapScheduler'
-import type { ChainAsset } from '../components/swap/AssetSelector'
+import type { ChainAsset } from '../lib/types'
 import type { SwapService } from '../lib/swap/SwapService'
 
 export interface UseRecurringSwapsResult {
@@ -66,7 +66,12 @@ export function useRecurringSwaps(swapService: SwapService | null, wallet: any):
   const createSchedule = useCallback(
     (config: Parameters<UseRecurringSwapsResult['createSchedule']>[0]) => {
       if (!schedulerRef.current) return null
-      return schedulerRef.current.createSchedule(config)
+      try {
+        return schedulerRef.current.createSchedule(config)
+      } catch (error) {
+        console.warn('[useRecurringSwaps] Failed to create schedule:', error)
+        return null
+      }
     },
     [],
   )

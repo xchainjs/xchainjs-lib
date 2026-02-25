@@ -4,41 +4,18 @@ import { useWallet } from '../contexts/WalletContext'
 import { useAggregator, type SwapQuote } from '../hooks/useAggregator'
 import { useOperation } from '../hooks/useOperation'
 import { useBalanceUsdValue, usePrices, formatUsdValue } from '../hooks/usePrices'
-import { AssetSelector, type ChainAsset } from '../components/swap/AssetSelector'
+import { AssetSelector } from '../components/swap/AssetSelector'
+import type { ChainAsset } from '../lib/types'
 import { QuoteCard } from '../components/swap/QuoteCard'
 import { SwapConfirmModal } from '../components/swap/SwapConfirmModal'
 import { SwapTrackingModal } from '../components/swap/SwapTrackingModal'
 import { ResultPanel } from '../components/ui/ResultPanel'
 import { CodePreview } from '../components/ui/CodePreview'
 import { generateSwapEstimateCode, generateSwapExecuteCode } from '../lib/codeExamples'
-import { getChainById, CHAIN_MIN_SWAP_AMOUNT } from '../lib/chains'
-import { assetAmount, assetToBase, baseToAsset, CryptoAmount, AssetType, type AnyAsset } from '@xchainjs/xchain-util'
+import { CHAIN_MIN_SWAP_AMOUNT } from '../lib/chains'
+import { buildAsset, getDecimals } from '../lib/assetUtils'
+import { assetAmount, assetToBase, baseToAsset, CryptoAmount } from '@xchainjs/xchain-util'
 import type { SwapResult } from '../lib/swap/SwapService'
-
-// Helper to build Asset or TokenAsset from ChainAsset
-function buildAsset(chainAsset: ChainAsset): AnyAsset {
-  if (chainAsset.contractAddress) {
-    return {
-      chain: chainAsset.chainId,
-      symbol: `${chainAsset.symbol}-${chainAsset.contractAddress}`,
-      ticker: chainAsset.symbol,
-      type: AssetType.TOKEN,
-    }
-  }
-  return {
-    chain: chainAsset.chainId,
-    symbol: chainAsset.symbol,
-    ticker: chainAsset.symbol,
-    type: AssetType.NATIVE,
-  }
-}
-
-// Get decimals — use token-specific decimals when available, else chain default
-function getDecimals(chainAsset: ChainAsset): number {
-  if (chainAsset.decimals !== undefined) return chainAsset.decimals
-  const chain = getChainById(chainAsset.chainId)
-  return chain?.decimals ?? 8
-}
 
 export default function SwapPage() {
   const { isConnected } = useWallet()
@@ -92,6 +69,8 @@ export default function SwapPage() {
       return
     }
 
+    let cancelled = false
+
     const fetchBalance = async () => {
       try {
         const asset = buildAsset(fromAsset)
@@ -113,6 +92,8 @@ export default function SwapPage() {
           }
         }
 
+        if (cancelled) return
+
         const match = balances.find(
           (b: any) =>
             b.asset.chain === asset.chain &&
@@ -126,11 +107,12 @@ export default function SwapPage() {
         }
       } catch (e) {
         console.warn('[SwapPage] Failed to fetch balance:', e)
-        setBalance(null)
+        if (!cancelled) setBalance(null)
       }
     }
 
     fetchBalance()
+    return () => { cancelled = true }
   }, [wallet, fromAsset])
 
   // Clear quotes when assets change
@@ -222,7 +204,7 @@ export default function SwapPage() {
           amount: cryptoAmount,
           fromAddress,
           destinationAddress,
-          // Streaming swap parameters (THORChain only)
+          // Streaming swap parameters (not applicable for Chainflip)
           ...(isStreaming && {
             streamingInterval: parseInt(streamingInterval) || 1,
             streamingQuantity: parseInt(streamingQuantity) || 0,

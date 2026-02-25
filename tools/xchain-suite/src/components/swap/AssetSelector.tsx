@@ -1,14 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, X, Search } from 'lucide-react'
 import { AssetIcon, POPULAR_CHAIN_IDS } from './assetIcons'
-
-interface ChainAsset {
-  chainId: string
-  chainName: string
-  symbol: string
-  contractAddress?: string
-  decimals?: number
-}
+import type { ChainAsset } from '../../lib/types'
 
 interface ChainGroup {
   name: string
@@ -286,4 +279,4 @@ export function AssetSelector({
   )
 }
 
-export type { ChainAsset }
+export type { ChainAsset } from '../../lib/types'

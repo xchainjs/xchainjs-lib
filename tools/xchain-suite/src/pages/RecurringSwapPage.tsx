@@ -4,13 +4,15 @@ import { useWallet } from '../contexts/WalletContext'
 import { useAggregator, type SwapQuote } from '../hooks/useAggregator'
 import { useRecurringSwaps } from '../hooks/useRecurringSwaps'
 import { useOperation } from '../hooks/useOperation'
-import { AssetSelector, type ChainAsset } from '../components/swap/AssetSelector'
+import { AssetSelector } from '../components/swap/AssetSelector'
+import type { ChainAsset } from '../lib/types'
 import { QuoteCard } from '../components/swap/QuoteCard'
 import { ScheduleCard } from '../components/recurring/ScheduleCard'
 import type { RecurringInterval } from '../lib/swap/RecurringSwapScheduler'
-import { AssetType, CryptoAmount, assetAmount, assetToBase, type AnyAsset } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 import { useAssetPrice } from '../hooks/usePrices'
-import { getChainById, CHAIN_MIN_SWAP_AMOUNT } from '../lib/chains'
+import { CHAIN_MIN_SWAP_AMOUNT } from '../lib/chains'
+import { buildAsset, getDecimals } from '../lib/assetUtils'
 
 const USD_PRESETS = [25, 50, 100, 250, 500]
 
@@ -26,23 +28,6 @@ const INTERVAL_OPTIONS: { value: RecurringInterval; label: string }[] = [
 ]
 
 const PROTOCOL_OPTIONS = ['Thorchain', 'Mayachain', 'Chainflip'] as const
-
-function buildAsset(chainAsset: ChainAsset): AnyAsset {
-  if (chainAsset.contractAddress) {
-    return {
-      chain: chainAsset.chainId,
-      symbol: `${chainAsset.symbol}-${chainAsset.contractAddress}`,
-      ticker: chainAsset.symbol,
-      type: AssetType.TOKEN,
-    }
-  }
-  return {
-    chain: chainAsset.chainId,
-    symbol: chainAsset.symbol,
-    ticker: chainAsset.symbol,
-    type: AssetType.NATIVE,
-  }
-}
 
 export default function RecurringSwapPage() {
   const { isConnected } = useWallet()
@@ -82,7 +67,7 @@ export default function RecurringSwapPage() {
 
     const fromAssetObj = buildAsset(fromAsset)
     const toAssetObj = buildAsset(toAsset)
-    const decimals = fromAsset.decimals ?? getChainById(fromAsset.chainId)?.decimals ?? 8
+    const decimals = getDecimals(fromAsset)
     const amountNum = parseFloat(amount)
     if (isNaN(amountNum) || amountNum <= 0) return
 
@@ -98,8 +83,8 @@ export default function RecurringSwapPage() {
         fromAddress,
         destinationAddress,
         ...(isStreaming && protocol !== 'Chainflip' && {
-          streamingInterval: parseInt(streamingInterval) || 1,
-          streamingQuantity: parseInt(streamingQuantity) || 0,
+          streamingInterval: Math.max(parseInt(streamingInterval) || 0, 1),
+          streamingQuantity: Math.max(parseInt(streamingQuantity) || 0, 0),
         }),
       })
       setPreviewQuotes(quotes)
@@ -123,8 +108,8 @@ export default function RecurringSwapPage() {
       interval,
       maxSlippageBps: slippage,
       streaming: isStreaming,
-      streamingInterval: parseInt(streamingInterval) || 1,
-      streamingQuantity: parseInt(streamingQuantity) || 0,
+      streamingInterval: Math.max(parseInt(streamingInterval) || 0, 1),
+      streamingQuantity: Math.max(parseInt(streamingQuantity) || 0, 0),
       startPaused,
     })
 
@@ -230,7 +215,7 @@ export default function RecurringSwapPage() {
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {USD_PRESETS.map((usd) => {
                     const assetAmt = usd / fromAssetPrice
-                    const decimals = fromAsset.decimals ?? getChainById(fromAsset.chainId)?.decimals ?? 8
+                    const decimals = getDecimals(fromAsset)
                     const display = assetAmt < 0.01 ? assetAmt.toFixed(decimals) : assetAmt.toFixed(6)
                     return (
                       <button
