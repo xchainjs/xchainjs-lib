@@ -39,3 +39,20 @@ export const getChainsByCategory = (category: ChainCategory): ChainConfig[] =>
   SUPPORTED_CHAINS.filter((c) => c.category === category)
 
 export const CHAIN_CATEGORIES: ChainCategory[] = ['utxo', 'evm', 'cosmos', 'other']
+
+/**
+ * Minimum swap amounts per chain (in asset units, not base).
+ * Derived from THORChain/MAYAChain dust thresholds:
+ *   BTC, BCH, LTC: 10,000 sats = 0.0001
+ *   DOGE: 1,000,000 sats = 0.01
+ *   DASH: 10,000 sats = 0.0001
+ * Amounts below these will be rejected by the AMMs or fail at the UTXO client level.
+ */
+export const CHAIN_MIN_SWAP_AMOUNT: Record<string, number> = {
+  BTC: 0.0001,
+  BCH: 0.0001,
+  LTC: 0.0001,
+  DOGE: 0.01,
+  DASH: 0.0001,
+  ZEC: 0.00001,
+}

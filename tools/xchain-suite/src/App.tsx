@@ -8,6 +8,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 
 // Lazy load pages to avoid loading dependencies on initial load
 const SwapPage = lazy(() => import('./pages/SwapPage'))
+const RecurringSwapPage = lazy(() => import('./pages/RecurringSwapPage'))
 const PoolsPage = lazy(() => import('./pages/PoolsPage'))
 const LiquidityPage = lazy(() => import('./pages/LiquidityPage'))
 const TradeAssetsPage = lazy(() => import('./pages/TradeAssetsPage'))
@@ -18,15 +19,19 @@ const MAYANamePage = lazy(() => import('./pages/MAYANamePage'))
 const THORNamePage = lazy(() => import('./pages/THORNamePage'))
 const RouterApprovalPage = lazy(() => import('./pages/RouterApprovalPage'))
 
-function SwapPageLoader() {
+function PageLoader({ message }: { message: string }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <div className="flex items-center gap-3">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading swap interface...</p>
+        <p className="text-gray-600 dark:text-gray-300">{message}</p>
       </div>
     </div>
   )
+}
+
+function SwapPageLoader() {
+  return <PageLoader message="Loading swap interface..." />
 }
 
 function PoolsPageLoader() {
@@ -142,6 +147,14 @@ export default function App() {
                   element={
                     <Suspense fallback={<SwapPageLoader />}>
                       <SwapPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/recurring"
+                  element={
+                    <Suspense fallback={<PageLoader message="Loading recurring swaps..." />}>
+                      <RecurringSwapPage />
                     </Suspense>
                   }
                 />

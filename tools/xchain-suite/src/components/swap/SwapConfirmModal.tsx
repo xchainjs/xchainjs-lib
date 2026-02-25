@@ -1,6 +1,6 @@
 import { X, ArrowRight, AlertTriangle, Loader2 } from 'lucide-react'
 import { baseToAsset, formatAssetAmountCurrency, assetToString, AssetType, type Asset } from '@xchainjs/xchain-util'
-import type { ChainAsset } from './AssetSelector'
+import type { ChainAsset } from '../../lib/types'
 import type { SwapQuote } from '../../lib/swap/SwapService'
 import { usePrices, formatUsdValue } from '../../hooks/usePrices'
 import { AssetIcon } from './assetIcons'

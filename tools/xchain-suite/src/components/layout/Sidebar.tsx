@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { ArrowRightLeft, Droplets, Server, Repeat, Coins, AtSign, Shield, BarChart3, Tag } from 'lucide-react'
+import { ArrowRightLeft, Droplets, Server, Repeat, Coins, AtSign, Shield, BarChart3, Tag, CalendarClock } from 'lucide-react'
 
 interface ChainGroup {
   name: string
@@ -69,6 +69,19 @@ export function Sidebar() {
           >
             <ArrowRightLeft className="w-4 h-4" />
             Swap
+          </NavLink>
+          <NavLink
+            to="/recurring"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`
+            }
+          >
+            <CalendarClock className="w-4 h-4" />
+            Recurring Swaps
           </NavLink>
           <NavLink
             to="/pools"
