@@ -28,7 +28,6 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@supercharge/promise-pool": "2.4.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.13.5",

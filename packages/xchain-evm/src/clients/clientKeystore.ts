@@ -50,7 +50,7 @@ export class ClientKeystore extends Client {
    * @throws {Error} if the client is not using an account
    */
   protected getSigner(): IKeystoreSigner {
-    if (!this.signer) throw Error('Can not get signer')
+    if (!this.signer) throw new Error('Can not get signer')
     return this.signer
   }
 }

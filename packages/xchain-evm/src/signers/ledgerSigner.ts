@@ -43,7 +43,7 @@ export class LedgerSigner extends Signer {
    * @returns
    */
   public async getAddressAsync(index = 0, verify = false): Promise<Address> {
-    if (index < 0) throw Error('Index must be greater than or equal to zero')
+    if (index < 0) throw new Error('Index must be greater than or equal to zero')
     const app = this.getApp()
     const result = await app.getAddress(this.getFullDerivationPath(index), verify)
     return result.address
