@@ -135,7 +135,8 @@ export function AssetSelector({
   const assetKey = (a: ChainAsset) => a.contractAddress ? `${a.chainId}-${a.contractAddress}` : a.chainId
 
   const popularChains = POPULAR_CHAIN_IDS
-    .map((id) => ALL_CHAINS.find((c) => c.chainId === id && !c.contractAddress)!)
+    .map((id) => ALL_CHAINS.find((c) => c.chainId === id && !c.contractAddress))
+    .filter((chain): chain is ChainAsset => Boolean(chain))
     .filter(isAvailable)
 
   const handleSelect = (asset: ChainAsset) => {

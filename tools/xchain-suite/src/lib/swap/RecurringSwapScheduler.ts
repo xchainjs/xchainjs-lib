@@ -101,6 +101,14 @@ export class RecurringSwapScheduler {
     streamingQuantity?: number
     startPaused?: boolean
   }): RecurringSchedule {
+    const amountNum = Number(config.amount)
+    if (!Number.isFinite(amountNum) || amountNum <= 0) {
+      throw new Error('Recurring swap amount must be a positive number')
+    }
+    const slippage = Math.max(1, Math.min(config.maxSlippageBps, 10000))
+    const streamingInterval = config.streamingInterval ?? 1
+    const streamingQuantity = config.streamingQuantity ?? 0
+
     const schedule: RecurringSchedule = {
       id: crypto.randomUUID(),
       fromAsset: config.fromAsset,
@@ -108,10 +116,10 @@ export class RecurringSwapScheduler {
       amount: config.amount,
       protocol: config.protocol,
       interval: config.interval,
-      maxSlippageBps: config.maxSlippageBps,
+      maxSlippageBps: slippage,
       streaming: config.streaming ?? true,
-      streamingInterval: config.streamingInterval ?? 1,
-      streamingQuantity: config.streamingQuantity ?? 0,
+      streamingInterval,
+      streamingQuantity,
       status: config.startPaused ? 'paused' : 'active',
       createdAt: Date.now(),
       nextExecutionAt: config.startPaused ? null : Date.now() + INTERVAL_MS[config.interval],
@@ -253,13 +261,11 @@ export class RecurringSwapScheduler {
 
       if (!quote) {
         this.addHistory(id, { status: 'skipped', skipReason: `No ${schedule.protocol} quote available` })
-        this.handlePostExecution(schedule)
         return
       }
 
       if (!quote.canSwap) {
         this.addHistory(id, { status: 'skipped', skipReason: `Cannot swap: ${quote.errors.join(', ')}` })
-        this.handlePostExecution(schedule)
         return
       }
 
@@ -269,7 +275,6 @@ export class RecurringSwapScheduler {
           skipReason: `Slippage ${quote.slipBasisPoints}bps exceeds max ${schedule.maxSlippageBps}bps`,
           slippageBps: quote.slipBasisPoints,
         })
-        this.handlePostExecution(schedule)
         return
       }
 

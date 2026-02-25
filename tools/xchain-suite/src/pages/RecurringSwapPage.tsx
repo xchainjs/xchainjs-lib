@@ -9,7 +9,10 @@ import { QuoteCard } from '../components/swap/QuoteCard'
 import { ScheduleCard } from '../components/recurring/ScheduleCard'
 import type { RecurringInterval } from '../lib/swap/RecurringSwapScheduler'
 import { AssetType, CryptoAmount, assetAmount, assetToBase, type AnyAsset } from '@xchainjs/xchain-util'
+import { useAssetPrice } from '../hooks/usePrices'
 import { getChainById, CHAIN_MIN_SWAP_AMOUNT } from '../lib/chains'
+
+const USD_PRESETS = [25, 50, 100, 250, 500]
 
 const INTERVAL_OPTIONS: { value: RecurringInterval; label: string }[] = [
   { value: 'every_minute', label: 'Every Minute' },
@@ -53,7 +56,7 @@ export default function RecurringSwapPage() {
     cancelSchedule,
     getHistory,
     activeCount,
-  } = useRecurringSwaps()
+  } = useRecurringSwaps(swapService, wallet)
 
   // Form state
   const [fromAsset, setFromAsset] = useState<ChainAsset | null>(null)
@@ -65,6 +68,10 @@ export default function RecurringSwapPage() {
   const [isStreaming, setIsStreaming] = useState(true)
   const [streamingInterval, setStreamingInterval] = useState('1')
   const [streamingQuantity, setStreamingQuantity] = useState('0')
+
+  // Price for USD presets
+  const fromAssetObj = fromAsset ? buildAsset(fromAsset) : null
+  const { price: fromAssetPrice } = useAssetPrice(fromAssetObj)
 
   // Preview quote
   const [previewQuotes, setPreviewQuotes] = useState<SwapQuote[]>([])
@@ -80,10 +87,10 @@ export default function RecurringSwapPage() {
     if (isNaN(amountNum) || amountNum <= 0) return
 
     const cryptoAmount = new CryptoAmount(assetToBase(assetAmount(amountNum, decimals)), fromAssetObj)
-    const fromAddress = await wallet.getAddress(fromAsset.chainId)
-    const destinationAddress = await wallet.getAddress(toAsset.chainId)
 
     await quoteOp.execute(async () => {
+      const fromAddress = await wallet.getAddress(fromAsset.chainId)
+      const destinationAddress = await wallet.getAddress(toAsset.chainId)
       const quotes = await swapService.estimateSwap({
         fromAsset: fromAssetObj,
         destinationAsset: toAssetObj,
@@ -105,7 +112,8 @@ export default function RecurringSwapPage() {
     const amountNum = parseFloat(amount)
     if (isNaN(amountNum) || amountNum <= 0) return
 
-    const slippage = parseInt(maxSlippageBps) || 300
+    const parsedSlippage = Number(maxSlippageBps)
+    const slippage = Number.isInteger(parsedSlippage) && parsedSlippage > 0 ? parsedSlippage : 300
 
     createSchedule({
       fromAsset,
@@ -217,6 +225,32 @@ export default function RecurringSwapPage() {
                 placeholder="0.00"
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-mono placeholder-gray-400 dark:placeholder-gray-500"
               />
+              {/* USD presets */}
+              {fromAsset && fromAssetPrice && fromAssetPrice > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {USD_PRESETS.map((usd) => {
+                    const assetAmt = usd / fromAssetPrice
+                    const decimals = fromAsset.decimals ?? getChainById(fromAsset.chainId)?.decimals ?? 8
+                    const display = assetAmt < 0.01 ? assetAmt.toFixed(decimals) : assetAmt.toFixed(6)
+                    return (
+                      <button
+                        key={usd}
+                        type="button"
+                        onClick={() => setAmount(display)}
+                        className="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                      >
+                        ${usd}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              {/* USD equivalent */}
+              {amount && fromAssetPrice && fromAssetPrice > 0 && (
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  ≈ ${(parseFloat(amount) * fromAssetPrice).toFixed(2)} USD
+                </p>
+              )}
               {isBelowMinimum && (
                 <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
                   Minimum amount for {fromAsset!.chainId} is {minSwapAmount} {fromAsset!.symbol}

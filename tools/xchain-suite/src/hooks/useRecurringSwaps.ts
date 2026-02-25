@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useAggregator } from './useAggregator'
 import {
   RecurringSwapScheduler,
   type RecurringSchedule,
@@ -7,6 +6,7 @@ import {
   type RecurringInterval,
 } from '../lib/swap/RecurringSwapScheduler'
 import type { ChainAsset } from '../components/swap/AssetSelector'
+import type { SwapService } from '../lib/swap/SwapService'
 
 export interface UseRecurringSwapsResult {
   schedules: RecurringSchedule[]
@@ -30,8 +30,7 @@ export interface UseRecurringSwapsResult {
   activeCount: number
 }
 
-export function useRecurringSwaps(): UseRecurringSwapsResult {
-  const { swapService, wallet } = useAggregator()
+export function useRecurringSwaps(swapService: SwapService | null, wallet: any): UseRecurringSwapsResult {
   const schedulerRef = useRef<RecurringSwapScheduler | null>(null)
   const [schedules, setSchedules] = useState<RecurringSchedule[]>([])
   const [isReady, setIsReady] = useState(false)

@@ -126,7 +126,7 @@ export default function SwapPage() {
         }
       } catch (e) {
         console.warn('[SwapPage] Failed to fetch balance:', e)
-        setBalance('—')
+        setBalance(null)
       }
     }
 
