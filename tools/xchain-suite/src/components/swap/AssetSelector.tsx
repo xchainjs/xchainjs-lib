@@ -6,6 +6,8 @@ interface ChainAsset {
   chainId: string
   chainName: string
   symbol: string
+  contractAddress?: string
+  decimals?: number
 }
 
 interface ChainGroup {
@@ -19,7 +21,7 @@ interface AssetSelectorProps {
   onChange: (asset: ChainAsset) => void
   availableChains: string[]
   disabled?: boolean
-  excludeChain?: string
+  excludeAsset?: ChainAsset
 }
 
 const CHAIN_GROUPS: ChainGroup[] = [
@@ -37,9 +39,19 @@ const CHAIN_GROUPS: ChainGroup[] = [
     name: 'EVM',
     chains: [
       { chainId: 'ETH', chainName: 'Ethereum', symbol: 'ETH' },
+      { chainId: 'ETH', chainName: 'Ethereum', symbol: 'USDT', contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+      { chainId: 'ETH', chainName: 'Ethereum', symbol: 'USDC', contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6 },
+      { chainId: 'ETH', chainName: 'Ethereum', symbol: 'DAI', contractAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18 },
+      { chainId: 'ETH', chainName: 'Ethereum', symbol: 'WBTC', contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
       { chainId: 'AVAX', chainName: 'Avalanche', symbol: 'AVAX' },
+      { chainId: 'AVAX', chainName: 'Avalanche', symbol: 'USDC', contractAddress: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E', decimals: 6 },
+      { chainId: 'AVAX', chainName: 'Avalanche', symbol: 'USDT', contractAddress: '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', decimals: 6 },
       { chainId: 'BSC', chainName: 'BNB Smart Chain', symbol: 'BNB' },
+      { chainId: 'BSC', chainName: 'BNB Smart Chain', symbol: 'USDT', contractAddress: '0x55d398326f99059fF775485246999027B3197955', decimals: 18 },
+      { chainId: 'BSC', chainName: 'BNB Smart Chain', symbol: 'USDC', contractAddress: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', decimals: 18 },
       { chainId: 'ARB', chainName: 'Arbitrum', symbol: 'ETH' },
+      { chainId: 'ARB', chainName: 'Arbitrum', symbol: 'USDC', contractAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', decimals: 6 },
+      { chainId: 'ARB', chainName: 'Arbitrum', symbol: 'USDT', contractAddress: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', decimals: 6 },
     ],
   },
   {
@@ -68,7 +80,7 @@ export function AssetSelector({
   onChange,
   availableChains,
   disabled = false,
-  excludeChain,
+  excludeAsset,
 }: AssetSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -97,8 +109,11 @@ export function AssetSelector({
     return () => document.removeEventListener('keydown', onKey)
   }, [isOpen])
 
+  const isSameAsset = (a: ChainAsset, b: ChainAsset) =>
+    a.chainId === b.chainId && a.symbol === b.symbol && a.contractAddress === b.contractAddress
+
   const isAvailable = (chain: ChainAsset) =>
-    availableChains.includes(chain.chainId) && chain.chainId !== excludeChain
+    availableChains.includes(chain.chainId) && !(excludeAsset && isSameAsset(chain, excludeAsset))
 
   // Filter groups by availability + search
   const query = search.toLowerCase().trim()
@@ -117,8 +132,10 @@ export function AssetSelector({
 
   const totalResults = filteredGroups.reduce((n, g) => n + g.chains.length, 0)
 
+  const assetKey = (a: ChainAsset) => a.contractAddress ? `${a.chainId}-${a.contractAddress}` : a.chainId
+
   const popularChains = POPULAR_CHAIN_IDS
-    .map((id) => ALL_CHAINS.find((c) => c.chainId === id)!)
+    .map((id) => ALL_CHAINS.find((c) => c.chainId === id && !c.contractAddress)!)
     .filter(isAvailable)
 
   const handleSelect = (asset: ChainAsset) => {
@@ -209,10 +226,10 @@ export function AssetSelector({
               <div className="flex flex-wrap gap-2 px-4 pb-3">
                 {popularChains.map((chain) => (
                   <button
-                    key={chain.chainId}
+                    key={assetKey(chain)}
                     onClick={() => handleSelect(chain)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                      value?.chainId === chain.chainId
+                      value && isSameAsset(value, chain)
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                         : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
@@ -238,10 +255,10 @@ export function AssetSelector({
                     </div>
                     {group.chains.map((chain) => (
                       <button
-                        key={chain.chainId}
+                        key={assetKey(chain)}
                         onClick={() => handleSelect(chain)}
                         className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                          value?.chainId === chain.chainId
+                          value && isSameAsset(value, chain)
                             ? 'bg-blue-50 dark:bg-blue-900/30'
                             : ''
                         }`}
@@ -249,10 +266,10 @@ export function AssetSelector({
                         <AssetIcon chainId={chain.chainId} symbol={chain.symbol} size={32} />
                         <div className="text-left">
                           <div className="font-medium text-gray-900 dark:text-gray-100">
-                            {chain.chainName}
+                            {chain.contractAddress ? `${chain.chainName} ${chain.symbol}` : chain.chainName}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {chain.symbol}
+                            {chain.contractAddress ? `${chain.chainId}.${chain.symbol}` : chain.symbol}
                           </div>
                         </div>
                       </button>

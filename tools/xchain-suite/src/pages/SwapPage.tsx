@@ -11,12 +11,20 @@ import { SwapTrackingModal } from '../components/swap/SwapTrackingModal'
 import { ResultPanel } from '../components/ui/ResultPanel'
 import { CodePreview } from '../components/ui/CodePreview'
 import { generateSwapEstimateCode, generateSwapExecuteCode } from '../lib/codeExamples'
-import { getChainById } from '../lib/chains'
-import { assetAmount, assetToBase, baseToAsset, CryptoAmount, AssetType, type Asset } from '@xchainjs/xchain-util'
+import { getChainById, CHAIN_MIN_SWAP_AMOUNT } from '../lib/chains'
+import { assetAmount, assetToBase, baseToAsset, CryptoAmount, AssetType, type AnyAsset } from '@xchainjs/xchain-util'
 import type { SwapResult } from '../lib/swap/SwapService'
 
-// Helper to build Asset from ChainAsset
-function buildAsset(chainAsset: ChainAsset): Asset {
+// Helper to build Asset or TokenAsset from ChainAsset
+function buildAsset(chainAsset: ChainAsset): AnyAsset {
+  if (chainAsset.contractAddress) {
+    return {
+      chain: chainAsset.chainId,
+      symbol: `${chainAsset.symbol}-${chainAsset.contractAddress}`,
+      ticker: chainAsset.symbol,
+      type: AssetType.TOKEN,
+    }
+  }
   return {
     chain: chainAsset.chainId,
     symbol: chainAsset.symbol,
@@ -25,9 +33,10 @@ function buildAsset(chainAsset: ChainAsset): Asset {
   }
 }
 
-// Get decimals for a chain
-function getDecimals(chainId: string): number {
-  const chain = getChainById(chainId)
+// Get decimals — use token-specific decimals when available, else chain default
+function getDecimals(chainAsset: ChainAsset): number {
+  if (chainAsset.decimals !== undefined) return chainAsset.decimals
+  const chain = getChainById(chainAsset.chainId)
   return chain?.decimals ?? 8
 }
 
@@ -55,6 +64,11 @@ export default function SwapPage() {
   const { usdValueFormatted: balanceUsdFormatted } = useBalanceUsdValue(balance, fromAssetObj)
   const inputUsdValue = fromAssetObj && amount ? prices.calculateValue(parseFloat(amount) || 0, fromAssetObj) : null
 
+  // Dust / minimum amount check (UTXO chains)
+  const amountNum = parseFloat(amount) || 0
+  const minSwapAmount = fromAsset && !fromAsset.contractAddress ? CHAIN_MIN_SWAP_AMOUNT[fromAsset.chainId] : undefined
+  const isBelowMinimum = minSwapAmount !== undefined && amountNum > 0 && amountNum < minSwapAmount
+
   // Quote state
   const [quotes, setQuotes] = useState<SwapQuote[]>([])
   const [selectedQuote, setSelectedQuote] = useState<SwapQuote | null>(null)
@@ -80,20 +94,39 @@ export default function SwapPage() {
 
     const fetchBalance = async () => {
       try {
-        const balances = await wallet.getBalance(fromAsset.chainId)
         const asset = buildAsset(fromAsset)
-        const nativeBalance = balances.find(
-          (b: any) => b.asset.chain === asset.chain && b.asset.symbol === asset.symbol,
+        // For tokens, request the specific asset so the provider queries the contract directly
+        // rather than relying on auto-discovery from transaction history
+        const assets = fromAsset.contractAddress ? [asset] : undefined
+        let balances: any[]
+
+        try {
+          balances = await wallet.getBalance(fromAsset.chainId, assets)
+        } catch (e) {
+          // If explicit token fetch fails (e.g. RPC doesn't support eth_call),
+          // fall back to auto-discovery which uses etherscan tokentx API
+          if (fromAsset.contractAddress) {
+            console.warn('[SwapPage] Explicit token balance fetch failed, trying auto-discovery:', e)
+            balances = await wallet.getBalance(fromAsset.chainId)
+          } else {
+            throw e
+          }
+        }
+
+        const match = balances.find(
+          (b: any) =>
+            b.asset.chain === asset.chain &&
+            b.asset.symbol.toLowerCase() === asset.symbol.toLowerCase(),
         )
-        if (nativeBalance) {
-          const assetAmt = baseToAsset(nativeBalance.amount)
+        if (match) {
+          const assetAmt = baseToAsset(match.amount)
           setBalance(assetAmt.amount().toFixed(6))
         } else {
           setBalance('0')
         }
       } catch (e) {
         console.warn('[SwapPage] Failed to fetch balance:', e)
-        setBalance(null)
+        setBalance('—')
       }
     }
 
@@ -132,8 +165,8 @@ export default function SwapPage() {
     if (balance && fromAsset) {
       const balanceNum = parseFloat(balance)
       let amt = balanceNum * pct
-      // Reserve fee buffer at 100% for chains that pay gas with native asset
-      if (pct === 1) {
+      // Reserve fee buffer at 100% for native assets (tokens don't pay gas directly)
+      if (pct === 1 && !fromAsset.contractAddress) {
         const reserve = FEE_RESERVES[fromAsset.chainId] || 0
         if (reserve > 0 && amt > reserve) {
           amt = amt - reserve
@@ -160,7 +193,7 @@ export default function SwapPage() {
 
     const fromAssetObj = buildAsset(fromAsset)
     const toAssetObj = buildAsset(toAsset)
-    const decimals = getDecimals(fromAsset.chainId)
+    const decimals = getDecimals(fromAsset)
 
     console.log('[SwapPage] Built assets:', { fromAssetObj, toAssetObj, decimals })
 
@@ -220,7 +253,7 @@ export default function SwapPage() {
 
     const fromAssetObj = buildAsset(fromAsset)
     const toAssetObj = buildAsset(toAsset)
-    const decimals = getDecimals(fromAsset.chainId)
+    const decimals = getDecimals(fromAsset)
     const amountNum = parseFloat(amount)
 
     const cryptoAmount = new CryptoAmount(assetToBase(assetAmount(amountNum, decimals)), fromAssetObj)
@@ -327,7 +360,7 @@ export default function SwapPage() {
                   value={fromAsset}
                   onChange={setFromAsset}
                   availableChains={supportedChains}
-                  excludeChain={toAsset?.chainId}
+                  excludeAsset={toAsset ?? undefined}
                 />
                 {fromAsset && balance !== null && (
                   <div className="mt-2 flex items-center justify-between text-sm">
@@ -369,7 +402,7 @@ export default function SwapPage() {
                 value={toAsset}
                 onChange={setToAsset}
                 availableChains={supportedChains}
-                excludeChain={fromAsset?.chainId}
+                excludeAsset={fromAsset ?? undefined}
               />
             </div>
 
@@ -392,6 +425,11 @@ export default function SwapPage() {
                   </div>
                 )}
               </div>
+              {isBelowMinimum && (
+                <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                  Minimum amount for {fromAsset!.chainId} is {minSwapAmount} {fromAsset!.symbol}
+                </p>
+              )}
             </div>
 
             {/* Streaming Swap Options */}
@@ -451,7 +489,7 @@ export default function SwapPage() {
             {/* Get Quote Button */}
             <button
               onClick={handleGetQuotes}
-              disabled={!fromAsset || !toAsset || !amount || quoteOp.loading}
+              disabled={!fromAsset || !toAsset || !amount || isBelowMinimum || quoteOp.loading}
               className="w-full px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {quoteOp.loading ? (
