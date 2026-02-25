@@ -4920,6 +4920,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-arbitrum@workspace:packages/xchain-arbitrum"
   dependencies:
+    "@ledgerhq/hw-transport": "npm:^6.31.6"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
