@@ -5157,7 +5157,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-evm-providers@workspace:packages/xchain-evm-providers"
   dependencies:
-    "@supercharge/promise-pool": "npm:2.4.0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.13.5"
