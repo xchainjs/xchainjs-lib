@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.1.13
+
+### Patch Changes
+
+- Updated dependencies [71adc43]
+  - @xchainjs/xchain-arbitrum@2.1.0
+
 ## 4.1.12
 
 ### Patch Changes
