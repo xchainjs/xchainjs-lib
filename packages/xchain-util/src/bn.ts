@@ -24,8 +24,12 @@ export const isValidBN = (value: BigNumber) => !value.isNaN()
  * @returns {BigNumber} The BigNumber interface from the given value. If invalid one is provided, will return `0`.
  * */
 export const bnOrZero = (value: string | number | undefined) => {
-  const b = value ? bn(value) : bn(0)
-  return isValidBN(b) ? b : bn(0)
+  try {
+    const b = value ? bn(value) : bn(0)
+    return isValidBN(b) ? b : bn(0)
+  } catch {
+    return bn(0)
+  }
 }
 
 /**
@@ -35,7 +39,13 @@ export const bnOrZero = (value: string | number | undefined) => {
  * @param {BigNumber|undefined} value
  * @returns {boolean} `true` or `false`.
  */
-export const validBNOrZero = (value: BigNumber | undefined) => (value && isValidBN(value) ? value : bn(0))
+export const validBNOrZero = (value: BigNumber | undefined) => {
+  try {
+    return value && isValidBN(value) ? value : bn(0)
+  } catch {
+    return bn(0)
+  }
+}
 
 /**
  * Format a BaseNumber to a string depending on given decimal places
@@ -85,9 +95,13 @@ export const formatBNCurrency = (
  * @returns {BigNumber} The BigNumber interface from the given value and decimal.
  * */
 export const fixedBN = (value: BigNumber.Value | undefined, decimalPlaces = 2): BigNumber => {
-  const n = bn(value || 0)
-  const fixedBN = isValidBN(n) ? n.toFixed(decimalPlaces) : bn(0).toFixed(decimalPlaces)
-  return bn(fixedBN)
+  try {
+    const n = bn(value || 0)
+    const fixed = isValidBN(n) ? n.toFixed(decimalPlaces) : bn(0).toFixed(decimalPlaces)
+    return bn(fixed)
+  } catch {
+    return bn(bn(0).toFixed(decimalPlaces))
+  }
 }
 
 export default bn

@@ -4925,7 +4925,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -4940,7 +4940,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -4954,7 +4954,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -5012,7 +5012,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -5078,7 +5078,7 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.13.5"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -5148,7 +5148,7 @@ __metadata:
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -5178,7 +5178,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.13.5"
     axios-mock-adapter: "npm:^2.1.0"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -5262,7 +5262,7 @@ __metadata:
     axios: "npm:1.13.5"
     axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
   languageName: unknown
   linkType: soft
 
@@ -5284,7 +5284,7 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.13.5"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -5434,7 +5434,7 @@ __metadata:
     axios: "npm:1.13.5"
     axios-mock-adapter: "npm:2.1.0"
     axios-retry: "npm:3.2.5"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
   languageName: unknown
   linkType: soft
 
@@ -5458,7 +5458,7 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.13.5"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     cosmjs-types: "npm:0.9.0"
     protobufjs: "npm:6.11.4"
   languageName: unknown
@@ -5492,7 +5492,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-util@workspace:packages/xchain-util"
   dependencies:
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
   languageName: unknown
   linkType: soft
 
@@ -5532,7 +5532,7 @@ __metadata:
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-utxo": "workspace:*"
-    bignumber.js: "npm:^9.1.2"
+    bignumber.js: "npm:^10.0.1"
     ethers: "npm:^6.14.3"
   languageName: unknown
   linkType: soft
@@ -6295,6 +6295,13 @@ __metadata:
   version: 9.1.2
   resolution: "bignumber.js@npm:9.1.2"
   checksum: 10c0/e17786545433f3110b868725c449fa9625366a6e675cd70eb39b60938d6adbd0158cb4b3ad4f306ce817165d37e63f4aa3098ba4110db1d9a3b9f66abfbaf10d
+  languageName: node
+  linkType: hard
+
+"bignumber.js@npm:^10.0.1":
+  version: 10.0.2
+  resolution: "bignumber.js@npm:10.0.2"
+  checksum: 10c0/471a17d851d275e458156d090c028b8851c84389dc41db79b08dd584b4df1e4d24f70b1684705a5974aec6c59dc8511337007e01bd78d8ed8d93e1a541356a7f
   languageName: node
   linkType: hard
 
