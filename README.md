@@ -178,12 +178,6 @@ Poweful tool to build whatever you want...
 |     [@xchainjs/xchain-wallet](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-wallet)     | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-wallet)](https://www.npmjs.com/package/@xchainjs/xchain-wallet)         |
 | [@xchainjs/xchain-aggregator](https://github.com/xchainjs/xchainjs-lib/tree/master/packages/xchain-aggregator) | [![npm](https://img.shields.io/npm/v/@xchainjs/xchain-aggregator)](https://www.npmjs.com/package/@xchainjs/xchain-aggregator) |
 
-## Tools
-
-### TxJammer
-
-[Tx Jammer](https://github.com/xchainjs/xchainjs-lib/tree/master/tools/txJammer) is a script which pushes a random amount of different types of transactions to stagenet to verify new stagenet releases
-
 ## Contributing
 
 What to become a XChainJS contributor? Read our [CONTRIBUTING.md](https://github.com/xchainjs/xchainjs-lib/blob/master/CONTRIBUTING.md) and be part of our contributor member. It's people like you that make XChainJS better.
