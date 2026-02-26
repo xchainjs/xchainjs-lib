@@ -1,6 +1,6 @@
 import type { SwapService, SwapQuote, SwapParams } from './SwapService'
 import type { ChainAsset } from '../types'
-import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import { CHAIN_MIN_SWAP_AMOUNT } from '../chains'
 import { buildAsset, getDecimals } from '../assetUtils'
 
@@ -222,6 +222,34 @@ export class RecurringSwapScheduler {
       const cryptoAmount = new CryptoAmount(assetToBase(assetAmount(amountNum, decimals)), fromAssetObj)
 
       const fromAddress = await this.wallet.getAddress(schedule.fromAsset.chainId)
+
+      // Check balance before attempting swap
+      try {
+        const assets = schedule.fromAsset.contractAddress ? [fromAssetObj] : undefined
+        const balances = await this.wallet.getBalance(schedule.fromAsset.chainId, assets)
+        const match = balances.find(
+          (b: any) =>
+            b.asset.chain === fromAssetObj.chain &&
+            b.asset.symbol.toLowerCase() === fromAssetObj.symbol.toLowerCase(),
+        )
+        const balanceAmount = match ? baseToAsset(match.amount).amount().toNumber() : 0
+
+        if (balanceAmount < amountNum) {
+          schedule.status = 'paused'
+          schedule.nextExecutionAt = null
+          this.clearTimer(id)
+          this.addHistory(id, {
+            status: 'skipped',
+            skipReason: `Insufficient balance: ${balanceAmount.toFixed(6)} ${schedule.fromAsset.symbol} < ${schedule.amount} needed. Schedule paused.`,
+          })
+          this.executing.delete(id)
+          this.persist()
+          this.notify()
+          return
+        }
+      } catch (e: any) {
+        console.warn(`[RecurringSwap] Balance check failed for ${id}, proceeding with swap:`, e.message)
+      }
       const destinationAddress = schedule.destinationAddress || await this.wallet.getAddress(schedule.toAsset.chainId)
 
       const streamingParams = schedule.streaming && schedule.protocol !== 'Chainflip'
