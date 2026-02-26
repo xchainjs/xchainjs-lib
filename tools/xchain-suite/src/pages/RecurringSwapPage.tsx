@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { RefreshCw, ChevronDown, ChevronUp } from 'lucide-react'
 import { useWallet } from '../contexts/WalletContext'
 import { useAggregator, type SwapQuote } from '../hooks/useAggregator'
 import { useRecurringSwaps } from '../hooks/useRecurringSwaps'
@@ -54,6 +54,37 @@ export default function RecurringSwapPage() {
   const [streamingInterval, setStreamingInterval] = useState('1')
   const [streamingQuantity, setStreamingQuantity] = useState('0')
 
+  // Custom destination address
+  const [destinationOverride, setDestinationOverride] = useState('')
+  const [showCustomDest, setShowCustomDest] = useState(false)
+  const [destValidationError, setDestValidationError] = useState<string | null>(null)
+
+  // Clear destination override when toAsset changes
+  useEffect(() => {
+    setDestinationOverride('')
+    setDestValidationError(null)
+  }, [toAsset])
+
+  // Validate destination address
+  const handleDestinationChange = useCallback(
+    (value: string) => {
+      setDestinationOverride(value)
+      if (!value.trim()) {
+        setDestValidationError(null)
+        return
+      }
+      if (wallet && toAsset) {
+        try {
+          const valid = wallet.validateAddress(toAsset.chainId, value.trim())
+          setDestValidationError(valid ? null : 'Invalid address for ' + toAsset.chainId)
+        } catch {
+          setDestValidationError('Unable to validate address')
+        }
+      }
+    },
+    [wallet, toAsset],
+  )
+
   // Price for USD presets
   const fromAssetObj = fromAsset ? buildAsset(fromAsset) : null
   const { price: fromAssetPrice } = useAssetPrice(fromAssetObj)
@@ -75,7 +106,7 @@ export default function RecurringSwapPage() {
 
     await quoteOp.execute(async () => {
       const fromAddress = await wallet.getAddress(fromAsset.chainId)
-      const destinationAddress = await wallet.getAddress(toAsset.chainId)
+      const destinationAddress = destinationOverride.trim() || await wallet.getAddress(toAsset.chainId)
       const quotes = await swapService.estimateSwap({
         fromAsset: fromAssetObj,
         destinationAsset: toAssetObj,
@@ -111,6 +142,7 @@ export default function RecurringSwapPage() {
       streamingInterval: Math.max(parseInt(streamingInterval) || 0, 1),
       streamingQuantity: Math.max(parseInt(streamingQuantity) || 0, 0),
       startPaused,
+      destinationAddress: destinationOverride.trim() || undefined,
     })
 
     // Reset form
@@ -196,6 +228,38 @@ export default function RecurringSwapPage() {
                 availableChains={supportedChains}
                 excludeAsset={fromAsset ?? undefined}
               />
+
+              {/* Custom Destination Address */}
+              {toAsset && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomDest(!showCustomDest)}
+                    className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  >
+                    {showCustomDest ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    Custom Destination Address
+                  </button>
+                  {showCustomDest && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        value={destinationOverride}
+                        onChange={(e) => handleDestinationChange(e.target.value)}
+                        placeholder={`Leave empty to use your ${toAsset.chainId} wallet address`}
+                        className={`w-full px-3 py-2 text-sm border ${
+                          destValidationError
+                            ? 'border-red-400 dark:border-red-600'
+                            : 'border-gray-300 dark:border-gray-600'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono placeholder-gray-400 dark:placeholder-gray-500`}
+                      />
+                      {destValidationError && (
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{destValidationError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Amount */}

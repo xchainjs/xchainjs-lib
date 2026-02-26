@@ -23,6 +23,7 @@ export interface RecurringSchedule {
   nextExecutionAt: number | null
   consecutiveFailures: number
   totalExecutions: number
+  destinationAddress?: string
 }
 
 export interface ExecutionRecord {
@@ -101,6 +102,7 @@ export class RecurringSwapScheduler {
     streamingInterval?: number
     streamingQuantity?: number
     startPaused?: boolean
+    destinationAddress?: string
   }): RecurringSchedule {
     const amountNum = Number(config.amount)
     if (!Number.isFinite(amountNum) || amountNum <= 0) {
@@ -123,6 +125,7 @@ export class RecurringSwapScheduler {
       streaming: config.streaming ?? true,
       streamingInterval,
       streamingQuantity,
+      destinationAddress: config.destinationAddress || undefined,
       status: config.startPaused ? 'paused' : 'active',
       createdAt: Date.now(),
       nextExecutionAt: config.startPaused ? null : Date.now() + INTERVAL_MS[config.interval],
@@ -219,7 +222,7 @@ export class RecurringSwapScheduler {
       const cryptoAmount = new CryptoAmount(assetToBase(assetAmount(amountNum, decimals)), fromAssetObj)
 
       const fromAddress = await this.wallet.getAddress(schedule.fromAsset.chainId)
-      const destinationAddress = await this.wallet.getAddress(schedule.toAsset.chainId)
+      const destinationAddress = schedule.destinationAddress || await this.wallet.getAddress(schedule.toAsset.chainId)
 
       const streamingParams = schedule.streaming && schedule.protocol !== 'Chainflip'
         ? { streamingInterval: schedule.streamingInterval, streamingQuantity: schedule.streamingQuantity }

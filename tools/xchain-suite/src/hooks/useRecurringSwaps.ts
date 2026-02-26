@@ -22,6 +22,7 @@ export interface UseRecurringSwapsResult {
     streamingInterval?: number
     streamingQuantity?: number
     startPaused?: boolean
+    destinationAddress?: string
   }) => RecurringSchedule | null
   pauseSchedule: (id: string) => void
   resumeSchedule: (id: string) => void
