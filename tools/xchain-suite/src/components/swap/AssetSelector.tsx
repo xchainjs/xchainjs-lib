@@ -53,6 +53,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { chainId: 'GAIA', chainName: 'Cosmos Hub', symbol: 'ATOM' },
       { chainId: 'THOR', chainName: 'THORChain', symbol: 'RUNE' },
       { chainId: 'MAYA', chainName: 'Maya Protocol', symbol: 'CACAO' },
+      { chainId: 'MAYA', chainName: 'Maya Protocol', symbol: 'MAYA', decimals: 4, isToken: true },
       { chainId: 'KUJI', chainName: 'Kujira', symbol: 'KUJI' },
     ],
   },
