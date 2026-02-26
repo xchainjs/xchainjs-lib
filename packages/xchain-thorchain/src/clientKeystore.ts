@@ -107,26 +107,28 @@ export class ClientKeystore extends Client {
   }
 
   public async transfer(params: TxParams): Promise<string> {
-    const sender = await this.getAddressAsync(params.walletIndex || 0)
+    return this.withTxLock(async () => {
+      const sender = await this.getAddressAsync(params.walletIndex || 0)
 
-    const { rawUnsignedTx } = await this.prepareTx({
-      sender,
-      recipient: params.recipient,
-      asset: params.asset,
-      amount: params.amount,
-      memo: params.memo,
+      const { rawUnsignedTx } = await this.prepareTx({
+        sender,
+        recipient: params.recipient,
+        asset: params.asset,
+        amount: params.amount,
+        memo: params.memo,
+      })
+
+      const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
+
+      const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
+        prefix: this.prefix,
+        hdPaths: [makeClientPath(this.getFullDerivationPath(params.walletIndex || 0))],
+      })
+
+      const tx = await this.roundRobinSignAndBroadcastTx(sender, unsignedTx, signer)
+
+      return tx.transactionHash
     })
-
-    const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
-
-    const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
-      prefix: this.prefix,
-      hdPaths: [makeClientPath(this.getFullDerivationPath(params.walletIndex || 0))],
-    })
-
-    const tx = await this.roundRobinSignAndBroadcastTx(sender, unsignedTx, signer)
-
-    return tx.transactionHash
   }
 
   /**
@@ -149,17 +151,19 @@ export class ClientKeystore extends Client {
     memo,
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
   }: DepositParam): Promise<string> {
-    // Get sender address
-    const sender = await this.getAddressAsync(walletIndex)
-    // Create signer
-    const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
-      prefix: this.prefix,
-      hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex || 0))],
+    return this.withTxLock(async () => {
+      // Get sender address
+      const sender = await this.getAddressAsync(walletIndex)
+      // Create signer
+      const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
+        prefix: this.prefix,
+        hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex || 0))],
+      })
+
+      const tx = await this.roundRobinSignAndBroadcastDeposit(sender, signer, gasLimit, amount, memo, asset)
+
+      return tx.transactionHash
     })
-
-    const tx = await this.roundRobinSignAndBroadcastDeposit(sender, signer, gasLimit, amount, memo, asset)
-
-    return tx.transactionHash
   }
 
   /**
