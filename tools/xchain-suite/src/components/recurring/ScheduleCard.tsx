@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, Pause, Play, XCircle } from 'lucide-react'
 import { AssetIcon } from '../swap/assetIcons'
 import type { RecurringSchedule, ExecutionRecord, RecurringInterval } from '../../lib/swap/RecurringSwapScheduler'
+import { baseToAsset } from '@xchainjs/xchain-util'
+import { buildAsset } from '../../lib/assetUtils'
 
 const INTERVAL_LABELS: Record<RecurringInterval, string> = {
   every_minute: 'Every Minute',
@@ -85,10 +87,50 @@ interface ScheduleCardProps {
   onPause: () => void
   onResume: () => void
   onCancel: () => void
+  wallet?: any
 }
 
-export function ScheduleCard({ schedule, history, onPause, onResume, onCancel }: ScheduleCardProps) {
+export function ScheduleCard({ schedule, history, onPause, onResume, onCancel, wallet }: ScheduleCardProps) {
   const [expanded, setExpanded] = useState(false)
+
+  // Fetch balance to show swaps remaining
+  const [swapsRemaining, setSwapsRemaining] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!wallet || schedule.status === 'cancelled') {
+      setSwapsRemaining(null)
+      return
+    }
+
+    let cancelled = false
+
+    const fetchBalance = async () => {
+      try {
+        const asset = buildAsset(schedule.fromAsset)
+        const assets = schedule.fromAsset.contractAddress ? [asset] : undefined
+        const balances = await wallet.getBalance(schedule.fromAsset.chainId, assets)
+        if (cancelled) return
+        const match = balances.find(
+          (b: any) =>
+            b.asset.chain === asset.chain &&
+            b.asset.symbol.toLowerCase() === asset.symbol.toLowerCase(),
+        )
+        const balanceNum = match ? baseToAsset(match.amount).amount().toNumber() : 0
+        const amountNum = parseFloat(schedule.amount)
+        setSwapsRemaining(amountNum > 0 ? Math.floor(balanceNum / amountNum) : null)
+      } catch {
+        if (!cancelled) setSwapsRemaining(null)
+      }
+    }
+
+    fetchBalance()
+    // Refresh every 60s for active schedules
+    const interval = schedule.status === 'active' ? setInterval(fetchBalance, 60_000) : undefined
+    return () => {
+      cancelled = true
+      if (interval) clearInterval(interval)
+    }
+  }, [wallet, schedule.fromAsset, schedule.amount, schedule.status, history.length])
 
   const successCount = history.filter((r) => r.status === 'success').length
   const failCount = history.filter((r) => r.status === 'failed').length
@@ -137,6 +179,11 @@ export function ScheduleCard({ schedule, history, onPause, onResume, onCancel }:
           {successCount > 0 && <span className="text-green-600 dark:text-green-400">{successCount} ok</span>}
           {failCount > 0 && <span className="text-red-600 dark:text-red-400">{failCount} failed</span>}
           {skipCount > 0 && <span className="text-yellow-600 dark:text-yellow-400">{skipCount} skipped</span>}
+          {swapsRemaining !== null && schedule.status !== 'cancelled' && (
+            <span className={`ml-auto font-medium ${swapsRemaining <= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'}`}>
+              ~{swapsRemaining} swap{swapsRemaining !== 1 ? 's' : ''} left
+            </span>
+          )}
         </div>
 
         {/* Actions */}

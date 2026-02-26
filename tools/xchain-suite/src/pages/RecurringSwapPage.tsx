@@ -557,6 +557,7 @@ export default function RecurringSwapPage() {
                   onPause={() => pauseSchedule(schedule.id)}
                   onResume={() => resumeSchedule(schedule.id)}
                   onCancel={() => cancelSchedule(schedule.id)}
+                  wallet={wallet}
                 />
               ))}
             </div>
