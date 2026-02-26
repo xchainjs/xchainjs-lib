@@ -4,7 +4,7 @@ import { useState } from 'react'
 // Keyed by chainId for native assets, by symbol for tokens
 const ICON_OVERRIDES: Record<string, string> = {
   THOR: 'https://assets.coingecko.com/coins/images/6595/standard/Rune200x200.png',
-  MAYA: 'https://assets.coingecko.com/coins/images/29512/standard/cacao.png',
+  CACAO: 'https://assets.coingecko.com/coins/images/29512/standard/cacao.png',
   KUJI: 'https://assets.coingecko.com/coins/images/20685/standard/kuji-200x200.png',
   ARB: 'https://assets.coingecko.com/coins/images/16547/standard/photo_2023-03-29_21.47.00.jpeg',
   // ERC-20 / token icons (keyed by ticker)

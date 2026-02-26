@@ -16,7 +16,7 @@ export function buildAsset(chainAsset: ChainAsset): AnyAsset {
     chain: chainAsset.chainId,
     symbol: chainAsset.symbol,
     ticker: chainAsset.symbol,
-    type: AssetType.NATIVE,
+    type: chainAsset.isToken ? AssetType.TOKEN : AssetType.NATIVE,
   }
 }
 
