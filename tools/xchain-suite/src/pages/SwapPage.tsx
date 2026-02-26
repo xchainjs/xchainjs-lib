@@ -17,6 +17,8 @@ import { buildAsset, getDecimals } from '../lib/assetUtils'
 import { assetAmount, assetToBase, baseToAsset, CryptoAmount } from '@xchainjs/xchain-util'
 import type { SwapResult } from '../lib/swap/SwapService'
 
+const USD_PRESETS = [25, 50, 100, 250, 500]
+
 export default function SwapPage() {
   const { isConnected } = useWallet()
   const { swapService, wallet, loading: serviceLoading, error: serviceError, supportedChains } = useAggregator()
@@ -27,6 +29,7 @@ export default function SwapPage() {
   const [toAsset, setToAsset] = useState<ChainAsset | null>(null)
   const [amount, setAmount] = useState('')
   const [balance, setBalance] = useState<string | null>(null)
+  const [balanceLoading, setBalanceLoading] = useState(false)
 
   // Custom destination address
   const [destinationOverride, setDestinationOverride] = useState('')
@@ -45,6 +48,7 @@ export default function SwapPage() {
   // Get USD values
   const { usdValueFormatted: balanceUsdFormatted } = useBalanceUsdValue(balance, fromAssetObj)
   const inputUsdValue = fromAssetObj && amount ? prices.calculateValue(parseFloat(amount) || 0, fromAssetObj) : null
+  const fromAssetPrice = fromAssetObj ? prices.getPrice(fromAssetObj) : null
 
   // Dust / minimum amount check (UTXO chains)
   const amountNum = parseFloat(amount) || 0
@@ -71,10 +75,12 @@ export default function SwapPage() {
   useEffect(() => {
     if (!wallet || !fromAsset) {
       setBalance(null)
+      setBalanceLoading(false)
       return
     }
 
     let cancelled = false
+    setBalanceLoading(true)
 
     const fetchBalance = async () => {
       try {
@@ -110,9 +116,13 @@ export default function SwapPage() {
         } else {
           setBalance('0')
         }
+        if (!cancelled) setBalanceLoading(false)
       } catch (e) {
         console.warn('[SwapPage] Failed to fetch balance:', e)
-        if (!cancelled) setBalance(null)
+        if (!cancelled) {
+          setBalance(null)
+          setBalanceLoading(false)
+        }
       }
     }
 
@@ -375,6 +385,12 @@ export default function SwapPage() {
                   availableChains={supportedChains}
                   excludeAsset={toAsset ?? undefined}
                 />
+                {fromAsset && balanceLoading && balance === null && (
+                  <div className="mt-2 flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
+                    <div className="w-3 h-3 border-2 border-gray-300 dark:border-gray-600 border-t-blue-500 rounded-full animate-spin" />
+                    Loading balance...
+                  </div>
+                )}
                 {fromAsset && balance !== null && (
                   <div className="mt-2 flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">
@@ -470,6 +486,26 @@ export default function SwapPage() {
                   </div>
                 )}
               </div>
+              {/* USD presets */}
+              {fromAsset && fromAssetPrice && fromAssetPrice > 0 && (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {USD_PRESETS.map((usd) => {
+                    const assetAmt = usd / fromAssetPrice
+                    const decimals = getDecimals(fromAsset)
+                    const display = assetAmt < 0.01 ? assetAmt.toFixed(decimals) : assetAmt.toFixed(6)
+                    return (
+                      <button
+                        key={usd}
+                        type="button"
+                        onClick={() => setAmount(display)}
+                        className="px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                      >
+                        ${usd}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
               {isBelowMinimum && (
                 <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
                   Minimum amount for {fromAsset!.chainId} is {minSwapAmount} {fromAsset!.symbol}
