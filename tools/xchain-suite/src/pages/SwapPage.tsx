@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { ArrowDownUp, RefreshCw, ExternalLink } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { ArrowDownUp, RefreshCw, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
 import { useWallet } from '../contexts/WalletContext'
 import { useAggregator, type SwapQuote } from '../hooks/useAggregator'
 import { useOperation } from '../hooks/useOperation'
@@ -27,6 +27,11 @@ export default function SwapPage() {
   const [toAsset, setToAsset] = useState<ChainAsset | null>(null)
   const [amount, setAmount] = useState('')
   const [balance, setBalance] = useState<string | null>(null)
+
+  // Custom destination address
+  const [destinationOverride, setDestinationOverride] = useState('')
+  const [showCustomDest, setShowCustomDest] = useState(false)
+  const [destValidationError, setDestValidationError] = useState<string | null>(null)
 
   // Streaming swap state (enabled by default for better prices on large swaps)
   const [isStreaming, setIsStreaming] = useState(true)
@@ -115,6 +120,32 @@ export default function SwapPage() {
     return () => { cancelled = true }
   }, [wallet, fromAsset])
 
+  // Clear destination override when toAsset changes
+  useEffect(() => {
+    setDestinationOverride('')
+    setDestValidationError(null)
+  }, [toAsset])
+
+  // Validate destination address
+  const handleDestinationChange = useCallback(
+    (value: string) => {
+      setDestinationOverride(value)
+      if (!value.trim()) {
+        setDestValidationError(null)
+        return
+      }
+      if (wallet && toAsset) {
+        try {
+          const valid = wallet.validateAddress(toAsset.chainId, value.trim())
+          setDestValidationError(valid ? null : 'Invalid address for ' + toAsset.chainId)
+        } catch {
+          setDestValidationError('Unable to validate address')
+        }
+      }
+    },
+    [wallet, toAsset],
+  )
+
   // Clear quotes when assets change
   useEffect(() => {
     setQuotes([])
@@ -191,7 +222,7 @@ export default function SwapPage() {
 
     // Get addresses
     const fromAddress = await wallet.getAddress(fromAsset.chainId)
-    const destinationAddress = await wallet.getAddress(toAsset.chainId)
+    const destinationAddress = destinationOverride.trim() || await wallet.getAddress(toAsset.chainId)
 
     console.log('[SwapPage] Addresses:', { fromAddress, destinationAddress })
 
@@ -241,7 +272,7 @@ export default function SwapPage() {
     const cryptoAmount = new CryptoAmount(assetToBase(assetAmount(amountNum, decimals)), fromAssetObj)
 
     const fromAddress = await wallet.getAddress(fromAsset.chainId)
-    const destinationAddress = await wallet.getAddress(toAsset.chainId)
+    const destinationAddress = destinationOverride.trim() || await wallet.getAddress(toAsset.chainId)
 
     setIsConfirmOpen(false)
 
@@ -386,6 +417,38 @@ export default function SwapPage() {
                 availableChains={supportedChains}
                 excludeAsset={fromAsset ?? undefined}
               />
+
+              {/* Custom Destination Address */}
+              {toAsset && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomDest(!showCustomDest)}
+                    className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  >
+                    {showCustomDest ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    Custom Destination Address
+                  </button>
+                  {showCustomDest && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        value={destinationOverride}
+                        onChange={(e) => handleDestinationChange(e.target.value)}
+                        placeholder={`Leave empty to use your ${toAsset.chainId} wallet address`}
+                        className={`w-full px-3 py-2 text-sm border ${
+                          destValidationError
+                            ? 'border-red-400 dark:border-red-600'
+                            : 'border-gray-300 dark:border-gray-600'
+                        } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono placeholder-gray-400 dark:placeholder-gray-500`}
+                      />
+                      {destValidationError && (
+                        <p className="mt-1 text-xs text-red-600 dark:text-red-400">{destValidationError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Amount Input */}
