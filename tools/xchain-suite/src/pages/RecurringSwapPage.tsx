@@ -9,7 +9,7 @@ import type { ChainAsset } from '../lib/types'
 import { QuoteCard } from '../components/swap/QuoteCard'
 import { ScheduleCard } from '../components/recurring/ScheduleCard'
 import type { RecurringInterval } from '../lib/swap/RecurringSwapScheduler'
-import { CryptoAmount, assetAmount, assetToBase } from '@xchainjs/xchain-util'
+import { CryptoAmount, assetAmount, assetToBase, baseToAsset } from '@xchainjs/xchain-util'
 import { useAssetPrice } from '../hooks/usePrices'
 import { CHAIN_MIN_SWAP_AMOUNT } from '../lib/chains'
 import { buildAsset, getDecimals } from '../lib/assetUtils'
@@ -88,6 +88,43 @@ export default function RecurringSwapPage() {
   // Price for USD presets
   const fromAssetObj = fromAsset ? buildAsset(fromAsset) : null
   const { price: fromAssetPrice } = useAssetPrice(fromAssetObj)
+
+  // Fetch balance for "swaps remaining" estimate
+  const [balance, setBalance] = useState<number | null>(null)
+  const [balanceLoading, setBalanceLoading] = useState(false)
+
+  useEffect(() => {
+    if (!wallet || !fromAsset) {
+      setBalance(null)
+      setBalanceLoading(false)
+      return
+    }
+
+    let cancelled = false
+    setBalanceLoading(true)
+
+    const fetchBalance = async () => {
+      try {
+        const asset = buildAsset(fromAsset)
+        const assets = fromAsset.contractAddress ? [asset] : undefined
+        const balances = await wallet.getBalance(fromAsset.chainId, assets)
+        if (cancelled) return
+        const match = balances.find(
+          (b: any) =>
+            b.asset.chain === asset.chain &&
+            b.asset.symbol.toLowerCase() === asset.symbol.toLowerCase(),
+        )
+        setBalance(match ? baseToAsset(match.amount).amount().toNumber() : 0)
+      } catch {
+        if (!cancelled) setBalance(null)
+      } finally {
+        if (!cancelled) setBalanceLoading(false)
+      }
+    }
+
+    fetchBalance()
+    return () => { cancelled = true }
+  }, [wallet, fromAsset])
 
   // Preview quote
   const [previewQuotes, setPreviewQuotes] = useState<SwapQuote[]>([])
@@ -198,6 +235,7 @@ export default function RecurringSwapPage() {
   const isBelowMinimum = minSwapAmount !== undefined && amountNum > 0 && amountNum < minSwapAmount
 
   const canCreate = fromAsset && toAsset && amount && amountNum > 0 && !isBelowMinimum && isReady
+  const swapsRemaining = balance !== null && amountNum > 0 ? Math.floor(balance / amountNum) : null
 
   return (
     <div className="p-6">
@@ -306,6 +344,28 @@ export default function RecurringSwapPage() {
                 </p>
               )}
             </div>
+
+            {/* Balance & swaps remaining estimate */}
+            {fromAsset && balanceLoading && balance === null && (
+              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
+                <div className="w-3 h-3 border-2 border-gray-300 dark:border-gray-600 border-t-blue-500 rounded-full animate-spin" />
+                Loading balance...
+              </div>
+            )}
+            {fromAsset && balance !== null && (
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-500 dark:text-gray-400">
+                    Balance: {balance.toFixed(6)} {fromAsset.symbol}
+                  </span>
+                  {swapsRemaining !== null && (
+                    <span className={`font-medium ${swapsRemaining <= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}`}>
+                      ~{swapsRemaining} swap{swapsRemaining !== 1 ? 's' : ''} remaining
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Protocol + Interval row */}
             <div className="grid grid-cols-2 gap-4">
