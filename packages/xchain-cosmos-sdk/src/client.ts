@@ -60,6 +60,7 @@ export enum MsgTypes {
  */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
   private readonly defaultFee: BaseAmount // Default fee structure
+  private txLock: Promise<void> = Promise.resolve() // Serializes sign-and-broadcast operations
   protected stargateClients: CachedValue<StargateClient[]> // Cached instance of StargateClient
   protected prefix: string // Address prefix
   protected readonly defaultDecimals: number // Default number of decimals for assets
@@ -249,6 +250,23 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       type: TxType.Transfer,
       hash: indexedTx.hash,
     }
+  }
+
+  /**
+   * Serializes async operations to prevent concurrent sequence number conflicts.
+   * Each call waits for the previous one to complete before executing.
+   */
+  protected withTxLock<T>(fn: () => Promise<T>): Promise<T> {
+    const prev = this.txLock
+    let resolve: () => void
+    this.txLock = new Promise<void>((r) => (resolve = r))
+    return prev.then(async () => {
+      try {
+        return await fn()
+      } finally {
+        resolve!()
+      }
+    })
   }
 
   /**
