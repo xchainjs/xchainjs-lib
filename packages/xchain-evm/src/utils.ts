@@ -120,8 +120,8 @@ export const estimateCall = async ({
   funcParams?: unknown[]
 }): Promise<BigNumber> => {
   const contract = new Contract(contractAddress, abi, provider)
-  const estiamtion = await contract.getFunction(funcName).estimateGas(...funcParams)
-  return new BigNumber(estiamtion.toString())
+  const estimation = await contract.getFunction(funcName).estimateGas(...funcParams)
+  return new BigNumber(estimation.toString())
 }
 /**
  * Calls a contract function.
@@ -154,8 +154,7 @@ export const call = async <T>({
     // For sending transactions, a signer is needed
     contract = contract.connect(signer)
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (contract as any)[funcName](...funcParams)
+  return contract.getFunction(funcName)(...funcParams)
 }
 
 /**

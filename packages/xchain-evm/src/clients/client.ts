@@ -182,7 +182,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @throws {Error} Method not implement
    */
   public getAddress(): string {
-    throw Error('Sync method not supported for Ledger')
+    throw new Error('Sync method not supported for Ledger')
   }
 
   getAddressAsync(walletIndex?: number, verify = false): Promise<string> {
@@ -424,7 +424,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     if (!this.isGasAsset(theAsset)) {
       // ERC20 gas estimate
       const assetAddress = getTokenAddress(theAsset)
-      if (!assetAddress) throw Error(`Can't get address from asset ${assetToString(theAsset)}`)
+      if (!assetAddress) throw new Error(`Can't get address from asset ${assetToString(theAsset)}`)
       const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
 
       const address = from || (await this.getAddressAsync())
@@ -535,7 +535,7 @@ export class Client extends BaseXChainClient implements EVMClient {
         console.warn(error)
       }
     }
-    throw Error('no provider able to get balance')
+    throw new Error('no provider able to get balance')
   }
   /**
    * Retrieves transaction data by round-robin querying multiple data providers.
@@ -554,7 +554,7 @@ export class Client extends BaseXChainClient implements EVMClient {
         console.warn(error)
       }
     }
-    throw Error('no provider able to GetTransactionData')
+    throw new Error('no provider able to GetTransactionData')
   }
   /**
    * Retrieves transaction history by round-robin querying multiple data providers.
@@ -572,7 +572,7 @@ export class Client extends BaseXChainClient implements EVMClient {
         console.warn(error)
       }
     }
-    throw Error('no provider able to GetTransactions')
+    throw new Error('no provider able to GetTransactions')
   }
   /**
    * Retrieves fee rates by round-robin querying multiple data providers.
@@ -589,7 +589,7 @@ export class Client extends BaseXChainClient implements EVMClient {
         console.warn(error)
       }
     }
-    throw Error('No provider available to getFeeRates')
+    throw new Error('No provider available to getFeeRates')
   }
 
   /**
@@ -610,10 +610,10 @@ export class Client extends BaseXChainClient implements EVMClient {
     sender: Address
   }): Promise<PreparedTx> {
     if (asset.chain !== this.chain)
-      throw Error(`This client can only prepare transactions on chain: ${this.chain}. Bad asset: ${asset.chain}`)
+      throw new Error(`This client can only prepare transactions on chain: ${this.chain}. Bad asset: ${asset.chain}`)
 
-    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
-    if (!this.validateAddress(recipient)) throw Error('Invalid recipient address')
+    if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw new Error('Invalid recipient address')
 
     const nonce = await this.getProvider().getTransactionCount(sender)
 
@@ -639,7 +639,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       }
     } else {
       const assetAddress = getTokenAddress(asset)
-      if (!assetAddress) throw Error(`Can't parse address from asset ${assetToString(asset)}`)
+      if (!assetAddress) throw new Error(`Can't parse address from asset ${assetToString(asset)}`)
 
       const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
 
@@ -670,9 +670,9 @@ export class Client extends BaseXChainClient implements EVMClient {
     amount,
     sender,
   }: ApproveParams & { sender: string }): Promise<PreparedTx> {
-    if (!this.validateAddress(contractAddress)) throw Error('Invalid contractAddress address')
-    if (!this.validateAddress(spenderAddress)) throw Error('Invalid spenderAddress address')
-    if (!this.validateAddress(sender)) throw Error('Invalid sender address')
+    if (!this.validateAddress(contractAddress)) throw new Error('Invalid contractAddress address')
+    if (!this.validateAddress(spenderAddress)) throw new Error('Invalid spenderAddress address')
+    if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
 
     const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
     const valueToApprove = getApprovalAmount(amount)
@@ -906,7 +906,7 @@ export class Client extends BaseXChainClient implements EVMClient {
    * @throws {Error} if the client is not using an account
    */
   protected getSigner(): ISigner {
-    if (!this.signer) throw Error('Can not get signer')
+    if (!this.signer) throw new Error('Can not get signer')
     return this.signer
   }
 }

@@ -45,7 +45,7 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
   async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
     //validate assets are for the correct chain
     assets?.forEach((i) => {
-      if (i.chain !== this.chain) throw Error(`${assetToString(i)} is not an asset of ${this.chain}`)
+      if (i.chain !== this.chain) throw new Error(`${assetToString(i)} is not an asset of ${this.chain}`)
     })
     const balances: Balance[] = []
     balances.push(await this.getNativeAssetBalance(address))

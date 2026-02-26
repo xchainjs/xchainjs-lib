@@ -121,7 +121,7 @@ export const getGasOracle = async (baseUrl: string, chainId: number, apiKey?: st
   const url = baseUrl + `/api?chainid=${chainId}&module=gastracker&action=gasoracle`
   const result = (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
 
-  if (typeof result === 'string') throw Error(`Can not retrieve gasOracle: ${result}`)
+  if (typeof result === 'string') throw new Error(`Can not retrieve gasOracle: ${result}`)
 
   return result
 }
@@ -186,8 +186,7 @@ export const getGasAssetTransactionHistory = async ({
   if (endblock) url += `&endblock=${endblock}`
 
   const result = (await axios.get(url)).data.result
-  if (JSON.stringify(result).includes('Invalid API Key')) throw new Error('Invalid API Key')
-  if (typeof result !== 'object') throw new Error(result)
+  if (typeof result === 'string') throw new Error(result)
 
   return filterSelfTxs<ETHTransactionInfoV2>(result)
     .filter((tx) => !bnOrZero(tx.value).isZero())
@@ -229,7 +228,7 @@ export const getTokenTransactionHistory = async ({
   if (startblock) url += `&startblock=${startblock}`
   if (endblock) url += `&endblock=${endblock}`
   const result = (await axios.get(url)).data.result
-  if (JSON.stringify(result).includes('Invalid API Key')) throw new Error('Invalid API Key')
+  if (typeof result === 'string') throw new Error(result)
 
   return filterSelfTxs<TokenTransactionInfoV2>(result)
     .filter((tx) => !bnOrZero(tx.value).isZero())
