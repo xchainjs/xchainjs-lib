@@ -1,0 +1,9 @@
+{
+  "buildCommand": "yarn build:tools",
+  "outputDirectory": "tools/xchain-suite/dist",
+  "framework": "vite",
+  "installCommand": "yarn install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
