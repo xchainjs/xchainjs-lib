@@ -161,7 +161,10 @@ export function SwapConfirmModal({
             <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <span className="text-sm text-amber-700 dark:text-amber-300">
-                Estimated slippage ({slippagePercent}%) exceeds your tolerance ({(slippageToleranceBps / 100).toFixed(2)}%). Proceed with caution.
+                Estimated slippage ({slippagePercent}%) exceeds your tolerance ({(slippageToleranceBps / 100).toFixed(2)}%).
+                {quote.protocol === 'Chainflip'
+                  ? ' The swap will be refunded if slippage exceeds this limit.'
+                  : ' This is advisory only — THORChain/MAYAChain swaps do not enforce slippage limits on-chain.'}
               </span>
             </div>
           )}

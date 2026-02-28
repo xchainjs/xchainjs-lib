@@ -600,6 +600,9 @@ export default function SwapPage() {
             {/* Slippage Tolerance */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Slippage Tolerance</label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                Enforced on-chain for Chainflip (fill-or-kill). For THORChain/MAYAChain this is advisory only.
+              </p>
               <div className="mt-2 flex items-center gap-2">
                 {[50, 100, 300].map((bps) => (
                   <button
@@ -622,6 +625,10 @@ export default function SwapPage() {
                     onChange={(e) => {
                       const val = e.target.value
                       setCustomSlippage(val)
+                      if (val === '') {
+                        setSlippageBps(100) // reset to 1% default
+                        return
+                      }
                       const num = parseFloat(val)
                       if (!isNaN(num) && num > 0 && num <= 50) {
                         setSlippageBps(Math.round(num * 100))
