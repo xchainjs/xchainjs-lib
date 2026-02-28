@@ -8,15 +8,17 @@ interface QuoteCardProps {
   isSelected: boolean
   onSelect: () => void
   isBest?: boolean
+  slippageToleranceBps?: number
 }
 
-export function QuoteCard({ quote, isSelected, onSelect, isBest = false }: QuoteCardProps) {
+export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippageToleranceBps }: QuoteCardProps) {
   const prices = usePrices()
   const expectedAmountFormatted = formatExpectedAmount(quote)
   const slippagePercent = (quote.slipBasisPoints / 100).toFixed(2)
   const estimatedTime = formatTime(quote.totalSwapSeconds)
 
   const canSwap = quote.canSwap && quote.errors.length === 0
+  const exceedsSlippageTolerance = slippageToleranceBps !== undefined && quote.slipBasisPoints > slippageToleranceBps
 
   // Calculate USD value of expected output
   const expectedUsdValue = prices.getValue(quote.expectedAmount)
@@ -41,6 +43,12 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false }: Quote
           {isBest && canSwap && (
             <span className="px-2 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 rounded-full">
               Best Rate
+            </span>
+          )}
+          {exceedsSlippageTolerance && canSwap && (
+            <span className="px-2 py-0.5 text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              High Slippage
             </span>
           )}
         </div>

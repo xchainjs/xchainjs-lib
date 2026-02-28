@@ -33,6 +33,8 @@ export interface SwapParams {
   // Streaming swap parameters (THORChain only)
   streamingInterval?: number // Interval in blocks between sub-swaps
   streamingQuantity?: number // Number of sub-swaps (0 = automatic)
+  // Slippage tolerance in basis points (used for Chainflip fillOrKill)
+  slippageToleranceBps?: number
 }
 
 export interface SwapResult {
@@ -305,11 +307,16 @@ export class SwapService {
         const { sdk, bestQuote, affiliateBrokers } = await fetchBestChainflipQuote(params)
         if (!bestQuote) throw new Error('No Chainflip quote available')
 
+        // Use user-provided slippage tolerance, fall back to quote recommendation or 2%
+        const slippagePercent = params.slippageToleranceBps !== undefined
+          ? params.slippageToleranceBps / 100
+          : bestQuote.recommendedSlippageTolerancePercent || 2
+
         const depositResponse = await sdk.requestDepositAddressV2({
           quote: bestQuote,
           destAddress: params.destinationAddress,
           fillOrKillParams: {
-            slippageTolerancePercent: bestQuote.recommendedSlippageTolerancePercent || 2,
+            slippageTolerancePercent: slippagePercent,
             refundAddress: params.fromAddress,
             retryDurationBlocks: 100,
           },
