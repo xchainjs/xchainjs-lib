@@ -18,6 +18,7 @@ const MAYANodePage = lazy(() => import('./pages/MAYANodePage'))
 const MAYANamePage = lazy(() => import('./pages/MAYANamePage'))
 const THORNamePage = lazy(() => import('./pages/THORNamePage'))
 const RouterApprovalPage = lazy(() => import('./pages/RouterApprovalPage'))
+const PortfolioPage = lazy(() => import('./pages/PortfolioPage'))
 
 function PageLoader({ message }: { message: string }) {
   return (
@@ -30,108 +31,6 @@ function PageLoader({ message }: { message: string }) {
   )
 }
 
-function SwapPageLoader() {
-  return <PageLoader message="Loading swap interface..." />
-}
-
-function PoolsPageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading pools...</p>
-      </div>
-    </div>
-  )
-}
-
-function LiquidityPageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading liquidity interface...</p>
-      </div>
-    </div>
-  )
-}
-
-function TradeAssetsPageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading trade assets interface...</p>
-      </div>
-    </div>
-  )
-}
-
-function RunePoolPageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading RUNEPool interface...</p>
-      </div>
-    </div>
-  )
-}
-
-function THORNodePageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading THORNode interface...</p>
-      </div>
-    </div>
-  )
-}
-
-function MAYANodePageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading MAYANode interface...</p>
-      </div>
-    </div>
-  )
-}
-
-function MAYANamePageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading MAYAName interface...</p>
-      </div>
-    </div>
-  )
-}
-
-function THORNamePageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading THORName interface...</p>
-      </div>
-    </div>
-  )
-}
-
-function RouterApprovalPageLoader() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <div className="flex items-center gap-3">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-        <p className="text-gray-600 dark:text-gray-300">Loading router approval interface...</p>
-      </div>
-    </div>
-  )
-}
 
 export default function App() {
   return (
@@ -141,11 +40,19 @@ export default function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Layout />}>
-                <Route index element={<Navigate to="/chain/BTC" replace />} />
+                <Route index element={<Navigate to="/portfolio" replace />} />
+                <Route
+                  path="/portfolio"
+                  element={
+                    <Suspense fallback={<PageLoader message="Loading portfolio..." />}>
+                      <PortfolioPage />
+                    </Suspense>
+                  }
+                />
                 <Route
                   path="/swap"
                   element={
-                    <Suspense fallback={<SwapPageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading swap interface..." />}>
                       <SwapPage />
                     </Suspense>
                   }
@@ -161,7 +68,7 @@ export default function App() {
                 <Route
                   path="/pools"
                   element={
-                    <Suspense fallback={<PoolsPageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading pools..." />}>
                       <PoolsPage />
                     </Suspense>
                   }
@@ -169,7 +76,7 @@ export default function App() {
                 <Route
                   path="/liquidity"
                   element={
-                    <Suspense fallback={<LiquidityPageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading liquidity interface..." />}>
                       <LiquidityPage />
                     </Suspense>
                   }
@@ -177,7 +84,7 @@ export default function App() {
                 <Route
                   path="/trade-assets"
                   element={
-                    <Suspense fallback={<TradeAssetsPageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading trade assets..." />}>
                       <TradeAssetsPage />
                     </Suspense>
                   }
@@ -185,7 +92,7 @@ export default function App() {
                 <Route
                   path="/runepool"
                   element={
-                    <Suspense fallback={<RunePoolPageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading RUNEPool..." />}>
                       <RunePoolPage />
                     </Suspense>
                   }
@@ -193,7 +100,7 @@ export default function App() {
                 <Route
                   path="/thornode"
                   element={
-                    <Suspense fallback={<THORNodePageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading THORNode..." />}>
                       <THORNodePage />
                     </Suspense>
                   }
@@ -201,7 +108,7 @@ export default function App() {
                 <Route
                   path="/mayanode"
                   element={
-                    <Suspense fallback={<MAYANodePageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading MAYANode..." />}>
                       <MAYANodePage />
                     </Suspense>
                   }
@@ -209,7 +116,7 @@ export default function App() {
                 <Route
                   path="/mayaname"
                   element={
-                    <Suspense fallback={<MAYANamePageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading MAYAName..." />}>
                       <MAYANamePage />
                     </Suspense>
                   }
@@ -217,7 +124,7 @@ export default function App() {
                 <Route
                   path="/thorname"
                   element={
-                    <Suspense fallback={<THORNamePageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading THORName..." />}>
                       <THORNamePage />
                     </Suspense>
                   }
@@ -225,7 +132,7 @@ export default function App() {
                 <Route
                   path="/router-approval"
                   element={
-                    <Suspense fallback={<RouterApprovalPageLoader />}>
+                    <Suspense fallback={<PageLoader message="Loading router approval..." />}>
                       <RouterApprovalPage />
                     </Suspense>
                   }

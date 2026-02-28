@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { RefreshCw, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Clock, Pause, ArrowRightLeft, Droplets } from 'lucide-react'
+import { RefreshCw, TrendingUp, ChevronDown, AlertTriangle, CheckCircle, Clock, Pause, ArrowRightLeft, Droplets, Search } from 'lucide-react'
 import { getChainflipSdk } from '../lib/swap/SwapService'
 import { AssetIcon } from '../components/swap/assetIcons'
 
@@ -117,6 +117,9 @@ export default function PoolsPage() {
   const [sortDesc, setSortDesc] = useState(true)
   const [showAllStatuses, setShowAllStatuses] = useState(false)
 
+  // Search
+  const [search, setSearch] = useState('')
+
   // Chainflip-specific state
   const [cfAssets, setCfAssets] = useState<ChainflipAsset[]>([])
   const [cfBoost, setCfBoost] = useState<Map<string, string>>(new Map())
@@ -215,9 +218,15 @@ export default function PoolsPage() {
   }, [protocol])
 
   // Filter and sort pools (THORChain/MAYAChain only)
-  const filteredPools = showAllStatuses
-    ? pools
-    : pools.filter(p => p.status.toLowerCase() === 'available')
+  const searchLower = search.toLowerCase()
+  const filteredPools = pools.filter(p => {
+    if (!showAllStatuses && p.status.toLowerCase() !== 'available') return false
+    if (searchLower) {
+      const { chain, symbol } = getAssetDisplay(p.asset)
+      return chain.toLowerCase().includes(searchLower) || symbol.toLowerCase().includes(searchLower) || p.asset.toLowerCase().includes(searchLower)
+    }
+    return true
+  })
 
   const sortedPools = [...filteredPools].sort((a, b) => {
     let comparison = 0
@@ -233,6 +242,11 @@ export default function PoolsPage() {
   // Calculate totals from filtered pools
   const totalTVL = filteredPools.reduce((sum, p) => sum + p.tvl, 0)
   const totalVolume = filteredPools.reduce((sum, p) => sum + p.volume, 0)
+
+  // Filter Chainflip assets by search
+  const filteredCfAssets = searchLower
+    ? cfAssets.filter(a => a.symbol.toLowerCase().includes(searchLower) || a.name.toLowerCase().includes(searchLower) || a.chain.toLowerCase().includes(searchLower))
+    : cfAssets
 
   // Chainflip stats
   const cfChainCount = new Set(cfAssets.map(a => a.chain)).size
@@ -343,6 +357,17 @@ export default function PoolsPage() {
           </div>
 
           <div className="flex items-center gap-6">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search pools..."
+                className="pl-9 pr-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 w-48 placeholder-gray-400 dark:placeholder-gray-500"
+              />
+            </div>
             {/* Stats */}
             {!loading && protocol === 'chainflip' && cfAssets.length > 0 && (
               <div className="flex items-center gap-6 text-sm">
@@ -436,7 +461,7 @@ export default function PoolsPage() {
 
             {/* Table Body */}
             <div className="divide-y divide-gray-100 dark:divide-gray-700/50">
-              {cfAssets.map((asset, index) => {
+              {filteredCfAssets.map((asset, index) => {
                 const boostKey = `${asset.chain}:${asset.asset}`
                 const boostAmount = cfBoost.get(boostKey)
                 const minSwap = parseFloat(asset.minimumSwapAmount) / Math.pow(10, asset.decimals)
@@ -501,7 +526,7 @@ export default function PoolsPage() {
               })}
             </div>
 
-            {cfAssets.length === 0 && !loading && (
+            {filteredCfAssets.length === 0 && !loading && (
               <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                 No assets available
               </div>
