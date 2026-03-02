@@ -140,7 +140,13 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const mapFrom: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
 
     // Skip ante handler events (fee processing) by finding the last 'tx' type event
-    const txEventIndex = indexedTx.events.findIndex((event) => event.type === 'tx')
+    let txEventIndex = -1
+    for (let i = indexedTx.events.length - 1; i >= 0; i--) {
+      if (indexedTx.events[i].type === 'tx') {
+        txEventIndex = i
+        break
+      }
+    }
     const messageEvents = txEventIndex >= 0 ? indexedTx.events.slice(txEventIndex + 1) : indexedTx.events
 
     messageEvents.forEach((event) => {
@@ -149,7 +155,12 @@ export default abstract class Client extends BaseXChainClient implements XChainC
         const keySender = event.attributes.find((atribute) => atribute.key === 'sender')
         const keyRecipient = event.attributes.find((atribute) => atribute.key === 'recipient')
 
-        if (!keyAmount?.value || !keySender?.value || !keyRecipient?.value) return
+        if (!keyAmount?.value || !keySender?.value || !keyRecipient?.value) {
+          console.warn(
+            `[mapIndexedTxToTx] Transfer event missing required attributes in tx ${indexedTx.hash}. Skipping.`,
+          )
+          return
+        }
 
         try {
           // Split amount and denomination strings
@@ -234,7 +245,12 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const blockData = await this.roundRobinGetBlock(indexedTx.height)
     // Return the mapped transaction object
     return {
-      asset: (txFrom[0]?.asset ?? txTo[0]?.asset ?? null) as CompatibleAsset,
+      asset:
+        txFrom[0]?.asset ??
+        txTo[0]?.asset ??
+        (() => {
+          throw new Error(`No transfer events found in tx ${indexedTx.hash}`)
+        })(),
       from: txFrom,
       to: txTo,
       date: new Date(blockData.header.time),
