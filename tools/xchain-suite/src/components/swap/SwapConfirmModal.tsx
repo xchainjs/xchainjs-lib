@@ -14,6 +14,7 @@ interface SwapConfirmModalProps {
   amount: string
   quote: SwapQuote
   isExecuting: boolean
+  slippageToleranceBps?: number
 }
 
 // Helper to build Asset from ChainAsset
@@ -35,6 +36,7 @@ export function SwapConfirmModal({
   amount,
   quote,
   isExecuting,
+  slippageToleranceBps,
 }: SwapConfirmModalProps) {
   const prices = usePrices()
 
@@ -113,6 +115,14 @@ export function SwapConfirmModal({
                 {slippagePercent}%
               </span>
             </div>
+            {slippageToleranceBps !== undefined && (
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-gray-400">Your Tolerance</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">
+                  {(slippageToleranceBps / 100).toFixed(2)}%
+                </span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Estimated Time</span>
               <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -145,6 +155,19 @@ export function SwapConfirmModal({
               </span>
             </div>
           </div>
+
+          {/* Slippage tolerance warning */}
+          {slippageToleranceBps !== undefined && quote.slipBasisPoints > slippageToleranceBps && (
+            <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <span className="text-sm text-amber-700 dark:text-amber-300">
+                Estimated slippage ({slippagePercent}%) exceeds your tolerance ({(slippageToleranceBps / 100).toFixed(2)}%).
+                {quote.protocol === 'Chainflip'
+                  ? ' The swap will be refunded if slippage exceeds this limit.'
+                  : ' This is advisory only — THORChain/MAYAChain swaps do not enforce slippage limits on-chain.'}
+              </span>
+            </div>
+          )}
 
           {/* Warning */}
           {quote.warning && (

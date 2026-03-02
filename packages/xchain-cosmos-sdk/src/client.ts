@@ -139,27 +139,18 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const mapTo: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
     const mapFrom: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
 
-    /**
-     * Approach to be compatible with other clients. Due to Cosmos transaction sorted events, the first 7 events
-     * belongs to the transaction fee, so they can be skipped
-     */
+    // Skip ante handler events (fee processing) by finding the last 'tx' type event
+    const txEventIndex = indexedTx.events.findIndex((event) => event.type === 'tx')
+    const messageEvents = txEventIndex >= 0 ? indexedTx.events.slice(txEventIndex + 1) : indexedTx.events
 
-    indexedTx.events.slice(7).forEach((event) => {
+    messageEvents.forEach((event) => {
       if (event.type === 'transfer') {
-        // Logic for parsing transfer events and mapping them to xchainjs transactions
-        // Find necessary attributes
-        const keyAmount = event.attributes.find((atribute) => atribute.key === 'amount') as {
-          key: string
-          value: string
-        }
-        const keySender = event.attributes.find((atribute) => atribute.key === 'sender') as {
-          key: string
-          value: string
-        }
-        const keyRecipient = event.attributes.find((atribute) => atribute.key === 'recipient') as {
-          key: string
-          value: string
-        }
+        const keyAmount = event.attributes.find((atribute) => atribute.key === 'amount')
+        const keySender = event.attributes.find((atribute) => atribute.key === 'sender')
+        const keyRecipient = event.attributes.find((atribute) => atribute.key === 'recipient')
+
+        if (!keyAmount?.value || !keySender?.value || !keyRecipient?.value) return
+
         try {
           // Split amount and denomination strings
           const allTokensInEvent = keyAmount.value.split(',') // More than one asset per event (kuji faucet example)
@@ -181,7 +172,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
             if (asset) {
               const recipientAssetKey = `${keyRecipient.value}${assetToString(asset)}`
               if (mapTo.has(recipientAssetKey)) {
-                const currentTo = mapTo.get(keyRecipient.value) as {
+                const currentTo = mapTo.get(recipientAssetKey) as {
                   amount: BaseAmount
                   asset: CompatibleAsset
                   address: Address
@@ -243,7 +234,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const blockData = await this.roundRobinGetBlock(indexedTx.height)
     // Return the mapped transaction object
     return {
-      asset: txFrom[0].asset as CompatibleAsset,
+      asset: (txFrom[0]?.asset ?? txTo[0]?.asset ?? null) as CompatibleAsset,
       from: txFrom,
       to: txTo,
       date: new Date(blockData.header.time),
