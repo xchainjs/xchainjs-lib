@@ -214,6 +214,31 @@ export async function estimateApprove({
 }
 
 /**
+ * Get the current allowance for a spender on a token contract.
+ *
+ * @param {Provider} provider The provider to interact with the contract.
+ * @param {Address} contractAddress The contract (ERC20 token) address.
+ * @param {Address} spenderAddress The spender address (router).
+ * @param {Address} fromAddress The token owner address.
+ * @returns {Promise<BigNumber>} The current allowance.
+ */
+export async function getAllowance({
+  provider,
+  contractAddress,
+  spenderAddress,
+  fromAddress,
+}: {
+  provider: Provider
+  contractAddress: Address
+  spenderAddress: Address
+  fromAddress: Address
+}): Promise<BigNumber> {
+  const contract: Contract = new Contract(contractAddress, erc20ABI, provider)
+  const allowanceResponse = await contract.allowance(fromAddress, spenderAddress)
+  return new BigNumber(allowanceResponse.toString())
+}
+
+/**
  * Check allowance.
  *
  * @param {Provider} provider The provider to interact with the contract.
@@ -238,9 +263,7 @@ export async function isApproved({
   amount?: BaseAmount
 }): Promise<boolean> {
   const txAmount = new BigNumber(amount?.amount().toFixed() ?? 1)
-  const contract: Contract = new Contract(contractAddress, erc20ABI, provider)
-  const allowanceResponse = await contract.allowance(fromAddress, spenderAddress)
-  const allowance: BigNumber = new BigNumber(allowanceResponse.toString())
+  const allowance = await getAllowance({ provider, contractAddress, spenderAddress, fromAddress })
 
   return txAmount.lte(allowance)
 }
