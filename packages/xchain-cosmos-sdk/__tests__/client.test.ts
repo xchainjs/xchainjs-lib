@@ -1,5 +1,4 @@
-import { StargateClient, IndexedTx, Block } from '@cosmjs/stargate'
-import { StdFee } from '@cosmjs/stargate'
+import { IndexedTx, Block, StdFee } from '@cosmjs/stargate'
 import { AssetInfo, Network, PreparedTx } from '@xchainjs/xchain-client'
 import { Asset, AssetType, baseAmount, assetToString } from '@xchainjs/xchain-util'
 
@@ -162,16 +161,40 @@ describe('CosmosSDKClient mapIndexedTxToTx', () => {
     // Typical Cosmos tx: several ante handler events, then a tx event, then message events
     const indexedTx = makeIndexedTx([
       // Ante handler events (fee-related)
-      { type: 'coin_spent', attributes: [{ key: 'spender', value: 'cosmos1sender' }, { key: 'amount', value: '5000uatom' }] },
-      { type: 'coin_received', attributes: [{ key: 'receiver', value: 'cosmos1feepool' }, { key: 'amount', value: '5000uatom' }] },
+      {
+        type: 'coin_spent',
+        attributes: [
+          { key: 'spender', value: 'cosmos1sender' },
+          { key: 'amount', value: '5000uatom' },
+        ],
+      },
+      {
+        type: 'coin_received',
+        attributes: [
+          { key: 'receiver', value: 'cosmos1feepool' },
+          { key: 'amount', value: '5000uatom' },
+        ],
+      },
       makeFeeTransferEvent(),
       { type: 'message', attributes: [{ key: 'sender', value: 'cosmos1sender' }] },
       { type: 'tx', attributes: [{ key: 'fee', value: '5000uatom' }] },
       { type: 'tx', attributes: [{ key: 'acc_seq', value: 'cosmos1sender/0' }] },
       makeTxEvent(),
       // Message events (actual transfer)
-      { type: 'coin_spent', attributes: [{ key: 'spender', value: 'cosmos1sender' }, { key: 'amount', value: '1000000uatom' }] },
-      { type: 'coin_received', attributes: [{ key: 'receiver', value: 'cosmos1recipient' }, { key: 'amount', value: '1000000uatom' }] },
+      {
+        type: 'coin_spent',
+        attributes: [
+          { key: 'spender', value: 'cosmos1sender' },
+          { key: 'amount', value: '1000000uatom' },
+        ],
+      },
+      {
+        type: 'coin_received',
+        attributes: [
+          { key: 'receiver', value: 'cosmos1recipient' },
+          { key: 'amount', value: '1000000uatom' },
+        ],
+      },
       makeTransferEvent('cosmos1sender', 'cosmos1recipient', '1000000uatom'),
       { type: 'message', attributes: [{ key: 'module', value: 'bank' }] },
     ])
@@ -210,9 +233,7 @@ describe('CosmosSDKClient mapIndexedTxToTx', () => {
   })
 
   it('should process all events when no tx-type event exists (fallback)', async () => {
-    const indexedTx = makeIndexedTx([
-      makeTransferEvent('cosmos1sender', 'cosmos1recipient', '100uatom'),
-    ])
+    const indexedTx = makeIndexedTx([makeTransferEvent('cosmos1sender', 'cosmos1recipient', '100uatom')])
 
     mockGetTx.mockResolvedValue(indexedTx)
 
@@ -268,9 +289,7 @@ describe('CosmosSDKClient mapIndexedTxToTx', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
     const tx = await client.getTransactionData('ABCDEF1234567890')
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('Transfer event missing required attributes'),
-    )
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Transfer event missing required attributes'))
     warnSpy.mockRestore()
 
     expect(tx.from).toHaveLength(1)
@@ -374,10 +393,7 @@ describe('CosmosSDKClient mapIndexedTxToTx', () => {
   })
 
   it('should return correct date from block header', async () => {
-    const indexedTx = makeIndexedTx([
-      makeTxEvent(),
-      makeTransferEvent('cosmos1sender', 'cosmos1recipient', '100uatom'),
-    ])
+    const indexedTx = makeIndexedTx([makeTxEvent(), makeTransferEvent('cosmos1sender', 'cosmos1recipient', '100uatom')])
 
     mockGetTx.mockResolvedValue(indexedTx)
 

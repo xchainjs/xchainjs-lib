@@ -245,7 +245,12 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     const blockData = await this.roundRobinGetBlock(indexedTx.height)
     // Return the mapped transaction object
     return {
-      asset: txFrom[0]?.asset ?? txTo[0]?.asset ?? (() => { throw new Error(`No transfer events found in tx ${indexedTx.hash}`) })(),
+      asset:
+        txFrom[0]?.asset ??
+        txTo[0]?.asset ??
+        (() => {
+          throw new Error(`No transfer events found in tx ${indexedTx.hash}`)
+        })(),
       from: txFrom,
       to: txTo,
       date: new Date(blockData.header.time),
