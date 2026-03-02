@@ -847,7 +847,7 @@ export class Client extends BaseXChainClient implements EVMClient {
   public async approve({
     contractAddress,
     spenderAddress,
-    feeOption = FeeOption.Fastest,
+    feeOption = FeeOption.Fast,
     amount,
     walletIndex = 0,
   }: ApproveParams): Promise<string> {
@@ -893,7 +893,8 @@ export class Client extends BaseXChainClient implements EVMClient {
       contractAddress,
       fromAddress: sender,
       amount,
-    }).catch(() => {
+    }).catch((error) => {
+      console.warn(`Failed to estimate approve gas limit, using default: ${String(error)}`)
       return new BigNumber(this.config.defaults[this.network].approveGasLimit)
     })
 
