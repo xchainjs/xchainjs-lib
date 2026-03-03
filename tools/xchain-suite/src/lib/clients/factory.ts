@@ -24,7 +24,7 @@ import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum
 function createEthParams(network: Network, phrase: string) {
   const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
 
-  const mainnetProvider = new JsonRpcProvider('https://eth.llamarpc.com', 'homestead')
+  const mainnetProvider = new JsonRpcProvider('https://ethereum.publicnode.com', 'homestead')
   const testnetProvider = new JsonRpcProvider('https://ethereum-sepolia-rpc.publicnode.com', { name: 'sepolia', chainId: 11155111 })
 
   const providers = {

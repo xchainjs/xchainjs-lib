@@ -24,6 +24,7 @@
     "@xchainjs/xchain-dash": "workspace:*",
     "@xchainjs/xchain-doge": "workspace:*",
     "@xchainjs/xchain-ethereum": "workspace:*",
+    "@xchainjs/xchain-evm": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-kujira": "workspace:*",
     "@xchainjs/xchain-litecoin": "workspace:*",

@@ -87,13 +87,14 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
 }
 
 /**
- * Returns approval amount. If amount is not set or zero, returns `MAX_APPROVAL`.
+ * Returns approval amount. If amount is not provided, returns `MAX_APPROVAL`.
+ * An explicit amount (including zero) is returned as-is, enabling revocation.
  *
  * @param {BaseAmount} amount The amount to check.
  * @returns {ethers.BigNumber} The approval amount.
  */
 export const getApprovalAmount = (amount?: BaseAmount): BigNumber =>
-  amount && amount.gt(baseAmount(0, amount.decimal)) ? new BigNumber(amount.amount().toFixed()) : MAX_APPROVAL
+  amount ? new BigNumber(amount.amount().toFixed()) : MAX_APPROVAL
 
 /**
  * Estimate gas required for calling a contract function.
