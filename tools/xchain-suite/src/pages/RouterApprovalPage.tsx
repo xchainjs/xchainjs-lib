@@ -86,6 +86,7 @@ export default function RouterApprovalPage() {
 
         // Get user address and provider from the EVM client
         const fromAddress = await evmClient.getAddressAsync()
+        if (!('getProvider' in evmClient)) throw new Error(`${selectedChain} client does not expose getProvider()`)
         const provider = (evmClient as unknown as { getProvider: () => import('ethers').Provider }).getProvider()
 
         const allowanceBN = await getAllowance({
