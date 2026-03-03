@@ -1,13 +1,14 @@
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EtherscanProvider } from '@xchainjs/xchain-evm-providers'
-import { Asset, AssetType, Chain } from '@xchainjs/xchain-util'
-import { JsonRpcProvider } from 'ethers'
+import { Asset, AssetType, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { JsonRpcProvider, Transaction } from 'ethers'
 import { BigNumber } from 'bignumber.js'
 
 import mock from '../__mocks__/axios-adapter'
 import { mock_gas_oracle_custom } from '../__mocks__/etherscan-api'
 import { mock_thornode_inbound_addresses_success } from '../__mocks__/thornode-api'
 import { Client, EVMKeystoreClientParams, KeystoreSigner } from '../src'
+import * as utils from '../src/utils'
 
 const importjson = async (file: string) => (await import(file, { with: { type: 'json' } })).default
 
@@ -158,6 +159,7 @@ describe('EVM client', () => {
 
   afterEach(() => {
     setupCleanMocks()
+    jest.restoreAllMocks()
   })
 
   afterAll(() => {
@@ -257,5 +259,136 @@ describe('EVM client', () => {
     expect(fast.amount().toString()).toEqual('25000000000')
     expect(fastest.amount().toString()).toEqual('125000000000') // 5x more than fast
     expect(average.amount().toString()).toEqual('12500000000') // 1/2 as much as fast
+  })
+
+  describe('approve - reset to zero for USDT-like tokens', () => {
+    const contractAddress = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+    const spenderAddress = '0x3624525075b88B24ecc29CE226b0CEc1fFcB6976'
+    const fakeSignedTx = '0xfakesignedtx'
+    const fakeTxHash = '0xfaketxhash'
+
+    const buildMockUnsignedTx = (): string => {
+      const tx = new Transaction()
+      tx.to = contractAddress
+      tx.chainId = BigInt(43113)
+      tx.nonce = 0
+      return tx.unsignedSerialized
+    }
+
+    it('Should reset allowance to 0 before approving when current allowance is non-zero', async () => {
+      const getAllowanceSpy = jest.spyOn(utils, 'getAllowance').mockResolvedValue(new BigNumber(1000))
+
+      jest.spyOn(avaxClient, 'estimateGasPrices').mockResolvedValue({
+        average: baseAmount(1, 18),
+        fast: baseAmount(1, 18),
+        fastest: baseAmount(1, 18),
+      })
+      jest.spyOn(avaxClient, 'estimateApprove').mockResolvedValue(new BigNumber(50000))
+      jest.spyOn(avaxClient, 'prepareApprove').mockResolvedValue({ rawUnsignedTx: buildMockUnsignedTx() })
+
+      const broadcastSpy = jest.spyOn(avaxClient, 'broadcastTx').mockResolvedValue(fakeTxHash)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const signer = (avaxClient as any).getSigner()
+      const signSpy = jest.spyOn(signer, 'signApprove').mockResolvedValue(fakeSignedTx)
+
+      const mockProvider = avaxClient.getProvider()
+      const waitSpy = jest.spyOn(mockProvider, 'waitForTransaction').mockResolvedValue({} as never)
+      jest.spyOn(mockProvider, 'getTransactionCount').mockResolvedValue(0)
+      jest.spyOn(mockProvider, 'getNetwork').mockResolvedValue({ chainId: BigInt(43113) } as never)
+
+      await avaxClient.approve({
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(5000, 18),
+      })
+
+      // Should have been called to check current allowance
+      expect(getAllowanceSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          contractAddress,
+          spenderAddress,
+        }),
+      )
+
+      // broadcastTx should be called twice: once for reset to 0, once for actual approval
+      expect(broadcastSpy).toHaveBeenCalledTimes(2)
+
+      // signApprove called twice: reset tx + actual approval tx
+      expect(signSpy).toHaveBeenCalledTimes(2)
+
+      // waitForTransaction must be called for the reset tx before the second broadcast
+      expect(waitSpy).toHaveBeenCalledTimes(1)
+      expect(waitSpy).toHaveBeenCalledWith(fakeTxHash)
+
+      getAllowanceSpy.mockRestore()
+    })
+
+    it('Should not reset allowance when current allowance is zero', async () => {
+      const getAllowanceSpy = jest.spyOn(utils, 'getAllowance').mockResolvedValue(new BigNumber(0))
+
+      jest.spyOn(avaxClient, 'estimateGasPrices').mockResolvedValue({
+        average: baseAmount(1, 18),
+        fast: baseAmount(1, 18),
+        fastest: baseAmount(1, 18),
+      })
+      jest.spyOn(avaxClient, 'estimateApprove').mockResolvedValue(new BigNumber(50000))
+      jest.spyOn(avaxClient, 'prepareApprove').mockResolvedValue({ rawUnsignedTx: buildMockUnsignedTx() })
+
+      const broadcastSpy = jest.spyOn(avaxClient, 'broadcastTx').mockResolvedValue(fakeTxHash)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const signer = (avaxClient as any).getSigner()
+      const signSpy = jest.spyOn(signer, 'signApprove').mockResolvedValue(fakeSignedTx)
+
+      const mockProvider = avaxClient.getProvider()
+      const waitSpy = jest.spyOn(mockProvider, 'waitForTransaction').mockResolvedValue({} as never)
+
+      await avaxClient.approve({
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(5000, 18),
+      })
+
+      // broadcastTx should be called only once for the actual approval
+      expect(broadcastSpy).toHaveBeenCalledTimes(1)
+
+      // signApprove called only once
+      expect(signSpy).toHaveBeenCalledTimes(1)
+
+      // waitForTransaction should not be called (no reset needed)
+      expect(waitSpy).not.toHaveBeenCalled()
+
+      getAllowanceSpy.mockRestore()
+    })
+
+    it('Should proceed with approval when getAllowance fails', async () => {
+      const getAllowanceSpy = jest.spyOn(utils, 'getAllowance').mockRejectedValue(new Error('RPC timeout'))
+
+      jest.spyOn(avaxClient, 'estimateGasPrices').mockResolvedValue({
+        average: baseAmount(1, 18),
+        fast: baseAmount(1, 18),
+        fastest: baseAmount(1, 18),
+      })
+      jest.spyOn(avaxClient, 'estimateApprove').mockResolvedValue(new BigNumber(50000))
+      jest.spyOn(avaxClient, 'prepareApprove').mockResolvedValue({ rawUnsignedTx: buildMockUnsignedTx() })
+
+      const broadcastSpy = jest.spyOn(avaxClient, 'broadcastTx').mockResolvedValue(fakeTxHash)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const signer = (avaxClient as any).getSigner()
+      jest.spyOn(signer, 'signApprove').mockResolvedValue(fakeSignedTx)
+
+      await avaxClient.approve({
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(5000, 18),
+      })
+
+      // Should still broadcast the approval despite getAllowance failure
+      expect(broadcastSpy).toHaveBeenCalledTimes(1)
+
+      getAllowanceSpy.mockRestore()
+    })
   })
 })

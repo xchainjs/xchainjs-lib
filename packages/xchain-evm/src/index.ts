@@ -21,6 +21,7 @@ export {
   call, // Function to call a contract
   estimateApprove, // Function to estimate approval transaction
   estimateCall, // Function to estimate contract function call
+  getAllowance, // Function to get the current allowance for a spender
   getApprovalAmount, // Function to calculate the approval amount
   getTokenAddress, // Function to get the address of a token
   getPrefix, // Function to get the address prefix

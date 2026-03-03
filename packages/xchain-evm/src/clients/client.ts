@@ -50,6 +50,7 @@ import {
   call,
   estimateApprove,
   estimateCall,
+  getAllowance,
   getApprovalAmount,
   getFee,
   getNetworkId,
@@ -846,7 +847,7 @@ export class Client extends BaseXChainClient implements EVMClient {
   public async approve({
     contractAddress,
     spenderAddress,
-    feeOption = FeeOption.Fastest,
+    feeOption = FeeOption.Fast, // Matches transfer() default; callers can override to Fastest if needed
     amount,
     walletIndex = 0,
   }: ApproveParams): Promise<string> {
@@ -858,12 +859,49 @@ export class Client extends BaseXChainClient implements EVMClient {
 
     checkFeeBounds(this.feeBounds, gasPrice.toNumber())
 
+    // Some tokens (e.g. USDT) require resetting allowance to 0 before setting a new non-zero value.
+    // Check current allowance and reset if needed. Failures are non-blocking to avoid
+    // preventing approval due to transient RPC issues.
+    const approvalAmount = getApprovalAmount(amount)
+    let shouldResetAllowance = false
+    if (approvalAmount.gt(0)) {
+      try {
+        const currentAllowance = await getAllowance({
+          provider: this.getProvider(),
+          contractAddress,
+          spenderAddress,
+          fromAddress: sender,
+        })
+        shouldResetAllowance = currentAllowance.gt(0)
+      } catch (error) {
+        console.warn(`Failed to read allowance, skipping reset pre-check: ${String(error)}`)
+      }
+      if (shouldResetAllowance) {
+        const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
+        const resetUnsignedTx = await contract.getFunction('approve').populateTransaction(spenderAddress, BigInt(0))
+        resetUnsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
+        resetUnsignedTx.nonce = await this.getProvider().getTransactionCount(sender)
+
+        const resetTx = Transaction.from(resetUnsignedTx)
+        resetTx.type = 1
+        resetTx.gasLimit = BigInt(this.config.defaults[this.network].approveGasLimit.toFixed())
+        resetTx.gasPrice = BigInt(gasPrice.toFixed())
+        resetTx.maxFeePerGas = null
+        resetTx.maxPriorityFeePerGas = null
+
+        const signedResetTx = await this.getSigner().signApprove({ walletIndex, tx: resetTx })
+        const resetHash = await this.broadcastTx(signedResetTx)
+        await this.getProvider().waitForTransaction(resetHash)
+      }
+    }
+
     const gasLimit: BigNumber = await this.estimateApprove({
       spenderAddress,
       contractAddress,
       fromAddress: sender,
       amount,
-    }).catch(() => {
+    }).catch((error) => {
+      console.warn(`Failed to estimate approve gas limit, using default: ${String(error)}`)
       return new BigNumber(this.config.defaults[this.network].approveGasLimit)
     })
 
