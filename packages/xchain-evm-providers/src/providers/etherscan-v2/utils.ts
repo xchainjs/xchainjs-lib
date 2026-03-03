@@ -88,10 +88,11 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
 /**
  * Returns approval amount
  *
- * If given amount is not set or zero, `MAX_APPROVAL` amount is used
+ * If amount is not provided, returns `MAX_APPROVAL`.
+ * An explicit amount (including zero) is returned as-is, enabling revocation.
  */
 export const getApprovalAmount = (amount?: BaseAmount): BigNumber =>
-  amount && amount.gt(baseAmount(0, amount.decimal)) ? new BigNumber(amount.amount().toFixed()) : MAX_APPROVAL
+  amount ? new BigNumber(amount.amount().toFixed()) : MAX_APPROVAL
 
 /**
  * Call a contract function.
