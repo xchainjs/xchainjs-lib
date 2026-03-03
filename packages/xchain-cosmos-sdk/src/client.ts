@@ -241,8 +241,14 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       }
       txFrom.push(txFromObj)
     }
-    // Retrieve block data
-    const blockData = await this.roundRobinGetBlock(indexedTx.height)
+    // Retrieve block data (best-effort — pruned blocks fall back to epoch 0)
+    let txDate: Date
+    try {
+      const blockData = await this.roundRobinGetBlock(indexedTx.height)
+      txDate = new Date(blockData.header.time)
+    } catch {
+      txDate = new Date(0)
+    }
     // Return the mapped transaction object
     return {
       asset:
@@ -253,7 +259,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
         })(),
       from: txFrom,
       to: txTo,
-      date: new Date(blockData.header.time),
+      date: txDate,
       type: TxType.Transfer,
       hash: indexedTx.hash,
     }
@@ -375,10 +381,17 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     ])
 
     const indexedTxs = [...indexedTxsReceipent, ...indexedTxsSender]
-    const promisesTxs = indexedTxs.map((indexedTx) => this.mapIndexedTxToTx(indexedTx))
-    const txs = await Promise.all(promisesTxs)
+    const results = await Promise.allSettled(indexedTxs.map((indexedTx) => this.mapIndexedTxToTx(indexedTx)))
+    const txs: Tx[] = []
+    results.forEach((result, i) => {
+      if (result.status === 'fulfilled') {
+        txs.push(result.value)
+      } else {
+        console.warn(`Skipping tx ${indexedTxs[i].hash}: ${result.reason}`)
+      }
+    })
     return {
-      total: indexedTxs.length,
+      total: txs.length,
       txs,
     }
   }
@@ -472,7 +485,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     for (const client of clients) {
       try {
         return await client.getBlock(height)
-      } catch {}
+      } catch (e) {
+        console.warn(`Failed to get block ${height}:`, e instanceof Error ? e.message : e)
+      }
     }
 
     throw Error(`No clients available. Can not retrieve block ${height}`)
