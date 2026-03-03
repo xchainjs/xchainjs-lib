@@ -263,7 +263,7 @@ export async function isApproved({
   amount?: BaseAmount
 }): Promise<boolean> {
   if (!amount) {
-    console.warn('isApproved called without amount, defaulting to 1 base unit check')
+    console.debug('isApproved called without amount, defaulting to 1 base unit check')
   }
   const txAmount = new BigNumber(amount?.amount().toFixed() ?? 1)
   const allowance = await getAllowance({ provider, contractAddress, spenderAddress, fromAddress })

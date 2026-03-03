@@ -159,6 +159,7 @@ describe('EVM client', () => {
 
   afterEach(() => {
     setupCleanMocks()
+    jest.restoreAllMocks()
   })
 
   afterAll(() => {
@@ -289,10 +290,10 @@ describe('EVM client', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const signer = (avaxClient as any).getSigner()
-      jest.spyOn(signer, 'signApprove').mockResolvedValue(fakeSignedTx)
+      const signSpy = jest.spyOn(signer, 'signApprove').mockResolvedValue(fakeSignedTx)
 
       const mockProvider = avaxClient.getProvider()
-      jest.spyOn(mockProvider, 'waitForTransaction').mockResolvedValue({} as never)
+      const waitSpy = jest.spyOn(mockProvider, 'waitForTransaction').mockResolvedValue({} as never)
       jest.spyOn(mockProvider, 'getTransactionCount').mockResolvedValue(0)
       jest.spyOn(mockProvider, 'getNetwork').mockResolvedValue({ chainId: BigInt(43113) } as never)
 
@@ -313,11 +314,56 @@ describe('EVM client', () => {
       // broadcastTx should be called twice: once for reset to 0, once for actual approval
       expect(broadcastSpy).toHaveBeenCalledTimes(2)
 
+      // signApprove called twice: reset tx + actual approval tx
+      expect(signSpy).toHaveBeenCalledTimes(2)
+
+      // waitForTransaction must be called for the reset tx before the second broadcast
+      expect(waitSpy).toHaveBeenCalledTimes(1)
+      expect(waitSpy).toHaveBeenCalledWith(fakeTxHash)
+
       getAllowanceSpy.mockRestore()
     })
 
     it('Should not reset allowance when current allowance is zero', async () => {
       const getAllowanceSpy = jest.spyOn(utils, 'getAllowance').mockResolvedValue(new BigNumber(0))
+
+      jest.spyOn(avaxClient, 'estimateGasPrices').mockResolvedValue({
+        average: baseAmount(1, 18),
+        fast: baseAmount(1, 18),
+        fastest: baseAmount(1, 18),
+      })
+      jest.spyOn(avaxClient, 'estimateApprove').mockResolvedValue(new BigNumber(50000))
+      jest.spyOn(avaxClient, 'prepareApprove').mockResolvedValue({ rawUnsignedTx: buildMockUnsignedTx() })
+
+      const broadcastSpy = jest.spyOn(avaxClient, 'broadcastTx').mockResolvedValue(fakeTxHash)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const signer = (avaxClient as any).getSigner()
+      const signSpy = jest.spyOn(signer, 'signApprove').mockResolvedValue(fakeSignedTx)
+
+      const mockProvider = avaxClient.getProvider()
+      const waitSpy = jest.spyOn(mockProvider, 'waitForTransaction').mockResolvedValue({} as never)
+
+      await avaxClient.approve({
+        contractAddress,
+        spenderAddress,
+        amount: baseAmount(5000, 18),
+      })
+
+      // broadcastTx should be called only once for the actual approval
+      expect(broadcastSpy).toHaveBeenCalledTimes(1)
+
+      // signApprove called only once
+      expect(signSpy).toHaveBeenCalledTimes(1)
+
+      // waitForTransaction should not be called (no reset needed)
+      expect(waitSpy).not.toHaveBeenCalled()
+
+      getAllowanceSpy.mockRestore()
+    })
+
+    it('Should proceed with approval when getAllowance fails', async () => {
+      const getAllowanceSpy = jest.spyOn(utils, 'getAllowance').mockRejectedValue(new Error('RPC timeout'))
 
       jest.spyOn(avaxClient, 'estimateGasPrices').mockResolvedValue({
         average: baseAmount(1, 18),
@@ -339,7 +385,7 @@ describe('EVM client', () => {
         amount: baseAmount(5000, 18),
       })
 
-      // broadcastTx should be called only once for the actual approval
+      // Should still broadcast the approval despite getAllowance failure
       expect(broadcastSpy).toHaveBeenCalledTimes(1)
 
       getAllowanceSpy.mockRestore()
