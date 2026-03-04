@@ -8,6 +8,9 @@ import { ResultPanel } from '../components/ui/ResultPanel'
 import { CodePreview } from '../components/ui/CodePreview'
 import { assetAmount, assetToBase, AssetType, CryptoAmount, type TokenAsset } from '@xchainjs/xchain-util'
 import { getAllowance } from '@xchainjs/xchain-evm'
+import BigNumber from 'bignumber.js'
+
+const UNLIMITED_THRESHOLD = new BigNumber(2).pow(128)
 
 // Common ERC-20 tokens on supported EVM chains
 const EVM_TOKENS = [
@@ -96,8 +99,10 @@ export default function RouterApprovalPage() {
           fromAddress,
         })
 
-        // Format with token decimals
-        const formatted = allowanceBN.div(10 ** selectedToken.decimals).toFixed(selectedToken.decimals > 6 ? 4 : 2)
+        // Format with token decimals — show "Unlimited" for MAX_APPROVAL-scale values
+        const formatted = allowanceBN.gte(UNLIMITED_THRESHOLD)
+          ? 'Unlimited'
+          : allowanceBN.div(10 ** selectedToken.decimals).toFixed(selectedToken.decimals > 6 ? 4 : 2)
 
         return {
           allowance: allowanceBN.toFixed(),
