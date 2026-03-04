@@ -11,7 +11,9 @@ const mockWalletFull = {
   sync: jest.fn().mockResolvedValue(undefined),
   getBalance: jest.fn().mockResolvedValue(BigInt('5000000000000')),
   getTransfers: jest.fn().mockResolvedValue([]),
-  createTx: jest.fn().mockResolvedValue('mockTxObject'),
+  createTx: jest
+    .fn()
+    .mockResolvedValue({ getHash: () => 'abc123def456789012345678901234567890123456789012345678901234abcd' }),
   relayTx: jest.fn().mockResolvedValue('abc123def456789012345678901234567890123456789012345678901234abcd'),
   close: jest.fn(),
 }
@@ -32,7 +34,7 @@ const mockDaemon = {
     }
     return null
   }),
-  submitTxHex: jest.fn().mockReturnValue({
+  submitTxHex: jest.fn().mockResolvedValue({
     getIsGood: () => true,
   }),
 }

@@ -1,5 +1,5 @@
 import { Network } from '@xchainjs/xchain-client'
-import { assetToString } from '@xchainjs/xchain-util'
+import { assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import { Client, defaultXMRParams } from '../src'
 
@@ -136,6 +136,14 @@ describe('Monero client', () => {
       ).toBeTruthy()
     })
 
+    it('Should validate integrated address as valid', () => {
+      expect(
+        client.validateAddress(
+          '4LL9oSLmtpccfufTMvppY6JwXNouMBzSkbLYfpAV5Usx3skxNgYeYTRj5UzqtReoS44qo9mtmXCqY45DJ852K5Jv2bYXZKKQePHES9khPK',
+        ),
+      ).toBeTruthy()
+    })
+
     it('Should validate address as invalid - wrong length', () => {
       expect(client.validateAddress('fakeAddress')).toBeFalsy()
     })
@@ -210,7 +218,9 @@ describe('Monero client', () => {
   describe('Unsupported', () => {
     it('Should throw on prepareTx', async () => {
       const client = new Client()
-      await expect(client.prepareTx()).rejects.toThrow('prepareTx is not supported for Monero')
+      await expect(client.prepareTx({ recipient: 'addr', amount: baseAmount(1, 12) })).rejects.toThrow(
+        'prepareTx is not supported for Monero',
+      )
     })
   })
 })

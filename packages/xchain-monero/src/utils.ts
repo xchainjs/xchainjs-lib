@@ -16,7 +16,7 @@ export const getMoneroNetworkType = (network: Network): number => {
   const networkMap: Record<Network, number> = {
     [Network.Mainnet]: MoneroNetworkType.MAINNET,
     [Network.Stagenet]: MoneroNetworkType.STAGENET,
-    [Network.Testnet]: MoneroNetworkType.STAGENET,
+    [Network.Testnet]: MoneroNetworkType.STAGENET, // Monero testnet is deprecated; stagenet is used for testing
   }
   return networkMap[network]
 }
@@ -48,6 +48,10 @@ const ED25519_ORDER = BigInt('72370055773322622139731865630429942408571163593799
  * Required to produce valid Monero private keys from arbitrary 32-byte seeds.
  */
 export const scReduce32 = (bytes: Uint8Array): Uint8Array => {
+  if (bytes.length !== 32) {
+    throw new Error(`scReduce32 expects 32 bytes, got ${bytes.length}`)
+  }
+
   // Interpret as little-endian integer
   let value = BigInt(0)
   for (let i = 31; i >= 0; i--) {

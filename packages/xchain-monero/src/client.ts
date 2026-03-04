@@ -82,13 +82,16 @@ export class Client extends BaseXChainClient {
    * @returns {Address} The Monero address related to the index provided.
    */
   public async getAddressAsync(index?: number): Promise<string> {
-    const spendKeyHex = this.getPrivateSpendKey(index || 0)
+    const spendKeyHex = this.getPrivateSpendKey(index ?? 0)
     const wallet = await moneroTs.createWalletKeys({
       networkType: getMoneroNetworkType(this.getNetwork()),
       privateSpendKey: spendKeyHex,
     })
-    const address = await wallet.getPrimaryAddress()
-    return address
+    try {
+      return await wallet.getPrimaryAddress()
+    } finally {
+      await wallet.close()
+    }
   }
 
   /**
@@ -159,7 +162,8 @@ export class Client extends BaseXChainClient {
    * Note: Monero transactions require private key context for ring signature
    * construction, so this method is not supported in the traditional sense.
    */
-  public async prepareTx(): Promise<PreparedTx> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async prepareTx(_params: TxParams): Promise<PreparedTx> {
     throw Error('prepareTx is not supported for Monero. Use transfer() instead.')
   }
 
@@ -193,16 +197,19 @@ export class Client extends BaseXChainClient {
           privateSpendKey: spendKeyHex,
         })
 
-        await wallet.sync()
-        const balance = await wallet.getBalance()
-        await wallet.close()
+        try {
+          await wallet.sync()
+          const balance = await wallet.getBalance()
 
-        return [
-          {
-            asset: AssetXMR,
-            amount: baseAmount(balance.toString(), XMR_DECIMALS),
-          },
-        ]
+          return [
+            {
+              asset: AssetXMR,
+              amount: baseAmount(balance.toString(), XMR_DECIMALS),
+            },
+          ]
+        } finally {
+          await wallet.close()
+        }
       } catch (error) {
         console.warn(`Daemon ${url} failed for getBalance:`, (error as Error).message)
         continue
@@ -246,19 +253,12 @@ export class Client extends BaseXChainClient {
 
         if (!tx) throw Error('Transaction not found')
 
-        const fee = tx.getFee() ?? BigInt(0)
-
         return {
           asset: AssetXMR,
           date: new Date((tx.getBlock()?.getTimestamp() ?? 0) * 1000),
           type: TxType.Transfer,
           hash: tx.getHash(),
-          from: [
-            {
-              from: '', // Monero txs don't expose sender addresses
-              amount: baseAmount(fee.toString(), XMR_DECIMALS),
-            },
-          ],
+          from: [], // Monero txs don't expose sender addresses or amounts without view key
           to: [], // Monero txs don't expose recipient amounts without view key
         }
       } catch (error) {
@@ -283,37 +283,40 @@ export class Client extends BaseXChainClient {
           privateSpendKey: spendKeyHex,
         })
 
-        await wallet.sync()
+        try {
+          await wallet.sync()
 
-        const transfers = await wallet.getTransfers()
-        await wallet.close()
+          const transfers = await wallet.getTransfers()
 
-        const offset = params?.offset ?? 0
-        const limit = params?.limit ?? 10
-        const sliced = transfers.slice(offset, offset + limit)
+          const offset = params?.offset ?? 0
+          const limit = params?.limit ?? 10
+          const sliced = transfers.slice(offset, offset + limit)
 
-        const txs: Tx[] = sliced.map((transfer) => ({
-          asset: AssetXMR,
-          date: new Date((transfer.getTx().getBlock()?.getTimestamp() ?? 0) * 1000),
-          type: TxType.Transfer,
-          hash: transfer.getTx().getHash(),
-          from: [
-            {
-              from: '',
-              amount: baseAmount(transfer.getAmount().toString(), XMR_DECIMALS),
-            },
-          ],
-          to: [
-            {
-              to: '',
-              amount: baseAmount(transfer.getAmount().toString(), XMR_DECIMALS),
-            },
-          ],
-        }))
+          const txs: Tx[] = sliced.map((transfer) => ({
+            asset: AssetXMR,
+            date: new Date((transfer.getTx().getBlock()?.getTimestamp() ?? 0) * 1000),
+            type: TxType.Transfer,
+            hash: transfer.getTx().getHash(),
+            from: [
+              {
+                from: '',
+                amount: baseAmount(transfer.getAmount().toString(), XMR_DECIMALS),
+              },
+            ],
+            to: [
+              {
+                to: '',
+                amount: baseAmount(transfer.getAmount().toString(), XMR_DECIMALS),
+              },
+            ],
+          }))
 
-        return {
-          txs,
-          total: transfers.length,
+          return {
+            txs,
+            total: transfers.length,
+          }
+        } finally {
+          await wallet.close()
         }
       } catch (error) {
         console.warn(`Daemon ${url} failed for getTransactions:`, (error as Error).message)
@@ -329,7 +332,7 @@ export class Client extends BaseXChainClient {
 
     for (const url of urls) {
       try {
-        const spendKeyHex = this.getPrivateSpendKey(walletIndex || 0)
+        const spendKeyHex = this.getPrivateSpendKey(walletIndex ?? 0)
         const wallet = await moneroTs.createWalletFull({
           password: '',
           networkType: getMoneroNetworkType(this.getNetwork()),
@@ -337,26 +340,29 @@ export class Client extends BaseXChainClient {
           privateSpendKey: spendKeyHex,
         })
 
-        await wallet.sync()
+        try {
+          await wallet.sync()
 
-        const txConfig: {
-          address: string
-          amount: bigint
-          note?: string
-        } = {
-          address: recipient,
-          amount: BigInt(amount.amount().toString()),
+          const txConfig: {
+            address: string
+            amount: bigint
+            note?: string
+          } = {
+            address: recipient,
+            amount: BigInt(amount.amount().toString()),
+          }
+
+          if (memo) {
+            txConfig.note = memo
+          }
+
+          const tx = await wallet.createTx(txConfig)
+          const hash = await wallet.relayTx(tx)
+
+          return hash
+        } finally {
+          await wallet.close()
         }
-
-        if (memo) {
-          txConfig.note = memo
-        }
-
-        const tx = await wallet.createTx(txConfig)
-        const hash = await wallet.relayTx(tx)
-        await wallet.close()
-
-        return hash
       } catch (error) {
         console.warn(`Daemon ${url} failed for transfer:`, (error as Error).message)
         continue
@@ -378,9 +384,9 @@ export class Client extends BaseXChainClient {
           throw Error(`Failed to broadcast: ${result.getReason() ?? 'unknown error'}`)
         }
 
-        // submitTxHex doesn't return the hash directly, but it's derived from the tx hex
-        // In practice, the caller should know the hash from the prepared transaction
-        return txHex.substring(0, 64) // First 32 bytes as placeholder hash
+        // Monero tx hash is not returned by submitTxHex.
+        // The caller should obtain the hash from transfer() or the prepared tx.
+        return txHex.substring(0, 64)
       } catch (error) {
         console.warn(`Daemon ${url} failed for broadcastTx:`, (error as Error).message)
         continue
