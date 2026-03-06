@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- 167a96c: Fix getTransactionData event parsing: replace hardcoded .slice(7) with dynamic tx event delimiter, fix map key mismatch in transfer aggregation, add attribute guards, and prevent crash on empty results
+- 5c8a481: Fix concurrent transaction sequence errors on Cosmos-based chains by serializing sign-and-broadcast operations per client instance
+- Updated dependencies [3dd82dd]
+  - @xchainjs/xchain-util@2.0.6
+  - @xchainjs/xchain-client@2.0.11
+
 ## 2.0.10
 
 ### Patch Changes
