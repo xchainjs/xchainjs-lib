@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.6
+
+### Patch Changes
+
+- 3dd82dd: Bump bignumber.js from 9.1.2 to 10.0.1. Updated bnOrZero, validBNOrZero, and fixedBN to handle v10 throwing on invalid input.
+
 ## 2.0.5
 
 ### Patch Changes

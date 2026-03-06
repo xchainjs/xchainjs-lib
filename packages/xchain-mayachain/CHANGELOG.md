@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.1.2
+
+### Patch Changes
+
+- 3dd82dd: Bump bignumber.js from 9.1.2 to 10.0.1. Updated bnOrZero, validBNOrZero, and fixedBN to handle v10 throwing on invalid input.
+- 5c8a481: Fix concurrent transaction sequence errors on Cosmos-based chains by serializing sign-and-broadcast operations per client instance
+- Updated dependencies [3dd82dd]
+- Updated dependencies [167a96c]
+- Updated dependencies [5c8a481]
+  - @xchainjs/xchain-util@2.0.6
+  - @xchainjs/xchain-cosmos-sdk@2.0.11
+  - @xchainjs/xchain-client@2.0.11
+
 ## 4.1.1
 
 ### Patch Changes

@@ -1,5 +1,44 @@
 # testing-gui
 
+## 1.0.8
+
+### Patch Changes
+
+- Updated dependencies [3dd82dd]
+- Updated dependencies [1c9a46f]
+- Updated dependencies [5c8a481]
+- Updated dependencies [a324d76]
+- Updated dependencies [f7b91eb]
+  - @xchainjs/xchain-util@2.0.6
+  - @xchainjs/xchain-evm@2.0.15
+  - @xchainjs/xchain-ethereum@2.0.16
+  - @xchainjs/xchain-avax@2.0.15
+  - @xchainjs/xchain-bsc@2.0.16
+  - @xchainjs/xchain-arbitrum@2.1.1
+  - @xchainjs/xchain-cosmos@3.0.11
+  - @xchainjs/xchain-thorchain@3.0.15
+  - @xchainjs/xchain-mayachain@4.1.2
+  - @xchainjs/xchain-thorchain-query@3.0.2
+  - @xchainjs/xchain-mayachain-query@2.1.8
+  - @xchainjs/xchain-wallet@2.0.24
+  - @xchainjs/xchain-evm-providers@2.0.14
+  - @xchainjs/xchain-bitcoin@2.2.2
+  - @xchainjs/xchain-bitcoincash@2.2.2
+  - @xchainjs/xchain-cardano@1.1.10
+  - @xchainjs/xchain-client@2.0.11
+  - @xchainjs/xchain-dash@2.2.2
+  - @xchainjs/xchain-doge@2.2.2
+  - @xchainjs/xchain-kujira@2.0.11
+  - @xchainjs/xchain-litecoin@2.2.2
+  - @xchainjs/xchain-mayachain-amm@4.1.14
+  - @xchainjs/xchain-mayamidgard-query@1.0.13
+  - @xchainjs/xchain-midgard-query@2.0.14
+  - @xchainjs/xchain-radix@2.0.11
+  - @xchainjs/xchain-ripple@1.0.13
+  - @xchainjs/xchain-solana@1.1.2
+  - @xchainjs/xchain-thorchain-amm@3.0.32
+  - @xchainjs/xchain-zcash@1.3.2
+
 ## 1.0.7
 
 ### Patch Changes

@@ -1,5 +1,32 @@
 # Changelog
 
+## 3.0.32
+
+### Patch Changes
+
+- Updated dependencies [3dd82dd]
+- Updated dependencies [1c9a46f]
+- Updated dependencies [5c8a481]
+- Updated dependencies [a324d76]
+  - @xchainjs/xchain-util@2.0.6
+  - @xchainjs/xchain-evm@2.0.15
+  - @xchainjs/xchain-ethereum@2.0.16
+  - @xchainjs/xchain-avax@2.0.15
+  - @xchainjs/xchain-bsc@2.0.16
+  - @xchainjs/xchain-base@1.0.15
+  - @xchainjs/xchain-cosmos@3.0.11
+  - @xchainjs/xchain-thorchain@3.0.15
+  - @xchainjs/xchain-thorchain-query@3.0.2
+  - @xchainjs/xchain-wallet@2.0.24
+  - @xchainjs/xchain-bitcoin@2.2.2
+  - @xchainjs/xchain-bitcoincash@2.2.2
+  - @xchainjs/xchain-client@2.0.11
+  - @xchainjs/xchain-doge@2.2.2
+  - @xchainjs/xchain-litecoin@2.2.2
+  - @xchainjs/xchain-ripple@1.0.13
+  - @xchainjs/xchain-solana@1.1.2
+  - @xchainjs/xchain-tron@3.0.4
+
 ## 3.0.31
 
 ### Patch Changes
