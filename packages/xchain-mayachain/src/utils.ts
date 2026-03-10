@@ -9,12 +9,12 @@ import { CompatibleAsset } from './types'
 /**
  * Default explorer URL for the mainnet.
  */
-const MAINNET_EXPLORER_URL = 'https://mayascan.org'
+const MAINNET_EXPLORER_URL = 'https://www.explorer.mayachain.info'
 
 /**
  * Default explorer URL for the stagenet.
  */
-const STAGENET_EXPLORER_URL = 'https://stagenet.mayascan.org'
+const STAGENET_EXPLORER_URL = 'https://www.explorer.mayachain.info'
 
 /**
  * Get default client URLs based on the network.
