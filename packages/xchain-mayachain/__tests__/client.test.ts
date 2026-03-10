@@ -29,16 +29,16 @@ describe('Mayachain client', () => {
         client = new Client()
       })
       it('Should get explorer url', () => {
-        expect(client.getExplorerUrl()).toBe('https://mayascan.org')
+        expect(client.getExplorerUrl()).toBe('https://www.explorer.mayachain.info')
       })
       it('Should get address url', () => {
         expect(client.getExplorerAddressUrl('maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6')).toBe(
-          'https://mayascan.org/address/maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6',
+          'https://www.explorer.mayachain.info/address/maya1fmecyfrrwsm98m59nv9y88urgur8p32g27kha6',
         )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('BD912F73A50317A4A3567A4D3C66B1A53D25BA7B299BB4C1D254E2A45DA83279')).toBe(
-          'https://mayascan.org/tx/BD912F73A50317A4A3567A4D3C66B1A53D25BA7B299BB4C1D254E2A45DA83279',
+          'https://www.explorer.mayachain.info/tx/BD912F73A50317A4A3567A4D3C66B1A53D25BA7B299BB4C1D254E2A45DA83279',
         )
       })
     })
@@ -53,7 +53,7 @@ describe('Mayachain client', () => {
         expect(client.getExplorerUrl()).toBe('deprecated')
       })
       it('Should get address url', () => {
-        expect(client.getExplorerAddressUrl('https://mayascan.org')).toBe('deprecated')
+        expect(client.getExplorerAddressUrl('https://www.explorer.mayachain.info')).toBe('deprecated')
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('BD912F73A50317A4A3567A4D3C66B1A53D25BA7B299BB4C1D254E2A45DA83279')).toBe(
@@ -69,16 +69,16 @@ describe('Mayachain client', () => {
         })
       })
       it('Should get explorer url', () => {
-        expect(client.getExplorerUrl()).toBe('https://stagenet.mayascan.org')
+        expect(client.getExplorerUrl()).toBe('https://www.explorer.mayachain.info')
       })
       it('Should get address url', () => {
         expect(client.getExplorerAddressUrl('smaya18z343fsdlav47chtkyp0aawqt6sgxsh3ctcu6u')).toBe(
-          'https://stagenet.mayascan.org/address/smaya18z343fsdlav47chtkyp0aawqt6sgxsh3ctcu6u',
+          'https://www.explorer.mayachain.info/address/smaya18z343fsdlav47chtkyp0aawqt6sgxsh3ctcu6u',
         )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('796D37DBB13F1A7EB86720832A4F395729F9AAFC953DC576795BEEE3FC4EBEC6')).toBe(
-          'https://stagenet.mayascan.org/tx/796D37DBB13F1A7EB86720832A4F395729F9AAFC953DC576795BEEE3FC4EBEC6',
+          'https://www.explorer.mayachain.info/tx/796D37DBB13F1A7EB86720832A4F395729F9AAFC953DC576795BEEE3FC4EBEC6',
         )
       })
     })
