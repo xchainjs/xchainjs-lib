@@ -6,9 +6,8 @@ import { getH, commit, zeroCommit } from '../src/crypto/pedersen'
 import { generateKeyImage } from '../src/crypto/keyImage'
 import { deriveOutputKey, deriveInputKey, isOutputForUs } from '../src/crypto/stealth'
 import { deriveSharedSecret, encryptAmount, decryptAmount } from '../src/crypto/ecdh'
-import { bytesToHex } from '../src/utils'
+import { bytesToHex, hexToBytes, scReduce32 } from '../src/utils'
 import { deriveKeyPairs, secretKeyToPublicKey } from '../src/crypto/keys'
-import { scReduce32 } from '../src/utils'
 
 const ExtPoint = ed25519.ExtendedPoint
 
@@ -23,7 +22,7 @@ describe('Phase 3a: Core crypto primitives', () => {
       ]
 
       for (const [inputHex, expectedHex] of vectors) {
-        const input = new Uint8Array(Buffer.from(inputHex, 'hex'))
+        const input = hexToBytes(inputHex)
         const result = hashToPoint(input)
         expect(bytesToHex(result.toRawBytes())).toBe(expectedHex)
       }

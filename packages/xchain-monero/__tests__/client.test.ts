@@ -224,14 +224,15 @@ describe('Monero client (pure JS)', () => {
       expect(balances[0].amount.amount().toString()).toBe('7000000000000')
     })
 
-    it('Should throw when no LWS configured', async () => {
+    it('Should throw when no LWS or daemon configured', async () => {
       const client = new Client({
         ...defaultXMRParams,
         phrase: TEST_PHRASE,
         lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
       })
 
-      await expect(client.getBalance('someAddress')).rejects.toThrow('No LWS URLs configured')
+      await expect(client.getBalance('someAddress')).rejects.toThrow('No daemon URLs configured')
     })
 
     it('Should try next LWS URL on failure', async () => {
@@ -451,14 +452,15 @@ describe('Monero client (pure JS)', () => {
       expect(result.txs[0].hash).toBe('tx2')
     })
 
-    it('Should throw when no LWS configured', async () => {
+    it('Should throw when no LWS or daemon configured', async () => {
       const client = new Client({
         ...defaultXMRParams,
         phrase: TEST_PHRASE,
         lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
       })
 
-      await expect(client.getTransactions()).rejects.toThrow('No LWS URLs configured')
+      await expect(client.getTransactions()).rejects.toThrow('No daemon URLs configured')
     })
   })
 
