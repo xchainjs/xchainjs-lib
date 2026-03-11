@@ -24,6 +24,15 @@ const SECONDS_PER_BLOCK = (365.25 * 24 * 60 * 60) / BLOCKS_PER_YEAR // ~6 second
 
 const ALIAS_CHAINS = ['BTC', 'ETH', 'AVAX', 'BSC', 'GAIA', 'THOR', 'DOGE', 'LTC', 'BCH', 'DASH', 'ARB', 'SOL', 'KUJI']
 
+const PREFERRED_ASSET_OPTIONS = [
+  { label: 'None', value: '' },
+  { label: 'ETH', value: 'ETH.ETH' },
+  { label: 'USDC (ETH)', value: 'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48' },
+  { label: 'USDT (ETH)', value: 'ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7' },
+  { label: 'BTC', value: 'BTC.BTC' },
+  { label: 'RUNE', value: 'THOR.RUNE' },
+]
+
 const EXPIRY_OPTIONS = [
   { label: '1 year', years: 1 },
   { label: '2 years', years: 2 },
@@ -57,6 +66,7 @@ export default function THORNamePage() {
   const [regChainAddress, setRegChainAddress] = useState('')
   const [regOwner, setRegOwner] = useState('')
   const [regExpiry, setRegExpiry] = useState(1)
+  const [regPreferredAsset, setRegPreferredAsset] = useState('')
   const quoteOp = useOperation<NameQuote>()
   const registerOp = useOperation<NameTxResult>()
   const { wallet } = useAggregator()
@@ -171,6 +181,9 @@ thorNames.forEach(name => {
         const thorchainAmm = new ThorchainAMM()
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
 
+        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
+        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
+
         if (regMode === 'register') {
           if (!regChain || !regChainAddress || !regOwner) {
             throw new Error('All fields are required for registration')
@@ -181,6 +194,7 @@ thorNames.forEach(name => {
             chain: regChain,
             chainAddress: regChainAddress,
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
           return {
             memo: quote.memo,
@@ -194,6 +208,7 @@ thorNames.forEach(name => {
             ...(regOwner && { owner: regOwner }),
             ...(regChain && regChainAddress && { chain: regChain, chainAddress: regChainAddress }),
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
           return {
             memo: quote.memo,
@@ -223,6 +238,9 @@ thorNames.forEach(name => {
         const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
 
+        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
+        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
+
         if (regMode === 'register') {
           return await thorchainAmm.registerTHORName({
             name: regName,
@@ -230,6 +248,7 @@ thorNames.forEach(name => {
             chain: regChain,
             chainAddress: regChainAddress,
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
         } else {
           return await thorchainAmm.updateTHORName({
@@ -237,6 +256,7 @@ thorNames.forEach(name => {
             ...(regOwner && { owner: regOwner }),
             ...(regChain && regChainAddress && { chain: regChain, chainAddress: regChainAddress }),
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
         }
       },
@@ -669,6 +689,26 @@ if (quote.allowed) {
                           <option key={opt.years} value={opt.years}>{opt.label}</option>
                         ))}
                       </select>
+                    </div>
+
+                    {/* Preferred Asset */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Preferred Asset <span className="text-gray-400">(optional)</span>
+                      </label>
+                      <select
+                        value={regPreferredAsset}
+                        onChange={(e) => setRegPreferredAsset(e.target.value)}
+                        disabled={!isConnected}
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
+                      >
+                        {PREFERRED_ASSET_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Asset to receive affiliate fees in
+                      </p>
                     </div>
 
                     {/* Get Quote Button */}

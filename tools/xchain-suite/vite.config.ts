@@ -24,8 +24,19 @@ export default defineConfig({
       define: { global: 'globalThis' },
     },
     include: ['buffer'],
+    exclude: ['@xchainjs/xchain-monero'],
   },
-  server: { port: 3000 },
+  server: {
+    port: 3000,
+    proxy: {
+      '/xmr-daemon': {
+        target: 'https://xmr-node.cakewallet.com:18081',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/xmr-daemon/, ''),
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

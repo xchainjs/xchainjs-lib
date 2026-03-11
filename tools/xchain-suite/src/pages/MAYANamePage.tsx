@@ -14,6 +14,7 @@ interface MAYANameDetails {
   expireBlockHeight: number
   currentBlockHeight?: number
   estimatedExpiry?: Date | null
+  preferredAsset?: string
   aliases: { address: string; chain: string }[]
 }
 
@@ -22,6 +23,16 @@ const BLOCKS_PER_YEAR = 5_256_000
 const SECONDS_PER_BLOCK = (365.25 * 24 * 60 * 60) / BLOCKS_PER_YEAR // ~6 seconds
 
 const ALIAS_CHAINS = ['BTC', 'ETH', 'AVAX', 'BSC', 'GAIA', 'THOR', 'MAYA', 'DOGE', 'LTC', 'BCH', 'DASH', 'ARB', 'SOL', 'KUJI']
+
+const PREFERRED_ASSET_OPTIONS = [
+  { label: 'None (CACAO)', value: '' },
+  { label: 'ETH', value: 'ETH.ETH' },
+  { label: 'USDC (ETH)', value: 'ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48' },
+  { label: 'USDC (ARB)', value: 'ARB.USDC-0XAF88D065E77C8CC2239327C5EDB3A432268E5831' },
+  { label: 'USDT (ETH)', value: 'ETH.USDT-0XDAC17F958D2EE523A2206206994597C13D831EC7' },
+  { label: 'BTC', value: 'BTC.BTC' },
+  { label: 'CACAO', value: 'MAYA.CACAO' },
+]
 
 const EXPIRY_OPTIONS = [
   { label: '1 year', years: 1 },
@@ -56,6 +67,7 @@ export default function MAYANamePage() {
   const [regChainAddress, setRegChainAddress] = useState('')
   const [regOwner, setRegOwner] = useState('')
   const [regExpiry, setRegExpiry] = useState(1)
+  const [regPreferredAsset, setRegPreferredAsset] = useState('')
   const quoteOp = useOperation<NameQuote>()
   const registerOp = useOperation<NameTxResult>()
   const { wallet } = useAggregator()
@@ -167,6 +179,9 @@ mayaNames.forEach(mayaName => {
         const mayachainAmm = new MayachainAMM()
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
 
+        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
+        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
+
         if (regMode === 'register') {
           if (!regChain || !regChainAddress || !regOwner) {
             throw new Error('All fields are required for registration')
@@ -177,6 +192,7 @@ mayaNames.forEach(mayaName => {
             chain: regChain,
             chainAddress: regChainAddress,
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
           return {
             memo: quote.memo,
@@ -190,6 +206,7 @@ mayaNames.forEach(mayaName => {
             ...(regOwner && { owner: regOwner }),
             ...(regChain && regChainAddress && { chain: regChain, chainAddress: regChainAddress }),
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
           return {
             memo: quote.memo,
@@ -217,6 +234,9 @@ mayaNames.forEach(mayaName => {
         const mayachainAmm = new MayachainAMM(mayachainQuery, wallet)
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
 
+        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
+        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
+
         if (regMode === 'register') {
           return await mayachainAmm.registerMAYAName({
             name: regName,
@@ -224,6 +244,7 @@ mayaNames.forEach(mayaName => {
             chain: regChain,
             chainAddress: regChainAddress,
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
         } else {
           return await mayachainAmm.updateMAYAName({
@@ -231,6 +252,7 @@ mayaNames.forEach(mayaName => {
             ...(regOwner && { owner: regOwner }),
             ...(regChain && regChainAddress && { chain: regChain, chainAddress: regChainAddress }),
             expiry,
+            ...(preferredAsset && { preferredAsset }),
           })
         }
       },
@@ -449,6 +471,14 @@ if (quote.allowed) {
                         {lookupOp.result.owner}
                       </p>
                     </div>
+                    {lookupOp.result.preferredAsset && (
+                      <div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Preferred Asset</span>
+                        <p className="font-mono text-sm text-gray-900 dark:text-gray-100 break-all">
+                          {lookupOp.result.preferredAsset}
+                        </p>
+                      </div>
+                    )}
                     <div>
                       <span className="text-xs text-gray-500 dark:text-gray-400 block mb-2">
                         Chain Aliases ({lookupOp.result.aliases.length})
@@ -653,6 +683,26 @@ if (quote.allowed) {
                       <option key={opt.years} value={opt.years}>{opt.label}</option>
                     ))}
                   </select>
+                </div>
+
+                {/* Preferred Asset */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Preferred Asset <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <select
+                    value={regPreferredAsset}
+                    onChange={(e) => setRegPreferredAsset(e.target.value)}
+                    disabled={!isConnected}
+                    className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    {PREFERRED_ASSET_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Asset to receive affiliate fees in
+                  </p>
                 </div>
 
                 {/* Get Quote Button */}

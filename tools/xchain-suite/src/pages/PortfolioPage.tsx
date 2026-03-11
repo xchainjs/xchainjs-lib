@@ -19,7 +19,7 @@ interface ChainBalance {
 }
 
 // Chains that need async address retrieval
-const ASYNC_ONLY_CHAINS = new Set(['SOL', 'XRD', 'ADA'])
+const ASYNC_ONLY_CHAINS = new Set(['SOL', 'XRD', 'ADA', 'XMR'])
 
 export default function PortfolioPage() {
   const { isConnected, phrase, network } = useWallet()

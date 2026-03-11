@@ -46,8 +46,13 @@ export const defaultXMRParams: XMRClientParams = {
     [Network.Stagenet]: mainnetExplorer,
   },
   daemonUrls: {
-    [Network.Mainnet]: ['https://node.sethforprivacy.com'],
+    [Network.Mainnet]: ['https://xmr-node.cakewallet.com:18081', 'https://node.sethforprivacy.com'],
     [Network.Testnet]: ['http://stagenet.xmr-tw.org:38081'],
-    [Network.Stagenet]: ['https://node.sethforprivacy.com'],
+    [Network.Stagenet]: ['https://xmr-node.cakewallet.com:18081', 'https://node.sethforprivacy.com'],
+  },
+  lwsUrls: {
+    [Network.Mainnet]: [],
+    [Network.Testnet]: [],
+    [Network.Stagenet]: [],
   },
 }

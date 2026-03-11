@@ -25,7 +25,7 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
       if (!client) {
         throw new Error('Client not available. Please connect wallet first.')
       }
-      const targetAddress = address.trim() || client.getAddress(0)
+      const targetAddress = address.trim() || await client.getAddressAsync(0)
       const response = await client.getTransactions({ address: targetAddress })
       return { transactions: response.txs || [] }
     })

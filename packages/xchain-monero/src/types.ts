@@ -15,6 +15,9 @@ import { Asset } from '@xchainjs/xchain-util'
 export type XMRClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
   daemonUrls?: Record<Network, string[]>
+  lwsUrls?: Record<Network, string[]>
+  /** Block height to start scanning from when using daemon fallback (no LWS). Set to wallet creation height to avoid full chain scan. */
+  restoreHeight?: number
 }
 
 export type Balance = BaseBalance & {
