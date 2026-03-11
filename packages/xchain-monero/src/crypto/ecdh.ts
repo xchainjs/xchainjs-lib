@@ -60,6 +60,20 @@ export function deriveSharedSecret(txPrivKey: Uint8Array, pubViewKey: Uint8Array
 }
 
 /**
+ * Compute the 1-byte view tag for an output.
+ * view_tag = keccak256("view_tag" || derivation || varint(outputIndex))[0]
+ */
+export function computeViewTag(sharedSecret: Uint8Array, outputIndex: number): number {
+  const prefix = new TextEncoder().encode('view_tag')
+  const idxBuf = encodeVarint(outputIndex)
+  const data = new Uint8Array(prefix.length + sharedSecret.length + idxBuf.length)
+  data.set(prefix, 0)
+  data.set(sharedSecret, prefix.length)
+  data.set(idxBuf, prefix.length + sharedSecret.length)
+  return keccak_256(data)[0]
+}
+
+/**
  * Encrypt an amount using ECDH-derived mask.
  * @param amount - Amount in piconero (bigint)
  * @param sharedSecret - ECDH shared secret (r*A compressed bytes)

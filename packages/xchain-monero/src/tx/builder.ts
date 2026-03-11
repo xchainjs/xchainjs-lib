@@ -13,7 +13,7 @@ import { bulletproofPlusProve } from '../crypto/bulletproofsPlus'
 import { commit } from '../crypto/pedersen'
 import { generateKeyImage } from '../crypto/keyImage'
 import { deriveOutputKey, deriveInputKey } from '../crypto/stealth'
-import { deriveSharedSecret, encryptAmount } from '../crypto/ecdh'
+import { deriveSharedSecret, encryptAmount, computeViewTag } from '../crypto/ecdh'
 import { secretKeyToPublicKey } from '../crypto/keys'
 
 import { scReduce32, concatBytes, bytesToHex, hexToBytes } from '../utils'
@@ -107,9 +107,13 @@ export async function buildTransaction(
   for (let i = 0; i < allDestinations.length; i++) {
     const dest = allDestinations[i]
 
+    // ECDH shared secret for this output
+    const sharedSecret = deriveSharedSecret(txPrivKey, dest.pubViewKey)
+
     // One-time output key
     const outputKey = deriveOutputKey(txPrivKey, dest.pubViewKey, dest.pubSpendKey, i)
-    txOutputs.push({ amount: BigInt(0), key: outputKey })
+    const viewTag = computeViewTag(sharedSecret, i)
+    txOutputs.push({ amount: BigInt(0), key: outputKey, viewTag })
 
     // Output commitment mask
     const outMask = randomScalar()
@@ -121,7 +125,6 @@ export async function buildTransaction(
     outCommitments.push(commitment.toRawBytes())
 
     // ECDH encrypted amount
-    const sharedSecret = deriveSharedSecret(txPrivKey, dest.pubViewKey)
     const encrypted = encryptAmount(dest.amount, sharedSecret, i)
     ecdhInfo.push(encrypted)
   }

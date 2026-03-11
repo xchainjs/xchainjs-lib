@@ -310,7 +310,11 @@ export class Client extends BaseXChainClient {
       const outAmount = BigInt(out.amount)
 
       // Parse rct field: first 64 chars = commitment, next 64 = mask
-      const rctMask = out.rct.length >= 128 ? hexToBytes(out.rct.substring(64, 128)) : new Uint8Array(32)
+      if (out.rct.length < 128) {
+        console.warn(`Skipping output ${out.global_index}: invalid rct data (length ${out.rct.length})`)
+        continue
+      }
+      const rctMask = hexToBytes(out.rct.substring(64, 128))
 
       spendableOutputs.push({
         globalIndex: out.global_index,

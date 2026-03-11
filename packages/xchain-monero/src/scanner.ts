@@ -9,11 +9,10 @@
 
 import { ed25519 } from '@noble/curves/ed25519'
 import { bytesToNumberLE } from '@noble/curves/abstract/utils'
-import { keccak_256 } from '@noble/hashes/sha3'
 
 import * as daemon from './daemon'
 import { isOutputForUs } from './crypto/stealth'
-import { decryptAmount } from './crypto/ecdh'
+import { decryptAmount, computeViewTag } from './crypto/ecdh'
 import { generateKeyImage } from './crypto/keyImage'
 import { deriveInputKey } from './crypto/stealth'
 import { hexToBytes, bytesToHex } from './utils'
@@ -69,29 +68,6 @@ function computeSharedSecret(privViewKey: Uint8Array, txPubKey: Uint8Array): Uin
   return R.multiply(a).multiply(BigInt(8)).toRawBytes()
 }
 
-/**
- * Compute the view tag for an output (1-byte optimization to skip EC math).
- * view_tag = keccak256("view_tag" || sharedSecret || outputIndex)[0]
- */
-function computeViewTag(sharedSecret: Uint8Array, outputIndex: number): number {
-  const prefix = new TextEncoder().encode('view_tag')
-  const idxBuf = encodeVarint(outputIndex)
-  const data = new Uint8Array(prefix.length + sharedSecret.length + idxBuf.length)
-  data.set(prefix, 0)
-  data.set(sharedSecret, prefix.length)
-  data.set(idxBuf, prefix.length + sharedSecret.length)
-  return keccak_256(data)[0]
-}
-
-function encodeVarint(n: number): Uint8Array {
-  const bytes: number[] = []
-  while (n >= 0x80) {
-    bytes.push((n & 0x7f) | 0x80)
-    n >>>= 7
-  }
-  bytes.push(n & 0x7f)
-  return new Uint8Array(bytes)
-}
 
 interface ScanProgress {
   currentHeight: number

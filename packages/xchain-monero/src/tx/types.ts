@@ -13,6 +13,7 @@ export interface TxInput {
 export interface TxOutput {
   amount: bigint
   key: Uint8Array // 32-byte one-time public key
+  viewTag: number // 1-byte view tag for fast scanning
 }
 
 /** CLSAG signature for one input */

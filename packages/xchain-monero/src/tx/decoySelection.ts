@@ -101,11 +101,17 @@ export function selectDecoys(
   }
 
   // If we couldn't get enough decoys from gamma sampling, fill randomly
-  while (decoys.size < RING_SIZE - 1) {
-    const idx = Math.floor(secureRandom() * maxIndex)
+  let fallbackAttempts = 0
+  while (decoys.size < RING_SIZE - 1 && fallbackAttempts < 10000) {
+    fallbackAttempts++
+    const idx = Math.floor(secureRandom() * (maxIndex + 1))
     if (idx !== realGlobalIndex && !decoys.has(idx)) {
       decoys.add(idx)
     }
+  }
+
+  if (decoys.size < RING_SIZE - 1) {
+    throw new Error(`Insufficient decoys: need ${RING_SIZE - 1}, got ${decoys.size} from ${maxIndex + 1} outputs`)
   }
 
   return Array.from(decoys).sort((a, b) => a - b)

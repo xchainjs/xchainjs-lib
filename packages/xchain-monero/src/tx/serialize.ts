@@ -68,9 +68,9 @@ function serializeInput(w: TxWriter, input: TxInput): void {
 
 function serializeOutput(w: TxWriter, output: TxOutput): void {
   w.writeVarint(output.amount)
-  w.writeByte(0x02) // txout_to_tagged_key tag (v2 outputs)
+  w.writeByte(0x03) // txout_to_tagged_key variant tag
   w.writeKey(output.key)
-  w.writeByte(0x00) // view tag placeholder (will be set by builder)
+  w.writeByte(output.viewTag) // 1-byte view tag for fast scanning
 }
 
 /**
