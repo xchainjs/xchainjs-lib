@@ -100,6 +100,7 @@ export function encryptAmount(amount: bigint, sharedSecret: Uint8Array, outputIn
  * @returns Decrypted amount in piconero
  */
 export function decryptAmount(encrypted: Uint8Array, sharedSecret: Uint8Array, outputIndex: number): bigint {
+  if (encrypted.length < 8) throw new Error(`decryptAmount: expected 8 bytes, got ${encrypted.length}`)
   const scalar = derivationToScalar(sharedSecret, outputIndex)
   const mask = amountMask(scalar)
 

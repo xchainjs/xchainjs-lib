@@ -417,7 +417,7 @@ export class Client extends BaseXChainClient {
    * Scan the blockchain via daemon RPC to find owned outputs.
    * Uses cached results and scans incrementally from the last scanned height.
    */
-  private async daemonScan(): Promise<{
+  private async daemonScan(walletIndex: number = 0): Promise<{
     ownedOutputs: OwnedOutput[]
     spentKeyImages: Set<string>
   }> {
@@ -435,7 +435,7 @@ export class Client extends BaseXChainClient {
       return this.scanCache
     }
 
-    const spendKey = this.getPrivateSpendKey(0)
+    const spendKey = this.getPrivateSpendKey(walletIndex)
     const keys = deriveKeyPairs(spendKey)
 
     const result = await scanBlocks(

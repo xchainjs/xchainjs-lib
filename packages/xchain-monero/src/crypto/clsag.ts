@@ -60,6 +60,8 @@ export function clsagSign(
   keyImage: Uint8Array,
 ): ClsagSig {
   const n = ring.length
+  if (n === 0) throw new Error('CLSAG: ring must not be empty')
+  if (realIndex < 0 || realIndex >= n) throw new Error(`CLSAG: realIndex ${realIndex} out of range [0, ${n})`)
   const I = ExtPoint.fromHex(keyImage)
 
   // Hp(P[l]) — hash of real signer's public key
@@ -159,7 +161,9 @@ export function clsagVerify(
   sig: ClsagSig,
 ): boolean {
   const n = ring.length
+  if (n === 0) return false
   const { s, c1, D: DBytes } = sig
+  if (s.length !== n) return false
 
   const I = ExtPoint.fromHex(keyImage)
   const D = ExtPoint.fromHex(DBytes)

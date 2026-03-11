@@ -160,7 +160,7 @@ function processTransactions(
         txHash: txEntry.tx_hash,
         outputIndex: i,
         amount,
-        globalIndex: 0,
+        globalIndex: -1, // Not available from get_transactions; outputs from daemon scan cannot be spent directly
         publicKey: outputKey,
         txPubKey,
         keyImage,

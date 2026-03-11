@@ -50,7 +50,10 @@ async function jsonRpc<T>(url: string, method: string, params?: Record<string, u
     throw new Error(`Daemon RPC error: ${response.status} ${response.statusText}`)
   }
 
-  const data = (await response.json()) as JsonRpcResponse<T>
+  const data = (await response.json()) as JsonRpcResponse<T> & { error?: { code: number; message: string } }
+  if (data.error) {
+    throw new Error(`Daemon RPC error: ${data.error.message} (code ${data.error.code})`)
+  }
   return data.result
 }
 
@@ -125,6 +128,9 @@ export const getOutputDistribution = async (
     from_height: fromHeight,
     to_height: toHeight,
   })
+  if (!result.distributions || result.distributions.length === 0) {
+    throw new Error('No output distribution data returned from daemon')
+  }
   const dist = result.distributions[0].distribution
   return { distribution: dist.data, startHeight: dist.start_height, base: dist.base }
 }
