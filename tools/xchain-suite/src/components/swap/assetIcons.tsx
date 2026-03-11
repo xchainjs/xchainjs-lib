@@ -3,10 +3,13 @@ import { useState } from 'react'
 // Override map for assets missing from or wrong in the cryptocurrency-icons CDN
 // Keyed by chainId for native assets, by symbol for tokens
 const ICON_OVERRIDES: Record<string, string> = {
-  THOR: 'https://assets.coingecko.com/coins/images/6595/standard/Rune200x200.png',
-  CACAO: 'https://assets.coingecko.com/coins/images/29512/standard/cacao.png',
-  KUJI: 'https://assets.coingecko.com/coins/images/20685/standard/kuji-200x200.png',
-  ARB: 'https://assets.coingecko.com/coins/images/16547/standard/photo_2023-03-29_21.47.00.jpeg',
+  THOR: '/icons/rune.svg',
+  RUNE: '/icons/rune.svg',
+  CACAO: '/icons/cacao.png',
+  MAYA: '/icons/maya.png',
+  KUJI: '/icons/kuji.png',
+  ARB: '/icons/arb.svg',
+  XRD: '/icons/xrd.svg',
   // ERC-20 / token icons (keyed by ticker)
   USDT: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',
   USDC: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',
