@@ -116,10 +116,8 @@ If you plan on using the publically accessible endpoints provided by Nine Realms
 Example
 
 ```typescript
-import cosmosclient from '@cosmos-client/core'
 import axios from 'axios'
-import { register9Rheader } from '@xchainjs/xchain-util'
+import { add9Rheader } from '@xchainjs/xchain-util'
 
-register9Rheader(axios)
-register9Rheader(cosmosclient.config.globalAxios)
+axios.interceptors.request.use(add9Rheader)
 ```

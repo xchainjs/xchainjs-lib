@@ -11,7 +11,7 @@ yarn add @xchainjs/xchain-cosmos
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-cosmos`.
 
 ```
-yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios cosmos-client/core
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios
 
 ```
 
@@ -44,4 +44,3 @@ Rate limits: No
 
 
 ## Extras
-Important note: Make sure to install same version of `cosmos-client/core` as `xchain-cosmos` is using (currently `"@cosmos-client/core": "^0.45.1",` ). In other case things might break.

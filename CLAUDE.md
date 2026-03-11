@@ -1,66 +1,101 @@
-
 # CLAUDE.md
 
-Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+## Build & Development Commands
 
-## 1. Think Before Coding
+```bash
+# Setup
+nvm use                # Node 20.14
+yarn install           # Yarn 4.9.2 (workspaces)
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+# Build
+yarn build             # Build all packages (turbo, respects dependency order)
+yarn build --filter=@xchainjs/xchain-bitcoin  # Build one package + its deps
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+# Test
+yarn test              # All packages
+yarn test --filter=@xchainjs/xchain-bitcoin    # One package
+cd packages/xchain-bitcoin && yarn test        # Alt: run from package dir
+cd packages/xchain-bitcoin && npx jest __tests__/client.test.ts  # Single test file
 
-## 2. Simplicity First
+# E2E (some packages have __e2e__/ dirs)
+cd packages/xchain-thorchain && yarn e2e
 
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
+# Lint
+yarn lint              # All packages
+cd packages/xchain-bitcoin && yarn lint        # One package (auto-fixes)
 ```
 
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+Turbo caches in `.turbo/`. `test` and `build` depend on `build` of upstream packages (`^build` in turbo pipeline). If tests fail mysteriously, try `yarn build` first.
 
----
+## Code Style
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+- Prettier: single quotes, no semicolons, trailing commas, 120 char width, 2-space indent
+- ESLint with TypeScript plugin, configured in root `eslint.config.mjs`
+- Pre-commit hook runs `yarn lint` via Husky
+
+## Architecture
+
+**Monorepo** with ~43 packages under `packages/`, managed by Yarn workspaces + Turborepo. Internal deps use `workspace:*`.
+
+### Package Layers (dependency flows downward)
+
+```
+AMM / Aggregator / Wallet          (xchain-thorchain-amm, xchain-aggregator, xchain-wallet)
+    ↓
+Query packages                     (xchain-thorchain-query, xchain-midgard-query, ...)
+    ↓
+Blockchain clients                 (xchain-bitcoin, xchain-ethereum, xchain-thorchain, ...)
+    ↓
+Shared chain infra                 (xchain-utxo, xchain-evm, xchain-cosmos-sdk)
+    ↓
+Providers                          (xchain-utxo-providers, xchain-evm-providers)
+    ↓
+Core                               (xchain-client, xchain-crypto, xchain-util)
+```
+
+### API packages (auto-generated)
+
+`xchain-thornode`, `xchain-mayanode`, `xchain-midgard`, `xchain-mayamidgard` are generated from OpenAPI specs. Don't hand-edit these.
+
+### Common package structure
+
+```
+packages/xchain-<name>/
+├── src/
+│   ├── index.ts              # Public exports
+│   ├── client.ts             # Main client (extends base from xchain-client)
+│   ├── clientKeystore.ts     # Keystore variant
+│   ├── clientLedger.ts       # Ledger hardware wallet variant
+│   ├── const.ts              # Chain constants (asset defs, decimals, fees)
+│   └── utils.ts
+├── __tests__/                # Jest unit tests (ts-jest preset)
+├── __e2e__/                  # Optional e2e tests
+├── rollup.config.js          # Dual output: CJS (lib/index.js) + ESM (lib/index.esm.js)
+└── tsconfig.json             # Extends root tsconfig.json
+```
+
+### Key patterns
+
+- **Client variants**: Most chain packages expose 3 client classes (default/keystore/ledger) extending a shared base from `xchain-client`
+- **Provider abstraction**: Data providers (balance, fees, tx history) are pluggable via `*-providers` packages
+- **Asset representation**: Uses `Asset` type from `xchain-util` with chain/symbol/ticker fields; amounts use `BaseAmount`/`AssetAmount` wrappers around BigNumber
+
+## Versioning & Releases
+
+Uses [Changesets](https://github.com/changesets/changesets). To propose version bumps:
+
+```bash
+yarn update-packages   # Interactive: select packages, bump type, write changelog
+```
+
+This creates a changeset file in `.changeset/`. Include it in your PR. Don't manually edit package versions.
+
+## Behavioral Guidelines
+
+- State assumptions explicitly. If uncertain, ask.
+- Minimum code that solves the problem. No speculative features or abstractions.
+- Surgical changes only: don't "improve" adjacent code, match existing style.
+- Remove imports/variables YOUR changes made unused; don't touch pre-existing dead code.
+- Define verifiable success criteria before implementing. Every changed line should trace to the request.

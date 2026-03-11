@@ -51,12 +51,10 @@ If you plan on using the publically accessible endpoints provided by Nine Realms
 Example
 
 ```typescript
-import cosmosclient from '@cosmos-client/core'
 import axios from 'axios'
-import { register9Rheader } from '@xchainjs/xchain-util'
+import { add9Rheader } from '@xchainjs/xchain-util'
 
-register9Rheader(axios)
-register9Rheader(cosmosclient.config.globalAxios)
+axios.interceptors.request.use(add9Rheader)
 ```
 
 For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)

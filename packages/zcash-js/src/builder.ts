@@ -1,6 +1,5 @@
 import { secp256k1 } from '@noble/curves/secp256k1'
 import { blake2b } from '@noble/hashes/blake2b'
-import { min, sumBy } from 'lodash'
 
 import { isValidAddr, mainnetPrefix, testnetPrefix } from './addr'
 import { addressToScript, memoToScript, writeSigScript } from './script'
@@ -58,7 +57,7 @@ function selectUTXOS(utxos: UTXO[], amount: number, memo?: string): UTXO[] {
     const deltaFee = fee - currentFee
     currentFee = fee
     remaining += deltaFee
-    const used = min([utxo.satoshis, remaining])!
+    const used = Math.min(utxo.satoshis, remaining)
     remaining -= used
   }
   return selected
@@ -108,7 +107,7 @@ export async function buildMaxTx(
   const fee = calculateFee(utxos.length, outputCount)
 
   // Calculate total value and max sendable amount
-  const totalValue = sumBy(utxos, (u: UTXO) => u.satoshis)
+  const totalValue = utxos.reduce((sum, u) => sum + u.satoshis, 0)
   const maxAmount = totalValue - fee
   if (maxAmount <= 0) throw new Error('Not enough funds')
 
@@ -154,7 +153,7 @@ export async function buildTx(
   const inputs = selectUTXOS(utxos, amount, memo)
   const outputCount = memo ? 3 : 2 // change + to + memo (if exists)
   const fee = getFee(inputs.length, outputCount, memo)
-  const change = sumBy(inputs, (u: UTXO) => u.satoshis) - amount - fee
+  const change = inputs.reduce((sum, u) => sum + u.satoshis, 0) - amount - fee
   if (change < 0) throw new Error('Not enough funds')
 
   const outputs: Output[] = []

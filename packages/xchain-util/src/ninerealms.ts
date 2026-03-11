@@ -31,12 +31,3 @@ export const add9Rheader = <T extends { url?: string; headers?: Record<string, s
   // console.log(` Request ${request.url} ${JSON.stringify(request.headers)}`)
   return request
 }
-
-/**
- * Adds custom header to axios requests (9R endpoints only)
- */
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export const register9Rheader = (axios: any) => {
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  axios.interceptors.request.use(add9Rheader, (error: any) => Promise.reject(error))
-}

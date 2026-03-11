@@ -11,10 +11,8 @@ yarn add @xchainjs/xchain-mayachain
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-mayachain`.
 
 ```
-yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @xchainjs/xchain-cosmos axios @cosmos-client/core bech32-buffer
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @xchainjs/xchain-cosmos axios bech32-buffer
 ```
-
-Important note: Make sure to install same version of `@cosmos-client/core` as `xchain-mayachain` is using (currently `@cosmos-client/core@0.46.1` ). In other case things might break.
 
 ## Documentation
 

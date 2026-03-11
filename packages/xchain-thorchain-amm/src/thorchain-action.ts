@@ -25,12 +25,14 @@ export type NonProtocolActionParams = {
   assetAmount: CryptoAmount<Asset | TokenAsset>
   recipient: Address
   memo: string
+  walletIndex?: number
 }
 
 export type ProtocolActionParams = {
   wallet: Wallet
   assetAmount: CryptoAmount<CompatibleAsset>
   memo: string
+  walletIndex?: number
 }
 
 export type ActionParams = ProtocolActionParams | NonProtocolActionParams
@@ -42,12 +44,18 @@ export class ThorchainAction {
       : this.makeProtocolAction(actionParams)
   }
 
-  private static async makeProtocolAction({ wallet, assetAmount, memo }: ProtocolActionParams): Promise<TxSubmitted> {
+  private static async makeProtocolAction({
+    wallet,
+    assetAmount,
+    memo,
+    walletIndex,
+  }: ProtocolActionParams): Promise<TxSubmitted> {
     const hash = await wallet.deposit({
       chain: THORChain,
       asset: assetAmount.asset,
       amount: assetAmount.baseAmount,
       memo,
+      walletIndex,
     })
 
     return {
@@ -61,11 +69,13 @@ export class ThorchainAction {
     assetAmount,
     recipient,
     memo,
+    walletIndex,
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     // Non EVM actions
     if (!isProtocolEVMChain(assetAmount.asset.chain)) {
       if (isProtocolBFTChain(assetAmount.asset.chain)) {
         const hash = await wallet.transfer({
+          walletIndex,
           asset: assetAmount.asset,
           amount: assetAmount.baseAmount,
           recipient,
@@ -78,6 +88,7 @@ export class ThorchainAction {
       }
       const feeRates = await wallet.getFeeRates(assetAmount.asset.chain, Protocol.THORCHAIN)
       const hash = await wallet.transfer({
+        walletIndex,
         asset: assetAmount.asset,
         amount: assetAmount.baseAmount,
         recipient,
@@ -119,6 +130,7 @@ export class ThorchainAction {
     const nativeAsset = wallet.getAssetInfo(assetAmount.asset.chain)
 
     const hash = await wallet.transfer({
+      walletIndex,
       asset: nativeAsset.asset,
       amount: isERC20 ? baseAmount(0, nativeAsset.decimal) : assetAmount.baseAmount,
       memo: unsignedTx.data,

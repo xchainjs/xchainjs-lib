@@ -35,12 +35,9 @@
     "axios": "1.13.5",
     "bs58check": "^4.0.0",
     "buffer": "^6.0.3",
-    "json-rpc-2.0": "^1.7.0",
-    "lodash": "^4.17.21"
+    "json-rpc-2.0": "^1.7.0"
   },
-  "devDependencies": {
-    "@types/lodash": "^4.17.13"
-  },
+  "devDependencies": {},
   "publishConfig": {
     "access": "public",
     "directory": "release/package"
