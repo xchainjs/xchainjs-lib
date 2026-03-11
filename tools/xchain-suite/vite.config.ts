@@ -14,6 +14,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@xchainjs/xchain-monero': fileURLToPath(new URL('../../packages/xchain-monero/src/index.ts', import.meta.url)),
       stream: 'stream-browserify',
       process: 'process/browser',
       buffer: 'buffer',
