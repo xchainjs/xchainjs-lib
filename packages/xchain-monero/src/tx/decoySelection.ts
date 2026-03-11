@@ -38,10 +38,7 @@ function sampleGamma(shape: number, rate: number): number {
     } while (v <= 0)
 
     const u = secureRandom()
-    if (
-      u < 1 - 0.0331 * Math.pow(x, 4) ||
-      Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))
-    ) {
+    if (u < 1 - 0.0331 * Math.pow(x, 4) || Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
       return (d * v) / rate
     }
   }
@@ -121,10 +118,7 @@ export function selectDecoys(
  * Build sorted ring with real index.
  * Returns the ring indices (sorted) and the position of the real input.
  */
-export function buildRingIndices(
-  realGlobalIndex: number,
-  decoys: number[],
-): { indices: number[]; realIndex: number } {
+export function buildRingIndices(realGlobalIndex: number, decoys: number[]): { indices: number[]; realIndex: number } {
   const all = [...decoys, realGlobalIndex].sort((a, b) => a - b)
   const realIndex = all.indexOf(realGlobalIndex)
   return { indices: all, realIndex }

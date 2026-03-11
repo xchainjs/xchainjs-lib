@@ -129,7 +129,10 @@ function nextPow2(n: number): number {
 function log2(n: number): number {
   let r = 0
   let v = n
-  while (v > 1) { v >>= 1; r++ }
+  while (v > 1) {
+    v >>= 1
+    r++
+  }
   return r
 }
 
@@ -148,16 +151,19 @@ function weightedInnerProduct(a: bigint[], b: bigint[], y: bigint): bigint {
 function computeLR(
   size: number,
   yFactor: bigint,
-  G: Point[], gOff: number,
-  H: Point[], hOff: number,
-  a: bigint[], aOff: number,
-  b: bigint[], bOff: number,
+  G: Point[],
+  gOff: number,
+  H: Point[],
+  hOff: number,
+  a: bigint[],
+  aOff: number,
+  b: bigint[],
+  bOff: number,
   c: bigint,
   d: bigint,
 ): Point {
   // Multi-scalar multiplication
-  let result = ExtPoint.BASE.multiply(modL(d * INV_EIGHT))
-    .add(getH().multiply(modL(c * INV_EIGHT)))
+  let result = ExtPoint.BASE.multiply(modL(d * INV_EIGHT)).add(getH().multiply(modL(c * INV_EIGHT)))
 
   for (let i = 0; i < size; i++) {
     const aScaled = modL(a[aOff + i] * modL(yFactor * INV_EIGHT))
@@ -310,11 +316,7 @@ export function bulletproofPlusProve(amounts: bigint[], masks: Uint8Array[]): BP
   for (let round = 0; round < logMN; round++) {
     nprime = nprime >> 1
 
-    const cL = weightedInnerProduct(
-      aprime.slice(0, nprime),
-      bprime.slice(nprime, nprime * 2),
-      y,
-    )
+    const cL = weightedInnerProduct(aprime.slice(0, nprime), bprime.slice(nprime, nprime * 2), y)
 
     // For cR: aprime[nprime..] scaled by y^nprime
     const aScaled: bigint[] = new Array(nprime)
@@ -326,10 +328,8 @@ export function bulletproofPlusProve(amounts: bigint[], masks: Uint8Array[]): BP
     const dL = randomScalar()
     const dR = randomScalar()
 
-    const LPoint = computeLR(nprime, yInvPow[nprime], Gprime, nprime, Hprime, 0,
-      aprime, 0, bprime, nprime, cL, dL)
-    const RPoint = computeLR(nprime, yPowers[nprime], Gprime, 0, Hprime, nprime,
-      aprime, nprime, bprime, 0, cR, dR)
+    const LPoint = computeLR(nprime, yInvPow[nprime], Gprime, nprime, Hprime, 0, aprime, 0, bprime, nprime, cL, dL)
+    const RPoint = computeLR(nprime, yPowers[nprime], Gprime, 0, Hprime, nprime, aprime, nprime, bprime, 0, cR, dR)
 
     const LBytes = LPoint.toRawBytes()
     const RBytes = RPoint.toRawBytes()
@@ -382,14 +382,14 @@ export function bulletproofPlusProve(amounts: bigint[], masks: Uint8Array[]): BP
   const eta = randomScalar()
 
   const rysb = modL(modL(r * modL(y * bprime[0])) + modL(s * modL(y * aprime[0])))
-  const A1 = Gprime[0].multiply(modL(r * INV_EIGHT))
+  const A1 = Gprime[0]
+    .multiply(modL(r * INV_EIGHT))
     .add(Hprime[0].multiply(modL(s * INV_EIGHT)))
     .add(ExtPoint.BASE.multiply(modL(d_ * INV_EIGHT)))
     .add(getH().multiply(modL(rysb * INV_EIGHT)))
   const A1Bytes = A1.toRawBytes()
 
-  const B = ExtPoint.BASE.multiply(modL(eta * INV_EIGHT))
-    .add(getH().multiply(modL(modL(r * modL(y * s)) * INV_EIGHT)))
+  const B = ExtPoint.BASE.multiply(modL(eta * INV_EIGHT)).add(getH().multiply(modL(modL(r * modL(y * s)) * INV_EIGHT)))
   const BBytes = B.toRawBytes()
 
   // Final challenge
@@ -519,11 +519,7 @@ export function bulletproofPlusVerify(proof: BPPlusProof, commitments: Uint8Arra
   let result = ExtPoint.BASE.multiply(d1)
 
   const hScalar = modL(
-    modL(r1 * modL(y * s1)) +
-    modL(eSq * modL(
-      modL(yPowers[MN + 1] * modL(z * sumD)) +
-      modL(modL(zSq - z) * sumY),
-    )),
+    modL(r1 * modL(y * s1)) + modL(eSq * modL(modL(yPowers[MN + 1] * modL(z * sumD)) + modL(modL(zSq - z) * sumY))),
   )
   result = result.add(getH().multiply(hScalar))
 
@@ -559,11 +555,7 @@ export function bulletproofPlusVerify(proof: BPPlusProof, commitments: Uint8Arra
 
   for (let i = 0; i < MN; i++) {
     const giScalar = modL(modL(eR1y * challengesCache[i]) + eSqZ)
-    const hiScalar = modL(
-      modL(eS1 * challengesCache[(~i) & (MN - 1)]) +
-      minusESqZ +
-      modL(minusESqYMN * d[i]),
-    )
+    const hiScalar = modL(modL(eS1 * challengesCache[~i & (MN - 1)]) + minusESqZ + modL(minusESqYMN * d[i]))
 
     result = result.add(gens.Gi[i].multiply(giScalar))
     result = result.add(gens.Hi[i].multiply(hiScalar))

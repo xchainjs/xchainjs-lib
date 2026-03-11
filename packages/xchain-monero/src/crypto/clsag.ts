@@ -79,25 +79,13 @@ export function clsagSign(
   const C_nonzero = ring.map((m) => m.mask)
 
   // Compute aggregation coefficients mu_P, mu_C
-  const aggParts = [
-    ...P.map((p) => p),
-    ...C_nonzero.map((c) => c),
-    keyImage,
-    DBytes,
-    Cout,
-  ]
+  const aggParts = [...P.map((p) => p), ...C_nonzero.map((c) => c), keyImage, DBytes, Cout]
 
   const muP = hashToScalar(concatBytes(CLSAG_AGG_0, ...aggParts))
   const muC = hashToScalar(concatBytes(CLSAG_AGG_1, ...aggParts))
 
   // Round hash prefix (constant across all rounds)
-  const roundPrefix = concatBytes(
-    CLSAG_ROUND,
-    ...P,
-    ...C_nonzero,
-    Cout,
-    message,
-  )
+  const roundPrefix = concatBytes(CLSAG_ROUND, ...P, ...C_nonzero, Cout, message)
 
   // Step 3: Generate nonce
   const alpha = randomScalar()
@@ -131,15 +119,11 @@ export function clsagSign(
     const Ci = ExtPoint.fromHex(C_nonzero[i]).subtract(CoutPoint)
 
     // L = s[i]*G + c_p*P[i] + c_c*C[i]
-    const L = ExtPoint.BASE.multiply(sScalar)
-      .add(Pi.multiply(cPScalar))
-      .add(Ci.multiply(cCScalar))
+    const L = ExtPoint.BASE.multiply(sScalar).add(Pi.multiply(cPScalar)).add(Ci.multiply(cCScalar))
 
     // R = s[i]*Hp(P[i]) + c_p*I + c_c*D_full
     const HpPi = hashToPoint(P[i])
-    const R = HpPi.multiply(sScalar)
-      .add(I.multiply(cPScalar))
-      .add(D_full.multiply(cCScalar))
+    const R = HpPi.multiply(sScalar).add(I.multiply(cPScalar)).add(D_full.multiply(cCScalar))
 
     c = hashToScalar(concatBytes(roundPrefix, L.toRawBytes(), R.toRawBytes()))
 
@@ -186,24 +170,12 @@ export function clsagVerify(
   const C_nonzero = ring.map((m) => m.mask)
 
   // Recompute aggregation coefficients
-  const aggParts = [
-    ...P,
-    ...C_nonzero,
-    keyImage,
-    DBytes,
-    Cout,
-  ]
+  const aggParts = [...P, ...C_nonzero, keyImage, DBytes, Cout]
 
   const muP = hashToScalar(concatBytes(CLSAG_AGG_0, ...aggParts))
   const muC = hashToScalar(concatBytes(CLSAG_AGG_1, ...aggParts))
 
-  const roundPrefix = concatBytes(
-    CLSAG_ROUND,
-    ...P,
-    ...C_nonzero,
-    Cout,
-    message,
-  )
+  const roundPrefix = concatBytes(CLSAG_ROUND, ...P, ...C_nonzero, Cout, message)
 
   let c = c1
 
@@ -218,14 +190,10 @@ export function clsagVerify(
     const Pi = ExtPoint.fromHex(P[i])
     const Ci = ExtPoint.fromHex(C_nonzero[i]).subtract(CoutPoint)
 
-    const L = ExtPoint.BASE.multiply(sScalar)
-      .add(Pi.multiply(cPScalar))
-      .add(Ci.multiply(cCScalar))
+    const L = ExtPoint.BASE.multiply(sScalar).add(Pi.multiply(cPScalar)).add(Ci.multiply(cCScalar))
 
     const HpPi = hashToPoint(P[i])
-    const R = HpPi.multiply(sScalar)
-      .add(I.multiply(cPScalar))
-      .add(D8.multiply(cCScalar))
+    const R = HpPi.multiply(sScalar).add(I.multiply(cPScalar)).add(D8.multiply(cCScalar))
 
     c = hashToScalar(concatBytes(roundPrefix, L.toRawBytes(), R.toRawBytes()))
   }

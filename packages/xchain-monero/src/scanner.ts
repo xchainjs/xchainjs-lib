@@ -11,10 +11,9 @@ import { ed25519 } from '@noble/curves/ed25519'
 import { bytesToNumberLE } from '@noble/curves/abstract/utils'
 
 import * as daemon from './daemon'
-import { isOutputForUs } from './crypto/stealth'
+import { isOutputForUs, deriveInputKey } from './crypto/stealth'
 import { decryptAmount, computeViewTag } from './crypto/ecdh'
 import { generateKeyImage } from './crypto/keyImage'
-import { deriveInputKey } from './crypto/stealth'
 import { hexToBytes, bytesToHex } from './utils'
 
 const ExtPoint = ed25519.ExtendedPoint
@@ -68,7 +67,6 @@ function computeSharedSecret(privViewKey: Uint8Array, txPubKey: Uint8Array): Uin
   return R.multiply(a).multiply(BigInt(8)).toRawBytes()
 }
 
-
 interface ScanProgress {
   currentHeight: number
   totalHeight: number
@@ -117,7 +115,10 @@ function processTransactions(
     if (!txPubKey) continue
 
     const sharedSecret = computeSharedSecret(privViewKey, txPubKey)
-    const meta = heightTimestampMap.get(txEntry.tx_hash) ?? { height: txEntry.block_height, timestamp: txEntry.block_timestamp }
+    const meta = heightTimestampMap.get(txEntry.tx_hash) ?? {
+      height: txEntry.block_height,
+      timestamp: txEntry.block_timestamp,
+    }
 
     for (let i = 0; i < txJson.vout.length; i++) {
       const out = txJson.vout[i]
@@ -207,7 +208,9 @@ export async function scanBlocks(
     }
   }
 
-  console.log(`[XMR scanner] ${blocksWithTxs.length} blocks with transactions out of ${toHeight - fromHeight + 1} total`)
+  console.log(
+    `[XMR scanner] ${blocksWithTxs.length} blocks with transactions out of ${toHeight - fromHeight + 1} total`,
+  )
 
   // Step 2: For each block with txs, fetch tx hashes sequentially
   const allTxHashes: string[] = []
@@ -247,7 +250,11 @@ export async function scanBlocks(
 
     if (onProgress) {
       const progress = Math.min(t + TX_BATCH, allTxHashes.length) / allTxHashes.length
-      onProgress({ currentHeight: fromHeight + Math.floor(progress * (toHeight - fromHeight)), totalHeight: toHeight, outputsFound: allOwnedOutputs.length })
+      onProgress({
+        currentHeight: fromHeight + Math.floor(progress * (toHeight - fromHeight)),
+        totalHeight: toHeight,
+        outputsFound: allOwnedOutputs.length,
+      })
     }
   }
 

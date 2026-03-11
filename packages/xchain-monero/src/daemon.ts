@@ -99,10 +99,7 @@ export interface OutputEntry {
   txid: string
 }
 
-export const getOuts = async (
-  url: string,
-  outputs: { amount: number; index: number }[],
-): Promise<OutputEntry[]> => {
+export const getOuts = async (url: string, outputs: { amount: number; index: number }[]): Promise<OutputEntry[]> => {
   const result = await httpPost<{ outs: OutputEntry[]; status: string }>(url, '/get_outs', {
     outputs,
     get_txid: true,
@@ -206,8 +203,15 @@ export const getBlockHeadersRange = async (
  * Get block tx hashes for a specific height.
  * Returns just the tx_hashes array (excludes miner tx).
  */
-export const getBlockTxHashes = async (url: string, height: number): Promise<{ txHashes: string[]; timestamp: number }> => {
-  const result = await jsonRpc<{ block_header: { timestamp: number }; tx_hashes: string[]; status: string }>(url, 'get_block', { height })
+export const getBlockTxHashes = async (
+  url: string,
+  height: number,
+): Promise<{ txHashes: string[]; timestamp: number }> => {
+  const result = await jsonRpc<{ block_header: { timestamp: number }; tx_hashes: string[]; status: string }>(
+    url,
+    'get_block',
+    { height },
+  )
   return { txHashes: result.tx_hashes ?? [], timestamp: result.block_header.timestamp }
 }
 

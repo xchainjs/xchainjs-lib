@@ -155,13 +155,7 @@ export async function buildTransaction(
     keyImages.push(ki)
 
     // Select decoys
-    const decoys = selectDecoys(
-      inp.globalIndex,
-      numOutputs,
-      height,
-      distData.distribution,
-      distData.startHeight,
-    )
+    const decoys = selectDecoys(inp.globalIndex, numOutputs, height, distData.distribution, distData.startHeight)
     const { indices: ringIndices, realIndex } = buildRingIndices(inp.globalIndex, decoys)
     realIndices.push(realIndex)
     const offsets = toRelativeOffsets(ringIndices)
@@ -250,15 +244,7 @@ export async function buildTransaction(
     if (z < BigInt(0)) z += L
     const zBytes = new Uint8Array(numberToBytesLE(z, 32))
 
-    const sig = clsagSign(
-      sigMessage,
-      rings[i],
-      pseudoOuts[i],
-      inputPrivKeys[i],
-      zBytes,
-      realIndices[i],
-      keyImages[i],
-    )
+    const sig = clsagSign(sigMessage, rings[i], pseudoOuts[i], inputPrivKeys[i], zBytes, realIndices[i], keyImages[i])
 
     tx.rctSignatures.clsags.push(sig)
   }
