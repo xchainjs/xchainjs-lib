@@ -15,6 +15,12 @@ type Point = InstanceType<typeof ExtPoint>
 
 // ed25519 field prime: 2^255 - 19
 const P = BigInt('57896044618658097711785492504343953926634992332820282019728792003956564819949')
+
+function mod(a: bigint): bigint {
+  const r = a % P
+  return r >= BigInt(0) ? r : r + P
+}
+
 const A = BigInt(486662)
 const A_SQUARED = mod(A * A)
 
@@ -24,11 +30,6 @@ const FFFB1 = BigInt('0x7e71fbefdad61b1720a9c53741fb19e3d19404a8b92a738d22a76975
 const FFFB2 = BigInt('0x32f9e1f5fba5d3096e2bae483fe9a041ae21fcb9fba908202d219b7c9f83650d')
 const FFFB3 = BigInt('0x1a43f3031067dbf926c0f4887ef7432eee46fc08a13f4a49853d1903b6b39186')
 const FFFB4 = BigInt('0x674a110d14c208efb89546403f0da2ed4024ff4ea5964229581b7d8717302c66')
-
-function mod(a: bigint): bigint {
-  const r = a % P
-  return r >= BigInt(0) ? r : r + P
-}
 
 function modPow(base: bigint, exp: bigint): bigint {
   let result = BigInt(1)

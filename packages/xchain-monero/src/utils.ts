@@ -93,6 +93,24 @@ export const hexToBytes = (hex: string): Uint8Array => {
   return bytes
 }
 
+function bytesToBigIntLE(bytes: Uint8Array): bigint {
+  let value = BigInt(0)
+  for (let i = bytes.length - 1; i >= 0; i--) {
+    value = (value << BigInt(8)) | BigInt(bytes[i])
+  }
+  return value
+}
+
+function bigIntToBytes32LE(value: bigint): Uint8Array {
+  const result = new Uint8Array(32)
+  let tmp = value
+  for (let i = 0; i < 32; i++) {
+    result[i] = Number(tmp & BigInt(0xff))
+    tmp >>= BigInt(8)
+  }
+  return result
+}
+
 /**
  * Scalar multiplication: (a * b) mod l
  */
@@ -141,24 +159,6 @@ export function concatBytes(...arrays: Uint8Array[]): Uint8Array {
   for (const arr of arrays) {
     result.set(arr, offset)
     offset += arr.length
-  }
-  return result
-}
-
-function bytesToBigIntLE(bytes: Uint8Array): bigint {
-  let value = BigInt(0)
-  for (let i = bytes.length - 1; i >= 0; i--) {
-    value = (value << BigInt(8)) | BigInt(bytes[i])
-  }
-  return value
-}
-
-function bigIntToBytes32LE(value: bigint): Uint8Array {
-  const result = new Uint8Array(32)
-  let tmp = value
-  for (let i = 0; i < 32; i++) {
-    result[i] = Number(tmp & BigInt(0xff))
-    tmp >>= BigInt(8)
   }
   return result
 }

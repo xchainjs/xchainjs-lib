@@ -27,14 +27,14 @@ const EIGHT = BigInt(8)
 const maxN = 64 // bits per value
 const maxM = 16 // max aggregated outputs
 
-// INV_EIGHT = modular inverse of 8 mod l
-const INV_EIGHT = bytesToNumberLE(hexToBytes('792fdce229e50661d0da1c7db39dd30700000000000000000000000000000006'))
-const MINUS_INV_EIGHT = modL(L - INV_EIGHT)
-
 function modL(x: bigint): bigint {
   const r = x % L
   return r < ZERO ? r + L : r
 }
+
+// INV_EIGHT = modular inverse of 8 mod l
+const INV_EIGHT = bytesToNumberLE(hexToBytes('792fdce229e50661d0da1c7db39dd30700000000000000000000000000000006'))
+const MINUS_INV_EIGHT = modL(L - INV_EIGHT)
 
 // Domain separator for generator derivation
 const EXPONENT_TAG = new TextEncoder().encode('bulletproof_plus')

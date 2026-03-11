@@ -30,6 +30,16 @@ function hashToScalar(data: Uint8Array): Uint8Array {
   return scReduce32(keccak_256(data))
 }
 
+function encodeVarint(n: number): Uint8Array {
+  const bytes: number[] = []
+  while (n >= 0x80) {
+    bytes.push((n & 0x7f) | 0x80)
+    n >>>= 7
+  }
+  bytes.push(n & 0x7f)
+  return new Uint8Array(bytes)
+}
+
 /**
  * Concatenate buffers with a varint output index.
  */
@@ -41,16 +51,6 @@ function deriveKeyData(sharedSecret: Point, outputIndex: number): Uint8Array {
   combined.set(secretBytes, 0)
   combined.set(indexBytes, secretBytes.length)
   return combined
-}
-
-function encodeVarint(n: number): Uint8Array {
-  const bytes: number[] = []
-  while (n >= 0x80) {
-    bytes.push((n & 0x7f) | 0x80)
-    n >>>= 7
-  }
-  bytes.push(n & 0x7f)
-  return new Uint8Array(bytes)
 }
 
 /**

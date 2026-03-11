@@ -14,6 +14,16 @@ import { scReduce32 } from '../utils'
 
 const ExtPoint = ed25519.ExtendedPoint
 
+function encodeVarint(n: number): Uint8Array {
+  const bytes: number[] = []
+  while (n >= 0x80) {
+    bytes.push((n & 0x7f) | 0x80)
+    n >>>= 7
+  }
+  bytes.push(n & 0x7f)
+  return new Uint8Array(bytes)
+}
+
 /**
  * Derive the shared secret scalar for amount encryption.
  * Hs(r*A || i) — same derivation as stealth address.
@@ -24,16 +34,6 @@ function derivationToScalar(sharedSecret: Uint8Array, outputIndex: number): Uint
   combined.set(sharedSecret, 0)
   combined.set(indexBytes, sharedSecret.length)
   return scReduce32(keccak_256(combined))
-}
-
-function encodeVarint(n: number): Uint8Array {
-  const bytes: number[] = []
-  while (n >= 0x80) {
-    bytes.push((n & 0x7f) | 0x80)
-    n >>>= 7
-  }
-  bytes.push(n & 0x7f)
-  return new Uint8Array(bytes)
 }
 
 /**
