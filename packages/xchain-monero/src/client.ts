@@ -13,6 +13,7 @@ import {
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, baseAmount } from '@xchainjs/xchain-util'
+import { keccak_256 } from '@noble/hashes/sha3'
 import slip10 from 'micro-key-producer/slip10.js'
 
 import { AssetXMR, XMRChain, XMR_DECIMALS, defaultXMRParams } from './const'
@@ -356,6 +357,8 @@ export class Client extends BaseXChainClient {
 
   /**
    * Broadcast a signed transaction hex to the network.
+   * Note: The returned hash is keccak256 of the raw tx blob, which differs from
+   * the canonical Monero txid (three-hash construction). Use transfer() for the correct txid.
    */
   public async broadcastTx(txHex: string): Promise<TxHash> {
     const urls = this.daemonUrls[this.getNetwork()]
@@ -363,7 +366,8 @@ export class Client extends BaseXChainClient {
     for (const url of urls) {
       try {
         await daemon.sendRawTransaction(url, txHex)
-        return txHex.substring(0, 64)
+        const txBytes = hexToBytes(txHex)
+        return bytesToHex(keccak_256(txBytes))
       } catch (error) {
         console.warn(`Daemon ${url} failed for broadcastTx:`, (error as Error).message)
         continue

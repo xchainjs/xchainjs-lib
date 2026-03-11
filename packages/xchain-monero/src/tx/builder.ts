@@ -15,7 +15,6 @@ import { generateKeyImage } from '../crypto/keyImage'
 import { deriveOutputKey, deriveInputKey } from '../crypto/stealth'
 import { deriveSharedSecret, encryptAmount } from '../crypto/ecdh'
 import { secretKeyToPublicKey } from '../crypto/keys'
-import { keccak_256 } from '@noble/hashes/sha3'
 
 import { scReduce32, concatBytes, bytesToHex, hexToBytes } from '../utils'
 import { selectDecoys, buildRingIndices, toRelativeOffsets } from './decoySelection'
@@ -264,7 +263,11 @@ export async function buildTransaction(
   // Serialize
   const txBytes = serializeTransaction(tx)
   const txHex = bytesToHex(txBytes)
-  const txHash = bytesToHex(keccak_256(txBytes))
+
+  // Monero txid = keccak256(prefixHash || keccak256(rctBase) || keccak256(rctPrunable))
+  // Must recompute rctPrunable after CLSAGs are filled in
+  const finalRctPrunable = serializeRctPrunable(rctSig)
+  const txHash = bytesToHex(rctSigHash(prefixHash, rctBase, finalRctPrunable))
 
   return { tx, txHex, txHash }
 }

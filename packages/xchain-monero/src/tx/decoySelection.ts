@@ -10,7 +10,17 @@ const GAMMA_SHAPE = 19.28
 const GAMMA_RATE = 1.61 // scale = 1/rate
 
 /**
+ * Generate a cryptographically secure random float in [0, 1).
+ */
+function secureRandom(): number {
+  const buf = new Uint32Array(1)
+  crypto.getRandomValues(buf)
+  return buf[0] / 0x100000000
+}
+
+/**
  * Sample from gamma distribution using Marsaglia & Tsang's method.
+ * Uses crypto.getRandomValues() for privacy-safe randomness.
  */
 function sampleGamma(shape: number, rate: number): number {
   const d = shape - 1 / 3
@@ -21,13 +31,13 @@ function sampleGamma(shape: number, rate: number): number {
     let v: number
     do {
       // Box-Muller for standard normal
-      const u1 = Math.random()
-      const u2 = Math.random()
+      const u1 = secureRandom()
+      const u2 = secureRandom()
       x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2)
       v = Math.pow(1 + c * x, 3)
     } while (v <= 0)
 
-    const u = Math.random()
+    const u = secureRandom()
     if (
       u < 1 - 0.0331 * Math.pow(x, 4) ||
       Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))
@@ -81,7 +91,7 @@ export function selectDecoys(
     if (blockEnd <= blockStart) continue // empty block
 
     // Pick random output within this block
-    const outputIdx = blockStart + Math.floor(Math.random() * (blockEnd - blockStart))
+    const outputIdx = blockStart + Math.floor(secureRandom() * (blockEnd - blockStart))
 
     if (outputIdx > maxIndex) continue
     if (outputIdx === realGlobalIndex) continue
@@ -92,7 +102,7 @@ export function selectDecoys(
 
   // If we couldn't get enough decoys from gamma sampling, fill randomly
   while (decoys.size < RING_SIZE - 1) {
-    const idx = Math.floor(Math.random() * maxIndex)
+    const idx = Math.floor(secureRandom() * maxIndex)
     if (idx !== realGlobalIndex && !decoys.has(idx)) {
       decoys.add(idx)
     }
