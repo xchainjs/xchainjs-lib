@@ -1,8 +1,4 @@
-import {
-  CommittedTransactionInfo,
-  TransactionCommittedDetailsRequest,
-  TransactionCommittedDetailsResponse,
-} from '@radixdlt/babylon-gateway-api-sdk'
+import { CommittedTransactionInfo } from './gateway-api'
 import {
   Convert,
   Curve,
@@ -287,19 +283,17 @@ export default class Client extends BaseXChainClient {
     const txList: TxsPage = { txs: [], total: 0 }
 
     while (hasNextPage) {
-      const response = await this.radixSpecificClient.gatewayClient.stream.innerClient.streamTransactions({
-        streamTransactionsRequest: {
-          affected_global_entities_filter: [address],
-          limit_per_page: limit && limit > 100 ? 100 : limit,
-          from_ledger_state: {
-            state_version: offset,
-          },
-          manifest_resources_filter: asset ? [asset] : undefined,
-          opt_ins: {
-            raw_hex: true,
-          },
-          cursor: nextCursor,
+      const response = await this.radixSpecificClient.gateway.getStreamTransactions({
+        affected_global_entities_filter: [address],
+        limit_per_page: limit && limit > 100 ? 100 : limit,
+        from_ledger_state: {
+          state_version: offset,
         },
+        manifest_resources_filter: asset ? [asset] : undefined,
+        opt_ins: {
+          raw_hex: true,
+        },
+        cursor: nextCursor,
       })
       committedTransactions = committedTransactions.concat(response.items)
       if (response.next_cursor) {
@@ -335,16 +329,12 @@ export default class Client extends BaseXChainClient {
    */
   async getTransactionData(txId: string): Promise<Tx> {
     try {
-      const transactionCommittedDetailsRequest: TransactionCommittedDetailsRequest = {
+      const transactionCommittedDetailsResponse = await this.radixSpecificClient.gateway.getTransactionDetails({
         intent_hash: txId,
         opt_ins: {
           raw_hex: true,
         },
-      }
-      const transactionCommittedDetailsResponse: TransactionCommittedDetailsResponse =
-        await this.radixSpecificClient.gatewayClient.transaction.innerClient.transactionCommittedDetails({
-          transactionCommittedDetailsRequest: transactionCommittedDetailsRequest,
-        })
+      })
       if (
         transactionCommittedDetailsResponse.transaction.raw_hex !== undefined &&
         transactionCommittedDetailsResponse.transaction.confirmed_at !== null &&

@@ -37,7 +37,6 @@
     "buffer": "^6.0.3",
     "json-rpc-2.0": "^1.7.0"
   },
-  "devDependencies": {},
   "publishConfig": {
     "access": "public",
     "directory": "release/package"

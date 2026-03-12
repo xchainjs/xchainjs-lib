@@ -3073,13 +3073,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radixdlt/babylon-gateway-api-sdk@npm:^1.4.1":
-  version: 1.6.1
-  resolution: "@radixdlt/babylon-gateway-api-sdk@npm:1.6.1"
-  checksum: 10c0/8f6be65f6e381f2a29d5b6aa97a62d2ba7529514eb5e35e77c01a1c06a90a27cd319e4e5f6bf3a9fa57299e5048c2b7d013d3d35fdad28d2a79e2616c7bc7dd6
-  languageName: node
-  linkType: hard
-
 "@radixdlt/radix-engine-toolkit@npm:^1.0.3":
   version: 1.0.4
   resolution: "@radixdlt/radix-engine-toolkit@npm:1.0.4"
@@ -4428,13 +4421,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.17.13":
-  version: 4.17.16
-  resolution: "@types/lodash@npm:4.17.16"
-  checksum: 10c0/cf017901b8ab1d7aabc86d5189d9288f4f99f19a75caf020c0e2c77b8d4cead4db0d0b842d009b029339f92399f49f34377dd7c2721053388f251778b4c23534
-  languageName: node
-  linkType: hard
-
 "@types/long@npm:^4.0.1":
   version: 4.0.2
   resolution: "@types/long@npm:4.0.2"
@@ -5434,7 +5420,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-radix@workspace:packages/xchain-radix"
   dependencies:
-    "@radixdlt/babylon-gateway-api-sdk": "npm:^1.4.1"
     "@radixdlt/radix-engine-toolkit": "npm:^1.0.3"
     "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"
@@ -5627,7 +5612,6 @@ __metadata:
     "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
     "@scure/bip32": "npm:^1.7.0"
     "@types/js-yaml": "npm:^4.0.9"
-    "@types/lodash": "npm:^4.17.13"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -5645,12 +5629,10 @@ __metadata:
   dependencies:
     "@noble/curves": "npm:^1.7.0"
     "@noble/hashes": "npm:^1.6.1"
-    "@types/lodash": "npm:^4.17.13"
     axios: "npm:1.13.5"
     bs58check: "npm:^4.0.0"
     buffer: "npm:^6.0.3"
     json-rpc-2.0: "npm:^1.7.0"
-    lodash: "npm:^4.17.21"
   languageName: unknown
   linkType: soft
 
