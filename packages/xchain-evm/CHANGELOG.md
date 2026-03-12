@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.15
+
+### Patch Changes
+
+- 3dd82dd: Bump bignumber.js from 9.1.2 to 10.0.1. Updated bnOrZero, validBNOrZero, and fixedBN to handle v10 throwing on invalid input.
+- 1c9a46f: Code quality improvements: fix typo, replace unsafe cast, remove unused dependency, improve error detection, standardize error constructors
+- a324d76: Fix EVM approve for tokens like USDT that require resetting allowance to 0 before setting a new non-zero value. Add getAllowance utility function.
+- Updated dependencies [3dd82dd]
+- Updated dependencies [1c9a46f]
+- Updated dependencies [f7b91eb]
+  - @xchainjs/xchain-util@2.0.6
+  - @xchainjs/xchain-evm-providers@2.0.14
+  - @xchainjs/xchain-client@2.0.11
+
 ## 2.0.14
 
 ### Patch Changes
