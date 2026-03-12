@@ -1,17 +1,17 @@
 import {
   FungibleResourcesCollectionItem,
-  GatewayApiClient,
+  GatewayPublicKey,
   NonFungibleResourcesCollectionItem,
-  PublicKey as GatewayPublicKey,
+  RadixGatewayApi,
   StateEntityDetailsVaultResponseItem,
   StateEntityFungiblesPageRequest,
   StateEntityFungiblesPageResponse,
   StateEntityNonFungiblesPageRequest,
   StateEntityNonFungiblesPageResponse,
-  TransactionPreviewOperationRequest,
+  TransactionPreviewRequest,
   TransactionPreviewResponse,
   TransactionSubmitResponse,
-} from '@radixdlt/babylon-gateway-api-sdk'
+} from './gateway-api'
 import {
   Convert,
   Intent,
@@ -53,35 +53,35 @@ type PartialTransactionPreviewResponse = {
  */
 export class RadixSpecificClient {
   private innerNetwork: number
-  private innerGatewayClient: GatewayApiClient
+  private innerGateway: RadixGatewayApi
 
   constructor(networkId: number) {
     this.innerNetwork = networkId
-    this.innerGatewayClient = RadixSpecificClient.createGatewayClient(networkId)
+    this.innerGateway = new RadixGatewayApi(networkId)
   }
 
   // #region Getters & Setters
   public set networkId(networkId: number) {
     this.innerNetwork = networkId
-    this.innerGatewayClient = RadixSpecificClient.createGatewayClient(networkId)
+    this.innerGateway = new RadixGatewayApi(networkId)
   }
 
   public get networkId(): number {
     return this.innerNetwork
   }
 
-  public get gatewayClient(): GatewayApiClient {
-    return this.innerGatewayClient
+  public get gateway(): RadixGatewayApi {
+    return this.innerGateway
   }
   // #endregion
 
   // #region Public Methods
   public async currentEpoch(): Promise<number> {
-    return this.innerGatewayClient.status.getCurrent().then((status) => status.ledger_state.epoch)
+    return this.innerGateway.getStatus().then((status) => status.ledger_state.epoch)
   }
 
   public async currentStateVersion(): Promise<number> {
-    return this.innerGatewayClient.status.getCurrent().then((status) => status.ledger_state.state_version)
+    return this.innerGateway.getStatus().then((status) => status.ledger_state.state_version)
   }
 
   public async fetchBalances(address: string): Promise<Balance[]> {
@@ -110,14 +110,15 @@ export class RadixSpecificClient {
 
     for (const batch of resourceBatches) {
       const addresses = batch.map((item) => item.resource_address)
-      const response: StateEntityDetailsVaultResponseItem[] =
-        await this.gatewayClient.state.getEntityDetailsVaultAggregated(addresses)
+      const response: StateEntityDetailsVaultResponseItem[] = await this.gateway.getEntityDetailsVaultAggregated(
+        addresses,
+      )
 
       const divisibilities = new Map<string, number>()
       response.forEach((result) => {
         if (result.details !== undefined) {
           if (result.details.type === 'FungibleResource') {
-            divisibilities.set(result.address, result.details.divisibility)
+            divisibilities.set(result.address, result.details.divisibility ?? 0)
           }
         }
       })
@@ -165,9 +166,7 @@ export class RadixSpecificClient {
       }
 
       const stateEntityNonFungiblesPageResponse: StateEntityNonFungiblesPageResponse =
-        await this.gatewayClient.state.innerClient.entityNonFungiblesPage({
-          stateEntityNonFungiblesPageRequest: stateEntityNonFungiblesPageRequest,
-        })
+        await this.gateway.getEntityNonFungiblesPage(stateEntityNonFungiblesPageRequest)
       nonFungibleResources = nonFungibleResources.concat(stateEntityNonFungiblesPageResponse.items)
       if (stateEntityNonFungiblesPageResponse.next_cursor) {
         nextCursor = stateEntityNonFungiblesPageResponse.next_cursor
@@ -194,9 +193,7 @@ export class RadixSpecificClient {
       }
 
       const stateEntityFungiblesPageResponse: StateEntityFungiblesPageResponse =
-        await this.gatewayClient.state.innerClient.entityFungiblesPage({
-          stateEntityFungiblesPageRequest: stateEntityFungiblesPageRequest,
-        })
+        await this.gateway.getEntityFungiblesPage(stateEntityFungiblesPageRequest)
 
       fungibleResources = fungibleResources.concat(stateEntityFungiblesPageResponse.items)
       if (stateEntityFungiblesPageResponse.next_cursor) {
@@ -293,23 +290,13 @@ export class RadixSpecificClient {
     const transactionHex = await RadixEngineToolkit.NotarizedTransaction.compile(notarizedTransaction).then(
       Convert.Uint8Array.toHexString,
     )
-    const response = await this.innerGatewayClient.transaction.innerClient.transactionSubmit({
-      transactionSubmitRequest: { notarized_transaction_hex: transactionHex },
-    })
+    const response = await this.innerGateway.submitTransaction(transactionHex)
 
     return [response, intentHash]
   }
   // #endregion Public Methods
 
   // #region Private Methods
-  private static createGatewayClient(network: number): GatewayApiClient {
-    const applicationName = 'xchainjs'
-    return GatewayApiClient.initialize({
-      networkId: network,
-      applicationName,
-    })
-  }
-
   private static createSimpleTransferManifest(
     from: string,
     to: string,
@@ -367,31 +354,29 @@ export class RadixSpecificClient {
 
   private async previewIntent(intent: Intent): Promise<TransactionPreviewResponse> {
     // Translate the RET models to the gateway models for preview.
-    const request: TransactionPreviewOperationRequest = {
-      transactionPreviewRequest: {
-        manifest: await RadixEngineToolkit.Instructions.convert(
-          intent.manifest.instructions,
-          this.networkId,
-          'String',
-        ).then((instructions) => instructions.value as string),
-        blobs_hex: [],
-        start_epoch_inclusive: intent.header.startEpochInclusive,
-        end_epoch_exclusive: intent.header.endEpochExclusive,
-        notary_public_key: RadixSpecificClient.retPublicKeyToGatewayPublicKey(intent.header.notaryPublicKey),
-        notary_is_signatory: intent.header.notaryIsSignatory,
-        tip_percentage: intent.header.tipPercentage,
-        nonce: intent.header.nonce,
-        signer_public_keys: [RadixSpecificClient.retPublicKeyToGatewayPublicKey(intent.header.notaryPublicKey)],
-        // TODO: Add message
-        flags: {
-          assume_all_signature_proofs: false,
-          skip_epoch_check: false,
-          use_free_credit: false,
-        },
+    const request: TransactionPreviewRequest = {
+      manifest: await RadixEngineToolkit.Instructions.convert(
+        intent.manifest.instructions,
+        this.networkId,
+        'String',
+      ).then((instructions) => instructions.value as string),
+      blobs_hex: [],
+      start_epoch_inclusive: intent.header.startEpochInclusive,
+      end_epoch_exclusive: intent.header.endEpochExclusive,
+      notary_public_key: RadixSpecificClient.retPublicKeyToGatewayPublicKey(intent.header.notaryPublicKey),
+      notary_is_signatory: intent.header.notaryIsSignatory,
+      tip_percentage: intent.header.tipPercentage,
+      nonce: intent.header.nonce,
+      signer_public_keys: [RadixSpecificClient.retPublicKeyToGatewayPublicKey(intent.header.notaryPublicKey)],
+      // TODO: Add message
+      flags: {
+        assume_all_signature_proofs: false,
+        skip_epoch_check: false,
+        use_free_credit: false,
       },
     }
 
-    return this.innerGatewayClient.transaction.innerClient.transactionPreview(request)
+    return this.innerGateway.previewTransaction(request)
   }
 
   private static retPublicKeyToGatewayPublicKey(publicKey: PublicKey): GatewayPublicKey {

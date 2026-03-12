@@ -1,10 +1,4 @@
-import {
-  Configuration,
-  GatewayStatusResponse,
-  TransactionApi,
-  TransactionStatus,
-  TransactionStatusResponse,
-} from '@radixdlt/babylon-gateway-api-sdk'
+import { GatewayStatusResponse } from '../src/gateway-api'
 import { Convert, Instruction, RadixEngineToolkit } from '@radixdlt/radix-engine-toolkit'
 import { Balance, Fees, Network, XChainClientParams } from '@xchainjs/xchain-client'
 import { AssetType, baseAmount } from '@xchainjs/xchain-util'
@@ -223,8 +217,7 @@ describe('RadixClient Test', () => {
   it('client should be able to get transaction data for a given tx id', async () => {
     const client = createClient()
     const transactionCommittedDetailsMock = jest.fn().mockResolvedValue(mockCommittedDetailsResponse)
-    client.radixClient.gatewayClient.transaction.innerClient.transactionCommittedDetails =
-      transactionCommittedDetailsMock
+    client.radixClient.gateway.getTransactionDetails = transactionCommittedDetailsMock
 
     const transaction: Tx = await client.getTransactionData(
       'txid_rdx195z9zjp43qvqk8fnzmnpazv5m7jsaepq6cnm5nnnn5p3m2573rvqamjaa8',
@@ -236,13 +229,13 @@ describe('RadixClient Test', () => {
   it('client should be able to get balances for an account', async () => {
     const client = createClient()
     const stateEntityFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityFungiblesPageResponse)
-    client.radixClient.gatewayClient.state.innerClient.entityFungiblesPage = stateEntityFungiblesPageResponseMock
+    client.radixClient.gateway.getEntityFungiblesPage = stateEntityFungiblesPageResponseMock
 
     const stateEntityNonFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityNonFungiblesPageResponse)
-    client.radixClient.gatewayClient.state.innerClient.entityNonFungiblesPage = stateEntityNonFungiblesPageResponseMock
+    client.radixClient.gateway.getEntityNonFungiblesPage = stateEntityNonFungiblesPageResponseMock
 
     const stateEntityDetailsResponseMock = jest.fn().mockResolvedValue(mockEntityDeatilsResponse)
-    client.radixClient.gatewayClient.state.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
+    client.radixClient.gateway.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
 
     const balances: Balance[] = await client.getBalance(
       'account_rdx16x47guzq44lmplg0ykfn2eltwt5wweylpuupstsxnfm8lgva7tdg2w',
@@ -256,13 +249,13 @@ describe('RadixClient Test', () => {
     const client = createClient()
 
     const stateEntityFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityFungiblesPageResponse)
-    client.radixClient.gatewayClient.state.innerClient.entityFungiblesPage = stateEntityFungiblesPageResponseMock
+    client.radixClient.gateway.getEntityFungiblesPage = stateEntityFungiblesPageResponseMock
 
     const stateEntityNonFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityNonFungiblesPageResponse)
-    client.radixClient.gatewayClient.state.innerClient.entityNonFungiblesPage = stateEntityNonFungiblesPageResponseMock
+    client.radixClient.gateway.getEntityNonFungiblesPage = stateEntityNonFungiblesPageResponseMock
 
     const stateEntityDetailsResponseMock = jest.fn().mockResolvedValue(mockEntityDeatilsResponse)
-    client.radixClient.gatewayClient.state.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
+    client.radixClient.gateway.getEntityDetailsVaultAggregated = stateEntityDetailsResponseMock
 
     const balances: Balance[] = await client.getBalance(
       'account_rdx16x47guzq44lmplg0ykfn2eltwt5wweylpuupstsxnfm8lgva7tdg2w',
@@ -284,9 +277,9 @@ describe('RadixClient Test', () => {
     const client = createClient()
 
     const getCurrentMock = jest.fn().mockResolvedValue({ ledger_state: { epoch: 123 } } as GatewayStatusResponse)
-    client.radixClient.gatewayClient.status.getCurrent = getCurrentMock
+    client.radixClient.gateway.getStatus = getCurrentMock
     const transactionPreviewResponseMock = jest.fn().mockResolvedValue(mockTransactionPreviewResponse)
-    client.radixClient.gatewayClient.transaction.innerClient.transactionPreview = transactionPreviewResponseMock
+    client.radixClient.gateway.previewTransaction = transactionPreviewResponseMock
 
     const fees: Fees = await client.getFees()
     expect(fees.average.gt(0)).toBe(true)
@@ -298,7 +291,7 @@ describe('RadixClient Test', () => {
     const client = createClient()
 
     const streamTransactionsResponseMock = jest.fn().mockResolvedValue(mockStreamTransactionsResponse)
-    client.radixClient.gatewayClient.stream.innerClient.streamTransactions = streamTransactionsResponseMock
+    client.radixClient.gateway.getStreamTransactions = streamTransactionsResponseMock
 
     const transactionsHistoryParams = {
       address: 'account_rdx169yt0y36etavnnxp4du5ekn7qq8thuls750q6frq5xw8gfq52dhxhg',
@@ -317,9 +310,9 @@ describe('RadixClient Test', () => {
     const client = createClient()
 
     const getCurrentMock = jest.fn().mockResolvedValue({ ledger_state: { epoch: 123 } } as GatewayStatusResponse)
-    client.radixClient.gatewayClient.status.getCurrent = getCurrentMock
+    client.radixClient.gateway.getStatus = getCurrentMock
     const transactionPreviewResponseMock = jest.fn().mockResolvedValue(mockTransactionPreviewResponse)
-    client.radixClient.gatewayClient.transaction.innerClient.transactionPreview = transactionPreviewResponseMock
+    client.radixClient.gateway.previewTransaction = transactionPreviewResponseMock
 
     const txParams: TxParams = {
       asset: AssetXRD,
@@ -354,10 +347,10 @@ describe('RadixClient Test', () => {
     client.broadcastTx = broadcastTxMock
 
     const getCurrentMock = jest.fn().mockResolvedValue({ ledger_state: { epoch: 123 } } as GatewayStatusResponse)
-    client.radixClient.gatewayClient.status.getCurrent = getCurrentMock
+    client.radixClient.gateway.getStatus = getCurrentMock
 
     const transactionPreviewResponseMock = jest.fn().mockResolvedValue(mockTransactionPreviewResponse)
-    client.radixClient.gatewayClient.transaction.innerClient.transactionPreview = transactionPreviewResponseMock
+    client.radixClient.gateway.previewTransaction = transactionPreviewResponseMock
 
     const txParams: TxParams = {
       asset: AssetXRD,
@@ -372,11 +365,11 @@ describe('RadixClient Test', () => {
   it('client should be able broadcast tx', async () => {
     const client = createClient()
     const transactionSubmitMock = jest.fn()
-    client.radixClient.gatewayClient.transaction.innerClient.transactionSubmit = transactionSubmitMock
+    client.radixClient.gateway.submitTransaction = transactionSubmitMock
     const transactionHex =
       '4d22030221022104210707020a7b000000000000000a850000000000000009a92f3af1220101200720f926e5d67daa984375a86abbb305abc350c7dadba11d348c1cf4db27640c8d4e0101080000202203410380005155d545fc40d2d01750b5d055631ddc6fa6b1f6779fec707b167ef695580c156c6f636b5f6665655f616e645f7769746864726177210385c48edb420206cc050000000000000000000000000000000080005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c685000064a7b3b6e00d00000000000000000000000000000000000280005da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c685000064a7b3b6e00d0000000000000000000000000000000041038000515d2ea24237d6d7e3e3882a2f5c0175318f3b372ac70ae4b68892e0065a0c147472795f6465706f7369745f6f725f61626f72742102810000000022000020200022010121020c0a746578742f706c61696e2200010c04746573742022002201012101200740b2f028fb4e2e130a9480d253a7709839980a7ed5e91394825115795d3f5b688e9472521295f90ae840e64bb82b9d086d9127bf2e53be55f0ee13775148defb09'
     await client.broadcastTx(transactionHex)
-    expect(client.radixClient.gatewayClient.transaction.innerClient.transactionSubmit).toHaveBeenCalledTimes(1)
+    expect(client.radixClient.gateway.submitTransaction).toHaveBeenCalledTimes(1)
   })
 
   it('client should be able prepare a tx without mocking', async () => {
@@ -421,16 +414,6 @@ describe('RadixClient Test', () => {
     }
   })
 
-  const getTransactionStatus = async (
-    transactionApi: TransactionApi,
-    transactionId: string,
-  ): Promise<TransactionStatusResponse> =>
-    transactionApi.transactionStatus({
-      transactionStatusRequest: {
-        intent_hash: transactionId,
-      },
-    })
-
   it('client should be able transfer without mock', async () => {
     const client = createClient()
     const txParams: TxParams = {
@@ -441,23 +424,14 @@ describe('RadixClient Test', () => {
     }
     const transactionId = await client.transfer(txParams)
 
-    const NetworkConfiguration = {
-      gatewayBaseUrl: 'https://stokenet.radixdlt.com',
-      networkId: 0x02,
-    }
-    const apiConfiguration = new Configuration({
-      basePath: NetworkConfiguration.gatewayBaseUrl,
-    })
-    const transactionApi = new TransactionApi(apiConfiguration)
-
     // Poll for transaction confirmation instead of a fixed sleep
     const maxAttempts = 12
-    let transactionStatus: TransactionStatusResponse | undefined
+    let transactionStatus: { status: string } | undefined
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise((resolve) => setTimeout(resolve, 5000))
-      transactionStatus = await getTransactionStatus(transactionApi, transactionId)
-      if (transactionStatus.status === TransactionStatus.CommittedSuccess) break
+      transactionStatus = await client.radixClient.gateway.getTransactionStatus(transactionId)
+      if (transactionStatus.status === 'CommittedSuccess') break
     }
-    expect(transactionStatus?.status).toBe(TransactionStatus.CommittedSuccess)
+    expect(transactionStatus?.status).toBe('CommittedSuccess')
   }, 90000)
 })
