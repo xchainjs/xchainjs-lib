@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512px" height="512px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>RUNE-ICON-FLASH</title>
+    <desc>THORCHAIN RUNE ICON WITH FLASH SHAPE</desc>
+    <defs>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="linearGradient-1">
+            <stop stop-color="#33FF99" offset="0%"></stop>
+            <stop stop-color="#00CCFF" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="RUNE-ICON-FLASH" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle id="Oval" fill="url(#linearGradient-1)" cx="256" cy="256" r="256"></circle>
+        <path d="M256,256 L322.364,322.364 L110,402 L256,256 Z M402,110 L256,256 L189.636,189.636 L402,110 Z" id="FLASH-SHAPE" fill="#FFFFFF"></path>
+    </g>
+</svg>
