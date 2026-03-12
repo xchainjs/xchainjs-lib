@@ -42,6 +42,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
   {
     name: 'Other',
     chains: [
+      { id: 'XMR', name: 'Monero' },
       { id: 'SOL', name: 'Solana' },
       { id: 'XRD', name: 'Radix' },
       { id: 'ADA', name: 'Cardano' },

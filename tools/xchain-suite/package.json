@@ -34,6 +34,7 @@
     "@xchainjs/xchain-mayamidgard-query": "workspace:*",
     "@xchainjs/xchain-mayanode": "workspace:*",
     "@xchainjs/xchain-midgard-query": "workspace:*",
+    "@xchainjs/xchain-monero": "workspace:*",
     "@xchainjs/xchain-radix": "workspace:*",
     "@xchainjs/xchain-ripple": "workspace:*",
     "@xchainjs/xchain-solana": "workspace:*",

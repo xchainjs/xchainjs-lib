@@ -183,6 +183,9 @@ thorNames.forEach(name => {
         const { assetFromStringEx } = await import('@xchainjs/xchain-util')
         const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) : undefined
 
+        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
+        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
+
         if (regMode === 'register') {
           if (!regChain || !regChainAddress || !regOwner) {
             throw new Error('All fields are required for registration')
@@ -238,6 +241,9 @@ thorNames.forEach(name => {
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
         const { assetFromStringEx } = await import('@xchainjs/xchain-util')
         const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) : undefined
+
+        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
+        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
 
         if (regMode === 'register') {
           return await thorchainAmm.registerTHORName({

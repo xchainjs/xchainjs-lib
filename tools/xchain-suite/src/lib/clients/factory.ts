@@ -313,6 +313,9 @@ function createDashParams(network: Network, phrase: string) {
   }
 }
 
+// Monero
+import { Client as XmrClient, defaultXMRParams } from '@xchainjs/xchain-monero'
+
 // Cosmos Chains
 import { Client as GaiaClient, defaultClientConfig as defaultGaiaParams } from '@xchainjs/xchain-cosmos'
 import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
@@ -367,6 +370,20 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       return new MayaClient({ ...defaultMayaParams, network, phrase })
     case 'KUJI':
       return new KujiClient({ ...defaultKujiParams, network, phrase })
+
+    // Monero
+    case 'XMR':
+      return new XmrClient({
+        ...defaultXMRParams,
+        network,
+        phrase,
+        restoreHeight: 3626700,
+        daemonUrls: {
+          ...defaultXMRParams.daemonUrls!,
+          // Use Vite proxy to avoid CORS issues with daemon HTTP endpoints
+          [Network.Mainnet]: ['/xmr-daemon'],
+        },
+      })
 
     // Other Chains
     case 'SOL': {
