@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.2
+
+### Patch Changes
+
+- 3dd82dd: Bump bignumber.js from 9.1.2 to 10.0.1. Updated bnOrZero, validBNOrZero, and fixedBN to handle v10 throwing on invalid input.
+- Updated dependencies [3dd82dd]
+  - @xchainjs/xchain-util@2.0.6
+  - @xchainjs/xchain-client@2.0.11
+  - @xchainjs/xchain-midgard-query@2.0.14
+
 ## 3.0.1
 
 ### Patch Changes

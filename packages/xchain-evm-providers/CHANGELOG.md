@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.14
+
+### Patch Changes
+
+- 1c9a46f: Code quality improvements: fix typo, replace unsafe cast, remove unused dependency, improve error detection, standardize error constructors
+- f7b91eb: fix(evm-providers): sync getApprovalAmount to allow explicit zero for allowance revocation
+- Updated dependencies [3dd82dd]
+  - @xchainjs/xchain-util@2.0.6
+  - @xchainjs/xchain-client@2.0.11
+
 ## 2.0.13
 
 ### Patch Changes

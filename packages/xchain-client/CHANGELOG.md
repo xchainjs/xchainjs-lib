@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.11
+
+### Patch Changes
+
+- Updated dependencies [3dd82dd]
+  - @xchainjs/xchain-util@2.0.6
+
 ## 2.0.10
 
 ### Patch Changes
