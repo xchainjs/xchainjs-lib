@@ -1,6 +1,6 @@
 import { selectDecoys, buildRingIndices, toRelativeOffsets } from '../src/tx/decoySelection'
 import { encodeAddress, decodeAddress } from '../src/crypto/address'
-import { deriveKeyPairs, secretKeyToPublicKey } from '../src/crypto/keys'
+import { deriveKeyPairs } from '../src/crypto/keys'
 import { scReduce32, bytesToHex } from '../src/utils'
 
 describe('Phase 3d: Decoy selection', () => {

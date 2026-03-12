@@ -1,10 +1,6 @@
-import { ed25519 } from '@noble/curves/ed25519'
-
 import { bulletproofPlusProve, bulletproofPlusVerify } from '../src/crypto/bulletproofsPlus'
 import { commit } from '../src/crypto/pedersen'
-import { scReduce32, bytesToHex } from '../src/utils'
-
-const ExtPoint = ed25519.ExtendedPoint
+import { scReduce32 } from '../src/utils'
 
 describe('Phase 3c: Bulletproofs+ range proofs', () => {
   // Helper to generate a random mask

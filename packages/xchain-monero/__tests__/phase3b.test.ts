@@ -1,23 +1,20 @@
-import { ed25519 } from '@noble/curves/ed25519'
 import { bytesToNumberLE, numberToBytesLE } from '@noble/curves/abstract/utils'
 
 import { clsagSign, clsagVerify } from '../src/crypto/clsag'
 import { generateKeyImage } from '../src/crypto/keyImage'
 import { commit } from '../src/crypto/pedersen'
-import { secretKeyToPublicKey, deriveKeyPairs } from '../src/crypto/keys'
+import { secretKeyToPublicKey } from '../src/crypto/keys'
 import { bytesToHex, scReduce32, scMul, scMulAdd, scMulSub, hashToScalar, concatBytes } from '../src/utils'
 import {
   writeVarint,
   serializeTxPrefix,
   txPrefixHash,
   serializeRctBase,
-  serializeClsag,
   serializeRctPrunable,
   rctSigHash,
 } from '../src/tx/serialize'
-import type { MoneroTransaction, RingMember, RctSignatures } from '../src/tx/types'
+import type { MoneroTransaction, RingMember } from '../src/tx/types'
 
-const ExtPoint = ed25519.ExtendedPoint
 const L = BigInt('7237005577332262213973186563042994240857116359379907606001950938285454250989')
 
 describe('Phase 3b: Scalar arithmetic', () => {
