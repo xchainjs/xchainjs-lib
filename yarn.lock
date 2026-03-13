@@ -4430,6 +4430,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash@npm:^4.17.13":
+  version: 4.17.24
+  resolution: "@types/lodash@npm:4.17.24"
+  checksum: 10c0/b72f60d4daacdad1fa643edb3faba204c02a01eb1ac00a83ff73496a6d236fc55e459c06106e8ced42277dba932d087d8fc090f8de4ef590d3f91e6d6f7ce85a
+  languageName: node
+  linkType: hard
+
 "@types/long@npm:^4.0.1":
   version: 4.0.2
   resolution: "@types/long@npm:4.0.2"
@@ -5613,6 +5620,7 @@ __metadata:
     "@bitcoin-js/tiny-secp256k1-asmjs": "npm:^2.2.3"
     "@scure/bip32": "npm:^1.7.0"
     "@types/js-yaml": "npm:^4.0.9"
+    "@types/lodash": "npm:^4.17.13"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
@@ -5630,10 +5638,12 @@ __metadata:
   dependencies:
     "@noble/curves": "npm:^1.7.0"
     "@noble/hashes": "npm:^1.6.1"
+    "@types/lodash": "npm:^4.17.13"
     axios: "npm:1.13.5"
     bs58check: "npm:^4.0.0"
     buffer: "npm:^6.0.3"
     json-rpc-2.0: "npm:^1.7.0"
+    lodash: "npm:^4.17.21"
   languageName: unknown
   linkType: soft
 
