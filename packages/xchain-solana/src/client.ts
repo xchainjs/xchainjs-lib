@@ -597,9 +597,22 @@ export class Client extends BaseXChainClient {
   private async roundRobinGetTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     try {
       for (const provider of this.providers) {
-        const signatures = await provider.solanaProvider.getSignaturesForAddress(
-          new PublicKey(params?.address || (await this.getAddressAsync())),
-        )
+        const address = new PublicKey(params?.address || (await this.getAddressAsync()))
+        const limit = params?.limit || 10
+        const offset = params?.offset || 0
+
+        // To support offset, fetch enough signatures to skip past the offset
+        const fetchCount = offset + limit
+        const allSignatures = await provider.solanaProvider.getSignaturesForAddress(address, {
+          limit: fetchCount,
+        })
+
+        // Apply offset by slicing
+        const signatures = allSignatures.slice(offset)
+
+        if (signatures.length === 0) {
+          return { txs: [], total: 0 }
+        }
 
         const transactions = await provider.solanaProvider.getParsedTransactions(
           signatures.map(({ signature }) => signature),
