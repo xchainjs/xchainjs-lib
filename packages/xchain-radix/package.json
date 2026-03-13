@@ -38,7 +38,6 @@
     "directory": "release/package"
   },
   "dependencies": {
-    "@radixdlt/babylon-gateway-api-sdk": "^1.4.1",
     "@radixdlt/radix-engine-toolkit": "^1.0.3",
     "@scure/base": "^1.2.6",
     "@scure/bip32": "^1.7.0",

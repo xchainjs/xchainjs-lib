@@ -3082,13 +3082,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radixdlt/babylon-gateway-api-sdk@npm:^1.4.1":
-  version: 1.6.1
-  resolution: "@radixdlt/babylon-gateway-api-sdk@npm:1.6.1"
-  checksum: 10c0/8f6be65f6e381f2a29d5b6aa97a62d2ba7529514eb5e35e77c01a1c06a90a27cd319e4e5f6bf3a9fa57299e5048c2b7d013d3d35fdad28d2a79e2616c7bc7dd6
-  languageName: node
-  linkType: hard
-
 "@radixdlt/radix-engine-toolkit@npm:^1.0.3":
   version: 1.0.4
   resolution: "@radixdlt/radix-engine-toolkit@npm:1.0.4"
@@ -4438,9 +4431,9 @@ __metadata:
   linkType: hard
 
 "@types/lodash@npm:^4.17.13":
-  version: 4.17.16
-  resolution: "@types/lodash@npm:4.17.16"
-  checksum: 10c0/cf017901b8ab1d7aabc86d5189d9288f4f99f19a75caf020c0e2c77b8d4cead4db0d0b842d009b029339f92399f49f34377dd7c2721053388f251778b4c23534
+  version: 4.17.24
+  resolution: "@types/lodash@npm:4.17.24"
+  checksum: 10c0/b72f60d4daacdad1fa643edb3faba204c02a01eb1ac00a83ff73496a6d236fc55e459c06106e8ced42277dba932d087d8fc090f8de4ef590d3f91e6d6f7ce85a
   languageName: node
   linkType: hard
 
@@ -5435,7 +5428,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-radix@workspace:packages/xchain-radix"
   dependencies:
-    "@radixdlt/babylon-gateway-api-sdk": "npm:^1.4.1"
     "@radixdlt/radix-engine-toolkit": "npm:^1.0.3"
     "@scure/base": "npm:^1.2.6"
     "@scure/bip32": "npm:^1.7.0"

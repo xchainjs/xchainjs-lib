@@ -75,7 +75,10 @@ export default function THORNamePage() {
   // Auto-populate owner address from wallet
   useEffect(() => {
     if (wallet && !regOwner) {
-      wallet.getAddress('THOR').then((addr: string) => setRegOwner(addr)).catch(() => {})
+      wallet
+        .getAddress('THOR')
+        .then((addr: string) => setRegOwner(addr))
+        .catch(() => {})
     }
   }, [wallet])
 
@@ -90,7 +93,7 @@ export default function THORNamePage() {
         // Fetch THORName details and current block height in parallel
         const [details, lastBlock] = await Promise.all([
           thorchainQuery.getThornameDetails(thorName),
-          fetch('https://thornode.ninerealms.com/thorchain/lastblock').then(r => r.json()),
+          fetch('https://thornode.ninerealms.com/thorchain/lastblock').then((r) => r.json()),
         ])
 
         if (!details || !details.name) {
@@ -120,7 +123,7 @@ export default function THORNamePage() {
           })),
         }
       },
-      { operation: 'getThornameDetails', params: { name: thorName } }
+      { operation: 'getThornameDetails', params: { name: thorName } },
     )
   }
 
@@ -134,7 +137,7 @@ export default function THORNamePage() {
         const names = await thorchainAmm.getThornamesByAddress(ownerAddress)
         return names || []
       },
-      { operation: 'getThornamesByAddress', params: { address: ownerAddress } }
+      { operation: 'getThornamesByAddress', params: { address: ownerAddress } },
     )
   }
 
@@ -181,10 +184,9 @@ thorNames.forEach(name => {
         const thorchainAmm = new ThorchainAMM()
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
         const { assetFromStringEx } = await import('@xchainjs/xchain-util')
-        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) : undefined
-
-        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
-        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
+        const preferredAsset = regPreferredAsset
+          ? (assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset)
+          : undefined
 
         if (regMode === 'register') {
           if (!regChain || !regChainAddress || !regOwner) {
@@ -220,7 +222,10 @@ thorNames.forEach(name => {
           }
         }
       },
-      { operation: regMode === 'register' ? 'estimateTHORNameRegistration' : 'estimateTHORNameUpdate', params: { name: regName } }
+      {
+        operation: regMode === 'register' ? 'estimateTHORNameRegistration' : 'estimateTHORNameUpdate',
+        params: { name: regName },
+      },
     )
   }
 
@@ -240,10 +245,9 @@ thorNames.forEach(name => {
         const thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
         const expiry = new Date(Date.now() + regExpiry * 365.25 * 24 * 60 * 60 * 1000)
         const { assetFromStringEx } = await import('@xchainjs/xchain-util')
-        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) : undefined
-
-        const { assetFromStringEx } = await import('@xchainjs/xchain-util')
-        const preferredAsset = regPreferredAsset ? assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset : undefined
+        const preferredAsset = regPreferredAsset
+          ? (assetFromStringEx(regPreferredAsset) as import('@xchainjs/xchain-util').Asset)
+          : undefined
 
         if (regMode === 'register') {
           return await thorchainAmm.registerTHORName({
@@ -264,7 +268,7 @@ thorNames.forEach(name => {
           })
         }
       },
-      { operation: regMode === 'register' ? 'registerTHORName' : 'updateTHORName', params: { name: regName } }
+      { operation: regMode === 'register' ? 'registerTHORName' : 'updateTHORName', params: { name: regName } },
     )
   }
 
@@ -311,14 +315,18 @@ const thorchainAmm = new ThorchainAMM(undefined, wallet)
 
 // Estimate update cost
 const quote = await thorchainAmm.estimateTHORNameUpdate({
-  name: '${regName || 'myname'}',${regOwner ? `\n  owner: '${regOwner}',` : ''}${regChain && regChainAddress ? `\n  chain: '${regChain}',\n  chainAddress: '${regChainAddress}',` : ''}
+  name: '${regName || 'myname'}',${regOwner ? `\n  owner: '${regOwner}',` : ''}${
+        regChain && regChainAddress ? `\n  chain: '${regChain}',\n  chainAddress: '${regChainAddress}',` : ''
+      }
   expiry: new Date(Date.now() + ${regExpiry} * 365.25 * 24 * 60 * 60 * 1000),
 })
 
 // Execute update
 if (quote.allowed) {
   const tx = await thorchainAmm.updateTHORName({
-    name: '${regName || 'myname'}',${regOwner ? `\n    owner: '${regOwner}',` : ''}${regChain && regChainAddress ? `\n    chain: '${regChain}',\n    chainAddress: '${regChainAddress}',` : ''}
+    name: '${regName || 'myname'}',${regOwner ? `\n    owner: '${regOwner}',` : ''}${
+        regChain && regChainAddress ? `\n    chain: '${regChain}',\n    chainAddress: '${regChainAddress}',` : ''
+      }
     expiry: new Date(Date.now() + ${regExpiry} * 365.25 * 24 * 60 * 60 * 1000),
   })
   console.log('Tx hash:', tx.hash)
@@ -340,13 +348,8 @@ if (quote.allowed) {
     return (
       <div className="space-y-2">
         {aliases.map((alias, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md"
-          >
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 w-16">
-              {alias.chain}
-            </span>
+          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-md">
+            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 w-16">{alias.chain}</span>
             <span className="font-mono text-xs text-gray-900 dark:text-gray-100 truncate flex-1 ml-2">
               {alias.address}
             </span>
@@ -364,17 +367,15 @@ if (quote.allowed) {
             {/* Header */}
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">THORName</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Lookup THORName registrations and aliases
-              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Lookup THORName registrations and aliases</p>
             </div>
 
             {/* Info Banner */}
             <div className="mx-6 mt-4 p-4 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
               <h3 className="text-sm font-medium text-cyan-800 dark:text-cyan-200">What is THORName?</h3>
               <p className="text-sm text-cyan-700 dark:text-cyan-300 mt-1">
-                THORName is a naming service on THORChain that maps human-readable names to blockchain addresses.
-                Each THORName can have aliases for multiple chains, making it easier to receive funds.
+                THORName is a naming service on THORChain that maps human-readable names to blockchain addresses. Each
+                THORName can have aliases for multiple chains, making it easier to receive funds.
               </p>
             </div>
 
@@ -444,9 +445,7 @@ if (quote.allowed) {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <span className="text-xs text-gray-500 dark:text-gray-400">Name</span>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">
-                              {lookupOp.result.name}
-                            </p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{lookupOp.result.name}</p>
                           </div>
                           <div>
                             <span className="text-xs text-gray-500 dark:text-gray-400">Expiry</span>
@@ -459,7 +458,12 @@ if (quote.allowed) {
                                     day: 'numeric',
                                   })}
                                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                                    (~{Math.ceil((lookupOp.result.expireBlockHeight - lookupOp.result.currentBlockHeight) / (BLOCKS_PER_YEAR / 365))} days)
+                                    (~
+                                    {Math.ceil(
+                                      (lookupOp.result.expireBlockHeight - lookupOp.result.currentBlockHeight) /
+                                        (BLOCKS_PER_YEAR / 365),
+                                    )}{' '}
+                                    days)
                                   </span>
                                 </>
                               ) : (
@@ -545,9 +549,7 @@ if (quote.allowed) {
                           Found {ownedOp.result.length} THORName{ownedOp.result.length !== 1 ? 's' : ''}
                         </p>
                         {ownedOp.result.length === 0 ? (
-                          <p className="text-gray-500 dark:text-gray-400">
-                            No THORNames found for this address
-                          </p>
+                          <p className="text-gray-500 dark:text-gray-400">No THORNames found for this address</p>
                         ) : (
                           <div className="space-y-2">
                             {ownedOp.result.map((name, index) => (
@@ -555,9 +557,7 @@ if (quote.allowed) {
                                 key={index}
                                 className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
                               >
-                                <span className="font-medium text-gray-900 dark:text-gray-100">
-                                  {name}
-                                </span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100">{name}</span>
                                 <button
                                   onClick={() => {
                                     setThorName(name)
@@ -586,7 +586,11 @@ if (quote.allowed) {
                   {/* Mode Toggle */}
                   <div className="flex gap-2">
                     <button
-                      onClick={() => { setRegMode('register'); quoteOp.reset(); registerOp.reset() }}
+                      onClick={() => {
+                        setRegMode('register')
+                        quoteOp.reset()
+                        registerOp.reset()
+                      }}
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                         regMode === 'register'
                           ? 'bg-cyan-600 text-white'
@@ -596,7 +600,11 @@ if (quote.allowed) {
                       Register New
                     </button>
                     <button
-                      onClick={() => { setRegMode('update'); quoteOp.reset(); registerOp.reset() }}
+                      onClick={() => {
+                        setRegMode('update')
+                        quoteOp.reset()
+                        registerOp.reset()
+                      }}
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                         regMode === 'update'
                           ? 'bg-cyan-600 text-white'
@@ -643,7 +651,9 @@ if (quote.allowed) {
                         className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
                       >
                         {ALIAS_CHAINS.map((chain) => (
-                          <option key={chain} value={chain}>{chain}</option>
+                          <option key={chain} value={chain}>
+                            {chain}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -680,9 +690,7 @@ if (quote.allowed) {
 
                     {/* Expiry */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Expiry
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expiry</label>
                       <select
                         value={regExpiry}
                         onChange={(e) => setRegExpiry(Number(e.target.value))}
@@ -690,7 +698,9 @@ if (quote.allowed) {
                         className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
                       >
                         {EXPIRY_OPTIONS.map((opt) => (
-                          <option key={opt.years} value={opt.years}>{opt.label}</option>
+                          <option key={opt.years} value={opt.years}>
+                            {opt.label}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -707,7 +717,9 @@ if (quote.allowed) {
                         className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50"
                       >
                         {PREFERRED_ASSET_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
                         ))}
                       </select>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -739,20 +751,26 @@ if (quote.allowed) {
                         {!quoteOp.result.allowed && quoteOp.result.errors.length > 0 && (
                           <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                             {quoteOp.result.errors.map((err, i) => (
-                              <p key={i} className="text-sm text-red-700 dark:text-red-300">{err}</p>
+                              <p key={i} className="text-sm text-red-700 dark:text-red-300">
+                                {err}
+                              </p>
                             ))}
                           </div>
                         )}
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <span className="text-xs text-gray-500 dark:text-gray-400">Cost</span>
-                            <p className="font-medium text-gray-900 dark:text-gray-100">
-                              {quoteOp.result.value}
-                            </p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{quoteOp.result.value}</p>
                           </div>
                           <div>
                             <span className="text-xs text-gray-500 dark:text-gray-400">Allowed</span>
-                            <p className={`font-medium ${quoteOp.result.allowed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            <p
+                              className={`font-medium ${
+                                quoteOp.result.allowed
+                                  ? 'text-green-600 dark:text-green-400'
+                                  : 'text-red-600 dark:text-red-400'
+                              }`}
+                            >
                               {quoteOp.result.allowed ? 'Yes' : 'No'}
                             </p>
                           </div>
@@ -775,8 +793,10 @@ if (quote.allowed) {
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                                 {regMode === 'register' ? 'Registering...' : 'Updating...'}
                               </>
+                            ) : regMode === 'register' ? (
+                              'Register THORName'
                             ) : (
-                              regMode === 'register' ? 'Register THORName' : 'Update THORName'
+                              'Update THORName'
                             )}
                           </button>
                         )}
@@ -810,7 +830,10 @@ if (quote.allowed) {
                   </ResultPanel>
 
                   {/* Code Example */}
-                  <CodePreview code={generateRegisterCode()} title={`${regMode === 'register' ? 'Register' : 'Update'} THORName`} />
+                  <CodePreview
+                    code={generateRegisterCode()}
+                    title={`${regMode === 'register' ? 'Register' : 'Update'} THORName`}
+                  />
                 </div>
               )}
             </div>

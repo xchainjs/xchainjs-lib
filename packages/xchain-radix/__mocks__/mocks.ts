@@ -3,7 +3,7 @@ import {
   StateEntityFungiblesPageResponse,
   StateEntityNonFungiblesPageResponse,
   TransactionCommittedDetailsResponse,
-} from '@radixdlt/babylon-gateway-api-sdk'
+} from '../src/gateway-api'
 
 export const stateEntityNonFungiblesPageResponse: StateEntityNonFungiblesPageResponse = {
   ledger_state: {
