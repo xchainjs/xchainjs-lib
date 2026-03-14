@@ -324,6 +324,7 @@ import { Client as KujiClient, defaultKujiParams } from '@xchainjs/xchain-kujira
 
 // Other Chains
 import { Client as SolClient, defaultSolanaParams } from '@xchainjs/xchain-solana'
+import { Client as SuiClient, defaultSuiParams } from '@xchainjs/xchain-sui'
 import { Client as XrdClient } from '@xchainjs/xchain-radix'
 import { Client as AdaClient, defaultAdaParams } from '@xchainjs/xchain-cardano'
 import { Client as XrpClient, defaultXRPParams } from '@xchainjs/xchain-ripple'
@@ -401,6 +402,8 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
         }),
       })
     }
+    case 'SUI':
+      return new SuiClient({ ...defaultSuiParams, network, phrase })
     case 'XRD':
       return new XrdClient({ network, phrase })
     case 'ADA':

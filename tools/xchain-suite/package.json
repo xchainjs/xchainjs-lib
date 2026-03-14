@@ -38,6 +38,7 @@
     "@xchainjs/xchain-radix": "workspace:*",
     "@xchainjs/xchain-ripple": "workspace:*",
     "@xchainjs/xchain-solana": "workspace:*",
+    "@xchainjs/xchain-sui": "workspace:*",
     "@xchainjs/xchain-thorchain": "workspace:*",
     "@xchainjs/xchain-thorchain-amm": "workspace:*",
     "@xchainjs/xchain-thorchain-query": "workspace:*",

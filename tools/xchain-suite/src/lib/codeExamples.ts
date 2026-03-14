@@ -98,6 +98,12 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
     paramsImport: 'defaultSolanaParams',
     clientInit: 'new Client({ ...defaultSolanaParams, network: Network.Mainnet, phrase })',
   },
+  SUI: {
+    packageName: '@xchainjs/xchain-sui',
+    clientImport: 'Client',
+    paramsImport: 'defaultSuiParams',
+    clientInit: 'new Client({ ...defaultSuiParams, network: Network.Mainnet, phrase })',
+  },
   XRD: {
     packageName: '@xchainjs/xchain-radix',
     clientImport: 'Client',
