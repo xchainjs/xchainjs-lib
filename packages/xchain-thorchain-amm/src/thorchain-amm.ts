@@ -5,6 +5,7 @@ import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xcha
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Client as BscClient, defaultBscParams } from '@xchainjs/xchain-bsc'
 import { Client as SOLClient, defaultSolanaParams } from '@xchainjs/xchain-solana'
+import { Client as SUIClient, defaultSuiParams } from '@xchainjs/xchain-sui'
 import { Network } from '@xchainjs/xchain-client'
 import { Client as GaiaClient } from '@xchainjs/xchain-cosmos'
 import { Client as DogeClient, defaultDogeParams } from '@xchainjs/xchain-doge'
@@ -103,6 +104,7 @@ export class ThorchainAMM {
       BASE: new BaseClient({ ...defaultBaseParams, network: Network.Mainnet }),
       XRP: new XRPClient({ ...defaultXRPParams, network: Network.Mainnet }),
       SOL: new SOLClient({ ...defaultSolanaParams, network: Network.Mainnet }),
+      SUI: new SUIClient({ ...defaultSuiParams, network: Network.Mainnet }),
       TRON: new TronClient({ ...defaultTRONParams, network: Network.Mainnet }),
     }),
   ) {
