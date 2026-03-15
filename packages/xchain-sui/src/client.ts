@@ -33,24 +33,22 @@ import { getDefaultClientUrl } from './utils'
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
   private suiClient: SuiRpcClient
-  private clientUrl?: string
+  private clientUrls?: Record<Network, string>
 
   constructor(params: SUIClientParams = defaultSuiParams) {
-    super(SUIChain, {
-      ...defaultSuiParams,
-      ...params,
-    })
-    this.explorerProviders = params.explorerProviders
-    this.clientUrl = params.clientUrls?.[this.getNetwork()]
+    const mergedParams = { ...defaultSuiParams, ...params }
+    super(SUIChain, mergedParams)
+    this.explorerProviders = mergedParams.explorerProviders
+    this.clientUrls = mergedParams.clientUrls
     this.suiClient = new SuiRpcClient({
-      url: this.clientUrl || getDefaultClientUrl(this.getNetwork()),
+      url: this.clientUrls?.[this.getNetwork()] || getDefaultClientUrl(this.getNetwork()),
     })
   }
 
   public setNetwork(network: Network): void {
     super.setNetwork(network)
     this.suiClient = new SuiRpcClient({
-      url: this.clientUrl || getDefaultClientUrl(this.getNetwork()),
+      url: this.clientUrls?.[this.getNetwork()] || getDefaultClientUrl(this.getNetwork()),
     })
   }
 
@@ -113,9 +111,11 @@ export class Client extends BaseXChainClient {
 
       if (assets && !assets.some((a) => eqAsset(a, tokenAsset))) continue
 
+      const decimals = await this.getCoinDecimals(coinBalance.coinType)
+
       balances.push({
         asset: tokenAsset,
-        amount: baseAmount(coinBalance.totalBalance, SUI_DECIMALS),
+        amount: baseAmount(coinBalance.totalBalance, decimals),
       })
     }
 
@@ -150,32 +150,19 @@ export class Client extends BaseXChainClient {
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const address = params?.address || (await this.getAddressAsync())
+    const limit = params?.limit || 50
 
-    const fromTxs = await this.suiClient.queryTransactionBlocks({
-      filter: { FromAddress: address },
-      options: {
-        showInput: true,
-        showEffects: true,
-        showBalanceChanges: true,
-      },
-      limit: params?.limit || 50,
-    })
+    // Fetch all pages for FromAddress
+    const fromResponses = await this.fetchAllTransactionBlocks({ FromAddress: address }, limit)
 
-    const toTxs = await this.suiClient.queryTransactionBlocks({
-      filter: { ToAddress: address },
-      options: {
-        showInput: true,
-        showEffects: true,
-        showBalanceChanges: true,
-      },
-      limit: params?.limit || 50,
-    })
+    // Fetch all pages for ToAddress
+    const toResponses = await this.fetchAllTransactionBlocks({ ToAddress: address }, limit)
 
     // Merge and deduplicate by digest
     const seen = new Set<string>()
     const allTxResponses: SuiTransactionBlockResponse[] = []
 
-    for (const tx of [...fromTxs.data, ...toTxs.data]) {
+    for (const tx of [...fromResponses, ...toResponses]) {
       if (!seen.has(tx.digest)) {
         seen.add(tx.digest)
         allTxResponses.push(tx)
@@ -199,7 +186,7 @@ export class Client extends BaseXChainClient {
     }
 
     const offset = params?.offset || 0
-    const paged = txs.slice(offset, params?.limit ? offset + params.limit : undefined)
+    const paged = txs.slice(offset, offset + limit)
 
     return {
       txs: paged,
@@ -208,6 +195,8 @@ export class Client extends BaseXChainClient {
   }
 
   public async transfer({ walletIndex, recipient, asset, amount, memo, gasBudget }: TxParams): Promise<string> {
+    if (memo) throw Error('Memo is not supported for SUI transfers')
+
     const keypair = this.getKeypair(walletIndex || 0)
     const tx = new Transaction()
 
@@ -240,10 +229,6 @@ export class Client extends BaseXChainClient {
       tx.transferObjects([splitCoin], recipient)
     }
 
-    if (memo) {
-      // No native memo support in SUI; memo can be stored in tx metadata externally
-    }
-
     if (gasBudget) {
       tx.setGasBudget(gasBudget.amount().toNumber())
     }
@@ -251,7 +236,12 @@ export class Client extends BaseXChainClient {
     const result = await this.suiClient.signAndExecuteTransaction({
       signer: keypair,
       transaction: tx,
+      options: { showEffects: true },
     })
+
+    if (result.effects?.status?.status !== 'success') {
+      throw Error(`Transaction failed: ${result.effects?.status?.error || 'unknown error'}`)
+    }
 
     await this.suiClient.waitForTransaction({ digest: result.digest })
 
@@ -261,23 +251,32 @@ export class Client extends BaseXChainClient {
   public async broadcastTx(txHex: string): Promise<TxHash> {
     const txBytes = Uint8Array.from(Buffer.from(txHex, 'hex'))
     const keypair = this.getKeypair(0)
-    const { signature } = await keypair.signTransaction(txBytes)
+    const { signature, bytes } = await keypair.signTransaction(txBytes)
 
     const result = await this.suiClient.executeTransactionBlock({
-      transactionBlock: txHex,
+      transactionBlock: bytes,
       signature,
+      options: { showEffects: true },
     })
+
+    if (result.effects?.status?.status !== 'success') {
+      throw Error(`Transaction failed: ${result.effects?.status?.error || 'unknown error'}`)
+    }
 
     return result.digest
   }
 
   public async prepareTx({
-    sender,
+    walletIndex,
+    memo,
     recipient,
     asset,
     amount,
     gasBudget,
-  }: TxParams & { sender: Address }): Promise<PreparedTx> {
+  }: TxParams): Promise<PreparedTx> {
+    if (memo) throw Error('Memo is not supported for SUI transfers')
+
+    const sender = await this.getAddressAsync(walletIndex ?? 0)
     const tx = new Transaction()
     tx.setSender(sender)
 
@@ -325,6 +324,45 @@ export class Client extends BaseXChainClient {
     return Ed25519Keypair.fromSecretKey(derived.privateKey)
   }
 
+  private async getCoinDecimals(coinType: string): Promise<number> {
+    if (coinType === SUI_TYPE_TAG) return SUI_DECIMALS
+    try {
+      const metadata = await this.suiClient.getCoinMetadata({ coinType })
+      return metadata?.decimals ?? SUI_DECIMALS
+    } catch {
+      return SUI_DECIMALS
+    }
+  }
+
+  private async fetchAllTransactionBlocks(
+    filter: { FromAddress: string } | { ToAddress: string },
+    maxResults: number,
+  ): Promise<SuiTransactionBlockResponse[]> {
+    const results: SuiTransactionBlockResponse[] = []
+    let cursor: string | null | undefined = undefined
+    const pageSize = Math.min(maxResults, 50)
+
+    do {
+      const page = await this.suiClient.queryTransactionBlocks({
+        filter,
+        options: {
+          showInput: true,
+          showEffects: true,
+          showBalanceChanges: true,
+        },
+        limit: pageSize,
+        cursor: cursor ?? undefined,
+      })
+
+      results.push(...page.data)
+      cursor = page.nextCursor
+
+      if (!page.hasNextPage || results.length >= maxResults) break
+    } while (cursor)
+
+    return results.slice(0, maxResults)
+  }
+
   private parseTransaction(txResponse: SuiTransactionBlockResponse): Tx {
     const from: TxFrom[] = []
     const to: TxTo[] = []
@@ -332,6 +370,7 @@ export class Client extends BaseXChainClient {
     if (txResponse.balanceChanges) {
       for (const change of txResponse.balanceChanges) {
         const isSui = change.coinType === SUI_TYPE_TAG
+        const decimals = isSui ? SUI_DECIMALS : SUI_DECIMALS // Will use cached metadata in future
         const asset = isSui ? SUIAsset : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(change.coinType)}`) as TokenAsset)
         const changeAmount = BigInt(change.amount)
 
@@ -340,7 +379,7 @@ export class Client extends BaseXChainClient {
             from: change.owner && typeof change.owner === 'object' && 'AddressOwner' in change.owner
               ? change.owner.AddressOwner
               : '',
-            amount: baseAmount((-changeAmount).toString(), SUI_DECIMALS),
+            amount: baseAmount((-changeAmount).toString(), decimals),
             asset,
           })
         } else if (changeAmount > BigInt(0)) {
@@ -348,7 +387,7 @@ export class Client extends BaseXChainClient {
             to: change.owner && typeof change.owner === 'object' && 'AddressOwner' in change.owner
               ? change.owner.AddressOwner
               : '',
-            amount: baseAmount(changeAmount.toString(), SUI_DECIMALS),
+            amount: baseAmount(changeAmount.toString(), decimals),
             asset,
           })
         }
