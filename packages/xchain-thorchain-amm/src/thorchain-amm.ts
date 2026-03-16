@@ -13,6 +13,7 @@ import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
 import { Client as LtcClient, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
+import { Client as ZecClient, defaultZECParams } from '@xchainjs/xchain-zcash'
 import {
   AssetRuneNative,
   Client as ThorClient,
@@ -106,6 +107,7 @@ export class ThorchainAMM {
       SOL: new SOLClient({ ...defaultSolanaParams, network: Network.Mainnet }),
       SUI: new SUIClient({ ...defaultSuiParams, network: Network.Mainnet }),
       TRON: new TronClient({ ...defaultTRONParams, network: Network.Mainnet }),
+      ZEC: new ZecClient({ ...defaultZECParams, network: Network.Mainnet }),
     }),
   ) {
     this.thorchainQuery = thorchainQuery
