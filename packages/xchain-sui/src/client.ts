@@ -145,7 +145,7 @@ export class Client extends BaseXChainClient {
       },
     })
 
-    return this.parseTransaction(txResponse)
+    return await this.parseTransaction(txResponse)
   }
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
@@ -179,7 +179,7 @@ export class Client extends BaseXChainClient {
     const txs: Tx[] = []
     for (const txResponse of allTxResponses) {
       try {
-        txs.push(this.parseTransaction(txResponse))
+        txs.push(await this.parseTransaction(txResponse))
       } catch {
         // Skip unparseable transactions
       }
@@ -363,30 +363,32 @@ export class Client extends BaseXChainClient {
     return results.slice(0, maxResults)
   }
 
-  private parseTransaction(txResponse: SuiTransactionBlockResponse): Tx {
+  private async parseTransaction(txResponse: SuiTransactionBlockResponse): Promise<Tx> {
     const from: TxFrom[] = []
     const to: TxTo[] = []
 
     if (txResponse.balanceChanges) {
       for (const change of txResponse.balanceChanges) {
         const isSui = change.coinType === SUI_TYPE_TAG
-        const decimals = isSui ? SUI_DECIMALS : SUI_DECIMALS // Will use cached metadata in future
-        const asset = isSui ? SUIAsset : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(change.coinType)}`) as TokenAsset)
+        const decimals = await this.getCoinDecimals(change.coinType)
+        const asset = isSui
+          ? SUIAsset
+          : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(change.coinType)}`) as TokenAsset)
         const changeAmount = BigInt(change.amount)
+        const ownerAddress =
+          change.owner && typeof change.owner === 'object' && 'AddressOwner' in change.owner
+            ? change.owner.AddressOwner
+            : ''
 
         if (changeAmount < BigInt(0)) {
           from.push({
-            from: change.owner && typeof change.owner === 'object' && 'AddressOwner' in change.owner
-              ? change.owner.AddressOwner
-              : '',
+            from: ownerAddress,
             amount: baseAmount((-changeAmount).toString(), decimals),
             asset,
           })
         } else if (changeAmount > BigInt(0)) {
           to.push({
-            to: change.owner && typeof change.owner === 'object' && 'AddressOwner' in change.owner
-              ? change.owner.AddressOwner
-              : '',
+            to: ownerAddress,
             amount: baseAmount(changeAmount.toString(), decimals),
             asset,
           })
