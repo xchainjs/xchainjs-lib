@@ -21,6 +21,7 @@ const SWAP_SUPPORTED_CHAINS: string[] = [
   'MAYA',
   'KUJI',
   'SOL',
+  'SUI',
 ]
 
 interface UseSwapResult {

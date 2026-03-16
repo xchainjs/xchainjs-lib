@@ -25,6 +25,7 @@ import {
   AssetMAYA,
   AssetXRP,
   AssetSOL,
+  AssetSUI,
   AssetRuneNative,
   BASEChain,
   BCHChain,
@@ -39,6 +40,7 @@ import {
   THORChain,
   XRPChain,
   SOLChain,
+  SUIChain,
   TRONChain,
   AssetTRON,
 } from './const'
@@ -93,6 +95,8 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetXRP
     case SOLChain:
       return AssetSOL
+    case SUIChain:
+      return AssetSUI
     case TRONChain:
       return AssetTRON
     default:
@@ -164,6 +168,8 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetXRP)
     case SOLChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetSOL)
+    case SUIChain:
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetSUI)
     case TRONChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetTRON)
   }
@@ -209,6 +215,8 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetXRP)
     case SOLChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetSOL)
+    case SUIChain:
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetSUI)
     case TRONChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetTRON)
   }
@@ -250,6 +258,8 @@ export const getChain = (chain: string): Chain => {
       return XRPChain
     case 'SOL':
       return SOLChain
+    case 'SUI':
+      return SUIChain
     case 'TRON':
       return TRONChain
     default:

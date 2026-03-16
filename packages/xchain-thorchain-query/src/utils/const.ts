@@ -15,6 +15,7 @@ export const AssetBNB = assetFromStringEx('BSC.BNB') as Asset
 export const AssetBASE = assetFromStringEx('BASE.ETH') as Asset
 export const AssetXRP = assetFromStringEx('XRP.XRP') as Asset
 export const AssetSOL = assetFromStringEx('SOL.SOL') as Asset
+export const AssetSUI = assetFromStringEx('SUI.SUI') as Asset
 export const AssetTRON = assetFromStringEx('TRON.TRX') as Asset
 
 export const BNBChain = 'BNB'
@@ -31,6 +32,7 @@ export const THORChain = 'THOR'
 export const BASEChain = 'BASE'
 export const XRPChain = 'XRP'
 export const SOLChain = 'SOL'
+export const SUIChain = 'SUI'
 export const TRONChain = 'TRON'
 
 export const THORCHAIN_DECIMAL = 8

@@ -8,6 +8,7 @@ import { AssetATOM, Client as GaiaClient, GAIAChain } from '@xchainjs/xchain-cos
 import { Client as DogeClient, DOGEChain, defaultDogeParams } from '@xchainjs/xchain-doge'
 import { Client as XRPClient, XRPChain, defaultXRPParams } from '@xchainjs/xchain-ripple'
 import { Client as SOLClient, SOLChain, defaultSolanaParams } from '@xchainjs/xchain-solana'
+import { Client as SUIClient, SUIChain, defaultSuiParams } from '@xchainjs/xchain-sui'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as TronClient, TRONChain, defaultTRONParams } from '@xchainjs/xchain-tron'
 import { Client as LtcClient, LTCChain, defaultLtcParams } from '@xchainjs/xchain-litecoin'
@@ -63,7 +64,7 @@ export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCrypto
  * @returns true if chain is EVM, otherwise, false
  */
 export const isProtocolBFTChain = (chain: Chain): boolean => {
-  return [AssetATOM.chain, SOLChain].includes(chain)
+  return [AssetATOM.chain, SOLChain, SUIChain].includes(chain)
 }
 
 export const validateAddress = (network: Network, chain: Chain, address: Address): boolean => {
@@ -92,6 +93,8 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new XRPClient({ ...defaultXRPParams, network }).validateAddress(address)
     case SOLChain:
       return new SOLClient({ ...defaultSolanaParams, network }).validateAddress(address)
+    case SUIChain:
+      return new SUIClient({ ...defaultSuiParams, network }).validateAddress(address)
     case TRONChain:
       return new TronClient({ ...defaultTRONParams, network }).validateAddress(address)
     default:
