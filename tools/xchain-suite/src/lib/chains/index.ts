@@ -29,6 +29,7 @@ export const SUPPORTED_CHAINS: ChainConfig[] = [
   // Other Chains
   { id: 'XMR', name: 'Monero', symbol: 'XMR', category: 'other', decimals: 12 },
   { id: 'SOL', name: 'Solana', symbol: 'SOL', category: 'other', decimals: 9 },
+  { id: 'SUI', name: 'Sui', symbol: 'SUI', category: 'other', decimals: 9 },
   { id: 'XRD', name: 'Radix', symbol: 'XRD', category: 'other', decimals: 18 },
   { id: 'ADA', name: 'Cardano', symbol: 'ADA', category: 'other', decimals: 6 },
   { id: 'XRP', name: 'Ripple', symbol: 'XRP', category: 'other', decimals: 6 },

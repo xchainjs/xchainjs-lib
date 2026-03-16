@@ -22,6 +22,7 @@ export const EXPLORER_TX_URLS: Record<string, string> = {
   KUJI: 'https://finder.kujira.network/kaiyo-1/tx/',
   // Other chains
   SOL: 'https://solscan.io/tx/',
+  SUI: 'https://suiscan.xyz/mainnet/tx/',
   XRD: 'https://dashboard.radixdlt.com/transaction/',
   ADA: 'https://cardanoscan.io/transaction/',
 }
