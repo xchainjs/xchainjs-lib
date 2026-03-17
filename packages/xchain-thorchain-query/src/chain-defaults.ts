@@ -66,6 +66,10 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0, // No block reward for TRON
     avgBlockTimeInSecs: 3, // Average block time for TRON in seconds
   },
+  ZEC: {
+    blockReward: 1.5625, // Block reward for Zcash (post-Canopy halving)
+    avgBlockTimeInSecs: 75, // Average block time for Zcash in seconds
+  },
 }
 
 // Export the DefaultChainAttributes object

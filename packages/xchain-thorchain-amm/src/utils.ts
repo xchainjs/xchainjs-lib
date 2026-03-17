@@ -11,6 +11,7 @@ import { Client as SOLClient, SOLChain, defaultSolanaParams } from '@xchainjs/xc
 import { Client as SUIClient, SUIChain, defaultSuiParams } from '@xchainjs/xchain-sui'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as TronClient, TRONChain, defaultTRONParams } from '@xchainjs/xchain-tron'
+import { Client as ZecClient, ZECChain, defaultZECParams } from '@xchainjs/xchain-zcash'
 import { Client as LtcClient, LTCChain, defaultLtcParams } from '@xchainjs/xchain-litecoin'
 import { Client as ThorClient, THORChain, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
 import { CompatibleAsset } from '@xchainjs/xchain-thorchain-query'
@@ -97,6 +98,8 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new SUIClient({ ...defaultSuiParams, network }).validateAddress(address)
     case TRONChain:
       return new TronClient({ ...defaultTRONParams, network }).validateAddress(address)
+    case ZECChain:
+      return new ZecClient({ ...defaultZECParams, network }).validateAddress(address)
     default:
       throw Error('Unsupported chain')
   }
