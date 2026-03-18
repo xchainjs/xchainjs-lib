@@ -9,7 +9,6 @@ interface DepthHistoryItem {
   assetDepth: string
   assetPrice: string
   assetPriceUSD: string
-  // OHLC fields added in recent Midgard versions
   liquidityUnits: string
   runeDepth: string
 }
@@ -23,17 +22,23 @@ interface DepthHistoryResponse {
 }
 
 function getMidgardUrl(pool: string): string {
-  // MAYA pools use Maya Midgard
   if (pool.startsWith('MAYA.')) return MAYA_MIDGARD
   return THORCHAIN_MIDGARD
 }
 
-// Map pool string to the actual pool identifier for Midgard
+// Native assets can't be queried directly via depth history.
+// Use BTC.BTC pool and derive RUNE price from runeDepth/assetDepth.
+const NATIVE_POOL_PROXY: Record<string, string> = {
+  'THOR.RUNE': 'BTC.BTC',
+  'MAYA.CACAO': 'ETH.ETH',
+}
+
 function getPoolId(pool: string): string {
-  // For native assets like THOR.RUNE, we need a synth pool approach
-  // Midgard depth history works on pools like BTC.BTC, ETH.ETH etc.
-  // For RUNE pricing we use BTC.BTC pool and derive from rune depth
-  return pool
+  return NATIVE_POOL_PROXY[pool] ?? pool
+}
+
+function isNativeAsset(pool: string): boolean {
+  return pool in NATIVE_POOL_PROXY
 }
 
 export async function fetchDepthHistory(
@@ -44,6 +49,7 @@ export async function fetchDepthHistory(
   const midgardUrl = getMidgardUrl(pool)
   const midgardInterval = MIDGARD_INTERVALS[interval]
   const poolId = getPoolId(pool)
+  const native = isNativeAsset(pool)
 
   const url = `${midgardUrl}/history/depths/${poolId}?interval=${midgardInterval}&count=${Math.min(count, 400)}`
   const res = await fetch(url)
@@ -52,15 +58,25 @@ export async function fetchDepthHistory(
   const data: DepthHistoryResponse = await res.json()
 
   return data.intervals.map((item) => {
-    const price = parseFloat(item.assetPriceUSD)
+    let price: number
+    if (native) {
+      // For RUNE: price = (assetDepth * assetPriceUSD) / runeDepth
+      const assetDepth = parseFloat(item.assetDepth)
+      const runeDepth = parseFloat(item.runeDepth)
+      const assetPriceUSD = parseFloat(item.assetPriceUSD)
+      price = runeDepth > 0 ? (assetDepth * assetPriceUSD) / runeDepth : 0
+    } else {
+      price = parseFloat(item.assetPriceUSD)
+    }
     const time = Math.floor(parseInt(item.startTime))
     return {
       time,
       open: price,
-      high: price, // Midgard depth history doesn't have OHLC, just a single price
+      high: price,
       low: price,
       close: price,
-      volume: parseFloat(item.assetDepth),
+      // Midgard depth history does not provide traded volume
+      volume: 0,
     }
   })
 }
@@ -77,7 +93,6 @@ export async function fetchMidgard24hrStats(pool: string): Promise<TickerStats> 
   const priceChangePercent = first.open > 0 ? (priceChange / first.open) * 100 : 0
   const high = Math.max(...candles.map((c) => c.high))
   const low = Math.min(...candles.map((c) => c.low))
-  const volume = candles.reduce((sum, c) => sum + c.volume, 0)
 
-  return { priceChange, priceChangePercent, high, low, volume }
+  return { priceChange, priceChangePercent, high, low, volume: 0 }
 }

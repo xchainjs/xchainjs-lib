@@ -8,16 +8,27 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>()
-const CACHE_TTL = 60_000 // 60s
+
+// Cache TTL per interval — shorter for frequently polled intervals
+const CACHE_TTL: Record<TimeInterval, number> = {
+  '1m': 8_000,
+  '5m': 25_000,
+  '15m': 55_000,
+  '1h': 55_000,
+  '4h': 55_000,
+  '1D': 55_000,
+  '1W': 55_000,
+}
 
 export async function fetchKlines(
   symbol: string,
   interval: TimeInterval,
   limit = 500
 ): Promise<OHLCVCandle[]> {
-  const cacheKey = `${symbol}-${interval}`
+  const cacheKey = `${symbol}-${interval}-${limit}`
   const cached = cache.get(cacheKey)
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+  const ttl = CACHE_TTL[interval]
+  if (cached && Date.now() - cached.timestamp < ttl) {
     return cached.data
   }
 
@@ -44,8 +55,21 @@ export async function fetchLatestCandle(
   symbol: string,
   interval: TimeInterval
 ): Promise<OHLCVCandle> {
-  const candles = await fetchKlines(symbol, interval, 1)
-  return candles[0]
+  // Bypass cache — always fetch fresh for single candle
+  const binanceInterval = BINANCE_INTERVALS[interval]
+  const url = `${BASE_URL}/klines?symbol=${symbol}&interval=${binanceInterval}&limit=1`
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Binance API error: ${res.status}`)
+  const raw = await res.json()
+  const k = raw[0]
+  return {
+    time: Math.floor((k[0] as number) / 1000),
+    open: parseFloat(k[1] as string),
+    high: parseFloat(k[2] as string),
+    low: parseFloat(k[3] as string),
+    close: parseFloat(k[4] as string),
+    volume: parseFloat(k[5] as string),
+  }
 }
 
 export async function fetch24hrTicker(symbol: string): Promise<TickerStats> {

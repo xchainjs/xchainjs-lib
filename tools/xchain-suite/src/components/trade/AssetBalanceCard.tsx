@@ -17,15 +17,20 @@ const ASSET_TO_CHAIN: Record<string, string> = {
   KUJI: 'KUJI', DASH: 'DASH', ZEC: 'ZEC', XRD: 'XRD', XMR: 'XMR',
 }
 
+// Map UI asset names to canonical native asset symbols
+const CANONICAL_SYMBOL: Record<string, string> = {
+  GAIA: 'ATOM', THOR: 'RUNE', MAYA: 'CACAO',
+}
+
 export function AssetBalanceCard({ asset }: Props) {
   const { isConnected } = useWallet()
   const chainId = ASSET_TO_CHAIN[asset] ?? asset
+  const nativeSymbol = CANONICAL_SYMBOL[asset] ?? asset
   const { client } = useChainClient(chainId)
   const [balance, setBalance] = useState<string | null>(null)
   const [balanceLoading, setBalanceLoading] = useState(false)
 
-  // Construct a minimal asset object for price lookup
-  const assetObj = { chain: chainId, symbol: asset, ticker: asset, type: 0 as const }
+  const assetObj = { chain: chainId, symbol: nativeSymbol, ticker: nativeSymbol, type: 0 as const }
   const { usdValueFormatted, loading: priceLoading } = useBalanceUsdValue(balance, assetObj)
 
   useEffect(() => {
@@ -44,7 +49,7 @@ export function AssetBalanceCard({ asset }: Props) {
         if (cancelled) return
 
         // Find native asset balance
-        const native = balances.find((b) => b.asset.symbol === asset || b.asset.ticker === asset)
+        const native = balances.find((b) => b.asset.symbol === nativeSymbol || b.asset.ticker === nativeSymbol)
         if (native) {
           setBalance(baseToAsset(native.amount).amount().toFixed(6))
         } else {

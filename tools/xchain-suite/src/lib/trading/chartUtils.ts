@@ -69,6 +69,10 @@ export function getDataSource(asset: string): 'binance' | 'midgard' {
   return BINANCE_SYMBOLS[asset] ? 'binance' : 'midgard'
 }
 
+export function getActualMidgardInterval(interval: TimeInterval): string {
+  return MIDGARD_INTERVALS[interval]
+}
+
 // All tradeable assets
 export const TRADE_ASSETS = [
   'BTC', 'ETH', 'SOL', 'AVAX', 'DOGE', 'LTC', 'BCH', 'XRP', 'ADA',
@@ -111,5 +115,9 @@ export function loadTrendLines(asset: string): TrendLine[] {
 }
 
 export function saveTrendLines(asset: string, lines: TrendLine[]) {
-  localStorage.setItem(TREND_LINE_KEY_PREFIX + asset, JSON.stringify(lines))
+  try {
+    localStorage.setItem(TREND_LINE_KEY_PREFIX + asset, JSON.stringify(lines))
+  } catch {
+    // Best-effort persistence
+  }
 }

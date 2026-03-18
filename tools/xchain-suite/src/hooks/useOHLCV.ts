@@ -32,7 +32,8 @@ export function useOHLCV(asset: string, interval: TimeInterval): UseOHLCVReturn 
         const source = getDataSource(asset)
 
         if (source === 'binance') {
-          const symbol = getBinanceSymbol(asset)!
+          const symbol = getBinanceSymbol(asset)
+          if (!symbol) throw new Error(`No Binance symbol mapping for ${asset}`)
           const [klines, tickerData] = await Promise.all([
             fetchKlines(symbol, interval),
             fetch24hrTicker(symbol),

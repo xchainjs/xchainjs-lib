@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { TimeInterval, TrendLine, loadTrendLines, saveTrendLines, getDataSource } from '../lib/trading/chartUtils'
+import { TimeInterval, TrendLine, loadTrendLines, saveTrendLines, getDataSource, getActualMidgardInterval } from '../lib/trading/chartUtils'
 import { useOHLCV } from '../hooks/useOHLCV'
 import { useTechnicalIndicators, IndicatorState } from '../hooks/useTechnicalIndicators'
 import { AssetPairSelector } from '../components/trade/AssetPairSelector'
@@ -26,13 +26,15 @@ function formatPrice(p: number): string {
   return p.toLocaleString(undefined, { maximumFractionDigits: 6 })
 }
 
+const DEFAULT_ASSET = 'BTC'
+
 export default function TradePage() {
-  const [asset, setAsset] = useState('BTC')
+  const [asset, setAsset] = useState(DEFAULT_ASSET)
   const [interval, setInterval] = useState<TimeInterval>('1h')
   const [indicatorState, setIndicatorState] = useState<IndicatorState>({
     sma20: false, sma50: false, ema12: false, ema26: false, rsi: false, macd: false,
   })
-  const [trendLines, setTrendLines] = useState<TrendLine[]>(() => loadTrendLines('BTC'))
+  const [trendLines, setTrendLines] = useState<TrendLine[]>(() => loadTrendLines(DEFAULT_ASSET))
 
   const { candles, ticker, loading, error, refresh } = useOHLCV(asset, interval)
   const indicators = useTechnicalIndicators(candles, indicatorState)
@@ -83,8 +85,8 @@ export default function TradePage() {
             </button>
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">
-              {source === 'binance' ? 'Binance' : 'Midgard'}
+            <span className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded" title={source === 'midgard' ? `Actual interval: ${getActualMidgardInterval(interval)}` : undefined}>
+              {source === 'binance' ? 'Binance' : `Midgard (${getActualMidgardInterval(interval)})`}
             </span>
             {ticker && (
               <>

@@ -23,12 +23,20 @@ export function TrendLineManager({ lines, onAdd, onRemove, onClear }: Props) {
     e.preventDefault()
     if (!startPrice || !endPrice || !startDate || !endDate) return
 
+    const parsedStartPrice = parseFloat(startPrice)
+    const parsedEndPrice = parseFloat(endPrice)
+    const parsedStartTime = Math.floor(new Date(startDate).getTime() / 1000)
+    const parsedEndTime = Math.floor(new Date(endDate).getTime() / 1000)
+
+    if (!Number.isFinite(parsedStartPrice) || !Number.isFinite(parsedEndPrice) ||
+        isNaN(parsedStartTime) || isNaN(parsedEndTime)) return
+
     onAdd({
       id: crypto.randomUUID(),
-      startTime: Math.floor(new Date(startDate).getTime() / 1000),
-      startPrice: parseFloat(startPrice),
-      endTime: Math.floor(new Date(endDate).getTime() / 1000),
-      endPrice: parseFloat(endPrice),
+      startTime: parsedStartTime,
+      startPrice: parsedStartPrice,
+      endTime: parsedEndTime,
+      endPrice: parsedEndPrice,
       color,
     })
 
@@ -111,6 +119,8 @@ export function TrendLineManager({ lines, onAdd, onRemove, onClear }: Props) {
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
+                  aria-label={`Select color ${c}`}
+                  aria-pressed={color === c}
                   className={`w-5 h-5 rounded-full border-2 transition-colors ${
                     color === c ? 'border-gray-900 dark:border-white' : 'border-transparent'
                   }`}

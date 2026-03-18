@@ -10,7 +10,7 @@ export function QuickTradePanel({ asset }: Props) {
 
   return (
     <button
-      onClick={() => navigate('/swap')}
+      onClick={() => navigate('/swap', { state: { fromAsset: asset } })}
       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
     >
       <ArrowRightLeft className="w-4 h-4" />

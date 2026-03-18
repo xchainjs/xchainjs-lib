@@ -61,6 +61,8 @@ function TradeOrderRow({ entry }: { entry: SwapHistoryEntry }) {
             href={entry.explorerUrl}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Open transaction in explorer"
+            title="Open transaction in explorer"
             className="text-gray-400 hover:text-blue-500 transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
