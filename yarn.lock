@@ -9167,6 +9167,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fancy-canvas@npm:2.1.0":
+  version: 2.1.0
+  resolution: "fancy-canvas@npm:2.1.0"
+  checksum: 10c0/2b863b1548214ac793a5104154be389dbca6847c53c8bda88e4309f14bcdb498f4da21e368b573f3ab5f458d3b47c3f0ef731a7b90c8264b23c1cf0bfc9d1da3
+  languageName: node
+  linkType: hard
+
 "fast-deep-equal@npm:^3.1.1, fast-deep-equal@npm:^3.1.3":
   version: 3.1.3
   resolution: "fast-deep-equal@npm:3.1.3"
@@ -11593,6 +11600,15 @@ __metadata:
   dependencies:
     libsodium-sumo: "npm:^0.7.13"
   checksum: 10c0/51a151d0f73418632dcf9cf0184b14d8eb6e16b9a3f01a652c7401c6d1bf8ead4f5ce40a4f00bd4754c5719a7a5fb71d6125691896aeb7a9c1abcfe4b73afc02
+  languageName: node
+  linkType: hard
+
+"lightweight-charts@npm:^4.2.0":
+  version: 4.2.3
+  resolution: "lightweight-charts@npm:4.2.3"
+  dependencies:
+    fancy-canvas: "npm:2.1.0"
+  checksum: 10c0/8c3c7aa3e3a5fe980f38d99d2410893cb8baf13c11406a6edde6860b594b024fe7830db8fc5e85e4a71ec9363ee30180ae42a2e43dff5dfac624f05dd393cb64
   languageName: node
   linkType: hard
 
@@ -16860,6 +16876,7 @@ __metadata:
     autoprefixer: "npm:^10.4.17"
     buffer: "npm:^6.0.3"
     jsdom: "npm:^24.0.0"
+    lightweight-charts: "npm:^4.2.0"
     lucide-react: "npm:^0.330.0"
     node-stdlib-browser: "npm:^1.2.0"
     postcss: "npm:^8.4.35"

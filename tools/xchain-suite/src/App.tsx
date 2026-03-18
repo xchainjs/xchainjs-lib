@@ -19,6 +19,7 @@ const MAYANamePage = lazy(() => import('./pages/MAYANamePage'))
 const THORNamePage = lazy(() => import('./pages/THORNamePage'))
 const RouterApprovalPage = lazy(() => import('./pages/RouterApprovalPage'))
 const PortfolioPage = lazy(() => import('./pages/PortfolioPage'))
+const TradePage = lazy(() => import('./pages/TradePage'))
 
 function PageLoader({ message }: { message: string }) {
   return (
@@ -134,6 +135,14 @@ export default function App() {
                   element={
                     <Suspense fallback={<PageLoader message="Loading router approval..." />}>
                       <RouterApprovalPage />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="/trade"
+                  element={
+                    <Suspense fallback={<PageLoader message="Loading trade charts..." />}>
+                      <TradePage />
                     </Suspense>
                   }
                 />

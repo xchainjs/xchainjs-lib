@@ -47,6 +47,7 @@
     "@xchainjs/xchain-wallet": "workspace:*",
     "@xchainjs/xchain-zcash": "workspace:*",
     "buffer": "^6.0.3",
+    "lightweight-charts": "^4.2.0",
     "lucide-react": "^0.330.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
   ArrowRightLeft, Droplets, Server, Repeat, Coins, AtSign, Shield,
-  BarChart3, Tag, CalendarClock, PanelLeftClose, PanelLeftOpen, LayoutDashboard,
+  BarChart3, Tag, CalendarClock, PanelLeftClose, PanelLeftOpen, LayoutDashboard, CandlestickChart,
 } from 'lucide-react'
 
 interface ChainGroup {
@@ -60,6 +60,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/portfolio', icon: LayoutDashboard, label: 'Portfolio' },
+  { to: '/trade', icon: CandlestickChart, label: 'Trade' },
   { to: '/swap', icon: ArrowRightLeft, label: 'Swap' },
   { to: '/recurring', icon: CalendarClock, label: 'Recurring Swaps' },
   { to: '/pools', icon: BarChart3, label: 'Pools' },
