@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.1.15
+
+### Patch Changes
+
+- Updated dependencies [a470c34]
+  - @xchainjs/xchain-radix@2.0.12
+  - @xchainjs/xchain-wallet@2.0.25
+
 ## 4.1.14
 
 ### Patch Changes

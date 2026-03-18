@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3
+
+### Patch Changes
+
+- 2ca71db: Fix RPC rate limiting in getTransactions by respecting limit/offset params and defaulting to 10 signatures instead of 1000
+
 ## 1.1.2
 
 ### Patch Changes
