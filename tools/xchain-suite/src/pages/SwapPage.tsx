@@ -73,7 +73,7 @@ export default function SwapPage() {
   // Tracking state
   const [isTrackingOpen, setIsTrackingOpen] = useState(false)
   const [trackingTxHash, setTrackingTxHash] = useState<string | null>(null)
-  const [trackingProtocol, setTrackingProtocol] = useState<'Thorchain' | 'Mayachain' | 'Chainflip'>('Thorchain')
+  const [trackingProtocol, setTrackingProtocol] = useState<'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'>('Thorchain')
   const [trackingExplorerUrl, setTrackingExplorerUrl] = useState<string | undefined>()
   const [trackingDepositChannelId, setTrackingDepositChannelId] = useState<string | undefined>()
 
@@ -306,9 +306,9 @@ export default function SwapPage() {
           destinationAddress,
           protocol: selectedQuote.protocol,
           slippageToleranceBps: slippageBps,
-          // Streaming swap parameters (not applicable for Chainflip)
+          // Streaming swap parameters (only for THORChain/MAYAChain)
           ...(isStreaming &&
-            selectedQuote.protocol !== 'Chainflip' && {
+            selectedQuote.protocol !== 'Chainflip' && selectedQuote.protocol !== 'OneClick' && {
               streamingInterval: parseInt(streamingInterval) || 1,
               streamingQuantity: parseInt(streamingQuantity) || 0,
             }),

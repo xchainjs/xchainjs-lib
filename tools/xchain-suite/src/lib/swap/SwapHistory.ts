@@ -8,7 +8,7 @@ export interface SwapHistoryEntry {
   toAsset: string // e.g. "ETH.ETH"
   inputAmount: string
   expectedOutput: string
-  protocol: 'Thorchain' | 'Mayachain' | 'Chainflip'
+  protocol: 'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'
   slippageBps: number
   txHash: string
   explorerUrl: string

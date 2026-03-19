@@ -15,7 +15,7 @@ export interface UseRecurringSwapsResult {
     fromAsset: ChainAsset
     toAsset: ChainAsset
     amount: string
-    protocol: 'Thorchain' | 'Mayachain' | 'Chainflip'
+    protocol: 'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'
     interval: RecurringInterval
     maxSlippageBps: number
     streaming?: boolean

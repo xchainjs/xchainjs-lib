@@ -2,6 +2,7 @@ import { Config, IProtocol, Protocol, ProtocolConfig } from '../types'
 
 import { ChainflipProtocol } from './chainflip'
 import { MayachainProtocol } from './mayachain'
+import { OneClickProtocol } from './oneclick'
 import { ThorchainProtocol } from './thorchain'
 
 const getProtocolConfig = (name: Protocol, configuration: Config): ProtocolConfig => {
@@ -12,6 +13,7 @@ const getProtocolConfig = (name: Protocol, configuration: Config): ProtocolConfi
     network: configuration.network,
     affiliateBrokers: configuration.affiliateBrokers,
     brokerUrl: configuration.brokerUrl,
+    oneClickApiKey: configuration.oneClickApiKey,
   }
 }
 
@@ -25,6 +27,8 @@ export class ProtocolFactory {
         return new MayachainProtocol(protocolConfig)
       case 'Chainflip':
         return new ChainflipProtocol(protocolConfig)
+      case 'OneClick':
+        return new OneClickProtocol(protocolConfig)
     }
   }
 }
