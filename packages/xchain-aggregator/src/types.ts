@@ -33,7 +33,7 @@ type Fees = {
 /**
  * Protocols supported by the Aggregator
  */
-type Protocol = 'Thorchain' | 'Mayachain' | 'Chainflip'
+type Protocol = 'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'
 
 /**
  * Affiliate config for the aggregator
@@ -80,6 +80,10 @@ export type Config = Partial<{
    * Broker URL for Chainflip protocol
    */
   brokerUrl: string
+  /**
+   * API key for OneClick (NEAR Intents) protocol
+   */
+  oneClickApiKey: string
 }>
 
 /**
@@ -95,6 +99,7 @@ export type ProtocolConfig = Partial<{
     commissionBps: number
   }[]
   brokerUrl: string
+  oneClickApiKey: string
 }>
 
 /**
