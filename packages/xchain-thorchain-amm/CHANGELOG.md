@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.0.33
+
+### Patch Changes
+
+- Updated dependencies [2ca71db]
+  - @xchainjs/xchain-solana@1.1.3
+  - @xchainjs/xchain-wallet@2.0.25
+
 ## 3.0.32
 
 ### Patch Changes

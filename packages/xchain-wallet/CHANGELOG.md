@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.25
+
+### Patch Changes
+
+- Updated dependencies [a470c34]
+  - @xchainjs/xchain-radix@2.0.12
+
 ## 2.0.24
 
 ### Patch Changes

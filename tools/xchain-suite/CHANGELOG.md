@@ -1,5 +1,17 @@
 # testing-gui
 
+## 1.0.9
+
+### Patch Changes
+
+- Updated dependencies [2ca71db]
+- Updated dependencies [a470c34]
+  - @xchainjs/xchain-solana@1.1.3
+  - @xchainjs/xchain-radix@2.0.12
+  - @xchainjs/xchain-thorchain-amm@3.0.33
+  - @xchainjs/xchain-mayachain-amm@4.1.15
+  - @xchainjs/xchain-wallet@2.0.25
+
 ## 1.0.8
 
 ### Patch Changes
