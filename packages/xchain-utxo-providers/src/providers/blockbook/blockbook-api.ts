@@ -87,8 +87,13 @@ export const broadcastTx = async ({
   baseUrl: string
   txHex: string
 }): Promise<TxHash> => {
-  const url = `${baseUrl}/sendtx/${txHex}`
-  const response = await axios.get(url, { headers: makeHeaders(apiKey) })
+  const url = `${baseUrl}/sendtx/`
+  const response = await axios.post(url, txHex, {
+    headers: {
+      ...makeHeaders(apiKey),
+      'Content-Type': 'application/json',
+    },
+  })
   return (response.data as BroadcastDTO).result
 }
 
