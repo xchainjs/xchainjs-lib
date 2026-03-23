@@ -113,7 +113,6 @@ export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
 // Docs: https://nownodes.io/nodes/litecoin-ltc
 const mainnetLtcBlockbookProvider = new BlockbookProvider(
   'https://ltcbook.nownodes.io/api/v2',
-  LTCChain,
   AssetLTC,
   LTC_DECIMAL,
   process.env.NOWNODES_API_KEY || '',

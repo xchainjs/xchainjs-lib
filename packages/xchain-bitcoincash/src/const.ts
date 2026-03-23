@@ -83,7 +83,6 @@ export const HaskoinDataProviders: UtxoOnlineDataProviders = {
 // Docs: https://nownodes.io/nodes/bch
 const mainnetBchBlockbookProvider = new BlockbookProvider(
   'https://bchbook.nownodes.io/api/v2',
-  BCHChain,
   AssetBCH,
   BCH_DECIMAL,
   process.env.NOWNODES_API_KEY || '',

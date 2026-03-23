@@ -1,5 +1,5 @@
 import { FeeOption, FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
-import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+import { Address, Asset, baseAmount } from '@xchainjs/xchain-util'
 
 import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '../../types'
 
@@ -15,7 +15,6 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
 
   constructor(
     baseUrl: string,
-    _chain: Chain,
     asset: Asset,
     assetDecimals: number,
     apiKey?: string,

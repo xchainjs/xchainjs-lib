@@ -114,7 +114,6 @@ export const blockcypherDataProviders = {
 // Docs: https://nownodes.io/nodes/dogecoin-doge
 const mainnetDogeBlockbookProvider = new BlockbookProvider(
   'https://dogebook.nownodes.io/api/v2',
-  DOGEChain,
   AssetDOGE,
   DOGE_DECIMAL,
   process.env.NOWNODES_API_KEY || '',
