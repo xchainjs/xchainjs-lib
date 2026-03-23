@@ -64,6 +64,11 @@ export type TxsPage = BaseTxsPage & {
 
 export interface UtxoOnlineDataProvider {
   /**
+   * Optional API key for hosted providers (e.g. Blockbook, Blockcypher); may be set at runtime.
+   */
+  apiKey?: string
+
+  /**
    * Get the balance for a given address.
    * @param {Address} address The address to get the balance for.
    * @param {Asset[]} assets (Optional) An array of assets to get the balance for.
