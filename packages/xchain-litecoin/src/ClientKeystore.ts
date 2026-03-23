@@ -98,11 +98,7 @@ export class ClientKeystore extends Client {
     psbt.finalizeAllInputs()
     const txHex = psbt.extractTransaction().toHex()
 
-    return await Utils.broadcastTx({
-      txHex,
-      nodeUrl: this.nodeUrls[this.network],
-      auth: this.nodeAuth,
-    })
+    return await this.broadcastTx(txHex)
   }
 
   /**
@@ -145,11 +141,7 @@ export class ClientKeystore extends Client {
     psbt.finalizeAllInputs()
 
     const txHex = psbt.extractTransaction().toHex()
-    const hash = await Utils.broadcastTx({
-      txHex,
-      nodeUrl: this.nodeUrls[this.network],
-      auth: this.nodeAuth,
-    })
+    const hash = await this.broadcastTx(txHex)
 
     return { hash, maxAmount, fee }
   }

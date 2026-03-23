@@ -24,19 +24,11 @@ import {
   UPPER_FEE_BOUND,
   explorerProviders,
 } from './const'
-import { NodeAuth } from './types'
 import * as Utils from './utils'
-/**
- * Defines a mapping of node URLs for different networks.
- */
-export type NodeUrls = Record<Network, string>
 /**
  * Default parameters for the Litecoin client.
  */
-export const defaultLtcParams: UtxoClientParams & {
-  nodeUrls: NodeUrls
-  nodeAuth?: NodeAuth
-} = {
+export const defaultLtcParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
@@ -50,19 +42,12 @@ export const defaultLtcParams: UtxoClientParams & {
     lower: LOWER_FEE_BOUND,
     upper: UPPER_FEE_BOUND,
   },
-  nodeUrls: {
-    [Network.Mainnet]: 'https://litecoin.ninerealms.com',
-    [Network.Stagenet]: 'https://litecoin.ninerealms.com',
-    [Network.Testnet]: 'https://testnet.ltc.thorchain.info',
-  },
 }
 
 /**
  * Custom Litecoin client.
  */
 abstract class Client extends UTXOClient {
-  protected nodeUrls: NodeUrls
-  protected nodeAuth?: NodeAuth
   /**
    * Constructs a new `Client` with the provided parameters.
    *
@@ -77,8 +62,6 @@ abstract class Client extends UTXOClient {
       explorerProviders: params.explorerProviders,
       dataProviders: params.dataProviders,
     })
-    this.nodeUrls = params.nodeUrls
-    this.nodeAuth = params.nodeAuth
   }
 
   /**
