@@ -99,7 +99,7 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
 
   /**
    * Returns fee rates using Blockbook's estimatefee endpoint.
-   * Block targets: 10 (average), 5 (fast), 1 (fastest).
+   * Block targets: 5 (average), 3 (fast), 1 (fastest).
    */
   async getFeeRates(): Promise<FeeRates> {
     const [average, fast, fastest] = await Promise.all([
