@@ -34,14 +34,14 @@ export const getTxs = async ({
   address: string
   baseUrl: string
   limit: number
-}): Promise<Transaction[]> => {
+}): Promise<{ transactions: Transaction[]; total: number }> => {
   const url = `${baseUrl}/address/${encodeAddressPathSegment(address)}`
   const response = await axios.get(url, {
     params: { details: 'txs', pageSize: limit },
     headers: makeHeaders(apiKey),
   })
   const info: GetAddressInfo = response.data
-  return (info.transactions as Transaction[]) ?? []
+  return { transactions: (info.transactions as Transaction[]) ?? [], total: info.txs }
 }
 
 export const getUTXOs = async ({

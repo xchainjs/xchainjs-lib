@@ -82,9 +82,9 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
   }
 
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const rawTxs = await this.getRawTransactions(params)
+    const { transactions: rawTxs, total } = await this.getRawTransactions(params)
     const txs = rawTxs.map((tx) => this.mapTransactionToTx(tx))
-    return { total: txs.length, txs }
+    return { total, txs }
   }
 
   async getTransactionData(txId: string): Promise<Tx> {
@@ -158,7 +158,7 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
     )
   }
 
-  private async getRawTransactions(params?: TxHistoryParams): Promise<Transaction[]> {
+  private async getRawTransactions(params?: TxHistoryParams): Promise<{ transactions: Transaction[]; total: number }> {
     if (params?.startTime) {
       throw Error('startTime is not supported by BlockbookProvider')
     }
@@ -170,12 +170,12 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
     const address = params?.address
     if (!address) throw Error('address is required')
     const addr = this.toApiAddress(address)
-    const transactions = await blockbook.getTxs({
+    const { transactions, total } = await blockbook.getTxs({
       apiKey: this._apiKey,
       baseUrl: this.baseUrl,
       address: addr,
       limit: offset + limit,
     })
-    return transactions.slice(offset, offset + limit)
+    return { transactions: transactions.slice(offset, offset + limit), total }
   }
 }
