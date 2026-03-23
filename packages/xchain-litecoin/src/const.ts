@@ -2,6 +2,7 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
+  BlockbookProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   SochainNetwork,
@@ -106,6 +107,21 @@ export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined,
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+// NowNodes Blockbook data providers for Litecoin
+// Docs: https://nownodes.io/nodes/litecoin-ltc
+const mainnetLtcBlockbookProvider = new BlockbookProvider(
+  'https://ltcbook.nownodes.io/api/v2',
+  LTCChain,
+  AssetLTC,
+  LTC_DECIMAL,
+  process.env.NOWNODES_API_KEY || '',
+)
+export const BlockbookDataProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined, // NowNodes does not provide an LTC testnet Blockbook node
+  [Network.Stagenet]: mainnetLtcBlockbookProvider,
+  [Network.Mainnet]: mainnetLtcBlockbookProvider,
 }
 
 /**

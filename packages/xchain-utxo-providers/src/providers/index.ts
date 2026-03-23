@@ -34,3 +34,5 @@ export { BlockcypherNetwork } from './blockcypher/blockcypher-api-types'
 export { BitgoProvider } from './bitgo/bitgo-data-provider'
 
 export { NownodesProvider } from './nownodes/nownodes-data-provider'
+
+export { BlockbookProvider } from './blockbook/blockbook-data-provider'

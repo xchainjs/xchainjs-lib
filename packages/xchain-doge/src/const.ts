@@ -2,6 +2,7 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
+  BlockbookProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   SochainNetwork,
@@ -107,6 +108,21 @@ export const blockcypherDataProviders = {
   [Network.Testnet]: undefined, //no provider here
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+// NowNodes Blockbook data providers for Dogecoin
+// Docs: https://nownodes.io/nodes/dogecoin-doge
+const mainnetDogeBlockbookProvider = new BlockbookProvider(
+  'https://dogebook.nownodes.io/api/v2',
+  DOGEChain,
+  AssetDOGE,
+  DOGE_DECIMAL,
+  process.env.NOWNODES_API_KEY || '',
+)
+export const BlockbookDataProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined, // NowNodes does not provide a DOGE testnet Blockbook node
+  [Network.Stagenet]: mainnetDogeBlockbookProvider,
+  [Network.Mainnet]: mainnetDogeBlockbookProvider,
 }
 
 /**

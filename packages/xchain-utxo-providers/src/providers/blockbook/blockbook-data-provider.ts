@@ -1,0 +1,180 @@
+import { FeeOption, FeeRates, TxHash, TxHistoryParams, TxType } from '@xchainjs/xchain-client'
+import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
+
+import { Balance, Tx, TxsPage, UTXO, UtxoOnlineDataProvider } from '../../types'
+
+import * as blockbook from './blockbook-api'
+import { AddressUTXO, Transaction } from './blockbook-api-types'
+
+export class BlockbookProvider implements UtxoOnlineDataProvider {
+  private baseUrl: string
+  private _apiKey?: string
+  private asset: Asset
+  private assetDecimals: number
+  private readonly normalizeAddressForApi?: (address: string) => string
+
+  constructor(
+    baseUrl: string,
+    _chain: Chain,
+    asset: Asset,
+    assetDecimals: number,
+    apiKey?: string,
+    normalizeAddressForApi?: (address: string) => string,
+  ) {
+    this.baseUrl = baseUrl
+    this._apiKey = apiKey
+    this.asset = asset
+    this.assetDecimals = assetDecimals
+    this.normalizeAddressForApi = normalizeAddressForApi
+  }
+
+  private toApiAddress(address: string): string {
+    return this.normalizeAddressForApi ? this.normalizeAddressForApi(address) : address
+  }
+
+  public get apiKey(): string | undefined {
+    return this._apiKey
+  }
+
+  public set apiKey(value: string | undefined) {
+    this._apiKey = value
+  }
+
+  async broadcastTx(txHex: string): Promise<TxHash> {
+    return await blockbook.broadcastTx({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+      txHex,
+    })
+  }
+
+  async getConfirmedUnspentTxs(address: string): Promise<UTXO[]> {
+    const addr = this.toApiAddress(address)
+    const utxos = await blockbook.getUTXOs({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+      address: addr,
+      isConfirmed: true,
+    })
+    return await this.mapUTXOs(utxos)
+  }
+
+  async getUnspentTxs(address: string): Promise<UTXO[]> {
+    const addr = this.toApiAddress(address)
+    const utxos = await blockbook.getUTXOs({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+      address: addr,
+      isConfirmed: false,
+    })
+    return await this.mapUTXOs(utxos)
+  }
+
+  async getBalance(address: Address, confirmedOnly?: boolean): Promise<Balance[]> {
+    const addr = this.toApiAddress(address)
+    const amount = await blockbook.getBalance({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+      address: addr,
+      confirmedOnly: confirmedOnly !== undefined ? confirmedOnly : true,
+      assetDecimals: this.assetDecimals,
+    })
+    return [{ amount, asset: this.asset }]
+  }
+
+  async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
+    const rawTxs = await this.getRawTransactions(params)
+    const txs = rawTxs.map((tx) => this.mapTransactionToTx(tx))
+    return { total: txs.length, txs }
+  }
+
+  async getTransactionData(txId: string): Promise<Tx> {
+    const rawTx = await blockbook.getTx({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+      hash: txId,
+    })
+    return this.mapTransactionToTx(rawTx)
+  }
+
+  /**
+   * Returns fee rates using Blockbook's estimatefee endpoint.
+   * Block targets: 10 (average), 5 (fast), 1 (fastest).
+   */
+  async getFeeRates(): Promise<FeeRates> {
+    const [average, fast, fastest] = await Promise.all([
+      blockbook.getFeeEstimate({ apiKey: this._apiKey, baseUrl: this.baseUrl, numberOfBlocks: 5 }),
+      blockbook.getFeeEstimate({ apiKey: this._apiKey, baseUrl: this.baseUrl, numberOfBlocks: 3 }),
+      blockbook.getFeeEstimate({ apiKey: this._apiKey, baseUrl: this.baseUrl, numberOfBlocks: 1 }),
+    ])
+    return {
+      [FeeOption.Average]: average,
+      [FeeOption.Fast]: fast,
+      [FeeOption.Fastest]: fastest,
+    }
+  }
+
+  private mapTransactionToTx(rawTx: Transaction): Tx {
+    return {
+      asset: this.asset,
+      from: rawTx.vin.map((i) => ({
+        from: i.addresses[0],
+        amount: baseAmount(i.value, this.assetDecimals),
+      })),
+      to: rawTx.vout
+        .filter((i) => i.isAddress)
+        .map((i) => ({ to: i.addresses[0], amount: baseAmount(i.value, this.assetDecimals) })),
+      date: new Date(rawTx.blockTime * 1000),
+      type: TxType.Transfer,
+      hash: rawTx.txid,
+    }
+  }
+
+  private async mapUTXOs(utxos: AddressUTXO[]): Promise<UTXO[]> {
+    return await Promise.all(
+      utxos.map(async (utxo) => {
+        const tx = await blockbook.getTx({
+          apiKey: this._apiKey,
+          baseUrl: this.baseUrl,
+          hash: utxo.txid,
+        })
+
+        const output = tx.vout.find((vout) => vout.n === utxo.vout)
+        if (!output?.hex) {
+          throw Error(`Could not resolve scriptPubKey for UTXO ${utxo.txid}:${utxo.vout}`)
+        }
+
+        const value = Number(utxo.value)
+        return {
+          hash: utxo.txid,
+          index: utxo.vout,
+          value,
+          witnessUtxo: {
+            value,
+            script: Buffer.from(output.hex, 'hex'),
+          },
+          txHex: tx.hex,
+        }
+      }),
+    )
+  }
+
+  private async getRawTransactions(params?: TxHistoryParams): Promise<Transaction[]> {
+    if (params?.startTime) {
+      throw Error('startTime is not supported by BlockbookProvider')
+    }
+    const offset = params?.offset ?? 0
+    const limit = params?.limit ?? 10
+    if (offset + limit > 1000) throw Error('cannot fetch more than the last 1000 txs')
+    if (offset < 0 || limit < 0) throw Error('offset and limit must be >= 0')
+
+    const addr = this.toApiAddress(`${params?.address}`)
+    const transactions = await blockbook.getTxs({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+      address: addr,
+      limit: offset + limit,
+    })
+    return transactions.slice(offset, offset + limit)
+  }
+}

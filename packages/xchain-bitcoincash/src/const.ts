@@ -2,10 +2,13 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
+  BlockbookProvider,
   HaskoinNetwork,
   HaskoinProvider,
   UtxoOnlineDataProviders,
 } from '@xchainjs/xchain-utxo-providers'
+
+import * as bchaddr from './bchaddrjs'
 
 /**
  * Lower bound for transaction fee rate.
@@ -74,6 +77,22 @@ export const HaskoinDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetHaskoinProvider,
   [Network.Stagenet]: mainnetHaskoinProvider,
   [Network.Mainnet]: mainnetHaskoinProvider,
+}
+
+// NowNodes Blockbook data providers for Bitcoin Cash
+// Docs: https://nownodes.io/nodes/bch
+const mainnetBchBlockbookProvider = new BlockbookProvider(
+  'https://bchbook.nownodes.io/api/v2',
+  BCHChain,
+  AssetBCH,
+  BCH_DECIMAL,
+  process.env.NOWNODES_API_KEY || '',
+  bchaddr.toCashAddress,
+)
+export const BlockbookDataProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined, // NowNodes does not provide a BCH testnet Blockbook node
+  [Network.Stagenet]: mainnetBchBlockbookProvider,
+  [Network.Mainnet]: mainnetBchBlockbookProvider,
 }
 
 /**
