@@ -116,14 +116,16 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
   private mapTransactionToTx(rawTx: Transaction): Tx {
     return {
       asset: this.asset,
-      from: rawTx.vin.map((i) => ({
-        from: i.addresses[0],
-        amount: baseAmount(i.value, this.assetDecimals),
-      })),
+      from: rawTx.vin
+        .filter((i) => i.addresses?.length > 0)
+        .map((i) => ({
+          from: i.addresses[0],
+          amount: baseAmount(i.value, this.assetDecimals),
+        })),
       to: rawTx.vout
-        .filter((i) => i.isAddress)
+        .filter((i) => i.isAddress && i.addresses?.length > 0)
         .map((i) => ({ to: i.addresses[0], amount: baseAmount(i.value, this.assetDecimals) })),
-      date: new Date(rawTx.blockTime * 1000),
+      date: rawTx.blockTime ? new Date(rawTx.blockTime * 1000) : new Date(0),
       type: TxType.Transfer,
       hash: rawTx.txid,
     }
