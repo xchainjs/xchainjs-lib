@@ -5,8 +5,7 @@ import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UTXO, UtxoClientParams, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 import * as Litecoin from 'bitcoinjs-lib'
 
-import { Client, NodeUrls } from './client'
-import { NodeAuth } from './types'
+import { Client } from './client'
 
 /**
  * Custom Ledger Litecoin client
@@ -19,7 +18,7 @@ class ClientLedger extends Client {
 
   // Constructor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(params: UtxoClientParams & { transport: any; nodeUrls: NodeUrls; nodeAuth?: NodeAuth }) {
+  constructor(params: UtxoClientParams & { transport: any }) {
     super(params)
     this.transport = params.transport
   }

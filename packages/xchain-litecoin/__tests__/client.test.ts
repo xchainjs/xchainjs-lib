@@ -5,7 +5,6 @@ import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { ClientKeystore as Client } from '../src'
-import { NodeUrls } from '../src/client'
 import {
   AssetLTC,
   LOWER_FEE_BOUND,
@@ -14,12 +13,8 @@ import {
   explorerProviders,
   sochainDataProviders,
 } from '../src/const'
-import { NodeAuth } from '../src/types'
 
-export const defaultLTCParams: UtxoClientParams & {
-  nodeUrls: NodeUrls
-  nodeAuth?: NodeAuth
-} = {
+export const defaultLTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
@@ -32,11 +27,6 @@ export const defaultLTCParams: UtxoClientParams & {
   feeBounds: {
     lower: LOWER_FEE_BOUND,
     upper: UPPER_FEE_BOUND,
-  },
-  nodeUrls: {
-    [Network.Mainnet]: 'https://litecoin.ninerealms.com',
-    [Network.Stagenet]: 'https://litecoin.ninerealms.com',
-    [Network.Testnet]: 'https://testnet.ltc.thorchain.info',
   },
 }
 

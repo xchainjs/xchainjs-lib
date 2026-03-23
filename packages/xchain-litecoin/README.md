@@ -70,10 +70,7 @@ For a complete example please see this [test](https://github.com/xchainjs/xchain
 Creating a no-arg LTC Client will default to the following settings:
 
 ```typescript
-const defaultLTCParams: UtxoClientParams & {
-  nodeUrls: NodeUrls
-  nodeAuth?: NodeAuth
-} = {
+const defaultLTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
@@ -87,15 +84,10 @@ const defaultLTCParams: UtxoClientParams & {
     lower: LOWER_FEE_BOUND,
     upper: UPPER_FEE_BOUND,
   },
-  nodeUrls: {
-    [Network.Mainnet]: 'https://litecoin.ninerealms.com',
-    [Network.Stagenet]: 'https://litecoin.ninerealms.com',
-    [Network.Testnet]: 'https://testnet.ltc.thorchain.info',
-  },
 }
 ```
 
-Note: BlockCypher is the default online data provider (to fetch realtime utxos, balances, etc)
+Note: Default online data providers is Blockcypher for UTXOs, balances, and broadcast.
 
 ## Overriding providers
 
