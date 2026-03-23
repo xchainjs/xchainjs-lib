@@ -168,7 +168,9 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
     if (offset + limit > 1000) throw Error('cannot fetch more than the last 1000 txs')
     if (offset < 0 || limit < 0) throw Error('offset and limit must be >= 0')
 
-    const addr = this.toApiAddress(`${params?.address}`)
+    const address = params?.address
+    if (!address) throw Error('address is required')
+    const addr = this.toApiAddress(address)
     const transactions = await blockbook.getTxs({
       apiKey: this._apiKey,
       baseUrl: this.baseUrl,
