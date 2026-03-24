@@ -91,7 +91,7 @@ export const broadcastTx = async ({
   const response = await axios.post(url, txHex, {
     headers: {
       ...makeHeaders(apiKey),
-      'Content-Type': 'application/json',
+      'Content-Type': 'text/plain',
     },
   })
   return (response.data as BroadcastDTO).result
