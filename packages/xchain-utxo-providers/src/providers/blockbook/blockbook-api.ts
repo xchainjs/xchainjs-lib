@@ -71,7 +71,7 @@ export const getBalance = async ({
   assetDecimals,
 }: BalanceParams): Promise<BaseAmount> => {
   const url = `${baseUrl}/address/${encodeAddressPathSegment(address)}`
-  const response = await axios.get(url, { headers: makeHeaders(apiKey) })
+  const response = await axios.get(url, { params: { details: 'tokenBalances' }, headers: makeHeaders(apiKey) })
   const info: GetAddressInfo = response.data
   return confirmedOnly
     ? baseAmount(info.balance, assetDecimals)
