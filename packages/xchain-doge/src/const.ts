@@ -110,13 +110,11 @@ export const blockcypherDataProviders = {
   [Network.Mainnet]: mainnetBlockcypherProvider,
 }
 
-// NowNodes Blockbook data providers for Dogecoin
-// Docs: https://nownodes.io/nodes/dogecoin-doge
+// Blockbook data providers for Dogecoin
 const mainnetDogeBlockbookProvider = new BlockbookProvider(
-  'https://dogebook.nownodes.io/api/v2',
+  'https://doge.nativeswap.io/api/v2',
   AssetDOGE,
   DOGE_DECIMAL,
-  process.env.NOWNODES_API_KEY || '',
 )
 export const BlockbookDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined, // NowNodes does not provide a DOGE testnet Blockbook node

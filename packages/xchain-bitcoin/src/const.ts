@@ -135,13 +135,13 @@ const mainnetBtcBlockbookProvider = new BlockbookProvider(
   'https://btcbook.nownodes.io/api/v2',
   AssetBTC,
   BTC_DECIMAL,
-  process.env.NOWNODES_API_KEY || '',
+  { apiKey: process.env.NOWNODES_API_KEY || '' },
 )
 const testnetBtcBlockbookProvider = new BlockbookProvider(
   'https://btcbook-testnet.nownodes.io/api/v2',
   AssetBTC,
   BTC_DECIMAL,
-  process.env.NOWNODES_API_KEY || '',
+  { apiKey: process.env.NOWNODES_API_KEY || '' },
 )
 export const BlockbookDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetBtcBlockbookProvider,

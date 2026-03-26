@@ -16,6 +16,7 @@ import accumulative from 'coinselect/accumulative.js'
 import {
   AssetLTC,
   BitgoProviders,
+  BlockbookDataProviders,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   LTCChain,
@@ -40,7 +41,7 @@ export const defaultLtcParams: UtxoClientParams & {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: explorerProviders,
-  dataProviders: [BitgoProviders, BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders, BlockbookDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/84'/2'/0'/0/`,
     [Network.Testnet]: `m/84'/1'/0'/0/`,

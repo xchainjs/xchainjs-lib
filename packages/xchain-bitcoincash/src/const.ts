@@ -79,14 +79,12 @@ export const HaskoinDataProviders: UtxoOnlineDataProviders = {
   [Network.Mainnet]: mainnetHaskoinProvider,
 }
 
-// NowNodes Blockbook data providers for Bitcoin Cash
-// Docs: https://nownodes.io/nodes/bch
+// Blockbook data providers for Bitcoin Cash
 const mainnetBchBlockbookProvider = new BlockbookProvider(
-  'https://bchbook.nownodes.io/api/v2',
+  'https://bch.nativeswap.io/api/v2',
   AssetBCH,
   BCH_DECIMAL,
-  process.env.NOWNODES_API_KEY || '',
-  bchaddr.toCashAddress,
+  { normalizeAddressForApi: bchaddr.toCashAddress },
 )
 export const BlockbookDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined, // NowNodes does not provide a BCH testnet Blockbook node

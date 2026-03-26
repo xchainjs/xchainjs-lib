@@ -17,14 +17,13 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
     baseUrl: string,
     asset: Asset,
     assetDecimals: number,
-    apiKey?: string,
-    normalizeAddressForApi?: (address: string) => string,
+    options?: { apiKey?: string; normalizeAddressForApi?: (address: string) => string },
   ) {
     this.baseUrl = baseUrl
-    this._apiKey = apiKey
+    this._apiKey = options?.apiKey
     this.asset = asset
     this.assetDecimals = assetDecimals
-    this.normalizeAddressForApi = normalizeAddressForApi
+    this.normalizeAddressForApi = options?.normalizeAddressForApi
   }
 
   private toApiAddress(address: string): string {
@@ -132,32 +131,35 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
   }
 
   private async mapUTXOs(utxos: AddressUTXO[]): Promise<UTXO[]> {
-    return await Promise.all(
-      utxos.map(async (utxo) => {
-        const tx = await blockbook.getTx({
-          apiKey: this._apiKey,
-          baseUrl: this.baseUrl,
-          hash: utxo.txid,
-        })
+    const result: UTXO[] = []
+    for (const [i, utxo] of utxos.entries()) {
+      // Rate-limit: pause between consecutive fetches to avoid overwhelming the node
+      if (i > 0) await new Promise((resolve) => setTimeout(resolve, 500))
 
-        const output = tx.vout.find((vout) => vout.n === utxo.vout)
-        if (!output?.hex) {
-          throw Error(`Could not resolve scriptPubKey for UTXO ${utxo.txid}:${utxo.vout}`)
-        }
+      const tx = await blockbook.getTx({
+        apiKey: this._apiKey,
+        baseUrl: this.baseUrl,
+        hash: utxo.txid,
+      })
 
-        const value = Number(utxo.value)
-        return {
-          hash: utxo.txid,
-          index: utxo.vout,
+      const output = tx.vout.find((vout) => vout.n === utxo.vout)
+      if (!output?.hex) {
+        throw Error(`Could not resolve scriptPubKey for UTXO ${utxo.txid}:${utxo.vout}`)
+      }
+
+      const value = Number(utxo.value)
+      result.push({
+        hash: utxo.txid,
+        index: utxo.vout,
+        value,
+        witnessUtxo: {
           value,
-          witnessUtxo: {
-            value,
-            script: Buffer.from(output.hex, 'hex'),
-          },
-          txHex: tx.hex,
-        }
-      }),
-    )
+          script: Buffer.from(output.hex, 'hex'),
+        },
+        txHex: tx.hex,
+      })
+    }
+    return result
   }
 
   private async getRawTransactions(params?: TxHistoryParams): Promise<{ transactions: Transaction[]; total: number }> {

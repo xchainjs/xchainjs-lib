@@ -98,14 +98,9 @@ export const broadcastTx = async ({
 }
 
 /**
- * Fetches fee estimate using Blockbook's legacy REST endpoint.
- *
- * The V2 REST spec only exposes fee estimation via websocket. The documented
- * REST path is the legacy /api/v1/estimatefee/<blocks> route, which all
- * Blockbook instances support regardless of version.
+ * Fetches fee estimate using Blockbook's V2 REST endpoint.
  *
  * Docs: https://github.com/trezor/blockbook/blob/master/docs/api.md
- * (Legacy API V1 → GET /api/v1/estimatefee/<number of blocks>)
  *
  * @param numberOfBlocks Target block confirmation count
  * @returns Estimated fee rate in sat/byte
@@ -119,9 +114,7 @@ export const getFeeEstimate = async ({
   baseUrl: string
   numberOfBlocks: number
 }): Promise<number> => {
-  // Derive the V1 base by replacing /api/v2 suffix with /api/v1
-  const v1Base = baseUrl.replace(/\/api\/v2\/?$/, '/api/v1')
-  const url = `${v1Base}/estimatefee/${numberOfBlocks}`
+  const url = `${baseUrl}/estimatefee/${numberOfBlocks}`
   const response = await axios.get(url, { headers: makeHeaders(apiKey) })
   const dto: FeeEstimateDTO = response.data
   // result is in BTC/kB; convert to sat/byte

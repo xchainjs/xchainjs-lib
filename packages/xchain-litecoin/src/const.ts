@@ -109,13 +109,11 @@ export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Mainnet]: mainnetBlockcypherProvider,
 }
 
-// NowNodes Blockbook data providers for Litecoin
-// Docs: https://nownodes.io/nodes/litecoin-ltc
+// Blockbook data providers for Litecoin
 const mainnetLtcBlockbookProvider = new BlockbookProvider(
-  'https://ltcbook.nownodes.io/api/v2',
+  'https://ltc.nativeswap.io/api/v2',
   AssetLTC,
   LTC_DECIMAL,
-  process.env.NOWNODES_API_KEY || '',
 )
 export const BlockbookDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined, // NowNodes does not provide an LTC testnet Blockbook node
