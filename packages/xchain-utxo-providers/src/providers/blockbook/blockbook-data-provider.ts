@@ -95,15 +95,25 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
     return this.mapTransactionToTx(rawTx)
   }
 
-  /**
-   * Returns fee rates using Blockbook's estimatefee endpoint.
-   * Block targets: 5 (average), 3 (fast), 1 (fastest).
-   */
+  private static readonly BLOCK_TARGETS: Record<FeeOption, number> = {
+    [FeeOption.Average]: 5,
+    [FeeOption.Fast]: 3,
+    [FeeOption.Fastest]: 1,
+  }
+
+  async getFeeRate(feeOption: FeeOption): Promise<number> {
+    return blockbook.getFeeEstimate({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+      numberOfBlocks: BlockbookProvider.BLOCK_TARGETS[feeOption],
+    })
+  }
+
   async getFeeRates(): Promise<FeeRates> {
     const [average, fast, fastest] = await Promise.all([
-      blockbook.getFeeEstimate({ apiKey: this._apiKey, baseUrl: this.baseUrl, numberOfBlocks: 5 }),
-      blockbook.getFeeEstimate({ apiKey: this._apiKey, baseUrl: this.baseUrl, numberOfBlocks: 3 }),
-      blockbook.getFeeEstimate({ apiKey: this._apiKey, baseUrl: this.baseUrl, numberOfBlocks: 1 }),
+      this.getFeeRate(FeeOption.Average),
+      this.getFeeRate(FeeOption.Fast),
+      this.getFeeRate(FeeOption.Fastest),
     ])
     return {
       [FeeOption.Average]: average,
