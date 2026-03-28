@@ -2,6 +2,7 @@ import {
   BaseXChainClient,
   ExplorerProviders,
   FeeEstimateOptions,
+  FeeOption,
   FeeRate,
   FeeRates,
   FeeType,
@@ -676,5 +677,25 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to get fee rates')
   }
+
+  protected async roundRobinGetFeeRate(feeOption: FeeOption): Promise<number> {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (!prov) continue
+        if (prov.getFeeRate) return await prov.getFeeRate(feeOption)
+        const rates = await prov.getFeeRates()
+        return rates[feeOption]
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    throw Error('no provider able to get fee rate')
+  }
+
+  async getFeeRate(feeOption: FeeOption): Promise<number> {
+    return this.roundRobinGetFeeRate(feeOption)
+  }
+
   public abstract transfer(params: TxParams & { feeRate?: number }): Promise<string>
 }

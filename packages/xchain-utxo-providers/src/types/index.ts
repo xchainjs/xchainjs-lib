@@ -1,5 +1,6 @@
 import {
   Balance as BaseBalance,
+  FeeOption,
   FeeRates,
   Network,
   Tx as BaseTx,
@@ -96,6 +97,14 @@ export interface UtxoOnlineDataProvider {
    * @returns {Promise<FeeRates>} A promise that resolves to the fee rates.
    */
   getFeeRates(): Promise<FeeRates>
+
+  /**
+   * Get the fee rate for a single fee level. Optional — providers that don't implement this
+   * will fall back to getFeeRates() at the client level.
+   * @param {FeeOption} feeOption The fee level to fetch.
+   * @returns {Promise<number>} A promise that resolves to the fee rate in satoshis/byte.
+   */
+  getFeeRate?(feeOption: FeeOption): Promise<number>
 
   /**
    * Get confirmed unspent transaction outputs
