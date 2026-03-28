@@ -132,15 +132,20 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
 
   private async mapUTXOs(utxos: AddressUTXO[]): Promise<UTXO[]> {
     const result: UTXO[] = []
-    for (const [i, utxo] of utxos.entries()) {
-      // Rate-limit: pause between consecutive fetches to avoid overwhelming the node
-      if (i > 0) await new Promise((resolve) => setTimeout(resolve, 500))
+    const txCache = new Map<string, Transaction>()
+    for (const utxo of utxos) {
+      let tx = txCache.get(utxo.txid)
+      if (!tx) {
+        // Rate-limit: pause between consecutive fetches to avoid overwhelming the node
+        if (txCache.size > 0) await new Promise((resolve) => setTimeout(resolve, 500))
 
-      const tx = await blockbook.getTx({
-        apiKey: this._apiKey,
-        baseUrl: this.baseUrl,
-        hash: utxo.txid,
-      })
+        tx = await blockbook.getTx({
+          apiKey: this._apiKey,
+          baseUrl: this.baseUrl,
+          hash: utxo.txid,
+        })
+        txCache.set(utxo.txid, tx)
+      }
 
       const output = tx.vout.find((vout) => vout.n === utxo.vout)
       if (!output?.hex) {
