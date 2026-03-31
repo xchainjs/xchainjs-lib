@@ -18,12 +18,11 @@ const TX_VERSION_GROUP_ID = 0x26a7270a
 const TX_VERSION = 0x80000005
 
 const PKH_OUTPUT_SIZE = 34
-const MARGINAL_FEE = 5000
-const GRACE_ACTIONS = 2
+const MARGINAL_FEE = 10000
 
 function calculateFee(inCount: number, outCount: number): number {
-  const logicalActions = inCount + outCount
-  return MARGINAL_FEE * Math.max(GRACE_ACTIONS, logicalActions)
+  const logicalActions = Math.max(inCount, outCount)
+  return MARGINAL_FEE * Math.max(1, logicalActions)
 }
 
 /**
