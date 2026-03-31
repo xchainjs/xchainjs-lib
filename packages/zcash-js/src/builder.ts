@@ -18,12 +18,11 @@ const TX_VERSION_GROUP_ID = 0x26a7270a
 const TX_VERSION = 0x80000005
 
 const PKH_OUTPUT_SIZE = 34
-const MARGINAL_FEE = 5000
-const GRACE_ACTIONS = 2
+const MARGINAL_FEE = 10000
 
 function calculateFee(inCount: number, outCount: number): number {
-  const logicalActions = inCount + outCount
-  return MARGINAL_FEE * Math.max(GRACE_ACTIONS, logicalActions)
+  const logicalActions = Math.max(inCount, outCount)
+  return MARGINAL_FEE * Math.max(1, logicalActions)
 }
 
 /**
@@ -104,8 +103,7 @@ export async function buildMaxTx(
   if (utxos.length === 0) throw new Error('No UTXOs provided')
 
   // For max tx: NO change output, just recipient + optional memo
-  const outputCount = memo ? 2 : 1
-  const fee = calculateFee(utxos.length, outputCount)
+  const fee = getFee(utxos.length, 1, memo) // 1 = recipient only; getFee adds memo slots
 
   // Calculate total value and max sendable amount
   const totalValue = sumBy(utxos, (u: UTXO) => u.satoshis)
@@ -152,8 +150,7 @@ export async function buildTx(
   if (memo && memo.length > 80) throw new Error('Memo too long')
 
   const inputs = selectUTXOS(utxos, amount, memo)
-  const outputCount = memo ? 3 : 2 // change + to + memo (if exists)
-  const fee = getFee(inputs.length, outputCount, memo)
+  const fee = getFee(inputs.length, 2, memo) // 2 = change + recipient; getFee adds memo slots
   const change = sumBy(inputs, (u: UTXO) => u.satoshis) - amount - fee
   if (change < 0) throw new Error('Not enough funds')
 

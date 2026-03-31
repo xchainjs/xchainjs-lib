@@ -251,8 +251,8 @@ abstract class Client extends UTXOClient {
       // Calculate total value of all UTXOs
       const totalValue = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
 
-      // Calculate flat fee for this transaction (2 outputs: recipient + potential memo)
-      const fee = getFee(utxos.length, memo ? 2 : 1, memo)
+      // Calculate flat fee for this transaction (1 = recipient only; getFee adds memo slots)
+      const fee = getFee(utxos.length, 1, memo)
 
       // Calculate max sendable amount
       const maxAmount = totalValue - fee
