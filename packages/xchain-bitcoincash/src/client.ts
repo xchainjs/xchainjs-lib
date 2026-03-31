@@ -122,9 +122,9 @@ abstract class Client extends UTXOClient {
 
     const targetOutputs = []
 
-    // Add output amount and recipient to target outputs
+    // Add output amount and recipient to target outputs (bitcore requires CashAddr / BCH legacy byte — not BTC-style 1…)
     targetOutputs.push({
-      address: recipient,
+      address: recipientCashAddress,
       value: amount.amount().toNumber(),
     })
 
@@ -304,12 +304,12 @@ abstract class Client extends UTXOClient {
         ),
       )
 
-      // Add recipient output
-      tx.to(recipient, targetValue)
+      // Add recipient output (must be CashAddr for bitcore; BTC-style legacy 1…/3… is rejected)
+      tx.to(recipientCashAddress, targetValue)
 
       // Add change output if needed
       if (selectionResult.changeAmount > 0) {
-        tx.to(sender, selectionResult.changeAmount)
+        tx.to(Utils.toCashAddress(sender), selectionResult.changeAmount)
       }
 
       // Add memo output if present
@@ -433,7 +433,7 @@ abstract class Client extends UTXOClient {
       )
 
       // Add recipient output (max amount - no change)
-      tx.to(recipient, maxCalc.amount)
+      tx.to(recipientCashAddress, maxCalc.amount)
 
       // Add memo output if present
       if (compiledMemo) {
