@@ -1,10 +1,88 @@
-import { AssetData, ChainData, Chains, DepositAddressRequestV2, QuoteRequest } from '@chainflip/sdk/swap'
+// Local type definitions to avoid importing from @chainflip/sdk/swap,
+// which triggers ESM-only dependency chain (@noble/hashes) in Jest.
+
+interface ChainData {
+  chain: string
+  name: string
+  evmChainId: number | undefined
+  isMainnet: boolean
+  requiredBlockConfirmations: number
+  maxRetryDurationBlocks: number | undefined
+}
+
+interface AssetData {
+  chainflipId: string
+  asset: string
+  chain: string
+  contractAddress: string | undefined
+  decimals: number
+  name: string
+  symbol: string
+  isMainnet: boolean
+  minimumSwapAmount: string
+  maximumSwapAmount: string | null
+  minimumEgressAmount: string
+}
+
+interface ChainAssetRef {
+  chain: string
+  asset: string
+}
+
+interface QuoteRequest {
+  srcAsset: string
+  srcChain: string
+  destAsset: string
+  destChain: string
+  amount: string
+  brokerCommissionBps?: number
+  affiliateBrokers?: AffiliateBroker[]
+  isVaultSwap?: boolean
+  ccmParams?: {
+    gasBudget: string
+    messageLengthBytes: number
+  }
+}
+
+interface AffiliateBroker {
+  account: string
+  commissionBps: number
+}
+
+interface FillOrKillParams {
+  retryDurationBlocks: number
+  refundAddress: string
+  slippageTolerancePercent?: string | number
+  minPrice?: string
+}
+
+interface DepositAddressRequestV2 {
+  quote: {
+    srcAsset: ChainAssetRef
+    destAsset: ChainAssetRef
+    depositAmount: string
+  }
+  srcAddress?: string
+  destAddress: string
+  fillOrKillParams: FillOrKillParams
+  affiliateBrokers?: AffiliateBroker[]
+  ccmParams?: {
+    gasBudget: string
+    message: string
+  }
+  brokerCommissionBps?: number
+}
+
+const Chains = {
+  Ethereum: 'Ethereum',
+  Arbitrum: 'Arbitrum',
+  Bitcoin: 'Bitcoin',
+  Solana: 'Solana',
+  Assethub: 'Assethub',
+} as const
 
 interface SwapSDKConfig {
   network?: string
-  enabledFeatures?: {
-    dca?: boolean
-  }
   broker?: {
     url: string
     commissionBps?: number
@@ -13,10 +91,7 @@ interface SwapSDKConfig {
 
 class SwapSDK {
   constructor(_config?: SwapSDKConfig) {
-    // Mock constructor for Chainflip SwapSDK
-    // Accepts optional config with network, DCA features, and broker URL
-    // In a real implementation, this would initialize the SDK with the provided configuration
-    // Config parameter is prefixed with underscore to indicate it's intentionally unused in the mock
+    // Mock constructor - config intentionally unused
   }
 
   async getChains(): Promise<ChainData[]> {
@@ -106,6 +181,45 @@ class SwapSDK {
         minimumSwapAmount: '70000',
         maximumSwapAmount: null,
         minimumEgressAmount: '600',
+      },
+      {
+        chainflipId: 'Wbtc',
+        asset: 'WBTC',
+        chain: 'Ethereum',
+        contractAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+        decimals: 8,
+        name: 'Wrapped BTC',
+        symbol: 'WBTC',
+        isMainnet: true,
+        minimumSwapAmount: '70000',
+        maximumSwapAmount: null,
+        minimumEgressAmount: '600',
+      },
+      {
+        chainflipId: 'ArbUsdt',
+        asset: 'USDT',
+        chain: 'Arbitrum',
+        contractAddress: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+        decimals: 6,
+        name: 'USDT',
+        symbol: 'USDT',
+        isMainnet: true,
+        minimumSwapAmount: '20000000',
+        maximumSwapAmount: null,
+        minimumEgressAmount: '1',
+      },
+      {
+        chainflipId: 'SolUsdt',
+        asset: 'USDT',
+        chain: 'Solana',
+        contractAddress: 'Es9vMFrzaCERmKcoYhgavJZfoogysRKAeriNU1kU2g3c',
+        decimals: 6,
+        name: 'USDT',
+        symbol: 'USDT',
+        isMainnet: true,
+        minimumSwapAmount: '20000000',
+        maximumSwapAmount: null,
+        minimumEgressAmount: '1',
       },
     ]
   }
