@@ -11,7 +11,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@chainflip/sdk": "2.0.3",
+    "@chainflip/sdk": "2.1.1",
     "@xchainjs/xchain-arbitrum": "workspace:*",
     "@xchainjs/xchain-avax": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",

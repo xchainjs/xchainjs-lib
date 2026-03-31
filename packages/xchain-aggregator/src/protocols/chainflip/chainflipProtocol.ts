@@ -49,9 +49,6 @@ export class ChainflipProtocol implements IProtocol {
   constructor(configuration?: ProtocolConfig) {
     this.sdk = new SwapSDK({
       network: networkToChainflip(configuration?.network),
-      enabledFeatures: {
-        dca: true,
-      },
       broker: configuration?.brokerUrl ? { url: configuration.brokerUrl } : undefined,
     })
     this.wallet = configuration?.wallet
