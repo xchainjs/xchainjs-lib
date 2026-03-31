@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.35
+
+### Patch Changes
+
+- Updated dependencies [5b56da3]
+  - @xchainjs/xchain-zcash@1.3.3
+
 ## 3.0.34
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.1
+
+### Patch Changes
+
+- @xchainjs/xchain-mayachain-amm@4.1.16
+- @xchainjs/xchain-thorchain-amm@3.0.35
+
 ## 2.3.0
 
 ### Minor Changes

@@ -1,5 +1,14 @@
 # testing-gui
 
+## 1.0.11
+
+### Patch Changes
+
+- Updated dependencies [5b56da3]
+  - @xchainjs/xchain-zcash@1.3.3
+  - @xchainjs/xchain-mayachain-amm@4.1.16
+  - @xchainjs/xchain-thorchain-amm@3.0.35
+
 ## 1.0.10
 
 ### Patch Changes

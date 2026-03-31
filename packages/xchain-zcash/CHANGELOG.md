@@ -1,5 +1,13 @@
 # @xchainjs/xchain-zcash
 
+## 1.3.3
+
+### Patch Changes
+
+- 5b56da3: Fix memo fee double-counting in buildTx/prepareMaxTx and bypass in buildMaxTx by standardizing all codepaths to use getFee as the single source of truth for memo output slot calculation
+- Updated dependencies [5b56da3]
+  - @xchainjs/zcash-js@1.1.1
+
 ## 1.3.2
 
 ### Patch Changes
