@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.3.0
+
+### Minor Changes
+
+- 4e8fafa: Update @chainflip/sdk from 2.0.3 to 2.1.1, adding support for new assets (Wbtc, ArbUsdt, SolUsdt) and removing deprecated DCA feature flag
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-amm@3.0.34
+- @xchainjs/xchain-wallet@2.0.25
+
 ## 2.2.4
 
 ### Patch Changes

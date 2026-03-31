@@ -1,5 +1,14 @@
 # testing-gui
 
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [9069989]
+  - @xchainjs/xchain-bitcoincash@2.2.3
+  - @xchainjs/xchain-thorchain-amm@3.0.34
+  - @xchainjs/xchain-wallet@2.0.25
+
 ## 1.0.9
 
 ### Patch Changes
