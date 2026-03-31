@@ -1,6 +1,5 @@
 import {
   Balance as BaseBalance,
-  FeeOption,
   FeeRates,
   Network,
   Tx as BaseTx,
@@ -65,11 +64,6 @@ export type TxsPage = BaseTxsPage & {
 
 export interface UtxoOnlineDataProvider {
   /**
-   * Optional API key for hosted providers (e.g. Blockbook, Blockcypher); may be set at runtime.
-   */
-  apiKey?: string
-
-  /**
    * Get the balance for a given address.
    * @param {Address} address The address to get the balance for.
    * @param {Asset[]} assets (Optional) An array of assets to get the balance for.
@@ -97,14 +91,6 @@ export interface UtxoOnlineDataProvider {
    * @returns {Promise<FeeRates>} A promise that resolves to the fee rates.
    */
   getFeeRates(): Promise<FeeRates>
-
-  /**
-   * Get the fee rate for a single fee level. Optional — providers that don't implement this
-   * will fall back to getFeeRates() at the client level.
-   * @param {FeeOption} feeOption The fee level to fetch.
-   * @returns {Promise<number>} A promise that resolves to the fee rate in satoshis/byte.
-   */
-  getFeeRate?(feeOption: FeeOption): Promise<number>
 
   /**
    * Get confirmed unspent transaction outputs

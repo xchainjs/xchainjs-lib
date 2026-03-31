@@ -111,11 +111,9 @@ export const blockcypherDataProviders = {
 }
 
 // Blockbook data providers for Dogecoin
-const mainnetDogeBlockbookProvider = new BlockbookProvider(
-  'https://doge.nativeswap.io/api/v2',
-  AssetDOGE,
-  DOGE_DECIMAL,
-)
+// nativeswap.io operated Blockbook instance — no SLA or API key auth - 500 requests per hour
+// Changeable to any blockbook api. For example: Nownodes
+const mainnetDogeBlockbookProvider = new BlockbookProvider('https://doge.nativeswap.io/api/v2', AssetDOGE, DOGE_DECIMAL)
 export const BlockbookDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined, // NowNodes does not provide a DOGE testnet Blockbook node
   [Network.Stagenet]: mainnetDogeBlockbookProvider,

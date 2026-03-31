@@ -18,6 +18,7 @@ import {
   BTCChain,
   BTC_DECIMAL,
   BitgoProviders,
+  BlockbookDataProviders,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   MIN_TX_FEE,
@@ -32,7 +33,7 @@ export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: [BitgoProviders, BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders, BlockbookDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/84'/0'/0'/0/`, // Not BIP44 compliant but compatible with pre-HD wallets
     [Network.Testnet]: `m/84'/1'/0'/0/`,
@@ -347,10 +348,7 @@ abstract class Client extends UTXOClient {
       if (this.addressFormat === AddressFormat.P2WPKH) {
         maxCalc.inputs.forEach((utxo: UTXO) => {
           if (!utxo.witnessUtxo) {
-            throw UtxoError.fromUnknown(
-              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
-              'sendMax',
-            )
+            throw UtxoError.fromUnknown(new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`), 'sendMax')
           }
           psbt.addInput({
             hash: utxo.hash,

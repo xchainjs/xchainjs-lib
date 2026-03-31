@@ -126,7 +126,7 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
     return {
       asset: this.asset,
       from: rawTx.vin
-        .filter((i) => i.addresses?.length > 0)
+        .filter((i) => i.isAddress && i.addresses?.length > 0)
         .map((i) => ({
           from: i.addresses[0],
           amount: baseAmount(i.value, this.assetDecimals),
@@ -147,7 +147,7 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
       let tx = txCache.get(utxo.txid)
       if (!tx) {
         // Rate-limit: pause between consecutive fetches to avoid overwhelming the node
-        if (txCache.size > 0) await new Promise((resolve) => setTimeout(resolve, 500))
+        if (txCache.size > 0) await new Promise((resolve) => setTimeout(resolve, 50))
 
         tx = await blockbook.getTx({
           apiKey: this._apiKey,
@@ -159,7 +159,7 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
 
       const output = tx.vout.find((vout) => vout.n === utxo.vout)
       if (!output?.hex) {
-        throw Error(`Could not resolve scriptPubKey for UTXO ${utxo.txid}:${utxo.vout}`)
+        throw Error(`BlockbookProvider: could not resolve scriptPubKey for UTXO ${utxo.txid}:${utxo.vout}`)
       }
 
       const value = Number(utxo.value)
@@ -179,16 +179,17 @@ export class BlockbookProvider implements UtxoOnlineDataProvider {
 
   private async getRawTransactions(params?: TxHistoryParams): Promise<{ transactions: Transaction[]; total: number }> {
     if (params?.startTime) {
-      throw Error('startTime is not supported by BlockbookProvider')
+      throw Error('BlockbookProvider: startTime is not supported')
     }
     const offset = params?.offset ?? 0
-    const limit = params?.limit ?? 10
-    if (offset + limit > 1000) throw Error('cannot fetch more than the last 1000 txs')
-    if (offset < 0 || limit < 0) throw Error('offset and limit must be >= 0')
+    const limit = params?.limit || 10
+    if (offset + limit > 1000) throw Error('BlockbookProvider: cannot fetch more than the last 1000 txs')
+    if (offset < 0 || limit < 0) throw Error('BlockbookProvider: offset and limit must be >= 0')
 
     const address = params?.address
-    if (!address) throw Error('address is required')
+    if (!address) throw Error('BlockbookProvider: address is required')
     const addr = this.toApiAddress(address)
+
     const { transactions, total } = await blockbook.getTxs({
       apiKey: this._apiKey,
       baseUrl: this.baseUrl,

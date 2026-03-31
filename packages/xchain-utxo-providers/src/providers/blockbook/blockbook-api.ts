@@ -14,9 +14,7 @@ import {
 
 const makeHeaders = (apiKey?: string) => (apiKey ? { 'api-key': apiKey } : {})
 
-/** Path segment encoding: `:` is valid unencoded in paths (RFC 3986). Avoid `%3A` in URLs/logs while keeping other escapes. */
-const encodeAddressPathSegment = (address: string) =>
-  encodeURIComponent(address).replace(/%3A/g, ':')
+const encodeAddressPathSegment = (address: string) => encodeURIComponent(address)
 
 export const getTx = async ({ apiKey, baseUrl, hash }: TxHashParams): Promise<Transaction> => {
   const url = `${baseUrl}/tx/${hash}`
@@ -118,5 +116,9 @@ export const getFeeEstimate = async ({
   const response = await axios.get(url, { headers: makeHeaders(apiKey) })
   const dto: FeeEstimateDTO = response.data
   // result is in BTC/kB; convert to sat/byte
-  return (parseFloat(dto.result) * 1e8) / 1000
+  const btcPerKb = parseFloat(dto.result)
+  if (isNaN(btcPerKb) || btcPerKb <= 0) {
+    throw new Error(`BlockbookProvider: invalid fee estimate: ${dto.result}`)
+  }
+  return (btcPerKb * 1e8) / 1000
 }

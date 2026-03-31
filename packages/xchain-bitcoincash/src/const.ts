@@ -80,12 +80,11 @@ export const HaskoinDataProviders: UtxoOnlineDataProviders = {
 }
 
 // Blockbook data providers for Bitcoin Cash
-const mainnetBchBlockbookProvider = new BlockbookProvider(
-  'https://bch.nativeswap.io/api/v2',
-  AssetBCH,
-  BCH_DECIMAL,
-  { normalizeAddressForApi: bchaddr.toCashAddress },
-)
+// nativeswap.io operated Blockbook instance — no SLA or API key auth - 500 requests per hour
+// Changeable to any blockbook api. For example: Nownodes
+const mainnetBchBlockbookProvider = new BlockbookProvider('https://bch.nativeswap.io/api/v2', AssetBCH, BCH_DECIMAL, {
+  normalizeAddressForApi: bchaddr.toCashAddress,
+})
 export const BlockbookDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined, // NowNodes does not provide a BCH testnet Blockbook node
   [Network.Stagenet]: mainnetBchBlockbookProvider,

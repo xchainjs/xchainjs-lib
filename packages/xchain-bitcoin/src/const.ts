@@ -131,12 +131,9 @@ export const BitgoProviders: UtxoOnlineDataProviders = {
 
 // NowNodes Blockbook data providers for Bitcoin
 // Docs: https://nownodes.io/nodes/bitcoin-btc
-const mainnetBtcBlockbookProvider = new BlockbookProvider(
-  'https://btcbook.nownodes.io/api/v2',
-  AssetBTC,
-  BTC_DECIMAL,
-  { apiKey: process.env.NOWNODES_API_KEY || '' },
-)
+const mainnetBtcBlockbookProvider = new BlockbookProvider('https://btcbook.nownodes.io/api/v2', AssetBTC, BTC_DECIMAL, {
+  apiKey: process.env.NOWNODES_API_KEY || '',
+})
 const testnetBtcBlockbookProvider = new BlockbookProvider(
   'https://btcbook-testnet.nownodes.io/api/v2',
   AssetBTC,
