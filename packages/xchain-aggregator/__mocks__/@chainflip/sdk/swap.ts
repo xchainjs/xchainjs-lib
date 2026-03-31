@@ -1,4 +1,59 @@
-import { AssetData, ChainData, Chains, DepositAddressRequestV2, QuoteRequest } from '@chainflip/sdk/swap'
+// Local type definitions to avoid importing from @chainflip/sdk/swap,
+// which triggers ESM-only dependency chain (@noble/hashes) in Jest.
+
+interface ChainData {
+  chain: string
+  name: string
+  evmChainId: number | undefined
+  isMainnet: boolean
+  requiredBlockConfirmations: number
+  maxRetryDurationBlocks: number | undefined
+}
+
+interface AssetData {
+  chainflipId: string
+  asset: string
+  chain: string
+  contractAddress: string | undefined
+  decimals: number
+  name: string
+  symbol: string
+  isMainnet: boolean
+  minimumSwapAmount: string
+  maximumSwapAmount: string | null
+  minimumEgressAmount: string
+}
+
+interface ChainAssetRef {
+  chain: string
+  asset: string
+}
+
+interface QuoteRequest {
+  srcAsset: string
+  srcChain: string
+  destAsset: string
+  destChain: string
+  amount: string
+}
+
+interface DepositAddressRequestV2 {
+  quote: {
+    srcAsset: ChainAssetRef
+    destAsset: ChainAssetRef
+    depositAmount: string
+  }
+  destAddress: string
+  affiliateBrokers?: Array<{ account: string; commissionBps: number }>
+}
+
+const Chains = {
+  Ethereum: 'Ethereum',
+  Arbitrum: 'Arbitrum',
+  Bitcoin: 'Bitcoin',
+  Solana: 'Solana',
+  Assethub: 'Assethub',
+} as const
 
 interface SwapSDKConfig {
   network?: string
