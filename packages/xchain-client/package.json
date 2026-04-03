@@ -21,7 +21,7 @@
   "dependencies": {
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.13.5"
+    "axios": "1.13.6"
   },
   "publishConfig": {
     "access": "public",
