@@ -66,10 +66,10 @@ export function NodeDetails({ nodesApi }: NodeDetailsProps) {
     }, { operation: 'node', params: { nodeAddress } })
   }
 
-  const codeExample = `import { NodesApi, Configuration, THORNODE_API_9R_URL } from '@xchainjs/xchain-thornode'
+  const codeExample = `import { NodesApi, Configuration, THORNODE_API_URL } from '@xchainjs/xchain-thornode'
 
 // Initialize API
-const config = new Configuration({ basePath: THORNODE_API_9R_URL })
+const config = new Configuration({ basePath: THORNODE_API_URL })
 const nodesApi = new NodesApi(config)
 
 // Fetch specific node by address

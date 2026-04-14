@@ -91,9 +91,8 @@ console.log('Active protocols:', config.protocols)
 
 The aggregator automatically uses the correct endpoints for each network:
 
-- **Mainnet**: `https://thornode.ninerealms.com`
-- **Stagenet**: `https://stagenet-thornode.ninerealms.com`
-- **Testnet**: `https://testnet.thornode.thorchain.info`
+- **Mainnet**: `https://gateway.liquify.com/chain/thorchain_api`
+- **Stagenet**: TBD — stagenet URL migration pending
 
 ## Supported Networks by Protocol
 

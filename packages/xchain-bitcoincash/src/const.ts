@@ -63,13 +63,7 @@ const testnetHaskoinProvider = new HaskoinProvider(
   8,
   HaskoinNetwork.BCHTEST,
 )
-const mainnetHaskoinProvider = new HaskoinProvider(
-  'https://haskoin.ninerealms.com',
-  BCHChain,
-  AssetBCH,
-  8,
-  HaskoinNetwork.BCH,
-)
+const mainnetHaskoinProvider = new HaskoinProvider('https://api.haskoin.com', BCHChain, AssetBCH, 8, HaskoinNetwork.BCH)
 export const HaskoinDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetHaskoinProvider,
   [Network.Stagenet]: mainnetHaskoinProvider,

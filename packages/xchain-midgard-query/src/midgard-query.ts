@@ -68,7 +68,7 @@ export class MidgardQuery {
     const assetString = assetToString(asset)
 
     // Map of assets to their actual decimal places from THORChain pools
-    // Data sourced from https://thornode-v2.ninerealms.com/thorchain/pools
+    // Data sourced from https://gateway.liquify.com/chain/thorchain_api/thorchain/pools
     const fallbackDecimalMap: Record<string, number> = {
       // Bitcoin and forks
       'BTC.BTC': 8,

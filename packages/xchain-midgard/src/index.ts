@@ -1,10 +1,10 @@
-import { MIDGARD_API_9R_URL } from './config'
+import { MIDGARD_API_URL } from './config'
 import { Configuration, DefaultApi } from './generated/midgardApi'
 
 /**
  * The base URL for the Midgard API.
  */
-const baseUrl = MIDGARD_API_9R_URL
+const baseUrl = MIDGARD_API_URL
 
 /**
  * Default configuration for the Midgard API client.
