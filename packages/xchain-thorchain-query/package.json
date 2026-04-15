@@ -37,9 +37,9 @@
     "@xchainjs/xchain-midgard-query": "workspace:*",
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.13.5",
+    "axios": "1.15.0",
     "axios-retry": "3.2.5",
-    "bignumber.js": "^10.0.1"
+    "bignumber.js": "^11.0.0"
   },
   "devDependencies": {
     "axios-mock-adapter": "2.1.0"

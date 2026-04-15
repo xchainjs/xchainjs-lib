@@ -41,13 +41,13 @@
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-evm-providers": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "bignumber.js": "^10.0.1",
+    "bignumber.js": "^11.0.0",
     "ethers": "^6.14.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport": "^6.31.6",
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
-    "axios": "1.13.5",
+    "axios": "1.15.0",
     "axios-mock-adapter": "^2.1.0"
   }
 }
