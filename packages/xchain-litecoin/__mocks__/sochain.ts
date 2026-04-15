@@ -51,5 +51,10 @@ export default {
       const resp = await importjson(filePath)
       return [200, resp]
     })
+
+    //Mock broadcast transaction
+    mock.onPost(/\/broadcast_transaction\//).reply(() => {
+      return [200, { tx_hex: 'mock-txid' }]
+    })
   },
 }
