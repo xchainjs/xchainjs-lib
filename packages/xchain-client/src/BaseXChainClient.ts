@@ -24,7 +24,7 @@ import {
 } from './types'
 
 const MAINNET_THORNODE_API_BASE = 'https://gateway.liquify.com/chain/thorchain_api/thorchain'
-const STAGENET_THORNODE_API_BASE = 'TBD'
+const STAGENET_THORNODE_API_BASE = ''
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 
 const MAINNET_MAYANODE_API_BASE = 'https://mayanode.mayachain.info/mayachain'

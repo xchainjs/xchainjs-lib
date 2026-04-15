@@ -51,7 +51,7 @@ const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
   },
   stagenet: {
     apiRetries: 3,
-    thornodeBaseUrls: ['TBD'],
+    thornodeBaseUrls: [],
   },
   testnet: {
     apiRetries: 3,

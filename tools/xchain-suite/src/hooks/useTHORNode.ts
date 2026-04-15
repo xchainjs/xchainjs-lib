@@ -41,7 +41,7 @@ export function useTHORNode(): THORNodeConfig {
         // Use appropriate endpoint based on network (testnet is not supported)
         let baseUrl = THORNODE_API_URL
         if (network === Network.Stagenet) {
-          baseUrl = 'TBD'
+          baseUrl = ''
         }
 
         const config = new Configuration({ basePath: baseUrl })

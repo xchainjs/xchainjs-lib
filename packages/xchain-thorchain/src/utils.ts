@@ -23,7 +23,7 @@ import { CompatibleAsset } from './types'
 export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
     [Network.Testnet]: ['deprecated'],
-    [Network.Stagenet]: ['TBD'],
+    [Network.Stagenet]: [],
     [Network.Mainnet]: ['https://gateway.liquify.com/chain/thorchain_rpc'],
   }
 }

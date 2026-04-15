@@ -16,7 +16,7 @@ export interface PriceData {
 // Midgard endpoints
 const MIDGARD_URLS: Record<Network, string> = {
   [Network.Mainnet]: 'https://gateway.liquify.com/chain/thorchain_midgard/v2',
-  [Network.Stagenet]: 'TBD',
+  [Network.Stagenet]: '',
   [Network.Testnet]: 'deprecated',
 }
 

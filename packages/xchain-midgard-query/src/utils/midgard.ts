@@ -20,7 +20,7 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   },
   stagenet: {
     apiRetries: 3,
-    midgardBaseUrls: ['TBD'],
+    midgardBaseUrls: [],
   },
   testnet: {
     apiRetries: 3,
