@@ -63,9 +63,9 @@ In order for this library to de/serialize proto3 structures, you can use the fol
 
 Alternatively, you can run the convenience script: `genMsgs.sh`, which will overwrite the proto/js files in types/proto. This should only be done and checked in if changes were made to the upstream Msg in the THORNode repo.
 
-### Setting Headers for Liquify endpoints
+### Setting Headers for public endpoints
 
-If you plan on using the publically accessible endpoints provided by Liquify (listed below), ensure that you add a valid 'x-client-id' to all requests
+If you plan on using the publicly accessible endpoints listed below, ensure that you add a valid 'x-client-id' to all requests
 
 - https://gateway.liquify.com/chain/thorchain_midgard
 - https://api.haskoin.com (BTC/BCH/LTC)

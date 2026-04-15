@@ -44,7 +44,7 @@ Bitaps API rate limits: Standard limit 15 requests within 5 seconds for a single
 
 ### Setting Headers for Nine Realms endpoints
 
-If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
+If you plan on using the publicly accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
 
 - https://midgard.ninerealms.com
 - https://haskoin.ninerealms.com (LTC/BCH/LTC)

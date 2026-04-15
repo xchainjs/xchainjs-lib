@@ -357,7 +357,7 @@ Removes liquidity for a user
 ### Midgard Requirements
 
 1. `LP Details https://gateway.liquify.com/chain/thorchain_midgard/v2/member/{address}`
-1. `Pool List https://gateway.liquify.com/chain/thorchain_midgard/v2/pools `
+1. `Pool List https://gateway.liquify.com/chain/thorchain_midgard/v2/pools`
 
 See if the pool is valid
 See if their wallet is a member of the pool.

@@ -51,7 +51,7 @@ async function getThornodeApi() {
   if (!thornodeApiPromise) {
     thornodeApiPromise = (async () => {
       const { TransactionsApi, Configuration } = await import('@xchainjs/xchain-thornode')
-      const config = new Configuration({ basePath: 'https://thornode.ninerealms.com' })
+      const config = new Configuration({ basePath: 'https://gateway.liquify.com/chain/thorchain_api' })
       return new TransactionsApi(config)
     })()
   }
@@ -77,11 +77,7 @@ export class TransactionTracker {
   /**
    * Start tracking a transaction
    */
-  async track(
-    hash: string,
-    protocol: 'Thorchain' | 'Mayachain',
-    onUpdate: StatusListener
-  ): Promise<void> {
+  async track(hash: string, protocol: 'Thorchain' | 'Mayachain', onUpdate: StatusListener): Promise<void> {
     const key = `${protocol}:${hash}`
 
     // Initialize status
@@ -142,9 +138,7 @@ export class TransactionTracker {
 
     const poll = async () => {
       try {
-        const api = protocol === 'Thorchain'
-          ? await getThornodeApi()
-          : await getMayanodeApi()
+        const api = protocol === 'Thorchain' ? await getThornodeApi() : await getMayanodeApi()
 
         // Normalize hash for API (remove 0x prefix, uppercase)
         const normalizedHash = normalizeHash(hash)
@@ -193,7 +187,7 @@ export class TransactionTracker {
 
         // Notify listeners
         const listeners = this.listeners.get(key) || []
-        listeners.forEach(listener => listener(newStatus))
+        listeners.forEach((listener) => listener(newStatus))
 
         // Stop polling if complete
         if (newStatus.isComplete) {
@@ -212,7 +206,7 @@ export class TransactionTracker {
           this.statuses.set(key, errorStatus)
 
           const listeners = this.listeners.get(key) || []
-          listeners.forEach(listener => listener(errorStatus))
+          listeners.forEach((listener) => listener(errorStatus))
         }
       }
     }

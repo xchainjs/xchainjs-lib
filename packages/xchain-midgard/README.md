@@ -28,9 +28,9 @@ const data = midgardApi.getPool('BTC.BTC')
 
 [`Midgard Liquify endpoint`](https://gateway.liquify.com/chain/thorchain_midgard/v2/doc)
 
-### Setting Headers for Liquify endpoints
+### Setting Headers for public endpoints
 
-If you plan on using the publically accessible endpoints provided by Liquify (listed below), ensure that you add a valid 'x-client-id' to all requests
+If you plan on using the publicly accessible endpoints listed below, ensure that you add a valid 'x-client-id' to all requests
 
 - https://gateway.liquify.com/chain/thorchain_midgard
 - https://api.haskoin.com (BTC/BCH/LTC)
