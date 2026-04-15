@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.3.0
+
+### Minor Changes
+
+- d3563de: Cleaned up the LTC client by removing Ninerealms default parameters (nodeUrls and nodeAuth).
+
+### Patch Changes
+
+- 0246a01: Update axios 1.13.5 → 1.15.0 to fix critical SSRF and header injection vulnerabilities. Update lodash to ^4.18.0 in zcash-js to fix code injection via \_.template. Update bignumber.js ^10.0.1 → ^11.0.0.
+- Updated dependencies [0246a01]
+- Updated dependencies [c4682c4]
+  - @xchainjs/xchain-client@2.0.12
+  - @xchainjs/xchain-utxo-providers@2.0.13
+  - @xchainjs/xchain-util@2.0.7
+  - @xchainjs/xchain-utxo@2.2.3
+
 ## 2.2.2
 
 ### Patch Changes

@@ -1,5 +1,44 @@
 # Changelog
 
+## 3.0.36
+
+### Patch Changes
+
+- 0246a01: Update axios 1.13.5 → 1.15.0 to fix critical SSRF and header injection vulnerabilities. Update lodash to ^4.18.0 in zcash-js to fix code injection via \_.template. Update bignumber.js ^10.0.1 → ^11.0.0.
+- c4682c4: Migrate Nine Realms endpoints to Liquify and updated providers
+
+  - Mainnet thornode/midgard/rpc endpoints now use gateway.liquify.com
+  - Haskoin endpoint updated to api.haskoin.com
+  - Tracker URL updated to track.thorchain.org
+  - New THORNODE_API_URL and MIDGARD_API_URL exports (old 9R names deprecated)
+  - x-client-id header middleware expanded to match liquify.com
+  - Stagenet defaults cleared (no Liquify stagenet yet)
+  - Testnet entries marked as deprecated
+
+- Updated dependencies [d3563de]
+- Updated dependencies [0246a01]
+- Updated dependencies [c4682c4]
+  - @xchainjs/xchain-litecoin@2.3.0
+  - @xchainjs/xchain-bitcoin@2.2.3
+  - @xchainjs/xchain-bitcoincash@2.2.4
+  - @xchainjs/xchain-client@2.0.12
+  - @xchainjs/xchain-cosmos@3.0.12
+  - @xchainjs/xchain-doge@2.2.3
+  - @xchainjs/xchain-evm@2.0.16
+  - @xchainjs/xchain-thorchain-query@3.0.3
+  - @xchainjs/xchain-thorchain@3.0.16
+  - @xchainjs/xchain-wallet@2.0.26
+  - @xchainjs/xchain-avax@2.0.16
+  - @xchainjs/xchain-base@1.0.16
+  - @xchainjs/xchain-bsc@2.0.17
+  - @xchainjs/xchain-ethereum@2.0.17
+  - @xchainjs/xchain-util@2.0.7
+  - @xchainjs/xchain-ripple@1.0.14
+  - @xchainjs/xchain-solana@1.1.4
+  - @xchainjs/xchain-sui@0.1.1
+  - @xchainjs/xchain-tron@3.0.5
+  - @xchainjs/xchain-zcash@1.3.4
+
 ## 3.0.35
 
 ### Patch Changes
