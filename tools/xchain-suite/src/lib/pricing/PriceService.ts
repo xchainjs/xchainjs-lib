@@ -15,9 +15,9 @@ export interface PriceData {
 
 // Midgard endpoints
 const MIDGARD_URLS: Record<Network, string> = {
-  [Network.Mainnet]: 'https://midgard.ninerealms.com/v2',
-  [Network.Stagenet]: 'https://stagenet-midgard.ninerealms.com/v2',
-  [Network.Testnet]: 'https://testnet.midgard.thorchain.info/v2',
+  [Network.Mainnet]: 'https://gateway.liquify.com/chain/thorchain_midgard/v2',
+  [Network.Stagenet]: '',
+  [Network.Testnet]: 'deprecated',
 }
 
 const MAYA_MIDGARD_URLS: Record<Network, string> = {
@@ -74,9 +74,7 @@ async function fetchThorchainPrices(network: Network): Promise<Map<string, numbe
     const usdcPrice = prices.get('AVAX.USDC') ?? prices.get('ETH.USDC')
     if (usdcPrice) {
       // Find a stablecoin pool to get RUNE price
-      const stablecoinPool = pools.find(p =>
-        p.asset.includes('USDC') || p.asset.includes('USDT')
-      )
+      const stablecoinPool = pools.find((p) => p.asset.includes('USDC') || p.asset.includes('USDT'))
       if (stablecoinPool) {
         // assetPrice is in RUNE terms, so RUNE price = 1 / assetPrice * assetPriceUSD
         // But actually, assetPriceUSD already accounts for this, so we can derive:
@@ -256,10 +254,7 @@ export class PriceService {
   async refreshPrices(): Promise<void> {
     thorchainCache = null
     mayachainCache = null
-    await Promise.all([
-      fetchThorchainPrices(this.network),
-      fetchMayachainPrices(this.network),
-    ])
+    await Promise.all([fetchThorchainPrices(this.network), fetchMayachainPrices(this.network)])
   }
 }
 

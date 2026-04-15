@@ -26,16 +26,15 @@ const data = midgardApi.getPool('BTC.BTC')
 
 ## Documentation
 
-[`Midgard Thorchain endpoint`](https://midgard.thorchain.info/v2/doc)
-[`Midgard NineRelms endpoint`](https://midgard.ninerealms.com/v2/doc)
+[`Midgard Liquify endpoint`](https://gateway.liquify.com/chain/thorchain_midgard/v2/doc)
 
-### Setting Headers for Nine Realms endpoints
+### Setting Headers for public endpoints
 
-If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
+If you plan on using the publicly accessible endpoints listed below, ensure that you add a valid 'x-client-id' to all requests
 
-- https://midgard.ninerealms.com
-- https://haskoin.ninerealms.com (BTC/BCH/LTC)
-- https://thornode.ninerealms.com
+- https://gateway.liquify.com/chain/thorchain_midgard
+- https://api.haskoin.com (BTC/BCH/LTC)
+- https://gateway.liquify.com/chain/thorchain_api
 
 Example
 

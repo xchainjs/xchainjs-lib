@@ -93,7 +93,7 @@ export default function THORNamePage() {
         // Fetch THORName details and current block height in parallel
         const [details, lastBlock] = await Promise.all([
           thorchainQuery.getThornameDetails(thorName),
-          fetch('https://thornode.ninerealms.com/thorchain/lastblock').then((r) => r.json()),
+          fetch('https://gateway.liquify.com/chain/thorchain_api/thorchain/lastblock').then((r) => r.json()),
         ])
 
         if (!details || !details.name) {

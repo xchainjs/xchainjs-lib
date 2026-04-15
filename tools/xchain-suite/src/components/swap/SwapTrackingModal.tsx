@@ -250,7 +250,7 @@ export function SwapTrackingModal({
   const trackerUrl = protocol === 'Chainflip'
     ? `https://scan.chainflip.io/channels/${depositChannelId || ''}`
     : protocol === 'Thorchain'
-    ? `https://track.ninerealms.com/${txHash}`
+    ? `https://track.thorchain.org/${txHash}`
     : `https://www.mayascan.org/tx/${txHash}`
 
   // THORChain/MAYAChain: find current active stage

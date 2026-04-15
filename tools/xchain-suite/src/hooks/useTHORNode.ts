@@ -34,16 +34,14 @@ export function useTHORNode(): THORNodeConfig {
 
       try {
         // Dynamically import thornode to avoid SSR issues
-        const { NodesApi, NetworkApi, MimirApi, Configuration, THORNODE_API_9R_URL } = await import(
+        const { NodesApi, NetworkApi, MimirApi, Configuration, THORNODE_API_URL } = await import(
           '@xchainjs/xchain-thornode'
         )
 
-        // Use appropriate endpoint based on network
-        let baseUrl = THORNODE_API_9R_URL
+        // Use appropriate endpoint based on network (testnet is not supported)
+        let baseUrl = THORNODE_API_URL
         if (network === Network.Stagenet) {
-          baseUrl = 'https://stagenet-thornode.ninerealms.com/'
-        } else if (network === Network.Testnet) {
-          baseUrl = 'https://testnet-thornode.ninerealms.com/'
+          baseUrl = ''
         }
 
         const config = new Configuration({ basePath: baseUrl })

@@ -13,7 +13,7 @@ export const add9Rheader = <T extends { url?: string; headers?: Record<string, s
     // [TypeError: Invalid URL] input: 'unknown-url', code: 'ERR_INVALID_URL' }
     const url = new URL(request?.url ?? 'unknown-url')
     const headerAlreadyExists = request.headers && 'x-client-id' in request.headers
-    if (url.host.includes('ninerealms') && !headerAlreadyExists) {
+    if ((url.host.includes('ninerealms') || url.host.includes('liquify.com')) && !headerAlreadyExists) {
       const headers = request?.headers ?? {}
       // Add custom header to request before returning it
       const newRequest = {

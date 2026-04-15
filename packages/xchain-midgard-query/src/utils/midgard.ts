@@ -16,15 +16,15 @@ import { GetActionsParams, MidgardConfig } from '../types'
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://midgard.ninerealms.com'],
+    midgardBaseUrls: ['https://gateway.liquify.com/chain/thorchain_midgard'],
   },
   stagenet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://stagenet-midgard.ninerealms.com'],
+    midgardBaseUrls: [],
   },
   testnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://testnet.midgard.thorchain.info'],
+    midgardBaseUrls: ['deprecated'],
   },
 }
 

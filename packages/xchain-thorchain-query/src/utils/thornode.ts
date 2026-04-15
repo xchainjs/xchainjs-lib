@@ -39,7 +39,6 @@ import { Address } from '@xchainjs/xchain-util'
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
 
-
 export type ThornodeConfig = {
   apiRetries: number
   thornodeBaseUrls: string[]
@@ -48,15 +47,15 @@ export type ThornodeConfig = {
 const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
   mainnet: {
     apiRetries: 3,
-    thornodeBaseUrls: [`https://thornode.ninerealms.com`],
+    thornodeBaseUrls: [`https://gateway.liquify.com/chain/thorchain_api`],
   },
   stagenet: {
     apiRetries: 3,
-    thornodeBaseUrls: ['https://stagenet-thornode.ninerealms.com'],
+    thornodeBaseUrls: [],
   },
   testnet: {
     apiRetries: 3,
-    thornodeBaseUrls: ['https://testnet.thornode.thorchain.info'],
+    thornodeBaseUrls: ['deprecated'],
   },
 }
 

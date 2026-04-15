@@ -5,7 +5,7 @@ Thornode Module for XChainJS Clients
 ## Modules
 
 Thornode module has been created using openapi-generator-cli to auto-generate rest api reading from "https://gitlab.com/thorchain/thornode/-/raw/release-{version}/openapi/openapi.yaml"
-This library exposes all the Api's outlined in the swagger doc "https://thornode.ninerealms.com/thorchain/doc"
+This library exposes all the Api's outlined in the swagger doc "https://gateway.liquify.com/chain/thorchain_api/thorchain/doc"
 
 ## Installation
 
@@ -18,10 +18,10 @@ yarn add @xchainjs/xchain-thornode
 Request data from MimirApi
 
 ```
-// THORNODE_API_9R_URL - default exported URL
-// import { MimirApi, THORNODE_API_9R_URL, Configuration } from '@xchainjs/xchain-thornode'
+// THORNODE_API_URL - default exported URL
+// import { MimirApi, THORNODE_API_URL, Configuration } from '@xchainjs/xchain-thornode'
 
-  const baseUrl = THORNODE_API_9R_URL
+  const baseUrl = THORNODE_API_URL
   const apiconfig = new Configuration({ basePath: baseUrl })
   const mimirApi = new MimirApi(apiconfig)
   const mimirResponse = await mimirApi.mimir()
@@ -34,10 +34,10 @@ Request data from MimirApi
 Request data from MimirApi
 
 ```
-// THORNODE_API_9R_URL - default exported URL
-// import { MimirApi, THORNODE_API_9R_URL, Configuration } from '@xchainjs/xchain-thornode'
+// THORNODE_API_URL - default exported URL
+// import { MimirApi, THORNODE_API_URL, Configuration } from '@xchainjs/xchain-thornode'
 
-  const baseUrl = THORNODE_API_9R_URL
+  const baseUrl = THORNODE_API_URL
   const headers = {"x-client-id": "my-custom-val"}
   const baseOptions = { headers }
   const apiconfig = new Configuration({ basePath: baseUrl , baseOptions })
@@ -49,15 +49,15 @@ Request data from MimirApi
 
 ## Documentation
 
-[`Thornode NineRelms endpoint`](https://thornode.ninerealms.com/)
+[`Thornode Liquify endpoint`](https://gateway.liquify.com/chain/thorchain_api/)
 
-### Setting Headers for Nine Realms endpoints
+### Setting Headers for public endpoints
 
-If you plan on using the publically accessible endpoints provided by Nine Realms(listed below), ensure that you add a valid 'x-client-id' to all requests
+If you plan on using the publicly accessible endpoints listed below, ensure that you add a valid 'x-client-id' to all requests
 
-- https://midgard.ninerealms.com
-- https://haskoin.ninerealms.com (BTC/BCH/LTC)
-- https://thornode.ninerealms.com
+- https://gateway.liquify.com/chain/thorchain_midgard
+- https://api.haskoin.com (BTC/BCH/LTC)
+- https://gateway.liquify.com/chain/thorchain_api
 
 Example
 

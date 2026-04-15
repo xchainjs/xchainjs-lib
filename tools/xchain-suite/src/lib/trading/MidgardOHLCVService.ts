@@ -1,6 +1,6 @@
 import { OHLCVCandle, TickerStats, TimeInterval, MIDGARD_INTERVALS } from './chartUtils'
 
-const THORCHAIN_MIDGARD = 'https://midgard.ninerealms.com/v2'
+const THORCHAIN_MIDGARD = 'https://gateway.liquify.com/chain/thorchain_midgard/v2'
 const MAYA_MIDGARD = 'https://midgard.mayachain.info/v2'
 
 interface DepthHistoryItem {
@@ -41,11 +41,7 @@ function isNativeAsset(pool: string): boolean {
   return pool in NATIVE_POOL_PROXY
 }
 
-export async function fetchDepthHistory(
-  pool: string,
-  interval: TimeInterval,
-  count = 500
-): Promise<OHLCVCandle[]> {
+export async function fetchDepthHistory(pool: string, interval: TimeInterval, count = 500): Promise<OHLCVCandle[]> {
   const midgardUrl = getMidgardUrl(pool)
   const midgardInterval = MIDGARD_INTERVALS[interval]
   const poolId = getPoolId(pool)

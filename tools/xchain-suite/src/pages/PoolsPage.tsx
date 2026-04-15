@@ -51,13 +51,13 @@ interface ChainflipBoost {
 
 // THORNode/MAYANode endpoints for pool status
 const NODE_ENDPOINTS = {
-  thorchain: 'https://thornode.ninerealms.com/thorchain/pools',
+  thorchain: 'https://gateway.liquify.com/chain/thorchain_api/thorchain/pools',
   mayachain: 'https://mayanode.mayachain.info/mayachain/pools',
 }
 
 // Midgard endpoints for price/volume data
 const MIDGARD_ENDPOINTS = {
-  thorchain: 'https://midgard.ninerealms.com/v2/pools',
+  thorchain: 'https://gateway.liquify.com/chain/thorchain_midgard/v2/pools',
   mayachain: 'https://midgard.mayachain.info/v2/pools',
 }
 
