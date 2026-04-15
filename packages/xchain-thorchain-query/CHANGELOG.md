@@ -1,5 +1,27 @@
 # Changelog
 
+## 3.0.3
+
+### Patch Changes
+
+- 0246a01: Update axios 1.13.5 → 1.15.0 to fix critical SSRF and header injection vulnerabilities. Update lodash to ^4.18.0 in zcash-js to fix code injection via \_.template. Update bignumber.js ^10.0.1 → ^11.0.0.
+- c4682c4: Migrate Nine Realms endpoints to Liquify and updated providers
+
+  - Mainnet thornode/midgard/rpc endpoints now use gateway.liquify.com
+  - Haskoin endpoint updated to api.haskoin.com
+  - Tracker URL updated to track.thorchain.org
+  - New THORNODE_API_URL and MIDGARD_API_URL exports (old 9R names deprecated)
+  - x-client-id header middleware expanded to match liquify.com
+  - Stagenet defaults cleared (no Liquify stagenet yet)
+  - Testnet entries marked as deprecated
+
+- Updated dependencies [0246a01]
+- Updated dependencies [c4682c4]
+  - @xchainjs/xchain-client@2.0.12
+  - @xchainjs/xchain-midgard-query@2.0.15
+  - @xchainjs/xchain-thornode@1.1.1
+  - @xchainjs/xchain-util@2.0.7
+
 ## 3.0.2
 
 ### Patch Changes

@@ -1,5 +1,27 @@
 # Changelog
 
+## 4.1.17
+
+### Patch Changes
+
+- 0246a01: Update axios 1.13.5 → 1.15.0 to fix critical SSRF and header injection vulnerabilities. Update lodash to ^4.18.0 in zcash-js to fix code injection via \_.template. Update bignumber.js ^10.0.1 → ^11.0.0.
+- Updated dependencies [0246a01]
+- Updated dependencies [c4682c4]
+  - @xchainjs/xchain-bitcoin@2.2.3
+  - @xchainjs/xchain-client@2.0.12
+  - @xchainjs/xchain-dash@2.2.3
+  - @xchainjs/xchain-evm@2.0.16
+  - @xchainjs/xchain-mayachain-query@2.1.9
+  - @xchainjs/xchain-mayachain@4.1.3
+  - @xchainjs/xchain-thorchain@3.0.16
+  - @xchainjs/xchain-wallet@2.0.26
+  - @xchainjs/xchain-arbitrum@2.1.2
+  - @xchainjs/xchain-ethereum@2.0.17
+  - @xchainjs/xchain-util@2.0.7
+  - @xchainjs/xchain-kujira@2.0.12
+  - @xchainjs/xchain-radix@2.0.13
+  - @xchainjs/xchain-zcash@1.3.4
+
 ## 4.1.16
 
 ### Patch Changes
