@@ -47,7 +47,7 @@
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "axios": "1.15.0",
-    "bignumber.js": "^10.0.1",
+    "bignumber.js": "^11.0.0",
     "cosmjs-types": "0.9.0",
     "protobufjs": "6.11.4"
   },
