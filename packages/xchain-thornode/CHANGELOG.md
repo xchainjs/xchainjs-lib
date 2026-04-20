@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- d81f5a1: Update THORNode API spec from 3.15.0 to 3.16.3
+
 ## 1.1.1
 
 ### Patch Changes
