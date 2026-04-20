@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.37
+
+### Patch Changes
+
+- @xchainjs/xchain-thorchain-query@3.0.4
+
 ## 3.0.36
 
 ### Patch Changes

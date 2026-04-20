@@ -1,5 +1,14 @@
 # testing-gui
 
+## 1.0.13
+
+### Patch Changes
+
+- Updated dependencies [d81f5a1]
+  - @xchainjs/xchain-thornode@1.2.0
+  - @xchainjs/xchain-thorchain-query@3.0.4
+  - @xchainjs/xchain-thorchain-amm@3.0.37
+
 ## 1.0.12
 
 ### Patch Changes

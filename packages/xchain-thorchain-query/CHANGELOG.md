@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.0.4
+
+### Patch Changes
+
+- Updated dependencies [d81f5a1]
+  - @xchainjs/xchain-thornode@1.2.0
+
 ## 3.0.3
 
 ### Patch Changes
