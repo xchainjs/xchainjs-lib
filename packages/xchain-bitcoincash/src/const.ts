@@ -2,10 +2,13 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
+  BlockbookProvider,
   HaskoinNetwork,
   HaskoinProvider,
   UtxoOnlineDataProviders,
 } from '@xchainjs/xchain-utxo-providers'
+
+import * as bchaddr from './bchaddrjs'
 
 /**
  * Lower bound for transaction fee rate.
@@ -68,6 +71,18 @@ export const HaskoinDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: testnetHaskoinProvider,
   [Network.Stagenet]: mainnetHaskoinProvider,
   [Network.Mainnet]: mainnetHaskoinProvider,
+}
+
+// Blockbook data providers for Bitcoin Cash
+// nativeswap.io operated Blockbook instance — no SLA or API key auth - 500 requests per hour
+// Changeable to any blockbook api. For example: Nownodes
+const mainnetBchBlockbookProvider = new BlockbookProvider('https://bch.nativeswap.io/api/v2', AssetBCH, BCH_DECIMAL, {
+  normalizeAddressForApi: bchaddr.toCashAddress,
+})
+export const BlockbookDataProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined, // NowNodes does not provide a BCH testnet Blockbook node
+  [Network.Stagenet]: mainnetBchBlockbookProvider,
+  [Network.Mainnet]: mainnetBchBlockbookProvider,
 }
 
 /**

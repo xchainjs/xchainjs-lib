@@ -2,6 +2,7 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
+  BlockbookProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   SochainNetwork,
@@ -107,6 +108,16 @@ export const blockcypherDataProviders = {
   [Network.Testnet]: undefined, //no provider here
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+// Blockbook data providers for Dogecoin
+// nativeswap.io operated Blockbook instance — no SLA or API key auth - 500 requests per hour
+// Changeable to any blockbook api. For example: Nownodes
+const mainnetDogeBlockbookProvider = new BlockbookProvider('https://doge.nativeswap.io/api/v2', AssetDOGE, DOGE_DECIMAL)
+export const BlockbookDataProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined, // NowNodes does not provide a DOGE testnet Blockbook node
+  [Network.Stagenet]: mainnetDogeBlockbookProvider,
+  [Network.Mainnet]: mainnetDogeBlockbookProvider,
 }
 
 /**
