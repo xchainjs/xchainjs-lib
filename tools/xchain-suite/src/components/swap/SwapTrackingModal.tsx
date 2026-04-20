@@ -7,7 +7,7 @@ interface SwapTrackingModalProps {
   isOpen: boolean
   onClose: () => void
   txHash: string
-  protocol: 'Thorchain' | 'Mayachain' | 'Chainflip'
+  protocol: 'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'
   explorerUrl?: string
   depositChannelId?: string
 }
@@ -174,12 +174,12 @@ export function SwapTrackingModal({
 
   // THORChain / MAYAChain tracking
   useEffect(() => {
-    if (!isOpen || !txHash || protocol === 'Chainflip') return
+    if (!isOpen || !txHash || protocol === 'Chainflip' || protocol === 'OneClick') return
 
-    transactionTracker.track(txHash, protocol, setStatus)
+    transactionTracker.track(txHash, protocol as 'Thorchain' | 'Mayachain', setStatus)
 
     return () => {
-      transactionTracker.stop(txHash, protocol)
+      transactionTracker.stop(txHash, protocol as 'Thorchain' | 'Mayachain')
     }
   }, [isOpen, txHash, protocol])
 
@@ -251,6 +251,8 @@ export function SwapTrackingModal({
     ? `https://scan.chainflip.io/channels/${depositChannelId || ''}`
     : protocol === 'Thorchain'
     ? `https://track.thorchain.org/${txHash}`
+    : protocol === 'OneClick'
+    ? explorerUrl || ''
     : `https://www.mayascan.org/tx/${txHash}`
 
   // THORChain/MAYAChain: find current active stage
@@ -345,7 +347,17 @@ export function SwapTrackingModal({
 
           {/* Stages */}
           <div className="space-y-2">
-            {protocol === 'Chainflip' ? (
+            {protocol === 'OneClick' ? (
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
+                <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                <p className="font-medium text-green-700 dark:text-green-300">
+                  Deposit Submitted
+                </p>
+                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                  Your funds were sent to the 1Click deposit address. The swap will be processed automatically — check the explorer link below for status.
+                </p>
+              </div>
+            ) : protocol === 'Chainflip' ? (
               CF_STAGE_ORDER.map((stageKey, index) => (
                 <ChainflipStageItem
                   key={stageKey}
@@ -380,7 +392,7 @@ export function SwapTrackingModal({
                 </p>
               </div>
             )
-          ) : (
+          ) : protocol !== 'OneClick' && (
             status?.isComplete && (
               <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
                 <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
@@ -415,7 +427,7 @@ export function SwapTrackingModal({
             rel="noopener noreferrer"
             className="flex-1 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center justify-center gap-2"
           >
-            View on {protocol === 'Chainflip' ? 'Chainflip Scan' : 'Tracker'} <ExternalLink className="w-4 h-4" />
+            View on {protocol === 'Chainflip' ? 'Chainflip Scan' : protocol === 'OneClick' ? 'Explorer' : 'Tracker'} <ExternalLink className="w-4 h-4" />
           </a>
           {explorerUrl && protocol !== 'Chainflip' && (
             <a

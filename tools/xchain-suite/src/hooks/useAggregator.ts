@@ -5,7 +5,7 @@ import type { XChainClient } from '@xchainjs/xchain-client'
 import type { Chain } from '@xchainjs/xchain-util'
 import { SwapService, type SwapQuote } from '../lib/swap/SwapService'
 
-// Chains supported by THORChain, MAYAChain, and Chainflip for swaps
+// Chains supported by THORChain, MAYAChain, Chainflip, and 1Click for swaps
 const SWAP_SUPPORTED_CHAINS: string[] = [
   'BTC',
   'BCH',
@@ -22,6 +22,8 @@ const SWAP_SUPPORTED_CHAINS: string[] = [
   'KUJI',
   'SOL',
   'SUI',
+  'XRP',
+  'ADA',
 ]
 
 interface UseSwapResult {
