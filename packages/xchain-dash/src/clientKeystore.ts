@@ -121,7 +121,9 @@ export class ClientKeystore extends Client {
       if (!insightUtxo) {
         throw new Error('Unable to match accumulative inputs with insight utxos')
       }
-      const scriptBuffer: Buffer = Buffer.from(insightUtxo.scriptPubKey || '', 'hex')
+      // Providers may populate either scriptPubKey (Insight) or witnessUtxo.script (Blockcypher)
+      const scriptHex = insightUtxo.scriptPubKey || insightUtxo.witnessUtxo?.script.toString('hex') || ''
+      const scriptBuffer: Buffer = Buffer.from(scriptHex, 'hex')
       const script = new dashcore.Script(scriptBuffer)
       tx.inputs[index] = new dashcore.Transaction.Input.PublicKeyHash({
         prevTxId: Buffer.from(insightUtxo.hash, 'hex'),
@@ -191,7 +193,9 @@ export class ClientKeystore extends Client {
       if (!insightUtxo) {
         throw new Error('Unable to match accumulative inputs with insight utxos')
       }
-      const scriptBuffer: Buffer = Buffer.from(insightUtxo.scriptPubKey || '', 'hex')
+      // Providers may populate either scriptPubKey (Insight) or witnessUtxo.script (Blockcypher)
+      const scriptHex = insightUtxo.scriptPubKey || insightUtxo.witnessUtxo?.script.toString('hex') || ''
+      const scriptBuffer: Buffer = Buffer.from(scriptHex, 'hex')
       const script = new dashcore.Script(scriptBuffer)
       tx.inputs[index] = new dashcore.Transaction.Input.PublicKeyHash({
         prevTxId: Buffer.from(insightUtxo.hash, 'hex'),

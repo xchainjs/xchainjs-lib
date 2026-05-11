@@ -347,7 +347,9 @@ abstract class Client extends UTXOClient {
 
       // Add selected inputs
       for (const utxo of selectionResult.inputs) {
-        const scriptBuffer: Buffer = Buffer.from(utxo.scriptPubKey || '', 'hex')
+        // Providers may populate either scriptPubKey (Insight) or witnessUtxo.script (Blockcypher)
+        const scriptHex = utxo.scriptPubKey || utxo.witnessUtxo?.script.toString('hex') || ''
+        const scriptBuffer: Buffer = Buffer.from(scriptHex, 'hex')
         const script = new dashcore.Script(scriptBuffer)
         const input = new dashcore.Transaction.Input.PublicKeyHash({
           prevTxId: Buffer.from(utxo.hash, 'hex'),
@@ -428,7 +430,9 @@ abstract class Client extends UTXOClient {
 
       // Add inputs
       for (const utxo of maxCalc.inputs) {
-        const scriptBuffer: Buffer = Buffer.from(utxo.scriptPubKey || '', 'hex')
+        // Providers may populate either scriptPubKey (Insight) or witnessUtxo.script (Blockcypher)
+        const scriptHex = utxo.scriptPubKey || utxo.witnessUtxo?.script.toString('hex') || ''
+        const scriptBuffer: Buffer = Buffer.from(scriptHex, 'hex')
         const script = new dashcore.Script(scriptBuffer)
         const input = new dashcore.Transaction.Input.PublicKeyHash({
           prevTxId: Buffer.from(utxo.hash, 'hex'),
