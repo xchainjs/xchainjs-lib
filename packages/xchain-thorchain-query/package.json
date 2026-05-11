@@ -37,7 +37,7 @@
     "@xchainjs/xchain-midgard-query": "workspace:*",
     "@xchainjs/xchain-thornode": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.15.0",
+    "axios": "1.15.2",
     "axios-retry": "3.2.5",
     "bignumber.js": "^11.0.0"
   },
