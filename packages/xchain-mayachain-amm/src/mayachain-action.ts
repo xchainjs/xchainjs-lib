@@ -1,3 +1,4 @@
+import { Protocol } from '@xchainjs/xchain-client'
 import { abi } from '@xchainjs/xchain-evm'
 import { MAYAChain } from '@xchainjs/xchain-mayachain'
 import { CompatibleAsset, MayachainQuery } from '@xchainjs/xchain-mayachain-query'
@@ -75,12 +76,7 @@ export class MayachainAction {
           url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
         }
       }
-      const feeRates = await wallet.estimateTransferFees({
-        asset: assetAmount.asset,
-        amount: assetAmount.baseAmount,
-        recipient,
-        memo,
-      })
+      const feeRates = await wallet.getFeeRates(assetAmount.asset.chain, Protocol.MAYACHAIN)
       const hash = await wallet.transfer({
         asset: assetAmount.asset,
         amount: assetAmount.baseAmount,
