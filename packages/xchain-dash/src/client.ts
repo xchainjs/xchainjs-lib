@@ -287,6 +287,17 @@ abstract class Client extends UTXOClient {
     return fee > Utils.TX_MIN_FEE ? fee : Utils.TX_MIN_FEE
   }
 
+  private getUtxoScriptHex(utxo: UTXO): string {
+    // Providers may populate either scriptPubKey (Insight) or witnessUtxo.script (Blockcypher)
+    const scriptHex = utxo.scriptPubKey || utxo.witnessUtxo?.script.toString('hex')
+    if (!scriptHex) {
+      throw UtxoError.validationError(
+        `UTXO ${utxo.hash}:${utxo.index} is missing scriptPubKey and witnessUtxo.script`,
+      )
+    }
+    return scriptHex
+  }
+
   // ==================== Enhanced Transaction Methods ====================
 
   /**
@@ -347,7 +358,7 @@ abstract class Client extends UTXOClient {
 
       // Add selected inputs
       for (const utxo of selectionResult.inputs) {
-        const scriptBuffer: Buffer = Buffer.from(utxo.scriptPubKey || '', 'hex')
+        const scriptBuffer: Buffer = Buffer.from(this.getUtxoScriptHex(utxo), 'hex')
         const script = new dashcore.Script(scriptBuffer)
         const input = new dashcore.Transaction.Input.PublicKeyHash({
           prevTxId: Buffer.from(utxo.hash, 'hex'),
@@ -428,7 +439,7 @@ abstract class Client extends UTXOClient {
 
       // Add inputs
       for (const utxo of maxCalc.inputs) {
-        const scriptBuffer: Buffer = Buffer.from(utxo.scriptPubKey || '', 'hex')
+        const scriptBuffer: Buffer = Buffer.from(this.getUtxoScriptHex(utxo), 'hex')
         const script = new dashcore.Script(scriptBuffer)
         const input = new dashcore.Transaction.Input.PublicKeyHash({
           prevTxId: Buffer.from(utxo.hash, 'hex'),
