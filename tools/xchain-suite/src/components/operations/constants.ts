@@ -18,7 +18,7 @@ export const EXPLORER_TX_URLS: Record<string, string> = {
   // Cosmos chains
   GAIA: 'https://www.mintscan.io/cosmos/txs/',
   THOR: 'https://runescan.io/tx/',
-  MAYA: 'https://www.mayascan.org/tx/',
+  MAYA: 'https://www.explorer.mayachain.info/tx/',
   KUJI: 'https://finder.kujira.network/kaiyo-1/tx/',
   // Other chains
   SOL: 'https://solscan.io/tx/',

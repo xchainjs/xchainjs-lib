@@ -251,7 +251,7 @@ export function SwapTrackingModal({
     ? `https://scan.chainflip.io/channels/${depositChannelId || ''}`
     : protocol === 'Thorchain'
     ? `https://track.thorchain.org/${txHash}`
-    : `https://www.mayascan.org/tx/${txHash}`
+    : `https://www.explorer.mayachain.info/tx/${txHash}`
 
   // THORChain/MAYAChain: find current active stage
   const activeStageIndex = status

@@ -10,7 +10,6 @@ import * as Dash from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 
 import { Client } from './client'
-import * as nodeApi from './node-api'
 import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
@@ -141,11 +140,7 @@ export class ClientKeystore extends Client {
     tx.sign(`${dashKeys.privateKey?.toString('hex')}`)
 
     const txHex = tx.checkedSerialize({})
-    return await nodeApi.broadcastTx({
-      txHex,
-      nodeUrl: this.nodeUrls[this.network],
-      auth: this.nodeAuth,
-    })
+    return await this.broadcastTx(txHex)
   }
 
   /**
@@ -212,11 +207,7 @@ export class ClientKeystore extends Client {
     tx.sign(`${dashKeys.privateKey?.toString('hex')}`)
 
     const txHex = tx.checkedSerialize({})
-    const hash = await nodeApi.broadcastTx({
-      txHex,
-      nodeUrl: this.nodeUrls[this.network],
-      auth: this.nodeAuth,
-    })
+    const hash = await this.broadcastTx(txHex)
 
     return { hash, maxAmount, fee }
   }

@@ -51,9 +51,9 @@ export const AssetDASH: Asset = { chain: DASHChain, symbol: 'DASH', ticker: 'DAS
  * Explorer provider for Dash mainnet.
  */
 const DASH_MAINNET_EXPLORER = new ExplorerProvider(
-  'https://insight.dash.org/insight',
-  'https://insight.dash.org/insight/address/%%ADDRESS%%',
-  'https://insight.dash.org/insight/tx/%%TX_ID%%',
+  'https://blockchair.com/dash',
+  'https://blockchair.com/dash/address/%%ADDRESS%%',
+  'https://blockchair.com/dash/transaction/%%TX_ID%%',
 )
 
 /**
