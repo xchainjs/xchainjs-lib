@@ -7,7 +7,6 @@ import { TxParams, UTXO, UtxoClientParams, UtxoSelectionPreferences } from '@xch
 
 import { Client } from './client'
 import { getRawTx } from './insight-api'
-import * as nodeApi from './node-api'
 import { NodeAuth, NodeUrls } from './types'
 
 /**
@@ -96,13 +95,8 @@ class ClientLedger extends Client {
       additionals: [],
     })
 
-    // Broadcast transaction
-    const txHash = await nodeApi.broadcastTx({
-      txHex,
-      nodeUrl: this.nodeUrls[this.network],
-      auth: this.nodeAuth,
-    })
-    // Throw error if no transaction hash is received
+    // Broadcast transaction via the configured data providers
+    const txHash = await this.broadcastTx(txHex)
     if (!txHash) {
       throw Error('No Tx hash')
     }
@@ -163,11 +157,7 @@ class ClientLedger extends Client {
       additionals: [],
     })
 
-    const hash = await nodeApi.broadcastTx({
-      txHex,
-      nodeUrl: this.nodeUrls[this.network],
-      auth: this.nodeAuth,
-    })
+    const hash = await this.broadcastTx(txHex)
     if (!hash) {
       throw Error('No Tx hash')
     }
