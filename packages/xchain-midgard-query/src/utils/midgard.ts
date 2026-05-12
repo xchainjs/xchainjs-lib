@@ -16,7 +16,7 @@ import { GetActionsParams, MidgardConfig } from '../types'
 const defaultMidgardConfig: Record<Network, MidgardConfig> = {
   mainnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['https://gateway.liquify.com/chain/thorchain_midgard'],
+    midgardBaseUrls: ['https://midgard.thorchain.network', 'https://gateway.liquify.com/chain/thorchain_midgard'],
   },
   stagenet: {
     apiRetries: 3,

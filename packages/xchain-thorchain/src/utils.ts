@@ -24,7 +24,7 @@ export const getDefaultClientUrls = (): Record<Network, string[]> => {
   return {
     [Network.Testnet]: ['deprecated'],
     [Network.Stagenet]: [],
-    [Network.Mainnet]: ['https://gateway.liquify.com/chain/thorchain_rpc'],
+    [Network.Mainnet]: ['https://rpc.thorchain.network', 'https://gateway.liquify.com/chain/thorchain_rpc'],
   }
 }
 /**

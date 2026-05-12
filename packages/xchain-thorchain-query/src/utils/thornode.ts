@@ -47,7 +47,7 @@ export type ThornodeConfig = {
 const defaultThornodeConfig: Record<Network, ThornodeConfig> = {
   mainnet: {
     apiRetries: 3,
-    thornodeBaseUrls: [`https://gateway.liquify.com/chain/thorchain_api`],
+    thornodeBaseUrls: [`https://thornode.thorchain.network`, `https://gateway.liquify.com/chain/thorchain_api`],
   },
   stagenet: {
     apiRetries: 3,

@@ -23,7 +23,7 @@ import {
   XChainClientParams,
 } from './types'
 
-const MAINNET_THORNODE_API_BASE = 'https://gateway.liquify.com/chain/thorchain_api/thorchain'
+const MAINNET_THORNODE_API_BASE = 'https://thornode.thorchain.network/thorchain'
 const STAGENET_THORNODE_API_BASE = ''
 const TESTNET_THORNODE_API_BASE = 'https://testnet.thornode.thorchain.info/thorchain'
 
