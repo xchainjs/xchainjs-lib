@@ -261,7 +261,7 @@ describe('OneClick protocol', () => {
 
     it('should use dry=true when addresses not provided', async () => {
       let capturedBody: string | undefined
-      mockFetch.mockImplementation((url: string, _options?: RequestInit) => {
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
         if (url.includes('/v0/tokens')) {
           return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
         }

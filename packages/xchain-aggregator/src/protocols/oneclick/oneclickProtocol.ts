@@ -18,6 +18,7 @@ import {
   QuoteSwap,
   QuoteSwapParams,
   SwapHistory,
+  SwapHistoryParams,
   TxSubmitted,
 } from '../../types'
 
@@ -170,7 +171,7 @@ export class OneClickProtocol implements IProtocol {
     return { hash, url }
   }
 
-  public async getSwapHistory(): Promise<SwapHistory> {
+  public async getSwapHistory(_params: SwapHistoryParams): Promise<SwapHistory> {
     return { count: 0, swaps: [] }
   }
 
