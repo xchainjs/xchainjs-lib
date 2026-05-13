@@ -5431,6 +5431,7 @@ __metadata:
     "@ledgerhq/hw-transport-node-hid": "npm:^6.28.6"
     "@xchainjs/xchain-arbitrum": "workspace:*"
     "@xchainjs/xchain-bitcoin": "workspace:*"
+    "@xchainjs/xchain-cardano": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-dash": "workspace:*"
