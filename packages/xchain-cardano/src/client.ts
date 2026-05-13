@@ -398,10 +398,13 @@ export class Client extends BaseXChainClient {
     const lovelaceUtxos = utxos.filter((u) => u.amount.some((a) => a.unit === 'lovelace'))
 
     const unspentOutputs = cardanoLib.TransactionUnspentOutputs.new()
+    let totalLovelace = 0n
     for (const utxo of lovelaceUtxos) {
       const amount = utxo.amount.find((a) => a.unit === 'lovelace')?.quantity
 
       if (!amount) continue
+
+      totalLovelace += BigInt(amount)
 
       const inputValue = cardanoLib.Value.new(cardanoLib.BigNum.from_str(amount.toString()))
 
@@ -420,10 +423,119 @@ export class Client extends BaseXChainClient {
       txBuilder.set_metadata(metadata)
     }
 
+    // Validate that the input set covers amount + fee BEFORE add_change_if_needed.
+    // Without this guard, CSL either throws InsufficientInputBalance (opaque to callers)
+    // or silently collapses the change output into the fee, draining the wallet. Callers
+    // sending the full balance must use prepareMaxTx instead.
+    const requestedAmount = BigInt(amount.amount().toString())
+    const minFee = BigInt(txBuilder.min_fee().to_str())
+    if (totalLovelace < requestedAmount + minFee) {
+      throw Error(
+        `Insufficient ADA: required ${requestedAmount + minFee} lovelace ` +
+          `(${requestedAmount} + ${minFee} fee), available ${totalLovelace} lovelace. ` +
+          `Use prepareMaxTx to send the maximum spendable balance.`,
+      )
+    }
+
     txBuilder.add_change_if_needed(senderAddr)
 
     return {
       rawUnsignedTx: txBuilder.build_tx().to_hex(),
+    }
+  }
+
+  /**
+   * Prepares a sweep transaction that sends the maximum spendable balance, after deducting the
+   * network fee, to the recipient. The output amount is computed as totalLovelace - fee and no
+   * change output is produced.
+   *
+   * @param {Object} params - Sweep params.
+   * @returns {Promise<PreparedTx & { maxAmount: BaseAmount; fee: BaseAmount }>} The raw unsigned
+   *   transaction along with the resolved max amount and fee in lovelace.
+   */
+  public async prepareMaxTx({
+    sender,
+    recipient,
+    memo,
+  }: {
+    sender: Address
+    recipient: Address
+    memo?: string
+  }): Promise<PreparedTx & { maxAmount: BaseAmount; fee: BaseAmount }> {
+    const currentSlot = await this.roundRobinGetLatestBlock()
+    const utxos = await this.roundRobinGetAllAddressUTXOs(sender)
+
+    if (!currentSlot.slot) {
+      throw Error('Fail to fetch slot number')
+    }
+
+    const cardanoLib = await getCardano()
+    const recipientAddr = cardanoLib.Address.from_bech32(recipient)
+    const senderAddr = cardanoLib.Address.from_bech32(sender)
+
+    const lovelaceUtxos = utxos.filter((u) => u.amount.some((a) => a.unit === 'lovelace'))
+    if (lovelaceUtxos.length === 0) {
+      throw Error('No spendable UTXOs')
+    }
+
+    const totalLovelace = lovelaceUtxos.reduce((sum, utxo) => {
+      const quantity = utxo.amount.find((a) => a.unit === 'lovelace')?.quantity ?? '0'
+      return sum + BigInt(quantity)
+    }, 0n)
+
+    // Build a sweep tx with the given output amount, all UTXOs as inputs, and no change output.
+    const buildSweepBuilder = async (outputAmount: bigint): Promise<TransactionBuilder> => {
+      const txBuilder = await this.getTransactionBuilder()
+      txBuilder.set_ttl(currentSlot.slot + 7200)
+
+      txBuilder.add_output(
+        cardanoLib.TransactionOutput.new(
+          recipientAddr,
+          cardanoLib.Value.new(cardanoLib.BigNum.from_str(outputAmount.toString())),
+        ),
+      )
+
+      for (const utxo of lovelaceUtxos) {
+        const quantity = utxo.amount.find((a) => a.unit === 'lovelace')?.quantity
+        if (!quantity) continue
+        const input = cardanoLib.TransactionInput.new(
+          cardanoLib.TransactionHash.from_bytes(Buffer.from(utxo.tx_hash, 'hex')),
+          utxo.output_index,
+        )
+        const value = cardanoLib.Value.new(cardanoLib.BigNum.from_str(quantity.toString()))
+        txBuilder.add_regular_input(senderAddr, input, value)
+      }
+
+      if (memo) {
+        const metadata = cardanoLib.GeneralTransactionMetadata.new()
+        metadata.insert(cardanoLib.BigNum.from_str('674'), cardanoLib.TransactionMetadatum.new_text(memo))
+        txBuilder.set_metadata(metadata)
+      }
+
+      return txBuilder
+    }
+
+    // First pass: build with the full balance as placeholder to compute min_fee. Using
+    // totalLovelace keeps the output BigNum encoding the same byte-length as the final
+    // (totalLovelace - fee) output, so the fee computed here matches the final tx size.
+    const draft = await buildSweepBuilder(totalLovelace)
+    const fee = BigInt(draft.min_fee().to_str())
+
+    if (totalLovelace <= fee) {
+      throw Error(`Balance ${totalLovelace} lovelace is insufficient to cover network fee ${fee} lovelace`)
+    }
+
+    const maxAmount = totalLovelace - fee
+
+    // Second pass: build with the correct output amount and pin the fee explicitly so the tx
+    // balances (total_inputs == total_outputs + fee) without a change output.
+    const finalBuilder = await buildSweepBuilder(maxAmount)
+    finalBuilder.set_fee(cardanoLib.BigNum.from_str(fee.toString()))
+
+    return {
+      rawUnsignedTx: finalBuilder.build_tx().to_hex(),
+      maxAmount: baseAmount(maxAmount.toString(), ADA_DECIMALS),
+      fee: baseAmount(fee.toString(), ADA_DECIMALS),
     }
   }
 
