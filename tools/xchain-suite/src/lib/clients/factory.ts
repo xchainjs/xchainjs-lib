@@ -406,8 +406,19 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       return new SuiClient({ ...defaultSuiParams, network, phrase })
     case 'XRD':
       return new XrdClient({ network, phrase })
-    case 'ADA':
-      return new AdaClient({ ...defaultAdaParams, network, phrase })
+    case 'ADA': {
+      const adaApiKey = import.meta.env.VITE_ADA_API_KEY
+      return new AdaClient({
+        ...defaultAdaParams,
+        network,
+        phrase,
+        ...(adaApiKey && {
+          apiKeys: {
+            blockfrostApiKeys: [{ mainnet: adaApiKey, testnet: adaApiKey, stagenet: adaApiKey }],
+          },
+        }),
+      })
+    }
     case 'XRP':
       return new XrpClient({ ...defaultXRPParams, network, phrase })
 

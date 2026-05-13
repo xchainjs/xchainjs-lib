@@ -21,6 +21,13 @@ interface ChainBalance {
 // Chains that need async address retrieval
 const ASYNC_ONLY_CHAINS = new Set(['SOL', 'XRD', 'ADA', 'XMR'])
 
+// EVM chains whose getBalance() enumerates ERC-20 holdings via Etherscan when called without
+// an explicit assets list. That enumeration can fail (rate limit, invalid key, NOTOK response)
+// and currently bubbles up, dropping the native balance with it. Passing an empty assets array
+// skips the enumeration and returns only the native asset, which is what the portfolio shows
+// as a per-chain summary anyway.
+const EVM_NATIVE_ONLY_CHAINS = new Set(['ETH', 'AVAX', 'BSC', 'ARB'])
+
 export default function PortfolioPage() {
   const { isConnected, phrase, network } = useWallet()
   const navigate = useNavigate()
@@ -67,8 +74,11 @@ export default function PortfolioPage() {
           address = await client.getAddressAsync()
         }
 
-        // Get balances
-        const rawBalances: Balance[] = await client.getBalance(address)
+        // Get balances. For EVM chains, pass [] to skip Etherscan ERC-20 enumeration — see
+        // EVM_NATIVE_ONLY_CHAINS comment.
+        const rawBalances: Balance[] = EVM_NATIVE_ONLY_CHAINS.has(chain.id)
+          ? await client.getBalance(address, [])
+          : await client.getBalance(address)
 
         // Get prices and build balance entries
         const balanceEntries: ChainBalance['balances'] = []

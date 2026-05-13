@@ -95,9 +95,12 @@ export default function SwapPage() {
     const fetchBalance = async () => {
       try {
         const asset = buildAsset(fromAsset)
-        // For tokens, request the specific asset so the provider queries the contract directly
-        // rather than relying on auto-discovery from transaction history
-        const assets = fromAsset.contractAddress ? [asset] : undefined
+        // Always request a specific asset list so the EVM Etherscan provider never falls into
+        // its "enumerate every ERC-20 the address has touched" path — that path can throw and
+        // drop the native balance with it. For tokens we pass the contract; for native assets
+        // we pass [] because the provider always returns the native balance regardless of the
+        // assets list, and a zero-length list skips the token loop entirely.
+        const assets = fromAsset.contractAddress ? [asset] : []
         let balances: any[]
 
         try {

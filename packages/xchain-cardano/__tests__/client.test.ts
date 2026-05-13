@@ -1,5 +1,5 @@
 import { Balance, Network, TxType } from '@xchainjs/xchain-client'
-import { assetAmount, assetToBase, assetToString, eqAsset } from '@xchainjs/xchain-util'
+import { assetAmount, assetToBase, assetToString, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 
 import cardanoApi from '../__mocks__/cardano/api'
 import { ADAAsset, Client, defaultAdaParams } from '../src'
@@ -88,6 +88,53 @@ describe('Cardano client', () => {
       expect(fees.average.amount().toString()).toBe('155381')
       expect(fees.fast.amount().toString()).toBe('194226')
       expect(fees.fastest.amount().toString()).toBe('233072')
+    })
+
+    it('Should prepare a tx when the balance comfortably covers amount + fee', async () => {
+      const sender =
+        'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
+
+      const { rawUnsignedTx } = await client.prepareTx({
+        sender,
+        recipient: sender,
+        amount: assetToBase(assetAmount(1, 6)),
+      })
+
+      expect(typeof rawUnsignedTx).toBe('string')
+      expect(rawUnsignedTx.length).toBeGreaterThan(0)
+    })
+
+    it('Should reject a prepareTx that drains the wallet (amount > balance - fee)', async () => {
+      const sender =
+        'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
+
+      // Mocked UTXOs sum to 88_765_089_594_051 lovelace. Asking for the full balance leaves
+      // nothing for the fee, which previously either threw an opaque CSL error or silently
+      // collapsed the change into the fee. We now reject this with a clear message.
+      await expect(
+        client.prepareTx({
+          sender,
+          recipient: sender,
+          amount: baseAmount('88765089594051', 6),
+        }),
+      ).rejects.toThrow(/Insufficient ADA/)
+    })
+
+    it('Should sweep the wallet via prepareMaxTx with maxAmount = balance - fee', async () => {
+      const sender =
+        'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
+
+      const totalLovelace = 88_765_089_594_051n
+
+      const result = await client.prepareMaxTx({ sender, recipient: sender })
+
+      const fee = BigInt(result.fee.amount().toString())
+      const maxAmount = BigInt(result.maxAmount.amount().toString())
+
+      expect(fee).toBeGreaterThan(0n)
+      expect(maxAmount).toBe(totalLovelace - fee)
+      expect(typeof result.rawUnsignedTx).toBe('string')
+      expect(result.rawUnsignedTx.length).toBeGreaterThan(0)
     })
 
     it('Should get native transaction data', async () => {

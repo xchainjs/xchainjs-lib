@@ -38,10 +38,15 @@ const Cardano = {
     new: jest.fn().mockImplementation((_config) => ({
       add_input: jest.fn().mockReturnThis(),
       add_output: jest.fn().mockReturnThis(),
+      add_regular_input: jest.fn().mockReturnThis(),
       set_ttl: jest.fn().mockReturnThis(),
       add_inputs_from: jest.fn().mockReturnThis(),
       add_change_if_needed: jest.fn().mockReturnThis(),
       set_metadata: jest.fn().mockReturnThis(),
+      set_fee: jest.fn().mockReturnThis(),
+      min_fee: jest.fn().mockReturnValue({
+        to_str: jest.fn().mockReturnValue('155381'),
+      }),
       build_tx: jest.fn().mockReturnValue({
         to_hex: jest.fn().mockReturnValue('mock-tx-hex'),
       }),
