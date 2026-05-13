@@ -7,7 +7,7 @@ interface SwapTrackingModalProps {
   isOpen: boolean
   onClose: () => void
   txHash: string
-  protocol: 'Thorchain' | 'Mayachain' | 'Chainflip'
+  protocol: 'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'
   explorerUrl?: string
   depositChannelId?: string
 }
@@ -64,20 +64,24 @@ function StageItem({ stage, stageKey, isActive }: { stage: TxStage; stageKey: st
   const label = STAGE_LABELS[stageKey]
 
   return (
-    <div className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
-      stage.completed
-        ? 'bg-green-50 dark:bg-green-900/20'
-        : isActive
-        ? 'bg-blue-50 dark:bg-blue-900/20'
-        : 'bg-gray-50 dark:bg-gray-800'
-    }`}>
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+    <div
+      className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
         stage.completed
-          ? 'bg-green-500 text-white'
+          ? 'bg-green-50 dark:bg-green-900/20'
           : isActive
-          ? 'bg-blue-500 text-white'
-          : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
-      }`}>
+          ? 'bg-blue-50 dark:bg-blue-900/20'
+          : 'bg-gray-50 dark:bg-gray-800'
+      }`}
+    >
+      <div
+        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+          stage.completed
+            ? 'bg-green-500 text-white'
+            : isActive
+            ? 'bg-blue-500 text-white'
+            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
+        }`}
+      >
         {stage.completed ? (
           <Check className="w-4 h-4" />
         ) : isActive ? (
@@ -87,24 +91,29 @@ function StageItem({ stage, stageKey, isActive }: { stage: TxStage; stageKey: st
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`font-medium ${
-          stage.completed
-            ? 'text-green-700 dark:text-green-300'
-            : isActive
-            ? 'text-blue-700 dark:text-blue-300'
-            : 'text-gray-500 dark:text-gray-400'
-        }`}>
+        <p
+          className={`font-medium ${
+            stage.completed
+              ? 'text-green-700 dark:text-green-300'
+              : isActive
+              ? 'text-blue-700 dark:text-blue-300'
+              : 'text-gray-500 dark:text-gray-400'
+          }`}
+        >
           {label.title}
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {label.description}
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{label.description}</p>
       </div>
     </div>
   )
 }
 
-function ChainflipStageItem({ stageKey, completed, isActive, index }: {
+function ChainflipStageItem({
+  stageKey,
+  completed,
+  isActive,
+  index,
+}: {
   stageKey: string
   completed: boolean
   isActive: boolean
@@ -113,20 +122,24 @@ function ChainflipStageItem({ stageKey, completed, isActive, index }: {
   const label = CF_STAGE_LABELS[stageKey]
 
   return (
-    <div className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
-      completed
-        ? 'bg-green-50 dark:bg-green-900/20'
-        : isActive
-        ? 'bg-blue-50 dark:bg-blue-900/20'
-        : 'bg-gray-50 dark:bg-gray-800'
-    }`}>
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+    <div
+      className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
         completed
-          ? 'bg-green-500 text-white'
+          ? 'bg-green-50 dark:bg-green-900/20'
           : isActive
-          ? 'bg-blue-500 text-white'
-          : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
-      }`}>
+          ? 'bg-blue-50 dark:bg-blue-900/20'
+          : 'bg-gray-50 dark:bg-gray-800'
+      }`}
+    >
+      <div
+        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+          completed
+            ? 'bg-green-500 text-white'
+            : isActive
+            ? 'bg-blue-500 text-white'
+            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400'
+        }`}
+      >
         {completed ? (
           <Check className="w-4 h-4" />
         ) : isActive ? (
@@ -136,18 +149,18 @@ function ChainflipStageItem({ stageKey, completed, isActive, index }: {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`font-medium ${
-          completed
-            ? 'text-green-700 dark:text-green-300'
-            : isActive
-            ? 'text-blue-700 dark:text-blue-300'
-            : 'text-gray-500 dark:text-gray-400'
-        }`}>
+        <p
+          className={`font-medium ${
+            completed
+              ? 'text-green-700 dark:text-green-300'
+              : isActive
+              ? 'text-blue-700 dark:text-blue-300'
+              : 'text-gray-500 dark:text-gray-400'
+          }`}
+        >
           {label.title}
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {label.description}
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{label.description}</p>
       </div>
     </div>
   )
@@ -174,12 +187,15 @@ export function SwapTrackingModal({
 
   // THORChain / MAYAChain tracking
   useEffect(() => {
-    if (!isOpen || !txHash || protocol === 'Chainflip') return
+    // Reset status whenever the modal target changes; otherwise a previous Thor/Maya
+    // status object can bleed into a subsequent Chainflip/OneClick render.
+    setStatus(null)
+    if (!isOpen || !txHash || protocol === 'Chainflip' || protocol === 'OneClick') return
 
-    transactionTracker.track(txHash, protocol, setStatus)
+    transactionTracker.track(txHash, protocol as 'Thorchain' | 'Mayachain', setStatus)
 
     return () => {
-      transactionTracker.stop(txHash, protocol)
+      transactionTracker.stop(txHash, protocol as 'Thorchain' | 'Mayachain')
     }
   }, [isOpen, txHash, protocol])
 
@@ -214,12 +230,16 @@ export function SwapTrackingModal({
       } catch (e: any) {
         if (cancelled) return
         console.warn('[SwapTrackingModal] Chainflip poll error:', e.message)
-        setCfStatus(prev => prev ? { ...prev, error: e.message } : {
-          state: 'WAITING',
-          isComplete: false,
-          isFailed: false,
-          error: e.message,
-        })
+        setCfStatus((prev) =>
+          prev
+            ? { ...prev, error: e.message }
+            : {
+                state: 'WAITING',
+                isComplete: false,
+                isFailed: false,
+                error: e.message,
+              },
+        )
       }
     }
 
@@ -247,16 +267,17 @@ export function SwapTrackingModal({
   if (!isOpen) return null
 
   // Determine tracker URL
-  const trackerUrl = protocol === 'Chainflip'
-    ? `https://scan.chainflip.io/channels/${depositChannelId || ''}`
-    : protocol === 'Thorchain'
-    ? `https://track.thorchain.org/${txHash}`
-    : `https://www.explorer.mayachain.info/tx/${txHash}`
+  const trackerUrl =
+    protocol === 'Chainflip'
+      ? `https://scan.chainflip.io/channels/${depositChannelId || ''}`
+      : protocol === 'Thorchain'
+      ? `https://track.thorchain.org/${txHash}`
+      : protocol === 'OneClick'
+      ? explorerUrl || ''
+      : `https://www.explorer.mayachain.info/tx/${txHash}`
 
   // THORChain/MAYAChain: find current active stage
-  const activeStageIndex = status
-    ? STAGE_ORDER.findIndex(key => !status.stages[key].completed)
-    : 0
+  const activeStageIndex = status ? STAGE_ORDER.findIndex((key) => !status.stages[key].completed) : 0
 
   // Chainflip: find current stage index
   const cfCurrentState = cfStatus?.state || 'WAITING'
@@ -271,9 +292,7 @@ export function SwapTrackingModal({
       <div className="relative z-[101] w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Transaction Progress
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Transaction Progress</h2>
           <button
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
@@ -290,9 +309,7 @@ export function SwapTrackingModal({
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 {protocol === 'Chainflip' ? 'Deposit Channel' : 'Transaction Hash'}
               </span>
-              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                {protocol}
-              </span>
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">{protocol}</span>
             </div>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-sm font-mono text-gray-900 dark:text-gray-100 truncate">
@@ -303,49 +320,48 @@ export function SwapTrackingModal({
                 className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 title={protocol === 'Chainflip' && depositChannelId ? 'Copy deposit channel ID' : 'Copy tx hash'}
               >
-                {copied ? (
-                  <CheckCheck className="w-4 h-4 text-green-500" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
+                {copied ? <CheckCheck className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
           {/* Error Display */}
-          {protocol === 'Chainflip' ? (
-            cfStatus?.error && (
-              <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
-                    {cfStatus.isFailed ? 'Swap Failed' : 'Waiting for status...'}
-                  </p>
-                  <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                    {cfStatus.error}
-                  </p>
+          {protocol === 'Chainflip'
+            ? cfStatus?.error && (
+                <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+                      {cfStatus.isFailed ? 'Swap Failed' : 'Waiting for status...'}
+                    </p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">{cfStatus.error}</p>
+                  </div>
                 </div>
-              </div>
-            )
-          ) : (
-            status?.error && (
-              <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
-                    Waiting for transaction...
-                  </p>
-                  <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                    {status.error}
-                  </p>
+              )
+            : status?.error && (
+                <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+                      Waiting for transaction...
+                    </p>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">{status.error}</p>
+                  </div>
                 </div>
-              </div>
-            )
-          )}
+              )}
 
           {/* Stages */}
           <div className="space-y-2">
-            {protocol === 'Chainflip' ? (
+            {protocol === 'OneClick' ? (
+              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
+                <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                <p className="font-medium text-green-700 dark:text-green-300">Deposit Submitted</p>
+                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                  Your funds were sent to the 1Click deposit address. The swap will be processed automatically — check
+                  the explorer link below for status.
+                </p>
+              </div>
+            ) : protocol === 'Chainflip' ? (
               CF_STAGE_ORDER.map((stageKey, index) => (
                 <ChainflipStageItem
                   key={stageKey}
@@ -368,31 +384,26 @@ export function SwapTrackingModal({
           </div>
 
           {/* Completion Message */}
-          {protocol === 'Chainflip' ? (
-            cfStatus?.isComplete && (
-              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
-                <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                <p className="font-medium text-green-700 dark:text-green-300">
-                  Swap Complete!
-                </p>
-                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                  Your funds have been sent to your destination address.
-                </p>
-              </div>
-            )
-          ) : (
-            status?.isComplete && (
-              <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
-                <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                <p className="font-medium text-green-700 dark:text-green-300">
-                  Swap Complete!
-                </p>
-                <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                  Your funds have been sent to your destination address.
-                </p>
-              </div>
-            )
-          )}
+          {protocol === 'Chainflip'
+            ? cfStatus?.isComplete && (
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
+                  <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                  <p className="font-medium text-green-700 dark:text-green-300">Swap Complete!</p>
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    Your funds have been sent to your destination address.
+                  </p>
+                </div>
+              )
+            : protocol !== 'OneClick' &&
+              status?.isComplete && (
+                <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
+                  <Check className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                  <p className="font-medium text-green-700 dark:text-green-300">Swap Complete!</p>
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    Your funds have been sent to your destination address.
+                  </p>
+                </div>
+              )}
 
           {/* Outbound Hash (THORChain/MAYAChain only) */}
           {protocol !== 'Chainflip' && status?.outboundHash && (
@@ -415,7 +426,8 @@ export function SwapTrackingModal({
             rel="noopener noreferrer"
             className="flex-1 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center justify-center gap-2"
           >
-            View on {protocol === 'Chainflip' ? 'Chainflip Scan' : 'Tracker'} <ExternalLink className="w-4 h-4" />
+            View on {protocol === 'Chainflip' ? 'Chainflip Scan' : protocol === 'OneClick' ? 'Explorer' : 'Tracker'}{' '}
+            <ExternalLink className="w-4 h-4" />
           </a>
           {explorerUrl && protocol !== 'Chainflip' && (
             <a
