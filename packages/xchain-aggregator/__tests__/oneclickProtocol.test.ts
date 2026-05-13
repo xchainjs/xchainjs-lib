@@ -2,10 +2,16 @@ import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetETH } from '@xchainjs/xchain-ethereum'
 import { AssetCacao } from '@xchainjs/xchain-mayachain'
 import { AssetRuneNative } from '@xchainjs/xchain-thorchain'
-import { CryptoAmount, assetAmount, assetFromStringEx, assetToBase, assetToString } from '@xchainjs/xchain-util'
+import {
+  CryptoAmount,
+  TokenAsset,
+  assetAmount,
+  assetFromStringEx,
+  assetToBase,
+  assetToString,
+} from '@xchainjs/xchain-util'
 
 import { OneClickProtocol } from '../src/protocols/oneclick'
-import { OneClickApi } from '../src/protocols/oneclick/api'
 import { OneClickToken } from '../src/protocols/oneclick/types'
 import {
   findOneClickToken,
@@ -168,7 +174,7 @@ describe('OneClick protocol', () => {
 
   describe('estimateSwap', () => {
     it('should return quote on success', async () => {
-      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+      mockFetch.mockImplementation((url: string, _options?: RequestInit) => {
         if (url.includes('/v0/tokens')) {
           return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
         }
@@ -255,7 +261,7 @@ describe('OneClick protocol', () => {
 
     it('should use dry=true when addresses not provided', async () => {
       let capturedBody: string | undefined
-      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+      mockFetch.mockImplementation((url: string, _options?: RequestInit) => {
         if (url.includes('/v0/tokens')) {
           return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
         }
@@ -340,16 +346,18 @@ describe('OneClick protocol', () => {
   })
 
   describe('getSwapHistory', () => {
-    it('should throw not implemented', async () => {
-      await expect(protocol.getSwapHistory({ chainAddresses: [] })).rejects.toThrow('Not implemented')
+    it('should return an empty history', async () => {
+      const result = await protocol.getSwapHistory({ chainAddresses: [] })
+      expect(result).toEqual({ count: 0, swaps: [] })
     })
   })
 
   describe('shouldBeApproved', () => {
-    it('should return false', async () => {
+    it('should return false for a token asset', async () => {
+      const usdt = assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7') as TokenAsset
       const result = await protocol.shouldBeApproved({
-        asset: AssetETH as any,
-        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        asset: usdt,
+        amount: new CryptoAmount(assetToBase(assetAmount(100, 6)), usdt),
         address: '0x123',
       })
       expect(result).toBe(false)
@@ -357,8 +365,9 @@ describe('OneClick protocol', () => {
   })
 
   describe('approveRouterToSpend', () => {
-    it('should throw not implemented', async () => {
-      expect(() => protocol.approveRouterToSpend({ asset: AssetETH as any })).toThrow('Not implemented')
+    it('should reject as not implemented', async () => {
+      const usdt = assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7') as TokenAsset
+      await expect(protocol.approveRouterToSpend({ asset: usdt })).rejects.toThrow('Not implemented')
     })
   })
 })

@@ -66,7 +66,7 @@ export const oneClickTokenToXAsset = (
 
   if (token.contractAddress) {
     const symbol = `${token.symbol}-${token.contractAddress}`
-    return { chain, symbol, ticker: symbol, type: AssetType.TOKEN }
+    return { chain, symbol, ticker: token.symbol, type: AssetType.TOKEN }
   }
 
   return { chain, symbol: token.symbol, ticker: token.symbol, type: AssetType.NATIVE }

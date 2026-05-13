@@ -73,7 +73,9 @@ export default function SwapPage() {
   // Tracking state
   const [isTrackingOpen, setIsTrackingOpen] = useState(false)
   const [trackingTxHash, setTrackingTxHash] = useState<string | null>(null)
-  const [trackingProtocol, setTrackingProtocol] = useState<'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'>('Thorchain')
+  const [trackingProtocol, setTrackingProtocol] = useState<'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'>(
+    'Thorchain',
+  )
   const [trackingExplorerUrl, setTrackingExplorerUrl] = useState<string | undefined>()
   const [trackingDepositChannelId, setTrackingDepositChannelId] = useState<string | undefined>()
 
@@ -119,9 +121,7 @@ export default function SwapPage() {
         if (cancelled) return
 
         const match = balances.find(
-          (b: any) =>
-            b.asset.chain === asset.chain &&
-            b.asset.symbol.toLowerCase() === asset.symbol.toLowerCase(),
+          (b: any) => b.asset.chain === asset.chain && b.asset.symbol.toLowerCase() === asset.symbol.toLowerCase(),
         )
         if (match) {
           const assetAmt = baseToAsset(match.amount)
@@ -140,7 +140,9 @@ export default function SwapPage() {
     }
 
     fetchBalance()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [wallet, fromAsset])
 
   // Clear destination override when toAsset changes
@@ -245,7 +247,7 @@ export default function SwapPage() {
 
     // Get addresses
     const fromAddress = await wallet.getAddress(fromAsset.chainId)
-    const destinationAddress = destinationOverride.trim() || await wallet.getAddress(toAsset.chainId)
+    const destinationAddress = destinationOverride.trim() || (await wallet.getAddress(toAsset.chainId))
 
     console.log('[SwapPage] Addresses:', { fromAddress, destinationAddress })
 
@@ -295,7 +297,7 @@ export default function SwapPage() {
     const cryptoAmount = new CryptoAmount(assetToBase(assetAmount(amountNum, decimals)), fromAssetObj)
 
     const fromAddress = await wallet.getAddress(fromAsset.chainId)
-    const destinationAddress = destinationOverride.trim() || await wallet.getAddress(toAsset.chainId)
+    const destinationAddress = destinationOverride.trim() || (await wallet.getAddress(toAsset.chainId))
 
     setIsConfirmOpen(false)
 
@@ -311,7 +313,8 @@ export default function SwapPage() {
           slippageToleranceBps: slippageBps,
           // Streaming swap parameters (only for THORChain/MAYAChain)
           ...(isStreaming &&
-            selectedQuote.protocol !== 'Chainflip' && selectedQuote.protocol !== 'OneClick' && {
+            selectedQuote.protocol !== 'Chainflip' &&
+            selectedQuote.protocol !== 'OneClick' && {
               streamingInterval: parseInt(streamingInterval) || 1,
               streamingQuantity: parseInt(streamingQuantity) || 0,
             }),
@@ -611,7 +614,10 @@ export default function SwapPage() {
                   <button
                     key={bps}
                     type="button"
-                    onClick={() => { setSlippageBps(bps); setCustomSlippage('') }}
+                    onClick={() => {
+                      setSlippageBps(bps)
+                      setCustomSlippage('')
+                    }}
                     className={`px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${
                       slippageBps === bps && !customSlippage
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
@@ -763,29 +769,32 @@ export default function SwapPage() {
         )}
 
         {/* Code Examples */}
-        {fromAsset && toAsset && amount && selectedQuote?.protocol !== 'Chainflip' && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Code Examples</h3>
-            <CodePreview
-              code={generateSwapEstimateCode(
-                fromAsset.chainId,
-                toAsset.chainId,
-                amount,
-                selectedQuote?.protocol === 'Mayachain' ? 'MAYAChain' : 'THORChain',
-              )}
-              title="Get Swap Quote"
-            />
-            <CodePreview
-              code={generateSwapExecuteCode(
-                fromAsset.chainId,
-                toAsset.chainId,
-                amount,
-                selectedQuote?.protocol === 'Mayachain' ? 'MAYAChain' : 'THORChain',
-              )}
-              title="Execute Swap"
-            />
-          </div>
-        )}
+        {fromAsset &&
+          toAsset &&
+          amount &&
+          (selectedQuote?.protocol === 'Thorchain' || selectedQuote?.protocol === 'Mayachain') && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Code Examples</h3>
+              <CodePreview
+                code={generateSwapEstimateCode(
+                  fromAsset.chainId,
+                  toAsset.chainId,
+                  amount,
+                  selectedQuote?.protocol === 'Mayachain' ? 'MAYAChain' : 'THORChain',
+                )}
+                title="Get Swap Quote"
+              />
+              <CodePreview
+                code={generateSwapExecuteCode(
+                  fromAsset.chainId,
+                  toAsset.chainId,
+                  amount,
+                  selectedQuote?.protocol === 'Mayachain' ? 'MAYAChain' : 'THORChain',
+                )}
+                title="Execute Swap"
+              />
+            </div>
+          )}
         {/* DCA Callout */}
         <Link
           to="/recurring"
@@ -795,7 +804,9 @@ export default function SwapPage() {
             <CalendarClock className="w-5 h-5 text-blue-500 shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Dollar-Cost Average</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Set up recurring swaps to DCA into any asset automatically</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Set up recurring swaps to DCA into any asset automatically
+              </p>
             </div>
             <ChevronDown className="w-4 h-4 text-gray-400 -rotate-90 group-hover:translate-x-0.5 transition-transform" />
           </div>
@@ -827,20 +838,24 @@ export default function SwapPage() {
                   >
                     <div className="min-w-0">
                       <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {entry.inputAmount} {entry.fromAsset.split('.')[1]} → {entry.expectedOutput} {entry.toAsset.split('.')[1]}
+                        {entry.inputAmount} {entry.fromAsset.split('.')[1]} → {entry.expectedOutput}{' '}
+                        {entry.toAsset.split('.')[1]}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {entry.protocol} · {formatTimeAgo(entry.timestamp)} · Slip: {(entry.slippageBps / 100).toFixed(2)}%
+                        {entry.protocol} · {formatTimeAgo(entry.timestamp)} · Slip:{' '}
+                        {(entry.slippageBps / 100).toFixed(2)}%
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                        entry.status === 'completed'
-                          ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400'
-                          : entry.status === 'failed'
-                          ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
-                          : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400'
-                      }`}>
+                      <span
+                        className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                          entry.status === 'completed'
+                            ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400'
+                            : entry.status === 'failed'
+                            ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-400'
+                            : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400'
+                        }`}
+                      >
                         {entry.status}
                       </span>
                       <a
@@ -856,7 +871,10 @@ export default function SwapPage() {
                 ))}
                 <button
                   type="button"
-                  onClick={() => { clearHistory(); setSwapHistory([]) }}
+                  onClick={() => {
+                    clearHistory()
+                    setSwapHistory([])
+                  }}
                   className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 >
                   <Trash2 className="w-3 h-3" />

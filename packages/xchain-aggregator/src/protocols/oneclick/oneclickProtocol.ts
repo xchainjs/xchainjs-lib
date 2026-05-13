@@ -10,7 +10,16 @@ import {
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
+import {
+  ApproveParams,
+  IProtocol,
+  IsApprovedParams,
+  ProtocolConfig,
+  QuoteSwap,
+  QuoteSwapParams,
+  SwapHistory,
+  TxSubmitted,
+} from '../../types'
 
 import { OneClickApi } from './api'
 import { CompatibleAsset, OneClickToken } from './types'
@@ -33,11 +42,11 @@ export class OneClickProtocol implements IProtocol {
     this.tokensCache = new CachedValue(() => this.api.getTokens(), 24 * 60 * 60 * 1000)
   }
 
-  public approveRouterToSpend(): Promise<TxSubmitted> {
+  public async approveRouterToSpend(_params: ApproveParams): Promise<TxSubmitted> {
     throw new Error('Not implemented')
   }
 
-  public async shouldBeApproved(): Promise<boolean> {
+  public async shouldBeApproved(_params: IsApprovedParams): Promise<boolean> {
     return false
   }
 
@@ -137,17 +146,32 @@ export class OneClickProtocol implements IProtocol {
       memo: quoteSwap.memo,
     })
 
-    // Fire-and-forget: notify 1Click about the deposit
-    void this.api.submitDeposit(hash, quoteSwap.toAddress)
-
-    return {
-      hash,
-      url: await this.wallet.getExplorerTxUrl(params.fromAsset.chain, hash),
+    // Funds are already on the wire. Awaiting submitDeposit lets callers distinguish
+    // "deposit registered, swap will settle" from "registration silently failed, swap will
+    // never settle" — surface the failure with the broadcast hash so it can be retried.
+    try {
+      await this.api.submitDeposit(hash, quoteSwap.toAddress)
+    } catch (e) {
+      throw new Error(
+        `1Click deposit tx ${hash} was broadcast, but submitDeposit failed: ${
+          e instanceof Error ? e.message : 'unknown error'
+        }`,
+      )
     }
+
+    // Explorer URL is best-effort; the hash is what callers actually need for tracking.
+    let url = ''
+    try {
+      url = await this.wallet.getExplorerTxUrl(params.fromAsset.chain, hash)
+    } catch {
+      // swallow: explorer URL lookup must not reject a successful swap
+    }
+
+    return { hash, url }
   }
 
   public async getSwapHistory(): Promise<SwapHistory> {
-    throw new Error('Not implemented')
+    return { count: 0, swaps: [] }
   }
 
   private errorQuote(params: QuoteSwapParams, error: string): QuoteSwap {
