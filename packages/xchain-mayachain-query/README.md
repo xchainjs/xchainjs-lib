@@ -167,15 +167,4 @@ If you plan on using the publicly accessible endpoints provided by MAYAChain (li
 - https://midgard.mayachain.info
 - https://mayanode.mayachain.info
 
-## Example
-
-```typescript
-import cosmosclient from '@cosmos-client/core'
-import axios from 'axios'
-import { register9Rheader } from '@xchainjs/xchain-util'
-
-register9Rheader(axios)
-register9Rheader(cosmosclient.config.globalAxios)
-```
-
 For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-mayachain-amm/__e2e__/wallet.e2e.ts)

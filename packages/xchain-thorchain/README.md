@@ -17,10 +17,8 @@ npm install @xchainjs/xchain-thorchain
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-thorchain`.
 
 ```sh
-yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util @xchainjs/xchain-cosmos axios @cosmos-client/core bech32-buffer
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util axios
 ```
-
-Important note: Make sure to install same version of `@cosmos-client/core` as `xchain-thorchain` is using (currently `@cosmos-client/core@0.45.1` ). In other case things might break.
 
 ## Documentation
 
@@ -70,16 +68,5 @@ If you plan on using the publicly accessible endpoints listed below, ensure that
 - https://gateway.liquify.com/chain/thorchain_midgard
 - https://api.haskoin.com (BTC/BCH/LTC)
 - https://gateway.liquify.com/chain/thorchain_api
-
-Example
-
-```typescript
-import cosmosclient from '@cosmos-client/core'
-import axios from 'axios'
-import { register9Rheader } from '@xchainjs/xchain-util'
-
-register9Rheader(axios)
-register9Rheader(cosmosclient.config.globalAxios)
-```
 
 For a complete example please see this [test](https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain-amm/__e2e__/wallet.e2e.ts)
