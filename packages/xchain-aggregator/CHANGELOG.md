@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.3.3
+
+### Patch Changes
+
+- 70acc68: Bump axios from 1.15.0 to 1.15.2 to patch high-severity advisories: GHSA-pmwg-cvhr-8vh7 (NO_PROXY loopback bypass), GHSA-q8qp-cvcw-x6jj (HTTP adapter prototype pollution), GHSA-pf86-5x62-jrwf (response/request prototype pollution gadgets), and GHSA-6chq-wfr3-2hj9 (header injection via prototype pollution).
+
+  Bump protobufjs from 6.11.4 to 7.5.5 in `@xchainjs/xchain-cosmos`, `@xchainjs/xchain-mayachain`, and `@xchainjs/xchain-thorchain` to patch GHSA-xq3m-2v4x-88gg (critical: arbitrary code execution).
+
+- Updated dependencies [70acc68]
+- Updated dependencies [ee77092]
+- Updated dependencies [e16cca9]
+- Updated dependencies [e16cca9]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-client@2.0.13
+  - @xchainjs/xchain-mayachain@4.1.4
+  - @xchainjs/xchain-mayachain-amm@4.1.18
+  - @xchainjs/xchain-mayachain-query@2.1.10
+  - @xchainjs/xchain-thorchain@3.0.17
+  - @xchainjs/xchain-thorchain-amm@3.0.37
+  - @xchainjs/xchain-thorchain-query@3.0.4
+  - @xchainjs/xchain-wallet@2.0.27
+
 ## 2.3.2
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.2.4
+
+### Patch Changes
+
+- 70acc68: Bump axios from 1.15.0 to 1.15.2 to patch high-severity advisories: GHSA-pmwg-cvhr-8vh7 (NO_PROXY loopback bypass), GHSA-q8qp-cvcw-x6jj (HTTP adapter prototype pollution), GHSA-pf86-5x62-jrwf (response/request prototype pollution gadgets), and GHSA-6chq-wfr3-2hj9 (header injection via prototype pollution).
+
+  Bump protobufjs from 6.11.4 to 7.5.5 in `@xchainjs/xchain-cosmos`, `@xchainjs/xchain-mayachain`, and `@xchainjs/xchain-thorchain` to patch GHSA-xq3m-2v4x-88gg (critical: arbitrary code execution).
+
+- 9434680: Route Dash balance, transaction list, single-transaction lookups, and broadcast through the configured `dataProviders` instead of calling `insight.dash.org/insight-api` directly. Insight has been placed behind a Cloudflare bot challenge that returns HTTP 403 to programmatic clients. Blockcypher is now ordered ahead of Bitgo in `defaultDashParams.dataProviders` so reads and broadcasts hit a working provider by default; Bitgo remains as a fallback. `transfer` and `transferMax` in `ClientKeystore` and `ClientLedger` now call the inherited `broadcastTx` from `UTXOClient` rather than posting to `nodeUrls`. The mainnet/stagenet explorer URLs (`getExplorerUrl`, `getExplorerAddressUrl`, `getExplorerTxUrl`) have moved from `insight.dash.org/insight` to `blockchair.com/dash`, which is more reliable and aligns with what consumers already use elsewhere. The transfer flow's UTXO fetch path is unchanged.
+- 70acc68: Fix retrieve PublicKeyHash. Fail fast when a UTXO is missing both `scriptPubKey` and `witnessUtxo.script` instead of silently building a transaction with an empty input script.
+- Updated dependencies [70acc68]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-client@2.0.13
+  - @xchainjs/xchain-utxo-providers@2.0.14
+  - @xchainjs/xchain-utxo@2.2.4
+
 ## 2.2.3
 
 ### Patch Changes
