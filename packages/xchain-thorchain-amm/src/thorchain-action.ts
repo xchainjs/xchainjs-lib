@@ -25,12 +25,14 @@ export type NonProtocolActionParams = {
   assetAmount: CryptoAmount<Asset | TokenAsset>
   recipient: Address
   memo: string
+  walletIndex?: number
 }
 
 export type ProtocolActionParams = {
   wallet: Wallet
   assetAmount: CryptoAmount<CompatibleAsset>
   memo: string
+  walletIndex?: number
 }
 
 export type ActionParams = ProtocolActionParams | NonProtocolActionParams
@@ -42,12 +44,18 @@ export class ThorchainAction {
       : this.makeProtocolAction(actionParams)
   }
 
-  private static async makeProtocolAction({ wallet, assetAmount, memo }: ProtocolActionParams): Promise<TxSubmitted> {
+  private static async makeProtocolAction({
+    wallet,
+    assetAmount,
+    memo,
+    walletIndex,
+  }: ProtocolActionParams): Promise<TxSubmitted> {
     const hash = await wallet.deposit({
       chain: THORChain,
       asset: assetAmount.asset,
       amount: assetAmount.baseAmount,
       memo,
+      walletIndex,
     })
 
     return {
@@ -61,6 +69,7 @@ export class ThorchainAction {
     assetAmount,
     recipient,
     memo,
+    walletIndex,
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     // Non EVM actions
     if (!isProtocolEVMChain(assetAmount.asset.chain)) {
@@ -70,6 +79,7 @@ export class ThorchainAction {
           amount: assetAmount.baseAmount,
           recipient,
           memo,
+          walletIndex,
         })
         return {
           hash,
@@ -83,6 +93,7 @@ export class ThorchainAction {
         recipient,
         memo,
         feeRate: feeRates.fast,
+        walletIndex,
       })
       return {
         hash,
@@ -126,6 +137,7 @@ export class ThorchainAction {
       gasPrice: gasPrices.fast,
       isMemoEncoded: true,
       gasLimit: new BigNumber(160000),
+      walletIndex,
     })
 
     return {

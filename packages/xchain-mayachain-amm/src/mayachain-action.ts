@@ -25,12 +25,14 @@ export type NonProtocolActionParams = {
   assetAmount: CryptoAmount<Asset | TokenAsset>
   recipient: Address
   memo: string
+  walletIndex?: number
 }
 
 export type ProtocolActionParams = {
   wallet: Wallet
   assetAmount: CryptoAmount<CompatibleAsset>
   memo: string
+  walletIndex?: number
 }
 
 export type ActionParams = ProtocolActionParams | NonProtocolActionParams
@@ -42,12 +44,18 @@ export class MayachainAction {
       : this.makeProtocolAction(actionParams)
   }
 
-  private static async makeProtocolAction({ wallet, assetAmount, memo }: ProtocolActionParams): Promise<TxSubmitted> {
+  private static async makeProtocolAction({
+    wallet,
+    assetAmount,
+    memo,
+    walletIndex,
+  }: ProtocolActionParams): Promise<TxSubmitted> {
     const hash = await wallet.deposit({
       chain: MAYAChain,
       asset: assetAmount.asset,
       amount: assetAmount.baseAmount,
       memo,
+      walletIndex,
     })
 
     return {
@@ -61,6 +69,7 @@ export class MayachainAction {
     assetAmount,
     recipient,
     memo,
+    walletIndex,
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     // Non EVM actions and non Radix action
     if (!isProtocolEVMChain(assetAmount.asset.chain) && !eqAsset(assetAmount.asset, AssetXRD)) {
@@ -70,6 +79,7 @@ export class MayachainAction {
           amount: assetAmount.baseAmount,
           recipient,
           memo,
+          walletIndex,
         })
         return {
           hash,
@@ -83,6 +93,7 @@ export class MayachainAction {
         recipient,
         memo,
         feeRate: feeRates.fast,
+        walletIndex,
       })
       return {
         hash,
@@ -112,6 +123,7 @@ export class MayachainAction {
             generateStringParam(memo),
           ],
         },
+        walletIndex,
       })
       return {
         hash,
@@ -155,6 +167,7 @@ export class MayachainAction {
     const hash = await wallet.transfer({
       ...tx,
       gasLimit,
+      walletIndex,
     })
 
     return {
