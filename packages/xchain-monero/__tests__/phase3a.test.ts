@@ -16,9 +16,18 @@ describe('Phase 3a: Core crypto primitives', () => {
     it('Should match official Monero hash_to_ec test vectors', () => {
       // From monero/tests/crypto/tests.txt
       const vectors: [string, string][] = [
-        ['da66e9ba613919dec28ef367a125bb310d6d83fb9052e71034164b6dc4f392d0', '52b3f38753b4e13b74624862e253072cf12f745d43fcfafbe8c217701a6e5875'],
-        ['a7fbdeeccb597c2d5fdaf2ea2e10cbfcd26b5740903e7f6d46bcbf9a90384fc6', 'f055ba2d0d9828ce2e203d9896bfda494d7830e7e3a27fa27d5eaa825a79a19c'],
-        ['ed6e6579368caba2cc4851672972e949c0ee586fee4d6d6a9476d4a908f64070', 'da3ceda9a2ef6316bf9272566e6dffd785ac71f57855c0202f422bbb86af4ec0'],
+        [
+          'da66e9ba613919dec28ef367a125bb310d6d83fb9052e71034164b6dc4f392d0',
+          '52b3f38753b4e13b74624862e253072cf12f745d43fcfafbe8c217701a6e5875',
+        ],
+        [
+          'a7fbdeeccb597c2d5fdaf2ea2e10cbfcd26b5740903e7f6d46bcbf9a90384fc6',
+          'f055ba2d0d9828ce2e203d9896bfda494d7830e7e3a27fa27d5eaa825a79a19c',
+        ],
+        [
+          'ed6e6579368caba2cc4851672972e949c0ee586fee4d6d6a9476d4a908f64070',
+          'da3ceda9a2ef6316bf9272566e6dffd785ac71f57855c0202f422bbb86af4ec0',
+        ],
       ]
 
       for (const [inputHex, expectedHex] of vectors) {
@@ -187,13 +196,7 @@ describe('Phase 3a: Core crypto primitives', () => {
       const outputIndex = 0
       const outputKey = deriveOutputKey(txPrivKey, recipKeys.publicViewKey, recipKeys.publicSpendKey, outputIndex)
 
-      const result = isOutputForUs(
-        txPubKey,
-        recipKeys.privateViewKey,
-        recipKeys.publicSpendKey,
-        outputKey,
-        outputIndex,
-      )
+      const result = isOutputForUs(txPubKey, recipKeys.privateViewKey, recipKeys.publicSpendKey, outputKey, outputIndex)
       expect(result).toBe(true)
     })
 

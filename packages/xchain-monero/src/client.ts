@@ -386,7 +386,6 @@ export class Client extends BaseXChainClient {
    * Monero transactions require private key context for ring signature
    * construction, so this method is not supported.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async prepareTx(_params: TxParams): Promise<PreparedTx> {
     throw Error('prepareTx is not supported for Monero. Use transfer() instead.')
   }

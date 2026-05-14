@@ -347,10 +347,7 @@ abstract class Client extends UTXOClient {
       if (this.addressFormat === AddressFormat.P2WPKH) {
         maxCalc.inputs.forEach((utxo: UTXO) => {
           if (!utxo.witnessUtxo) {
-            throw UtxoError.fromUnknown(
-              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
-              'sendMax',
-            )
+            throw UtxoError.fromUnknown(new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`), 'sendMax')
           }
           psbt.addInput({
             hash: utxo.hash,

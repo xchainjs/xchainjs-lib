@@ -23,9 +23,9 @@ describe('Sui client', () => {
         expect(client.getExplorerUrl()).toBe('https://suiscan.xyz/mainnet')
       })
       it('Should get address url', () => {
-        expect(
-          client.getExplorerAddressUrl('0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e'),
-        ).toBe('https://suiscan.xyz/mainnet/account/0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e')
+        expect(client.getExplorerAddressUrl('0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e')).toBe(
+          'https://suiscan.xyz/mainnet/account/0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e',
+        )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('3Tsu2vJq1MbGZkPGSMBrcpBuNJ8qJcGh7ZJbHfY5mEV6')).toBe(
@@ -45,9 +45,9 @@ describe('Sui client', () => {
         expect(client.getExplorerUrl()).toBe('https://suiscan.xyz/testnet')
       })
       it('Should get address url', () => {
-        expect(
-          client.getExplorerAddressUrl('0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e'),
-        ).toBe('https://suiscan.xyz/testnet/account/0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e')
+        expect(client.getExplorerAddressUrl('0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e')).toBe(
+          'https://suiscan.xyz/testnet/account/0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e',
+        )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('3Tsu2vJq1MbGZkPGSMBrcpBuNJ8qJcGh7ZJbHfY5mEV6')).toBe(
@@ -92,9 +92,7 @@ describe('Sui client', () => {
     })
 
     it('Should validate address as valid', () => {
-      expect(
-        client.validateAddress('0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e'),
-      ).toBeTruthy()
+      expect(client.validateAddress('0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e')).toBeTruthy()
     })
 
     it('Should validate address as invalid', () => {

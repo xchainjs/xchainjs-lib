@@ -175,9 +175,7 @@ abstract class Client extends UTXOClient {
     // Providers may populate either scriptPubKey (Insight) or witnessUtxo.script (Blockcypher)
     const scriptHex = utxo.scriptPubKey || utxo.witnessUtxo?.script.toString('hex')
     if (!scriptHex) {
-      throw UtxoError.validationError(
-        `UTXO ${utxo.hash}:${utxo.index} is missing scriptPubKey and witnessUtxo.script`,
-      )
+      throw UtxoError.validationError(`UTXO ${utxo.hash}:${utxo.index} is missing scriptPubKey and witnessUtxo.script`)
     }
     return scriptHex
   }
@@ -265,8 +263,7 @@ abstract class Client extends UTXOClient {
         tx.addData(memo)
       }
 
-      // ESLint disabled: Dash transaction has proper toString() method that returns hex string
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      // Dash transaction has proper toString() method that returns hex string
       return { rawUnsignedTx: tx.toString(), utxos, inputs: selectionResult.inputs }
     } catch (error) {
       if (UtxoError.isUtxoError(error)) {
@@ -342,8 +339,7 @@ abstract class Client extends UTXOClient {
         tx.addData(memo)
       }
 
-      // ESLint disabled: Dash transaction has proper toString() method that returns hex string
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      // Dash transaction has proper toString() method that returns hex string
       return {
         rawUnsignedTx: tx.toString(),
         utxos,

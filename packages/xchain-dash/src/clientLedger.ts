@@ -62,12 +62,10 @@ class ClientLedger extends Client {
     const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
 
     const tx = new dashcore.Transaction(rawUnsignedTx)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
     const ledgerInputs: [LedgerTransaction, number, string | null, number | null][] = []
 
     for (const input of tx.inputs) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const insightUtxo = inputs.find((utxo) => {
         return utxo.hash === input.prevTxId.toString('hex') && utxo.index == input.outputIndex
       })

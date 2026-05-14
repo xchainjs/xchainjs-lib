@@ -187,7 +187,7 @@ export function sortedObject(obj: any): any {
 /**
  * Returns a JSON string with objects sorted by key
  * */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function sortAndStringifyJson(obj: any): string {
   return JSON.stringify(sortedObject(obj))
 }
