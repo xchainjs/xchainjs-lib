@@ -25,6 +25,7 @@ type TabId =
   | 'prepare'
 
 const UTXO_CHAINS = ['BTC', 'BCH', 'LTC', 'DOGE', 'DASH', 'ZEC']
+const SWEEP_CHAINS = [...UTXO_CHAINS, 'ADA']
 
 interface Tab {
   id: TabId
@@ -37,7 +38,7 @@ const TABS: Tab[] = [
   { id: 'balance', label: 'Balance' },
   { id: 'fees', label: 'Fees' },
   { id: 'transfer', label: 'Transfer' },
-  { id: 'sweep', label: 'Sweep', chains: UTXO_CHAINS },
+  { id: 'sweep', label: 'Sweep', chains: SWEEP_CHAINS },
   { id: 'coin-control', label: 'Coin Control', chains: UTXO_CHAINS },
   { id: 'deposit', label: 'Deposit', chains: ['THOR', 'MAYA'] },
   { id: 'history', label: 'History' },

@@ -321,8 +321,41 @@ export class Client extends BaseXChainClient {
       asset: ADAAsset,
     })
 
-    const accountKey = await this.generatePrivateKey(params.walletIndex)
+    return this.signAndBroadcast(rawUnsignedTx, params.walletIndex)
+  }
 
+  /**
+   * Sweep the entire spendable balance to the recipient via `prepareMaxTx`, then sign and
+   * broadcast. Returns the resolved max amount and fee (lovelace) so callers can surface what
+   * was actually sent.
+   *
+   * @param {Object} params Sweep params.
+   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} Tx hash with the
+   *   swept amount and fee in lovelace.
+   */
+  public async transferMax(params: {
+    recipient: Address
+    memo?: string
+    walletIndex?: number
+  }): Promise<{ hash: TxHash; maxAmount: number; fee: number }> {
+    const sender = await this.getAddressAsync(params.walletIndex)
+    const { rawUnsignedTx, maxAmount, fee } = await this.prepareMaxTx({
+      sender,
+      recipient: params.recipient,
+      memo: params.memo,
+    })
+
+    const hash = await this.signAndBroadcast(rawUnsignedTx, params.walletIndex)
+
+    return {
+      hash,
+      maxAmount: Number(maxAmount.amount().toString()),
+      fee: Number(fee.amount().toString()),
+    }
+  }
+
+  private async signAndBroadcast(rawUnsignedTx: string, walletIndex?: number): Promise<TxHash> {
+    const accountKey = await this.generatePrivateKey(walletIndex)
     const privKey = accountKey.derive(0).derive(0)
 
     const cardanoLib = await getCardano()
@@ -331,27 +364,22 @@ export class Client extends BaseXChainClient {
     const auxData = usignedTx.auxiliary_data()
 
     const fixedTx = cardanoLib.FixedTransaction.new_from_body_bytes(txBody.to_bytes())
-
     const txHash = fixedTx.transaction_hash()
 
     const witnesses = cardanoLib.TransactionWitnessSet.new()
     const vKeyWitnesses = cardanoLib.Vkeywitnesses.new()
-
     const vKeyWitness = cardanoLib.make_vkey_witness(txHash, privKey.to_raw_key())
-
     vKeyWitnesses.add(vKeyWitness)
     witnesses.set_vkeys(vKeyWitnesses)
 
     const tx = cardanoLib.Transaction.new(txBody, witnesses, auxData)
 
     const fee = tx.body().fee().to_js_value()
-
     if (Number(fee) < LOWER_FEE_BOUND || Number(fee) > UPPER_FEE_BOUND) {
       throw Error('Fee is out of bounds')
     }
 
     const hash = await this.broadcastTx(tx.to_hex())
-
     return hash.replace(/"/g, '')
   }
 

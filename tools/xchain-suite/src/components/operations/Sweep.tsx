@@ -6,11 +6,12 @@ import { getExplorerTxUrl } from './constants'
 import type { FeeRates } from '@xchainjs/xchain-client'
 import { baseToAsset, baseAmount } from '@xchainjs/xchain-util'
 
-// UTXO client type with transferMax method
-interface UtxoClient {
+// Sweep-capable client. `getFeeRates`/`feeRate` are UTXO-only — Cardano has no fee rate
+// concept (the protocol params determine min_fee directly from tx size).
+interface SweepClient {
   getAddressAsync: (index: number) => Promise<string>
   getBalance: (address: string) => Promise<{ amount: { amount: () => bigint } }[]>
-  getFeeRates: () => Promise<FeeRates>
+  getFeeRates?: () => Promise<FeeRates>
   transferMax: (params: {
     recipient: string
     memo?: string
@@ -20,7 +21,7 @@ interface UtxoClient {
 
 interface SweepProps {
   chainId: string
-  client: UtxoClient | null
+  client: SweepClient | null
 }
 
 interface SweepResult {
@@ -76,12 +77,17 @@ export function Sweep({ chainId, client }: SweepProps) {
       // Fetch balance
       await fetchBalance()
 
-      // Fetch fee rate separately so balance still shows if this fails
-      try {
-        const feeRates = await client.getFeeRates()
-        setFeeRate(feeRates.fast)
-      } catch (e) {
-        console.error('Failed to fetch fee rates:', e)
+      // Fetch fee rate separately so balance still shows if this fails. Skip when the
+      // client has no fee-rate concept (e.g. Cardano).
+      if (client.getFeeRates) {
+        try {
+          const feeRates = await client.getFeeRates()
+          setFeeRate(feeRates.fast)
+        } catch (e) {
+          console.error('Failed to fetch fee rates:', e)
+          setFeeRate(null)
+        }
+      } else {
         setFeeRate(null)
       }
 
