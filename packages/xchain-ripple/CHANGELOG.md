@@ -1,5 +1,13 @@
 # @xchainjs/xchain-ripple
 
+## 1.0.15
+
+### Patch Changes
+
+- Updated dependencies [70acc68]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-client@2.0.13
+
 ## 1.0.14
 
 ### Patch Changes

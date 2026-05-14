@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.0.17
+
+### Patch Changes
+
+- 70acc68: Bump axios from 1.15.0 to 1.15.2 to patch high-severity advisories: GHSA-pmwg-cvhr-8vh7 (NO_PROXY loopback bypass), GHSA-q8qp-cvcw-x6jj (HTTP adapter prototype pollution), GHSA-pf86-5x62-jrwf (response/request prototype pollution gadgets), and GHSA-6chq-wfr3-2hj9 (header injection via prototype pollution).
+
+  Bump protobufjs from 6.11.4 to 7.5.5 in `@xchainjs/xchain-cosmos`, `@xchainjs/xchain-mayachain`, and `@xchainjs/xchain-thorchain` to patch GHSA-xq3m-2v4x-88gg (critical: arbitrary code execution).
+
+- e16cca9: Bump `protobufjs` from `7.5.5` to `7.5.8` to address GHSA-66ff-xgx4-vchm (high-severity code injection through bytes field defaults in generated `toObject` code). All versions `<=7.5.5` are vulnerable; the issue is fixed in `7.5.6` and forward. `7.5.8` is the latest stable 7.x patch — no API changes, no behavioral changes in our usage.
+- 5f92a68: Point THORChain endpoint defaults at the new official public gateway hosted at `*.thorchain.network` (announced in xchainjs/xchainjs-lib#1665). Mainnet defaults now use `https://thornode.thorchain.network`, `https://midgard.thorchain.network`, and `https://rpc.thorchain.network` as the primary URLs, with the existing Liquify gateway (`gateway.liquify.com`) retained as a fallback in packages that support multiple base URLs (`xchain-thorchain`, `xchain-thorchain-query`, `xchain-midgard-query`). The single-URL constants in `xchain-thornode` (`THORNODE_API_URL`) and `xchain-midgard` (`MIDGARD_API_URL`) are switched to the new gateway, as is the `MAINNET_THORNODE_API_BASE` used by `BaseXChainClient.thornodeAPIGet` in `xchain-client`. Consumers that pass their own URLs are unaffected.
+- Updated dependencies [70acc68]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-client@2.0.13
+  - @xchainjs/xchain-cosmos-sdk@2.0.13
+
 ## 3.0.16
 
 ### Patch Changes

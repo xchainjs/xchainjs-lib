@@ -1,5 +1,36 @@
 # Changelog
 
+## 3.0.37
+
+### Patch Changes
+
+- 70acc68: Bump axios from 1.15.0 to 1.15.2 to patch high-severity advisories: GHSA-pmwg-cvhr-8vh7 (NO_PROXY loopback bypass), GHSA-q8qp-cvcw-x6jj (HTTP adapter prototype pollution), GHSA-pf86-5x62-jrwf (response/request prototype pollution gadgets), and GHSA-6chq-wfr3-2hj9 (header injection via prototype pollution).
+
+  Bump protobufjs from 6.11.4 to 7.5.5 in `@xchainjs/xchain-cosmos`, `@xchainjs/xchain-mayachain`, and `@xchainjs/xchain-thorchain` to patch GHSA-xq3m-2v4x-88gg (critical: arbitrary code execution).
+
+- Updated dependencies [70acc68]
+- Updated dependencies [e16cca9]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-bitcoin@2.2.4
+  - @xchainjs/xchain-bitcoincash@2.2.5
+  - @xchainjs/xchain-client@2.0.13
+  - @xchainjs/xchain-cosmos@3.0.13
+  - @xchainjs/xchain-doge@2.2.4
+  - @xchainjs/xchain-evm@2.0.17
+  - @xchainjs/xchain-litecoin@2.3.1
+  - @xchainjs/xchain-thorchain@3.0.17
+  - @xchainjs/xchain-thorchain-query@3.0.4
+  - @xchainjs/xchain-wallet@2.0.27
+  - @xchainjs/xchain-avax@2.0.17
+  - @xchainjs/xchain-base@1.0.17
+  - @xchainjs/xchain-bsc@2.0.18
+  - @xchainjs/xchain-ethereum@2.0.18
+  - @xchainjs/xchain-ripple@1.0.15
+  - @xchainjs/xchain-solana@1.1.5
+  - @xchainjs/xchain-sui@0.1.2
+  - @xchainjs/xchain-tron@3.0.6
+  - @xchainjs/xchain-zcash@1.3.5
+
 ## 3.0.36
 
 ### Patch Changes

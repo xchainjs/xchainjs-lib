@@ -1,5 +1,37 @@
 # Changelog
 
+## 4.1.18
+
+### Patch Changes
+
+- 70acc68: Bump axios from 1.15.0 to 1.15.2 to patch high-severity advisories: GHSA-pmwg-cvhr-8vh7 (NO_PROXY loopback bypass), GHSA-q8qp-cvcw-x6jj (HTTP adapter prototype pollution), GHSA-pf86-5x62-jrwf (response/request prototype pollution gadgets), and GHSA-6chq-wfr3-2hj9 (header injection via prototype pollution).
+
+  Bump protobufjs from 6.11.4 to 7.5.5 in `@xchainjs/xchain-cosmos`, `@xchainjs/xchain-mayachain`, and `@xchainjs/xchain-thorchain` to patch GHSA-xq3m-2v4x-88gg (critical: arbitrary code execution).
+
+- ee77092: Use getFeeRates from the protocol for a AMM swap
+- e16cca9: Add Cardano (ADA) address validation to `validateAddress` in `mayachain-amm/utils.ts`. Previously, calling `estimateSwap` with a destination on ADAChain threw `Error: Unsupported chain` from the default case of the switch before the quote ever reached MAYAChain's REST API, even though MAYAChain has live ADA pools. The switch now resolves an ADAChain destination by instantiating an `AdaClient` from `@xchainjs/xchain-cardano` (added as a dependency) and delegating to its `validateAddress`. This unblocks ETH→ADA (and other →ADA) quoting; full deposit construction from a Cardano sender via `doSwap` is still not wired in this package and remains a follow-up.
+- Updated dependencies [70acc68]
+- Updated dependencies [e16cca9]
+- Updated dependencies [07dd336]
+- Updated dependencies [9434680]
+- Updated dependencies [70acc68]
+- Updated dependencies [e16cca9]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-bitcoin@2.2.4
+  - @xchainjs/xchain-client@2.0.13
+  - @xchainjs/xchain-dash@2.2.4
+  - @xchainjs/xchain-evm@2.0.17
+  - @xchainjs/xchain-mayachain@4.1.4
+  - @xchainjs/xchain-mayachain-query@2.1.10
+  - @xchainjs/xchain-thorchain@3.0.17
+  - @xchainjs/xchain-cardano@1.2.0
+  - @xchainjs/xchain-wallet@2.0.27
+  - @xchainjs/xchain-arbitrum@2.1.3
+  - @xchainjs/xchain-ethereum@2.0.18
+  - @xchainjs/xchain-kujira@2.0.13
+  - @xchainjs/xchain-radix@2.0.14
+  - @xchainjs/xchain-zcash@1.3.5
+
 ## 4.1.17
 
 ### Patch Changes

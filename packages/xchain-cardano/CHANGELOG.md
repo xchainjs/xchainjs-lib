@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- 07dd336: Add `Client.transferMax({ recipient, memo, walletIndex })` to sweep the entire spendable ADA balance to a recipient in one call. The method wraps `prepareMaxTx`, signs, and broadcasts, returning `{ hash, maxAmount, fee }` where `maxAmount` and `fee` are lovelace numbers — matching the shape used by `xchain-bitcoin`'s `transferMax`. This lets callers surface what was actually swept without recomputing the fee. The signing path is factored into a private helper shared with `transfer()`, so the existing `LOWER_FEE_BOUND`/`UPPER_FEE_BOUND` checks apply to both.
+
+### Patch Changes
+
+- e16cca9: Fix Cardano transaction fee handling so that the network fee is properly reserved when constructing send transactions. Previously, `prepareTx` passed the requested amount straight into the Cardano serialization lib's transaction builder and relied on `add_change_if_needed` to compute the fee at the end. When the requested amount approached the total balance, the change output could not absorb the fee — depending on the CSL build this either threw an opaque `InsufficientInputBalance` error or silently collapsed the would-be change into the fee, draining the wallet. `prepareTx` now computes `min_fee` against the assembled tx and rejects the call with a clear `Insufficient ADA: required X lovelace (amount + fee), available Y lovelace` error before the change step runs. A new `prepareMaxTx(sender, recipient, memo?)` method has been added for sweep flows: it adds every spendable UTXO as an input, computes the exact fee, sets the output to `totalLovelace - fee` with no change output, and returns the prepared transaction along with the resolved `maxAmount` and `fee`.
+- Updated dependencies [70acc68]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-client@2.0.13
+
 ## 1.1.11
 
 ### Patch Changes

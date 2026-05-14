@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.4
+
+### Patch Changes
+
+- Updated dependencies [70acc68]
+- Updated dependencies [5f92a68]
+  - @xchainjs/xchain-client@2.0.13
+  - @xchainjs/xchain-utxo-providers@2.0.14
+
 ## 2.2.3
 
 ### Patch Changes
