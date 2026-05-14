@@ -17,7 +17,6 @@ export class ClientLedger extends EVMClientLedger {
    * @param {Object} config - Configuration object for the client (optional).
    *                          Defaults to `defaultEthParams` if not provided.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(config: Omit<EVMClientParams, 'signer' | 'phrase'> & { transport: Transport }) {
     // Call the constructor of the parent class with the provided config or the default parameters
     super({

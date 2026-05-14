@@ -79,7 +79,9 @@ export class Client extends BaseXChainClient {
   }
 
   public async getAddressAsync(index?: number): Promise<string> {
-    return this.getKeypair(index || 0).getPublicKey().toSuiAddress()
+    return this.getKeypair(index || 0)
+      .getPublicKey()
+      .toSuiAddress()
   }
 
   public getAddress(): string {
@@ -266,14 +268,7 @@ export class Client extends BaseXChainClient {
     return result.digest
   }
 
-  public async prepareTx({
-    walletIndex,
-    memo,
-    recipient,
-    asset,
-    amount,
-    gasBudget,
-  }: TxParams): Promise<PreparedTx> {
+  public async prepareTx({ walletIndex, memo, recipient, asset, amount, gasBudget }: TxParams): Promise<PreparedTx> {
     if (memo) throw Error('Memo is not supported for SUI transfers')
 
     const sender = await this.getAddressAsync(walletIndex ?? 0)

@@ -689,9 +689,7 @@ export class Client extends BaseXChainClient {
         .pool_deposit(cardanoLib.BigNum.from_str(protocolParams.pool_deposit))
         .key_deposit(cardanoLib.BigNum.from_str(protocolParams.key_deposit))
         // coins_per_utxo_size is already introduced in current Cardano fork
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         .coins_per_utxo_byte(cardanoLib.BigNum.from_str(protocolParams.coins_per_utxo_size!))
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         .max_value_size(parseInt(protocolParams.max_val_size!))
         .max_tx_size(protocolParams.max_tx_size)
         .build(),

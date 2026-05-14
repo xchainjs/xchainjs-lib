@@ -429,7 +429,6 @@ export class Client extends BaseXChainClient implements EVMClient {
       const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
 
       const address = from || (await this.getAddressAsync())
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gasEstimateResponse = await contract.getFunction('transfer').estimateGas(recipient, txAmount, {
         from: address,
       })
