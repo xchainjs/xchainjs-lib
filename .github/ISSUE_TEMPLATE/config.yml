@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a vulnerability privately
+    url: https://github.com/xchainjs/xchainjs-lib/security/advisories/new
+    about: |
+      If you have found an UNDISCLOSED security vulnerability affecting this
+      project (not already covered by a public CVE/GHSA), do NOT open a public
+      issue. Use GitHub's private security advisory flow instead so the issue
+      can be triaged and patched before disclosure.

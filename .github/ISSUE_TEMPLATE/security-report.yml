@@ -1,0 +1,101 @@
+name: Security advisory follow-up (public CVE/GHSA)
+description: Report a PUBLIC vulnerability (existing CVE or GHSA) in xchainjs-lib or one of its dependencies.
+title: "[Security] "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Use this template only for vulnerabilities that are already public
+        Already-published CVE or GHSA → continue with this form.
+
+        **Undisclosed vulnerability in this repo?** Stop and use the
+        [private security advisory flow](https://github.com/xchainjs/xchainjs-lib/security/advisories/new)
+        instead. Public issues for undisclosed vulns make exploitation easier.
+
+        **Recommending a security tool, auditor, or scanner?** That is not a vulnerability
+        report. Please don't file it as one — issues that recommend installing third-party
+        "audit tools" are routinely used for social-engineering attacks against crypto
+        projects and will be closed.
+  - type: checkboxes
+    id: confirm-public
+    attributes:
+      label: Confirmations
+      options:
+        - label: This is an already-public vulnerability (CVE or GHSA exists).
+          required: true
+        - label: I am NOT recommending or promoting a third-party security tool, scanner, or auditor.
+          required: true
+  - type: input
+    id: cve
+    attributes:
+      label: CVE or GHSA ID
+      description: Must be a published advisory. Format `CVE-YYYY-NNNNN` or `GHSA-xxxx-yyyy-zzzz`.
+      placeholder: CVE-2026-12345 or GHSA-1234-5678-9abc
+    validations:
+      required: true
+  - type: input
+    id: advisory-url
+    attributes:
+      label: Upstream advisory URL
+      description: Link to the NVD, GitHub Security Advisory, or upstream maintainer's disclosure.
+      placeholder: https://nvd.nist.gov/vuln/detail/CVE-2026-12345
+    validations:
+      required: true
+  - type: input
+    id: affected-package
+    attributes:
+      label: Affected package + version
+      description: |
+        Exact name and version of the package in this repo's dependency tree that
+        is vulnerable. Check `yarn.lock` for the resolved version, not the range.
+      placeholder: "example: axios@1.15.2 (transitive via @xchainjs/xchain-cosmos)"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: CVSS severity (from the advisory)
+      options:
+        - Critical (9.0–10.0)
+        - High (7.0–8.9)
+        - Medium (4.0–6.9)
+        - Low (0.1–3.9)
+        - Not yet scored
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Vulnerability summary
+      description: |
+        One paragraph: what the vulnerability is, the attacker capability required,
+        and the impact. Copy the advisory's summary if you don't have a custom write-up.
+      placeholder: |
+        e.g., "Axios <1.16.1 is vulnerable to prototype pollution in mergeConfig
+        via attacker-controlled __proto__ keys. Triggered when..."
+    validations:
+      required: true
+  - type: textarea
+    id: reachability
+    attributes:
+      label: Reachability in this repo
+      description: |
+        Is the vulnerable code path actually reachable through xchainjs-lib's public
+        API, or only via paths that consumers don't hit? Be specific. If you haven't
+        verified reachability, say so — "I don't know" is acceptable.
+      placeholder: |
+        e.g., "Reachable via @xchainjs/xchain-cosmos when caller passes a
+        user-controlled value into Client.transfer({...}). NOT reachable in
+        the read-only Midgard query path because Midgard responses are
+        validated before merge."
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Suggested fix
+      description: Version to bump to, code change, or other mitigation. Optional but speeds up triage.
+      placeholder: "Bump axios to 1.16.1 via the root resolutions block."
+    validations:
+      required: false
