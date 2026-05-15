@@ -1,4 +1,4 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: Report a vulnerability privately
     url: https://github.com/xchainjs/xchainjs-lib/security/advisories/new
@@ -7,3 +7,12 @@ contact_links:
       project (not already covered by a public CVE/GHSA), do NOT open a public
       issue. Use GitHub's private security advisory flow instead so the issue
       can be triaged and patched before disclosure.
+  - name: Ask a question on Discord
+    url: https://discord.com/channels/838986635756044328/842252939149967382
+    about: |
+      Usage questions, integration help, "how do I…" — please ask in Discord
+      first. The issue tracker is for bug reports and feature requests.
+  - name: Ask a question on Telegram
+    url: https://t.me/xchainjs
+    about: |
+      Alternative community channel for usage questions and general discussion.

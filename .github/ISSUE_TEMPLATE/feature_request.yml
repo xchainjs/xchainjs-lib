@@ -1,0 +1,83 @@
+name: Feature request
+description: Suggest a new capability, API, or chain integration for xchainjs-lib.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing an improvement. Strong feature requests describe a
+        concrete problem and at least one proposed shape for the solution —
+        please avoid open-ended "it would be nice if…" framing.
+
+        **Before filing:**
+        - Search [existing issues](https://github.com/xchainjs/xchainjs-lib/issues?q=is%3Aissue) — your idea may already be tracked.
+        - Usage / "how do I…" questions belong on [Discord](https://discord.com/channels/838986635756044328/842252939149967382) or [Telegram](https://t.me/xchainjs).
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: What kind of change is this?
+      options:
+        - New chain / asset support
+        - New API or method on an existing package
+        - Enhancement to existing behavior
+        - Developer experience (tooling, types, docs ergonomics)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: package
+    attributes:
+      label: Target package(s)
+      description: Which `@xchainjs/*` package(s) would this affect? Use "new package" if you're proposing a new chain integration.
+      placeholder: "@xchainjs/xchain-thorchain-amm, or 'new package: @xchainjs/xchain-foo'"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What are you trying to do, and why is it hard or impossible today? Be concrete — name the call site or the missing primitive.
+      placeholder: |
+        e.g., "I'm building a wallet that needs to display pending inbound swap
+        status. xchain-thorchain-query exposes finalized swaps but not the
+        pre-finality observation count, so the UI can't show progress."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Sketch the API or behavior change. Pseudo-code or a type signature is fine; you do not need a full implementation.
+      render: ts
+      placeholder: |
+        // e.g. extend ThorchainQuery:
+        getSwapObservations(txid: string): Promise<{
+          observed: number
+          required: number
+          status: 'pending' | 'finalized'
+        }>
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you weighed, or workarounds you're currently using.
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Links to specs, upstream chain docs, related issues, prior art in other libraries.
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Are you willing to help?
+      options:
+        - label: I am willing to open a PR for this.
+        - label: I can help test a PR if someone else implements it.

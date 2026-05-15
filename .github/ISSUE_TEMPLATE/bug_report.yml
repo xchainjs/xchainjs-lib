@@ -1,0 +1,141 @@
+name: Bug report
+description: Something in an xchainjs-lib package is broken or behaves incorrectly.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. A reproducible report makes
+        triage dramatically faster.
+
+        **Before filing:**
+        - Search [existing issues](https://github.com/xchainjs/xchainjs-lib/issues?q=is%3Aissue) — your bug may already be reported.
+        - Usage / integration questions belong on [Discord](https://discord.com/channels/838986635756044328/842252939149967382) or [Telegram](https://t.me/xchainjs), not here.
+        - Security vulnerabilities → use the [private advisory flow](https://github.com/xchainjs/xchainjs-lib/security/advisories/new), not a public issue.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Affected package
+      description: Which `@xchainjs/*` package is the bug in? Pick "Other / multiple" if it spans several.
+      options:
+        - "@xchainjs/xchain-aggregator"
+        - "@xchainjs/xchain-arbitrum"
+        - "@xchainjs/xchain-avax"
+        - "@xchainjs/xchain-base"
+        - "@xchainjs/xchain-bitcoin"
+        - "@xchainjs/xchain-bitcoincash"
+        - "@xchainjs/xchain-bsc"
+        - "@xchainjs/xchain-cardano"
+        - "@xchainjs/xchain-client"
+        - "@xchainjs/xchain-cosmos"
+        - "@xchainjs/xchain-cosmos-sdk"
+        - "@xchainjs/xchain-crypto"
+        - "@xchainjs/xchain-dash"
+        - "@xchainjs/xchain-doge"
+        - "@xchainjs/xchain-ethereum"
+        - "@xchainjs/xchain-evm"
+        - "@xchainjs/xchain-evm-providers"
+        - "@xchainjs/xchain-kujira"
+        - "@xchainjs/xchain-litecoin"
+        - "@xchainjs/xchain-mayachain"
+        - "@xchainjs/xchain-mayachain-amm"
+        - "@xchainjs/xchain-mayachain-query"
+        - "@xchainjs/xchain-mayamidgard"
+        - "@xchainjs/xchain-mayamidgard-query"
+        - "@xchainjs/xchain-mayanode"
+        - "@xchainjs/xchain-midgard"
+        - "@xchainjs/xchain-midgard-query"
+        - "@xchainjs/xchain-monero"
+        - "@xchainjs/xchain-radix"
+        - "@xchainjs/xchain-ripple"
+        - "@xchainjs/xchain-solana"
+        - "@xchainjs/xchain-sui"
+        - "@xchainjs/xchain-thorchain"
+        - "@xchainjs/xchain-thorchain-amm"
+        - "@xchainjs/xchain-thorchain-query"
+        - "@xchainjs/xchain-thornode"
+        - "@xchainjs/xchain-tron"
+        - "@xchainjs/xchain-util"
+        - "@xchainjs/xchain-utxo"
+        - "@xchainjs/xchain-utxo-providers"
+        - "@xchainjs/xchain-wallet"
+        - "@xchainjs/xchain-zcash"
+        - "zcash-js"
+        - "Other / multiple"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: Exact version installed (check `yarn.lock` or your `node_modules/.../package.json`, not the range in your `package.json`).
+      placeholder: "1.2.3"
+    validations:
+      required: true
+  - type: input
+    id: network
+    attributes:
+      label: Network
+      description: Mainnet, stagenet, testnet, or N/A.
+      placeholder: "mainnet"
+    validations:
+      required: false
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Briefly describe the bug — what you observed vs. what you expected.
+      placeholder: |
+        e.g., "Calling client.transfer() on xchain-thorchain with a memo longer
+        than 250 chars silently drops the memo instead of throwing."
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: |
+        Steps and/or a minimal code snippet that reproduces the bug. Smaller is
+        much better than complete — strip everything that isn't load-bearing.
+      render: ts
+      placeholder: |
+        import { Client } from '@xchainjs/xchain-thorchain'
+        const c = new Client({ network: Network.Mainnet })
+        await c.transfer({ /* ... */ })
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: "Expected the transfer to throw a validation error for memos > 250 bytes."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the full error message and stack trace if there is one.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Node version, OS, package manager, framework (if any).
+      placeholder: |
+        - Node: 20.11.0
+        - OS: macOS 14.5 / Ubuntu 22.04 / Windows 11
+        - Package manager: yarn 4.9.2
+        - Runtime: Node / React Native / browser (bundler?)
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Anything else worth knowing — related issues, recent upgrade, workarounds tried.
+    validations:
+      required: false
