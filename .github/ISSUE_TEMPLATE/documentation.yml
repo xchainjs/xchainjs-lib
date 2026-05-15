@@ -1,0 +1,48 @@
+name: Documentation issue
+description: README, package docs, or code comments are wrong, missing, or misleading.
+title: "[Docs] "
+labels: [documentation]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for documentation problems — typos, broken examples,
+        outdated API signatures, missing usage notes, etc.
+
+        Behavior bugs (the docs are correct but the code does the wrong thing)
+        belong in the **Bug report** template instead.
+  - type: input
+    id: location
+    attributes:
+      label: Where is the issue?
+      description: Link to the file, line, or rendered page. Permalinks (with commit SHA) are ideal.
+      placeholder: https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain/README.md#L42
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of problem
+      options:
+        - Incorrect / outdated information
+        - Broken or non-runnable example
+        - Missing documentation
+        - Typo / formatting
+        - Unclear or ambiguous
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong?
+      description: Quote the problematic text or describe what's missing.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested correction
+      description: If you know the right answer, share it. PRs welcome.
+    validations:
+      required: false
