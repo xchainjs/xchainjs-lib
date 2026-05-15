@@ -1,7 +1,7 @@
 name: Documentation issue
 description: README, package docs, or code comments are wrong, missing, or misleading.
 title: "[Docs] "
-labels: ["documentation"]
+labels: [documentation]
 body:
   - type: markdown
     attributes:
@@ -16,7 +16,7 @@ body:
     attributes:
       label: Where is the issue?
       description: Link to the file, line, or rendered page. Permalinks (with commit SHA) are ideal.
-      placeholder: "https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain/README.md#L42"
+      placeholder: https://github.com/xchainjs/xchainjs-lib/blob/master/packages/xchain-thorchain/README.md#L42
     validations:
       required: true
   - type: dropdown

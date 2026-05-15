@@ -1,7 +1,7 @@
 name: Bug report
 description: Something in an xchainjs-lib package is broken or behaves incorrectly.
 title: "[Bug] "
-labels: ["bug"]
+labels: [bug]
 body:
   - type: markdown
     attributes:
@@ -61,8 +61,8 @@ body:
         - "@xchainjs/xchain-utxo-providers"
         - "@xchainjs/xchain-wallet"
         - "@xchainjs/xchain-zcash"
-        - "zcash-js"
-        - "Other / multiple"
+        - zcash-js
+        - Other / multiple
     validations:
       required: true
   - type: input
@@ -70,7 +70,7 @@ body:
     attributes:
       label: Package version
       description: Exact version installed (check `yarn.lock` or your `node_modules/.../package.json`, not the range in your `package.json`).
-      placeholder: "1.2.3"
+      placeholder: 1.2.3
     validations:
       required: true
   - type: input
@@ -78,7 +78,7 @@ body:
     attributes:
       label: Network
       description: Mainnet, stagenet, testnet, or N/A.
-      placeholder: "mainnet"
+      placeholder: mainnet
     validations:
       required: false
   - type: textarea
@@ -109,7 +109,7 @@ body:
     id: expected
     attributes:
       label: Expected behavior
-      placeholder: "Expected the transfer to throw a validation error for memos > 250 bytes."
+      placeholder: Expected the transfer to throw a validation error for memos > 250 bytes.
     validations:
       required: true
   - type: textarea
