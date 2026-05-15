@@ -1,5 +1,15 @@
 # @xchainjs/xchain-zcash
 
+## 1.3.6
+
+### Patch Changes
+
+- Updated dependencies [51569ce]
+  - @xchainjs/xchain-client@2.0.14
+  - @xchainjs/xchain-utxo-providers@2.0.15
+  - @xchainjs/zcash-js@1.1.4
+  - @xchainjs/xchain-utxo@2.2.5
+
 ## 1.3.5
 
 ### Patch Changes

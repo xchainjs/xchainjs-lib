@@ -1,5 +1,12 @@
 # @xchainjs/xchain-sui
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [51569ce]
+  - @xchainjs/xchain-client@2.0.14
+
 ## 0.1.2
 
 ### Patch Changes
