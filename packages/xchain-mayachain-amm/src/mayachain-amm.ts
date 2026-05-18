@@ -168,6 +168,7 @@ export class MayachainAMM {
     amount,
     affiliateAddress,
     affiliateBps,
+    affiliates,
     streamingInterval,
     streamingQuantity,
   }: QuoteSwapParams): Promise<string[]> {
@@ -184,16 +185,40 @@ export class MayachainAMM {
     ) {
       errors.push(`destinationAddress ${destinationAddress} is not a valid address`)
     }
-    // Validate affiliate address if provided
-    if (affiliateAddress) {
+    // Reject mixing the singular form with the multi-affiliate array — the protocol's quote
+    // endpoint reads them from the same query params, so passing both produces ambiguous wire output.
+    if (affiliates && (affiliateAddress || affiliateBps !== undefined)) {
+      errors.push('affiliates is mutually exclusive with affiliateAddress / affiliateBps; pass one form, not both')
+    }
+    // Validate multi-affiliate array if provided
+    if (affiliates) {
+      if (affiliates.length === 0) {
+        errors.push('affiliates array is empty; omit the field or include at least one entry')
+      }
+      // MAYAChain consensus caps the affiliate count at 5 per swap (MultipleAffiliatesMaxCount).
+      if (affiliates.length > 5) {
+        errors.push(`affiliates count ${affiliates.length} exceeds MAYAChain maximum of 5`)
+      }
+      for (const a of affiliates) {
+        const isMayaAddress = validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, a.address)
+        const isMayaName = await this.isMAYAName(a.address)
+        if (!(isMayaAddress || isMayaName)) {
+          errors.push(`affiliate address ${a.address} is not a valid MAYA address or MAYAName`)
+        }
+        if (a.bps < 0 || a.bps > 500) {
+          errors.push(`affiliate bps ${a.bps} for ${a.address} out of range [0 - 500]`)
+        }
+      }
+    } else if (affiliateAddress) {
+      // Validate single-affiliate address
       const isMayaAddress = validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, affiliateAddress)
       const isMayaName = await this.isMAYAName(affiliateAddress)
       if (!(isMayaAddress || isMayaName))
         errors.push(`affiliateAddress ${affiliateAddress} is not a valid MAYA address`)
     }
-    // Validate affiliate basis points if provided
-    if (affiliateBps && (affiliateBps < 0 || affiliateBps > 10000)) {
-      errors.push(`affiliateBps ${affiliateBps} out of range [0 - 10000]`)
+    // MAYAChain caps single-affiliate bps at 500 (5%); previous limit of 10000 was wider than the protocol accepts.
+    if (affiliateBps !== undefined && (affiliateBps < 0 || affiliateBps > 500)) {
+      errors.push(`affiliateBps ${affiliateBps} out of range [0 - 500]`)
     }
     // Validate approval if asset is an ERC20 token and fromAddress is provided
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {

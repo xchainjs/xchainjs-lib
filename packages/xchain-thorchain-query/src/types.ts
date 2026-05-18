@@ -50,6 +50,13 @@ export type SwapEstimate = {
   warning: string // Any warning messages
 }
 /**
+ * A single affiliate entry. Used by the multi-affiliate `affiliates` field on QuoteSwapParams.
+ */
+export type Affiliate = {
+  address: string // The affiliate address or THORName
+  bps: number // The affiliate basis points (0-1000 on THORChain)
+}
+/**
  * Represents parameters for requesting a swap quote.
  */
 export type QuoteSwapParams = {
@@ -62,8 +69,11 @@ export type QuoteSwapParams = {
   streamingQuantity?: number // The streaming quantity (optional)
   toleranceBps?: number // The tolerance basis points (optional)
   liquidityToleranceBps?: number // The pool swing tolerance points (optional)
-  affiliateAddress?: string // The affiliate address (optional)
-  affiliateBps?: number // The affiliate basis points (optional)
+  affiliateAddress?: string // Single-affiliate address. Mutually exclusive with `affiliates`.
+  affiliateBps?: number // Single-affiliate basis points. Mutually exclusive with `affiliates`.
+  // Multi-affiliate form. THORChain accepts up to 5 affiliates per swap with per-affiliate bps;
+  // each bps must be 0-1000. Mutually exclusive with the singular affiliateAddress / affiliateBps.
+  affiliates?: Affiliate[]
   height?: number // The block height (optional)
   interfaceID?: string // The interface ID (optional)
   feeOption?: FeeOption // The fee option (optional)

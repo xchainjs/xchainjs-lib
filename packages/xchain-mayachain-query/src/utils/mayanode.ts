@@ -101,7 +101,9 @@ export class Mayanode {
     streamingQuantity?: number,
     liquidityToleranceBps?: number,
     toleranceBps?: number,
-    affiliateBps?: number,
+    // `string` is accepted to carry the slash-delimited per-affiliate form (e.g. "10/20/30")
+    // used when multiple affiliates are passed. Single-affiliate callers pass a number as before.
+    affiliateBps?: number | string,
     affiliate?: string,
     height?: number,
   ): Promise<QuoteSwapResponse> {
@@ -119,7 +121,7 @@ export class Mayanode {
             streamingQuantity,
             toleranceBps,
             liquidityToleranceBps,
-            affiliateBps?.toString(),
+            typeof affiliateBps === 'number' ? affiliateBps.toString() : affiliateBps,
             affiliate,
           )
         ).data
