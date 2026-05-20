@@ -139,8 +139,9 @@ export class ThorchainQuery {
     // If the caller passed a multi-affiliate array, collapse it into the slash-delimited
     // form the protocol's /quote/swap endpoint accepts. The endpoint requires per-affiliate bps
     // (it does not auto-expand a single shared bps), so both fields are joined in parallel.
-    const quoteAffiliateAddress = affiliates ? affiliates.map((a) => a.address).join('/') : affiliateAddress
-    const quoteAffiliateBps = affiliates ? affiliates.map((a) => a.bps).join('/') : affiliateBps
+    const hasAffiliates = Boolean(affiliates?.length)
+    const quoteAffiliateAddress = hasAffiliates ? affiliates!.map((a) => a.address).join('/') : affiliateAddress
+    const quoteAffiliateBps = hasAffiliates ? affiliates!.map((a) => a.bps).join('/') : affiliateBps
 
     // Fetch quote
     const swapQuote = await this.thorchainCache.thornode.getSwapQuote(

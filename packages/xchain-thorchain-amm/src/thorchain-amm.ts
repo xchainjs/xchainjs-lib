@@ -266,10 +266,14 @@ export class ThorchainAMM {
   private async isThorAffiliateAddress(identifier: string): Promise<boolean> {
     const network = this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network
     if (validateAddress(network, THORChain, identifier)) return true
-    const thorname = await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(
-      identifier,
-    )
-    return !!thorname
+    try {
+      const thorname = await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(
+        identifier,
+      )
+      return !!thorname
+    } catch {
+      return false
+    }
   }
 
   /**
