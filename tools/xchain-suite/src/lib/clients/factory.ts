@@ -6,7 +6,7 @@ import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
 
 // UTXO Chains
-import { Client as BtcClient, defaultBTCParams, AssetBTC, BTC_DECIMAL, BTCChain } from '@xchainjs/xchain-bitcoin'
+import { Client as BtcClient, defaultBTCParams, AssetBTC, BTC_DECIMAL, BTCChain, AddressFormat, tapRootDerivationPaths } from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Client as LtcClient, defaultLtcParams, AssetLTC, LTC_DECIMAL, LTCChain } from '@xchainjs/xchain-litecoin'
 import { Client as DogeClient, defaultDogeParams, AssetDOGE, DOGE_DECIMAL, DOGEChain } from '@xchainjs/xchain-doge'
@@ -175,12 +175,18 @@ function createZecParams(network: Network, phrase: string) {
 }
 
 // Lazy creation of BTC config to use BlockCypher API key
-function createBtcParams(network: Network, phrase: string) {
+function createBtcParams(network: Network, phrase: string, addressFormat: AddressFormat = AddressFormat.P2WPKH) {
   const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
+
+  // Taproot (P2TR) requires BIP-86 (m/86') derivation paths; native SegWit uses the defaults
+  const taprootParams =
+    addressFormat === AddressFormat.P2TR
+      ? { addressFormat: AddressFormat.P2TR, rootDerivationPaths: tapRootDerivationPaths }
+      : {}
 
   // If no API key, use default params
   if (!blockcypherApiKey) {
-    return { ...defaultBTCParams, network, phrase }
+    return { ...defaultBTCParams, network, phrase, ...taprootParams }
   }
 
   const mainnetBlockcypherProvider = new BlockcypherProvider(
@@ -211,6 +217,7 @@ function createBtcParams(network: Network, phrase: string) {
     network,
     phrase,
     dataProviders,
+    ...taprootParams,
   }
 }
 
@@ -332,15 +339,17 @@ import { Client as XrpClient, defaultXRPParams } from '@xchainjs/xchain-ripple'
 export interface ClientConfig {
   phrase: string
   network: Network
+  /** BTC address format. Defaults to native SegWit (P2WPKH); only consumed by the BTC client. */
+  addressFormat?: AddressFormat
 }
 
 export function createClient(chainId: string, config: ClientConfig): XChainClient {
-  const { phrase, network } = config
+  const { phrase, network, addressFormat } = config
 
   switch (chainId) {
     // UTXO Chains - use BlockCypher API key if available
     case 'BTC':
-      return new BtcClient(createBtcParams(network, phrase))
+      return new BtcClient(createBtcParams(network, phrase, addressFormat))
     case 'BCH':
       return new BchClient({ ...defaultBchParams, network, phrase })
     case 'LTC':

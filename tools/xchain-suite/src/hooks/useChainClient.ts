@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useWallet } from '../contexts/WalletContext'
 import { createClient } from '../lib/clients/factory'
 import type { XChainClient } from '@xchainjs/xchain-client'
+import type { AddressFormat } from '@xchainjs/xchain-bitcoin'
 
 interface UseChainClientResult {
   client: XChainClient | null
@@ -11,9 +12,10 @@ interface UseChainClientResult {
 
 /**
  * Hook that creates a client for the given chain ID using the wallet phrase.
- * The client is recreated when the phrase or chainId changes.
+ * The client is recreated when the phrase, chainId, network, or addressFormat changes.
+ * `addressFormat` is only consumed by the BTC client; pass `undefined` for other chains.
  */
-export function useChainClient(chainId: string): UseChainClientResult {
+export function useChainClient(chainId: string, addressFormat?: AddressFormat): UseChainClientResult {
   const { phrase, isConnected, network } = useWallet()
   const [client, setClient] = useState<XChainClient | null>(null)
   // Start loading if wallet is connected (client will be created in useEffect)
@@ -33,7 +35,7 @@ export function useChainClient(chainId: string): UseChainClientResult {
 
     try {
       console.log(`[useChainClient] Creating client for ${chainId}...`)
-      const newClient = createClient(chainId, { phrase, network })
+      const newClient = createClient(chainId, { phrase, network, addressFormat })
       console.log(`[useChainClient] Client created successfully:`, newClient)
       setClient(newClient)
       setLoading(false)
@@ -43,7 +45,7 @@ export function useChainClient(chainId: string): UseChainClientResult {
       setError(e as Error)
       setLoading(false)
     }
-  }, [phrase, chainId, isConnected, network])
+  }, [phrase, chainId, isConnected, network, addressFormat])
 
   return { client, loading, error }
 }

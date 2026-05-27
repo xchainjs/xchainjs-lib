@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { AddressFormat } from '@xchainjs/xchain-bitcoin'
 import { useChainClient } from '../hooks/useChainClient'
 import { GetAddress } from '../components/operations/GetAddress'
 import { GetBalance } from '../components/operations/GetBalance'
@@ -49,7 +50,11 @@ const TABS: Tab[] = [
 export function ChainPage() {
   const { chainId } = useParams<{ chainId: string }>()
   const [activeTab, setActiveTab] = useState<TabId>('address')
-  const { client, loading, error } = useChainClient(chainId || '')
+  const [btcAddressFormat, setBtcAddressFormat] = useState<AddressFormat>(AddressFormat.P2WPKH)
+  const { client, loading, error } = useChainClient(
+    chainId || '',
+    chainId === 'BTC' ? btcAddressFormat : undefined,
+  )
 
   // Reset activeTab when switching chains (prevents showing unavailable tabs)
   useEffect(() => {
@@ -135,9 +140,38 @@ export function ChainPage() {
       <div className="max-w-4xl mx-auto">
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-            <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{chainId}</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Test chain operations and view results</p>
+            <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{chainId}</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Test chain operations and view results</p>
+              </div>
+              {chainId === 'BTC' && (
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Address format</span>
+                  <div className="inline-flex rounded-md border border-gray-300 dark:border-gray-600 overflow-hidden">
+                    <button
+                      onClick={() => setBtcAddressFormat(AddressFormat.P2WPKH)}
+                      className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                        btcAddressFormat === AddressFormat.P2WPKH
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      Native SegWit
+                    </button>
+                    <button
+                      onClick={() => setBtcAddressFormat(AddressFormat.P2TR)}
+                      className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                        btcAddressFormat === AddressFormat.P2TR
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      Taproot
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="border-b border-gray-200 dark:border-gray-700">
