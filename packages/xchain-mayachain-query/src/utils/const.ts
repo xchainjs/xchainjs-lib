@@ -10,6 +10,7 @@ export const KujiraAsset = assetFromStringEx('KUJI.KUJI') as Asset
 export const ArbAsset = assetFromStringEx('ARB.ETH') as Asset
 export const XdrAsset = assetFromStringEx('XRD.XRD') as Asset
 export const ZecAsset = assetFromStringEx('ZEC.ZEC') as Asset
+export const AdaAsset = assetFromStringEx('ADA.ADA') as Asset
 
 export const BtcChain = 'BTC'
 export const EthChain = 'ETH'
@@ -20,6 +21,7 @@ export const KujiraChain = 'KUJI'
 export const ArbChain = 'ARB'
 export const XdrChain = 'XRD'
 export const ZecChain = 'ZEC'
+export const AdaChain = 'ADA'
 
 export const DEFAULT_MAYACHAIN_DECIMALS = 8
 export const MAYA_DECIMAL = 4
