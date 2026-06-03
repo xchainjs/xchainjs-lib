@@ -1,5 +1,32 @@
 # Changelog
 
+## 3.0.38
+
+### Patch Changes
+
+- 21e0085: Thread `walletIndex` through `ThorchainAction.makeAction` and `MayachainAction.makeAction` so callers can target a non-zero account when initiating swaps, deposits, or other protocol actions. Previously the parameter was dropped on the floor and every action ran from `walletIndex` 0. Fixes #1372.
+- 51569ce: Bump direct `axios` dependency from 1.15.2 to 1.16.1 across all packages that declare it. Also bumps `lodash` from `^4.18.0` to `4.18.1` in `@xchainjs/zcash-js`. This propagates the security fixes from the earlier yarn-resolutions PR to actual consumers of the published packages — root resolutions only affect builds within this repo, not what downstream installers receive. Closes axios prototype-pollution / NO_PROXY-bypass / SSRF / CRLF / DoS advisories (GHSA-\* covering versions <1.16.1) and the lodash code-injection-via-template advisory for the affected published packages.
+- Updated dependencies [51569ce]
+  - @xchainjs/xchain-bitcoin@2.2.5
+  - @xchainjs/xchain-bitcoincash@2.2.6
+  - @xchainjs/xchain-client@2.0.14
+  - @xchainjs/xchain-cosmos@3.0.14
+  - @xchainjs/xchain-doge@2.2.5
+  - @xchainjs/xchain-evm@2.0.18
+  - @xchainjs/xchain-litecoin@2.3.2
+  - @xchainjs/xchain-thorchain@3.0.18
+  - @xchainjs/xchain-thorchain-query@3.0.5
+  - @xchainjs/xchain-wallet@2.0.28
+  - @xchainjs/xchain-avax@2.0.18
+  - @xchainjs/xchain-base@1.0.18
+  - @xchainjs/xchain-bsc@2.0.19
+  - @xchainjs/xchain-ethereum@2.0.19
+  - @xchainjs/xchain-ripple@1.0.16
+  - @xchainjs/xchain-solana@1.1.6
+  - @xchainjs/xchain-sui@0.1.3
+  - @xchainjs/xchain-tron@3.0.7
+  - @xchainjs/xchain-zcash@1.3.6
+
 ## 3.0.37
 
 ### Patch Changes
