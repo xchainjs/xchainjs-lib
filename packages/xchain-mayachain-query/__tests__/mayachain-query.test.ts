@@ -173,6 +173,13 @@ describe('Mayachain-query tests', () => {
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK') as TokenAsset)).toBe(6)
   })
 
+  it('Should return the ADA dust value (1 ADA) without throwing', () => {
+    const dust = mayachainQuery.getChainDustValue('ADA')
+    expect(assetToString(dust.asset)).toBe('ADA.ADA')
+    expect(dust.baseAmount.amount().toString()).toBe('1000000')
+    expect(dust.baseAmount.decimal).toBe(6)
+  })
+
   it('Should get swaps history', async () => {
     const swapResume = await mayachainQuery.getSwapHistory({ addresses: ['address'] })
     expect(swapResume.count === swapResume.swaps.length)
