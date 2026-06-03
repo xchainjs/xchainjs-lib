@@ -35,22 +35,32 @@ const Cardano = {
     }),
   },
   TransactionBuilder: {
-    new: jest.fn().mockImplementation((_config) => ({
-      add_input: jest.fn().mockReturnThis(),
-      add_output: jest.fn().mockReturnThis(),
-      add_regular_input: jest.fn().mockReturnThis(),
-      set_ttl: jest.fn().mockReturnThis(),
-      add_inputs_from: jest.fn().mockReturnThis(),
-      add_change_if_needed: jest.fn().mockReturnThis(),
-      set_metadata: jest.fn().mockReturnThis(),
-      set_fee: jest.fn().mockReturnThis(),
-      min_fee: jest.fn().mockReturnValue({
-        to_str: jest.fn().mockReturnValue('155381'),
-      }),
-      build_tx: jest.fn().mockReturnValue({
-        to_hex: jest.fn().mockReturnValue('mock-tx-hex'),
-      }),
-    })),
+    new: jest.fn().mockImplementation((_config) => {
+      const builder = {
+        add_input: jest.fn().mockReturnThis(),
+        add_output: jest.fn().mockReturnThis(),
+        add_regular_input: jest.fn().mockReturnThis(),
+        set_ttl: jest.fn().mockReturnThis(),
+        add_inputs_from: jest.fn().mockReturnThis(),
+        add_change_if_needed: jest.fn().mockReturnThis(),
+        // Legacy label-674 path. Kept so tests can assert the memo path no longer uses it.
+        set_metadata: jest.fn().mockReturnThis(),
+        // Conway aux-data path. Records the attached AuxiliaryData for introspection in tests.
+        set_auxiliary_data: jest.fn(function (auxData) {
+          this._auxData = auxData
+          return this
+        }),
+        set_fee: jest.fn().mockReturnThis(),
+        min_fee: jest.fn().mockReturnValue({
+          to_str: jest.fn().mockReturnValue('155381'),
+        }),
+        build_tx: jest.fn().mockReturnValue({
+          to_hex: jest.fn().mockReturnValue('mock-tx-hex'),
+        }),
+      }
+      Cardano.__builders.push(builder)
+      return builder
+    }),
   },
   TransactionBuilderConfigBuilder: {
     new: jest.fn().mockReturnValue({
@@ -67,7 +77,8 @@ const Cardano = {
     new: jest.fn().mockReturnValue({}),
   },
   BigNum: {
-    from_str: jest.fn().mockReturnValue({}),
+    // Records the string so tests can assert which metadata label was used (6676 vs legacy 674).
+    from_str: jest.fn().mockImplementation((value) => ({ value })),
   },
   TransactionOutput: {
     new: jest.fn().mockImplementation((_address, _value) => ({
@@ -105,14 +116,91 @@ const Cardano = {
   CoinSelectionStrategyCIP2: {
     LargestFirst: {},
   },
+  // Metadata is modelled as plain tagged objects so the structure the client builds can be
+  // introspected and decoded back to JSON the way the real serialization library would.
   GeneralTransactionMetadata: {
-    new: jest.fn().mockReturnValue({
-      insert: jest.fn().mockReturnThis(),
+    new: jest.fn().mockImplementation(() => {
+      const byLabel = new Map()
+      return {
+        insert: jest.fn(function (label, metadatum) {
+          byLabel.set(label.value, metadatum)
+          return this
+        }),
+        get: (label) => byLabel.get(label.value),
+      }
+    }),
+  },
+  MetadataList: {
+    new: jest.fn().mockImplementation(() => {
+      const items = []
+      return {
+        items,
+        add: jest.fn((metadatum) => items.push(metadatum)),
+      }
+    }),
+  },
+  MetadataMap: {
+    new: jest.fn().mockImplementation(() => {
+      const entries = []
+      return {
+        entries,
+        insert: jest.fn(function (key, value) {
+          entries.push([key, value])
+          return this
+        }),
+      }
     }),
   },
   TransactionMetadatum: {
-    new_text: jest.fn().mockReturnValue({}),
+    new_text: jest.fn().mockImplementation((text) => ({ kind: 'text', text })),
+    new_list: jest.fn().mockImplementation((list) => ({ kind: 'list', list })),
+    new_map: jest.fn().mockImplementation((map) => ({ kind: 'map', map })),
   },
+  AuxiliaryData: {
+    new: jest.fn().mockImplementation(() => {
+      const auxData = {
+        _metadata: undefined,
+        _preferAlonzo: false,
+        set_metadata: jest.fn(function (metadata) {
+          this._metadata = metadata
+        }),
+        set_prefer_alonzo_format: jest.fn(function (prefer) {
+          this._preferAlonzo = prefer
+        }),
+        metadata() {
+          return this._metadata
+        },
+      }
+      return auxData
+    }),
+  },
+  MetadataJsonSchema: {
+    BasicConversions: 'BasicConversions',
+  },
+  // Mirrors @emurgo's decode_metadatum_to_json_str for the tagged objects above: text -> string,
+  // list -> array, map (text keys only) -> object. Sufficient for the swap-memo shape.
+  decode_metadatum_to_json_str: jest.fn().mockImplementation((metadatum) => {
+    const decode = (node) => {
+      switch (node.kind) {
+        case 'text':
+          return node.text
+        case 'list':
+          return node.list.items.map(decode)
+        case 'map': {
+          const obj = {}
+          for (const [key, value] of node.map.entries) obj[decode(key)] = decode(value)
+          return obj
+        }
+        default:
+          throw new Error(`Unsupported metadatum kind: ${node.kind}`)
+      }
+    }
+    return JSON.stringify(decode(metadatum))
+  }),
 }
+
+// Records every TransactionBuilder created during a test so assertions can inspect the auxiliary
+// data attached to the builder for a given prepareTx/prepareMaxTx call.
+Cardano.__builders = []
 
 module.exports = Cardano
