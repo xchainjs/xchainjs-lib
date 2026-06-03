@@ -3,6 +3,36 @@ import { assetAmount, assetToBase, assetToString, baseAmount, eqAsset } from '@x
 
 import cardanoApi from '../__mocks__/cardano/api'
 import { ADAAsset, Client, defaultAdaParams } from '../src'
+import { chunkMemoUtf8 } from '../src/utils'
+import { getCardano } from '../src/wasm'
+
+// Inspects the auxiliary data the client attached to the most recently built transaction. The CSL
+// mock records every builder it creates on __builders, and prepareTx builds exactly one, so the
+// last builder is the one for the call under test. Returns the CIP-20 message decoded from metadata
+// label 674 ({msg: [chunks]}), whether the legacy bare-text set_metadata path was used, and whether
+// the Conway tag-259 (prefer-alonzo) form was requested. Real CBOR-byte validation against live
+// MAYA is done manually in xchain-suite; the stub mock can't produce real serialization.
+const inspectLastBuiltTx = async () => {
+  const cardanoLib = await getCardano()
+  const builders = (cardanoLib as unknown as { __builders: { _auxData?: AttachedAuxData; set_metadata: jest.Mock }[] })
+    .__builders
+  const builder = builders[builders.length - 1]
+  const auxData = builder._auxData
+  const legacyMetadataUsed = builder.set_metadata.mock.calls.length > 0
+  if (!auxData) return { auxData: undefined, legacyMetadataUsed, preferAlonzo: false, msg: undefined }
+  const metadatum = auxData.metadata()?.get(cardanoLib.BigNum.from_str('674'))
+  const msg = metadatum
+    ? (JSON.parse(
+        cardanoLib.decode_metadatum_to_json_str(metadatum, cardanoLib.MetadataJsonSchema.BasicConversions),
+      ) as { msg: string[] })
+    : undefined
+  return { auxData, legacyMetadataUsed, preferAlonzo: auxData._preferAlonzo, msg }
+}
+
+type AttachedAuxData = {
+  _preferAlonzo: boolean
+  metadata: () => { get: (label: { value: string }) => unknown } | undefined
+}
 
 describe('Cardano client', () => {
   let client: Client
@@ -102,6 +132,57 @@ describe('Cardano client', () => {
 
       expect(typeof rawUnsignedTx).toBe('string')
       expect(rawUnsignedTx.length).toBeGreaterThan(0)
+    })
+
+    const memoSender =
+      'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
+
+    it('Should not attach auxiliary data when no memo is given', async () => {
+      await client.prepareTx({
+        sender: memoSender,
+        recipient: memoSender,
+        amount: assetToBase(assetAmount(1, 6)),
+      })
+
+      const { auxData, legacyMetadataUsed } = await inspectLastBuiltTx()
+      expect(auxData).toBeUndefined()
+      expect(legacyMetadataUsed).toBe(false)
+    })
+
+    it('Should embed a short memo at CIP-20 label 674 as {msg: [chunks]} in Conway (prefer-alonzo) aux data', async () => {
+      const memo = '=:ADA.ADA:addr1...:0/1/0'
+
+      await client.prepareTx({
+        sender: memoSender,
+        recipient: memoSender,
+        amount: assetToBase(assetAmount(1, 6)),
+        memo,
+      })
+
+      const { msg: decoded, preferAlonzo, legacyMetadataUsed } = await inspectLastBuiltTx()
+      expect(decoded).toEqual({ msg: [memo] })
+      // prefer-alonzo emits the CBOR tag-259 form the MAYA Cardano observer reads the memo from.
+      expect(preferAlonzo).toBe(true)
+      // The legacy bare-text set_metadata path must no longer be used.
+      expect(legacyMetadataUsed).toBe(false)
+    })
+
+    it('Should split a long memo into <=64-byte chunks at CIP-20 label 674', async () => {
+      const longMemo = 'A'.repeat(150)
+
+      await client.prepareTx({
+        sender: memoSender,
+        recipient: memoSender,
+        amount: assetToBase(assetAmount(1, 6)),
+        memo: longMemo,
+      })
+
+      const { msg: decoded } = await inspectLastBuiltTx()
+      const chunks = decoded!.msg
+      expect(chunks).toEqual(chunkMemoUtf8(longMemo))
+      expect(chunks.join('')).toBe(longMemo)
+      expect(chunks.length).toBe(3)
+      expect(chunks.every((chunk) => new TextEncoder().encode(chunk).length <= 64)).toBe(true)
     })
 
     it('Should reject a prepareTx that drains the wallet (amount > balance - fee)', async () => {
@@ -253,6 +334,31 @@ describe('Cardano client', () => {
           'https://adastat.net/transactions/f479bd4b1a77a61ce90248065d903ccee8629351132d77fae90cda73731fd0d3',
         )
       })
+    })
+  })
+
+  describe('chunkMemoUtf8', () => {
+    it('Should return an empty array for an empty memo', () => {
+      expect(chunkMemoUtf8('')).toEqual([])
+    })
+
+    it('Should keep a memo at or below 64 bytes as a single chunk', () => {
+      const memo = 'A'.repeat(64)
+      expect(chunkMemoUtf8(memo)).toEqual([memo])
+    })
+
+    it('Should split a 65-byte memo into two chunks', () => {
+      const memo = 'A'.repeat(65)
+      expect(chunkMemoUtf8(memo)).toEqual(['A'.repeat(64), 'A'])
+    })
+
+    it('Should chunk by UTF-8 byte length without splitting a multi-byte codepoint', () => {
+      // '€' is 3 UTF-8 bytes. 63 'A' (63 bytes) + '€' would be 66 bytes, so the euro sign must
+      // start a new chunk rather than being split across the 64-byte boundary.
+      const memo = 'A'.repeat(63) + '€'
+      const chunks = chunkMemoUtf8(memo)
+      expect(chunks).toEqual(['A'.repeat(63), '€'])
+      expect(chunks.every((chunk) => new TextEncoder().encode(chunk).length <= 64)).toBe(true)
     })
   })
 
