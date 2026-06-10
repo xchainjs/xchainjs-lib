@@ -16,6 +16,7 @@ import accumulative from 'coinselect/accumulative.js'
 import {
   AssetDOGE,
   BitgoProviders,
+  BlockbookDataProviders,
   DOGEChain,
   DOGE_DECIMAL,
   LOWER_FEE_BOUND,
@@ -34,7 +35,7 @@ export const defaultDogeParams: UtxoClientParams = {
   network: Network.Mainnet, // Default network is Mainnet
   phrase: '', // Default empty phrase
   explorerProviders: blockstreamExplorerProviders, // Default explorer providers
-  dataProviders: [BitgoProviders, blockcypherDataProviders], // Default data providers
+  dataProviders: [BitgoProviders, blockcypherDataProviders, BlockbookDataProviders], // Default data providers
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/3'/0'/0/`, // Default root derivation path for Mainnet
     [Network.Stagenet]: `m/44'/3'/0'/0/`, // Default root derivation path for Stagenet

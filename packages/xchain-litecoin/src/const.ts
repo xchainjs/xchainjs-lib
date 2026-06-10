@@ -2,6 +2,7 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
+  BlockbookProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   SochainNetwork,
@@ -106,6 +107,16 @@ export const BlockcypherDataProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined,
   [Network.Stagenet]: mainnetBlockcypherProvider,
   [Network.Mainnet]: mainnetBlockcypherProvider,
+}
+
+// Blockbook data providers for Litecoin
+// nativeswap.io operated Blockbook instance — no SLA or API key auth - 500 requests per hour
+// Changeable to any blockbook api. For example: Nownodes
+const mainnetLtcBlockbookProvider = new BlockbookProvider('https://ltc.nativeswap.io/api/v2', AssetLTC, LTC_DECIMAL)
+export const BlockbookDataProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: undefined, // NowNodes does not provide an LTC testnet Blockbook node
+  [Network.Stagenet]: mainnetLtcBlockbookProvider,
+  [Network.Mainnet]: mainnetLtcBlockbookProvider,
 }
 
 /**

@@ -19,6 +19,7 @@ import {
   BCHChain,
   BCH_DECIMAL,
   BitgoProviders,
+  BlockbookDataProviders,
   HaskoinDataProviders,
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
@@ -31,7 +32,7 @@ export const defaultBchParams: UtxoClientParams = {
   network: Network.Mainnet, // Default network is Mainnet
   phrase: '', // Default empty phrase
   explorerProviders: explorerProviders, // Default explorer providers
-  dataProviders: [BitgoProviders, HaskoinDataProviders], // Default data providers
+  dataProviders: [BitgoProviders, HaskoinDataProviders, BlockbookDataProviders], // Default data providers
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/145'/0'/0/`, // Default root derivation path for Mainnet
     [Network.Testnet]: `m/44'/1'/0'/0/`, // Default root derivation path for Testnet

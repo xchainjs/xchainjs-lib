@@ -676,5 +676,6 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to get fee rates')
   }
+
   public abstract transfer(params: TxParams & { feeRate?: number }): Promise<string>
 }
