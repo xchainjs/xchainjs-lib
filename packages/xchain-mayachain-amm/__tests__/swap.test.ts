@@ -10,6 +10,7 @@ import { AssetRuneNative, Client as ThorClient } from '@xchainjs/xchain-thorchai
 import { Asset, CryptoAmount, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
+import mockAdapter from '../__mocks__/axios-adapter'
 import mayanodeApi from '../__mocks__/mayanode-api/mayanode-api'
 import midgarApi from '../__mocks__/midgard-api/midgard-api'
 import { MayachainAMM } from '../src'
@@ -191,6 +192,27 @@ describe('MayachainAMM', () => {
       })
 
       expect(errors).toContain('affiliate bps 600 for eld out of range [0 - 500]')
+    })
+
+    it(`Should forward the affiliates array to the quote endpoint as slash-joined params`, async () => {
+      mockAdapter.resetHistory()
+      const quoteSwap = await mayachainAmm.estimateSwap({
+        fromAsset: AssetRuneNative,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(baseAmount(688598892692), AssetRuneNative),
+        destinationAddress: 'bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj',
+        affiliates: [
+          { address: 'maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz', bps: 100 },
+          { address: 'eld', bps: 200 },
+        ],
+      })
+
+      expect(quoteSwap.canSwap).toBe(true)
+      const quoteRequest = mockAdapter.history.get.find((request) => `${request.url}`.includes('/mayachain/quote/swap'))
+      expect(quoteRequest).toBeDefined()
+      const params = new URL(`${quoteRequest?.url}`).searchParams
+      expect(params.get('affiliate')).toBe('maya18z343fsdlav47chtkyp0aawqt6sgxsh3vjy2vz/eld')
+      expect(params.get('affiliate_bps')).toBe('100/200')
     })
 
     it(`Should validate streaming swap from ETH to BTC with streamingInterval error`, async () => {
