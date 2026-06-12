@@ -1,5 +1,31 @@
 # Changelog
 
+## 4.1.19
+
+### Patch Changes
+
+- 21e0085: Thread `walletIndex` through `ThorchainAction.makeAction` and `MayachainAction.makeAction` so callers can target a non-zero account when initiating swaps, deposits, or other protocol actions. Previously the parameter was dropped on the floor and every action ran from `walletIndex` 0. Fixes #1372.
+- 760762d: Add Cardano (ADA) support to MAYAChain swap estimation and execution. `MayachainQuery.getDustValues()` now includes an ADA entry (1 ADA), so `quoteSwap`/`estimateSwap` for ADA no longer throws `No dust value known for ADA chain` and returns a valid quote. `MayachainAMM` now registers an ADA client in its default wallet so ADA swaps can be executed (previously `getClient('ADA')` threw `Client not found for ADA chain`). ADA address validation was already supported.
+- 981d205: Fix ADA (Cardano) swap execution: `makeNonProtocolAction` no longer calls `wallet.getFeeRates` for Cardano. The Cardano client derives its fee internally from on-chain protocol params and has no per-byte fee rate, so the call threw `getFeeRates method not supported in ADA chain` and the swap could not be broadcast. ADA now takes the same no-feeRate transfer path as BFT/Cosmos chains. Follow-up to the ADA swap support added in #1700.
+- 51569ce: Bump direct `axios` dependency from 1.15.2 to 1.16.1 across all packages that declare it. Also bumps `lodash` from `^4.18.0` to `4.18.1` in `@xchainjs/zcash-js`. This propagates the security fixes from the earlier yarn-resolutions PR to actual consumers of the published packages — root resolutions only affect builds within this repo, not what downstream installers receive. Closes axios prototype-pollution / NO_PROXY-bypass / SSRF / CRLF / DoS advisories (GHSA-\* covering versions <1.16.1) and the lodash code-injection-via-template advisory for the affected published packages.
+- Updated dependencies [981d205]
+- Updated dependencies [760762d]
+- Updated dependencies [51569ce]
+  - @xchainjs/xchain-cardano@1.2.1
+  - @xchainjs/xchain-mayachain-query@2.1.11
+  - @xchainjs/xchain-bitcoin@2.2.5
+  - @xchainjs/xchain-client@2.0.14
+  - @xchainjs/xchain-dash@2.2.5
+  - @xchainjs/xchain-evm@2.0.18
+  - @xchainjs/xchain-mayachain@4.1.5
+  - @xchainjs/xchain-thorchain@3.0.18
+  - @xchainjs/xchain-wallet@2.0.28
+  - @xchainjs/xchain-arbitrum@2.1.4
+  - @xchainjs/xchain-ethereum@2.0.19
+  - @xchainjs/xchain-kujira@2.0.14
+  - @xchainjs/xchain-radix@2.0.15
+  - @xchainjs/xchain-zcash@1.3.6
+
 ## 4.1.18
 
 ### Patch Changes

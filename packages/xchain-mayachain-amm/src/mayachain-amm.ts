@@ -2,6 +2,7 @@
  * Import necessary modules and libraries
  */
 import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
+import { Client as AdaClient, defaultAdaParams } from '@xchainjs/xchain-cardano'
 import { defaultZECParams, Client as ZecClient } from '@xchainjs/xchain-zcash'
 import { Client as BtcClient, defaultBTCParams as defaultBtcParams } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
@@ -76,6 +77,7 @@ export class MayachainAMM {
       MAYA: new MayaClient({ network: Network.Mainnet }),
       XRD: new RadixClient({ network: Network.Mainnet }),
       ZEC: new ZecClient({ ...defaultZECParams, network: Network.Mainnet }),
+      ADA: new AdaClient({ ...defaultAdaParams, network: Network.Mainnet }),
     }),
   ) {
     this.mayachainQuery = mayachainQuery

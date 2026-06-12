@@ -38,6 +38,8 @@ import {
   TransactionAction,
 } from './types'
 import {
+  AdaAsset,
+  AdaChain,
   ArbAsset,
   ArbChain,
   BtcAsset,
@@ -245,6 +247,8 @@ export class MayachainQuery {
       [ArbChain]: new AssetCryptoAmount(baseAmount(0, 18), ArbAsset),
       [XdrChain]: new AssetCryptoAmount(baseAmount(0, 18), XdrAsset),
       [ZecChain]: new AssetCryptoAmount(baseAmount(1000, 8), ZecAsset),
+      // 1 ADA in lovelace (6 decimals); matches MAYAChain's 1 ADA inbound minimum.
+      [AdaChain]: new AssetCryptoAmount(baseAmount(1000000, 6), AdaAsset),
     }
   }
 

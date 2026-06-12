@@ -1,4 +1,8 @@
-import { type Bip32PrivateKey, type TransactionBuilder } from '@emurgo/cardano-serialization-lib-browser'
+import {
+  type AuxiliaryData,
+  type Bip32PrivateKey,
+  type TransactionBuilder,
+} from '@emurgo/cardano-serialization-lib-browser'
 import {
   AssetInfo,
   BaseXChainClient,
@@ -21,8 +25,18 @@ import WAValidator from 'multicoin-address-validator'
 import { BlockFrostClient } from './blockfrost-client'
 import { ADAAsset, ADAChain, ADA_DECIMALS, LOWER_FEE_BOUND, UPPER_FEE_BOUND, defaultAdaParams } from './const'
 import { ADAClientParams, Balance, Tx, TxParams } from './types'
-import { getCardanoNetwork } from './utils'
+import { chunkMemoUtf8, getCardanoNetwork } from './utils'
 import { getCardano } from './wasm'
+
+/**
+ * CIP-20 transaction-message metadata label. MAYA's Cardano observer reads the swap memo from the
+ * standard CIP-20 location: label 674 as the map {"msg": [chunks]} inside Conway-era (CBOR tag 259)
+ * auxiliary data. The previous code used label 674 but as a bare text value, which is not CIP-20 and
+ * the observer could not parse. (The mayanode quote `notes` field currently advertises label 6676 /
+ * {"memo": [...]}, but on-chain reality is that only 674 / {"msg": [...]} is observed — verified
+ * against successful ADA->MAYA swaps and a failed 6676 attempt.)
+ */
+const MEMO_METADATA_LABEL = '674'
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
@@ -445,10 +459,9 @@ export class Client extends BaseXChainClient {
     }
     txBuilder.add_inputs_from(unspentOutputs, cardanoLib.CoinSelectionStrategyCIP2.LargestFirst)
 
-    if (memo) {
-      const metadata = cardanoLib.GeneralTransactionMetadata.new()
-      metadata.insert(cardanoLib.BigNum.from_str('674'), cardanoLib.TransactionMetadatum.new_text(memo))
-      txBuilder.set_metadata(metadata)
+    const auxData = this.buildMemoAuxiliaryData(cardanoLib, memo)
+    if (auxData) {
+      txBuilder.set_auxiliary_data(auxData)
     }
 
     // Validate that the input set covers amount + fee BEFORE add_change_if_needed.
@@ -534,10 +547,9 @@ export class Client extends BaseXChainClient {
         txBuilder.add_regular_input(senderAddr, input, value)
       }
 
-      if (memo) {
-        const metadata = cardanoLib.GeneralTransactionMetadata.new()
-        metadata.insert(cardanoLib.BigNum.from_str('674'), cardanoLib.TransactionMetadatum.new_text(memo))
-        txBuilder.set_metadata(metadata)
+      const auxData = this.buildMemoAuxiliaryData(cardanoLib, memo)
+      if (auxData) {
+        txBuilder.set_auxiliary_data(auxData)
       }
 
       return txBuilder
@@ -673,6 +685,39 @@ export class Client extends BaseXChainClient {
       .derive(1852 | 0x80000000)
       .derive(1815 | 0x80000000)
       .derive(walletIndex | 0x80000000)
+  }
+
+  /**
+   * Builds Conway-era (CBOR tag 259) auxiliary data carrying the swap memo in the CIP-20 shape MAYA's
+   * Cardano observer reads: metadata label 674 -> {"msg": [chunks]}, where each chunk is at most
+   * 64 UTF-8 bytes. {@link AuxiliaryData.set_prefer_alonzo_format} is forced on so the tag-259 form
+   * is emitted regardless of the serialization library's default.
+   *
+   * @param {Awaited<ReturnType<typeof getCardano>>} cardanoLib - The loaded serialization library.
+   * @param {string} [memo] - The memo to embed. An empty/undefined memo yields no auxiliary data.
+   * @returns {AuxiliaryData | undefined} The auxiliary data, or undefined when there is no memo.
+   */
+  private buildMemoAuxiliaryData(
+    cardanoLib: Awaited<ReturnType<typeof getCardano>>,
+    memo?: string,
+  ): AuxiliaryData | undefined {
+    if (!memo) return undefined
+
+    const msgList = cardanoLib.MetadataList.new()
+    for (const chunk of chunkMemoUtf8(memo)) {
+      msgList.add(cardanoLib.TransactionMetadatum.new_text(chunk))
+    }
+
+    const msgMap = cardanoLib.MetadataMap.new()
+    msgMap.insert(cardanoLib.TransactionMetadatum.new_text('msg'), cardanoLib.TransactionMetadatum.new_list(msgList))
+
+    const metadata = cardanoLib.GeneralTransactionMetadata.new()
+    metadata.insert(cardanoLib.BigNum.from_str(MEMO_METADATA_LABEL), cardanoLib.TransactionMetadatum.new_map(msgMap))
+
+    const auxData = cardanoLib.AuxiliaryData.new()
+    auxData.set_metadata(metadata)
+    auxData.set_prefer_alonzo_format(true)
+    return auxData
   }
 
   private async getTransactionBuilder(): Promise<TransactionBuilder> {

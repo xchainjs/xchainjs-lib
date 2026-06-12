@@ -1,3 +1,4 @@
+import { ADAChain } from '@xchainjs/xchain-cardano'
 import { Protocol } from '@xchainjs/xchain-client'
 import { abi } from '@xchainjs/xchain-evm'
 import { MAYAChain } from '@xchainjs/xchain-mayachain'
@@ -73,7 +74,9 @@ export class MayachainAction {
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     // Non EVM actions and non Radix action
     if (!isProtocolEVMChain(assetAmount.asset.chain) && !eqAsset(assetAmount.asset, AssetXRD)) {
-      if (isProtocolBFTChain(assetAmount.asset.chain)) {
+      // BFT/Cosmos chains and Cardano derive their fee internally (Cardano from on-chain
+      // protocol params) and do not accept a caller-supplied per-byte feeRate, unlike UTXO chains.
+      if (isProtocolBFTChain(assetAmount.asset.chain) || assetAmount.asset.chain === ADAChain) {
         const hash = await wallet.transfer({
           asset: assetAmount.asset,
           amount: assetAmount.baseAmount,

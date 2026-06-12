@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.3.4
+
+### Patch Changes
+
+- 51569ce: Bump direct `axios` dependency from 1.15.2 to 1.16.1 across all packages that declare it. Also bumps `lodash` from `^4.18.0` to `4.18.1` in `@xchainjs/zcash-js`. This propagates the security fixes from the earlier yarn-resolutions PR to actual consumers of the published packages — root resolutions only affect builds within this repo, not what downstream installers receive. Closes axios prototype-pollution / NO_PROXY-bypass / SSRF / CRLF / DoS advisories (GHSA-\* covering versions <1.16.1) and the lodash code-injection-via-template advisory for the affected published packages.
+- Updated dependencies [21e0085]
+- Updated dependencies [760762d]
+- Updated dependencies [981d205]
+- Updated dependencies [51569ce]
+  - @xchainjs/xchain-thorchain-amm@3.0.38
+  - @xchainjs/xchain-mayachain-amm@4.1.19
+  - @xchainjs/xchain-mayachain-query@2.1.11
+  - @xchainjs/xchain-client@2.0.14
+  - @xchainjs/xchain-mayachain@4.1.5
+  - @xchainjs/xchain-thorchain@3.0.18
+  - @xchainjs/xchain-thorchain-query@3.0.5
+  - @xchainjs/xchain-wallet@2.0.28
+
 ## 2.3.3
 
 ### Patch Changes

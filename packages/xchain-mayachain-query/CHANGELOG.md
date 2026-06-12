@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.11
+
+### Patch Changes
+
+- 760762d: Add Cardano (ADA) support to MAYAChain swap estimation and execution. `MayachainQuery.getDustValues()` now includes an ADA entry (1 ADA), so `quoteSwap`/`estimateSwap` for ADA no longer throws `No dust value known for ADA chain` and returns a valid quote. `MayachainAMM` now registers an ADA client in its default wallet so ADA swaps can be executed (previously `getClient('ADA')` threw `Client not found for ADA chain`). ADA address validation was already supported.
+- 51569ce: Bump direct `axios` dependency from 1.15.2 to 1.16.1 across all packages that declare it. Also bumps `lodash` from `^4.18.0` to `4.18.1` in `@xchainjs/zcash-js`. This propagates the security fixes from the earlier yarn-resolutions PR to actual consumers of the published packages — root resolutions only affect builds within this repo, not what downstream installers receive. Closes axios prototype-pollution / NO_PROXY-bypass / SSRF / CRLF / DoS advisories (GHSA-\* covering versions <1.16.1) and the lodash code-injection-via-template advisory for the affected published packages.
+- Updated dependencies [51569ce]
+  - @xchainjs/xchain-client@2.0.14
+  - @xchainjs/xchain-mayamidgard@1.1.3
+  - @xchainjs/xchain-mayamidgard-query@1.0.16
+  - @xchainjs/xchain-mayanode@1.2.3
+
 ## 2.1.10
 
 ### Patch Changes
