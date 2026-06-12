@@ -115,6 +115,7 @@ export class MayachainQuery {
     toleranceBps,
     affiliateBps,
     affiliateAddress,
+    affiliates,
     height,
     streamingInterval,
     streamingQuantity,
@@ -126,6 +127,12 @@ export class MayachainQuery {
       ? amount.baseAmount.amount()
       : getBaseAmountWithDiffDecimals(amount, this.getQuoteAssetDecimals(fromAsset))
 
+    // If the caller passed a multi-affiliate array, collapse it into the slash-delimited
+    // form the protocol's /quote/swap endpoint accepts. The endpoint requires per-affiliate bps
+    // (it does not auto-expand a single shared bps), so both fields are joined in parallel.
+    const quoteAffiliateAddress = affiliates ? affiliates.map((a) => a.address).join('/') : affiliateAddress
+    const quoteAffiliateBps = affiliates ? affiliates.map((a) => a.bps).join('/') : affiliateBps
+
     const swapQuote: QuoteSwapResponse = await this.mayachainCache.mayanode.getSwapQuote(
       fromAssetString,
       toAssetString,
@@ -135,8 +142,8 @@ export class MayachainQuery {
       streamingQuantity,
       liquidityToleranceBps,
       toleranceBps,
-      affiliateBps,
-      affiliateAddress,
+      quoteAffiliateBps,
+      quoteAffiliateAddress,
       height,
     )
 

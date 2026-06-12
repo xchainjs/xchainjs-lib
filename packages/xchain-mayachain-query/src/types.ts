@@ -85,6 +85,14 @@ export type QuoteSwap = {
 }
 
 /**
+ * A single affiliate entry. Used by the multi-affiliate `affiliates` field on QuoteSwapParams.
+ */
+export type Affiliate = {
+  address: string // The affiliate address or MAYAName
+  bps: number // The affiliate basis points (0-500 on MAYAChain)
+}
+
+/**
  * Represents parameters for quoting a swap operation.
  */
 export type QuoteSwapParams = {
@@ -96,8 +104,11 @@ export type QuoteSwapParams = {
   height?: number // The block height for the swap
   liquidityToleranceBps?: number
   toleranceBps?: number // The tolerance basis points for the swap
-  affiliateBps?: number // The affiliate basis points for the swap
-  affiliateAddress?: string // The affiliate address for the swap
+  affiliateBps?: number // Single-affiliate basis points. Mutually exclusive with `affiliates`.
+  affiliateAddress?: string // Single-affiliate address. Mutually exclusive with `affiliates`.
+  // Multi-affiliate form. MAYAChain accepts up to 5 affiliates per swap with per-affiliate bps;
+  // each bps must be 0-500. Mutually exclusive with the singular affiliateAddress / affiliateBps.
+  affiliates?: Affiliate[]
   streamingInterval?: number
   streamingQuantity?: number
 }
