@@ -121,7 +121,8 @@ abstract class Client extends UTXOClient {
           if (branchId) return branchId
         }
       } catch (error) {
-        console.warn(error)
+        // Log only the message: the full axios error serializes request headers, including the api-key.
+        console.warn(error instanceof Error ? error.message : error)
       }
     }
     return DEFAULT_CONSENSUS_BRANCH_ID

@@ -146,11 +146,13 @@ export const getConsensusBranchId = async ({
     headers: {
       'api-key': apiKey,
     },
+    timeout: 10_000, // fail fast so the caller can fall back to the default branch ID
   })
   const nextblock = (response.data as StatusDTO).backend?.consensus?.nextblock
-  if (!nextblock) return undefined
-  const branchId = parseInt(nextblock, 16)
-  return Number.isNaN(branchId) ? undefined : branchId
+  // A consensus branch ID is a 32-bit value, always exactly 8 hex digits. Reject anything
+  // else rather than risk signing with a malformed branch ID parsed from a partial match.
+  if (!nextblock || !/^[0-9a-fA-F]{8}$/.test(nextblock)) return undefined
+  return parseInt(nextblock, 16)
 }
 
 export const broadcastTx = async ({
