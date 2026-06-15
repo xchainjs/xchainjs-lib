@@ -131,6 +131,7 @@ export class ThorchainAMM {
     destinationAddress,
     affiliateAddress = '',
     affiliateBps = 0,
+    affiliates,
     toleranceBps,
     liquidityToleranceBps,
     streamingInterval,
@@ -150,6 +151,7 @@ export class ThorchainAMM {
       destinationAddress,
       affiliateAddress,
       affiliateBps,
+      affiliates,
       toleranceBps,
       liquidityToleranceBps,
       streamingInterval,
@@ -174,6 +176,7 @@ export class ThorchainAMM {
     amount,
     affiliateAddress,
     affiliateBps,
+    affiliates,
     streamingInterval,
     streamingQuantity,
   }: QuoteSwapParams): Promise<string[]> {
@@ -204,22 +207,35 @@ export class ThorchainAMM {
       )
     }
 
-    if (affiliateAddress) {
-      const isThorAddress = validateAddress(
-        this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network,
-        THORChain,
-        affiliateAddress,
-      )
-      const isThorname =
-        !!(await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(
-          affiliateAddress,
-        ))
-      if (!(isThorAddress || isThorname))
-        errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
+    // Reject mixing the singular form with the multi-affiliate array — the protocol's quote
+    // endpoint reads them from the same query params, so passing both produces ambiguous wire output.
+    if (affiliates && (affiliateAddress || affiliateBps !== undefined)) {
+      errors.push('affiliates is mutually exclusive with affiliateAddress / affiliateBps; pass one form, not both')
     }
 
-    if (affiliateBps && (affiliateBps < 0 || affiliateBps > 10000)) {
-      errors.push(`affiliateBps ${affiliateBps} out of range [0 - 10000]`)
+    if (affiliates) {
+      if (affiliates.length === 0) {
+        errors.push('affiliates array is empty; omit the field or include at least one entry')
+      }
+      // THORChain consensus caps the affiliate count at 5 per swap (MultipleAffiliatesMaxCount).
+      if (affiliates.length > 5) {
+        errors.push(`affiliates count ${affiliates.length} exceeds THORChain maximum of 5`)
+      }
+      for (const a of affiliates) {
+        const valid = await this.isThorAffiliateAddress(a.address)
+        if (!valid) errors.push(`affiliate address ${a.address} is not a valid THOR address or THORName`)
+        if (a.bps < 0 || a.bps > 1000) {
+          errors.push(`affiliate bps ${a.bps} for ${a.address} out of range [0 - 1000]`)
+        }
+      }
+    } else if (affiliateAddress) {
+      const valid = await this.isThorAffiliateAddress(affiliateAddress)
+      if (!valid) errors.push(`affiliateAddress ${affiliateAddress} is not a valid THOR address`)
+    }
+
+    // THORChain caps single-affiliate bps at 1000 (10%); previous limit of 10000 was wider than the protocol accepts.
+    if (affiliateBps !== undefined && (affiliateBps < 0 || affiliateBps > 1000)) {
+      errors.push(`affiliateBps ${affiliateBps} out of range [0 - 1000]`)
     }
 
     if (streamingInterval && streamingInterval < 0) {
@@ -247,6 +263,22 @@ export class ThorchainAMM {
   }
 
   /**
+   * Returns true if the given identifier is either a valid THOR bech32 address or a registered THORName.
+   */
+  private async isThorAffiliateAddress(identifier: string): Promise<boolean> {
+    const network = this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.network
+    if (validateAddress(network, THORChain, identifier)) return true
+    try {
+      const thorname = await this.thorchainQuery.thorchainCache.midgardQuery.midgardCache.midgard.getTHORNameDetails(
+        identifier,
+      )
+      return !!thorname
+    } catch {
+      return false
+    }
+  }
+
+  /**
    * Conducts a swap with the given inputs. This method should be called after estimateSwap() to ensure the swap is valid.
    *
    * @param wallet - The wallet to use for the swap.
@@ -261,6 +293,7 @@ export class ThorchainAMM {
     destinationAddress,
     affiliateAddress,
     affiliateBps,
+    affiliates,
     toleranceBps,
     streamingInterval,
     streamingQuantity,
@@ -274,6 +307,7 @@ export class ThorchainAMM {
       destinationAddress,
       affiliateAddress,
       affiliateBps,
+      affiliates,
       toleranceBps,
       streamingInterval,
       streamingQuantity,

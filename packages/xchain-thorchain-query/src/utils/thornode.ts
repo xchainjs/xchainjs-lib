@@ -385,7 +385,9 @@ export class Thornode {
     streamingQuantity?: number,
     toleranceBps?: number,
     liquidityToleranceBps?: number,
-    affiliateBps?: number,
+    // `string` is accepted to carry the slash-delimited per-affiliate form (e.g. "10/20/30")
+    // used when multiple affiliates are passed. Single-affiliate callers pass a number as before.
+    affiliateBps?: number | string,
     affiliate?: string,
     height?: number,
     refundAddress?: string,
@@ -404,7 +406,9 @@ export class Thornode {
             streamingQuantity,
             toleranceBps,
             liquidityToleranceBps,
-            affiliateBps,
+            // Generated client types this as `number`; axios serializes either number or string
+            // identically into the query string, so the runtime accepts both.
+            affiliateBps as number | undefined,
             affiliate,
           )
         ).data
