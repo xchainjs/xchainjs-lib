@@ -1,4 +1,4 @@
-import { buildMaxTx, buildTx, getFee, memoToScript } from '@xchainjs/zcash-js'
+import { DEFAULT_CONSENSUS_BRANCH_ID, buildMaxTx, buildTx, getFee, memoToScript } from '@xchainjs/zcash-js'
 import {
   AssetInfo,
   FeeEstimateOptions,
@@ -19,6 +19,7 @@ import {
   UtxoError,
   UtxoTransactionValidator,
 } from '@xchainjs/xchain-utxo'
+import { NownodesProvider } from '@xchainjs/xchain-utxo-providers'
 
 import {
   AssetZEC,
@@ -99,6 +100,31 @@ abstract class Client extends UTXOClient {
    */
   protected compileMemo(memo: string): Buffer {
     return memoToScript(memo)
+  }
+
+  /**
+   * Get the consensus branch ID to sign transactions against.
+   *
+   * Zcash v5 transactions commit to the branch ID of the active network upgrade; signing
+   * against a stale value causes nodes to reject the broadcast (e.g. after NU6.2). This
+   * fetches the live value from the data provider so transactions stay valid across upgrades
+   * without a library change, falling back to {@link DEFAULT_CONSENSUS_BRANCH_ID} if no
+   * provider can supply it.
+   * @returns {Promise<number>} The consensus branch ID for the next block.
+   */
+  protected async getConsensusBranchId(): Promise<number> {
+    for (const provider of this.dataProviders) {
+      try {
+        const prov = provider[this.network]
+        if (prov instanceof NownodesProvider) {
+          const branchId = await prov.getConsensusBranchId()
+          if (branchId) return branchId
+        }
+      } catch (error) {
+        console.warn(error)
+      }
+    }
+    return DEFAULT_CONSENSUS_BRANCH_ID
   }
 
   /**

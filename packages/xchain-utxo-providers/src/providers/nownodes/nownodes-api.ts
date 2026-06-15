@@ -7,6 +7,7 @@ import {
   BalanceParams,
   BroadcastDTO,
   GetAddressInfo,
+  StatusDTO,
   Transaction,
   TxHashParams,
 } from './nownodes-api-types'
@@ -122,6 +123,34 @@ export const getBalance = async ({
     ? baseAmount(balanceResponse.balance, assetDecimals)
     : baseAmount(balanceResponse.balance).plus(balanceResponse.unconfirmedBalance, assetDecimals)
   return balance
+}
+
+/**
+ * Get the consensus branch ID for the next block from the Blockbook backend status.
+ *
+ * Returned by Blockbook at its API root as `backend.consensus.nextblock`, a hex string
+ * (e.g. "5437f330"). Used to sign Zcash v5 transactions against the currently active
+ * network upgrade so they remain valid after consensus upgrades.
+ *
+ * @param {string} baseUrl The nownodes blockbook URL (already includes /api/v2).
+ * @returns {number | undefined} The consensus branch ID, or undefined if unavailable.
+ */
+export const getConsensusBranchId = async ({
+  apiKey,
+  baseUrl,
+}: {
+  apiKey: string
+  baseUrl: string
+}): Promise<number | undefined> => {
+  const response = await axios.get(baseUrl, {
+    headers: {
+      'api-key': apiKey,
+    },
+  })
+  const nextblock = (response.data as StatusDTO).backend?.consensus?.nextblock
+  if (!nextblock) return undefined
+  const branchId = parseInt(nextblock, 16)
+  return Number.isNaN(branchId) ? undefined : branchId
 }
 
 export const broadcastTx = async ({
