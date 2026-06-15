@@ -127,7 +127,14 @@ class ClientKeystore extends Client {
       throw Error('Error getting private key')
     }
 
-    const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
+    const consensusBranchId = await this.getConsensusBranchId()
+    const signedBuffer = await signAndFinalize(
+      0,
+      (zecKeys.privateKey as Buffer).toString('hex'),
+      tx.inputs,
+      tx.outputs,
+      consensusBranchId,
+    )
 
     const txId = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
 
@@ -180,7 +187,14 @@ class ClientKeystore extends Client {
 
     checkFeeBounds(this.feeBounds, tx.fee)
 
-    const signedBuffer = await signAndFinalize(0, (zecKeys.privateKey as Buffer).toString('hex'), tx.inputs, tx.outputs)
+    const consensusBranchId = await this.getConsensusBranchId()
+    const signedBuffer = await signAndFinalize(
+      0,
+      (zecKeys.privateKey as Buffer).toString('hex'),
+      tx.inputs,
+      tx.outputs,
+      consensusBranchId,
+    )
     const hash = await this.roundRobinBroadcastTx(signedBuffer.toString('hex'))
 
     return { hash, maxAmount: tx.maxAmount, fee: tx.fee }

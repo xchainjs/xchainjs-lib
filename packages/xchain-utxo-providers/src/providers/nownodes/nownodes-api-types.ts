@@ -74,3 +74,12 @@ export type GetAddressInfo = {
 export type BroadcastDTO = {
   result: string
 }
+
+export type StatusDTO = {
+  backend: {
+    consensus?: {
+      chaintip: string
+      nextblock: string
+    }
+  }
+}

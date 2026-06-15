@@ -101,6 +101,18 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
     throw Error('Zcash has flat fees. Fee rates not apply')
   }
 
+  /**
+   * Get the consensus branch ID for the next block from the backend status.
+   * Used to sign Zcash transactions against the active network upgrade.
+   * @returns {number | undefined} The consensus branch ID, or undefined if unavailable.
+   */
+  async getConsensusBranchId(): Promise<number | undefined> {
+    return await nownodes.getConsensusBranchId({
+      apiKey: this._apiKey,
+      baseUrl: this.baseUrl,
+    })
+  }
+
   private mapTransactionToTx(rawTx: Transaction): Tx {
     return {
       asset: this.asset,
