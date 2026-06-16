@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-bitcoin",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "Custom Bitcoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",
