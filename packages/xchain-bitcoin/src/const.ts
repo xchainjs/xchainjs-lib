@@ -2,6 +2,7 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 import {
   BitgoProvider,
+  BlockbookProvider,
   BlockcypherNetwork,
   BlockcypherProvider,
   HaskoinNetwork,
@@ -126,6 +127,23 @@ export const BitgoProviders: UtxoOnlineDataProviders = {
   [Network.Testnet]: undefined,
   [Network.Stagenet]: mainnetBitgoProvider,
   [Network.Mainnet]: mainnetBitgoProvider,
+}
+
+// NowNodes Blockbook data providers for Bitcoin
+// Docs: https://nownodes.io/nodes/bitcoin-btc
+const mainnetBtcBlockbookProvider = new BlockbookProvider('https://btcbook.nownodes.io/api/v2', AssetBTC, BTC_DECIMAL, {
+  apiKey: process.env.NOWNODES_API_KEY || '',
+})
+const testnetBtcBlockbookProvider = new BlockbookProvider(
+  'https://btcbook-testnet.nownodes.io/api/v2',
+  AssetBTC,
+  BTC_DECIMAL,
+  { apiKey: process.env.NOWNODES_API_KEY || '' },
+)
+export const BlockbookDataProviders: UtxoOnlineDataProviders = {
+  [Network.Testnet]: testnetBtcBlockbookProvider,
+  [Network.Stagenet]: mainnetBtcBlockbookProvider,
+  [Network.Mainnet]: mainnetBtcBlockbookProvider,
 }
 
 export const tapRootDerivationPaths = {
