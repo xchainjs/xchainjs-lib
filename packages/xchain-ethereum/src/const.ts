@@ -104,6 +104,17 @@ const ethRootDerivationPaths = {
 }
 
 /**
+ * Ledger Live derivation paths. The `{index}` placeholder is substituted with the wallet index
+ * into the hardened account position (`m/44'/60'/{index}'/0/0`). Pass as `rootDerivationPaths`
+ * to derive Ledger Live accounts instead of the default BIP44 address index scheme.
+ */
+export const ledgerLiveDerivationPaths = {
+  [Network.Mainnet]: "m/44'/60'/{index}'/0/0",
+  [Network.Testnet]: "m/44'/60'/{index}'/0/0",
+  [Network.Stagenet]: "m/44'/60'/{index}'/0/0",
+}
+
+/**
  * Default parameters for Ethereum clients.
  */
 const defaults = {

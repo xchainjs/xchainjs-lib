@@ -27,11 +27,17 @@ export abstract class Signer implements ISigner {
 
   /**
    * Get the full derivation path based on the wallet index.
+   *
+   * If the configured path contains an `{index}` placeholder (e.g. Ledger Live's
+   * `m/44'/60'/{index}'/0/0`), the wallet index is substituted into that position.
+   * Otherwise the index is appended, preserving the default `m/44'/60'/0'/0/{index}` behavior.
    * @param {number} walletIndex The HD wallet index
    * @returns {string} The full derivation path
    */
   public getFullDerivationPath(walletIndex: number): string {
-    return `${this.derivationPath}/${walletIndex}`
+    return this.derivationPath.includes('{index}')
+      ? this.derivationPath.replace('{index}', `${walletIndex}`)
+      : `${this.derivationPath}/${walletIndex}`
   }
 
   /**

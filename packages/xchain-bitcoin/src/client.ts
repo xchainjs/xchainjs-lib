@@ -70,14 +70,21 @@ abstract class Client extends UTXOClient {
     })
     this.addressFormat = params.addressFormat || AddressFormat.P2WPKH
 
-    if (this.addressFormat === AddressFormat.P2TR) {
-      if (
-        !this.rootDerivationPaths?.mainnet.startsWith(`m/86'`) ||
-        !this.rootDerivationPaths?.testnet.startsWith(`m/86'`) ||
-        !this.rootDerivationPaths?.stagenet.startsWith(`m/86'`)
-      ) {
-        throw Error(`Unsupported derivation paths for Taproot client. Use 86' paths`)
-      }
+    // Non-default address formats require BIP-compliant derivation paths matching their purpose.
+    // P2WPKH is left unvalidated to preserve existing behavior for consumers passing custom paths.
+    const requiredPurpose: Partial<Record<AddressFormat, string>> = {
+      [AddressFormat.P2TR]: `m/86'`,
+      [AddressFormat.P2PKH]: `m/44'`,
+      [AddressFormat.P2SH_P2WPKH]: `m/49'`,
+    }
+    const purpose = requiredPurpose[this.addressFormat]
+    if (
+      purpose &&
+      (!this.rootDerivationPaths?.mainnet.startsWith(purpose) ||
+        !this.rootDerivationPaths?.testnet.startsWith(purpose) ||
+        !this.rootDerivationPaths?.stagenet.startsWith(purpose))
+    ) {
+      throw Error(`Unsupported derivation paths for ${AddressFormat[this.addressFormat]} client. Use ${purpose} paths`)
     }
     Bitcoin.initEccLib(ecc)
   }
@@ -144,6 +151,66 @@ abstract class Client extends UTXOClient {
   }
 
   /**
+   * Add inputs to a PSBT according to the configured address format.
+   * - P2WPKH / P2SH-P2WPKH use `witnessUtxo` (the P2SH redeem script is attached later by the
+   *   keystore signer, which holds the public key; the Ledger client rebuilds inputs from `txHex`).
+   * - P2TR uses `witnessUtxo` + `tapInternalKey` reconstructed from the sender address.
+   * - P2PKH (legacy) uses `nonWitnessUtxo` built from the full previous transaction hex.
+   * @param {Bitcoin.Psbt} psbt The PSBT to add inputs to.
+   * @param {UTXO[]} inputs The selected UTXOs.
+   * @param {Address} sender The sender address (used to reconstruct the Taproot internal key).
+   */
+  protected addInputsToPsbt(psbt: Bitcoin.Psbt, inputs: UTXO[], sender: Address): void {
+    switch (this.addressFormat) {
+      case AddressFormat.P2WPKH:
+      case AddressFormat.P2SH_P2WPKH:
+        inputs.forEach((utxo: UTXO) => {
+          if (!utxo.witnessUtxo) {
+            throw UtxoError.fromUnknown(
+              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
+              'addInputsToPsbt',
+            )
+          }
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: utxo.witnessUtxo,
+          })
+        })
+        break
+      case AddressFormat.P2PKH:
+        inputs.forEach((utxo: UTXO) => {
+          if (!utxo.txHex) {
+            throw UtxoError.fromUnknown(
+              new Error(`Missing 'txHex' for UTXO ${utxo.hash}:${utxo.index}`),
+              'addInputsToPsbt',
+            )
+          }
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            nonWitnessUtxo: Buffer.from(utxo.txHex, 'hex'),
+          })
+        })
+        break
+      case AddressFormat.P2TR: {
+        const { pubkey, output } = Bitcoin.payments.p2tr({
+          address: sender,
+        })
+        inputs.forEach((utxo: UTXO) =>
+          psbt.addInput({
+            hash: utxo.hash,
+            index: utxo.index,
+            witnessUtxo: { value: utxo.value, script: output as Buffer },
+            tapInternalKey: pubkey,
+          }),
+        )
+        break
+      }
+    }
+  }
+
+  /**
    * Enhanced Bitcoin transaction builder with comprehensive validation and optimal UTXO selection
    * @param params Transaction parameters
    * @returns Enhanced transaction build result with PSBT, UTXOs, and inputs
@@ -200,33 +267,7 @@ abstract class Client extends UTXOClient {
       const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
 
       // Add inputs based on selection
-      if (this.addressFormat === AddressFormat.P2WPKH) {
-        selectionResult.inputs.forEach((utxo: UTXO) => {
-          if (!utxo.witnessUtxo) {
-            throw UtxoError.fromUnknown(
-              new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`),
-              'buildTxPsbt',
-            )
-          }
-          psbt.addInput({
-            hash: utxo.hash,
-            index: utxo.index,
-            witnessUtxo: utxo.witnessUtxo,
-          })
-        })
-      } else {
-        const { pubkey, output } = Bitcoin.payments.p2tr({
-          address: sender,
-        })
-        selectionResult.inputs.forEach((utxo: UTXO) =>
-          psbt.addInput({
-            hash: utxo.hash,
-            index: utxo.index,
-            witnessUtxo: { value: utxo.value, script: output as Buffer },
-            tapInternalKey: pubkey,
-          }),
-        )
-      }
+      this.addInputsToPsbt(psbt, selectionResult.inputs, sender)
 
       // Add recipient output
       psbt.addOutput({
@@ -345,30 +386,7 @@ abstract class Client extends UTXOClient {
       const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
 
       // Add inputs
-      if (this.addressFormat === AddressFormat.P2WPKH) {
-        maxCalc.inputs.forEach((utxo: UTXO) => {
-          if (!utxo.witnessUtxo) {
-            throw UtxoError.fromUnknown(new Error(`Missing witnessUtxo for UTXO ${utxo.hash}:${utxo.index}`), 'sendMax')
-          }
-          psbt.addInput({
-            hash: utxo.hash,
-            index: utxo.index,
-            witnessUtxo: utxo.witnessUtxo,
-          })
-        })
-      } else {
-        const { pubkey, output } = Bitcoin.payments.p2tr({
-          address: sender,
-        })
-        maxCalc.inputs.forEach((utxo: UTXO) =>
-          psbt.addInput({
-            hash: utxo.hash,
-            index: utxo.index,
-            witnessUtxo: { value: utxo.value, script: output as Buffer },
-            tapInternalKey: pubkey,
-          }),
-        )
-      }
+      this.addInputsToPsbt(psbt, maxCalc.inputs, sender)
 
       // Add recipient output (max amount - no change)
       psbt.addOutput({
