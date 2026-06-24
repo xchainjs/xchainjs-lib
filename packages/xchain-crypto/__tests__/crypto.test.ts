@@ -22,6 +22,28 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
     crypto: {
       cipher: 'aes-128-ctr',
       ciphertext:
+        '14bdcc0565d4ecd101a61a129b4cf109d80a496ee46547013086daab702554f6fa6b78596cc0bc008e2c26518b0c38e066fb215746639674b8f1be4693ef17ae77b35dbab753421af10307df1f177a',
+      cipherparams: { iv: 'dffdb8bbe92e9a00e173eaa20f1a3784' },
+      kdf: 'pbkdf2',
+      kdfparams: {
+        prf: 'hmac-sha256',
+        dklen: 32,
+        salt: 'ead4ad6c09f5a5586235a642fa39c95741b35283304e3fd464d942e300fe0514',
+        c: 600000,
+      },
+      mac: 'f2b7858b9f46cc5a4391f1b747561ec5e7197463774b8cc6c62a2da6eb2a9d30',
+    },
+    id: '9ad9ea91-22ad-46a7-9613-4f9d190e32ab',
+    version: 1,
+    meta: 'xchain-keystore',
+  }
+
+  // Keystore produced with the legacy c=262144 iteration count. The iteration count is
+  // stored in the keystore itself, so older keystores must still decrypt unchanged.
+  const legacyKeystore = {
+    crypto: {
+      cipher: 'aes-128-ctr',
+      ciphertext:
         'aa6838a2aded226922107d5a2322513e5dd706149831580356dec17d8ab531f873d3f173c2775f125d2b3203c498214039cfa78ac1d0ecb29c3f9be35483c1e4d0e2267bba7b36cec14172f760a91a',
       cipherparams: { iv: 'dffdb8bbe92e9a00e173eaa20f1a3784' },
       kdf: 'pbkdf2',
@@ -56,6 +78,15 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
     const result = await decryptFromKeystore(expectedKeystore, password)
     expect(result).toBe(phrase)
   })
+
+  it('decryptFromKeystore() should still decrypt legacy (c=262144) keystores', async () => {
+    const result = await decryptFromKeystore(legacyKeystore, password)
+    expect(result).toBe(phrase)
+  })
+
+  it('decryptFromKeystore() should reject an incorrect password', async () => {
+    await expect(decryptFromKeystore(expectedKeystore, 'wrong-password')).rejects.toThrow('Invalid password')
+  })
 })
 
 describe('Validate Phrase', () => {
@@ -84,7 +115,7 @@ describe('Export Keystore', () => {
     expect(keystore.crypto.cipher).toEqual('aes-128-ctr')
     expect(keystore.crypto.kdf).toEqual('pbkdf2')
     expect(keystore.crypto.kdfparams.prf).toEqual('hmac-sha256')
-    expect(keystore.crypto.kdfparams.c).toEqual(262144)
+    expect(keystore.crypto.kdfparams.c).toEqual(600000)
     expect(keystore.version).toEqual(1)
     expect(keystore.meta).toEqual('xchain-keystore')
   })

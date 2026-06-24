@@ -12,7 +12,7 @@ const cipher = 'aes-128-ctr' // Encryption cipher
 const kdf = 'pbkdf2' // Key derivation function
 const prf = 'hmac-sha256' // Pseudorandom function
 const dklen = 32 // Derived key length
-const c = 262144 // Iteration count
+const c = 600000 // Iteration count (OWASP-recommended minimum for PBKDF2-HMAC-SHA256)
 const hashFunction = 'sha256' // Hash function
 const meta = 'xchain-keystore' // Metadata
 
@@ -161,9 +161,12 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
 
   const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
   const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), ciphertext]), { dkLen: 32 })
-  const mac: string = Buffer.from(mac_bytes).toString('hex')
+  const computedMac = Buffer.from(mac_bytes)
+  const expectedMac = Buffer.from(keystore.crypto.mac, 'hex')
 
-  if (mac !== keystore.crypto.mac) throw new Error('Invalid password')
+  // Constant-time comparison to avoid leaking MAC bytes via timing
+  if (computedMac.length !== expectedMac.length || !crypto.timingSafeEqual(computedMac, expectedMac))
+    throw new Error('Invalid password')
   const decipher = crypto.createDecipheriv(
     keystore.crypto.cipher,
     derivedKey.slice(0, 16),
