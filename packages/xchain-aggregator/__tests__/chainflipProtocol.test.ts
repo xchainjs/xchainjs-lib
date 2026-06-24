@@ -52,6 +52,13 @@ describe('Chainflip protocol', () => {
     expect(await protocol.isAssetSupported(AssetRuneNative)).toBeFalsy()
   })
 
+  it('Should check Tron assets are supported', async () => {
+    expect(await protocol.isAssetSupported(assetFromStringEx('TRON.TRX'))).toBeTruthy()
+    expect(
+      await protocol.isAssetSupported(assetFromStringEx('TRON.USDT-TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t')),
+    ).toBeTruthy()
+  })
+
   it('Should check trade assets are not supported', async () => {
     expect(await protocol.isAssetSupported(assetFromStringEx('AVAX~AVAX'))).toBeFalsy()
   })

@@ -221,6 +221,32 @@ class SwapSDK {
         maximumSwapAmount: null,
         minimumEgressAmount: '1',
       },
+      {
+        chainflipId: 'Trx',
+        asset: 'TRX',
+        chain: 'Tron',
+        contractAddress: undefined,
+        decimals: 6,
+        name: 'Tron',
+        symbol: 'TRX',
+        isMainnet: true,
+        minimumSwapAmount: '10000000',
+        maximumSwapAmount: null,
+        minimumEgressAmount: '1',
+      },
+      {
+        chainflipId: 'TrxUsdt',
+        asset: 'USDT',
+        chain: 'Tron',
+        contractAddress: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
+        decimals: 6,
+        name: 'USDT',
+        symbol: 'USDT',
+        isMainnet: true,
+        minimumSwapAmount: '20000000',
+        maximumSwapAmount: null,
+        minimumEgressAmount: '1',
+      },
     ]
   }
 
