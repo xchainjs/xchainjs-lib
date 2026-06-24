@@ -196,6 +196,7 @@ export default function SwapPage() {
     THOR: 0.02,
     MAYA: 0.02,
     KUJI: 0.01,
+    TRON: 2,
   }
 
   // Set amount to percentage of balance

@@ -29,6 +29,7 @@ const CDN_SYMBOL_MAP: Record<string, string> = {
   BSC: 'bnb',
   GAIA: 'atom',
   SOL: 'sol',
+  TRON: 'trx',
 }
 
 export function getAssetIconUrl(chainId: string, symbol?: string): string {
