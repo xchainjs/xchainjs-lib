@@ -121,6 +121,12 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
     paramsImport: 'defaultXRPParams',
     clientInit: 'new Client({ ...defaultXRPParams, network: Network.Mainnet, phrase })',
   },
+  TRON: {
+    packageName: '@xchainjs/xchain-tron',
+    clientImport: 'Client',
+    paramsImport: 'defaultTRONParams',
+    clientInit: 'new Client({ ...defaultTRONParams, network: Network.Mainnet, phrase })',
+  },
 }
 
 function getChainConfig(chainId: string): ChainConfig {

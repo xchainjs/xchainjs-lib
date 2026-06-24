@@ -126,6 +126,7 @@ const CHAINFLIP_CHAINS: Record<string, string> = {
   ETH: 'Ethereum',
   ARB: 'Arbitrum',
   SOL: 'Solana',
+  TRON: 'Tron',
 }
 
 function isChainflipCompatible(chain: string): boolean {
@@ -329,7 +330,7 @@ export class SwapService {
 
         if (bestQuote) {
           // Chainflip egressAmount is in base units with native decimals per chain
-          const CF_DECIMALS: Record<string, number> = { BTC: 8, ETH: 18, ARB: 18, SOL: 9 }
+          const CF_DECIMALS: Record<string, number> = { BTC: 8, ETH: 18, ARB: 18, SOL: 9, TRON: 6 }
           const destDecimals = CF_DECIMALS[params.destinationAsset.chain] || 18
           const expectedCrypto = new CryptoAmountClass(
             baseAmountFn(bestQuote.egressAmount, destDecimals),

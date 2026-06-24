@@ -25,6 +25,7 @@ const SWAP_SUPPORTED_CHAINS: string[] = [
   'SUI',
   'XRP',
   'ADA',
+  'TRON',
 ]
 
 interface UseSwapResult {

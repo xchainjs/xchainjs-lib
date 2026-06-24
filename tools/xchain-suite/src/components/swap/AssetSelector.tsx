@@ -63,6 +63,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { chainId: 'SOL', chainName: 'Solana', symbol: 'SOL' },
       { chainId: 'SUI', chainName: 'Sui', symbol: 'SUI' },
       { chainId: 'ADA', chainName: 'Cardano', symbol: 'ADA' },
+      { chainId: 'TRON', chainName: 'Tron', symbol: 'TRX' },
     ],
   },
 ]

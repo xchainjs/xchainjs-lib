@@ -328,6 +328,7 @@ import { Client as SuiClient, defaultSuiParams } from '@xchainjs/xchain-sui'
 import { Client as XrdClient } from '@xchainjs/xchain-radix'
 import { Client as AdaClient, defaultAdaParams } from '@xchainjs/xchain-cardano'
 import { Client as XrpClient, defaultXRPParams } from '@xchainjs/xchain-ripple'
+import { Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
 
 export interface ClientConfig {
   phrase: string
@@ -421,6 +422,8 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     }
     case 'XRP':
       return new XrpClient({ ...defaultXRPParams, network, phrase })
+    case 'TRON':
+      return new TronClient({ ...defaultTRONParams, network, phrase })
 
     default:
       throw new Error(`Unsupported chain: ${chainId}`)

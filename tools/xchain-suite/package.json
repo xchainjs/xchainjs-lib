@@ -11,7 +11,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@chainflip/sdk": "2.1.1",
+    "@chainflip/sdk": "2.2.1",
     "@xchainjs/xchain-arbitrum": "workspace:*",
     "@xchainjs/xchain-avax": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",
@@ -43,6 +43,7 @@
     "@xchainjs/xchain-thorchain-amm": "workspace:*",
     "@xchainjs/xchain-thorchain-query": "workspace:*",
     "@xchainjs/xchain-thornode": "workspace:*",
+    "@xchainjs/xchain-tron": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
     "@xchainjs/xchain-wallet": "workspace:*",
     "@xchainjs/xchain-zcash": "workspace:*",
