@@ -64,3 +64,15 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+---
+
+## Project-Specific Notes
+
+### `xchain-monero` is work-in-progress
+
+The `@xchainjs/xchain-monero` package is **not yet functional** and is under active development. Treat it as out of scope for cross-cutting work:
+
+- **Exclude it from monorepo-wide dependency bumps, refactors, and codemods** unless the task explicitly targets monero. It pins its own crypto dependency ranges (`@noble/curves`, `@noble/hashes`, `micro-key-producer`) and should be allowed to keep them independently — e.g. when upgrading `@scure`/`@noble` to 2.x elsewhere, leave monero on its current versions rather than forcing alignment.
+- Don't rely on its tests as a gate for shared changes, and don't "fix" its incomplete code as a side effect of unrelated work.
+- If a change genuinely must touch monero, call it out explicitly and scope it on its own.
