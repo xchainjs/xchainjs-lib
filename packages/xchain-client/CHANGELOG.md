@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.15
+
+### Patch Changes
+
+- Updated dependencies [dbdfc76]
+  - @xchainjs/xchain-crypto@1.0.7
+
 ## 2.0.14
 
 ### Patch Changes

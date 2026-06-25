@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2.7
+
+### Patch Changes
+
+- Updated dependencies [dbdfc76]
+  - @xchainjs/xchain-crypto@1.0.7
+  - @xchainjs/xchain-client@2.0.15
+  - @xchainjs/xchain-utxo@2.2.7
+  - @xchainjs/xchain-utxo-providers@2.0.17
+
 ## 2.2.6
 
 ### Patch Changes

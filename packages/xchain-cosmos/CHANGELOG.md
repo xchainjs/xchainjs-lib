@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.0.15
+
+### Patch Changes
+
+- 189cfe3: Bump protobufjs 7.5.8 → 7.6.4 to address security advisory. Exact pin, no caret.
+- Updated dependencies [dbdfc76]
+  - @xchainjs/xchain-crypto@1.0.7
+  - @xchainjs/xchain-client@2.0.15
+  - @xchainjs/xchain-cosmos-sdk@2.0.15
+
 ## 3.0.14
 
 ### Patch Changes

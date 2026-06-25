@@ -1,5 +1,44 @@
 # testing-gui
 
+## 1.0.16
+
+### Patch Changes
+
+- Updated dependencies [189cfe3]
+- Updated dependencies [dbdfc76]
+  - @xchainjs/xchain-cosmos@3.0.15
+  - @xchainjs/xchain-mayachain@4.1.6
+  - @xchainjs/xchain-thorchain@3.0.19
+  - @xchainjs/xchain-crypto@1.0.7
+  - @xchainjs/xchain-thorchain-amm@3.1.1
+  - @xchainjs/xchain-mayachain-amm@4.2.1
+  - @xchainjs/xchain-wallet@2.0.30
+  - @xchainjs/xchain-bitcoin@2.2.7
+  - @xchainjs/xchain-bitcoincash@2.2.8
+  - @xchainjs/xchain-cardano@1.2.2
+  - @xchainjs/xchain-client@2.0.15
+  - @xchainjs/xchain-dash@2.2.7
+  - @xchainjs/xchain-doge@2.2.7
+  - @xchainjs/xchain-evm@2.0.19
+  - @xchainjs/xchain-kujira@2.0.15
+  - @xchainjs/xchain-litecoin@2.3.4
+  - @xchainjs/xchain-monero@0.2.4
+  - @xchainjs/xchain-radix@2.0.16
+  - @xchainjs/xchain-ripple@1.0.17
+  - @xchainjs/xchain-solana@1.1.7
+  - @xchainjs/xchain-sui@0.1.4
+  - @xchainjs/xchain-tron@3.0.8
+  - @xchainjs/xchain-zcash@1.3.8
+  - @xchainjs/xchain-arbitrum@2.1.5
+  - @xchainjs/xchain-avax@2.0.19
+  - @xchainjs/xchain-bsc@2.0.20
+  - @xchainjs/xchain-ethereum@2.0.20
+  - @xchainjs/xchain-evm-providers@2.0.18
+  - @xchainjs/xchain-mayachain-query@2.2.1
+  - @xchainjs/xchain-mayamidgard-query@1.0.17
+  - @xchainjs/xchain-midgard-query@2.0.18
+  - @xchainjs/xchain-thorchain-query@3.1.1
+
 ## 1.0.15
 
 ### Patch Changes

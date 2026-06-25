@@ -1,5 +1,13 @@
 # @xchainjs/xchain-monero
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [dbdfc76]
+  - @xchainjs/xchain-crypto@1.0.7
+  - @xchainjs/xchain-client@2.0.15
+
 ## 0.2.3
 
 ### Patch Changes
