@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.20
+
+### Patch Changes
+
+- Updated dependencies [4ec2e3e]
+  - @xchainjs/xchain-crypto@1.0.8
+  - @xchainjs/xchain-client@2.0.16
+  - @xchainjs/xchain-evm-providers@2.0.19
+
 ## 2.0.19
 
 ### Patch Changes
