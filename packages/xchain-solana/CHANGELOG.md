@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.8
+
+### Patch Changes
+
+- Updated dependencies [4ec2e3e]
+  - @xchainjs/xchain-crypto@1.0.8
+  - @xchainjs/xchain-client@2.0.16
+
 ## 1.1.7
 
 ### Patch Changes

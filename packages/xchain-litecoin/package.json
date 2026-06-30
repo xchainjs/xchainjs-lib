@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-litecoin",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "Custom Litecoin client and utilities used by XChainJS clients",
   "keywords": [
     "XChain",

@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-mayachain",
-  "version": "4.1.6",
+  "version": "4.1.7",
   "description": "Custom Mayachain client and utilities used by XChainJS clients",
   "keywords": [
     "MAYAChain",

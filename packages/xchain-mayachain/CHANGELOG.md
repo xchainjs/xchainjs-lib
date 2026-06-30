@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.1.7
+
+### Patch Changes
+
+- Updated dependencies [4ec2e3e]
+  - @xchainjs/xchain-crypto@1.0.8
+  - @xchainjs/xchain-client@2.0.16
+  - @xchainjs/xchain-cosmos-sdk@2.0.16
+
 ## 4.1.6
 
 ### Patch Changes
