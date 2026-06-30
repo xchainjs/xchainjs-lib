@@ -87,6 +87,30 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
   it('decryptFromKeystore() should reject an incorrect password', async () => {
     await expect(decryptFromKeystore(expectedKeystore, 'wrong-password')).rejects.toThrow('Invalid password')
   })
+
+  // Browsers/bundlers polyfill `crypto` with crypto-browserify, which lacks
+  // timingSafeEqual. Simulate its absence and ensure decrypt still works.
+  describe('without crypto.timingSafeEqual (browser polyfill)', () => {
+    const original = crypto.timingSafeEqual
+
+    beforeEach(() => {
+      // @ts-expect-error simulate a polyfill that does not implement timingSafeEqual
+      crypto.timingSafeEqual = undefined
+    })
+
+    afterEach(() => {
+      crypto.timingSafeEqual = original
+    })
+
+    it('decryptFromKeystore() should return original phrase via fallback comparison', async () => {
+      const result = await decryptFromKeystore(expectedKeystore, password)
+      expect(result).toBe(phrase)
+    })
+
+    it('decryptFromKeystore() should still reject an incorrect password via fallback comparison', async () => {
+      await expect(decryptFromKeystore(expectedKeystore, 'wrong-password')).rejects.toThrow('Invalid password')
+    })
+  })
 })
 
 describe('Validate Phrase', () => {

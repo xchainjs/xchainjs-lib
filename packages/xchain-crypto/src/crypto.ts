@@ -50,6 +50,26 @@ const _isNode = (): boolean => {
 }
 
 /**
+ * Constant-time comparison of two equal-length buffers.
+ *
+ * Uses Node's `crypto.timingSafeEqual` when available, and falls back to a
+ * manual constant-time comparison for browser/bundler environments whose
+ * `crypto` polyfill (e.g. `crypto-browserify`) does not implement it.
+ *
+ * @param {Buffer} a First buffer.
+ * @param {Buffer} b Second buffer.
+ * @returns {boolean} True if the buffers are equal in constant time.
+ */
+const constantTimeEqual = (a: Buffer, b: Buffer): boolean => {
+  if (a.length !== b.length) return false
+  if (typeof crypto.timingSafeEqual === 'function') return crypto.timingSafeEqual(a, b)
+  // Fallback for browser polyfills (crypto-browserify) that lack timingSafeEqual
+  let diff = 0
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i]
+  return diff === 0
+}
+
+/**
  * Generates a new mnemonic phrase.
  * @param {number} size The size of the phrase in words. Default is 12.
  * @returns {string} The generated mnemonic phrase.
@@ -165,7 +185,7 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
   const expectedMac = Buffer.from(keystore.crypto.mac, 'hex')
 
   // Constant-time comparison to avoid leaking MAC bytes via timing
-  if (computedMac.length !== expectedMac.length || !crypto.timingSafeEqual(computedMac, expectedMac))
+  if (computedMac.length !== expectedMac.length || !constantTimeEqual(computedMac, expectedMac))
     throw new Error('Invalid password')
   const decipher = crypto.createDecipheriv(
     keystore.crypto.cipher,
