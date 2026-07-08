@@ -8,13 +8,37 @@ import { v4 as uuidv4 } from 'uuid'
 import { pbkdf2Async } from './utils'
 
 // Constants
-const cipher = 'aes-128-ctr' // Encryption cipher
+const cipher = 'aes-256-ctr' // Encryption cipher (keystore v2). Legacy v1 keystores use aes-128-ctr.
 const kdf = 'pbkdf2' // Key derivation function
 const prf = 'hmac-sha256' // Pseudorandom function
-const dklen = 32 // Derived key length
+const dklen = 64 // Derived key length: 32-byte AES-256 key + 32-byte independent MAC key
 const c = 600000 // Iteration count (OWASP-recommended minimum for PBKDF2-HMAC-SHA256)
 const hashFunction = 'sha256' // Hash function
 const meta = 'xchain-keystore' // Metadata
+const keystoreVersion = 2 // Keystore format version written by encryptToKeyStore
+
+/**
+ * Returns the AES key length in bytes for a supported keystore cipher.
+ *
+ * The keystore is self-describing: its `cipher` field determines how many of the
+ * PBKDF2-derived bytes are the AES key; the remaining `dklen - keyLength` bytes are
+ * the independent MAC key. This lets legacy v1 keystores (aes-128-ctr, 16-byte key,
+ * dklen 32) stay decryptable alongside v2 (aes-256-ctr, 32-byte key, dklen 64).
+ *
+ * @param {string} cipherName The cipher name read from the keystore.
+ * @returns {number} AES key length in bytes.
+ * @throws {Error} Thrown if the cipher is not supported.
+ */
+const aesKeyLengthForCipher = (cipherName: string): number => {
+  switch (cipherName) {
+    case 'aes-256-ctr':
+      return 32
+    case 'aes-128-ctr':
+      return 16
+    default:
+      throw new Error(`Unsupported keystore cipher: ${cipherName}`)
+  }
+}
 
 /**
  * The Keystore interface.
@@ -136,9 +160,14 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   }
 
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
-  const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
+  // Split the derived key into an AES key and an independent MAC key — the two key
+  // materials must not overlap, so the MAC key is the bytes after the AES key.
+  const aesKeyLength = aesKeyLengthForCipher(cipher)
+  const encryptionKey = derivedKey.slice(0, aesKeyLength)
+  const macKey = derivedKey.slice(aesKeyLength, kdfParams.dklen)
+  const cipherIV = crypto.createCipheriv(cipher, encryptionKey, iv)
   const cipherText = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
-  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]), {
+  const mac_bytes: Uint8Array = blake2b(Buffer.concat([macKey, Buffer.from(cipherText)]), {
     dkLen: 32,
   })
   const mac: string = Buffer.from(mac_bytes).toString('hex')
@@ -155,7 +184,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   const keystore = {
     crypto: cryptoStruct,
     id: ID,
-    version: 1,
+    version: keystoreVersion,
     meta: meta,
   }
 
@@ -180,7 +209,12 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
   )
 
   const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
-  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), ciphertext]), { dkLen: 32 })
+  // Derive the AES key / MAC key split from the keystore's own cipher and dklen, so
+  // legacy v1 (aes-128-ctr, 16-byte key) and v2 (aes-256-ctr, 32-byte key) both decrypt.
+  const aesKeyLength = aesKeyLengthForCipher(keystore.crypto.cipher)
+  const encryptionKey = derivedKey.slice(0, aesKeyLength)
+  const macKey = derivedKey.slice(aesKeyLength, kdfparams.dklen)
+  const mac_bytes: Uint8Array = blake2b(Buffer.concat([macKey, ciphertext]), { dkLen: 32 })
   const computedMac = Buffer.from(mac_bytes)
   const expectedMac = Buffer.from(keystore.crypto.mac, 'hex')
 
@@ -189,7 +223,7 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
     throw new Error('Invalid password')
   const decipher = crypto.createDecipheriv(
     keystore.crypto.cipher,
-    derivedKey.slice(0, 16),
+    encryptionKey,
     Buffer.from(keystore.crypto.cipherparams.iv, 'hex'),
   )
 
