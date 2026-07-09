@@ -18,6 +18,7 @@ import {
   BTCChain,
   BTC_DECIMAL,
   BitgoProviders,
+  BlockbookDataProviders,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
   MIN_TX_FEE,
@@ -32,7 +33,7 @@ export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: blockstreamExplorerProviders,
-  dataProviders: [BitgoProviders, BlockcypherDataProviders],
+  dataProviders: [BitgoProviders, BlockcypherDataProviders, BlockbookDataProviders],
   rootDerivationPaths: {
     [Network.Mainnet]: `m/84'/0'/0'/0/`, // Not BIP44 compliant but compatible with pre-HD wallets
     [Network.Testnet]: `m/84'/1'/0'/0/`,
