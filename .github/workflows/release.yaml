@@ -3,6 +3,7 @@ name: Release workflow
 permissions:
   contents: write
   pull-requests: write
+  id-token: write # Required for npm Trusted Publishing (OIDC) and provenance attestations
 
 on:
   push:
@@ -35,6 +36,13 @@ jobs:
           node-version: 20.x
           cache: yarn
 
+      # npm Trusted Publishing (OIDC) requires npm >= 11.5.1. Node 20 ships npm 10.x,
+      # so upgrade the globally-installed npm that `changeset publish` shells out to.
+      - name: Upgrade npm for Trusted Publishing (OIDC)
+        run: |
+          npm install -g npm@latest
+          npm --version
+
       - name: Install dependencies
         run: yarn install --immutable
 
@@ -47,6 +55,11 @@ jobs:
 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NPM_TOKEN is a TEMPORARY fallback during the Trusted Publishing migration.
+          # Packages with a trusted publisher configured on npmjs.com publish via OIDC
+          # (no token); packages not yet configured fall back to this token.
+          # Remove this line — and revoke the token — once every package under
+          # packages/* has a trusted publisher registered. See the PR that introduced OIDC.
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Prepare notification for Discord
