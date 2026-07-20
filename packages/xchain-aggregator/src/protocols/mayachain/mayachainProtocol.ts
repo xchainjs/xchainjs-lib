@@ -37,10 +37,14 @@ export class MayachainProtocol implements IProtocol {
     // Use network from configuration, fallback to wallet network, or default to mainnet
     const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
 
-    // Create MayachainQuery with proper network configuration
-    // TODO: Fix MidgardQuery constructor to accept network parameter
-    const midgardCache = new MidgardCache(new MidgardApi(network))
-    const mayachainCache = new MayachainCache(new MidgardQuery(midgardCache), new Mayanode(network))
+    // Create MayachainQuery with proper network configuration.
+    // Forward optional custom Mayanode/Midgard configs when provided; otherwise the
+    // clients fall back to their per-network default endpoints.
+    const midgardCache = new MidgardCache(new MidgardApi(network, configuration?.mayaMidgardConfig))
+    const mayachainCache = new MayachainCache(
+      new MidgardQuery(midgardCache),
+      new Mayanode(network, configuration?.mayanodeConfig),
+    )
     this.mayachainQuery = new MayachainQuery(mayachainCache)
     this.mayachainAmm = new MayachainAMM(this.mayachainQuery, configuration?.wallet)
     this.configuration = configuration

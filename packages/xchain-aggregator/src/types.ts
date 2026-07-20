@@ -1,4 +1,8 @@
 import { TxHash, Network } from '@xchainjs/xchain-client'
+import { MidgardConfig } from '@xchainjs/xchain-midgard-query'
+import { MidgardConfig as MayaMidgardConfig } from '@xchainjs/xchain-mayamidgard-query'
+import { MayanodeConfig } from '@xchainjs/xchain-mayachain-query'
+import { ThornodeConfig } from '@xchainjs/xchain-thorchain-query'
 import {
   Address,
   AnyAsset,
@@ -84,6 +88,26 @@ export type Config = Partial<{
    * API key for OneClick (NEAR Intents) protocol
    */
   oneClickApiKey: string
+  /**
+   * Custom THORNode client configuration (base URLs and retries) for the Thorchain protocol.
+   * When omitted, the network default THORNode endpoints are used.
+   */
+  thornodeConfig: ThornodeConfig
+  /**
+   * Custom Midgard client configuration (base URLs and retries) for the Thorchain protocol.
+   * When omitted, the network default Midgard endpoints are used.
+   */
+  midgardConfig: MidgardConfig
+  /**
+   * Custom MAYANode client configuration (base URLs and retries) for the Mayachain protocol.
+   * When omitted, the network default MAYANode endpoints are used.
+   */
+  mayanodeConfig: MayanodeConfig
+  /**
+   * Custom Maya Midgard client configuration (base URLs and retries) for the Mayachain protocol.
+   * When omitted, the network default Maya Midgard endpoints are used.
+   */
+  mayaMidgardConfig: MayaMidgardConfig
 }>
 
 /**
@@ -100,6 +124,10 @@ export type ProtocolConfig = Partial<{
   }[]
   brokerUrl: string
   oneClickApiKey: string
+  thornodeConfig: ThornodeConfig
+  midgardConfig: MidgardConfig
+  mayanodeConfig: MayanodeConfig
+  mayaMidgardConfig: MayaMidgardConfig
 }>
 
 /**
