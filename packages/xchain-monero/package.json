@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-monero",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Monero (XMR) client for XChainJS",
   "keywords": [
     "Monero",

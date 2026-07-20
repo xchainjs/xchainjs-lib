@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.3.0
+
+### Minor Changes
+
+- 0ed1d12: Added Blockbook data providers for Bitcoin, Bitcoin Cash, Dogecoin, and Litecoin. Implemented BlockbookProvider for each asset, including API methods for transactions and balance retrieval
+
+### Patch Changes
+
+- Updated dependencies [4ec2e3e]
+- Updated dependencies [0ed1d12]
+  - @xchainjs/xchain-crypto@1.0.8
+  - @xchainjs/xchain-utxo-providers@2.1.0
+  - @xchainjs/xchain-client@2.0.16
+  - @xchainjs/xchain-utxo@2.2.8
+
 ## 2.2.8
 
 ### Patch Changes
