@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.5.0
+
+### Minor Changes
+
+- b06756d: Allow custom THORNode/Midgard (and MAYANode/Maya Midgard) base URLs for the Thorchain and Mayachain protocols.
+
+  The aggregator previously hardcoded the THORChain and MAYAChain clients with only the network, so it always talked to the public default endpoints. Consumers can now pass optional `thornodeConfig`, `midgardConfig`, `mayanodeConfig` and `mayaMidgardConfig` fields (the existing `ThornodeConfig` / `MidgardConfig` / `MayanodeConfig` shapes from the query packages) via the aggregator config. These are forwarded to the underlying `Thornode`, `Midgard`, `Mayanode` and `MidgardApi` clients so integrators can point at their own gateway/proxy.
+
+  Fully backward compatible: when the new fields are omitted, behaviour is unchanged and the per-network default endpoints are used.
+
+### Patch Changes
+
+- @xchainjs/xchain-client@2.0.16
+- @xchainjs/xchain-mayachain@4.1.7
+- @xchainjs/xchain-mayachain-amm@4.2.2
+- @xchainjs/xchain-thorchain@3.0.20
+- @xchainjs/xchain-thorchain-amm@3.1.2
+- @xchainjs/xchain-wallet@2.0.31
+- @xchainjs/xchain-thorchain-query@3.1.2
+- @xchainjs/xchain-mayachain-query@2.2.2
+- @xchainjs/xchain-mayamidgard-query@1.0.18
+- @xchainjs/xchain-midgard-query@2.0.19
+
 ## 2.4.0
 
 ### Minor Changes

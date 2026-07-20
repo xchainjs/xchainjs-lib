@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.2
+
+### Patch Changes
+
+- b06756d: Change the default `THORNODE_API_URL` from `https://thornode.thorchain.network/` to `https://gateway.liquify.com/chain/thorchain_api`.
+
 ## 1.2.1
 
 ### Patch Changes
