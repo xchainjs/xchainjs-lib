@@ -36,9 +36,14 @@ export class ThorchainProtocol implements IProtocol {
     // Use network from configuration, fallback to wallet network, or default to mainnet
     const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
 
-    // Create ThorchainQuery with proper network configuration
-    const midgardCache = new MidgardCache(new Midgard(network))
-    const thorchainCache = new ThorchainCache(new Thornode(network), new MidgardQuery(midgardCache))
+    // Create ThorchainQuery with proper network configuration.
+    // Forward optional custom Thornode/Midgard configs when provided; otherwise the
+    // clients fall back to their per-network default endpoints.
+    const midgardCache = new MidgardCache(new Midgard(network, configuration?.midgardConfig))
+    const thorchainCache = new ThorchainCache(
+      new Thornode(network, configuration?.thornodeConfig),
+      new MidgardQuery(midgardCache),
+    )
     this.thorchainQuery = new ThorchainQuery(thorchainCache)
     this.thorchainAmm = new ThorchainAMM(this.thorchainQuery, configuration?.wallet)
     this.configuration = configuration

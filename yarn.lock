@@ -5237,6 +5237,8 @@ __metadata:
     "@xchainjs/xchain-mayachain": "workspace:*"
     "@xchainjs/xchain-mayachain-amm": "workspace:*"
     "@xchainjs/xchain-mayachain-query": "workspace:*"
+    "@xchainjs/xchain-mayamidgard-query": "workspace:*"
+    "@xchainjs/xchain-midgard-query": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-thorchain-amm": "workspace:*"
     "@xchainjs/xchain-thorchain-query": "workspace:*"

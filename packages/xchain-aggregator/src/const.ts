@@ -3,7 +3,19 @@ import { Config, Protocol } from './types'
 
 export const SupportedProtocols: Protocol[] = ['Thorchain', 'Mayachain', 'Chainflip', 'OneClick']
 
-export const DEFAULT_CONFIG: Required<Omit<Config, 'wallet' | 'affiliate' | 'brokerUrl' | 'oneClickApiKey'>> = {
+export const DEFAULT_CONFIG: Required<
+  Omit<
+    Config,
+    | 'wallet'
+    | 'affiliate'
+    | 'brokerUrl'
+    | 'oneClickApiKey'
+    | 'thornodeConfig'
+    | 'midgardConfig'
+    | 'mayanodeConfig'
+    | 'mayaMidgardConfig'
+  >
+> = {
   protocols: SupportedProtocols,
   network: Network.Mainnet,
   affiliateBrokers: [],
