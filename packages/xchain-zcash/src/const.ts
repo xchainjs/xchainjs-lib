@@ -49,3 +49,42 @@ export const NownodesProviders: UtxoOnlineDataProviders = {
   [Network.Stagenet]: mainnetNownodesProvider,
   [Network.Mainnet]: mainnetNownodesProvider,
 }
+
+/**
+ * Optional fallback Blockbook backend so a single-provider outage (e.g. a nownodes 502)
+ * cannot block ZEC broadcasts. It reuses the Blockbook-based {@link NownodesProvider}, so any
+ * Blockbook-compatible Zcash endpoint works — GetBlock is the intended target.
+ *
+ * Configured entirely via env and disabled when unset:
+ * - `ZEC_FALLBACK_BLOCKBOOK_URL` — Blockbook `/api/v2` base URL. GetBlock embeds its access
+ *   token in the path (e.g. `https://go.getblock.io/<TOKEN>/api/v2`).
+ * - `ZEC_FALLBACK_BLOCKBOOK_API_KEY` — sent as the `api-key` header; leave empty for GetBlock
+ *   since its token lives in the URL.
+ */
+const fallbackBlockbookUrl = process.env.ZEC_FALLBACK_BLOCKBOOK_URL
+const fallbackBlockbookProvider = fallbackBlockbookUrl
+  ? new NownodesProvider(
+      fallbackBlockbookUrl,
+      ZECChain,
+      AssetZEC,
+      ZEC_DECIMAL,
+      process.env.ZEC_FALLBACK_BLOCKBOOK_API_KEY || '',
+    )
+  : undefined
+
+export const FallbackBlockbookProviders: UtxoOnlineDataProviders | undefined = fallbackBlockbookProvider
+  ? {
+      [Network.Testnet]: undefined,
+      [Network.Stagenet]: fallbackBlockbookProvider,
+      [Network.Mainnet]: fallbackBlockbookProvider,
+    }
+  : undefined
+
+/**
+ * Ordered data-provider list used by the default client: primary nownodes first, optional
+ * fallback second. `roundRobinBroadcastTx` and `getConsensusBranchId` try each in order, so the
+ * fallback only takes over when nownodes fails.
+ */
+export const zcashDataProviders: UtxoOnlineDataProviders[] = FallbackBlockbookProviders
+  ? [NownodesProviders, FallbackBlockbookProviders]
+  : [NownodesProviders]
