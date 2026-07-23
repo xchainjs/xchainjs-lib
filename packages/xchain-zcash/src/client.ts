@@ -24,10 +24,10 @@ import { NownodesProvider } from '@xchainjs/xchain-utxo-providers'
 import {
   AssetZEC,
   LOWER_FEE_BOUND,
-  NownodesProviders,
   UPPER_FEE_BOUND,
   ZECChain,
   ZEC_DECIMAL,
+  zcashDataProviders,
   zcashExplorerProviders,
 } from './const'
 import * as Utils from './utils'
@@ -37,7 +37,7 @@ export const defaultZECParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
   explorerProviders: zcashExplorerProviders,
-  dataProviders: [NownodesProviders],
+  dataProviders: zcashDataProviders,
   rootDerivationPaths: {
     [Network.Mainnet]: `m/44'/133'/0'/0/`,
     [Network.Testnet]: `m/44'/1'/0'/0/`,
