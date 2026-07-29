@@ -52,9 +52,7 @@ This package uses the following service providers:
 | Transaction broadcast       | Insight API | https://insight.dash.org/insight-api               |
 | Explorer                    | Blockchair  | https://blockchair.com/dash                        |
 
-### UtxoOnlineDataProviders
-
-## default providers
+## Default providers
 
 Creating a no-arg DASH Client will default to the following settings:
 

@@ -92,10 +92,11 @@ With the Sui client you can:
 
 ## Explorer
 
-| Network | Explorer |
-| ------- | -------- |
-| Mainnet | https://suiscan.xyz/mainnet |
-| Testnet | https://suiscan.xyz/testnet |
+| Network  | Explorer |
+| -------- | -------- |
+| Mainnet  | https://suiscan.xyz/mainnet |
+| Testnet  | https://suiscan.xyz/testnet |
+| Stagenet | https://suiscan.xyz/mainnet (uses Mainnet explorer) |
 
 ## Documentation
 
