@@ -30,17 +30,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Setup Node.js 20.x
+      # Trusted Publishing requires Node >= 22.14.0 and npm >= 11.5.1
+      # (https://docs.npmjs.com/trusted-publishers/). Pin npm for a deterministic release.
+      - name: Setup Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 22.x
           cache: yarn
 
-      # npm Trusted Publishing (OIDC) requires npm >= 11.5.1. Node 20 ships npm 10.x,
-      # so upgrade the globally-installed npm that `changeset publish` shells out to.
       - name: Upgrade npm for Trusted Publishing (OIDC)
         run: |
-          npm install -g npm@latest
+          npm install -g npm@11.5.1
+          node --version
           npm --version
 
       - name: Install dependencies
