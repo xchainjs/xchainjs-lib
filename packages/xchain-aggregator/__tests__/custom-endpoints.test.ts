@@ -28,9 +28,9 @@ describe('Custom THORNode/Midgard endpoint configuration', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const cache = (protocol as any).thorchainQuery.thorchainCache
-      expect(cache.thornode.config.thornodeBaseUrls).toContain('https://thornode.thorchain.network')
+      expect(cache.thornode.config.thornodeBaseUrls).toContain('https://gateway.liquify.com/chain/thorchain_api')
       expect(cache.midgardQuery.midgardCache.midgard.config.midgardBaseUrls).toContain(
-        'https://midgard.thorchain.network',
+        'https://gateway.liquify.com/chain/thorchain_midgard',
       )
     })
   })
