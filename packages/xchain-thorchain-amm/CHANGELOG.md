@@ -1,5 +1,32 @@
 # Changelog
 
+## 3.1.3
+
+### Patch Changes
+
+- 322b1bf: Bump direct `axios` dependency from 1.16.1 to 1.18.1 across all packages that declare it, and pin the same version in the root yarn resolutions. This closes GHSA-gcfj-64vw-6mp9 (Axios Node HTTP adapter can use an inherited proxy after interceptor config cloning; vulnerable range `>=1.15.2 <1.18.0`). Exact pin only — no caret range — so consumers and the monorepo do not float onto a compromised patch.
+- Updated dependencies [322b1bf]
+- Updated dependencies [2e28cb5]
+  - @xchainjs/xchain-bitcoin@2.3.1
+  - @xchainjs/xchain-bitcoincash@2.3.1
+  - @xchainjs/xchain-client@2.0.17
+  - @xchainjs/xchain-cosmos@3.0.17
+  - @xchainjs/xchain-doge@2.3.1
+  - @xchainjs/xchain-evm@2.0.21
+  - @xchainjs/xchain-litecoin@2.4.1
+  - @xchainjs/xchain-thorchain@3.0.21
+  - @xchainjs/xchain-thorchain-query@3.1.3
+  - @xchainjs/xchain-wallet@2.0.32
+  - @xchainjs/xchain-avax@2.0.21
+  - @xchainjs/xchain-base@1.0.21
+  - @xchainjs/xchain-bsc@2.0.22
+  - @xchainjs/xchain-ethereum@2.0.22
+  - @xchainjs/xchain-ripple@1.0.19
+  - @xchainjs/xchain-solana@1.1.9
+  - @xchainjs/xchain-sui@0.1.6
+  - @xchainjs/xchain-tron@3.0.10
+  - @xchainjs/xchain-zcash@1.3.10
+
 ## 3.1.2
 
 ### Patch Changes

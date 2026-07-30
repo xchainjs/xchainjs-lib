@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.8
+
+### Patch Changes
+
+- 322b1bf: Bump direct `axios` dependency from 1.16.1 to 1.18.1 across all packages that declare it, and pin the same version in the root yarn resolutions. This closes GHSA-gcfj-64vw-6mp9 (Axios Node HTTP adapter can use an inherited proxy after interceptor config cloning; vulnerable range `>=1.15.2 <1.18.0`). Exact pin only — no caret range — so consumers and the monorepo do not float onto a compromised patch.
+- Updated dependencies [322b1bf]
+- Updated dependencies [2e28cb5]
+  - @xchainjs/xchain-client@2.0.17
+  - @xchainjs/xchain-cosmos-sdk@2.0.17
+
 ## 4.1.7
 
 ### Patch Changes
