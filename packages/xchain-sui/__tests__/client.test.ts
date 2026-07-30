@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { assetToString } from '@xchainjs/xchain-util'
 
-import { Client, defaultSuiParams } from '../src'
+import { Client, defaultSuiParams, getDefaultGraphqlUrl, getDefaultGrpcUrl } from '../src'
 
 describe('Sui client', () => {
   describe('Asset', () => {
@@ -10,6 +10,16 @@ describe('Sui client', () => {
       const assetInfo = client.getAssetInfo()
       expect(assetToString(assetInfo.asset)).toBe('SUI.SUI')
       expect(assetInfo.decimal).toBe(9)
+    })
+  })
+
+  describe('Defaults (post JSON-RPC deprecation)', () => {
+    it('Should default transport to grpc with Foundation fullnode and GraphQL URLs', () => {
+      expect(defaultSuiParams.transport).toBe('grpc')
+      expect(defaultSuiParams.clientUrls?.[Network.Mainnet]).toBe(getDefaultGrpcUrl(Network.Mainnet))
+      expect(defaultSuiParams.graphqlUrls?.[Network.Mainnet]).toBe(getDefaultGraphqlUrl(Network.Mainnet))
+      expect(getDefaultGrpcUrl(Network.Mainnet)).toContain('fullnode.mainnet.sui.io')
+      expect(getDefaultGraphqlUrl(Network.Mainnet)).toContain('graphql.mainnet.sui.io')
     })
   })
 
