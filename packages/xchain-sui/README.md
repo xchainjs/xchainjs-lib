@@ -10,6 +10,12 @@
 yarn add @xchainjs/xchain-sui
 ```
 
+Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-sui`.
+
+```sh
+yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util
+```
+
 ## Network access (JSON-RPC deprecation)
 
 Sui Foundation **disabled JSON-RPC on public fullnodes** (week of 2026-07-27). Full decommission is planned mid-October 2026.
@@ -119,9 +125,11 @@ const defaultSuiParams = {
 
 ## Features
 
-- Get native SUI and coin/token balances
+With the Sui client you can:
+
+- Get native SUI and coin/token balances for an address
 - Generate addresses from a secret phrase (SLIP-10, coin type `784`)
-- Transfer SUI and coins/tokens
+- Transfer SUI and coins/tokens to another address
 - Get transaction details by digest (GraphQL, with fullnode fallback)
 - Get address transaction history (GraphQL `affectedAddress`)
 - Estimate fees (gas-based model)
