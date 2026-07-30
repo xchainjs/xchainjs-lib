@@ -2,7 +2,6 @@ import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 
 import { SUIClientParams } from './types'
-import { getDefaultGraphqlUrl, getDefaultGrpcUrl } from './utils'
 
 export const SUIChain = 'SUI' as const
 
@@ -26,6 +25,15 @@ const mainnetExplorer = new ExplorerProvider(
   'https://suiscan.xyz/mainnet/tx/%%TX_ID%%',
 )
 
+/**
+ * Default client params.
+ *
+ * Endpoint URLs are resolved in the Client constructor from caller overrides
+ * (`grpcUrls` / `clientUrls` / `graphqlUrls`) with Foundation public defaults
+ * as fallback. They are intentionally omitted here so spreading
+ * `defaultSuiParams` does not shadow consumer `clientUrls` with baked-in
+ * `grpcUrls` (shallow merge would otherwise ignore custom endpoints).
+ */
 export const defaultSuiParams: SUIClientParams = {
   network: Network.Mainnet,
   transport: 'grpc',
@@ -42,22 +50,5 @@ export const defaultSuiParams: SUIClientParams = {
       'https://suiscan.xyz/testnet/tx/%%TX_ID%%',
     ),
     [Network.Stagenet]: mainnetExplorer,
-  },
-  // Backward-compatible: consumers historically passed fullnode URLs as clientUrls.
-  // Those hosts still work as gRPC base URLs after JSON-RPC deprecation.
-  clientUrls: {
-    [Network.Mainnet]: getDefaultGrpcUrl(Network.Mainnet),
-    [Network.Testnet]: getDefaultGrpcUrl(Network.Testnet),
-    [Network.Stagenet]: getDefaultGrpcUrl(Network.Stagenet),
-  },
-  grpcUrls: {
-    [Network.Mainnet]: getDefaultGrpcUrl(Network.Mainnet),
-    [Network.Testnet]: getDefaultGrpcUrl(Network.Testnet),
-    [Network.Stagenet]: getDefaultGrpcUrl(Network.Stagenet),
-  },
-  graphqlUrls: {
-    [Network.Mainnet]: getDefaultGraphqlUrl(Network.Mainnet),
-    [Network.Testnet]: getDefaultGraphqlUrl(Network.Testnet),
-    [Network.Stagenet]: getDefaultGraphqlUrl(Network.Stagenet),
   },
 }

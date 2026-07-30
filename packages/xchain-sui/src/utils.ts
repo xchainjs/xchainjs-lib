@@ -1,5 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 
+import { SUIClientParams } from './types'
+
 export const getSuiNetwork = (network: Network): 'mainnet' | 'testnet' => {
   const networkMap: { [key in Network]: 'mainnet' | 'testnet' } = {
     [Network.Mainnet]: 'mainnet',
@@ -33,6 +35,28 @@ export const getDefaultGraphqlUrl = (network: Network): string => {
     [Network.Testnet]: 'https://graphql.testnet.sui.io/graphql',
   }
   return networkMap[network]
+}
+
+/**
+ * Resolve primary (gRPC / JSON-RPC) URL for a network.
+ *
+ * Precedence: `grpcUrls` → `clientUrls` → Foundation default.
+ * Pass **caller** params only (not a shallow-merge with defaults) so consumer
+ * `clientUrls` are not shadowed by baked-in default `grpcUrls`.
+ */
+export const resolvePrimaryUrl = (
+  network: Network,
+  params: Pick<SUIClientParams, 'grpcUrls' | 'clientUrls'> = {},
+): string => {
+  return params.grpcUrls?.[network] ?? params.clientUrls?.[network] ?? getDefaultGrpcUrl(network)
+}
+
+/**
+ * Resolve GraphQL URL for a network.
+ * Precedence: `graphqlUrls` → Foundation default.
+ */
+export const resolveGraphqlUrl = (network: Network, params: Pick<SUIClientParams, 'graphqlUrls'> = {}): string => {
+  return params.graphqlUrls?.[network] ?? getDefaultGraphqlUrl(network)
 }
 
 /**

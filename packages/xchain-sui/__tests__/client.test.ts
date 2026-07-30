@@ -1,7 +1,14 @@
 import { Network } from '@xchainjs/xchain-client'
 import { assetToString } from '@xchainjs/xchain-util'
 
-import { Client, defaultSuiParams, getDefaultGraphqlUrl, getDefaultGrpcUrl } from '../src'
+import {
+  Client,
+  defaultSuiParams,
+  getDefaultGraphqlUrl,
+  getDefaultGrpcUrl,
+  resolveGraphqlUrl,
+  resolvePrimaryUrl,
+} from '../src'
 
 describe('Sui client', () => {
   describe('Asset', () => {
@@ -16,10 +23,57 @@ describe('Sui client', () => {
   describe('Defaults (post JSON-RPC deprecation)', () => {
     it('Should default transport to grpc with Foundation fullnode and GraphQL URLs', () => {
       expect(defaultSuiParams.transport).toBe('grpc')
-      expect(defaultSuiParams.clientUrls?.[Network.Mainnet]).toBe(getDefaultGrpcUrl(Network.Mainnet))
-      expect(defaultSuiParams.graphqlUrls?.[Network.Mainnet]).toBe(getDefaultGraphqlUrl(Network.Mainnet))
+      // Endpoint maps are resolved in the client (not baked into defaultSuiParams)
+      // so consumer clientUrls are not shadowed by default grpcUrls.
+      expect(defaultSuiParams.clientUrls).toBeUndefined()
+      expect(defaultSuiParams.grpcUrls).toBeUndefined()
       expect(getDefaultGrpcUrl(Network.Mainnet)).toContain('fullnode.mainnet.sui.io')
       expect(getDefaultGraphqlUrl(Network.Mainnet)).toContain('graphql.mainnet.sui.io')
+      expect(resolvePrimaryUrl(Network.Mainnet)).toBe(getDefaultGrpcUrl(Network.Mainnet))
+      expect(resolveGraphqlUrl(Network.Mainnet)).toBe(getDefaultGraphqlUrl(Network.Mainnet))
+    })
+
+    it('Should honor consumer clientUrls over defaults (Asgardex-style spread)', () => {
+      const custom = 'https://my-private-node.example:443'
+      // Typical consumer pattern: spread defaults then set clientUrls
+      const url = resolvePrimaryUrl(Network.Mainnet, {
+        ...defaultSuiParams,
+        clientUrls: {
+          [Network.Mainnet]: custom,
+          [Network.Testnet]: custom,
+          [Network.Stagenet]: custom,
+        },
+      })
+      expect(url).toBe(custom)
+    })
+
+    it('Should prefer grpcUrls over clientUrls when both provided', () => {
+      const url = resolvePrimaryUrl(Network.Mainnet, {
+        grpcUrls: {
+          [Network.Mainnet]: 'https://grpc.example',
+          [Network.Testnet]: 'https://grpc.example',
+          [Network.Stagenet]: 'https://grpc.example',
+        },
+        clientUrls: {
+          [Network.Mainnet]: 'https://client.example',
+          [Network.Testnet]: 'https://client.example',
+          [Network.Stagenet]: 'https://client.example',
+        },
+      })
+      expect(url).toBe('https://grpc.example')
+    })
+
+    it('Should honor graphqlUrls override', () => {
+      const custom = 'https://graphql.example/graphql'
+      expect(
+        resolveGraphqlUrl(Network.Mainnet, {
+          graphqlUrls: {
+            [Network.Mainnet]: custom,
+            [Network.Testnet]: custom,
+            [Network.Stagenet]: custom,
+          },
+        }),
+      ).toBe(custom)
     })
   })
 

@@ -30,7 +30,7 @@ import slip10 from 'micro-key-producer/slip10.js'
 
 import { DEFAULT_GAS_BUDGET, SUIAsset, SUIChain, SUI_DECIMALS, SUI_TYPE_TAG, defaultSuiParams } from './const'
 import { Balance, SUIClientParams, SuiTransport, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
-import { getDefaultGraphqlUrl, getDefaultGrpcUrl, getSuiNetwork } from './utils'
+import { getSuiNetwork, resolveGraphqlUrl, resolvePrimaryUrl } from './utils'
 
 type CoreClient = SuiGrpcClient | SuiJsonRpcClient
 type GasCoinRef = { objectId: string; version: string | number; digest: string }
@@ -74,29 +74,22 @@ export class Client extends BaseXChainClient {
     const mergedParams = { ...defaultSuiParams, ...params }
     super(SUIChain, mergedParams)
     this.explorerProviders = mergedParams.explorerProviders
-    this.transport = mergedParams.transport ?? 'grpc'
+    this.transport = params.transport ?? mergedParams.transport ?? 'grpc'
 
-    const network = this.getNetwork()
+    // Resolve endpoints from caller params only (not shallow-merged defaults),
+    // so consumer `clientUrls` / `graphqlUrls` are not shadowed by baked-in maps.
     this.clientUrls = {
-      [Network.Mainnet]:
-        mergedParams.grpcUrls?.[Network.Mainnet] ||
-        mergedParams.clientUrls?.[Network.Mainnet] ||
-        getDefaultGrpcUrl(Network.Mainnet),
-      [Network.Testnet]:
-        mergedParams.grpcUrls?.[Network.Testnet] ||
-        mergedParams.clientUrls?.[Network.Testnet] ||
-        getDefaultGrpcUrl(Network.Testnet),
-      [Network.Stagenet]:
-        mergedParams.grpcUrls?.[Network.Stagenet] ||
-        mergedParams.clientUrls?.[Network.Stagenet] ||
-        getDefaultGrpcUrl(Network.Stagenet),
+      [Network.Mainnet]: resolvePrimaryUrl(Network.Mainnet, params),
+      [Network.Testnet]: resolvePrimaryUrl(Network.Testnet, params),
+      [Network.Stagenet]: resolvePrimaryUrl(Network.Stagenet, params),
     }
     this.graphqlUrls = {
-      [Network.Mainnet]: mergedParams.graphqlUrls?.[Network.Mainnet] || getDefaultGraphqlUrl(Network.Mainnet),
-      [Network.Testnet]: mergedParams.graphqlUrls?.[Network.Testnet] || getDefaultGraphqlUrl(Network.Testnet),
-      [Network.Stagenet]: mergedParams.graphqlUrls?.[Network.Stagenet] || getDefaultGraphqlUrl(Network.Stagenet),
+      [Network.Mainnet]: resolveGraphqlUrl(Network.Mainnet, params),
+      [Network.Testnet]: resolveGraphqlUrl(Network.Testnet, params),
+      [Network.Stagenet]: resolveGraphqlUrl(Network.Stagenet, params),
     }
 
+    const network = this.getNetwork()
     this.coreClient = this.createCoreClient(network)
     this.graphqlClient = this.createGraphqlClient(network)
   }
@@ -256,11 +249,12 @@ export class Client extends BaseXChainClient {
 
     // GraphQL supports affectedAddress (sent + received). Core API only supports sender.
     const nodes = await this.fetchGraphqlTransactions(address, limit + offset)
+    const decimalsCache = new Map<string, number>()
 
     const txs: Tx[] = []
     for (const node of nodes) {
       try {
-        txs.push(this.parseGraphqlTransactionNode(node))
+        txs.push(await this.parseGraphqlTransactionNode(node, decimalsCache))
       } catch {
         // Skip unparseable transactions
       }
@@ -578,6 +572,7 @@ export class Client extends BaseXChainClient {
       }
       await new Promise((r) => setTimeout(r, 1000))
     }
+    throw Error(`Timed out waiting for transaction ${digest} to be indexed`)
   }
 
   private async getTransactionDataFromGraphql(txId: string): Promise<Tx> {
@@ -655,7 +650,10 @@ export class Client extends BaseXChainClient {
     return nodes.slice(0, maxResults)
   }
 
-  private parseGraphqlTransactionNode(node: GraphqlTxNode): Tx {
+  private async parseGraphqlTransactionNode(
+    node: GraphqlTxNode,
+    decimalsCache: Map<string, number> = new Map(),
+  ): Promise<Tx> {
     const from: TxFrom[] = []
     const to: TxTo[] = []
     const changes = node.effects?.balanceChanges?.nodes || []
@@ -663,7 +661,11 @@ export class Client extends BaseXChainClient {
     for (const change of changes) {
       const coinType = change.coinType?.repr || SUI_TYPE_TAG
       const isSui = this.isSuiCoinType(coinType)
-      const decimals = isSui ? SUI_DECIMALS : SUI_DECIMALS // token decimals unknown in history path; use 9 fallback
+      let decimals = decimalsCache.get(coinType)
+      if (decimals === undefined) {
+        decimals = await this.getCoinDecimals(coinType)
+        decimalsCache.set(coinType, decimals)
+      }
       const asset = isSui ? SUIAsset : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(coinType)}`) as TokenAsset)
       const changeAmount = BigInt(change.amount)
       const ownerAddress = change.owner?.address || ''
