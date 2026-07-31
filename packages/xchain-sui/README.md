@@ -6,29 +6,85 @@
 
 ## Installation
 
-```
+```sh
 yarn add @xchainjs/xchain-sui
 ```
 
 Following peer dependencies have to be installed into your project. These are not included in `@xchainjs/xchain-sui`.
 
-```
+```sh
 yarn add @xchainjs/xchain-client @xchainjs/xchain-crypto @xchainjs/xchain-util
 ```
 
+## Network access (JSON-RPC deprecation)
+
+Sui Foundation **disabled JSON-RPC on public fullnodes** (week of 2026-07-27). Full decommission is planned mid-October 2026.
+
+See the [JSON-RPC migration guide](https://docs.sui.io/develop/accessing-data/json-rpc-migration).
+
+This package defaults to:
+
+| Role | Transport | Default mainnet URL |
+| ---- | --------- | ------------------- |
+| Balances, fees, coins, transfer execution | **gRPC** | `https://fullnode.mainnet.sui.io:443` |
+| Transaction history / archival lookups | **GraphQL** | `https://graphql.mainnet.sui.io/graphql` |
+
+`clientUrls` pointing at `fullnode.*.sui.io` still work: those hosts remain valid as **gRPC** base URLs. They no longer serve public JSON-RPC.
+
+### Migration for apps (e.g. Asgardex)
+
+```ts
+// Before: JSON-RPC against Foundation fullnodes (broken on public mainnet)
+clientUrls: {
+  mainnet: 'https://fullnode.mainnet.sui.io',
+  testnet: 'https://fullnode.testnet.sui.io',
+}
+
+// After: same URLs work with the default transport ('grpc').
+// No URL change required if you only used Foundation fullnodes.
+new Client({
+  ...defaultSuiParams,
+  clientUrls, // optional; defaults already use Foundation fullnode gRPC
+  phrase,
+})
+
+// Optional: explicit GraphQL endpoint for history
+new Client({
+  ...defaultSuiParams,
+  graphqlUrls: {
+    mainnet: 'https://graphql.mainnet.sui.io/graphql',
+    testnet: 'https://graphql.testnet.sui.io/graphql',
+    stagenet: 'https://graphql.mainnet.sui.io/graphql',
+  },
+  phrase,
+})
+
+// Optional: private node that still enables JSON-RPC
+new Client({
+  ...defaultSuiParams,
+  transport: 'jsonRpc',
+  clientUrls: {
+    mainnet: 'https://my-private-node.example/json-rpc',
+    // ...
+  },
+  phrase,
+})
+```
+
+Public Foundation endpoints are rate-limited and intended for development. Production apps should use a dedicated provider or self-hosted node.
+
 ## Usage
 
-Using the Sui client you can initialize the main class in consultation mode if you do not provide a phrase. That means you can retrieve information from the blockchain and prepare read operations, but you will not be able to sign transactions or derive owned addresses.
+Read-only (no phrase):
 
 ```typescript
 import { Client } from '@xchainjs/xchain-sui'
 
 const client = new Client()
-
-// Make read operations with your client
+const balances = await client.getBalance('0x...')
 ```
 
-To sign transactions and derive addresses, initialize with a mnemonic phrase:
+Sign and transfer:
 
 ```typescript
 import { Client, defaultSuiParams, SUIAsset } from '@xchainjs/xchain-sui'
@@ -56,26 +112,16 @@ const txHash = await client.transfer({
 ```typescript
 const defaultSuiParams = {
   network: Network.Mainnet,
+  transport: 'grpc',
   rootDerivationPaths: {
     [Network.Mainnet]: "m/44'/784'/",
     [Network.Testnet]: "m/44'/784'/",
     [Network.Stagenet]: "m/44'/784'/",
   },
-  explorerProviders: {
-    // Suiscan explorers for mainnet / testnet
-  },
+  // clientUrls / grpcUrls → Foundation fullnode gRPC
+  // graphqlUrls → Foundation GraphQL
 }
 ```
-
-Default RPC endpoints:
-
-| Network  | URL                                      |
-| -------- | ---------------------------------------- |
-| Mainnet  | `https://fullnode.mainnet.sui.io:443`    |
-| Testnet  | `https://fullnode.testnet.sui.io:443`    |
-| Stagenet | `https://fullnode.mainnet.sui.io:443`    |
-
-You can override RPC URLs via `clientUrls` in the client params.
 
 ## Features
 
@@ -84,8 +130,8 @@ With the Sui client you can:
 - Get native SUI and coin/token balances for an address
 - Generate addresses from a secret phrase (SLIP-10, coin type `784`)
 - Transfer SUI and coins/tokens to another address
-- Get transaction details by digest
-- Get address transaction history
+- Get transaction details by digest (GraphQL, with fullnode fallback)
+- Get address transaction history (GraphQL `affectedAddress`)
 - Estimate fees (gas-based model)
 
 **Note:** Memos are not supported for SUI transfers.
