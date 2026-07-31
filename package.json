@@ -56,7 +56,21 @@
     "rollup": "4.60.4",
     "validator": "13.15.35",
     "lodash": "4.18.1",
-    "postcss": "8.5.24"
+    "postcss": "8.5.24",
+    "@scure/base": "1.1.5",
+    "@cosmjs/amino": "0.37.0",
+    "@cosmjs/crypto": "0.37.0",
+    "@cosmjs/encoding": "0.37.0",
+    "@cosmjs/ledger-amino": "0.37.0",
+    "@cosmjs/math": "0.37.0",
+    "@cosmjs/proto-signing": "0.37.0",
+    "@cosmjs/stargate": "0.37.0",
+    "@cosmjs/tendermint-rpc": "0.37.0",
+    "@cosmjs/utils": "0.37.0",
+    "@cosmjs/stream": "0.37.0",
+    "@cosmjs/json-rpc": "0.37.0",
+    "@cosmjs/socket": "0.37.0",
+    "cosmjs-types": "0.10.1"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
