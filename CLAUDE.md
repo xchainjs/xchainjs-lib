@@ -76,3 +76,11 @@ The `@xchainjs/xchain-monero` package is **not yet functional** and is under act
 - **Exclude it from monorepo-wide dependency bumps, refactors, and codemods** unless the task explicitly targets monero. It pins its own crypto dependency ranges (`@noble/curves`, `@noble/hashes`, `micro-key-producer`) and should be allowed to keep them independently — e.g. when upgrading `@scure`/`@noble` to 2.x elsewhere, leave monero on its current versions rather than forcing alignment.
 - Don't rely on its tests as a gate for shared changes, and don't "fix" its incomplete code as a side effect of unrelated work.
 - If a change genuinely must touch monero, call it out explicitly and scope it on its own.
+
+### `xchain-kujira` is deprecated
+
+The `@xchainjs/xchain-kujira` package is **deprecated**. The Kujira chain/ecosystem is no longer actively maintained (exchanges/validators have withdrawn support; it is not a meaningful trading venue). Treat it like monero for cross-cutting work:
+
+- **Exclude it from monorepo-wide dependency bumps, refactors, and codemods** unless the task explicitly targets kujira.
+- Don't expand suite/aggregator/wallet integration surface for KUJI.
+- Prefer removal over new features; call out any unavoidable touch.
