@@ -1,11 +1,13 @@
 {
   "name": "@xchainjs/xchain-kujira",
   "version": "2.0.16",
-  "description": "Custom Kujira client",
+  "description": "DEPRECATED: Kujira client — chain/ecosystem is no longer actively maintained",
   "keywords": [
     "XChain",
-    "Kujira"
+    "Kujira",
+    "deprecated"
   ],
+  "deprecated": "The Kujira network/ecosystem is no longer actively maintained or meaningfully traded. @xchainjs/xchain-kujira is deprecated and will not receive further feature work; plan to remove it from consumers.",
   "author": "XChainJS",
   "homepage": "https://github.com/xchainjs/xchainjs-lib",
   "license": "MIT",
