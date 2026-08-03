@@ -5578,7 +5578,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.18.1"
     axios-mock-adapter: "npm:2.1.0"
-    axios-retry: "npm:3.2.5"
+    axios-retry: "npm:3.9.1"
     bignumber.js: "npm:^11.0.0"
   languageName: unknown
   linkType: soft
@@ -5776,7 +5776,7 @@ __metadata:
     "@xchainjs/xchain-util": "workspace:*"
     axios: "npm:1.18.1"
     axios-mock-adapter: "npm:2.1.0"
-    axios-retry: "npm:3.2.5"
+    axios-retry: "npm:3.9.1"
     bignumber.js: "npm:^11.0.0"
   languageName: unknown
   linkType: soft
@@ -6388,17 +6388,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios-retry@npm:3.2.5":
-  version: 3.2.5
-  resolution: "axios-retry@npm:3.2.5"
-  dependencies:
-    "@babel/runtime": "npm:^7.15.4"
-    is-retry-allowed: "npm:^2.2.0"
-  checksum: 10c0/f5fb174c26312d60608d41836a92e374e95f2d4da71e2afb604d33dcc23bbc0cb32008f887a4829f9061b25c69ad3f34fa3ba64cfe0f0531c3e7be69650b09df
-  languageName: node
-  linkType: hard
-
-"axios-retry@npm:^3.9.1":
+"axios-retry@npm:3.9.1":
   version: 3.9.1
   resolution: "axios-retry@npm:3.9.1"
   dependencies:

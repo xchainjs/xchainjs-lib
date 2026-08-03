@@ -70,7 +70,8 @@
     "@cosmjs/stream": "0.37.0",
     "@cosmjs/json-rpc": "0.37.0",
     "@cosmjs/socket": "0.37.0",
-    "cosmjs-types": "0.10.1"
+    "cosmjs-types": "0.10.1",
+    "axios-retry": "3.9.1"
   },
   "devDependencies": {
     "@actions/core": "1.10.0",
