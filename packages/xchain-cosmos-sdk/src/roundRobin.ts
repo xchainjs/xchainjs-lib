@@ -2,9 +2,9 @@
  * Round-robin RPC error handling for Cosmos SDK clients.
  *
  * Goal: only treat connection/transport failures as "try next endpoint".
- * Chain / application failures (insufficient funds, bad sequence, etc.) rethrow
- * immediately. When every endpoint fails, surface the last real error so UIs
- * do not only show a generic "No clients available" string.
+ * Chain / application failures rethrow immediately. When every endpoint fails,
+ * surface the last real error so UIs do not only show a generic
+ * "No clients available" string.
  *
  * @see https://github.com/xchainjs/xchainjs-lib/issues/1727
  */
@@ -26,47 +26,39 @@ export function errorMessage(error: unknown): string {
 }
 
 /**
- * Chain / application errors that should not fail over to the next RPC URL.
- * Connection and most HTTP gateway failures remain retryable so multi-URL
- * configs still work.
+ * Positive allowlist: only these transport / gateway failures fail over to the
+ * next RPC URL. Everything else (4xx, chain rejections, unknown) is non-retryable.
  */
-const NON_RETRYABLE_SUBSTRINGS = [
-  'insufficient funds',
-  'insufficient fee',
-  'account sequence mismatch',
-  'signature verification failed',
-  'unauthorized',
-  'invalid coins',
-  'invalid address',
-  'tx parse error',
-  'out of gas',
-  'failed to execute message',
-  'panic message redacted',
-  'incorrect account sequence',
-  'pubkey type not supported',
-  'signature could not be verified',
+const RETRYABLE_RPC_ERROR_PATTERNS: RegExp[] = [
+  /failed to fetch/i,
+  /fetch failed/i,
+  /networkerror/i,
+  /network request failed/i,
+  /econnrefused/i,
+  /econnreset/i,
+  /enotfound/i,
+  /eai_again/i,
+  /etimedout/i,
+  /socket hang up/i,
+  /socket closed/i,
+  /request timed out/i,
+  /timeout/i,
+  /aborted/i,
+  /ehostunreach/i,
+  /enetunreach/i,
+  // CosmJS Tendermint HTTP gateway errors — only 5xx (and 429) are retryable
+  /bad status on response:\s*(429|5\d\d)\b/i,
+  /status code\s*(429|5\d\d)\b/i,
+  /http (429|5\d\d)\b/i,
 ]
 
 /**
- * @returns true if the error is likely transport/provider related and the next
- * endpoint should be tried; false if the error is a definitive chain rejection.
+ * @returns true if the error is a known transport/gateway failure and the next
+ * endpoint should be tried; false for chain/application errors and unknowns.
  */
 export function isRetryableRpcError(error: unknown): boolean {
-  const msg = errorMessage(error).toLowerCase()
-
-  if (NON_RETRYABLE_SUBSTRINGS.some((s) => msg.includes(s))) {
-    return false
-  }
-
-  // Explicit codespace-style deliver tx failures (CosmJS often embeds these)
-  if (msg.includes('codespace:') && msg.includes('code:')) {
-    // Connection errors rarely include both codespace and code
-    if (!msg.includes('bad status on response')) {
-      return false
-    }
-  }
-
-  return true
+  const msg = errorMessage(error)
+  return RETRYABLE_RPC_ERROR_PATTERNS.some((pattern) => pattern.test(msg))
 }
 
 /**
@@ -125,4 +117,49 @@ export async function roundRobinTry<TItem, TResult>(
   }
 
   throw createRoundRobinExhaustedError(operation, lastError)
+}
+
+/**
+ * Fetch a tx across multiple clients.
+ * - Returns the first non-null tx.
+ * - `null` from a client counts as not-found for that endpoint (try next).
+ * - Retryable RPC errors try the next client.
+ * - Non-retryable errors rethrow immediately.
+ * - If **every** client returns null → `TxNotFoundError`.
+ * - If mixed null + provider failures → exhausted error with last error (not TxNotFound).
+ */
+export async function roundRobinGetTx<TClient, TTx>(
+  clients: readonly TClient[],
+  txId: string,
+  getTx: (client: TClient) => Promise<TTx | null>,
+): Promise<TTx> {
+  let lastError: unknown
+  let notFoundCount = 0
+
+  if (clients.length === 0) {
+    throw createRoundRobinExhaustedError(`retrieve transaction ${txId}`)
+  }
+
+  for (const client of clients) {
+    try {
+      const tx = await getTx(client)
+      if (!tx) {
+        notFoundCount++
+        continue
+      }
+      return tx
+    } catch (error) {
+      lastError = error
+      if (!isRetryableRpcError(error)) {
+        throw error
+      }
+    }
+  }
+
+  // Only when every client successfully reported "missing" — not when providers failed.
+  if (notFoundCount === clients.length) {
+    throw new TxNotFoundError(txId)
+  }
+
+  throw createRoundRobinExhaustedError(`retrieve transaction ${txId}`, lastError)
 }

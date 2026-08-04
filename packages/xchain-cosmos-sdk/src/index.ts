@@ -16,6 +16,7 @@ export {
   createRoundRobinExhaustedError,
   errorMessage,
   isRetryableRpcError,
+  roundRobinGetTx,
   roundRobinTry,
 } from './utils'
 export type { RoundRobinTryOptions } from './utils'

@@ -33,12 +33,7 @@ import {
   eqAsset,
 } from '@xchainjs/xchain-util'
 
-import {
-  TxNotFoundError,
-  createRoundRobinExhaustedError,
-  isRetryableRpcError,
-  roundRobinTry,
-} from './roundRobin'
+import { roundRobinGetTx, roundRobinTry } from './roundRobin'
 import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 
 /**
@@ -496,36 +491,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinGetTransaction(txId: string): Promise<IndexedTx> {
     const clients = await this.stargateClients.getValue()
-    let lastError: unknown
-    let notFoundCount = 0
-
-    if (clients.length === 0) {
-      throw createRoundRobinExhaustedError(`retrieve transaction ${txId}`)
-    }
-
-    for (const client of clients) {
-      try {
-        const tx = await client.getTx(txId)
-        if (!tx) {
-          notFoundCount++
-          continue
-        }
-        return tx
-      } catch (error) {
-        lastError = error
-        if (!isRetryableRpcError(error)) {
-          throw error
-        }
-      }
-    }
-
-    // Prefer a distinct not-found error so status pollers can retry without treating
-    // this as "no RPC clients configured / all dead".
-    if (notFoundCount > 0) {
-      throw new TxNotFoundError(txId)
-    }
-
-    throw createRoundRobinExhaustedError(`retrieve transaction ${txId}`, lastError)
+    return roundRobinGetTx(clients, txId, (client) => client.getTx(txId))
   }
 
   /**
