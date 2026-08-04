@@ -16,6 +16,7 @@ import {
   MsgTypes,
   bech32ToBase64,
   makeClientPath,
+  roundRobinTry,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, BaseAmount, assetFromString, eqAsset, isSynthAsset } from '@xchainjs/xchain-util'
@@ -457,28 +458,24 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     signer: DirectSecp256k1HdWallet,
     gasLimit: BigNumber,
   ): Promise<TxRaw> {
-    for (const url of this.clientUrls[this.network]) {
-      try {
-        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-          registry: this.registry,
-        })
-        // Map messages and sign the transaction
-        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-        })
+    return roundRobinTry(this.clientUrls[this.network], 'sign transaction', async (url) => {
+      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+        registry: this.registry,
+      })
+      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+      })
 
-        return await signingClient.sign(
-          sender,
-          messages,
-          {
-            amount: [],
-            gas: gasLimit.toString(),
-          },
-          unsignedTx.body.memo,
-        )
-      } catch {}
-    }
-    throw Error('No clients available. Can not sign transaction')
+      return signingClient.sign(
+        sender,
+        messages,
+        {
+          amount: [],
+          gas: gasLimit.toString(),
+        },
+        unsignedTx.body.memo,
+      )
+    })
   }
 
   /**
@@ -494,20 +491,17 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     unsignedTx: DecodedTxRaw,
     signer: DirectSecp256k1HdWallet,
   ): Promise<DeliverTxResponse> {
-    for (const url of this.clientUrls[this.network]) {
-      try {
-        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-          registry: this.registry,
-        })
+    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
+      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+        registry: this.registry,
+      })
 
-        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-        })
+      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+      })
 
-        return await signingClient.signAndBroadcast(sender, messages, this.getStandardFee(), unsignedTx.body.memo)
-      } catch {}
-    }
-    throw Error('No clients available. Can not sign and broadcast transaction')
+      return signingClient.signAndBroadcast(sender, messages, this.getStandardFee(), unsignedTx.body.memo)
+    })
   }
 
   /**
@@ -529,37 +523,33 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     memo: string,
     asset: CompatibleAsset,
   ): Promise<DeliverTxResponse> {
-    for (const url of this.clientUrls[this.network]) {
-      try {
-        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-          registry: this.registry,
-        })
-        // Sign and broadcast the deposit transaction
-        return await signingClient.signAndBroadcast(
-          sender,
-          [
-            {
-              typeUrl: MSG_DEPOSIT_TYPE_URL,
-              value: {
-                signer: bech32ToBase64(sender),
-                memo,
-                coins: [
-                  {
-                    amount: amount.amount().toString(),
-                    asset: parseAssetToMayanodeAsset(asset),
-                  },
-                ],
-              },
-            },
-          ],
+    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast deposit transaction', async (url) => {
+      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+        registry: this.registry,
+      })
+      return signingClient.signAndBroadcast(
+        sender,
+        [
           {
-            amount: [],
-            gas: gasLimit.toString(),
+            typeUrl: MSG_DEPOSIT_TYPE_URL,
+            value: {
+              signer: bech32ToBase64(sender),
+              memo,
+              coins: [
+                {
+                  amount: amount.amount().toString(),
+                  asset: parseAssetToMayanodeAsset(asset),
+                },
+              ],
+            },
           },
-          memo,
-        )
-      } catch {}
-    }
-    throw Error('No clients available. Can not sign and broadcast deposit transaction')
+        ],
+        {
+          amount: [],
+          gas: gasLimit.toString(),
+        },
+        memo,
+      )
+    })
   }
 }

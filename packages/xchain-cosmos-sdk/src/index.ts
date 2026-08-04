@@ -8,6 +8,16 @@ export * from './client'
  * Export specific utility functions from the 'utils' file.
  * This includes 'base64ToBech32', 'bech32ToBase64', and 'makeClientPath'.
  */
-export { base64ToBech32, bech32ToBase64, makeClientPath } from './utils'
+export {
+  base64ToBech32,
+  bech32ToBase64,
+  makeClientPath,
+  TxNotFoundError,
+  createRoundRobinExhaustedError,
+  errorMessage,
+  isRetryableRpcError,
+  roundRobinTry,
+} from './utils'
+export type { RoundRobinTryOptions } from './utils'
 
 export type { Balance, Tx, TxFrom, TxTo, TxsPage, CompatibleAsset, TxParams } from './types'

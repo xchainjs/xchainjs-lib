@@ -9,7 +9,13 @@ import {
 } from '@cosmjs/proto-signing'
 import { DeliverTxResponse, GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
 import { AssetInfo, PreparedTx } from '@xchainjs/xchain-client'
-import { Client as CosmosSdkClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
+import {
+  Client as CosmosSdkClient,
+  CosmosSdkClientParams,
+  MsgTypes,
+  makeClientPath,
+  roundRobinTry,
+} from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, AssetType, eqAsset } from '@xchainjs/xchain-util'
 import { bech32 } from '@scure/base'
@@ -266,27 +272,21 @@ export class Client extends CosmosSdkClient {
     unsignedTx: DecodedTxRaw,
     signer: DirectSecp256k1HdWallet,
   ): Promise<DeliverTxResponse> {
-    for (const url of this.clientUrls[this.network]) {
-      try {
-        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-          registry: this.registry,
-        })
+    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
+      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+        registry: this.registry,
+      })
 
-        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-        })
+      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+      })
 
-        const tx = await signingClient.signAndBroadcast(
-          sender,
-          messages,
-          this.getStandardFee(this.getAssetInfo().asset),
-          unsignedTx.body.memo,
-        )
-
-        return tx
-      } catch {}
-    }
-
-    throw Error('No clients available. Can not sign and broadcast transaction')
+      return signingClient.signAndBroadcast(
+        sender,
+        messages,
+        this.getStandardFee(this.getAssetInfo().asset),
+        unsignedTx.body.memo,
+      )
+    })
   }
 }

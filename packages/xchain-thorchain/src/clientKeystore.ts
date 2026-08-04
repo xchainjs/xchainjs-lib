@@ -7,6 +7,7 @@ import {
   MsgTypes,
   bech32ToBase64,
   makeClientPath,
+  roundRobinTry,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { BaseAmount } from '@xchainjs/xchain-util'
@@ -234,31 +235,25 @@ export class ClientKeystore extends Client {
     signer: DirectSecp256k1HdWallet,
     gasLimit: BigNumber,
   ): Promise<TxRaw> {
-    // Connect to signing client
-    for (const url of this.clientUrls[this.network]) {
-      try {
-        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-          registry: this.registry,
-        })
+    return roundRobinTry(this.clientUrls[this.network], 'sign transaction', async (url) => {
+      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+        registry: this.registry,
+      })
 
-        // Prepare messages
-        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-        })
+      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+      })
 
-        // Sign transaction
-        return await signingClient.sign(
-          sender,
-          messages,
-          {
-            amount: [],
-            gas: gasLimit.toString(),
-          },
-          unsignedTx.body.memo,
-        )
-      } catch {}
-    }
-    throw Error('No clients available. Can not sign transaction')
+      return signingClient.sign(
+        sender,
+        messages,
+        {
+          amount: [],
+          gas: gasLimit.toString(),
+        },
+        unsignedTx.body.memo,
+      )
+    })
   }
 
   /**
@@ -274,7 +269,7 @@ export class ClientKeystore extends Client {
     unsignedTx: DecodedTxRaw,
     signer: DirectSecp256k1HdWallet,
   ): Promise<DeliverTxResponse> {
-    for (const url of this.clientUrls[this.network]) {
+    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
       const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
         registry: this.registry,
       })
@@ -283,9 +278,8 @@ export class ClientKeystore extends Client {
         return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
       })
 
-      return await signingClient.signAndBroadcast(sender, messages, this.getStandardFee(), unsignedTx.body.memo)
-    }
-    throw Error('No clients available. Can not sign and broadcast transaction')
+      return signingClient.signAndBroadcast(sender, messages, this.getStandardFee(), unsignedTx.body.memo)
+    })
   }
 
   /**
@@ -307,14 +301,15 @@ export class ClientKeystore extends Client {
     memo: string,
     asset: CompatibleAsset,
   ): Promise<DeliverTxResponse> {
-    for (const url of this.clientUrls[this.network]) {
-      try {
+    return roundRobinTry(
+      this.clientUrls[this.network],
+      'sign and broadcast deposit transaction',
+      async (url) => {
         const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
           registry: this.registry,
         })
 
-        // Sign and broadcast transaction
-        return await signingClient.signAndBroadcast(
+        return signingClient.signAndBroadcast(
           sender,
           [
             {
@@ -337,10 +332,12 @@ export class ClientKeystore extends Client {
           },
           memo,
         )
-      } catch (e: unknown) {
-        console.warn(e instanceof Error ? e.message : String(e))
-      }
-    }
-    throw Error('No clients available. Can not sign and broadcast deposit transaction')
+      },
+      {
+        onRetryableError: (e) => {
+          console.warn(e instanceof Error ? e.message : String(e))
+        },
+      },
+    )
   }
 }

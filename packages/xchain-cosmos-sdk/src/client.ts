@@ -33,6 +33,12 @@ import {
   eqAsset,
 } from '@xchainjs/xchain-util'
 
+import {
+  TxNotFoundError,
+  createRoundRobinExhaustedError,
+  isRetryableRpcError,
+  roundRobinTry,
+} from './roundRobin'
 import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 
 /**
@@ -463,14 +469,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinGetBalance(address: Address): Promise<readonly Coin[]> {
     const clients = await this.stargateClients.getValue()
-
-    for (const client of clients) {
-      try {
-        return await client.getAllBalances(address)
-      } catch {}
-    }
-
-    throw Error(`No clients available. Can not retrieve balances for ${address}`)
+    return roundRobinTry(clients, `retrieve balances for ${address}`, (client) => client.getAllBalances(address))
   }
 
   /**
@@ -481,36 +480,52 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinGetBlock(height: number): Promise<Block> {
     const clients = await this.stargateClients.getValue()
-
-    for (const client of clients) {
-      try {
-        return await client.getBlock(height)
-      } catch (e) {
+    return roundRobinTry(clients, `retrieve block ${height}`, (client) => client.getBlock(height), {
+      onRetryableError: (e) => {
         console.warn(`Failed to get block ${height}:`, e instanceof Error ? e.message : e)
-      }
-    }
-
-    throw Error(`No clients available. Can not retrieve block ${height}`)
+      },
+    })
   }
 
   /**
    * Retrieve a transaction making a round robin over the clients urls provided to the client
    * @param {string} txId The hash of the transaction to be retrieved.
    * @returns {IndexedTx} The transaction linked to the hash provided
-   * @throws {Error} if the transaction can not be retrieved
+   * @throws {TxNotFoundError} if no client returns the tx (distinct from RPC unavailability)
+   * @throws {Error} if no client is reachable
    */
   private async roundRobinGetTransaction(txId: string): Promise<IndexedTx> {
     const clients = await this.stargateClients.getValue()
+    let lastError: unknown
+    let notFoundCount = 0
+
+    if (clients.length === 0) {
+      throw createRoundRobinExhaustedError(`retrieve transaction ${txId}`)
+    }
 
     for (const client of clients) {
       try {
         const tx = await client.getTx(txId)
-        if (!tx) throw Error(`Can not find transaction ${txId}`)
+        if (!tx) {
+          notFoundCount++
+          continue
+        }
         return tx
-      } catch {}
+      } catch (error) {
+        lastError = error
+        if (!isRetryableRpcError(error)) {
+          throw error
+        }
+      }
     }
 
-    throw Error(`No clients available. Can not retrieve transaction ${txId}`)
+    // Prefer a distinct not-found error so status pollers can retry without treating
+    // this as "no RPC clients configured / all dead".
+    if (notFoundCount > 0) {
+      throw new TxNotFoundError(txId)
+    }
+
+    throw createRoundRobinExhaustedError(`retrieve transaction ${txId}`, lastError)
   }
 
   /**
@@ -521,14 +536,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinBroadcast(txHex: Uint8Array): Promise<DeliverTxResponse> {
     const clients = await this.stargateClients.getValue()
-
-    for (const client of clients) {
-      try {
-        return await client.broadcastTx(txHex)
-      } catch {}
-    }
-
-    throw Error(`No clients available. Can not broadcast transaction`)
+    return roundRobinTry(clients, 'broadcast transaction', (client) => client.broadcastTx(txHex))
   }
 
   /**
@@ -539,14 +547,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinSearchTx(filters: { key: string; value: string }[]): Promise<IndexedTx[]> {
     const clients = await this.stargateClients.getValue()
-
-    for (const client of clients) {
-      try {
-        return await client.searchTx(filters)
-      } catch {}
-    }
-
-    throw Error(`No clients available. Can not search transaction`)
+    return roundRobinTry(clients, 'search transaction', (client) => client.searchTx(filters))
   }
 
   /**
@@ -557,13 +558,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinGetAccount(address: Address): Promise<Account | null> {
     const clients = await this.stargateClients.getValue()
-
-    for (const client of clients) {
-      try {
-        return await client.getAccount(address)
-      } catch {}
-    }
-    throw Error('No clients available. Can not get address account')
+    return roundRobinTry(clients, 'get address account', (client) => client.getAccount(address))
   }
 
   /**
@@ -574,14 +569,7 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinGetChainId(): Promise<string> {
     const clients = await this.stargateClients.getValue()
-
-    for (const client of clients) {
-      try {
-        return await client.getChainId()
-      } catch {}
-    }
-
-    throw Error(`No clients available. Can not get chain id`)
+    return roundRobinTry(clients, 'get chain id', (client) => client.getChainId())
   }
 
   public abstract prepareTx({
