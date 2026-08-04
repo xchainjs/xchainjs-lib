@@ -9,7 +9,13 @@ import {
 } from '@cosmjs/proto-signing'
 import { GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
 import { AssetInfo, FeeType, Fees, PreparedTx, singleFee } from '@xchainjs/xchain-client'
-import { Client as CosmosSDKClient, CosmosSdkClientParams, MsgTypes, makeClientPath } from '@xchainjs/xchain-cosmos-sdk'
+import {
+  Client as CosmosSDKClient,
+  CosmosSdkClientParams,
+  MsgTypes,
+  makeClientPath,
+  roundRobinTry,
+} from '@xchainjs/xchain-cosmos-sdk'
 import { Address, Asset, AssetType, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
@@ -269,28 +275,24 @@ export abstract class Client extends CosmosSDKClient {
     signer: DirectSecp256k1HdWallet,
     gasLimit: BigNumber,
   ): Promise<TxRaw> {
-    for (const url of this.clientUrls[this.network]) {
-      try {
-        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-          registry: this.registry,
-        })
+    return roundRobinTry(this.clientUrls[this.network], 'sign transaction', async (url) => {
+      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+        registry: this.registry,
+      })
 
-        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-        })
+      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+      })
 
-        return await signingClient.sign(
-          sender,
-          messages,
-          {
-            amount: [],
-            gas: gasLimit.toString(),
-          },
-          unsignedTx.body.memo,
-        )
-      } catch {}
-    }
-
-    throw Error('No clients available. Can not sign transaction')
+      return signingClient.sign(
+        sender,
+        messages,
+        {
+          amount: [],
+          gas: gasLimit.toString(),
+        },
+        unsignedTx.body.memo,
+      )
+    })
   }
 }

@@ -31,3 +31,13 @@ export const bech32ToBase64 = (address: string): string =>
  * @returns {string} The address in Bech32 format.
  */
 export const base64ToBech32 = (address: string, prefix: string): string => toBech32(prefix, base64.decode(address))
+
+export {
+  TxNotFoundError,
+  createRoundRobinExhaustedError,
+  errorMessage,
+  isRetryableRpcError,
+  roundRobinGetTx,
+  roundRobinTry,
+} from './roundRobin'
+export type { RoundRobinTryOptions } from './roundRobin'
