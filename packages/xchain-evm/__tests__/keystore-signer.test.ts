@@ -1,4 +1,3 @@
-import { Network } from '@xchainjs/xchain-client'
 import { JsonRpcProvider } from 'ethers'
 
 import { KeystoreSigner } from '../src'
