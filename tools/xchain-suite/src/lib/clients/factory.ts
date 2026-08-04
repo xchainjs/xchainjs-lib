@@ -1,3 +1,4 @@
+import type Transport from '@ledgerhq/hw-transport'
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import type { XChainClient } from '@xchainjs/xchain-client'
 import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
@@ -6,7 +7,18 @@ import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
 
 // UTXO Chains
-import { Client as BtcClient, defaultBTCParams, AssetBTC, BTC_DECIMAL, BTCChain } from '@xchainjs/xchain-bitcoin'
+import {
+  Client as BtcClient,
+  ClientLedger as BtcClientLedger,
+  defaultBTCParams,
+  AssetBTC,
+  BTC_DECIMAL,
+  BTCChain,
+  AddressFormat,
+  legacyDerivationPaths,
+  nestedSegwitDerivationPaths,
+  tapRootDerivationPaths,
+} from '@xchainjs/xchain-bitcoin'
 import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoincash'
 import { Client as LtcClient, defaultLtcParams, AssetLTC, LTC_DECIMAL, LTCChain } from '@xchainjs/xchain-litecoin'
 import { Client as DogeClient, defaultDogeParams, AssetDOGE, DOGE_DECIMAL, DOGEChain } from '@xchainjs/xchain-doge'
@@ -15,13 +27,53 @@ import { Client as ZecClient, defaultZECParams, AssetZEC, ZEC_DECIMAL, zcashExpl
 import { NownodesProvider, BlockcypherProvider, BlockcypherNetwork } from '@xchainjs/xchain-utxo-providers'
 
 // EVM Chains - import only the Client classes, not the default params (they trigger broken module-level code)
-import { Client as EthClient, defaultEthParams, AssetETH, ETHChain, ETH_GAS_ASSET_DECIMAL } from '@xchainjs/xchain-ethereum'
+import {
+  Client as EthClient,
+  ClientLedger as EthClientLedger,
+  defaultEthParams,
+  AssetETH,
+  ETHChain,
+  ETH_GAS_ASSET_DECIMAL,
+  ledgerLiveDerivationPaths,
+} from '@xchainjs/xchain-ethereum'
 import { Client as AvaxClient } from '@xchainjs/xchain-avax'
 import { Client as BscClient } from '@xchainjs/xchain-bsc'
 import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
 
+import {
+  type BtcAddressFormatOption,
+  type EthDerivationStyle,
+  type SuiteWalletType,
+  isLedgerSupportedChain,
+  LEDGER_SUPPORTED_CHAINS,
+} from '../ledger/types'
+import { applyDerivationOverrides, type DerivationPathOverrides } from '../ledger/paths'
+
+function resolveBtcDerivation(format: BtcAddressFormatOption = 'p2wpkh') {
+  switch (format) {
+    case 'p2pkh':
+      return { addressFormat: AddressFormat.P2PKH, rootDerivationPaths: legacyDerivationPaths }
+    case 'p2sh-p2wpkh':
+      return { addressFormat: AddressFormat.P2SH_P2WPKH, rootDerivationPaths: nestedSegwitDerivationPaths }
+    case 'p2tr':
+      return { addressFormat: AddressFormat.P2TR, rootDerivationPaths: tapRootDerivationPaths }
+    case 'p2wpkh':
+    default:
+      return {
+        addressFormat: AddressFormat.P2WPKH,
+        rootDerivationPaths: defaultBTCParams.rootDerivationPaths,
+      }
+  }
+}
+
 // Lazy creation of ETH config to use Vite env var for Etherscan API key
-function createEthParams(network: Network, phrase: string) {
+function createEthParams(
+  network: Network,
+  options: {
+    phrase?: string
+    ethDerivationStyle?: EthDerivationStyle
+  } & DerivationPathOverrides = {},
+) {
   const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
 
   const mainnetProvider = new JsonRpcProvider('https://ethereum.publicnode.com', 'homestead')
@@ -39,12 +91,21 @@ function createEthParams(network: Network, phrase: string) {
     [Network.Stagenet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, ETHChain, AssetETH, ETH_GAS_ASSET_DECIMAL, 1),
   }]
 
+  const baseRoots =
+    options.ethDerivationStyle === 'ledgerLive' ? ledgerLiveDerivationPaths : defaultEthParams.rootDerivationPaths
+  const rootDerivationPaths = applyDerivationOverrides(
+    baseRoots,
+    { accountIndex: options.accountIndex, customRootPath: options.customRootPath },
+    'eth',
+  )
+
   return {
     ...defaultEthParams,
     network,
-    phrase,
+    ...(options.phrase !== undefined ? { phrase: options.phrase } : {}),
     providers,
     dataProviders,
+    rootDerivationPaths,
     feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
   }
 }
@@ -175,12 +236,32 @@ function createZecParams(network: Network, phrase: string) {
 }
 
 // Lazy creation of BTC config to use BlockCypher API key
-function createBtcParams(network: Network, phrase: string) {
+function createBtcParams(
+  network: Network,
+  options: {
+    phrase?: string
+    btcAddressFormat?: BtcAddressFormatOption
+  } & DerivationPathOverrides = {},
+) {
   const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
+  const derivation = resolveBtcDerivation(options.btcAddressFormat)
+  const rootDerivationPaths = applyDerivationOverrides(
+    derivation.rootDerivationPaths,
+    { accountIndex: options.accountIndex, customRootPath: options.customRootPath },
+    'btc',
+  )
 
-  // If no API key, use default params
+  const base = {
+    ...defaultBTCParams,
+    network,
+    ...(options.phrase !== undefined ? { phrase: options.phrase } : {}),
+    addressFormat: derivation.addressFormat,
+    rootDerivationPaths,
+  }
+
+  // If no API key, use default data providers
   if (!blockcypherApiKey) {
-    return { ...defaultBTCParams, network, phrase }
+    return base
   }
 
   const mainnetBlockcypherProvider = new BlockcypherProvider(
@@ -207,9 +288,7 @@ function createBtcParams(network: Network, phrase: string) {
   }]
 
   return {
-    ...defaultBTCParams,
-    network,
-    phrase,
+    ...base,
     dataProviders,
   }
 }
@@ -331,17 +410,78 @@ import { Client as XrpClient, defaultXRPParams } from '@xchainjs/xchain-ripple'
 import { Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
 
 export interface ClientConfig {
-  phrase: string
+  /** Required for phrase / keystore wallets */
+  phrase?: string
   network: Network
+  /** When set with `walletType: 'ledger'`, builds ClientLedger for BTC/ETH */
+  transport?: Transport
+  walletType?: SuiteWalletType
+  btcAddressFormat?: BtcAddressFormatOption
+  ethDerivationStyle?: EthDerivationStyle
+  /** BIP account index (default 0). No effect on Ledger Live ETH `{index}` paths. */
+  accountIndex?: number
+  /**
+   * Optional root path override for BTC/ETH (applied to all networks).
+   * Must match the selected BTC address format purpose (m/84', m/86', m/44', m/49').
+   */
+  customRootPath?: string
 }
 
+function requirePhrase(config: ClientConfig, chainId: string): string {
+  if (!config.phrase) {
+    throw new Error(`Phrase is required to create a keystore client for ${chainId}`)
+  }
+  return config.phrase
+}
+
+/**
+ * Create a chain client for either a keystore phrase or a Ledger transport.
+ *
+ * Ledger mode currently supports **BTC** and **ETH** only (WebHID).
+ * BTC address format, ETH derivation style, account index, and optional custom
+ * root path are honoured for both wallet types so the suite can exercise path work
+ * without a device.
+ */
 export function createClient(chainId: string, config: ClientConfig): XChainClient {
-  const { phrase, network } = config
+  const {
+    network,
+    walletType = 'phrase',
+    transport,
+    btcAddressFormat,
+    ethDerivationStyle,
+    accountIndex,
+    customRootPath,
+  } = config
+  const pathOverrides = { accountIndex, customRootPath }
+
+  if (walletType === 'ledger') {
+    if (!transport) {
+      throw new Error('Ledger transport is required when walletType is "ledger"')
+    }
+    if (!isLedgerSupportedChain(chainId)) {
+      throw new Error(
+        `Ledger is only supported for ${LEDGER_SUPPORTED_CHAINS.join(' and ')} in xchain-suite (got ${chainId}). Open the Bitcoin or Ethereum app on the device and select that chain.`,
+      )
+    }
+
+    if (chainId === 'BTC') {
+      const params = createBtcParams(network, { btcAddressFormat, ...pathOverrides })
+      return new BtcClientLedger({ ...params, transport })
+    }
+
+    // ETH
+    const params = createEthParams(network, { ethDerivationStyle, ...pathOverrides })
+    // ClientLedger omits phrase/signer and injects LedgerSigner from transport
+    const { phrase: _omitPhrase, ...ledgerEthParams } = params as typeof params & { phrase?: string }
+    return new EthClientLedger({ ...ledgerEthParams, transport })
+  }
+
+  const phrase = requirePhrase(config, chainId)
 
   switch (chainId) {
     // UTXO Chains - use BlockCypher API key if available
     case 'BTC':
-      return new BtcClient(createBtcParams(network, phrase))
+      return new BtcClient(createBtcParams(network, { phrase, btcAddressFormat, ...pathOverrides }))
     case 'BCH':
       return new BchClient({ ...defaultBchParams, network, phrase })
     case 'LTC':
@@ -355,7 +495,7 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
 
     // EVM Chains - use wide fee bounds to accommodate varying gas prices
     case 'ETH':
-      return new EthClient(createEthParams(network, phrase))
+      return new EthClient(createEthParams(network, { phrase, ethDerivationStyle, ...pathOverrides }))
     case 'AVAX':
       return new AvaxClient(createAvaxParams(network, phrase))
     case 'BSC':

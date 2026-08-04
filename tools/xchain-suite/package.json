@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@chainflip/sdk": "2.2.1",
+    "@ledgerhq/hw-transport": "^6.31.6",
+    "@ledgerhq/hw-transport-webhid": "^6.29.4",
     "@xchainjs/xchain-arbitrum": "workspace:*",
     "@xchainjs/xchain-avax": "workspace:*",
     "@xchainjs/xchain-bitcoin": "workspace:*",

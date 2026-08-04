@@ -1,6 +1,14 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode, useMemo } from 'react'
+import type Transport from '@ledgerhq/hw-transport'
 import { validatePhrase, encryptToKeyStore, decryptFromKeystore, generatePhrase, type Keystore } from '@xchainjs/xchain-crypto'
 import { Network } from '@xchainjs/xchain-client'
+
+import { closeLedgerTransport, openLedgerTransport } from '../lib/ledger/transport'
+import type {
+  BtcAddressFormatOption,
+  EthDerivationStyle,
+  SuiteWalletType,
+} from '../lib/ledger/types'
 
 const WALLETS_STORAGE_KEY = 'xchainjs-testing-gui-wallets'
 const ACTIVE_WALLET_KEY = 'xchainjs-testing-gui-active-wallet'
@@ -12,9 +20,24 @@ export interface SavedWallet {
   createdAt: number
 }
 
+export type ConnectLedgerOptions = {
+  btcAddressFormat?: BtcAddressFormatOption
+  ethDerivationStyle?: EthDerivationStyle
+  /** BIP account index (default 0). No effect on Ledger Live ETH `{index}` paths. */
+  accountIndex?: number
+  /** Optional root path override for BTC/ETH, e.g. m/84'/0'/5'/0/ */
+  customRootPath?: string
+}
+
 interface WalletContextValue {
   // Current session
   phrase: string | null
+  walletType: SuiteWalletType
+  transport: Transport | null
+  btcAddressFormat: BtcAddressFormatOption
+  ethDerivationStyle: EthDerivationStyle
+  accountIndex: number
+  customRootPath: string
   isConnected: boolean
   network: Network
   activeWalletId: string | null
@@ -24,7 +47,12 @@ interface WalletContextValue {
   savedWallets: SavedWallet[]
   connect: (phrase: string) => { success: boolean; error?: string }
   connectWithKeystore: (keystore: Keystore, password: string, walletName?: string) => Promise<{ success: boolean; error?: string }>
+  connectLedger: (options?: ConnectLedgerOptions) => Promise<{ success: boolean; error?: string }>
   disconnect: () => void
+  setBtcAddressFormat: (format: BtcAddressFormatOption) => void
+  setEthDerivationStyle: (style: EthDerivationStyle) => void
+  setAccountIndex: (index: number) => void
+  setCustomRootPath: (path: string) => void
 
   // Keystore operations (save to storage)
   createWallet: (name: string, password: string) => Promise<{ success: boolean; error?: string; phrase?: string }>
@@ -67,6 +95,12 @@ function generateWalletId(): string {
 
 export function WalletProvider({ children }: WalletProviderProps) {
   const [phrase, setPhrase] = useState<string | null>(null)
+  const [walletType, setWalletType] = useState<SuiteWalletType>('phrase')
+  const [transport, setTransport] = useState<Transport | null>(null)
+  const [btcAddressFormat, setBtcAddressFormat] = useState<BtcAddressFormatOption>('p2wpkh')
+  const [ethDerivationStyle, setEthDerivationStyle] = useState<EthDerivationStyle>('default')
+  const [accountIndex, setAccountIndex] = useState(0)
+  const [customRootPath, setCustomRootPath] = useState('')
   const [savedWallets, setSavedWallets] = useState<SavedWallet[]>([])
   const [activeWalletId, setActiveWalletId] = useState<string | null>(null)
   const [tempWalletName, setTempWalletName] = useState<string | null>(null) // For non-saved connections
@@ -107,11 +141,15 @@ export function WalletProvider({ children }: WalletProviderProps) {
       return { success: false, error: 'Invalid mnemonic phrase' }
     }
 
+    // Drop any active Ledger session when switching to phrase
+    void closeLedgerTransport(transport)
+    setTransport(null)
+    setWalletType('phrase')
     setPhrase(trimmedPhrase)
     setActiveWalletId(null)
     setTempWalletName(null)
     return { success: true }
-  }, [])
+  }, [transport])
 
   // Connect with keystore file without saving (quick connect)
   const connectWithKeystore = useCallback(async (keystore: Keystore, password: string, walletName?: string): Promise<{ success: boolean; error?: string }> => {
@@ -122,6 +160,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
         return { success: false, error: 'Decrypted data is not a valid mnemonic' }
       }
 
+      void closeLedgerTransport(transport)
+      setTransport(null)
+      setWalletType('phrase')
       setPhrase(decryptedPhrase)
       setActiveWalletId(null)
       setTempWalletName(walletName || 'Keystore Wallet')
@@ -130,14 +171,50 @@ export function WalletProvider({ children }: WalletProviderProps) {
     } catch (e) {
       return { success: false, error: e instanceof Error ? e.message : 'Failed to decrypt keystore. Check your password.' }
     }
-  }, [])
+  }, [transport])
+
+  /**
+   * Connect a Ledger device over WebHID.
+   * Unlock the device, open the Bitcoin or Ethereum app before using those chains.
+   */
+  const connectLedger = useCallback(async (options?: ConnectLedgerOptions): Promise<{ success: boolean; error?: string }> => {
+    try {
+      // Close any previous transport first
+      await closeLedgerTransport(transport)
+
+      const next = await openLedgerTransport()
+      setTransport(next)
+      setWalletType('ledger')
+      setPhrase(null)
+      setActiveWalletId(null)
+      setTempWalletName('Ledger')
+      localStorage.removeItem(ACTIVE_WALLET_KEY)
+
+      if (options?.btcAddressFormat) setBtcAddressFormat(options.btcAddressFormat)
+      if (options?.ethDerivationStyle) setEthDerivationStyle(options.ethDerivationStyle)
+      if (options?.accountIndex !== undefined) setAccountIndex(options.accountIndex)
+      if (options?.customRootPath !== undefined) setCustomRootPath(options.customRootPath)
+
+      return { success: true }
+    } catch (e) {
+      setTransport(null)
+      setWalletType('phrase')
+      return {
+        success: false,
+        error: e instanceof Error ? e.message : 'Failed to connect Ledger. Unlock the device and try again.',
+      }
+    }
+  }, [transport])
 
   const disconnect = useCallback(() => {
+    void closeLedgerTransport(transport)
+    setTransport(null)
+    setWalletType('phrase')
     setPhrase(null)
     setActiveWalletId(null)
     setTempWalletName(null)
     localStorage.removeItem(ACTIVE_WALLET_KEY)
-  }, [])
+  }, [transport])
 
   // Create a new wallet with generated phrase
   const createWallet = useCallback(async (name: string, password: string): Promise<{ success: boolean; error?: string; phrase?: string }> => {
@@ -152,6 +229,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
         createdAt: Date.now(),
       }
 
+      void closeLedgerTransport(transport)
+      setTransport(null)
+      setWalletType('phrase')
       setSavedWallets(prev => [...prev, wallet])
       setPhrase(newPhrase)
       setActiveWalletId(wallet.id)
@@ -161,7 +241,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     } catch (e) {
       return { success: false, error: e instanceof Error ? e.message : 'Failed to create wallet' }
     }
-  }, [])
+  }, [transport])
 
   // Import wallet from phrase
   const importFromPhrase = useCallback(async (name: string, inputPhrase: string, password: string): Promise<{ success: boolean; error?: string }> => {
@@ -181,6 +261,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
         createdAt: Date.now(),
       }
 
+      void closeLedgerTransport(transport)
+      setTransport(null)
+      setWalletType('phrase')
       setSavedWallets(prev => [...prev, wallet])
       setPhrase(trimmedPhrase)
       setActiveWalletId(wallet.id)
@@ -190,7 +273,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     } catch (e) {
       return { success: false, error: e instanceof Error ? e.message : 'Failed to import wallet' }
     }
-  }, [])
+  }, [transport])
 
   // Import wallet from keystore file
   const importFromKeystore = useCallback(async (name: string, keystore: Keystore, password: string): Promise<{ success: boolean; error?: string }> => {
@@ -209,6 +292,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
         createdAt: Date.now(),
       }
 
+      void closeLedgerTransport(transport)
+      setTransport(null)
+      setWalletType('phrase')
       setSavedWallets(prev => [...prev, wallet])
       setPhrase(decryptedPhrase)
       setActiveWalletId(wallet.id)
@@ -218,7 +304,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     } catch (e) {
       return { success: false, error: e instanceof Error ? e.message : 'Failed to decrypt keystore. Check your password.' }
     }
-  }, [])
+  }, [transport])
 
   // Unlock an existing saved wallet
   const unlockWallet = useCallback(async (walletId: string, password: string): Promise<{ success: boolean; error?: string }> => {
@@ -234,6 +320,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
         return { success: false, error: 'Decrypted data is not a valid mnemonic' }
       }
 
+      void closeLedgerTransport(transport)
+      setTransport(null)
+      setWalletType('phrase')
       setPhrase(decryptedPhrase)
       setActiveWalletId(walletId)
       setTempWalletName(null)
@@ -243,17 +332,20 @@ export function WalletProvider({ children }: WalletProviderProps) {
     } catch (e) {
       return { success: false, error: 'Incorrect password' }
     }
-  }, [savedWallets])
+  }, [savedWallets, transport])
 
   // Delete a saved wallet
   const deleteWallet = useCallback((walletId: string) => {
     setSavedWallets(prev => prev.filter(w => w.id !== walletId))
     if (activeWalletId === walletId) {
+      void closeLedgerTransport(transport)
+      setTransport(null)
+      setWalletType('phrase')
       setPhrase(null)
       setActiveWalletId(null)
       localStorage.removeItem(ACTIVE_WALLET_KEY)
     }
-  }, [activeWalletId])
+  }, [activeWalletId, transport])
 
   // Export keystore for download
   const exportKeystore = useCallback((walletId: string): Keystore | null => {
@@ -261,11 +353,17 @@ export function WalletProvider({ children }: WalletProviderProps) {
     return wallet?.keystore || null
   }, [savedWallets])
 
-  const isConnected = phrase !== null
+  const isConnected = walletType === 'ledger' ? transport !== null : phrase !== null
 
   const value = useMemo<WalletContextValue>(
     () => ({
       phrase,
+      walletType,
+      transport,
+      btcAddressFormat,
+      ethDerivationStyle,
+      accountIndex,
+      customRootPath,
       isConnected,
       network,
       activeWalletId,
@@ -273,7 +371,12 @@ export function WalletProvider({ children }: WalletProviderProps) {
       savedWallets,
       connect,
       connectWithKeystore,
+      connectLedger,
       disconnect,
+      setBtcAddressFormat,
+      setEthDerivationStyle,
+      setAccountIndex,
+      setCustomRootPath,
       createWallet,
       importFromPhrase,
       importFromKeystore,
@@ -281,7 +384,30 @@ export function WalletProvider({ children }: WalletProviderProps) {
       deleteWallet,
       exportKeystore,
     }),
-    [phrase, isConnected, network, activeWalletId, activeWalletName, savedWallets, connect, connectWithKeystore, disconnect, createWallet, importFromPhrase, importFromKeystore, unlockWallet, deleteWallet, exportKeystore]
+    [
+      phrase,
+      walletType,
+      transport,
+      btcAddressFormat,
+      ethDerivationStyle,
+      accountIndex,
+      customRootPath,
+      isConnected,
+      network,
+      activeWalletId,
+      activeWalletName,
+      savedWallets,
+      connect,
+      connectWithKeystore,
+      connectLedger,
+      disconnect,
+      createWallet,
+      importFromPhrase,
+      importFromKeystore,
+      unlockWallet,
+      deleteWallet,
+      exportKeystore,
+    ],
   )
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
