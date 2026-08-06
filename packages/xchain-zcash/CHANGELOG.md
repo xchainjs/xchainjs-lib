@@ -1,5 +1,17 @@
 # @xchainjs/xchain-zcash
 
+## 1.3.10
+
+### Patch Changes
+
+- 33ceeac: Add an optional fallback Blockbook data provider so a single-provider outage (e.g. a nownodes 502) no longer blocks ZEC broadcasts or the consensus branch ID fetch. Configured via `ZEC_FALLBACK_BLOCKBOOK_URL` (and optional `ZEC_FALLBACK_BLOCKBOOK_API_KEY`) and disabled when unset; the default client now round-robins nownodes → fallback.
+- Updated dependencies [322b1bf]
+- Updated dependencies [2e28cb5]
+  - @xchainjs/xchain-client@2.0.17
+  - @xchainjs/xchain-utxo-providers@2.1.1
+  - @xchainjs/zcash-js@1.1.6
+  - @xchainjs/xchain-utxo@2.2.9
+
 ## 1.3.9
 
 ### Patch Changes

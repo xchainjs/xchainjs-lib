@@ -1,5 +1,26 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- 90d28d7: Bump all `@cosmjs/*` packages from 0.34.0 to 0.37.0 (and `cosmjs-types` 0.9.0 → 0.10.1) across cosmos-sdk, cosmos, thorchain, mayachain, and kujira.
+
+  Also pin matching versions via root yarn resolutions so a single copy of each CosmJS package is used (avoids duplicate `Registry` type mismatches), pin `@scure/base` to 1.1.5 for CJS/Jest compatibility (CosmJS 0.37 pulls ESM-only `@scure/base@2` by default), and set TypeScript `moduleResolution` to `bundler` so CosmJS 0.37's `exports`-only package.json is resolvable.
+
+  Bump `axios-retry` 3.2.5 → 3.9.1 in mayachain-query and thorchain-query (and pin via resolutions): under `moduleResolution: bundler`, TypeScript requires a `types` condition in package `exports`, which 3.2.5 lacks.
+
+### Patch Changes
+
+- 03e5317: Preserve real RPC/chain errors in Cosmos round-robin helpers instead of always throwing a generic "No clients available" message. Non-retryable failures (e.g. insufficient funds) rethrow immediately; exhausted failover includes the last error as message + cause. `getTransaction` uses `TxNotFoundError` when the tx is missing on reachable nodes.
+- e0eef34: Mark `@xchainjs/xchain-kujira` as deprecated. The Kujira network/ecosystem is no longer actively maintained or meaningfully traded; this package will not receive further feature work and consumers should plan to remove it.
+- Updated dependencies [90d28d7]
+- Updated dependencies [03e5317]
+- Updated dependencies [322b1bf]
+- Updated dependencies [2e28cb5]
+  - @xchainjs/xchain-cosmos-sdk@2.1.0
+  - @xchainjs/xchain-client@2.0.17
+
 ## 2.0.16
 
 ### Patch Changes
