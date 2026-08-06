@@ -4,6 +4,22 @@
 
 ### Minor Changes
 
+- f8db6e5: Migrate `@xchainjs/xchain-sui` off deprecated Sui Foundation JSON-RPC fullnodes.
+
+  Defaults now use **gRPC** (`fullnode.*.sui.io`) for balances, fees, coins, and execution, and **GraphQL** (`graphql.*.sui.io`) for transaction history. Existing `clientUrls` pointing at Foundation fullnodes continue to work as gRPC base URLs.
+
+  Optional `transport: 'jsonRpc'` remains for private nodes that still enable JSON-RPC. New optional `grpcUrls` / `graphqlUrls` params allow overriding each endpoint.
+
+### Patch Changes
+
+- Updated dependencies [322b1bf]
+- Updated dependencies [2e28cb5]
+  - @xchainjs/xchain-client@2.0.17
+
+## 0.2.0
+
+### Minor Changes
+
 - Migrate off deprecated Sui Foundation JSON-RPC fullnodes.
   - Default transport is **gRPC** against `fullnode.*.sui.io` (balances, fees, coins, transfer execution).
   - Transaction history uses **GraphQL** at `graphql.*.sui.io`.
@@ -19,7 +35,6 @@
 - Updated dependencies [4ec2e3e]
   - @xchainjs/xchain-crypto@1.0.8
   - @xchainjs/xchain-client@2.0.16
-
 
 ## 0.1.4
 

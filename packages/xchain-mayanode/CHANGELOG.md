@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.4
+
+### Patch Changes
+
+- 322b1bf: Bump direct `axios` dependency from 1.16.1 to 1.18.1 across all packages that declare it, and pin the same version in the root yarn resolutions. This closes GHSA-gcfj-64vw-6mp9 (Axios Node HTTP adapter can use an inherited proxy after interceptor config cloning; vulnerable range `>=1.15.2 <1.18.0`). Exact pin only — no caret range — so consumers and the monorepo do not float onto a compromised patch.
+
 ## 1.2.3
 
 ### Patch Changes
