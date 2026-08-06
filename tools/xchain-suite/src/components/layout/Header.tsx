@@ -4,7 +4,7 @@ import { WalletConnect } from '../wallet/WalletConnect'
 import { Wallet } from 'lucide-react'
 
 export function Header() {
-  const { isConnected, activeWalletName, disconnect } = useWallet()
+  const { isConnected, activeWalletName, disconnect, walletType } = useWallet()
   const [showConnectModal, setShowConnectModal] = useState(false)
 
   return (
@@ -23,6 +23,7 @@ export function Header() {
                   <Wallet className="w-4 h-4 text-green-600 dark:text-green-400" />
                   <span className="text-sm font-medium text-green-700 dark:text-green-300">
                     {activeWalletName || 'Connected'}
+                    {walletType === 'ledger' ? ' · Ledger' : ''}
                   </span>
                 </div>
                 <button
