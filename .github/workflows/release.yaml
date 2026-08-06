@@ -44,6 +44,14 @@ jobs:
           node --version
           npm --version
 
+      # node-hid (Ledger transports) has no prebuild for Node 22 on some runners and
+      # compiles from source; that needs libusb. Without this, yarn install fails and
+      # changesets/action never refreshes changeset-release/master (stale Version Packages PR).
+      - name: Install native build deps (node-hid / libusb)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0-0-dev libudev-dev
+
       - name: Install dependencies
         run: yarn install --immutable
 
