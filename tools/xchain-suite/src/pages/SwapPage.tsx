@@ -197,6 +197,8 @@ export default function SwapPage() {
     MAYA: 0.02,
     KUJI: 0.01,
     TRON: 2,
+    // Matches xchain-sui DEFAULT_GAS_BUDGET (10_000_000 MIST = 0.01 SUI)
+    SUI: 0.01,
   }
 
   // Set amount to percentage of balance
