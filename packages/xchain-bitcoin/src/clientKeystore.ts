@@ -45,19 +45,7 @@ class ClientKeystore extends Client {
       const btcKeys = this.getBtcKeys(this.phrase, index)
 
       // Generate the address using the Bitcoinjs library
-
-      let address: string | undefined
-      if (this.addressFormat === AddressFormat.P2WPKH) {
-        address = Bitcoin.payments.p2wpkh({
-          pubkey: btcKeys.publicKey,
-          network: btcNetwork,
-        }).address
-      } else {
-        address = Bitcoin.payments.p2tr({
-          internalPubkey: Utils.toXOnly(btcKeys.publicKey),
-          network: btcNetwork,
-        }).address
-      }
+      const address = Utils.getPaymentForFormat(this.addressFormat, btcKeys.publicKey, btcNetwork).address
 
       // Throw an error if the address is not defined
       if (!address) {
@@ -78,6 +66,34 @@ class ClientKeystore extends Client {
    */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
+  }
+
+  /**
+   * @private
+   * Sign and finalize all PSBT inputs according to the configured address format.
+   * P2TR inputs are signed with a tweaked key; P2SH-P2WPKH inputs need the redeem
+   * script attached before signing; P2WPKH and P2PKH sign with the plain key.
+   * @param {Bitcoin.Psbt} psbt The PSBT to sign.
+   * @param {ECPairInterface} btcKeys The signing key pair.
+   */
+  private signPsbt(psbt: Bitcoin.Psbt, btcKeys: ECPairInterface): void {
+    if (this.addressFormat === AddressFormat.P2SH_P2WPKH) {
+      const redeemScript = Bitcoin.payments.p2wpkh({
+        pubkey: btcKeys.publicKey,
+        network: Utils.btcNetwork(this.network),
+      }).output
+      for (let i = 0; i < psbt.data.inputs.length; i++) {
+        psbt.updateInput(i, { redeemScript })
+      }
+    }
+
+    const signer =
+      this.addressFormat === AddressFormat.P2TR
+        ? btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey)))
+        : btcKeys
+
+    psbt.signAllInputs(signer)
+    psbt.finalizeAllInputs()
   }
 
   /**
@@ -147,15 +163,8 @@ class ClientKeystore extends Client {
     // Build the PSBT
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
 
-    // Sign all inputs
-    psbt.signAllInputs(
-      this.addressFormat === AddressFormat.P2WPKH
-        ? btcKeys
-        : btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey))),
-    )
-
-    // Finalize inputs
-    psbt.finalizeAllInputs()
+    // Sign and finalize all inputs according to the address format
+    this.signPsbt(psbt, btcKeys)
 
     // Extract the transaction hex
     const txHex = psbt.extractTransaction().toHex()
@@ -200,12 +209,7 @@ class ClientKeystore extends Client {
     })
 
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
-    psbt.signAllInputs(
-      this.addressFormat === AddressFormat.P2WPKH
-        ? btcKeys
-        : btcKeys.tweak(Bitcoin.crypto.taggedHash('TapTweak', Utils.toXOnly(btcKeys.publicKey))),
-    )
-    psbt.finalizeAllInputs()
+    this.signPsbt(psbt, btcKeys)
 
     const txHex = psbt.extractTransaction().toHex()
     const hash = await this.roundRobinBroadcastTx(txHex)

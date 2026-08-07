@@ -38,11 +38,43 @@ class ClientLedger extends Client {
     throw Error('Sync method not supported for Ledger')
   }
 
+  // Map the configured address format to the Ledger address format string
+  private get ledgerFormat(): 'bech32' | 'bech32m' | 'legacy' | 'p2sh' {
+    switch (this.addressFormat) {
+      case AddressFormat.P2TR:
+        return 'bech32m'
+      case AddressFormat.P2PKH:
+        return 'legacy'
+      case AddressFormat.P2SH_P2WPKH:
+        return 'p2sh'
+      default:
+        return 'bech32'
+    }
+  }
+
+  // Whether the configured format spends segwit inputs (everything except legacy P2PKH)
+  private get isSegwit(): boolean {
+    return this.addressFormat !== AddressFormat.P2PKH
+  }
+
+  // `additionals` flags for createPaymentTransaction. Native segwit needs the bech32 flag,
+  // taproot bech32m; legacy P2PKH and wrapped segwit (P2SH-P2WPKH) need none.
+  private get ledgerAdditionals(): string[] {
+    switch (this.addressFormat) {
+      case AddressFormat.P2WPKH:
+        return ['bech32']
+      case AddressFormat.P2TR:
+        return ['bech32m']
+      default:
+        return []
+    }
+  }
+
   // Get the current address asynchronously
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const result = await app.getWalletPublicKey(this.getFullDerivationPath(index), {
-      format: this.addressFormat === AddressFormat.P2TR ? 'bech32m' : 'bech32',
+      format: this.ledgerFormat,
       verify,
     })
     return result.bitcoinAddress
@@ -96,16 +128,16 @@ class ClientLedger extends Client {
     const associatedKeysets = ledgerInputs.map(() => this.getFullDerivationPath(fromAddressIndex))
     // Serialize unsigned transaction
     const unsignedHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
-    const newTx = app.splitTransaction(unsignedHex, true)
+    const newTx = app.splitTransaction(unsignedHex, this.isSegwit)
     const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
     // Create payment transaction
     const txHex = await app.createPaymentTransaction({
       inputs: ledgerInputs,
       associatedKeysets,
       outputScriptHex,
-      segwit: true,
-      useTrustedInputForSegwit: true,
-      additionals: [this.addressFormat === AddressFormat.P2TR ? 'bech32m' : 'bech32'],
+      segwit: this.isSegwit,
+      useTrustedInputForSegwit: this.isSegwit,
+      additionals: this.ledgerAdditionals,
     })
     // Broadcast transaction
     const txHash = await this.broadcastTx(txHex)
@@ -155,15 +187,15 @@ class ClientLedger extends Client {
 
     const associatedKeysets = ledgerInputs.map(() => this.getFullDerivationPath(fromAddressIndex))
     const unsignedHex = psbt.data.globalMap.unsignedTx.toBuffer().toString('hex')
-    const newTx = app.splitTransaction(unsignedHex, true)
+    const newTx = app.splitTransaction(unsignedHex, this.isSegwit)
     const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
     const txHex = await app.createPaymentTransaction({
       inputs: ledgerInputs,
       associatedKeysets,
       outputScriptHex,
-      segwit: true,
-      useTrustedInputForSegwit: true,
-      additionals: [this.addressFormat === AddressFormat.P2TR ? 'bech32m' : 'bech32'],
+      segwit: this.isSegwit,
+      useTrustedInputForSegwit: this.isSegwit,
+      additionals: this.ledgerAdditionals,
     })
 
     const hash = await this.broadcastTx(txHex)

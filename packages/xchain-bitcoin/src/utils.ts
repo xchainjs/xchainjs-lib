@@ -4,6 +4,8 @@ import { Address } from '@xchainjs/xchain-util' // Importing the Address type fr
 import { UTXO } from '@xchainjs/xchain-utxo' // Importing the UTXO type from xchain-utxo module
 import * as Bitcoin from 'bitcoinjs-lib' // Importing the entire bitcoinjs-lib module and aliasing it as Bitcoin
 
+import { AddressFormat } from './types'
+
 // Constants defining the sizes of various components in a Bitcoin transaction
 export const TX_EMPTY_SIZE = 4 + 1 + 1 + 4 // Total size of an empty transaction
 export const TX_INPUT_BASE = 32 + 4 + 1 + 4 // Size of a base input in a transaction
@@ -83,3 +85,28 @@ export const getPrefix = (network: Network): string => {
  * @returns The X-only public key.
  */
 export const toXOnly = (pubKey: Buffer): Buffer => (pubKey.length === 32 ? pubKey : pubKey.subarray(1, 33))
+
+/**
+ * Build the bitcoinjs payment object for a given address format and public key.
+ * Shared by address derivation and P2SH-P2WPKH redeem script construction to avoid drift.
+ * @param {AddressFormat} format The address format.
+ * @param {Buffer} pubkey The public key.
+ * @param {Bitcoin.Network} network The Bitcoin network.
+ * @returns {Bitcoin.payments.Payment} The payment object.
+ */
+export const getPaymentForFormat = (
+  format: AddressFormat,
+  pubkey: Buffer,
+  network: Bitcoin.Network,
+): Bitcoin.payments.Payment => {
+  switch (format) {
+    case AddressFormat.P2WPKH:
+      return Bitcoin.payments.p2wpkh({ pubkey, network })
+    case AddressFormat.P2TR:
+      return Bitcoin.payments.p2tr({ internalPubkey: toXOnly(pubkey), network })
+    case AddressFormat.P2PKH:
+      return Bitcoin.payments.p2pkh({ pubkey, network })
+    case AddressFormat.P2SH_P2WPKH:
+      return Bitcoin.payments.p2sh({ redeem: Bitcoin.payments.p2wpkh({ pubkey, network }), network })
+  }
+}

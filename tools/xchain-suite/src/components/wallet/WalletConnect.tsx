@@ -1,9 +1,23 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useWallet, type SavedWallet } from '../../contexts/WalletContext'
-import { Wallet, Plus, Upload, Key, Trash2, Download, Eye, EyeOff, Zap } from 'lucide-react'
+import { Wallet, Plus, Upload, Key, Trash2, Download, Eye, EyeOff, Zap, Cpu } from 'lucide-react'
 import type { Keystore } from '@xchainjs/xchain-crypto'
+import type { BtcAddressFormatOption, EthDerivationStyle } from '../../lib/ledger/types'
+import { previewRootPath } from '../../lib/ledger/paths'
 
-type ViewMode = 'list' | 'create' | 'import-phrase' | 'import-keystore' | 'unlock' | 'quick-connect'
+const BTC_BASE_ROOT: Record<BtcAddressFormatOption, string> = {
+  p2wpkh: "m/84'/0'/0'/0/",
+  p2tr: "m/86'/0'/0'/0/",
+  p2pkh: "m/44'/0'/0'/0/",
+  'p2sh-p2wpkh': "m/49'/0'/0'/0/",
+}
+
+const ETH_BASE_ROOT: Record<EthDerivationStyle, string> = {
+  default: "m/44'/60'/0'/0/",
+  ledgerLive: "m/44'/60'/{index}'/0/0",
+}
+
+type ViewMode = 'list' | 'create' | 'import-phrase' | 'import-keystore' | 'unlock' | 'quick-connect' | 'ledger'
 
 interface WalletConnectProps {
   onClose: () => void
@@ -14,6 +28,7 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
     savedWallets,
     connect,
     connectWithKeystore,
+    connectLedger,
     createWallet,
     importFromPhrase,
     importFromKeystore,
@@ -34,6 +49,10 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
   const [keystoreFile, setKeystoreFile] = useState<Keystore | null>(null)
   const [keystoreFileName, setKeystoreFileName] = useState('')
   const [quickConnectMode, setQuickConnectMode] = useState<'phrase' | 'keystore'>('keystore')
+  const [btcAddressFormat, setBtcAddressFormat] = useState<BtcAddressFormatOption>('p2wpkh')
+  const [ethDerivationStyle, setEthDerivationStyle] = useState<EthDerivationStyle>('default')
+  const [accountIndex, setAccountIndex] = useState(0)
+  const [customRootPath, setCustomRootPath] = useState('')
 
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -41,6 +60,19 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const quickConnectFileRef = useRef<HTMLInputElement>(null)
+
+  const pathOverrides = useMemo(
+    () => ({ accountIndex, customRootPath }),
+    [accountIndex, customRootPath],
+  )
+  const btcPathPreview = useMemo(
+    () => previewRootPath(BTC_BASE_ROOT[btcAddressFormat], pathOverrides, 'btc'),
+    [btcAddressFormat, pathOverrides],
+  )
+  const ethPathPreview = useMemo(
+    () => previewRootPath(ETH_BASE_ROOT[ethDerivationStyle], pathOverrides, 'eth'),
+    [ethDerivationStyle, pathOverrides],
+  )
 
   const resetForm = () => {
     setWalletName('')
@@ -51,6 +83,10 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
     setKeystoreFileName('')
     setError(null)
     setGeneratedPhrase(null)
+    setBtcAddressFormat('p2wpkh')
+    setEthDerivationStyle('default')
+    setAccountIndex(0)
+    setCustomRootPath('')
   }
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -195,6 +231,30 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
     }
   }
 
+  const handleConnectLedger = async () => {
+    setError(null)
+    setIsLoading(true)
+    try {
+      if (accountIndex < 0 || !Number.isInteger(accountIndex)) {
+        setError('Account index must be a non-negative integer')
+        return
+      }
+      const result = await connectLedger({
+        btcAddressFormat,
+        ethDerivationStyle,
+        accountIndex,
+        customRootPath: customRootPath.trim(),
+      })
+      if (result.success) {
+        onClose()
+      } else {
+        setError(result.error || 'Failed to connect Ledger')
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleQuickConnectPhrase = async () => {
     setError(null)
 
@@ -262,6 +322,24 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
 
   const renderWalletList = () => (
     <>
+      {/* Ledger */}
+      <div className="mb-3">
+        <button
+          onClick={() => { resetForm(); setViewMode('ledger') }}
+          className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/30 dark:to-violet-900/30 border border-indigo-200 dark:border-indigo-800 rounded-lg hover:from-indigo-100 hover:to-violet-100 dark:hover:from-indigo-900/50 dark:hover:to-violet-900/50 transition-colors"
+        >
+          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-full">
+            <Cpu className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div className="text-left">
+            <p className="font-medium text-gray-900 dark:text-gray-100">Connect Ledger</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              BTC + ETH via WebHID — open the chain app on the device
+            </p>
+          </div>
+        </button>
+      </div>
+
       {/* Quick Connect Option */}
       <div className="mb-4">
         <button
@@ -766,6 +844,111 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
     </div>
   )
 
+  const renderLedgerForm = () => (
+    <div className="space-y-4">
+      <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 rounded-md">
+        <p className="text-sm text-indigo-900 dark:text-indigo-200">
+          Unlock your Ledger, enable WebHID when prompted, and open the <strong>Bitcoin</strong> or{' '}
+          <strong>Ethereum</strong> app before running chain operations. Other chains are not supported in Ledger mode.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          BTC address format
+        </label>
+        <select
+          value={btcAddressFormat}
+          onChange={(e) => setBtcAddressFormat(e.target.value as BtcAddressFormatOption)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+        >
+          <option value="p2wpkh">Native SegWit (P2WPKH / bc1q… / BIP84)</option>
+          <option value="p2tr">Taproot (P2TR / bc1p… / BIP86)</option>
+          <option value="p2pkh">Legacy (P2PKH / 1… / BIP44)</option>
+          <option value="p2sh-p2wpkh">Nested SegWit (P2SH-P2WPKH / 3… / BIP49)</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          ETH derivation style
+        </label>
+        <select
+          value={ethDerivationStyle}
+          onChange={(e) => setEthDerivationStyle(e.target.value as EthDerivationStyle)}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+        >
+          <option value="default">Default BIP44 (m/44&apos;/60&apos;/0&apos;/0/index)</option>
+          <option value="ledgerLive">Ledger Live (m/44&apos;/60&apos;/index&apos;/0/0)</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="accountIndex" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Account index
+        </label>
+        <input
+          id="accountIndex"
+          type="number"
+          min={0}
+          step={1}
+          value={accountIndex}
+          onChange={(e) => setAccountIndex(Math.max(0, parseInt(e.target.value, 10) || 0))}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+        />
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          BIP account slot (default 0). Rewrites e.g. m/84&apos;/0&apos;/<strong>{accountIndex}</strong>&apos;/0/.
+          No effect on Ledger Live ETH — use wallet index on Get Address instead.
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="customRootPath" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Custom root path <span className="font-normal text-gray-500">(optional)</span>
+        </label>
+        <input
+          id="customRootPath"
+          type="text"
+          value={customRootPath}
+          onChange={(e) => setCustomRootPath(e.target.value)}
+          placeholder="e.g. m/84'/0'/5'/0/ or m/44'/60'/{index}'/0/0"
+          spellCheck={false}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
+        />
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          Overrides account index when set. BTC purpose must match the format above (m/84&apos;, m/86&apos;, m/44&apos;, or m/49&apos;).
+          Use <code className="text-[11px]">{'{index}'}</code> for Ledger Live–style ETH paths.
+        </p>
+      </div>
+
+      <div className="p-3 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-md space-y-1">
+        <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Effective root (preview)</p>
+        <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all">
+          BTC: {btcPathPreview}
+          <span className="text-gray-400 dark:text-gray-500">{'{walletIndex}'}</span>
+        </p>
+        <p className="text-xs font-mono text-gray-600 dark:text-gray-400 break-all">
+          ETH:{' '}
+          {ethPathPreview.includes('{index}')
+            ? ethPathPreview
+            : `${ethPathPreview.replace(/\/$/, '')}/` + '{walletIndex}'}
+        </p>
+      </div>
+
+      <button
+        onClick={handleConnectLedger}
+        disabled={isLoading}
+        className="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isLoading ? 'Connecting…' : 'Connect Ledger (WebHID)'}
+      </button>
+
+      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+        Requires Chrome, Edge, or another Chromium browser with WebHID.
+      </p>
+    </div>
+  )
+
   const getTitle = () => {
     switch (viewMode) {
       case 'list': return 'Connect Wallet'
@@ -774,6 +957,7 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
       case 'import-keystore': return 'Import Keystore'
       case 'unlock': return 'Unlock Wallet'
       case 'quick-connect': return 'Quick Connect'
+      case 'ledger': return 'Connect Ledger'
     }
   }
 
@@ -812,7 +996,7 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
             </button>
           </div>
 
-          {viewMode !== 'unlock' && viewMode !== 'quick-connect' && (
+          {viewMode !== 'unlock' && viewMode !== 'quick-connect' && viewMode !== 'ledger' && (
             <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-md">
               <p className="text-sm text-amber-800 dark:text-amber-300">
                 <strong>Warning:</strong> Testing only. Do not use with significant funds.
@@ -832,6 +1016,7 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
           {viewMode === 'import-keystore' && renderImportKeystoreForm()}
           {viewMode === 'unlock' && renderUnlockForm()}
           {viewMode === 'quick-connect' && renderQuickConnectForm()}
+          {viewMode === 'ledger' && renderLedgerForm()}
         </div>
       </div>
     </div>
