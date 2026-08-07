@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [ce7f4c1]
+  - @xchainjs/xchain-sui@0.2.1
+
 ## 3.1.3
 
 ### Patch Changes
