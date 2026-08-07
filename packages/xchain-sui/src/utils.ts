@@ -64,3 +64,44 @@ export const resolveGraphqlUrl = (network: Network, params: Pick<SUIClientParams
  * the old name; returns the gRPC fullnode URL (not JSON-RPC).
  */
 export const getDefaultClientUrl = getDefaultGrpcUrl
+
+/**
+ * JSON.stringify that never throws on BigInt (common in Sui gRPC/protobuf).
+ * BigInts are converted to decimal strings.
+ */
+export const safeJsonStringify = (value: unknown): string => {
+  try {
+    return JSON.stringify(value, (_key, v) => (typeof v === 'bigint' ? v.toString() : v))
+  } catch {
+    // Circular refs or other exotic values — fall back without throwing.
+    return String(value)
+  }
+}
+
+/**
+ * gRPC `ExecutionStatus` may be a protobuf object (`{ success, error }`) or an
+ * enum number depending on decoder path. Only treat object `{ success: false }`
+ * as failure (same rule as before).
+ */
+export const isGrpcExecutionFailure = (status: unknown): boolean => {
+  return Boolean(
+    status && typeof status === 'object' && 'success' in status && (status as { success?: boolean }).success === false,
+  )
+}
+
+/**
+ * Build a human-readable message for a failed gRPC execution status.
+ * Prefers `error.description` when present; otherwise safe-stringifies the
+ * whole status (handles BigInt fields such as `error.command`).
+ */
+export const formatGrpcExecutionFailure = (status: unknown): string => {
+  if (status && typeof status === 'object') {
+    const error = (status as { error?: { description?: string; command?: bigint | number | string } }).error
+    if (error?.description) {
+      const command =
+        error.command !== undefined && error.command !== null ? ` (command ${error.command.toString()})` : ''
+      return `Transaction failed: ${error.description}${command}`
+    }
+  }
+  return `Transaction failed: ${safeJsonStringify(status)}`
+}

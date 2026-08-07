@@ -4,10 +4,13 @@ import { assetToString } from '@xchainjs/xchain-util'
 import {
   Client,
   defaultSuiParams,
+  formatGrpcExecutionFailure,
   getDefaultGraphqlUrl,
   getDefaultGrpcUrl,
+  isGrpcExecutionFailure,
   resolveGraphqlUrl,
   resolvePrimaryUrl,
+  safeJsonStringify,
 } from '../src'
 
 describe('Sui client', () => {
@@ -74,6 +77,59 @@ describe('Sui client', () => {
           },
         }),
       ).toBe(custom)
+    })
+  })
+
+  describe('gRPC execution status error reporting', () => {
+    it('Should stringify objects that contain BigInt without throwing', () => {
+      const status = {
+        success: false,
+        error: {
+          description: 'InsufficientGas',
+          command: 2n,
+        },
+      }
+      expect(() => JSON.stringify(status)).toThrow(/BigInt/)
+      expect(safeJsonStringify(status)).toContain('2')
+      expect(safeJsonStringify(status)).toContain('InsufficientGas')
+    })
+
+    it('Should treat only object success:false as failure', () => {
+      expect(isGrpcExecutionFailure({ success: false })).toBe(true)
+      expect(isGrpcExecutionFailure({ success: true })).toBe(false)
+      expect(isGrpcExecutionFailure(undefined)).toBe(false)
+      // enum-style number — leave as non-failure (same as pre-fix behavior)
+      expect(isGrpcExecutionFailure(0)).toBe(false)
+      expect(isGrpcExecutionFailure(1)).toBe(false)
+    })
+
+    it('Should format failure using description and BigInt command without TypeError', () => {
+      const status = {
+        success: false,
+        error: {
+          description: 'InsufficientCoinBalance',
+          command: 0n,
+        },
+      }
+      const message = formatGrpcExecutionFailure(status)
+      expect(message).toContain('Transaction failed')
+      expect(message).toContain('InsufficientCoinBalance')
+      expect(message).toContain('command 0')
+      expect(() => {
+        if (isGrpcExecutionFailure(status)) {
+          throw Error(formatGrpcExecutionFailure(status))
+        }
+      }).toThrow(/InsufficientCoinBalance/)
+    })
+
+    it('Should fall back to safe stringify when description is missing', () => {
+      const status = { success: false, error: { command: 7n, kind: 3 } }
+      const message = formatGrpcExecutionFailure(status)
+      expect(message.startsWith('Transaction failed:')).toBe(true)
+      expect(message).toContain('7')
+      expect(() => {
+        throw Error(formatGrpcExecutionFailure(status))
+      }).not.toThrow(/serialize a BigInt/)
     })
   })
 

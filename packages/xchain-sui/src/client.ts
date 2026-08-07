@@ -30,7 +30,13 @@ import slip10 from 'micro-key-producer/slip10.js'
 
 import { DEFAULT_GAS_BUDGET, SUIAsset, SUIChain, SUI_DECIMALS, SUI_TYPE_TAG, defaultSuiParams } from './const'
 import { Balance, SUIClientParams, SuiTransport, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
-import { getSuiNetwork, resolveGraphqlUrl, resolvePrimaryUrl } from './utils'
+import {
+  formatGrpcExecutionFailure,
+  getSuiNetwork,
+  isGrpcExecutionFailure,
+  resolveGraphqlUrl,
+  resolvePrimaryUrl,
+} from './utils'
 
 type CoreClient = SuiGrpcClient | SuiJsonRpcClient
 type GasCoinRef = { objectId: string; version: string | number; digest: string }
@@ -544,8 +550,9 @@ export class Client extends BaseXChainClient {
 
     const status = response.transaction?.effects?.status
     // status may be enum number or object depending on protobuf version
-    if (status && typeof status === 'object' && 'success' in status && status.success === false) {
-      throw Error(`Transaction failed: ${JSON.stringify(status)}`)
+    if (isGrpcExecutionFailure(status)) {
+      // Prefer description; never JSON.stringify raw protobuf (BigInt throws).
+      throw Error(formatGrpcExecutionFailure(status))
     }
 
     return digest
