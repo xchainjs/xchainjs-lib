@@ -98,8 +98,12 @@ export const formatGrpcExecutionFailure = (status: unknown): string => {
   if (status && typeof status === 'object') {
     const error = (status as { error?: { description?: string; command?: bigint | number | string } }).error
     if (error?.description) {
+      // Descriptions often already include "in command N" — avoid "… (command N)".
+      const alreadyHasCommand = /command\s+\d+/i.test(error.description)
       const command =
-        error.command !== undefined && error.command !== null ? ` (command ${error.command.toString()})` : ''
+        !alreadyHasCommand && error.command !== undefined && error.command !== null
+          ? ` (command ${error.command.toString()})`
+          : ''
       return `Transaction failed: ${error.description}${command}`
     }
   }

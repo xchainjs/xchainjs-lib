@@ -466,13 +466,17 @@ export class Client extends BaseXChainClient {
 
     const tx = new Transaction()
     tx.setSender(sender)
-    tx.setGasPayment([
-      {
-        objectId: gasCoins[0].objectId,
-        version: gasCoins[0].version,
-        digest: gasCoins[0].digest,
-      },
-    ])
+    // Use ALL SUI coin objects as gas payment. Native transfers split the send
+    // amount from `tx.gas`; if only the first coin is set, fragmented balances
+    // fail with InsufficientCoinBalance even when total SUI is enough (common
+    // after many receives / swaps). Multiple gas inputs are merged by the PTB.
+    tx.setGasPayment(
+      gasCoins.map((c) => ({
+        objectId: c.objectId,
+        version: c.version,
+        digest: c.digest,
+      })),
+    )
     tx.setGasBudget(budget)
     tx.setGasPrice(gasPrice)
 

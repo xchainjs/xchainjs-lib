@@ -122,6 +122,17 @@ describe('Sui client', () => {
       }).toThrow(/InsufficientCoinBalance/)
     })
 
+    it('Should not duplicate command id when description already includes it', () => {
+      const message = formatGrpcExecutionFailure({
+        success: false,
+        error: {
+          description: 'InsufficientCoinBalance in command 0',
+          command: 0n,
+        },
+      })
+      expect(message).toBe('Transaction failed: InsufficientCoinBalance in command 0')
+    })
+
     it('Should fall back to safe stringify when description is missing', () => {
       const status = { success: false, error: { command: 7n, kind: 3 } }
       const message = formatGrpcExecutionFailure(status)
