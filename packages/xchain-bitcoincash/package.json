@@ -44,7 +44,7 @@
     "bitcore-lib-cash": "11.0.0",
     "bs58check": "^4.0.0",
     "cashaddrjs": "^0.4.4",
-    "coinselect": "3.1.12"
+    "coinselect": "3.1.13"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
