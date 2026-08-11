@@ -72,11 +72,22 @@ pnpm preview
 ## Usage
 
 ### Connect Wallet
-1. Click the wallet icon in the header
-2. Enter your BIP-39 mnemonic phrase
-3. Select network (Mainnet/Testnet/Stagenet)
+1. Click **Connect Wallet** in the header
+2. Choose one of:
+   - **Connect Ledger** (BTC + ETH via WebHID) — unlock the device, approve the browser prompt, open the Bitcoin or Ethereum app
+   - **Quick Connect** — temporary keystore or mnemonic (not saved)
+   - **Create / Import** — encrypted keystore stored in browser localStorage
 
-> **Security Note**: This tool stores your mnemonic in memory only. Never use mainnet wallets with significant funds for testing.
+#### Ledger (BTC + ETH)
+- Browser: Chrome / Edge (WebHID)
+- On the Ledger connect screen, pick:
+  - **BTC address format**: native SegWit, Taproot, legacy (`1…`), or nested SegWit (`3…`)
+  - **ETH derivation**: default BIP44 or Ledger Live account path
+  - **Account index**: BIP account slot (e.g. `m/84'/0'/N'/0/…`); ignored for Ledger Live ETH — use wallet index on Get Address
+  - **Custom root path** (optional): full override such as `m/84'/0'/5'/0/` or `m/44'/60'/{index}'/0/0`
+- Only **BTC** and **ETH** chain pages work in Ledger mode; other chains error with a clear message
+
+> **Security Note**: Phrase mode stores your mnemonic in memory only. Never use mainnet wallets with significant funds for testing.
 
 ### Making a Swap
 1. Navigate to **Swap** in the sidebar

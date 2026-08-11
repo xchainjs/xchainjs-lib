@@ -1,6 +1,13 @@
 import { Network } from '@xchainjs/xchain-client'
 
-import { AddressFormat, Client, defaultBTCParams, tapRootDerivationPaths } from '../src'
+import {
+  AddressFormat,
+  Client,
+  defaultBTCParams,
+  legacyDerivationPaths,
+  nestedSegwitDerivationPaths,
+  tapRootDerivationPaths,
+} from '../src'
 
 describe('Bitcoin Keystore client', () => {
   let knownPhrase: string
@@ -54,6 +61,48 @@ describe('Bitcoin Keystore client', () => {
         new Client({ ...defaultBTCParams, phrase: 'invalid phrase', network: Network.Mainnet })
       }).toThrow()
     })
+
+    it('Should instantiate legacy (P2PKH) client with valid phrase', () => {
+      expect(() => {
+        new Client({
+          ...defaultBTCParams,
+          addressFormat: AddressFormat.P2PKH,
+          rootDerivationPaths: legacyDerivationPaths,
+          phrase: knownPhrase,
+        })
+      }).not.toThrow()
+    })
+
+    it('Should not instantiate legacy client with non-44 paths', () => {
+      expect(() => {
+        new Client({
+          ...defaultBTCParams,
+          addressFormat: AddressFormat.P2PKH,
+          rootDerivationPaths: defaultBTCParams.rootDerivationPaths,
+        })
+      }).toThrow()
+    })
+
+    it('Should instantiate nested segwit (P2SH-P2WPKH) client with valid phrase', () => {
+      expect(() => {
+        new Client({
+          ...defaultBTCParams,
+          addressFormat: AddressFormat.P2SH_P2WPKH,
+          rootDerivationPaths: nestedSegwitDerivationPaths,
+          phrase: knownPhrase,
+        })
+      }).not.toThrow()
+    })
+
+    it('Should not instantiate nested segwit client with non-49 paths', () => {
+      expect(() => {
+        new Client({
+          ...defaultBTCParams,
+          addressFormat: AddressFormat.P2SH_P2WPKH,
+          rootDerivationPaths: defaultBTCParams.rootDerivationPaths,
+        })
+      }).toThrow()
+    })
   })
 
   describe('Address', () => {
@@ -92,6 +141,44 @@ describe('Bitcoin Keystore client', () => {
       it('Should generate address', async () => {
         const address = await client.getAddressAsync()
         expect(address).toBe(knownAddress)
+      })
+    })
+
+    describe('Legacy (P2PKH) client', () => {
+      let client: Client
+
+      beforeAll(() => {
+        client = new Client({
+          ...defaultBTCParams,
+          addressFormat: AddressFormat.P2PKH,
+          rootDerivationPaths: legacyDerivationPaths,
+          phrase: knownPhrase,
+        })
+      })
+
+      // BIP44 m/44'/0'/0'/0/0 for the standard "abandon..." test mnemonic
+      it('Should generate legacy address', async () => {
+        const address = await client.getAddressAsync()
+        expect(address).toBe('1LqBGSKuX5yYUonjxT5qGfpUsXKYYWeabA')
+      })
+    })
+
+    describe('Nested segwit (P2SH-P2WPKH) client', () => {
+      let client: Client
+
+      beforeAll(() => {
+        client = new Client({
+          ...defaultBTCParams,
+          addressFormat: AddressFormat.P2SH_P2WPKH,
+          rootDerivationPaths: nestedSegwitDerivationPaths,
+          phrase: knownPhrase,
+        })
+      })
+
+      // BIP49 m/49'/0'/0'/0/0 for the standard "abandon..." test mnemonic
+      it('Should generate nested segwit address', async () => {
+        const address = await client.getAddressAsync()
+        expect(address).toBe('37VucYSaXLCAsxYyAPfbSi9eh4iEcbShgf')
       })
     })
   })

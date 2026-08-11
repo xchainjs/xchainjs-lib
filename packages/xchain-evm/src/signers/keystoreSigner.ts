@@ -1,7 +1,7 @@
 import { TxHash } from '@xchainjs/xchain-client'
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
-import { HDNodeWallet, Mnemonic } from 'ethers'
+import { HDNodeWallet } from 'ethers'
 import BigNumber from 'bignumber.js'
 
 import { IKeystoreSigner, SignApproveParams, SignTransferParams } from '../types'
@@ -17,16 +17,13 @@ export type KeystoreSignerParams = SignerParams & { phrase: string }
  * Signer which operates with an EVM account thanks to the seed phrase
  */
 export class KeystoreSigner extends Signer implements IKeystoreSigner {
-  private hdNode?: HDNodeWallet
   private phrase?: string
 
   constructor(params: KeystoreSignerParams) {
     super(params)
-    const mnemonic = Mnemonic.fromPhrase(params.phrase)
-    if (params.derivationPath.endsWith('/')) {
-      params.derivationPath = params.derivationPath.slice(0, -1)
+    if (!validatePhrase(params.phrase)) {
+      throw new Error('Invalid phrase')
     }
-    this.hdNode = HDNodeWallet.fromMnemonic(mnemonic, params.derivationPath)
     this.phrase = params.phrase
   }
 
@@ -42,8 +39,6 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
         throw new Error('Invalid phrase')
       }
       this.phrase = phrase
-      const mnemonic = Mnemonic.fromPhrase(phrase)
-      this.hdNode = HDNodeWallet.fromMnemonic(mnemonic, this.derivationPath)
     }
 
     return this.getAddress(walletIndex)
@@ -55,8 +50,21 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
    * @returns {void}
    */
   public purge(): void {
-    this.hdNode = undefined
     this.phrase = undefined
+  }
+
+  /**
+   * @private
+   * Derive the HD wallet at the full derivation path for the given index. The full path honors
+   * the `{index}` template (e.g. Ledger Live's `m/44'/60'/{index}'/0/0`) via getFullDerivationPath.
+   * @param {number} walletIndex The HD wallet index.
+   * @returns {HDNodeWallet} The derived wallet.
+   */
+  private deriveWallet(walletIndex: number): HDNodeWallet {
+    if (!this.phrase) {
+      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
+    }
+    return HDNodeWallet.fromPhrase(this.phrase, undefined, this.getFullDerivationPath(walletIndex))
   }
 
   /**
@@ -66,11 +74,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
     if (walletIndex < 0) {
       throw new Error('Index must be greater than or equal to zero')
     }
-    if (!this.hdNode) {
-      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
-    }
-    const derived = this.hdNode.deriveChild(walletIndex)
-    return derived.address.toLowerCase()
+    return this.deriveWallet(walletIndex).address.toLowerCase()
   }
 
   /**
@@ -94,12 +98,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
    * Note: A phrase is needed to create a wallet and to derive an address from it.
    */
   public getWallet(walletIndex = 0): HDNodeWallet {
-    if (!this.hdNode) {
-      throw new Error('HDNode is not defined. Make sure phrase has been provided.')
-    }
-    const derived = HDNodeWallet.fromExtendedKey(this.hdNode.extendedKey).deriveChild(walletIndex)
-    derived.connect(this.getProvider())
-    return derived as HDNodeWallet
+    return this.deriveWallet(walletIndex).connect(this.getProvider()) as HDNodeWallet
   }
 
   /**

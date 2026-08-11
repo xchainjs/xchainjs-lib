@@ -24,7 +24,13 @@ export default defineConfig({
     esbuildOptions: {
       define: { global: 'globalThis' },
     },
-    include: ['buffer'],
+    include: [
+      'buffer',
+      '@ledgerhq/hw-transport',
+      '@ledgerhq/hw-transport-webhid',
+      '@ledgerhq/hw-app-btc',
+      '@ledgerhq/hw-app-eth',
+    ],
     exclude: ['@xchainjs/xchain-monero'],
   },
   server: {

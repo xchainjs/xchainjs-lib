@@ -151,3 +151,17 @@ export const tapRootDerivationPaths = {
   [Network.Testnet]: `m/86'/1'/0'/0/`,
   [Network.Stagenet]: `m/86'/0'/0'/0/`,
 }
+
+// BIP44 legacy paths (P2PKH). Pass as `rootDerivationPaths` with `addressFormat: AddressFormat.P2PKH`
+export const legacyDerivationPaths = {
+  [Network.Mainnet]: `m/44'/0'/0'/0/`,
+  [Network.Testnet]: `m/44'/1'/0'/0/`,
+  [Network.Stagenet]: `m/44'/0'/0'/0/`,
+}
+
+// BIP49 nested segwit paths (P2SH-P2WPKH). Pass as `rootDerivationPaths` with `addressFormat: AddressFormat.P2SH_P2WPKH`
+export const nestedSegwitDerivationPaths = {
+  [Network.Mainnet]: `m/49'/0'/0'/0/`,
+  [Network.Testnet]: `m/49'/1'/0'/0/`,
+  [Network.Stagenet]: `m/49'/0'/0'/0/`,
+}
