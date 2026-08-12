@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.1.4
+
+### Patch Changes
+
+- Updated dependencies [d57ad27]
+- Updated dependencies [fe91856]
+- Updated dependencies [d57ad27]
+- Updated dependencies [ce7f4c1]
+  - @xchainjs/xchain-bitcoin@2.4.0
+  - @xchainjs/xchain-bitcoincash@2.3.2
+  - @xchainjs/xchain-doge@2.3.2
+  - @xchainjs/xchain-litecoin@2.4.2
+  - @xchainjs/xchain-evm@2.1.0
+  - @xchainjs/xchain-ethereum@2.1.0
+  - @xchainjs/xchain-sui@0.2.1
+  - @xchainjs/xchain-wallet@2.0.33
+  - @xchainjs/xchain-avax@2.0.22
+  - @xchainjs/xchain-base@1.0.22
+  - @xchainjs/xchain-bsc@2.0.23
+
 ## 3.1.3
 
 ### Patch Changes

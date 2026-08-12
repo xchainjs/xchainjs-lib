@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.2
+
+### Patch Changes
+
+- fe91856: Bump `coinselect` from 3.1.12 to 3.1.13 across UTXO chain packages.
+
+  3.1.13 only changes the `split` algorithm (treat `value: 0` as a fixed output, not a split target). XChain UTXO clients use `coinselect/accumulative.js`, which is identical between 3.1.12 and 3.1.13 — this is a hygiene/alignment bump with no intended selection behavior change for current call sites.
+
 ## 2.4.1
 
 ### Patch Changes
