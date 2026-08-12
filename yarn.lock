@@ -5339,7 +5339,7 @@ __metadata:
     axios: "npm:1.18.1"
     axios-mock-adapter: "npm:^2.1.0"
     bitcoinjs-lib: "npm:^6.1.7"
-    coinselect: "npm:3.1.12"
+    coinselect: "npm:3.1.13"
     ecpair: "npm:2.1.0"
   languageName: unknown
   linkType: soft
@@ -5363,7 +5363,7 @@ __metadata:
     bitcore-lib-cash: "npm:11.0.0"
     bs58check: "npm:^4.0.0"
     cashaddrjs: "npm:^0.4.4"
-    coinselect: "npm:3.1.12"
+    coinselect: "npm:3.1.13"
   languageName: unknown
   linkType: soft
 
@@ -5477,7 +5477,7 @@ __metadata:
     axios: "npm:1.18.1"
     axios-mock-adapter: "npm:^2.1.0"
     bitcoinjs-lib: "npm:^6.1.7"
-    coinselect: "npm:3.1.12"
+    coinselect: "npm:3.1.13"
     ecpair: "npm:2.1.0"
   languageName: unknown
   linkType: soft
@@ -5498,7 +5498,7 @@ __metadata:
     axios: "npm:1.18.1"
     axios-mock-adapter: "npm:^2.1.0"
     bitcoinjs-lib: "npm:^6.1.7"
-    coinselect: "npm:3.1.12"
+    coinselect: "npm:3.1.13"
     ecpair: "npm:2.1.0"
   languageName: unknown
   linkType: soft
@@ -5582,7 +5582,7 @@ __metadata:
     axios: "npm:1.18.1"
     axios-mock-adapter: "npm:^2.1.0"
     bitcoinjs-lib: "npm:^6.1.7"
-    coinselect: "npm:3.1.12"
+    coinselect: "npm:3.1.13"
     ecpair: "npm:2.1.0"
   languageName: unknown
   linkType: soft
@@ -7581,10 +7581,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"coinselect@npm:3.1.12":
-  version: 3.1.12
-  resolution: "coinselect@npm:3.1.12"
-  checksum: 10c0/d68337aeb47cbf017df27a2ce73a0eca7d8300beee2f32578c039461d7a30d16141f4b229817512723ea55083ad049ac9b29c420d71dfdb5b73444885733864a
+"coinselect@npm:3.1.13":
+  version: 3.1.13
+  resolution: "coinselect@npm:3.1.13"
+  checksum: 10c0/bdab9186e2b735c82a835e7c8fb23f21b5d79538a270e82c079194e865d0bbd90a4cfcf189465cb971992657dfbe4eeb5397e44f42382876c476e6be8b6a3265
   languageName: node
   linkType: hard
 
