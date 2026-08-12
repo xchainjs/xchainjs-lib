@@ -1,5 +1,28 @@
 # testing-gui
 
+## 1.0.19
+
+### Patch Changes
+
+- Updated dependencies [d57ad27]
+- Updated dependencies [fe91856]
+- Updated dependencies [d57ad27]
+- Updated dependencies [ce7f4c1]
+  - @xchainjs/xchain-bitcoin@2.4.0
+  - @xchainjs/xchain-bitcoincash@2.3.2
+  - @xchainjs/xchain-dash@2.2.10
+  - @xchainjs/xchain-doge@2.3.2
+  - @xchainjs/xchain-litecoin@2.4.2
+  - @xchainjs/xchain-evm@2.1.0
+  - @xchainjs/xchain-ethereum@2.1.0
+  - @xchainjs/xchain-sui@0.2.1
+  - @xchainjs/xchain-mayachain-amm@4.2.4
+  - @xchainjs/xchain-thorchain-amm@3.1.4
+  - @xchainjs/xchain-wallet@2.0.33
+  - @xchainjs/xchain-arbitrum@2.1.8
+  - @xchainjs/xchain-avax@2.0.22
+  - @xchainjs/xchain-bsc@2.0.23
+
 ## 1.0.18
 
 ### Patch Changes

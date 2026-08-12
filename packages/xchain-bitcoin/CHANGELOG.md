@@ -1,5 +1,25 @@
 # Changelog
 
+## 2.4.0
+
+### Minor Changes
+
+- d57ad27: Add legacy (P2PKH) and nested segwit (P2SH-P2WPKH) address formats
+
+  The `AddressFormat` enum now supports `P2PKH` (BIP44 legacy, `1...` addresses) and
+  `P2SH_P2WPKH` (BIP49 nested segwit, `3...` addresses) in addition to the existing
+  `P2WPKH` and `P2TR`. Select a format via the `addressFormat` constructor param and pass
+  the matching paths exported as `legacyDerivationPaths` (`m/44'`) or
+  `nestedSegwitDerivationPaths` (`m/49'`) as `rootDerivationPaths`. Address derivation, PSBT
+  building/signing (keystore) and the Ledger client all honor the selected format. Existing
+  P2WPKH/P2TR behavior is unchanged.
+
+### Patch Changes
+
+- fe91856: Bump `coinselect` from 3.1.12 to 3.1.13 across UTXO chain packages.
+
+  3.1.13 only changes the `split` algorithm (treat `value: 0` as a fixed output, not a split target). XChain UTXO clients use `coinselect/accumulative.js`, which is identical between 3.1.12 and 3.1.13 — this is a hygiene/alignment bump with no intended selection behavior change for current call sites.
+
 ## 2.3.1
 
 ### Patch Changes

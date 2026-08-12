@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.2.4
+
+### Patch Changes
+
+- Updated dependencies [d57ad27]
+- Updated dependencies [fe91856]
+- Updated dependencies [d57ad27]
+  - @xchainjs/xchain-bitcoin@2.4.0
+  - @xchainjs/xchain-dash@2.2.10
+  - @xchainjs/xchain-evm@2.1.0
+  - @xchainjs/xchain-ethereum@2.1.0
+  - @xchainjs/xchain-wallet@2.0.33
+  - @xchainjs/xchain-arbitrum@2.1.8
+
 ## 4.2.3
 
 ### Patch Changes
