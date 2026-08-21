@@ -513,19 +513,25 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     case 'KUJI':
       return new KujiClient({ ...defaultKujiParams, network, phrase })
 
-    // Monero
-    case 'XMR':
+    // Monero — local monerod + monero-wallet-rpc via Vite proxies
+    case 'XMR': {
+      const restoreHeight = Number(import.meta.env.VITE_XMR_RESTORE_HEIGHT) || 3626700
       return new XmrClient({
         ...defaultXMRParams,
         network,
         phrase,
-        restoreHeight: 3626700,
+        restoreHeight,
         daemonUrls: {
           ...defaultXMRParams.daemonUrls!,
-          // Use Vite proxy to avoid CORS issues with daemon HTTP endpoints
           [Network.Mainnet]: ['/xmr-daemon'],
         },
+        walletRpcUrls: {
+          [Network.Mainnet]: ['/xmr-wallet'],
+          [Network.Testnet]: [],
+          [Network.Stagenet]: [],
+        },
       })
+    }
 
     // Other Chains
     case 'SOL': {

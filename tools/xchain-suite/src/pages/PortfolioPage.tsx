@@ -272,7 +272,14 @@ function ChainCard({ entry, onNavigate }: { entry: ChainBalance; onNavigate: (ch
             ) : null}
           </div>
           {loading ? (
-            <div className="mt-1 h-4 w-32 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="mt-1">
+              <div className="h-4 w-32 bg-gray-100 dark:bg-gray-700 rounded animate-pulse" />
+              {chain.id === 'XMR' && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Scanning local monerod via wallet-rpc. First sync can take a few minutes.
+                </p>
+              )}
+            </div>
           ) : error ? (
             <p className="text-xs text-red-500 dark:text-red-400 mt-0.5 truncate">{error}</p>
           ) : balances.length === 0 ? (

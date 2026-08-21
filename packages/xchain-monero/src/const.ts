@@ -55,4 +55,9 @@ export const defaultXMRParams: XMRClientParams = {
     [Network.Testnet]: [],
     [Network.Stagenet]: [],
   },
+  walletRpcUrls: {
+    [Network.Mainnet]: [],
+    [Network.Testnet]: [],
+    [Network.Stagenet]: [],
+  },
 }
