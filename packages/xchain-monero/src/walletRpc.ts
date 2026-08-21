@@ -220,18 +220,16 @@ export async function getTransfers(url: string, accountIndex = 0): Promise<Walle
   const result = await jsonRpc<{
     in?: RawTransfer[]
     out?: RawTransfer[]
-    block?: RawTransfer[]
   }>(url, 'get_transfers', {
     in: true,
     out: true,
     pending: false,
     failed: false,
     pool: false,
-    block: true,
     account_index: accountIndex,
   })
 
-  return [...(result.in ?? []), ...(result.out ?? []), ...(result.block ?? [])]
+  return [...(result.in ?? []), ...(result.out ?? [])]
     .map(normalizeTransfer)
     .filter((tx) => tx.txid && tx.height > 0)
 }
@@ -312,7 +310,7 @@ export async function ensureWallet(url: string, options: EnsureWalletOptions): P
       return
     }
     const message = error instanceof Error ? error.message.toLowerCase() : ''
-    if (message.includes('already exists') || message.includes('exists')) {
+    if (message.includes('already exists')) {
       await openWallet(url, options.filename, options.password)
       await assertOpenAddress(url, options.address)
       return

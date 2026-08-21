@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react'
 import nodePolyfills from 'vite-plugin-node-stdlib-browser'
 import wasm from 'vite-plugin-wasm'
 import topLevelAwait from 'vite-plugin-top-level-await'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { existsSync, mkdirSync } from 'node:fs'
@@ -12,9 +12,7 @@ import net from 'node:net'
 
 const LOCAL_MONEROD = 'http://127.0.0.1:18081'
 const LOCAL_WALLET_RPC = 'http://127.0.0.1:18088'
-const WALLET_RPC_BIN = process.env.MONERO_WALLET_RPC || 'monero-wallet-rpc'
-const WALLET_DIR = process.env.MONERO_WALLET_DIR || join(homedir(), '.cache/xchain-suite/monero-wallets')
-const WALLET_RPC_LOG = process.env.MONERO_WALLET_RPC_LOG || join(WALLET_DIR, 'xchain-wallet-rpc.log')
+const ENV_DIR = fileURLToPath(new URL('.', import.meta.url))
 
 function isPortOpen(port: number, host = '127.0.0.1'): Promise<boolean> {
   return new Promise((resolve) => {
@@ -27,7 +25,7 @@ function isPortOpen(port: number, host = '127.0.0.1'): Promise<boolean> {
 }
 
 /** Start monero-wallet-rpc against the local monerod when `yarn dev` runs. */
-function moneroWalletRpcPlugin(): Plugin {
+function moneroWalletRpcPlugin(walletRpcBin: string, walletDir: string, walletRpcLog: string): Plugin {
   let child: ChildProcess | null = null
   return {
     name: 'monero-wallet-rpc',
@@ -37,14 +35,14 @@ function moneroWalletRpcPlugin(): Plugin {
         return
       }
       // Absolute/relative paths can be checked up front; bare names rely on PATH at spawn.
-      if ((WALLET_RPC_BIN.includes('/') || WALLET_RPC_BIN.startsWith('.')) && !existsSync(WALLET_RPC_BIN)) {
-        console.warn(`[xmr] ${WALLET_RPC_BIN} not found; XMR balances need a running monero-wallet-rpc`)
+      if ((walletRpcBin.includes('/') || walletRpcBin.startsWith('.')) && !existsSync(walletRpcBin)) {
+        console.warn(`[xmr] ${walletRpcBin} not found; XMR balances need a running monero-wallet-rpc`)
         return
       }
-      mkdirSync(WALLET_DIR, { recursive: true })
-      mkdirSync(dirname(WALLET_RPC_LOG), { recursive: true })
+      mkdirSync(walletDir, { recursive: true })
+      mkdirSync(dirname(walletRpcLog), { recursive: true })
       child = spawn(
-        WALLET_RPC_BIN,
+        walletRpcBin,
         [
           '--daemon-address',
           '127.0.0.1:18081',
@@ -57,11 +55,11 @@ function moneroWalletRpcPlugin(): Plugin {
           '--rpc-ssl',
           'disabled',
           '--wallet-dir',
-          WALLET_DIR,
+          walletDir,
           '--disable-rpc-ban',
           '--no-initial-sync',
           '--log-file',
-          WALLET_RPC_LOG,
+          walletRpcLog,
           '--log-level',
           '0',
         ],
@@ -85,89 +83,100 @@ function moneroWalletRpcPlugin(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [react(), nodePolyfills(), wasm(), topLevelAwait(), moneroWalletRpcPlugin()],
-  define: {
-    'process.env': {},
-    global: 'globalThis',
-  },
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      // Point at package source so suite picks up local WIP without reinstall
-      '@xchainjs/xchain-monero': fileURLToPath(new URL('../../packages/xchain-monero/src/index.ts', import.meta.url)),
-      '@xchainjs/xchain-sui': fileURLToPath(new URL('../../packages/xchain-sui/src/index.ts', import.meta.url)),
-      stream: 'stream-browserify',
-      process: 'process/browser',
-      buffer: 'buffer',
+export default defineConfig(({ mode }) => {
+  // Vite does not put .env into process.env during config eval — load it explicitly.
+  // Shell-exported vars still win over .env values.
+  const env = loadEnv(mode, ENV_DIR, '')
+  const walletRpcBin = process.env.MONERO_WALLET_RPC || env.MONERO_WALLET_RPC || 'monero-wallet-rpc'
+  const walletDir =
+    process.env.MONERO_WALLET_DIR || env.MONERO_WALLET_DIR || join(homedir(), '.cache/xchain-suite/monero-wallets')
+  const walletRpcLog =
+    process.env.MONERO_WALLET_RPC_LOG || env.MONERO_WALLET_RPC_LOG || join(walletDir, 'xchain-wallet-rpc.log')
+
+  return {
+    plugins: [react(), nodePolyfills(), wasm(), topLevelAwait(), moneroWalletRpcPlugin(walletRpcBin, walletDir, walletRpcLog)],
+    define: {
+      'process.env': {},
+      global: 'globalThis',
     },
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      define: { global: 'globalThis' },
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        // Point at package source so suite picks up local WIP without reinstall
+        '@xchainjs/xchain-monero': fileURLToPath(new URL('../../packages/xchain-monero/src/index.ts', import.meta.url)),
+        '@xchainjs/xchain-sui': fileURLToPath(new URL('../../packages/xchain-sui/src/index.ts', import.meta.url)),
+        stream: 'stream-browserify',
+        process: 'process/browser',
+        buffer: 'buffer',
+      },
     },
-    include: [
-      'buffer',
-      '@ledgerhq/hw-transport',
-      '@ledgerhq/hw-transport-webhid',
-      '@ledgerhq/hw-app-btc',
-      '@ledgerhq/hw-app-eth',
-    ],
-    // Keep monorepo packages out of the dep optimizer so local edits are live
-    exclude: ['@xchainjs/xchain-monero', '@xchainjs/xchain-sui'],
-  },
-  server: {
-    port: 3000,
-    // This machine is already at the inotify cap (~65k). Don't watch the
-    // monorepo lib/ trees, and poll the small leftover set instead of ENOSPC.
-    watch: {
-      usePolling: true,
-      interval: 1000,
-      ignored: [
-        '**/.git/**',
-        '**/node_modules/**',
-        '**/.turbo/**',
-        '**/lib/**',
-        '**/dist/**',
-        '**/__tests__/**',
-        '**/__e2e__/**',
-        '**/__mocks__/**',
-        '**/stats.html',
-        '../../packages/**/lib/**',
-        '../../packages/**/node_modules/**',
+    optimizeDeps: {
+      esbuildOptions: {
+        define: { global: 'globalThis' },
+      },
+      include: [
+        'buffer',
+        '@ledgerhq/hw-transport',
+        '@ledgerhq/hw-transport-webhid',
+        '@ledgerhq/hw-app-btc',
+        '@ledgerhq/hw-app-eth',
       ],
+      // Keep monorepo packages out of the dep optimizer so local edits are live
+      exclude: ['@xchainjs/xchain-monero', '@xchainjs/xchain-sui'],
     },
-    proxy: {
-      '/xmr-daemon': {
-        target: LOCAL_MONEROD,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/xmr-daemon/, ''),
+    server: {
+      port: 3000,
+      // This machine is already at the inotify cap (~65k). Don't watch the
+      // monorepo lib/ trees, and poll the small leftover set instead of ENOSPC.
+      watch: {
+        usePolling: true,
+        interval: 1000,
+        ignored: [
+          '**/.git/**',
+          '**/node_modules/**',
+          '**/.turbo/**',
+          '**/lib/**',
+          '**/dist/**',
+          '**/__tests__/**',
+          '**/__e2e__/**',
+          '**/__mocks__/**',
+          '**/stats.html',
+          '../../packages/**/lib/**',
+          '../../packages/**/node_modules/**',
+        ],
       },
-      '/xmr-wallet': {
-        target: LOCAL_WALLET_RPC,
-        changeOrigin: true,
-        timeout: 600_000,
-        proxyTimeout: 600_000,
-        rewrite: (path) => path.replace(/^\/xmr-wallet/, ''),
-      },
-      // Optional browser proxies if CORS or grpc-web headers misbehave in some environments
-      '/sui-grpc': {
-        target: 'https://fullnode.mainnet.sui.io:443',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/sui-grpc/, ''),
-      },
-      '/sui-graphql': {
-        target: 'https://graphql.mainnet.sui.io',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/sui-graphql/, ''),
+      proxy: {
+        '/xmr-daemon': {
+          target: LOCAL_MONEROD,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/xmr-daemon/, ''),
+        },
+        '/xmr-wallet': {
+          target: LOCAL_WALLET_RPC,
+          changeOrigin: true,
+          timeout: 600_000,
+          proxyTimeout: 600_000,
+          rewrite: (path) => path.replace(/^\/xmr-wallet/, ''),
+        },
+        // Optional browser proxies if CORS or grpc-web headers misbehave in some environments
+        '/sui-grpc': {
+          target: 'https://fullnode.mainnet.sui.io:443',
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/sui-grpc/, ''),
+        },
+        '/sui-graphql': {
+          target: 'https://graphql.mainnet.sui.io',
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path.replace(/^\/sui-graphql/, ''),
+        },
       },
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
-  },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.ts',
+    },
+  }
 })

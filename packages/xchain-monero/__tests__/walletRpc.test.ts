@@ -23,16 +23,32 @@ describe('wallet RPC client', () => {
     )
   })
 
-  it('Should surface AbortError as a wallet RPC timeout', async () => {
-    mockFetch.mockImplementationOnce(async (_input: RequestInfo | URL, init?: RequestInit) => {
-      const err = new Error('aborted')
-      err.name = 'AbortError'
-      // Mimic fetch rejecting when the AbortSignal fires.
-      if (init?.signal?.aborted) throw err
-      throw err
-    })
+  it('Should time out when the AbortSignal fires', async () => {
+    jest.useFakeTimers()
+    try {
+      mockFetch.mockImplementationOnce((_input: RequestInfo | URL, init?: RequestInit) => {
+        return new Promise((_, reject) => {
+          init?.signal?.addEventListener(
+            'abort',
+            () => {
+              const err = new Error('aborted')
+              err.name = 'AbortError'
+              reject(err)
+            },
+            { once: true },
+          )
+        })
+      })
 
-    await expect(walletRpc.getVersion(url)).rejects.toThrow(/Wallet RPC timeout/)
+      // Attach the rejection matcher before the timer fires so the abort is not unhandled.
+      const assertion = expect(walletRpc.getVersion(url)).rejects.toThrow(
+        /Wallet RPC timeout after 30000ms calling get_version/,
+      )
+      await jest.advanceTimersByTimeAsync(30_000)
+      await assertion
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   it('Should parse get_balance integers as strings', async () => {
@@ -94,22 +110,30 @@ describe('wallet RPC client', () => {
     expect(methods).toContain('generate_from_keys')
   })
 
-  it('Should flatten in/out/block transfers and drop unconfirmed', async () => {
+  it('Should flatten in/out transfers and drop height-0 entries', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         result: {
-          in: [{ txid: 'aaa', timestamp: 1, height: 10, amount: 1, type: 'in' }],
+          in: [
+            { txid: 'aaa', timestamp: 1, height: 10, amount: 1, type: 'in' },
+            { txid: 'unconfirmed', timestamp: 4, height: 0, amount: 4, type: 'in' },
+          ],
           out: [{ txid: 'bbb', timestamp: 2, height: 11, amount: 2, type: 'out' }],
-          block: [{ txid: 'ccc', timestamp: 3, height: 12, amount: 3, type: 'block' }],
-          pool: [{ txid: 'ddd', timestamp: 4, height: 0, amount: 4, type: 'pool' }],
         },
       }),
     })
 
     const transfers = await walletRpc.getTransfers(url)
-    expect(transfers.map((tx) => tx.txid)).toEqual(['aaa', 'bbb', 'ccc'])
+    expect(transfers.map((tx) => tx.txid)).toEqual(['aaa', 'bbb'])
     expect(transfers[1].amount).toBe('2')
+
+    const body = JSON.parse(String(mockFetch.mock.calls[0][1]?.body)) as {
+      params: { in?: boolean; out?: boolean; block?: boolean }
+    }
+    expect(body.params.block).toBeUndefined()
+    expect(body.params.in).toBe(true)
+    expect(body.params.out).toBe(true)
   })
 
   it('Should send transfer destinations in piconero', async () => {
