@@ -1,13 +1,14 @@
 import { Bip39, EnglishMnemonic, Secp256k1, Slip10, Slip10Curve } from '@cosmjs/crypto'
 import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import { DecodedTxRaw, DirectSecp256k1HdWallet, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
-import { Account, DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
+import { Account, DeliverTxResponse, SigningStargateClient, StargateClient } from '@cosmjs/stargate'
 import {
   // Import client-related types and functions from @xchainjs/xchain-cosmos-sdk for Cosmos SDK client configuration.
   MsgTypes,
   bech32ToBase64,
   makeClientPath,
   roundRobinTry,
+  signOnceThenRoundRobinBroadcast,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { BaseAmount } from '@xchainjs/xchain-util'
@@ -269,17 +270,29 @@ export class ClientKeystore extends Client {
     unsignedTx: DecodedTxRaw,
     signer: DirectSecp256k1HdWallet,
   ): Promise<DeliverTxResponse> {
-    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
-      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-        registry: this.registry,
-      })
-
-      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-      })
-
-      return signingClient.signAndBroadcast(sender, messages, this.getStandardFee(), unsignedTx.body.memo)
-    })
+    const urls = this.clientUrls[this.network]
+    // Sign once, then rebroadcast the same bytes on failover (never resign).
+    return signOnceThenRoundRobinBroadcast(
+      urls,
+      async (url) => {
+        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+          registry: this.registry,
+        })
+        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+        })
+        const txRaw = await signingClient.sign(sender, messages, this.getStandardFee(), unsignedTx.body.memo)
+        return TxRaw.encode(txRaw).finish()
+      },
+      async (url, txBytes) => {
+        const client = await StargateClient.connect(url)
+        return client.broadcastTx(txBytes)
+      },
+      {
+        signOperation: 'sign transaction',
+        broadcastOperation: 'broadcast transaction',
+      },
+    )
   }
 
   /**
@@ -301,42 +314,45 @@ export class ClientKeystore extends Client {
     memo: string,
     asset: CompatibleAsset,
   ): Promise<DeliverTxResponse> {
-    return roundRobinTry(
-      this.clientUrls[this.network],
-      'sign and broadcast deposit transaction',
+    const urls = this.clientUrls[this.network]
+    const fee = { amount: [], gas: gasLimit.toString() }
+    const messages: EncodeObject[] = [
+      {
+        typeUrl: MSG_DEPOSIT_TYPE_URL,
+        value: {
+          signer: bech32ToBase64(sender),
+          memo,
+          coins: [
+            {
+              amount: amount.amount().toString(),
+              asset: parseAssetToTHORNodeAsset(asset),
+            },
+          ],
+        },
+      },
+    ]
+    const onRetryableError = (e: unknown) => {
+      console.warn(e instanceof Error ? e.message : String(e))
+    }
+
+    // Sign once, then rebroadcast the same bytes on failover (never resign).
+    return signOnceThenRoundRobinBroadcast(
+      urls,
       async (url) => {
         const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
           registry: this.registry,
         })
-
-        return signingClient.signAndBroadcast(
-          sender,
-          [
-            {
-              typeUrl: MSG_DEPOSIT_TYPE_URL,
-              value: {
-                signer: bech32ToBase64(sender),
-                memo,
-                coins: [
-                  {
-                    amount: amount.amount().toString(),
-                    asset: parseAssetToTHORNodeAsset(asset),
-                  },
-                ],
-              },
-            },
-          ],
-          {
-            amount: [],
-            gas: gasLimit.toString(),
-          },
-          memo,
-        )
+        const txRaw = await signingClient.sign(sender, messages, fee, memo)
+        return TxRaw.encode(txRaw).finish()
+      },
+      async (url, txBytes) => {
+        const client = await StargateClient.connect(url)
+        return client.broadcastTx(txBytes)
       },
       {
-        onRetryableError: (e) => {
-          console.warn(e instanceof Error ? e.message : String(e))
-        },
+        signOperation: 'sign deposit transaction',
+        broadcastOperation: 'broadcast deposit transaction',
+        onRetryableError,
       },
     )
   }

@@ -2,13 +2,14 @@ import { OfflineAminoSigner } from '@cosmjs/amino'
 import { fromBase64 } from '@cosmjs/encoding'
 import { LedgerSigner } from '@cosmjs/ledger-amino'
 import { DecodedTxRaw, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
-import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
+import { DeliverTxResponse, SigningStargateClient, StargateClient } from '@cosmjs/stargate'
 import CosmosApp from '@ledgerhq/hw-app-cosmos'
 import type Transport from '@ledgerhq/hw-transport'
 import { TxHash } from '@xchainjs/xchain-client'
-import { MsgTypes, roundRobinTry } from '@xchainjs/xchain-cosmos-sdk'
+import { MsgTypes, signOnceThenRoundRobinBroadcast } from '@xchainjs/xchain-cosmos-sdk'
 import { Address } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 
 import { Client, CosmosClientParams } from './client'
 import { TxParams } from './types'
@@ -79,21 +80,32 @@ export class ClientLedger extends Client {
     unsignedTx: DecodedTxRaw,
     signer: OfflineAminoSigner,
   ): Promise<DeliverTxResponse> {
-    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
-      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-        registry: this.registry,
-      })
-
-      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-      })
-
-      return signingClient.signAndBroadcast(
-        sender,
-        messages,
-        this.getStandardFee(this.getAssetInfo().asset),
-        unsignedTx.body.memo,
-      )
-    })
+    const urls = this.clientUrls[this.network]
+    return signOnceThenRoundRobinBroadcast(
+      urls,
+      async (url) => {
+        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+          registry: this.registry,
+        })
+        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+        })
+        const txRaw = await signingClient.sign(
+          sender,
+          messages,
+          this.getStandardFee(this.getAssetInfo().asset),
+          unsignedTx.body.memo,
+        )
+        return TxRaw.encode(txRaw).finish()
+      },
+      async (url, txBytes) => {
+        const client = await StargateClient.connect(url)
+        return client.broadcastTx(txBytes)
+      },
+      {
+        signOperation: 'sign transaction',
+        broadcastOperation: 'broadcast transaction',
+      },
+    )
   }
 }

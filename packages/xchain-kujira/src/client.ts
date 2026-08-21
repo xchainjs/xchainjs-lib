@@ -7,14 +7,14 @@ import {
   TxBodyEncodeObject,
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
-import { DeliverTxResponse, GasPrice, SigningStargateClient, calculateFee } from '@cosmjs/stargate'
+import { DeliverTxResponse, GasPrice, SigningStargateClient, StargateClient, calculateFee } from '@cosmjs/stargate'
 import { AssetInfo, PreparedTx } from '@xchainjs/xchain-client'
 import {
   Client as CosmosSdkClient,
   CosmosSdkClientParams,
   MsgTypes,
   makeClientPath,
-  roundRobinTry,
+  signOnceThenRoundRobinBroadcast,
 } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address, AssetType, eqAsset } from '@xchainjs/xchain-util'
@@ -272,21 +272,32 @@ export class Client extends CosmosSdkClient {
     unsignedTx: DecodedTxRaw,
     signer: DirectSecp256k1HdWallet,
   ): Promise<DeliverTxResponse> {
-    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
-      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-        registry: this.registry,
-      })
-
-      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-      })
-
-      return signingClient.signAndBroadcast(
-        sender,
-        messages,
-        this.getStandardFee(this.getAssetInfo().asset),
-        unsignedTx.body.memo,
-      )
-    })
+    const urls = this.clientUrls[this.network]
+    return signOnceThenRoundRobinBroadcast(
+      urls,
+      async (url) => {
+        const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
+          registry: this.registry,
+        })
+        const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
+          return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
+        })
+        const txRaw = await signingClient.sign(
+          sender,
+          messages,
+          this.getStandardFee(this.getAssetInfo().asset),
+          unsignedTx.body.memo,
+        )
+        return TxRaw.encode(txRaw).finish()
+      },
+      async (url, txBytes) => {
+        const client = await StargateClient.connect(url)
+        return client.broadcastTx(txBytes)
+      },
+      {
+        signOperation: 'sign transaction',
+        broadcastOperation: 'broadcast transaction',
+      },
+    )
   }
 }

@@ -1,9 +1,12 @@
 import {
   TxNotFoundError,
   createRoundRobinExhaustedError,
+  isAlreadyBroadcastError,
   isRetryableRpcError,
   roundRobinGetTx,
   roundRobinTry,
+  signOnceThenRoundRobinBroadcast,
+  tendermintTxHash,
 } from '../src/roundRobin'
 
 describe('isRetryableRpcError', () => {
@@ -131,5 +134,99 @@ describe('TxNotFoundError', () => {
     expect(err.name).toBe('TxNotFoundError')
     expect(err.txId).toBe('ABC')
     expect(err.message).toBe('Can not find transaction ABC')
+  })
+})
+
+describe('isAlreadyBroadcastError', () => {
+  it('matches mempool / already-exists messages', () => {
+    expect(isAlreadyBroadcastError(new Error('tx already exists in cache'))).toBe(true)
+    expect(isAlreadyBroadcastError(new Error('tx already in mempool'))).toBe(true)
+    expect(isAlreadyBroadcastError(new Error('Failed to broadcast tx: already in mempool'))).toBe(true)
+  })
+
+  it('does not match unrelated errors', () => {
+    expect(isAlreadyBroadcastError(new Error('request timed out'))).toBe(false)
+    expect(isAlreadyBroadcastError(new Error('insufficient funds'))).toBe(false)
+  })
+})
+
+describe('signOnceThenRoundRobinBroadcast', () => {
+  const txBytesA = new Uint8Array([1, 2, 3, 4])
+  const txBytesB = new Uint8Array([9, 9, 9, 9])
+  const hashA = tendermintTxHash(txBytesA)
+
+  it('signs once then rebroadcasts the same bytes after a timeout on the first URL', async () => {
+    const signCalls: string[] = []
+    const broadcastCalls: { url: string; bytes: Uint8Array }[] = []
+
+    const result = await signOnceThenRoundRobinBroadcast(
+      ['url0', 'url1'],
+      async (url) => {
+        signCalls.push(url)
+        // First URL succeeds at signing — we must never sign again on url1
+        return txBytesA
+      },
+      async (url, txBytes) => {
+        broadcastCalls.push({ url, bytes: txBytes })
+        if (url === 'url0') {
+          throw new Error('request timed out')
+        }
+        // url1 would accept a *new* signature; we assert it only gets the same bytes
+        return { transactionHash: tendermintTxHash(txBytes), code: 0 }
+      },
+    )
+
+    expect(signCalls).toEqual(['url0'])
+    expect(broadcastCalls).toHaveLength(2)
+    expect(broadcastCalls[0].url).toBe('url0')
+    expect(broadcastCalls[1].url).toBe('url1')
+    expect(Array.from(broadcastCalls[0].bytes)).toEqual(Array.from(txBytesA))
+    expect(Array.from(broadcastCalls[1].bytes)).toEqual(Array.from(txBytesA))
+    expect(result.transactionHash).toBe(hashA)
+    // Ensure we did not accidentally produce a second distinct payload
+    expect(Array.from(broadcastCalls[1].bytes)).not.toEqual(Array.from(txBytesB))
+  })
+
+  it('treats already-in-mempool on the second URL as success with the known hash', async () => {
+    const result = await signOnceThenRoundRobinBroadcast(
+      ['url0', 'url1'],
+      async () => txBytesA,
+      async (url) => {
+        if (url === 'url0') throw new Error('Bad status on response: 502')
+        throw new Error('tx already exists in cache')
+      },
+    )
+    expect(result.transactionHash).toBe(hashA)
+    expect(result.code).toBe(0)
+  })
+
+  it('rethrows non-retryable chain errors during broadcast without trying the next URL', async () => {
+    const broadcastUrls: string[] = []
+    await expect(
+      signOnceThenRoundRobinBroadcast(
+        ['url0', 'url1'],
+        async () => txBytesA,
+        async (url) => {
+          broadcastUrls.push(url)
+          throw new Error('insufficient funds: insufficient account funds')
+        },
+      ),
+    ).rejects.toThrow('insufficient funds')
+    expect(broadcastUrls).toEqual(['url0'])
+  })
+
+  it('may try the next URL for sign if the first sign fails with a transport error', async () => {
+    const signCalls: string[] = []
+    const result = await signOnceThenRoundRobinBroadcast(
+      ['url0', 'url1'],
+      async (url) => {
+        signCalls.push(url)
+        if (url === 'url0') throw new Error('Failed to fetch')
+        return txBytesA
+      },
+      async (_url, txBytes) => ({ transactionHash: tendermintTxHash(txBytes), code: 0 }),
+    )
+    expect(signCalls).toEqual(['url0', 'url1'])
+    expect(result.transactionHash).toBe(hashA)
   })
 })
