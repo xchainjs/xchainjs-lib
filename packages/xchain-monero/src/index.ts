@@ -14,3 +14,4 @@ export type { MoneroTransaction, TxInput, TxOutput, ClsagSig, BPPlusProof, RctSi
 export type { SpendableOutput, Destination, BuiltTransaction } from './tx/builder'
 export type { OwnedOutput } from './scanner'
 export { scanBlocks, computeBalance, getUnspentOutputs } from './scanner'
+export type { WalletBalance, WalletTransfer, EnsureWalletOptions } from './walletRpc'

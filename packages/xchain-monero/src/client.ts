@@ -21,6 +21,7 @@ import { encodeAddress, decodeAddress } from './crypto/address'
 import { deriveKeyPairs } from './crypto/keys'
 import * as daemon from './daemon'
 import * as lws from './lws'
+import * as walletRpc from './walletRpc'
 import { buildTransaction } from './tx/builder'
 import type { SpendableOutput, Destination } from './tx/builder'
 import { scanBlocks, computeBalance, OwnedOutput } from './scanner'
@@ -31,8 +32,10 @@ export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
   private daemonUrls: Record<Network, string[]>
   private lwsUrls: Record<Network, string[]>
+  private walletRpcUrls: Record<Network, string[]>
   private lwsLoggedIn = false
   private restoreHeight: number
+  private walletRpcLock: Promise<unknown> = Promise.resolve()
 
   /** Cached scan state for daemon fallback */
   private scanCache: {
@@ -49,6 +52,7 @@ export class Client extends BaseXChainClient {
     this.explorerProviders = params.explorerProviders ?? defaultXMRParams.explorerProviders
     this.daemonUrls = params.daemonUrls ?? defaultXMRParams.daemonUrls!
     this.lwsUrls = params.lwsUrls ?? defaultXMRParams.lwsUrls!
+    this.walletRpcUrls = params.walletRpcUrls ?? defaultXMRParams.walletRpcUrls!
     this.restoreHeight = params.restoreHeight ?? 0
   }
 
@@ -101,10 +105,29 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Get balance via LWS, falling back to daemon scanning if LWS is unavailable.
+   * Get balance via wallet-rpc (local monerod), then LWS, then a bounded daemon scan.
    */
   public async getBalance(address: Address): Promise<Balance[]> {
-    // Try LWS first
+    const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
+    if (walletRpcUrls && walletRpcUrls.length > 0) {
+      const ownAddress = await this.getAddressAsync(0)
+      if (address !== ownAddress) {
+        throw new Error('Monero wallet RPC can only return the balance for the unlocked wallet address')
+      }
+      let lastError: unknown
+      for (const url of walletRpcUrls) {
+        try {
+          const amount = await this.getBalanceFromWalletRpc(url)
+          return [{ asset: AssetXMR, amount: baseAmount(amount.toString(), XMR_DECIMALS) }]
+        } catch (error) {
+          lastError = error
+          console.warn(`Wallet RPC ${url} failed for getBalance:`, (error as Error).message)
+        }
+      }
+      throw lastError instanceof Error ? lastError : new Error('All Monero wallet RPC endpoints failed for getBalance')
+    }
+
+    // Try LWS next
     const urls = this.lwsUrls[this.getNetwork()]
     if (urls && urls.length > 0) {
       const viewKeyHex = this.getViewKeyHex(0)
@@ -190,16 +213,36 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Get transaction history via LWS, falling back to daemon scanning.
-   * Due to Monero privacy, counterparty addresses are unavailable;
-   * the own address is used with net amount for from/to.
+   * Get transaction history via wallet-rpc, then LWS, then a bounded daemon scan.
+   * Incoming counterparties are unknown (Monero privacy). Outgoing destinations
+   * are available when the tx was created by this wallet.
    */
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const address = params?.address || (await this.getAddressAsync(0))
     const offset = params?.offset ?? 0
     const limit = params?.limit ?? 10
 
-    // Try LWS first
+    const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
+    if (walletRpcUrls && walletRpcUrls.length > 0) {
+      const ownAddress = await this.getAddressAsync(0)
+      if (address !== ownAddress) {
+        throw new Error('Monero wallet RPC can only return history for the unlocked wallet address')
+      }
+      let lastError: unknown
+      for (const url of walletRpcUrls) {
+        try {
+          return await this.getTransactionsFromWalletRpc(url, address, offset, limit)
+        } catch (error) {
+          lastError = error
+          console.warn(`Wallet RPC ${url} failed for getTransactions:`, (error as Error).message)
+        }
+      }
+      throw lastError instanceof Error
+        ? lastError
+        : new Error('All Monero wallet RPC endpoints failed for getTransactions')
+    }
+
+    // Try LWS next
     const urls = this.lwsUrls[this.getNetwork()]
     if (urls && urls.length > 0) {
       const viewKeyHex = this.getViewKeyHex(0)
@@ -265,12 +308,29 @@ export class Client extends BaseXChainClient {
 
   /**
    * Transfer XMR to a recipient address.
-   * Builds a complete RingCT transaction with CLSAG signatures and Bulletproofs+ range proof.
+   * Prefers monero-wallet-rpc (local monerod). Falls back to LWS + local RingCT builder.
    */
   public async transfer(params: TxParams): Promise<string> {
     const { recipient, amount } = params
     if (!recipient) throw new Error('Recipient address is required')
     if (!amount) throw new Error('Amount is required')
+
+    const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
+    if (walletRpcUrls && walletRpcUrls.length > 0) {
+      if (!this.validateAddress(recipient)) {
+        throw new Error('Invalid Monero recipient address')
+      }
+      let lastError: unknown
+      for (const url of walletRpcUrls) {
+        try {
+          return await this.transferViaWalletRpc(url, params)
+        } catch (error) {
+          lastError = error
+          console.warn(`Wallet RPC ${url} failed for transfer:`, (error as Error).message)
+        }
+      }
+      throw lastError instanceof Error ? lastError : new Error('All Monero wallet RPC endpoints failed for transfer')
+    }
 
     const recipientKeys = decodeAddress(recipient)
     const spendKey = this.getPrivateSpendKey(params.walletIndex ?? 0)
@@ -434,6 +494,16 @@ export class Client extends BaseXChainClient {
       return this.scanCache
     }
 
+    // JSON daemon scanning is only viable for a short range. A local node still
+    // cannot answer "what is my balance?" without wallet-rpc or LWS.
+    const MAX_DAEMON_SCAN_BLOCKS = 5_000
+    if (currentHeight - fromHeight > MAX_DAEMON_SCAN_BLOCKS) {
+      throw new Error(
+        `Daemon scan range too large (${currentHeight - fromHeight} blocks from height ${fromHeight}). ` +
+          'Configure walletRpcUrls or lwsUrls, or set a more recent restoreHeight.',
+      )
+    }
+
     const spendKey = this.getPrivateSpendKey(walletIndex)
     const keys = deriveKeyPairs(spendKey)
 
@@ -460,5 +530,138 @@ export class Client extends BaseXChainClient {
     }
 
     return this.scanCache
+  }
+
+  private async withWalletRpcLock<T>(fn: () => Promise<T>): Promise<T> {
+    const run = this.walletRpcLock.then(fn, fn)
+    this.walletRpcLock = run.then(
+      () => undefined,
+      () => undefined,
+    )
+    return run
+  }
+
+  /**
+   * Restore or open a wallet-rpc wallet from the BIP-39 derived keys and wait
+   * until it has caught the local daemon. Returns the derived primary address.
+   */
+  private async prepareWalletRpc(url: string, walletIndex = 0): Promise<string> {
+    const spendKey = this.getPrivateSpendKey(walletIndex)
+    const keys = deriveKeyPairs(spendKey)
+    const address = encodeAddress(keys.publicSpendKey, keys.publicViewKey, getMoneroNetworkType(this.getNetwork()))
+    const filename = `xchain-${address.slice(0, 16)}`
+    const password = bytesToHex(keccak_256(spendKey))
+
+    await walletRpc.ensureWallet(url, {
+      filename,
+      address,
+      spendKey: bytesToHex(spendKey),
+      viewKey: bytesToHex(keys.privateViewKey),
+      password,
+      restoreHeight: this.restoreHeight,
+    })
+
+    await this.waitForWalletSync(url)
+    return address
+  }
+
+  private async getBalanceFromWalletRpc(url: string): Promise<bigint> {
+    return this.withWalletRpcLock(async () => {
+      await this.prepareWalletRpc(url)
+      const result = await walletRpc.callWithBusyRetry(() => walletRpc.getBalance(url))
+      return BigInt(result.balance)
+    })
+  }
+
+  private async transferViaWalletRpc(url: string, params: TxParams): Promise<string> {
+    return this.withWalletRpcLock(async () => {
+      await this.prepareWalletRpc(url, params.walletIndex ?? 0)
+      return walletRpc.callWithBusyRetry(() =>
+        walletRpc.transfer(url, {
+          address: params.recipient,
+          amountPiconero: params.amount.amount().toFixed(0).toString(),
+        }),
+      )
+    })
+  }
+
+  private async getTransactionsFromWalletRpc(
+    url: string,
+    address: string,
+    offset: number,
+    limit: number,
+  ): Promise<TxsPage> {
+    const { ownAddress, transfers } = await this.withWalletRpcLock(async () => {
+      const prepared = await this.prepareWalletRpc(url)
+      const txs = await walletRpc.callWithBusyRetry(() => walletRpc.getTransfers(url))
+      return { ownAddress: prepared, transfers: txs }
+    })
+
+    const confirmed = transfers.sort((a, b) => b.height - a.height || b.timestamp - a.timestamp)
+    const paginated = confirmed.slice(offset, offset + limit)
+
+    const txs: Tx[] = paginated.map((tx) => {
+      const amount = baseAmount(tx.amount, XMR_DECIMALS)
+      const isIncoming = tx.type !== 'out'
+
+      return {
+        asset: AssetXMR,
+        date: new Date(tx.timestamp * 1000),
+        type: TxType.Transfer,
+        hash: tx.txid,
+        from: isIncoming ? [] : [{ from: address || ownAddress, amount }],
+        to: isIncoming
+          ? [{ to: address || ownAddress, amount }]
+          : tx.destinations.map((dest) => ({
+              to: dest.address,
+              amount: baseAmount(dest.amount, XMR_DECIMALS),
+            })),
+      }
+    })
+
+    return { total: confirmed.length, txs }
+  }
+
+  private async waitForWalletSync(walletUrl: string): Promise<void> {
+    const daemonUrl = this.daemonUrls[this.getNetwork()]?.[0]
+    let target: number | null = null
+    if (daemonUrl) {
+      try {
+        target = await daemon.getHeight(daemonUrl)
+      } catch (error) {
+        console.warn('Could not read daemon height while waiting for wallet sync:', (error as Error).message)
+      }
+    }
+
+    // Without a daemon tip there is nothing to wait for — refresh once and continue.
+    if (target == null) {
+      try {
+        await walletRpc.refresh(walletUrl)
+      } catch (error) {
+        if (!walletRpc.isBusyError(error)) throw error
+      }
+      return
+    }
+
+    const started = Date.now()
+    const timeoutMs = 15 * 60 * 1000
+    let lastLogged = 0
+
+    while (Date.now() - started < timeoutMs) {
+      try {
+        await walletRpc.refresh(walletUrl)
+        const { height } = await walletRpc.getHeight(walletUrl)
+        if (height !== lastLogged) {
+          console.log(`[XMR] wallet sync ${height} / ${target}`)
+          lastLogged = height
+        }
+        if (height + 2 >= target) return
+      } catch (error) {
+        if (!walletRpc.isBusyError(error)) throw error
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+    }
+
+    throw new Error('Timed out waiting for Monero wallet RPC to sync with the local node')
   }
 }

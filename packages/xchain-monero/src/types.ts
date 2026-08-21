@@ -16,6 +16,8 @@ export type XMRClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
   daemonUrls?: Record<Network, string[]>
   lwsUrls?: Record<Network, string[]>
+  /** monero-wallet-rpc endpoints. Preferred for getBalance against a local monerod. */
+  walletRpcUrls?: Record<Network, string[]>
   /** Block height to start scanning from when using daemon fallback (no LWS). Set to wallet creation height to avoid full chain scan. */
   restoreHeight?: number
 }

@@ -235,6 +235,215 @@ describe('Monero client (pure JS)', () => {
       await expect(client.getBalance('someAddress')).rejects.toThrow('No daemon URLs configured')
     })
 
+    it('Should return balance from wallet RPC without falling back to daemon scan', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: ['https://daemon.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        restoreHeight: 3626700,
+      })
+
+      const address = await client.getAddressAsync()
+      let created = false
+
+      mockFetch.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+        const rawBody = typeof init?.body === 'string' ? init.body : '{}'
+        const body = JSON.parse(rawBody) as { method?: string }
+        if (url.includes('daemon.test')) {
+          return {
+            ok: true,
+            json: async () => ({ result: { count: 3626705, status: 'OK' } }),
+          }
+        }
+        switch (body.method) {
+          case 'get_version':
+            return { ok: true, json: async () => ({ result: { version: 65536 } }) }
+          case 'get_address':
+            if (!created) {
+              return {
+                ok: true,
+                json: async () => ({
+                  error: { code: -13, message: 'No wallet file' },
+                }),
+              }
+            }
+            return { ok: true, json: async () => ({ result: { address } }) }
+          case 'open_wallet':
+            return {
+              ok: true,
+              json: async () => ({
+                error: { code: -1, message: 'Failed to open wallet' },
+              }),
+            }
+          case 'generate_from_keys':
+            created = true
+            return {
+              ok: true,
+              json: async () => ({ result: { address, info: 'Wallet has been generated successfully.' } }),
+            }
+          case 'refresh':
+            return { ok: true, json: async () => ({ result: { blocks_fetched: 5, received_money: false } }) }
+          case 'get_height':
+            return { ok: true, json: async () => ({ result: { height: 3626705 } }) }
+          case 'get_balance':
+            return {
+              ok: true,
+              json: async () => ({ result: { balance: 1500000000000, unlocked_balance: 1500000000000 } }),
+            }
+          default:
+            return { ok: false, status: 500, statusText: `unexpected ${body.method}` }
+        }
+      })
+
+      const balances = await client.getBalance(address)
+
+      expect(balances).toHaveLength(1)
+      expect(balances[0].amount.amount().toString()).toBe('1500000000000')
+      const walletCalls = mockFetch.mock.calls.filter((call) => String(call[0]).includes('wallet.test'))
+      expect(walletCalls.length).toBeGreaterThan(0)
+    })
+
+    it('Should reject foreign addresses on the wallet RPC balance path', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+      })
+
+      await expect(client.getBalance('someAddress')).rejects.toThrow(
+        /can only return the balance for the unlocked wallet address/,
+      )
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    it('Should throw wallet RPC error without daemon fallback when wallet RPC is configured', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+      })
+
+      const address = await client.getAddressAsync()
+      mockFetch.mockResolvedValue({ ok: false, status: 502, statusText: 'Bad Gateway' })
+
+      await expect(client.getBalance(address)).rejects.toThrow(/Wallet RPC error: 502/)
+    })
+
+    it('Should reject foreign addresses on the wallet RPC history path', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+      })
+
+      await expect(client.getTransactions({ address: 'someAddress' })).rejects.toThrow(
+        /can only return history for the unlocked wallet address/,
+      )
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    it('Should return history from wallet RPC without falling back to daemon scan', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: ['https://daemon.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        restoreHeight: 3626700,
+      })
+
+      mockFetch.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+        const rawBody = typeof init?.body === 'string' ? init.body : '{}'
+        const body = JSON.parse(rawBody) as { method?: string }
+        if (url.includes('daemon.test')) {
+          return {
+            ok: true,
+            json: async () => ({ result: { count: 3626705, status: 'OK' } }),
+          }
+        }
+        switch (body.method) {
+          case 'get_version':
+            return { ok: true, json: async () => ({ result: { version: 65536 } }) }
+          case 'get_address':
+            return {
+              ok: true,
+              json: async () => ({
+                result: {
+                  address:
+                    '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
+                },
+              }),
+            }
+          case 'refresh':
+            return { ok: true, json: async () => ({ result: { blocks_fetched: 0, received_money: false } }) }
+          case 'get_height':
+            return { ok: true, json: async () => ({ result: { height: 3626705 } }) }
+          case 'get_transfers':
+            return {
+              ok: true,
+              json: async () => ({
+                result: {
+                  in: [
+                    {
+                      txid: 'in_old',
+                      timestamp: 1700000000,
+                      height: 3626701,
+                      amount: 1000000000000,
+                      fee: 0,
+                      type: 'in',
+                      address: '4in',
+                    },
+                    {
+                      txid: 'in_new',
+                      timestamp: 1700001000,
+                      height: 3626704,
+                      amount: 2000000000000,
+                      fee: 0,
+                      type: 'in',
+                      address: '4in',
+                    },
+                  ],
+                  out: [
+                    {
+                      txid: 'out_mid',
+                      timestamp: 1700000500,
+                      height: 3626703,
+                      amount: 500000000000,
+                      fee: 20000,
+                      type: 'out',
+                      address: '4out',
+                      destinations: [{ address: '4dest', amount: 500000000000 }],
+                    },
+                  ],
+                },
+              }),
+            }
+          default:
+            return { ok: false, status: 500, statusText: `unexpected ${body.method}` }
+        }
+      })
+
+      const address = await client.getAddressAsync()
+      const result = await client.getTransactions({ address, limit: 10 })
+
+      expect(result.total).toBe(3)
+      expect(result.txs).toHaveLength(3)
+      expect(result.txs.map((tx) => tx.hash)).toEqual(['in_new', 'out_mid', 'in_old'])
+      expect(result.txs[0].to[0]?.amount.amount().toString()).toBe('2000000000000')
+      expect(result.txs[1].from[0]?.from).toBe(address)
+      expect(result.txs[1].to[0]?.to).toBe('4dest')
+    })
+
     it('Should try next LWS URL on failure', async () => {
       const client = new Client({
         ...defaultXMRParams,
@@ -485,6 +694,77 @@ describe('Monero client (pure JS)', () => {
       })
 
       await expect(client.getTransactions()).rejects.toThrow('No daemon URLs configured')
+    })
+  })
+
+  describe('Transfer (wallet RPC)', () => {
+    const dest = '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H'
+
+    beforeEach(() => {
+      mockFetch.mockReset()
+    })
+
+    it('Should transfer via wallet RPC without LWS', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: ['https://daemon.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        restoreHeight: 3626700,
+      })
+
+      const ownAddress = await client.getAddressAsync()
+
+      mockFetch.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+        const rawBody = typeof init?.body === 'string' ? init.body : '{}'
+        const body = JSON.parse(rawBody) as { method?: string }
+        if (url.includes('daemon.test')) {
+          return { ok: true, json: async () => ({ result: { count: 3626705, status: 'OK' } }) }
+        }
+        switch (body.method) {
+          case 'get_version':
+            return { ok: true, json: async () => ({ result: { version: 65536 } }) }
+          case 'get_address':
+            return { ok: true, json: async () => ({ result: { address: ownAddress } }) }
+          case 'refresh':
+            return { ok: true, json: async () => ({ result: { blocks_fetched: 0, received_money: false } }) }
+          case 'get_height':
+            return { ok: true, json: async () => ({ result: { height: 3626705 } }) }
+          case 'transfer':
+            return { ok: true, json: async () => ({ result: { tx_hash: 'ef12'.repeat(16) } }) }
+          default:
+            return { ok: false, status: 500, statusText: `unexpected ${body.method}` }
+        }
+      })
+
+      const txHash = await client.transfer({ recipient: dest, amount: baseAmount(1000000000000, 12) })
+      expect(txHash).toBe('ef12'.repeat(16))
+
+      const transferCall = mockFetch.mock.calls.find((call) => {
+        const raw = call[1]?.body
+        return typeof raw === 'string' && raw.includes('"transfer"')
+      })
+      expect(transferCall).toBeDefined()
+      const payload = JSON.parse(String(transferCall?.[1]?.body)) as {
+        params: { destinations: { amount: number; address: string }[] }
+      }
+      expect(payload.params.destinations[0]).toEqual({ amount: 1000000000000, address: dest })
+    })
+
+    it('Should reject an invalid recipient before calling wallet RPC', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+      })
+
+      await expect(client.transfer({ recipient: 'not-an-address', amount: baseAmount(1, 12) })).rejects.toThrow(
+        'Invalid Monero recipient address',
+      )
+      expect(mockFetch).not.toHaveBeenCalled()
     })
   })
 

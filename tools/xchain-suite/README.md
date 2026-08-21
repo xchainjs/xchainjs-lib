@@ -39,34 +39,34 @@ A browser-based developer suite for XChainJS packages. Test chain clients, execu
 | **UTXO** | Bitcoin (BTC), Bitcoin Cash (BCH), Litecoin (LTC), Dogecoin (DOGE), Dash (DASH), Zcash (ZEC) |
 | **EVM** | Ethereum (ETH), Avalanche (AVAX), BNB Smart Chain (BSC), Arbitrum (ARB) |
 | **Cosmos** | Cosmos Hub (GAIA), THORChain (THOR), MAYAChain (MAYA), Kujira (KUJI) |
-| **Other** | Solana (SOL), Radix (XRD), Cardano (ADA), Ripple (XRP) |
+| **Other** | Monero (XMR), Solana (SOL), Radix (XRD), Cardano (ADA), Ripple (XRP) |
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js 18+
-- pnpm (recommended) or npm
+- Yarn 4 (this monorepo uses `packageManager: yarn@4.9.2`)
 
 ### Installation
 
 ```bash
 # From the xchainjs-lib root directory
-pnpm install
+yarn install
 
 # Navigate to xchain-suite
 cd tools/xchain-suite
 
 # Start development server
-pnpm dev
+yarn dev
 ```
 
-The app will be available at `http://localhost:5173`
+The app will be available at `http://localhost:3000`
 
 ### Build for Production
 
 ```bash
-pnpm build
-pnpm preview
+yarn build
+yarn preview
 ```
 
 ## Usage
@@ -88,6 +88,94 @@ pnpm preview
 - Only **BTC** and **ETH** chain pages work in Ledger mode; other chains error with a clear message
 
 > **Security Note**: Phrase mode stores your mnemonic in memory only. Never use mainnet wallets with significant funds for testing.
+
+## Monero (local node)
+
+`monerod` stores the chain, not wallets. The suite shows an XMR balance by talking to **`monero-wallet-rpc`**, which scans with the BIP-39 view key against your local daemon.
+
+That address is **not** a `monero-wallet-cli` wallet. Official Monero seeds are 25 words; the suite derives XMR via SLIP-10 `m/44'/128'/0'` from the same BIP-39 phrase as every other chain.
+
+Full client notes: [`packages/xchain-monero/README.md`](../../packages/xchain-monero/README.md).
+
+### 1. Run `monerod`
+
+Pruned is fine. Bind RPC to localhost. Wait until it is synced.
+
+```bash
+monerod \
+  --prune-blockchain \
+  --rpc-bind-ip 127.0.0.1 \
+  --rpc-bind-port 18081 \
+  --restricted-rpc 0 \
+  --non-interactive
+```
+
+Check:
+
+```bash
+curl -s http://127.0.0.1:18081/json_rpc \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":"0","method":"get_info"}'
+```
+
+You want `"synchronized": true` and `"restricted": false`.
+
+### 2. Run `monero-wallet-rpc`
+
+`yarn dev` starts this automatically if it finds the binary (`MONERO_WALLET_RPC`, or `monero-wallet-rpc` on `PATH`). Wallet files default to `~/.cache/xchain-suite/monero-wallets` (`MONERO_WALLET_DIR`). Otherwise start it yourself:
+
+```bash
+export MONERO_WALLET_RPC=/path/to/monero-wallet-rpc
+export MONERO_WALLET_DIR=/path/to/xchain-wallets
+
+mkdir -p "$MONERO_WALLET_DIR"
+
+"$MONERO_WALLET_RPC" \
+  --daemon-address 127.0.0.1:18081 \
+  --trusted-daemon \
+  --rpc-bind-ip 127.0.0.1 \
+  --rpc-bind-port 18088 \
+  --disable-rpc-login \
+  --rpc-ssl disabled \
+  --wallet-dir "$MONERO_WALLET_DIR" \
+  --disable-rpc-ban \
+  --no-initial-sync
+```
+
+Use a **dedicated** `--wallet-dir`. Do not reuse an official-seed wallet directory.
+
+### 3. Point the suite at it
+
+Vite already proxies the browser to localhost:
+
+| Path | Process |
+|---|---|
+| `/xmr-daemon` | `monerod` `:18081` |
+| `/xmr-wallet` | `monero-wallet-rpc` `:18088` |
+
+Optional, in `tools/xchain-suite/.env`:
+
+```bash
+# Wallet creation / first-scan height. Use when the suite address was first funded.
+VITE_XMR_RESTORE_HEIGHT=3626700
+```
+
+Then `yarn dev`, open http://localhost:3000, unlock, and wait for the XMR card. The first sync from `VITE_XMR_RESTORE_HEIGHT` to tip can take a few minutes. Later unlocks reuse the wallet file under `MONERO_WALLET_DIR`.
+
+**History:** Chain → XMR → History uses the same wallet-rpc wallet (`get_transfers`). Incoming senders are hidden (Monero). Outgoing destinations show when this wallet created the spend.
+
+**Transfer:** Chain → XMR → Transfer also uses wallet-rpc (`transfer`). Do not send your entire unlocked balance — the daemon still takes a fee. Incoming outputs need ~10 confirmations before they can be spent. Send a small test amount first.
+
+If the card says **No balance**, the suite SLIP-10 address is empty. Send a test amount from any Monero wallet **to the address shown on the XMR card**.
+
+### Troubleshooting
+
+| Symptom | Likely cause |
+|---|---|
+| `ENOSPC: System limit for number of file watchers` | Linux inotify cap. Suite polls instead of watching `packages/*/lib`. Restart `yarn dev` after pulling that change, or `sudo sysctl -w fs.inotify.max_user_watches=524288`. |
+| XMR card errors about wallet RPC | `monero-wallet-rpc` is not on `:18088`. Start it or set `MONERO_WALLET_RPC`. |
+| First load spins for a long time | Expected. wallet-rpc is scanning from restore height. |
+| Balance is 0 / No balance | Different address than your official Monero wallet. Check the address on the card. |
 
 ### Making a Swap
 1. Navigate to **Swap** in the sidebar
@@ -203,7 +291,7 @@ This app runs entirely in the browser. Some notes:
 
 1. Create a feature branch from `master`
 2. Make your changes
-3. Test in browser with `pnpm dev`
+3. Test in browser with `yarn dev`
 4. Submit a PR
 
 ## License

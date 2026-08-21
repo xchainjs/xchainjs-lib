@@ -37,14 +37,14 @@ export function GetHistory({ chainId, client }: GetHistoryProps) {
   }
 
   const formatAmount = (tx: Tx): string => {
-    if (tx.from.length === 0 && tx.to.length === 0) return '-'
-    const firstTo = tx.to[0]
-    if (!firstTo) return '-'
+    const first = tx.to[0] ?? (tx.from[0] ? { amount: tx.from[0].amount } : undefined)
+    if (!first) return '-'
     try {
-      const assetAmt = baseToAsset(firstTo.amount)
-      return formatAssetAmountCurrency({ amount: assetAmt, trimZeros: true })
+      const assetAmt = baseToAsset(first.amount)
+      const formatted = formatAssetAmountCurrency({ amount: assetAmt, asset: tx.asset, trimZeros: true })
+      return tx.to.length === 0 && tx.from.length > 0 ? `-${formatted}` : formatted
     } catch {
-      return firstTo.amount.amount().toString()
+      return first.amount.amount().toString()
     }
   }
 

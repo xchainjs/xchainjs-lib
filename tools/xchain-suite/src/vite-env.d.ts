@@ -17,6 +17,7 @@ interface ImportMetaEnv {
   readonly VITE_SOCHAIN_API_KEY?: string
   readonly VITE_COVALENT_API_KEY?: string
   readonly VITE_SOL_API_KEY?: string
+  readonly VITE_XMR_RESTORE_HEIGHT?: string
   readonly VITE_ASGARDEX_BROKER_URL?: string
   readonly VITE_ASGARDEX_AFFILIATE_BROKERS_ADDRESS?: string
 }
