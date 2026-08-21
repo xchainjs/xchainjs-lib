@@ -6,8 +6,15 @@
  * surface the last real error so UIs do not only show a generic
  * "No clients available" string.
  *
+ * Fund-moving sign+broadcast must not resign on ambiguous transport failures:
+ * use {@link signOnceThenRoundRobinBroadcast} so the same signed bytes are
+ * rebroadcast (idempotent) instead of a new signature/sequence.
+ *
  * @see https://github.com/xchainjs/xchainjs-lib/issues/1727
  */
+
+import { sha256 } from '@cosmjs/crypto'
+import { toHex } from '@cosmjs/encoding'
 
 /** Tx was not found on any reachable node (distinct from RPC unavailability). */
 export class TxNotFoundError extends Error {
@@ -162,4 +169,86 @@ export async function roundRobinGetTx<TClient, TTx>(
   }
 
   throw createRoundRobinExhaustedError(`retrieve transaction ${txId}`, lastError)
+}
+
+/**
+ * Tendermint tx hash (uppercase hex) from encoded TxRaw bytes — matches CosmJS
+ * `DeliverTxResponse.transactionHash`.
+ */
+export function tendermintTxHash(txBytes: Uint8Array): string {
+  return toHex(sha256(txBytes)).toUpperCase()
+}
+
+/**
+ * True when the node indicates this exact tx was already accepted (mempool/cache).
+ * Safe to treat as success when we already know the hash of the signed bytes.
+ */
+export function isAlreadyBroadcastError(error: unknown): boolean {
+  const msg = errorMessage(error)
+  return (
+    /tx already exists/i.test(msg) ||
+    /already in mempool/i.test(msg) ||
+    /tx in mempool/i.test(msg) ||
+    /retrieved result \([^)]+\) still pending/i.test(msg)
+  )
+}
+
+export type SignOnceThenBroadcastOptions = RoundRobinTryOptions & {
+  signOperation?: string
+  broadcastOperation?: string
+}
+
+export type BroadcastResult = {
+  transactionHash: string
+  code?: number
+  rawLog?: string
+  height?: number
+  gasUsed?: bigint | number
+  gasWanted?: bigint | number
+}
+
+/**
+ * Sign **once** (first successful RPC), then round-robin **broadcast the same
+ * signed bytes**. Prevents double-spend when node A accepts a tx but the HTTP
+ * response times out / 5xxs and a naive signAndBroadcast failover would resign
+ * with the next account sequence on node B.
+ *
+ * Rebroadcasting identical bytes is idempotent; "already in mempool" is treated
+ * as success using the known hash.
+ */
+export async function signOnceThenRoundRobinBroadcast<TResult extends BroadcastResult = BroadcastResult>(
+  urls: readonly string[],
+  sign: (url: string) => Promise<Uint8Array>,
+  broadcast: (url: string, txBytes: Uint8Array) => Promise<TResult>,
+  options: SignOnceThenBroadcastOptions = {},
+): Promise<TResult> {
+  const signOperation = options.signOperation ?? 'sign transaction'
+  const broadcastOperation = options.broadcastOperation ?? 'broadcast transaction'
+
+  // 1) Sign once — retryable failures may try the next URL (no broadcast yet).
+  const txBytes = await roundRobinTry(urls, signOperation, (url) => sign(url), {
+    isRetryable: options.isRetryable,
+    onRetryableError: options.onRetryableError,
+  })
+  const knownHash = tendermintTxHash(txBytes)
+
+  // 2) Broadcast the same bytes across URLs (no resign).
+  return roundRobinTry(
+    urls,
+    broadcastOperation,
+    async (url) => {
+      try {
+        return await broadcast(url, txBytes)
+      } catch (error) {
+        if (isAlreadyBroadcastError(error)) {
+          return { transactionHash: knownHash, code: 0 } as TResult
+        }
+        throw error
+      }
+    },
+    {
+      isRetryable: options.isRetryable,
+      onRetryableError: options.onRetryableError,
+    },
+  )
 }

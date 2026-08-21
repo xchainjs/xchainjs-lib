@@ -1,14 +1,15 @@
 import { OfflineAminoSigner } from '@cosmjs/amino'
-import { fromBase64 } from '@cosmjs/encoding'
+import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import { LedgerSigner } from '@cosmjs/ledger-amino'
 import { DecodedTxRaw, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
-import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
+import { SigningStargateClient } from '@cosmjs/stargate'
 import CosmosApp from '@ledgerhq/hw-app-cosmos'
 import type Transport from '@ledgerhq/hw-transport'
 import { TxHash } from '@xchainjs/xchain-client'
 import { MsgTypes, roundRobinTry } from '@xchainjs/xchain-cosmos-sdk'
 import { Address } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 
 import { Client, CosmosClientParams } from './client'
 import { TxParams } from './types'
@@ -61,25 +62,29 @@ export class ClientLedger extends Client {
 
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
 
-    const tx = await this.roundRobinSignAndBroadcast(fromAddress, unsignedTx, ledgerSigner)
+    // Sign once, then round-robin only the broadcast. Retrying signAndBroadcast after a
+    // transport timeout can re-sign with a new sequence and submit a second transaction.
+    const rawTx = await this.roundRobinSignTransfer(fromAddress, unsignedTx, ledgerSigner)
 
-    return tx.transactionHash
+    return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
   }
 
   /**
-   * Sign a transaction making a round robin over the clients urls provided to the client
+   * Sign a transfer making a round robin over the clients urls provided to the client.
+   * Does not broadcast — callers must broadcast the signed bytes once via broadcastTx.
+   * Named separately from Client.roundRobinSign to avoid a private-member subclass clash.
    *
    * @param {string} sender Sender address
    * @param {DecodedTxRaw} unsignedTx Unsigned transaction
    * @param {OfflineAminoSigner} signer Signer
-   * @returns {DeliverTxResponse} The transaction broadcasted
+   * @returns {TxRaw} The raw signed transaction
    */
-  private async roundRobinSignAndBroadcast(
+  private async roundRobinSignTransfer(
     sender: string,
     unsignedTx: DecodedTxRaw,
     signer: OfflineAminoSigner,
-  ): Promise<DeliverTxResponse> {
-    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
+  ): Promise<TxRaw> {
+    return roundRobinTry(this.clientUrls[this.network], 'sign transaction', async (url) => {
       const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
         registry: this.registry,
       })
@@ -88,7 +93,7 @@ export class ClientLedger extends Client {
         return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
       })
 
-      return signingClient.signAndBroadcast(
+      return signingClient.sign(
         sender,
         messages,
         this.getStandardFee(this.getAssetInfo().asset),

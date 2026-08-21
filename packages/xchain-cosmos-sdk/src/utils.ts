@@ -36,8 +36,11 @@ export {
   TxNotFoundError,
   createRoundRobinExhaustedError,
   errorMessage,
+  isAlreadyBroadcastError,
   isRetryableRpcError,
   roundRobinGetTx,
   roundRobinTry,
+  signOnceThenRoundRobinBroadcast,
+  tendermintTxHash,
 } from './roundRobin'
-export type { RoundRobinTryOptions } from './roundRobin'
+export type { BroadcastResult, RoundRobinTryOptions, SignOnceThenBroadcastOptions } from './roundRobin'

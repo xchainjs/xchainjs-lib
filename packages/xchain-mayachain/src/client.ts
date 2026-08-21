@@ -8,7 +8,7 @@ import {
   TxBodyEncodeObject,
   decodeTxRaw,
 } from '@cosmjs/proto-signing'
-import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
+import { SigningStargateClient } from '@cosmjs/stargate'
 import { AssetInfo, Network, PreparedTx, TxHash } from '@xchainjs/xchain-client'
 import {
   Client as CosmosSDKClient,
@@ -148,9 +148,16 @@ export class Client extends CosmosSDKClient implements MayachainClient {
         hdPaths: [makeClientPath(this.getFullDerivationPath(params.walletIndex || 0))],
       })
 
-      const tx = await this.roundRobinSignAndBroadcastTx(sender, unsignedTx, signer)
+      // Sign once, then round-robin only the broadcast. Retrying signAndBroadcast after a
+      // transport timeout can re-sign with a new sequence and submit a second transaction.
+      const rawTx = await this.roundRobinSign(
+        sender,
+        unsignedTx,
+        signer,
+        new BigNumber(this.getStandardFee().gas),
+      )
 
-      return tx.transactionHash
+      return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
     })
   }
 
@@ -315,9 +322,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
         hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex || 0))],
       })
 
-      const tx = await this.roundRobinSignAndBroadcastDeposit(sender, signer, gasLimit, amount, memo, asset)
-      // Return the transaction hash
-      return tx.transactionHash
+      // Sign once, then round-robin only the broadcast (same bytes → same tx hash).
+      const rawTx = await this.roundRobinSignDeposit(sender, signer, gasLimit, amount, memo, asset)
+
+      return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
     })
   }
 
@@ -479,55 +487,30 @@ export class Client extends CosmosSDKClient implements MayachainClient {
   }
 
   /**
-   * Sign and broadcast a transaction making a round robin over the clients urls provided to the client
-   *
-   * @param {string} sender Sender address
-   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
-   * @param {DirectSecp256k1HdWallet} signer Signer
-   * @returns {DeliverTxResponse} The transaction broadcasted
-   */
-  private async roundRobinSignAndBroadcastTx(
-    sender: string,
-    unsignedTx: DecodedTxRaw,
-    signer: DirectSecp256k1HdWallet,
-  ): Promise<DeliverTxResponse> {
-    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
-      const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
-        registry: this.registry,
-      })
-
-      const messages: EncodeObject[] = unsignedTx.body.messages.map((message) => {
-        return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
-      })
-
-      return signingClient.signAndBroadcast(sender, messages, this.getStandardFee(), unsignedTx.body.memo)
-    })
-  }
-
-  /**
-   * Sign and broadcast a transaction making a round robin over the clients urls provided to the client
+   * Sign a deposit transaction making a round robin over the clients urls provided to the client.
+   * Does not broadcast — callers must broadcast the signed bytes once via broadcastTx.
    *
    * @param {string} sender Sender address
    * @param {DirectSecp256k1HdWallet} signer Signer
    * @param {BigNumber} gasLimit Gas limit for the transaction
    * @param {BaseAmount} amount Amount to deposit
    * @param {string} memo Deposit memo
-   * @param {Asset} asset Asset to deposit
-   * @returns {DeliverTxResponse} The transaction broadcasted
+   * @param {CompatibleAsset} asset Asset to deposit
+   * @returns {TxRaw} The raw signed transaction
    */
-  private async roundRobinSignAndBroadcastDeposit(
+  private async roundRobinSignDeposit(
     sender: string,
     signer: DirectSecp256k1HdWallet,
     gasLimit: BigNumber,
     amount: BaseAmount,
     memo: string,
     asset: CompatibleAsset,
-  ): Promise<DeliverTxResponse> {
-    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast deposit transaction', async (url) => {
+  ): Promise<TxRaw> {
+    return roundRobinTry(this.clientUrls[this.network], 'sign deposit transaction', async (url) => {
       const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
         registry: this.registry,
       })
-      return signingClient.signAndBroadcast(
+      return signingClient.sign(
         sender,
         [
           {

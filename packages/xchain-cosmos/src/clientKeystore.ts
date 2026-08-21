@@ -1,10 +1,11 @@
-import { fromBase64 } from '@cosmjs/encoding'
+import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import { DecodedTxRaw, DirectSecp256k1HdWallet, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
-import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate'
+import { SigningStargateClient } from '@cosmjs/stargate'
 import { MsgTypes, makeClientPath, roundRobinTry } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { bech32 } from '@scure/base'
 import { HDKey } from '@scure/bip32'
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js'
 import { createHash } from 'crypto'
 import * as secp from '@bitcoin-js/tiny-secp256k1-asmjs'
 
@@ -64,9 +65,11 @@ export class ClientKeystore extends Client {
       hdPaths: [makeClientPath(this.getFullDerivationPath(params.walletIndex || 0))],
     })
 
-    const tx = await this.roundRobinSignAndBroadcast(sender, unsignedTx, signer)
+    // Sign once, then round-robin only the broadcast. Retrying signAndBroadcast after a
+    // transport timeout can re-sign with a new sequence and submit a second transaction.
+    const rawTx = await this.roundRobinSignTransfer(sender, unsignedTx, signer)
 
-    return tx.transactionHash
+    return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
   }
 
   /**
@@ -84,19 +87,21 @@ export class ClientKeystore extends Client {
   }
 
   /**
-   * Sign a transaction making a round robin over the clients urls provided to the client
+   * Sign a transfer making a round robin over the clients urls provided to the client.
+   * Does not broadcast — callers must broadcast the signed bytes once via broadcastTx.
+   * Named separately from Client.roundRobinSign to avoid a private-member subclass clash.
    *
    * @param {string} sender Sender address
    * @param {DecodedTxRaw} unsignedTx Unsigned transaction
    * @param {DirectSecp256k1HdWallet} signer Signer
-   * @returns {DeliverTxResponse} The transaction broadcasted
+   * @returns {TxRaw} The raw signed transaction
    */
-  private async roundRobinSignAndBroadcast(
+  private async roundRobinSignTransfer(
     sender: string,
     unsignedTx: DecodedTxRaw,
     signer: DirectSecp256k1HdWallet,
-  ): Promise<DeliverTxResponse> {
-    return roundRobinTry(this.clientUrls[this.network], 'sign and broadcast transaction', async (url) => {
+  ): Promise<TxRaw> {
+    return roundRobinTry(this.clientUrls[this.network], 'sign transaction', async (url) => {
       const signingClient = await SigningStargateClient.connectWithSigner(url, signer, {
         registry: this.registry,
       })
@@ -105,7 +110,7 @@ export class ClientKeystore extends Client {
         return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
       })
 
-      return signingClient.signAndBroadcast(
+      return signingClient.sign(
         sender,
         messages,
         this.getStandardFee(this.getAssetInfo().asset),
