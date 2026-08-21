@@ -141,17 +141,15 @@ export class ChainflipProtocol implements IProtocol {
     const selected = await this.getSelectedQuote(params, srcAssetData, destAssetData)
     if (!selected) throw Error('No suitable Chainflip quote found')
 
-    const quoteToUse =
-      params.enableBoost && selected.selectedQuote.boostQuote
-        ? selected.selectedQuote.boostQuote
-        : selected.selectedQuote
+    const quoteToUse = selected.actualQuote
 
     const resp = await this.sdk.requestDepositAddressV2({
       quote: quoteToUse,
       destAddress: params.destinationAddress,
       srcAddress: params.fromAddress,
       fillOrKillParams: {
-        slippageTolerancePercent: selected.selectedQuote.recommendedSlippageTolerancePercent,
+        // Must match the effective quote (boost vs regular), not the parent wrapper.
+        slippageTolerancePercent: quoteToUse.recommendedSlippageTolerancePercent,
         refundAddress: params.fromAddress,
         retryDurationBlocks: 100,
       },
@@ -168,11 +166,23 @@ export class ChainflipProtocol implements IProtocol {
       depositChannelId: resp.depositChannelId,
       expiresAt: new Date(expiresAtSeconds * 1000),
       depositChannelExpiryBlock: resp.depositChannelExpiryBlock,
+      expectedAmount: new CryptoAmount(
+        baseAmount(quoteToUse.egressAmount, destAssetData.decimals),
+        params.destinationAsset,
+      ),
+      slipBasisPoints: quoteToUse.recommendedSlippageTolerancePercent
+        ? quoteToUse.recommendedSlippageTolerancePercent * 100
+        : 0,
     }
   }
 
   /**
    * Perform a swap: open a deposit channel, then transfer to the deposit address.
+   *
+   * Prefer {@link openDepositChannel} when the UI must track `expiresAt` /
+   * `depositChannelId` around slow signing (e.g. Ledger) or post-broadcast
+   * monitoring — `doSwap` does not return channel metadata.
+   *
    * @param {QuoteSwapParams} params Swap parameters
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
@@ -275,21 +285,31 @@ export class ChainflipProtocol implements IProtocol {
     const networkFee = actualQuote.includedFees.find((fee) => fee.type === 'NETWORK')
     const boostFee = actualQuote.includedFees.find((fee) => fee.type === 'BOOST')
 
+    // Never sum base units across assets (NETWORK is typically USDC; BOOST is src asset).
+    const reportedNetworkFee =
+      isUsingBoost && boostFee
+        ? new CryptoAmount(baseAmount(boostFee.amount, srcAssetData.decimals), params.fromAsset)
+        : new CryptoAmount(baseAmount(networkFee ? networkFee.amount : 0, 6), assetUSDC)
+
     const baseWarning =
-      'Do not cache this response. Open a deposit channel immediately before broadcast; do not send funds after channel expiry.'
+      'Do not cache this response. Open a deposit channel immediately before broadcast; do not send funds after channel expiry. Deposit must be observed by Chainflip before expiry (broadcast-before-expiry is not enough for slow EVM inclusion).'
 
     return {
       protocol: this.name,
       // Quote-only: channel is opened via openDepositChannel / doSwap
       toAddress: '',
       memo: '',
-      expectedAmount: new CryptoAmount(baseAmount(actualQuote.egressAmount, destAssetData.decimals), params.destinationAsset),
+      expectedAmount: new CryptoAmount(
+        baseAmount(actualQuote.egressAmount, destAssetData.decimals),
+        params.destinationAsset,
+      ),
       dustThreshold: new CryptoAmount(
         baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
         params.fromAsset,
       ),
       totalSwapSeconds: actualQuote.estimatedDurationSeconds ? actualQuote.estimatedDurationSeconds : 0,
       maxStreamingQuantity: undefined,
+      // Usable quote exists — NOT "channel already open". Callers must open a channel before send.
       canSwap: true,
       warning: actualQuote.lowLiquidityWarning
         ? `${baseWarning} The difference in the chainflip swap rate (excluding fees) is lower than the global index rate of the swap by more than a certain threshold (currently set to 5%)`
@@ -302,13 +322,7 @@ export class ChainflipProtocol implements IProtocol {
         : 0,
       fees: {
         asset: assetUSDC,
-        networkFee: new CryptoAmount(
-          baseAmount(
-            (networkFee ? parseInt(networkFee.amount) : 0) + (isUsingBoost && boostFee ? parseInt(boostFee.amount) : 0),
-            isUsingBoost && boostFee ? srcAssetData.decimals : 6,
-          ),
-          isUsingBoost && boostFee ? params.fromAsset : assetUSDC,
-        ),
+        networkFee: reportedNetworkFee,
         outboundFee: new CryptoAmount(
           baseAmount(outboundFee ? outboundFee.amount : 0, destAssetData.decimals),
           params.destinationAsset,

@@ -76,6 +76,8 @@ Recommended flow:
 
 Do not cache deposit addresses across `expiresAt`. EVM Chainflip deposit addresses can be reused across channels; always bind signing to a live `depositChannelId` + expiry.
 
+**Important:** Chainflip must **observe** the deposit before channel expiry. Broadcasting before `expiresAt` is not enough if the source chain (especially EVM) confirms after expiry — funds may not create a swap and may not FoK-refund. Prefer `requestChainflipDepositAddress` over `doSwap` when you need to track `expiresAt` / `depositChannelId` around slow Ledger signing or post-broadcast monitoring (`doSwap` does not return channel metadata).
+
 
 ## Examples
 

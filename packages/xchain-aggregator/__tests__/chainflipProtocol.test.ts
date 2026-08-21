@@ -15,6 +15,9 @@ import {
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
+import { SwapSDK } from '@chainflip/sdk/swap'
+
+import { Aggregator } from '../src'
 import { ChainflipProtocol } from '../src/protocols/chainflip'
 
 jest.setTimeout(60000)
@@ -35,6 +38,10 @@ describe('Chainflip protocol', () => {
     })
 
     protocol = new ChainflipProtocol({ wallet })
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it('Should get supported chains', async () => {
@@ -217,7 +224,7 @@ describe('Chainflip protocol', () => {
     expect(estimatedSwap.expectedAmount.baseAmount.amount().toString()).toBe('51193')
   })
 
-  it('Should open deposit channel with address, channel id, and expiry', async () => {
+  it('Should open deposit channel with address, channel id, expiry, and quote snapshot', async () => {
     const channel = await protocol.openDepositChannel({
       fromAsset: AssetETH,
       destinationAsset: AssetBTC,
@@ -229,6 +236,46 @@ describe('Chainflip protocol', () => {
     expect(channel.depositChannelId).toBe('ethereum-channel-id')
     expect(channel.expiresAt).toEqual(new Date(1716889354 * 1000))
     expect(channel.depositChannelExpiryBlock).toBe(BigInt(20000))
+    expect(channel.expectedAmount.baseAmount.amount().toString()).toBe('51193')
+    expect(channel.slipBasisPoints).toBe(100)
+  })
+
+  it('Should pass dest/src/refund and effective quote slippage into requestDepositAddressV2', async () => {
+    const spy = jest.spyOn(SwapSDK.prototype, 'requestDepositAddressV2')
+
+    await protocol.openDepositChannel({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      fromAddress: 'ETHEREUMrefundAddress',
+      amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+      destinationAddress: 'BITCOINFakeAddress',
+    })
+
+    expect(spy).toHaveBeenCalledTimes(1)
+    const args = spy.mock.calls[0][0]
+    expect(args.destAddress).toBe('BITCOINFakeAddress')
+    expect(args.srcAddress).toBe('ETHEREUMrefundAddress')
+    expect(args.fillOrKillParams.refundAddress).toBe('ETHEREUMrefundAddress')
+    expect(args.fillOrKillParams.slippageTolerancePercent).toBe(args.quote.recommendedSlippageTolerancePercent)
+  })
+
+  it('Should reject channel response without expiry', async () => {
+    jest.spyOn(SwapSDK.prototype, 'requestDepositAddressV2').mockResolvedValueOnce({
+      depositAddress: 'ETHEREUMfakeaddress',
+      depositChannelId: 'ethereum-channel-id',
+      depositChannelExpiryBlock: BigInt(20000),
+      // estimatedDepositChannelExpiryTime intentionally omitted
+    } as never)
+
+    await expect(
+      protocol.openDepositChannel({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        fromAddress: 'ETHEREUMfakeaddress',
+        amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+        destinationAddress: 'BITCOINFakeAddress',
+      }),
+    ).rejects.toThrow(/missing estimatedDepositChannelExpiryTime/)
   })
 
   it('Should require addresses to open deposit channel', async () => {
@@ -248,5 +295,31 @@ describe('Chainflip protocol', () => {
         amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
       }),
     ).rejects.toThrow(/destinationAddress is required/)
+  })
+
+  it('Aggregator.requestChainflipDepositAddress should open a channel', async () => {
+    const aggregator = new Aggregator({ protocols: ['Chainflip'] })
+    const channel = await aggregator.requestChainflipDepositAddress({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      fromAddress: 'ETHEREUMfakeaddress',
+      amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+      destinationAddress: 'BITCOINFakeAddress',
+    })
+    expect(channel.depositChannelId).toBe('ethereum-channel-id')
+    expect(channel.expiresAt).toEqual(new Date(1716889354 * 1000))
+  })
+
+  it('Aggregator.requestChainflipDepositAddress should throw if Chainflip disabled', async () => {
+    const aggregator = new Aggregator({ protocols: ['Thorchain'] })
+    await expect(
+      aggregator.requestChainflipDepositAddress({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        fromAddress: 'ETHEREUMfakeaddress',
+        amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+        destinationAddress: 'BITCOINFakeAddress',
+      }),
+    ).rejects.toThrow(/Chainflip protocol is not enabled/)
   })
 })
