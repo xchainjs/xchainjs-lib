@@ -33,7 +33,7 @@ import {
   eqAsset,
 } from '@xchainjs/xchain-util'
 
-import { roundRobinGetTx, roundRobinTry } from './roundRobin'
+import { isAlreadyBroadcastError, roundRobinGetTx, roundRobinTry, tendermintTxHash } from './roundRobin'
 import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 
 /**
@@ -502,7 +502,18 @@ export default abstract class Client extends BaseXChainClient implements XChainC
    */
   private async roundRobinBroadcast(txHex: Uint8Array): Promise<DeliverTxResponse> {
     const clients = await this.stargateClients.getValue()
-    return roundRobinTry(clients, 'broadcast transaction', (client) => client.broadcastTx(txHex))
+    const knownHash = tendermintTxHash(txHex)
+    return roundRobinTry(clients, 'broadcast transaction', async (client) => {
+      try {
+        return await client.broadcastTx(txHex)
+      } catch (error) {
+        // Same signed bytes already accepted — treat as success for Ledger / offline paths.
+        if (isAlreadyBroadcastError(error)) {
+          return { transactionHash: knownHash, code: 0 } as DeliverTxResponse
+        }
+        throw error
+      }
+    })
   }
 
   /**
