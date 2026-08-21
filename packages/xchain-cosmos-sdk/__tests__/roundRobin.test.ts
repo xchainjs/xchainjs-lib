@@ -79,6 +79,42 @@ describe('roundRobinTry', () => {
       'No clients available. Can not get chain id',
     )
   })
+
+  /**
+   * Guardrail for cosmos keystore clients: never wrap sign+broadcast as one
+   * roundRobinTry unit. A timeout after the first node accepted the tx can
+   * re-sign with a new sequence and submit a second transaction.
+   * Safe pattern: sign once, then round-robin only broadcast of the same bytes.
+   */
+  it('documents that side-effecting callbacks run once per retried endpoint', async () => {
+    let sideEffects = 0
+    const result = await roundRobinTry(['a', 'b'], 'sign and broadcast', async (url) => {
+      sideEffects++
+      if (url === 'a') throw new Error('request timed out')
+      return `hash-from-${url}`
+    })
+    expect(sideEffects).toBe(2)
+    expect(result).toBe('hash-from-b')
+  })
+
+  it('keeps a single signed payload when only broadcast is round-robined', async () => {
+    let signs = 0
+    let broadcasts = 0
+    const signed = await (async () => {
+      signs++
+      return 'same-signed-bytes'
+    })()
+
+    const result = await roundRobinTry(['a', 'b'], 'broadcast transaction', async (url) => {
+      broadcasts++
+      if (url === 'a') throw new Error('request timed out')
+      return `accepted:${signed}`
+    })
+
+    expect(signs).toBe(1)
+    expect(broadcasts).toBe(2)
+    expect(result).toBe('accepted:same-signed-bytes')
+  })
 })
 
 describe('roundRobinGetTx', () => {
