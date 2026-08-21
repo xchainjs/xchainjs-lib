@@ -99,7 +99,9 @@ describe('Chainflip protocol', () => {
       destinationAddress: 'BITCOINFakeAddress',
     })
     expect(estimatedSwap.protocol).toBe('Chainflip')
-    expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeaddress')
+    // Quote-only: no deposit channel opened on estimate
+    expect(estimatedSwap.toAddress).toBe('')
+    expect(estimatedSwap.depositChannelId).toBeUndefined()
     expect(estimatedSwap.memo).toBe('')
     expect(assetToString(estimatedSwap.expectedAmount.asset)).toBe('BTC.BTC')
     expect(estimatedSwap.expectedAmount.baseAmount.amount().toString()).toBe('51193')
@@ -120,7 +122,7 @@ describe('Chainflip protocol', () => {
     expect(estimatedSwap.slipBasisPoints).toBe(100)
     expect(estimatedSwap.canSwap).toBe(true)
     expect(estimatedSwap.errors.length).toBe(0)
-    expect(estimatedSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
+    expect(estimatedSwap.warning).toContain('Open a deposit channel immediately before broadcast')
   })
 
   it('Should estimate from ERC-20 swap', async () => {
@@ -136,7 +138,8 @@ describe('Chainflip protocol', () => {
       destinationAddress: 'ETHEREUMfakeaddress',
     })
     expect(estimatedSwap.protocol).toBe('Chainflip')
-    expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeaddress')
+    expect(estimatedSwap.toAddress).toBe('')
+    expect(estimatedSwap.depositChannelId).toBeUndefined()
     expect(estimatedSwap.memo).toBe('')
     expect(assetToString(estimatedSwap.expectedAmount.asset)).toBe('ETH.ETH')
     expect(estimatedSwap.expectedAmount.baseAmount.amount().toString()).toBe('2063188201000691')
@@ -157,7 +160,7 @@ describe('Chainflip protocol', () => {
     expect(estimatedSwap.slipBasisPoints).toBe(100)
     expect(estimatedSwap.canSwap).toBe(true)
     expect(estimatedSwap.errors.length).toBe(0)
-    expect(estimatedSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
+    expect(estimatedSwap.warning).toContain('Open a deposit channel immediately before broadcast')
   })
 
   it('Should estimate to ERC-20 swap', async () => {
@@ -173,7 +176,8 @@ describe('Chainflip protocol', () => {
       destinationAddress: 'ETHEREUMfakeaddress',
     })
     expect(estimatedSwap.protocol).toBe('Chainflip')
-    expect(estimatedSwap.toAddress).toBe('ETHEREUMfakeaddress')
+    expect(estimatedSwap.toAddress).toBe('')
+    expect(estimatedSwap.depositChannelId).toBeUndefined()
     expect(estimatedSwap.memo).toBe('')
     expect(assetToString(estimatedSwap.expectedAmount.asset)).toBe(
       'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7',
@@ -198,6 +202,51 @@ describe('Chainflip protocol', () => {
     expect(estimatedSwap.slipBasisPoints).toBe(100)
     expect(estimatedSwap.canSwap).toBe(true)
     expect(estimatedSwap.errors.length).toBe(0)
-    expect(estimatedSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
+    expect(estimatedSwap.warning).toContain('Open a deposit channel immediately before broadcast')
+  })
+
+  it('Should estimate without addresses (quote refresh path)', async () => {
+    const estimatedSwap = await protocol.estimateSwap({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+    })
+    expect(estimatedSwap.canSwap).toBe(true)
+    expect(estimatedSwap.toAddress).toBe('')
+    expect(estimatedSwap.depositChannelId).toBeUndefined()
+    expect(estimatedSwap.expectedAmount.baseAmount.amount().toString()).toBe('51193')
+  })
+
+  it('Should open deposit channel with address, channel id, and expiry', async () => {
+    const channel = await protocol.openDepositChannel({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      fromAddress: 'ETHEREUMfakeaddress',
+      amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+      destinationAddress: 'BITCOINFakeAddress',
+    })
+    expect(channel.depositAddress).toBe('ETHEREUMfakeaddress')
+    expect(channel.depositChannelId).toBe('ethereum-channel-id')
+    expect(channel.expiresAt).toEqual(new Date(1716889354 * 1000))
+    expect(channel.depositChannelExpiryBlock).toBe(BigInt(20000))
+  })
+
+  it('Should require addresses to open deposit channel', async () => {
+    await expect(
+      protocol.openDepositChannel({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+      }),
+    ).rejects.toThrow(/fromAddress is required/)
+
+    await expect(
+      protocol.openDepositChannel({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        fromAddress: 'ETHEREUMfakeaddress',
+        amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+      }),
+    ).rejects.toThrow(/destinationAddress is required/)
   })
 })

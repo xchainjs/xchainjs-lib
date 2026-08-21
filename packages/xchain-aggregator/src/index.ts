@@ -1,4 +1,6 @@
 export { Aggregator } from './aggregator'
+export { ChainflipProtocol } from './protocols/chainflip'
+export type { ChainflipDepositChannel } from './protocols/chainflip'
 export type {
   IProtocol,
   QuoteSwapParams,
