@@ -3,6 +3,7 @@ import { assetToString, isTokenAsset } from '@xchainjs/xchain-util'
 
 import { DEFAULT_CONFIG } from './const'
 import { ProtocolFactory } from './protocols'
+import { ChainflipDepositChannel, ChainflipProtocol } from './protocols/chainflip'
 import {
   Config,
   IProtocol,
@@ -102,6 +103,22 @@ export class Aggregator {
       )
 
     return successfulQuotes
+  }
+
+  /**
+   * Open a Chainflip deposit channel for the given swap params.
+   * Call immediately before broadcast; do not cache across expiry.
+   * Chainflip `estimateSwap` is quote-only and does not open a channel.
+   *
+   * @param {QuoteSwapParams} params Must include fromAddress and destinationAddress
+   * @returns {ChainflipDepositChannel} Deposit address, channel id, and expiry
+   */
+  public async requestChainflipDepositAddress(params: QuoteSwapParams): Promise<ChainflipDepositChannel> {
+    const protocol = this.protocols.find((p) => p.name === 'Chainflip')
+    if (!protocol || !(protocol instanceof ChainflipProtocol)) {
+      throw Error('Chainflip protocol is not enabled')
+    }
+    return protocol.openDepositChannel(params)
   }
 
   /**

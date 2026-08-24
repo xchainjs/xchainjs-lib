@@ -19,7 +19,7 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
 
-import { CompatibleAsset } from './types'
+import { ChainflipDepositChannel, CompatibleAsset } from './types'
 import { cChainToXChain, xAssetToCAsset } from './utils'
 import { assetUSDC } from '@xchainjs/xchain-thorchain-query'
 
@@ -31,6 +31,14 @@ const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
     default:
       return 'mainnet'
   }
+}
+
+type SelectedQuoteContext = {
+  srcAssetData: AssetData
+  destAssetData: AssetData
+  selectedQuote: Quote
+  actualQuote: Quote
+  isUsingBoost: boolean
 }
 
 /**
@@ -93,158 +101,101 @@ export class ChainflipProtocol implements IProtocol {
   }
 
   /**
-   * Estimate swap by validating the swap parameters.
+   * Estimate swap (quote only). Does **not** open a deposit channel.
+   *
+   * Call {@link openDepositChannel} (or {@link doSwap}) immediately before broadcast.
    *
    * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
-   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
+   * @returns {QuoteSwap} Quote swap result. `toAddress` / `depositChannelId` are empty until a channel is opened.
    */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const srcAssetData = await this.getAssetData(params.fromAsset)
     const destAssetData = await this.getAssetData(params.destinationAsset)
 
     try {
-      let toAddress = ''
-      let depositChannelId = ''
-      const { quotes } = await this.sdk.getQuoteV2({
-        srcChain: srcAssetData.chain,
-        srcAsset: srcAssetData.asset,
-        destChain: destAssetData.chain,
-        destAsset: destAssetData.asset,
-        amount: params.amount.baseAmount.amount().toString(),
-        affiliateBrokers: this.affiliateBrokers,
-      })
-      // Find quote based on user preference for boost
-      let selectedQuote: Quote | undefined
-
-      if (params.enableBoost) {
-        // User wants boost - prioritize DCA with boost > REGULAR with boost > DCA > REGULAR
-        selectedQuote =
-          quotes.find((quote) => quote.type === 'DCA' && quote.boostQuote) ||
-          quotes.find((quote) => quote.type === 'REGULAR' && quote.boostQuote) ||
-          quotes.find((quote) => quote.type === 'DCA') ||
-          quotes.find((quote) => quote.type === 'REGULAR')
-      } else {
-        // User wants regular quotes - prioritize DCA > REGULAR (ignore boost quotes)
-        selectedQuote = quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
+      const selected = await this.getSelectedQuote(params, srcAssetData, destAssetData)
+      if (!selected) {
+        return this.emptyQuoteSwap(params, srcAssetData, destAssetData, ['No suitable quote found'])
       }
-
-      if (params.destinationAddress && selectedQuote && params.fromAddress) {
-        const quoteToUse = params.enableBoost && selectedQuote.boostQuote ? selectedQuote.boostQuote : selectedQuote
-        const resp = await this.sdk.requestDepositAddressV2({
-          quote: quoteToUse,
-          destAddress: params.destinationAddress,
-          srcAddress: params.fromAddress,
-          fillOrKillParams: {
-            slippageTolerancePercent: selectedQuote.recommendedSlippageTolerancePercent,
-            refundAddress: params.fromAddress,
-            retryDurationBlocks: 100,
-          },
-          affiliateBrokers: this.affiliateBrokers,
-        })
-        toAddress = resp.depositAddress
-        depositChannelId = resp.depositChannelId
-      } else {
-        console.error('No suitable quote found or destination/refund address missing')
-      }
-
-      // Determine which quote to use for fee calculations
-      const actualQuote = params.enableBoost && selectedQuote?.boostQuote ? selectedQuote.boostQuote : selectedQuote
-
-      const outboundFee = actualQuote?.includedFees.find((fee) => fee.type === 'EGRESS')
-      const brokerFee = actualQuote?.includedFees.find((fee) => fee.type === 'BROKER')
-      const networkFee = actualQuote?.includedFees.find((fee) => fee.type === 'NETWORK')
-      const boostFee = actualQuote?.includedFees.find((fee) => fee.type === 'BOOST')
-
-      // Check if boost is actually being used
-      const isUsingBoost = params.enableBoost && selectedQuote?.boostQuote && actualQuote === selectedQuote.boostQuote
-
-      return {
-        protocol: this.name,
-        toAddress,
-        memo: '',
-        expectedAmount: new CryptoAmount(
-          baseAmount(actualQuote?.egressAmount, destAssetData.decimals),
-          params.destinationAsset,
-        ),
-        dustThreshold: new CryptoAmount(
-          baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
-          params.fromAsset,
-        ),
-        totalSwapSeconds: actualQuote?.estimatedDurationSeconds ? actualQuote.estimatedDurationSeconds : 0,
-        maxStreamingQuantity: undefined,
-        canSwap: toAddress !== '',
-        warning: actualQuote?.lowLiquidityWarning
-          ? 'Do not cache this response. Do not send funds after the expiry. The difference in the chainflip swap rate (excluding fees) is lower than the global index rate of the swap by more than a certain threshold (currently set to 5%)'
-          : isUsingBoost
-          ? 'Do not cache this response. Do not send funds after the expiry. Boost enabled for faster processing.'
-          : 'Do not cache this response. Do not send funds after the expiry.',
-        errors: [],
-        slipBasisPoints: actualQuote?.recommendedSlippageTolerancePercent
-          ? actualQuote?.recommendedSlippageTolerancePercent * 100
-          : 0,
-        fees: {
-          asset: assetUSDC, // networkFee & broker fee paid in usdc
-          networkFee: new CryptoAmount(
-            baseAmount(
-              (networkFee ? parseInt(networkFee.amount) : 0) +
-                (isUsingBoost && boostFee ? parseInt(boostFee.amount) : 0),
-              isUsingBoost && boostFee ? srcAssetData.decimals : 6,
-            ),
-            isUsingBoost && boostFee ? params.fromAsset : assetUSDC,
-          ),
-          outboundFee: new CryptoAmount(
-            baseAmount(outboundFee ? outboundFee.amount : 0, destAssetData.decimals),
-            params.destinationAsset,
-          ),
-          affiliateFee: new CryptoAmount(baseAmount(brokerFee ? brokerFee.amount : 0, 6), assetUSDC),
-        },
-        depositChannelId,
-      }
+      return this.mapQuoteToQuoteSwap(params, selected)
     } catch (e) {
-      return {
-        protocol: this.name,
-        toAddress: '',
-        memo: '',
-        expectedAmount: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
-        dustThreshold: new CryptoAmount(
-          baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
-          params.fromAsset,
-        ),
-        totalSwapSeconds: 0,
-        maxStreamingQuantity: 0,
-        canSwap: false,
-        warning: '',
-        errors: [e instanceof Error ? e.message : 'Unknown error'],
-        slipBasisPoints: 0,
-        fees: {
-          asset: params.destinationAsset,
-          outboundFee: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
-          networkFee: new CryptoAmount(baseAmount(0, 6), assetUSDC),
-          affiliateFee: new CryptoAmount(baseAmount(0, 6), assetUSDC),
-        },
-        depositChannelId: undefined,
-      }
+      return this.emptyQuoteSwap(params, srcAssetData, destAssetData, [
+        e instanceof Error ? e.message : 'Unknown error',
+      ])
     }
   }
 
   /**
-   * Perform a swap operation between assets.
+   * Open a Chainflip deposit channel for the current quote.
+   * Open immediately before broadcast; do not cache across `expiresAt`.
+   *
+   * @param {QuoteSwapParams} params Must include `fromAddress` and `destinationAddress`
+   * @returns {ChainflipDepositChannel} Deposit address, channel id, and expiry
+   */
+  public async openDepositChannel(params: QuoteSwapParams): Promise<ChainflipDepositChannel> {
+    if (!params.fromAddress) throw Error('fromAddress is required to open a Chainflip deposit channel')
+    if (!params.destinationAddress) throw Error('destinationAddress is required to open a Chainflip deposit channel')
+
+    const srcAssetData = await this.getAssetData(params.fromAsset)
+    const destAssetData = await this.getAssetData(params.destinationAsset)
+    const selected = await this.getSelectedQuote(params, srcAssetData, destAssetData)
+    if (!selected) throw Error('No suitable Chainflip quote found')
+
+    const quoteToUse = selected.actualQuote
+
+    const resp = await this.sdk.requestDepositAddressV2({
+      quote: quoteToUse,
+      destAddress: params.destinationAddress,
+      srcAddress: params.fromAddress,
+      fillOrKillParams: {
+        // Must match the effective quote (boost vs regular), not the parent wrapper.
+        slippageTolerancePercent: quoteToUse.recommendedSlippageTolerancePercent,
+        refundAddress: params.fromAddress,
+        retryDurationBlocks: 100,
+      },
+      affiliateBrokers: this.affiliateBrokers,
+    })
+
+    const expiresAtSeconds = resp.estimatedDepositChannelExpiryTime
+    if (expiresAtSeconds == null) {
+      throw Error('Chainflip deposit channel response missing estimatedDepositChannelExpiryTime')
+    }
+
+    return {
+      depositAddress: resp.depositAddress,
+      depositChannelId: resp.depositChannelId,
+      expiresAt: new Date(expiresAtSeconds * 1000),
+      depositChannelExpiryBlock: resp.depositChannelExpiryBlock,
+      expectedAmount: new CryptoAmount(
+        baseAmount(quoteToUse.egressAmount, destAssetData.decimals),
+        params.destinationAsset,
+      ),
+      slipBasisPoints: quoteToUse.recommendedSlippageTolerancePercent
+        ? quoteToUse.recommendedSlippageTolerancePercent * 100
+        : 0,
+    }
+  }
+
+  /**
+   * Perform a swap: open a deposit channel, then transfer to the deposit address.
+   *
+   * Prefer {@link openDepositChannel} when the UI must track `expiresAt` /
+   * `depositChannelId` around slow signing (e.g. Ledger) or post-broadcast
+   * monitoring — `doSwap` does not return channel metadata.
+   *
    * @param {QuoteSwapParams} params Swap parameters
    * @returns {TxSubmitted} Transaction hash and URL of the swap
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
-    const quoteSwap = await this.estimateSwap(params)
-    if (!quoteSwap.canSwap) {
-      throw Error(`Can not make swap. ${quoteSwap.errors.join('\n')}`)
-    }
-
     if (!this.wallet) throw Error('Wallet not configured. Can not do swap')
 
+    const channel = await this.openDepositChannel(params)
+
     const hash = await this.wallet.transfer({
-      recipient: quoteSwap.toAddress,
+      recipient: channel.depositAddress,
       amount: params.amount.baseAmount,
       asset: params.fromAsset as CompatibleAsset,
-      memo: quoteSwap.memo,
+      memo: '',
     })
 
     return {
@@ -284,5 +235,129 @@ export class ChainflipProtocol implements IProtocol {
     })
     if (!assetData) throw Error(`${asset.ticker} asset not supported in ${asset.chain} chain`)
     return assetData
+  }
+
+  private async getSelectedQuote(
+    params: QuoteSwapParams,
+    srcAssetData: AssetData,
+    destAssetData: AssetData,
+  ): Promise<SelectedQuoteContext | undefined> {
+    const { quotes } = await this.sdk.getQuoteV2({
+      srcChain: srcAssetData.chain,
+      srcAsset: srcAssetData.asset,
+      destChain: destAssetData.chain,
+      destAsset: destAssetData.asset,
+      amount: params.amount.baseAmount.amount().toString(),
+      affiliateBrokers: this.affiliateBrokers,
+    })
+
+    let selectedQuote: Quote | undefined
+
+    if (params.enableBoost) {
+      selectedQuote =
+        quotes.find((quote) => quote.type === 'DCA' && quote.boostQuote) ||
+        quotes.find((quote) => quote.type === 'REGULAR' && quote.boostQuote) ||
+        quotes.find((quote) => quote.type === 'DCA') ||
+        quotes.find((quote) => quote.type === 'REGULAR')
+    } else {
+      selectedQuote = quotes.find((quote) => quote.type === 'DCA') || quotes.find((quote) => quote.type === 'REGULAR')
+    }
+
+    if (!selectedQuote) return undefined
+
+    const isUsingBoost = Boolean(params.enableBoost && selectedQuote.boostQuote)
+    const actualQuote = isUsingBoost && selectedQuote.boostQuote ? selectedQuote.boostQuote : selectedQuote
+
+    return {
+      srcAssetData,
+      destAssetData,
+      selectedQuote,
+      actualQuote,
+      isUsingBoost,
+    }
+  }
+
+  private mapQuoteToQuoteSwap(params: QuoteSwapParams, selected: SelectedQuoteContext): QuoteSwap {
+    const { destAssetData, srcAssetData, actualQuote, isUsingBoost } = selected
+
+    const outboundFee = actualQuote.includedFees.find((fee) => fee.type === 'EGRESS')
+    const brokerFee = actualQuote.includedFees.find((fee) => fee.type === 'BROKER')
+    // Prefer USDC NETWORK fee; never overload networkFee with BOOST (different asset, no Fees.boostFee field).
+    const networkFee =
+      actualQuote.includedFees.find((fee) => fee.type === 'NETWORK' && fee.asset === 'USDC') ||
+      actualQuote.includedFees.find((fee) => fee.type === 'NETWORK')
+    const reportedNetworkFee = new CryptoAmount(baseAmount(networkFee ? networkFee.amount : 0, 6), assetUSDC)
+
+    const baseWarning =
+      'Do not cache this response. Open a deposit channel immediately before broadcast; do not send funds after channel expiry. Deposit must be observed by Chainflip before expiry (broadcast-before-expiry is not enough for slow EVM inclusion).'
+
+    return {
+      protocol: this.name,
+      // Quote-only: channel is opened via openDepositChannel / doSwap
+      toAddress: '',
+      memo: '',
+      expectedAmount: new CryptoAmount(
+        baseAmount(actualQuote.egressAmount, destAssetData.decimals),
+        params.destinationAsset,
+      ),
+      dustThreshold: new CryptoAmount(
+        baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
+        params.fromAsset,
+      ),
+      totalSwapSeconds: actualQuote.estimatedDurationSeconds ? actualQuote.estimatedDurationSeconds : 0,
+      maxStreamingQuantity: undefined,
+      // Usable quote exists — NOT "channel already open". Callers must open a channel before send.
+      canSwap: true,
+      warning: actualQuote.lowLiquidityWarning
+        ? `${baseWarning} The difference in the chainflip swap rate (excluding fees) is lower than the global index rate of the swap by more than a certain threshold (currently set to 5%)`
+        : isUsingBoost
+        ? `${baseWarning} Boost enabled for faster processing.`
+        : baseWarning,
+      errors: [],
+      slipBasisPoints: actualQuote.recommendedSlippageTolerancePercent
+        ? actualQuote.recommendedSlippageTolerancePercent * 100
+        : 0,
+      fees: {
+        asset: assetUSDC,
+        networkFee: reportedNetworkFee,
+        outboundFee: new CryptoAmount(
+          baseAmount(outboundFee ? outboundFee.amount : 0, destAssetData.decimals),
+          params.destinationAsset,
+        ),
+        affiliateFee: new CryptoAmount(baseAmount(brokerFee ? brokerFee.amount : 0, 6), assetUSDC),
+      },
+      depositChannelId: undefined,
+    }
+  }
+
+  private emptyQuoteSwap(
+    params: QuoteSwapParams,
+    srcAssetData: AssetData,
+    destAssetData: AssetData,
+    errors: string[],
+  ): QuoteSwap {
+    return {
+      protocol: this.name,
+      toAddress: '',
+      memo: '',
+      expectedAmount: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
+      dustThreshold: new CryptoAmount(
+        baseAmount(srcAssetData.minimumSwapAmount, srcAssetData.decimals),
+        params.fromAsset,
+      ),
+      totalSwapSeconds: 0,
+      maxStreamingQuantity: 0,
+      canSwap: false,
+      warning: '',
+      errors,
+      slipBasisPoints: 0,
+      fees: {
+        asset: params.destinationAsset,
+        outboundFee: new CryptoAmount(baseAmount(0, destAssetData.decimals), params.destinationAsset),
+        networkFee: new CryptoAmount(baseAmount(0, 6), assetUSDC),
+        affiliateFee: new CryptoAmount(baseAmount(0, 6), assetUSDC),
+      },
+      depositChannelId: undefined,
+    }
   }
 }

@@ -64,6 +64,20 @@ const aggregator = new Aggregator({
 - Do swaps
 - Get swap history through different protocols
 
+### Chainflip deposit channels
+
+Chainflip `estimateSwap` is **quote-only** — it does **not** open a deposit channel. Wallets that refresh quotes must not call channel creation on every refresh (channels expire; late deposits may not swap or refund).
+
+Recommended flow:
+
+1. `aggregator.estimateSwap(...)` — price discovery / refresh (`toAddress` empty for Chainflip; `canSwap` means a usable quote exists)
+2. At confirm, immediately before broadcast: `aggregator.requestChainflipDepositAddress(...)` — returns `depositAddress`, `depositChannelId`, and `expiresAt`
+3. Transfer to that deposit address (or use `doSwap`, which opens a channel then sends)
+
+Do not cache deposit addresses across `expiresAt`. EVM Chainflip deposit addresses can be reused across channels; always bind signing to a live `depositChannelId` + expiry.
+
+**Important:** Chainflip must **observe** the deposit before channel expiry. Broadcasting before `expiresAt` is not enough if the source chain (especially EVM) confirms after expiry — funds may not create a swap and may not FoK-refund. Prefer `requestChainflipDepositAddress` over `doSwap` when you need to track `expiresAt` / `depositChannelId` around slow Ledger signing or post-broadcast monitoring (`doSwap` does not return channel metadata).
+
 
 ## Examples
 
