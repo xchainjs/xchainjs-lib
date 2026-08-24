@@ -282,14 +282,11 @@ export class ChainflipProtocol implements IProtocol {
 
     const outboundFee = actualQuote.includedFees.find((fee) => fee.type === 'EGRESS')
     const brokerFee = actualQuote.includedFees.find((fee) => fee.type === 'BROKER')
-    const networkFee = actualQuote.includedFees.find((fee) => fee.type === 'NETWORK')
-    const boostFee = actualQuote.includedFees.find((fee) => fee.type === 'BOOST')
-
-    // Never sum base units across assets (NETWORK is typically USDC; BOOST is src asset).
-    const reportedNetworkFee =
-      isUsingBoost && boostFee
-        ? new CryptoAmount(baseAmount(boostFee.amount, srcAssetData.decimals), params.fromAsset)
-        : new CryptoAmount(baseAmount(networkFee ? networkFee.amount : 0, 6), assetUSDC)
+    // Prefer USDC NETWORK fee; never overload networkFee with BOOST (different asset, no Fees.boostFee field).
+    const networkFee =
+      actualQuote.includedFees.find((fee) => fee.type === 'NETWORK' && fee.asset === 'USDC') ||
+      actualQuote.includedFees.find((fee) => fee.type === 'NETWORK')
+    const reportedNetworkFee = new CryptoAmount(baseAmount(networkFee ? networkFee.amount : 0, 6), assetUSDC)
 
     const baseWarning =
       'Do not cache this response. Open a deposit channel immediately before broadcast; do not send funds after channel expiry. Deposit must be observed by Chainflip before expiry (broadcast-before-expiry is not enough for slow EVM inclusion).'

@@ -259,6 +259,61 @@ describe('Chainflip protocol', () => {
     expect(args.fillOrKillParams.slippageTolerancePercent).toBe(args.quote.recommendedSlippageTolerancePercent)
   })
 
+  it('Should use boost quote slippage (not parent) when enableBoost is set', async () => {
+    const parentSlippage = 1
+    const boostSlippage = 5
+    const boostQuote = {
+      srcAsset: { chain: 'Ethereum', asset: 'ETH' },
+      destAsset: { chain: 'Bitcoin', asset: 'BTC' },
+      depositAmount: '1000000',
+      type: 'REGULAR',
+      egressAmount: '50000',
+      includedFees: [
+        { type: 'NETWORK', chain: 'Ethereum', asset: 'USDC', amount: '100' },
+        { type: 'BOOST', chain: 'Ethereum', asset: 'ETH', amount: '1000' },
+        { type: 'EGRESS', chain: 'Bitcoin', asset: 'BTC', amount: '1599' },
+      ],
+      lowLiquidityWarning: false,
+      estimatedDurationSeconds: 100,
+      recommendedSlippageTolerancePercent: boostSlippage,
+      poolInfo: [],
+      estimatedPrice: '2300',
+    }
+    const parentQuote = {
+      ...boostQuote,
+      egressAmount: '51193',
+      recommendedSlippageTolerancePercent: parentSlippage,
+      boostQuote,
+    }
+
+    jest.spyOn(SwapSDK.prototype, 'getQuoteV2').mockResolvedValueOnce({
+      amount: '10000000000000000',
+      srcChain: 'Ethereum',
+      srcAsset: 'ETH',
+      destChain: 'Bitcoin',
+      destAsset: 'BTC',
+      quotes: [parentQuote],
+    } as never)
+
+    const spy = jest.spyOn(SwapSDK.prototype, 'requestDepositAddressV2')
+
+    await protocol.openDepositChannel({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      fromAddress: 'ETHEREUMrefundAddress',
+      amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+      destinationAddress: 'BITCOINFakeAddress',
+      enableBoost: true,
+    })
+
+    expect(spy).toHaveBeenCalledTimes(1)
+    const args = spy.mock.calls[0][0]
+    expect(args.quote).toBe(boostQuote)
+    expect(args.quote.recommendedSlippageTolerancePercent).toBe(boostSlippage)
+    expect(args.fillOrKillParams.slippageTolerancePercent).toBe(boostSlippage)
+    expect(args.fillOrKillParams.slippageTolerancePercent).not.toBe(parentSlippage)
+  })
+
   it('Should reject channel response without expiry', async () => {
     jest.spyOn(SwapSDK.prototype, 'requestDepositAddressV2').mockResolvedValueOnce({
       depositAddress: 'ETHEREUMfakeaddress',
