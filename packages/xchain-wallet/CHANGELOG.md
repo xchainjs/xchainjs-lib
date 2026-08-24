@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.34
+
+### Patch Changes
+
+- Updated dependencies [f291e3f]
+  - @xchainjs/xchain-thorchain@3.1.1
+  - @xchainjs/xchain-mayachain@4.2.1
+
 ## 2.0.33
 
 ### Patch Changes

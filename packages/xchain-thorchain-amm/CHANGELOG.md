@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.1.5
+
+### Patch Changes
+
+- Updated dependencies [f291e3f]
+  - @xchainjs/xchain-thorchain@3.1.1
+  - @xchainjs/xchain-cosmos@3.1.1
+  - @xchainjs/xchain-wallet@2.0.34
+
 ## 3.1.4
 
 ### Patch Changes

@@ -1,5 +1,18 @@
 # testing-gui
 
+## 1.0.20
+
+### Patch Changes
+
+- Updated dependencies [f291e3f]
+  - @xchainjs/xchain-thorchain@3.1.1
+  - @xchainjs/xchain-mayachain@4.2.1
+  - @xchainjs/xchain-cosmos@3.1.1
+  - @xchainjs/xchain-kujira@2.1.1
+  - @xchainjs/xchain-mayachain-amm@4.2.5
+  - @xchainjs/xchain-thorchain-amm@3.1.5
+  - @xchainjs/xchain-wallet@2.0.34
+
 ## 1.0.19
 
 ### Patch Changes
