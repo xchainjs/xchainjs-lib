@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.2.5
+
+### Patch Changes
+
+- Updated dependencies [f291e3f]
+  - @xchainjs/xchain-thorchain@3.1.1
+  - @xchainjs/xchain-mayachain@4.2.1
+  - @xchainjs/xchain-kujira@2.1.1
+  - @xchainjs/xchain-wallet@2.0.34
+
 ## 4.2.4
 
 ### Patch Changes
