@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1
+
+### Patch Changes
+
+- 667f433: Fix Chainflip `openDepositChannel` when using `brokerUrl`: `@chainflip/sdk` broker path omits `estimatedDepositChannelExpiryTime`, which previously aborted after the channel was already opened. Fall back to a ~24h TTL (Chainflip channel lifetime) so broker-mode submits can proceed.
+
 ## 3.0.0
 
 ### Major Changes
