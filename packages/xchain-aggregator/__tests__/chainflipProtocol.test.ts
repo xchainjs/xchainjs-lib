@@ -314,23 +314,31 @@ describe('Chainflip protocol', () => {
     expect(args.fillOrKillParams.slippageTolerancePercent).not.toBe(parentSlippage)
   })
 
-  it('Should reject channel response without expiry', async () => {
+  it('Should fall back to ~24h expiry when broker response omits estimatedDepositChannelExpiryTime', async () => {
     jest.spyOn(SwapSDK.prototype, 'requestDepositAddressV2').mockResolvedValueOnce({
       depositAddress: 'ETHEREUMfakeaddress',
       depositChannelId: 'ethereum-channel-id',
       depositChannelExpiryBlock: BigInt(20000),
-      // estimatedDepositChannelExpiryTime intentionally omitted
+      // estimatedDepositChannelExpiryTime intentionally omitted (broker SDK path)
     } as never)
 
-    await expect(
-      protocol.openDepositChannel({
-        fromAsset: AssetETH,
-        destinationAsset: AssetBTC,
-        fromAddress: 'ETHEREUMfakeaddress',
-        amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
-        destinationAddress: 'BITCOINFakeAddress',
-      }),
-    ).rejects.toThrow(/missing estimatedDepositChannelExpiryTime/)
+    const beforeMs = Date.now()
+    const channel = await protocol.openDepositChannel({
+      fromAsset: AssetETH,
+      destinationAsset: AssetBTC,
+      fromAddress: 'ETHEREUMfakeaddress',
+      amount: new CryptoAmount(assetToBase(assetAmount(0.01, ETH_GAS_ASSET_DECIMAL)), AssetETH),
+      destinationAddress: 'BITCOINFakeAddress',
+    })
+    const afterMs = Date.now()
+
+    expect(channel.depositAddress).toBe('ETHEREUMfakeaddress')
+    expect(channel.depositChannelId).toBe('ethereum-channel-id')
+    // Fallback = now + 24h; allow small clock skew around the call
+    const minExpiryMs = beforeMs + 24 * 60 * 60 * 1000 - 1000
+    const maxExpiryMs = afterMs + 24 * 60 * 60 * 1000 + 1000
+    expect(channel.expiresAt.getTime()).toBeGreaterThanOrEqual(minExpiryMs)
+    expect(channel.expiresAt.getTime()).toBeLessThanOrEqual(maxExpiryMs)
   })
 
   it('Should require addresses to open deposit channel', async () => {
