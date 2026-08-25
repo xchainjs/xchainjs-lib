@@ -13,7 +13,11 @@ export type CompatibleAsset = Asset | TokenAsset
 export type ChainflipDepositChannel = {
   depositAddress: string
   depositChannelId: string
-  /** From SDK `estimatedDepositChannelExpiryTime` (unix seconds). */
+  /**
+   * Channel expiry. Prefer SDK `estimatedDepositChannelExpiryTime` (unix seconds).
+   * Broker-mode SDK responses omit that field — then a ~24h fallback is used
+   * (Chainflip deposit-channel lifetime).
+   */
   expiresAt: Date
   depositChannelExpiryBlock?: bigint
   /** Egress amount from the quote bound to this channel. */

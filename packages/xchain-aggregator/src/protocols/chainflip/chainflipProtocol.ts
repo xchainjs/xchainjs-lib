@@ -33,6 +33,13 @@ const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
   }
 }
 
+/**
+ * Broker-mode `requestDepositAddressV2` omits `estimatedDepositChannelExpiryTime`.
+ * Chainflip deposit channels expire after ~24h; use that for TTL guards when the
+ * SDK leaves expiry undefined (channel is already open — do not throw).
+ */
+export const CHAINFLIP_BROKER_CHANNEL_TTL_FALLBACK_SECONDS = 24 * 60 * 60
+
 type SelectedQuoteContext = {
   srcAssetData: AssetData
   destAssetData: AssetData
@@ -156,10 +163,13 @@ export class ChainflipProtocol implements IProtocol {
       affiliateBrokers: this.affiliateBrokers,
     })
 
-    const expiresAtSeconds = resp.estimatedDepositChannelExpiryTime
-    if (expiresAtSeconds == null) {
-      throw Error('Chainflip deposit channel response missing estimatedDepositChannelExpiryTime')
-    }
+    // Backend API path returns estimatedDepositChannelExpiryTime. Broker RPC path
+    // (@chainflip/sdk requestDepositAddressV2 with brokerUrl) only returns
+    // sourceChainExpiryBlock and leaves estimatedExpiryTime undefined — do not fail
+    // the open after the channel already exists. Chainflip channels live ~24h.
+    const expiresAtSeconds =
+      resp.estimatedDepositChannelExpiryTime ??
+      Math.floor(Date.now() / 1000) + CHAINFLIP_BROKER_CHANNEL_TTL_FALLBACK_SECONDS
 
     return {
       depositAddress: resp.depositAddress,
