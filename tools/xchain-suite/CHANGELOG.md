@@ -1,5 +1,12 @@
 # testing-gui
 
+## 1.0.21
+
+### Patch Changes
+
+- Updated dependencies [0b77252]
+  - @xchainjs/xchain-monero@0.2.7
+
 ## 1.0.20
 
 ### Patch Changes
