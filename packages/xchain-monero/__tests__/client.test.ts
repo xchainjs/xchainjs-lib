@@ -1,7 +1,7 @@
 import { Network } from '@xchainjs/xchain-client'
 import { assetToString, baseAmount } from '@xchainjs/xchain-util'
 
-import { Client, defaultXMRParams } from '../src'
+import { Client, defaultXMRParams, TYPICAL_TX_WEIGHT } from '../src'
 
 // Mock fetch globally for LWS tests
 const mockFetch = jest.fn()
@@ -85,7 +85,7 @@ describe('Monero client (pure JS)', () => {
         })
       })
       it('Should get explorer url', () => {
-        expect(client.getExplorerUrl()).toBe('https://xmrchain.net/')
+        expect(client.getExplorerUrl()).toBe('https://stagenet.xmrchain.net/')
       })
       it('Should get address url', () => {
         expect(
@@ -93,12 +93,12 @@ describe('Monero client (pure JS)', () => {
             '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
           ),
         ).toBe(
-          'https://xmrchain.net/search?value=44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
+          'https://stagenet.xmrchain.net/search?value=44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
         )
       })
       it('Should get transaction url', () => {
         expect(client.getExplorerTxUrl('abc123def456789012345678901234567890123456789012345678901234abcd')).toBe(
-          'https://xmrchain.net/tx/abc123def456789012345678901234567890123456789012345678901234abcd',
+          'https://stagenet.xmrchain.net/tx/abc123def456789012345678901234567890123456789012345678901234abcd',
         )
       })
     })
@@ -168,6 +168,13 @@ describe('Monero client (pure JS)', () => {
           '44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQ0EP3A',
         ),
       ).toBeFalsy()
+    })
+
+    it('Should reject a same-length address with a bad checksum', () => {
+      const valid = '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR'
+      const tampered = valid.slice(0, -1) + (valid.endsWith('R') ? 'N' : 'R')
+      expect(client.validateAddress(tampered)).toBe(false)
+      expect(client.validateAddress(valid)).toBe(true)
     })
 
     it('Should get address with phrase', async () => {
@@ -766,12 +773,67 @@ describe('Monero client (pure JS)', () => {
       )
       expect(mockFetch).not.toHaveBeenCalled()
     })
+
+    it('Should refuse transfer when wallet RPC is not configured, even if LWS is', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: ['https://lws.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+      })
+
+      await expect(client.transfer({ recipient: dest, amount: baseAmount(1, 12) })).rejects.toThrow(
+        /requires monero-wallet-rpc/,
+      )
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Fees', () => {
+    beforeEach(() => {
+      mockFetch.mockReset()
+    })
+
+    it('Should scale daemon fee-per-byte by typical tx weight', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        daemonUrls: { [Network.Mainnet]: ['https://daemon.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+      })
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: { fee: 20, quantization_mask: 10000, status: 'OK' } }),
+      })
+
+      const fees = await client.getFees()
+      expect(fees.average.amount().toString()).toBe((20 * TYPICAL_TX_WEIGHT).toString())
+      expect(fees.fast.amount().toString()).toBe((20 * TYPICAL_TX_WEIGHT).toString())
+    })
   })
 
   describe('Unsupported methods', () => {
-    it('Should throw on transfer without phrase', async () => {
+    it('Should throw on transfer without wallet RPC', async () => {
       const client = new Client()
-      await expect(client.transfer({ recipient: 'addr', amount: baseAmount(1, 12) })).rejects.toThrow()
+      await expect(
+        client.transfer({
+          recipient: '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
+          amount: baseAmount(1, 12),
+        }),
+      ).rejects.toThrow(/requires monero-wallet-rpc/)
+    })
+
+    it('Should throw on transfer without phrase when wallet RPC is configured', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+      })
+      await expect(
+        client.transfer({
+          recipient: '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
+          amount: baseAmount(1, 12),
+        }),
+      ).rejects.toThrow(/Phrase must be provided/)
     })
 
     it('Should throw on prepareTx', async () => {

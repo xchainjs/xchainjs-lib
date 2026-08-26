@@ -1,6 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
 import { keccak_256 } from '@noble/hashes/sha3'
 
+import { decodeAddress } from './crypto/address'
+
 /**
  * Monero network type values matching monero-ts MoneroNetworkType enum
  */
@@ -23,20 +25,15 @@ export const getMoneroNetworkType = (network: Network): number => {
 }
 
 /**
- * Validates a Monero address format.
- * Standard addresses are 95 chars, integrated addresses are 106 chars.
- * Uses base58 character set and prefix validation.
+ * Validates a Monero address: Cryptonote base58, known prefix, and keccak checksum.
  */
 export const validateMoneroAddress = (address: string): boolean => {
-  const base58Chars = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/
-  if (!base58Chars.test(address)) return false
-
-  // Standard address (95 chars): primary starts with 4/5/9, subaddress starts with 8/7/B
-  if (address.length === 95) return /^[45789B]/.test(address)
-  // Integrated address (106 chars): starts with 4/5/A
-  if (address.length === 106) return /^[45A]/.test(address)
-
-  return false
+  try {
+    decodeAddress(address)
+    return true
+  } catch {
+    return false
+  }
 }
 
 /**

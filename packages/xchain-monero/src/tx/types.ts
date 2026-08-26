@@ -1,5 +1,5 @@
 /**
- * Monero transaction types for RCTTypeCLSAG transactions.
+ * Monero transaction types for RCTTypeBulletproofPlus (type 6) transactions.
  */
 
 /** A transaction input (key input) */

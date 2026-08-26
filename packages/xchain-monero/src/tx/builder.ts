@@ -3,6 +3,10 @@
  * Orchestrates: stealth addresses, Pedersen commitments, ECDH encryption,
  * CLSAG signatures, Bulletproofs+ range proofs, and serialization.
  *
+ * Not used by Client.transfer. Do not broadcast builder output until it is
+ * verified against monerod — RPC, CLSAG message hash, and decoy sampling are
+ * not consensus-compatible.
+ *
  * Reference: monero/src/wallet/wallet2.cpp (create_transactions_2)
  */
 

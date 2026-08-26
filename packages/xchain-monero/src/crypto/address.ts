@@ -2,11 +2,33 @@ import { keccak_256 } from '@noble/hashes/sha3'
 
 import { cnBase58Encode, cnBase58Decode } from './base58monero'
 
-/** Network address prefixes (byte value) */
+/** Network address prefixes (byte value) for standard (primary) addresses */
 const NETWORK_PREFIXES: Record<number, number> = {
   0: 0x12, // mainnet (18)
   1: 0x35, // testnet (53)
   2: 0x18, // stagenet (24)
+}
+
+export type MoneroAddressKind = 'standard' | 'subaddress' | 'integrated'
+
+const PREFIX_META: Record<number, { networkType: number; kind: MoneroAddressKind }> = {
+  0x12: { networkType: 0, kind: 'standard' },
+  0x13: { networkType: 0, kind: 'integrated' },
+  0x2a: { networkType: 0, kind: 'subaddress' },
+  0x35: { networkType: 1, kind: 'standard' },
+  0x36: { networkType: 1, kind: 'integrated' },
+  0x3f: { networkType: 1, kind: 'subaddress' },
+  0x18: { networkType: 2, kind: 'standard' },
+  0x19: { networkType: 2, kind: 'integrated' },
+  0x24: { networkType: 2, kind: 'subaddress' },
+}
+
+export interface DecodedMoneroAddress {
+  publicSpendKey: Uint8Array
+  publicViewKey: Uint8Array
+  networkType: number
+  kind: MoneroAddressKind
+  paymentId?: Uint8Array
 }
 
 /**
@@ -36,34 +58,35 @@ export const encodeAddress = (publicSpendKey: Uint8Array, publicViewKey: Uint8Ar
 }
 
 /**
- * Decodes a standard Monero address into its public spend/view keys.
- * Validates the checksum.
+ * Decodes a Monero address (standard, subaddress, or integrated) and checks the keccak checksum.
  */
-export const decodeAddress = (
-  address: string,
-): { publicSpendKey: Uint8Array; publicViewKey: Uint8Array; networkType: number } => {
+export const decodeAddress = (address: string): DecodedMoneroAddress => {
   const data = cnBase58Decode(address)
-  if (data.length !== 69) throw new Error(`Invalid address length: ${data.length}`)
+  if (data.length !== 69 && data.length !== 77) {
+    throw new Error(`Invalid address length: ${data.length}`)
+  }
 
-  const payload = data.slice(0, 65)
-  const checksum = data.slice(65, 69)
-
-  // Verify checksum
+  const payload = data.slice(0, data.length - 4)
+  const checksum = data.slice(data.length - 4)
   const expected = keccak_256(payload).slice(0, 4)
   for (let i = 0; i < 4; i++) {
     if (checksum[i] !== expected[i]) throw new Error('Invalid address checksum')
   }
 
-  const prefix = data[0]
-  let networkType: number
-  if (prefix === 0x12) networkType = 0 // mainnet
-  else if (prefix === 0x35) networkType = 1 // testnet
-  else if (prefix === 0x18) networkType = 2 // stagenet
-  else throw new Error(`Unknown address prefix: ${prefix}`)
+  const meta = PREFIX_META[data[0]]
+  if (!meta) throw new Error(`Unknown address prefix: ${data[0]}`)
+  if (meta.kind === 'integrated' && data.length !== 77) {
+    throw new Error(`Invalid integrated address length: ${data.length}`)
+  }
+  if (meta.kind !== 'integrated' && data.length !== 69) {
+    throw new Error(`Invalid ${meta.kind} address length: ${data.length}`)
+  }
 
   return {
     publicSpendKey: data.slice(1, 33),
     publicViewKey: data.slice(33, 65),
-    networkType,
+    networkType: meta.networkType,
+    kind: meta.kind,
+    paymentId: meta.kind === 'integrated' ? data.slice(65, 73) : undefined,
   }
 }
