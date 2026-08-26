@@ -14,6 +14,12 @@ export const XMRChain = 'XMR' as const
 export const XMR_DECIMALS = 12
 
 /**
+ * Approximate serialized weight of a 2-in/2-out RingCT tx, used to turn daemon
+ * fee-per-byte into a displayable total. Wallet-rpc transfer computes the real fee.
+ */
+export const TYPICAL_TX_WEIGHT = 3000
+
+/**
  * Monero native asset
  */
 export const AssetXMR: Asset = {
@@ -29,6 +35,12 @@ const mainnetExplorer = new ExplorerProvider(
   'https://xmrchain.net/tx/%%TX_ID%%',
 )
 
+const stagenetExplorer = new ExplorerProvider(
+  'https://stagenet.xmrchain.net/',
+  'https://stagenet.xmrchain.net/search?value=%%ADDRESS%%',
+  'https://stagenet.xmrchain.net/tx/%%TX_ID%%',
+)
+
 export const defaultXMRParams: XMRClientParams = {
   network: Network.Mainnet,
   rootDerivationPaths: {
@@ -38,17 +50,13 @@ export const defaultXMRParams: XMRClientParams = {
   },
   explorerProviders: {
     [Network.Mainnet]: mainnetExplorer,
-    [Network.Testnet]: new ExplorerProvider(
-      'https://stagenet.xmrchain.net/',
-      'https://stagenet.xmrchain.net/search?value=%%ADDRESS%%',
-      'https://stagenet.xmrchain.net/tx/%%TX_ID%%',
-    ),
-    [Network.Stagenet]: mainnetExplorer,
+    [Network.Testnet]: stagenetExplorer,
+    [Network.Stagenet]: stagenetExplorer,
   },
   daemonUrls: {
     [Network.Mainnet]: ['https://xmr-node.cakewallet.com:18081', 'https://node.sethforprivacy.com'],
     [Network.Testnet]: ['http://stagenet.xmr-tw.org:38081'],
-    [Network.Stagenet]: ['https://xmr-node.cakewallet.com:18081', 'https://node.sethforprivacy.com'],
+    [Network.Stagenet]: ['http://stagenet.xmr-tw.org:38081'],
   },
   lwsUrls: {
     [Network.Mainnet]: [],

@@ -229,9 +229,7 @@ export async function getTransfers(url: string, accountIndex = 0): Promise<Walle
     account_index: accountIndex,
   })
 
-  return [...(result.in ?? []), ...(result.out ?? [])]
-    .map(normalizeTransfer)
-    .filter((tx) => tx.txid && tx.height > 0)
+  return [...(result.in ?? []), ...(result.out ?? [])].map(normalizeTransfer).filter((tx) => tx.txid && tx.height > 0)
 }
 
 export async function getBalance(url: string, accountIndex = 0): Promise<WalletBalance> {

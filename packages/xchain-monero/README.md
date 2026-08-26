@@ -1,10 +1,19 @@
 # `@xchainjs/xchain-monero`
 
-Monero (XMR) client for XChainJS — a pure JavaScript implementation with no WASM dependencies.
+Monero (XMR) client for XChainJS. Address derivation is pure JavaScript (no WASM). **Sending funds requires `monero-wallet-rpc`.**
 
 ## Status
 
-Address derivation, **balance**, **history**, and **transfer** against a local `monerod` work via `monero-wallet-rpc`. Fee estimates still come from the daemon (per-byte; the suite Fees tab is not a full tx fee). The JS RingCT builder + LWS path remains as a fallback and is not what xchain-suite uses.
+This package is experimental. Treat it as a local-node adapter, not a general-purpose Monero wallet.
+
+| Capability | How |
+|---|---|
+| Address from BIP-39 | Pure JS (SLIP-10). Not a 25-word `monero-wallet-cli` seed. |
+| Balance / history | `walletRpcUrls` → `lwsUrls` → bounded daemon scan (≤ 5,000 blocks) |
+| Transfer | **`walletRpcUrls` only.** The in-process RingCT builder is not used. |
+| Fees | Daemon fee-per-byte × a typical 2-in/2-out weight. Wallet-rpc sets the real fee. |
+
+A public `monerod` cannot answer “what is my balance?” or build a spend. Point the client at your own node plus `monero-wallet-rpc`.
 
 ## Overview
 
@@ -12,10 +21,10 @@ This package implements the standard XChainJS `XChainClient` interface.
 
 Key design decisions:
 
-- **Pure JS** — `@noble/curves`, `@noble/hashes`, and `micro-key-producer`. No native modules or WASM, so it runs in Node.js and the browser.
+- **Address crypto in JS** — `@noble/curves`, `@noble/hashes`, and `micro-key-producer`. No native modules or WASM.
 - **SLIP-10 key derivation** — spend/view keys come from a BIP-39 mnemonic at `m/44'/128'/account'`. This is **not** a Monero 25-word seed. A `monero-wallet-cli` wallet created with the official seed will not share this address.
-- **`monerod` has no wallet state.** The daemon will not return a balance. You need wallet-rpc (preferred for a local node), LWS, or a short client-side scan.
-- **Balance lookup order** — `walletRpcUrls` → `lwsUrls` → JSON daemon scan (only if the range is ≤ 5,000 blocks).
+- **`monerod` has no wallet state.** The daemon will not return a balance.
+- **Do not broadcast output from `tx/builder.ts`.** That path is not consensus-compatible.
 
 ## Installation
 
@@ -82,6 +91,8 @@ Leave this with `--wallet-dir` and no wallet preloaded. The client creates/opens
 ```bash
 mkdir -p /path/to/xchain-wallets
 
+# --disable-rpc-login is for localhost development only. Do not bind this
+# process to a public interface.
 monero-wallet-rpc \
   --daemon-address 127.0.0.1:18081 \
   --trusted-daemon \
@@ -114,16 +125,13 @@ src/
 ├── client.ts          # XChainClient implementation
 ├── const.ts           # Chain constants, default params
 ├── types.ts           # Client parameter types
-├── utils.ts           # Address derivation, key helpers
-├── walletRpc.ts       # monero-wallet-rpc (balance against a local node)
+├── utils.ts           # Address helpers, scalar ops
+├── walletRpc.ts       # monero-wallet-rpc (balance / history / transfer)
 ├── lws.ts             # MyMonero-compatible Light Wallet Server API
 ├── daemon.ts          # Monero daemon RPC client
 ├── scanner.ts         # Bounded JSON daemon scan fallback
-└── tx/
-    ├── builder.ts     # Transaction construction
-    ├── serialize.ts   # Binary serialization
-    ├── decoySelection.ts  # Ring member (decoy) selection
-    └── types.ts       # Transaction types
+├── crypto/            # Address + primitive crypto (not a send path)
+└── tx/                # Experimental RingCT builder — not used by transfer()
 ```
 
 ## License

@@ -78,6 +78,7 @@ describe('Phase 3d: Address encode/decode roundtrip', () => {
 
     const decoded = decodeAddress(address)
     expect(decoded.networkType).toBe(0)
+    expect(decoded.kind).toBe('standard')
     expect(bytesToHex(decoded.publicSpendKey)).toBe(bytesToHex(keys.publicSpendKey))
     expect(bytesToHex(decoded.publicViewKey)).toBe(bytesToHex(keys.publicViewKey))
   })
@@ -103,5 +104,15 @@ describe('Phase 3d: Address encode/decode roundtrip', () => {
     const tampered = chars.join('')
 
     expect(() => decodeAddress(tampered)).toThrow()
+  })
+
+  it('Should decode a known mainnet subaddress', () => {
+    const decoded = decodeAddress(
+      '888tNkZrPN6JsEgekjMnABU4TBzc2Dt29EPAvkRxbANsAnjyPbb3iQ1YBRk1UXcdRsiKc9dhwMVgN5S9cQUiyoogDavup3H',
+    )
+    expect(decoded.kind).toBe('subaddress')
+    expect(decoded.networkType).toBe(0)
+    expect(decoded.publicSpendKey.length).toBe(32)
+    expect(decoded.publicViewKey.length).toBe(32)
   })
 })

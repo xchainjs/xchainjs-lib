@@ -16,14 +16,12 @@ import { Address, baseAmount } from '@xchainjs/xchain-util'
 import { keccak_256 } from '@noble/hashes/sha3'
 import slip10 from 'micro-key-producer/slip10.js'
 
-import { AssetXMR, XMRChain, XMR_DECIMALS, defaultXMRParams } from './const'
-import { encodeAddress, decodeAddress } from './crypto/address'
+import { AssetXMR, XMRChain, XMR_DECIMALS, TYPICAL_TX_WEIGHT, defaultXMRParams } from './const'
+import { encodeAddress } from './crypto/address'
 import { deriveKeyPairs } from './crypto/keys'
 import * as daemon from './daemon'
 import * as lws from './lws'
 import * as walletRpc from './walletRpc'
-import { buildTransaction } from './tx/builder'
-import type { SpendableOutput, Destination } from './tx/builder'
 import { scanBlocks, computeBalance, OwnedOutput } from './scanner'
 import { Balance, Tx, TxParams, TxsPage, XMRClientParams } from './types'
 import { bytesToHex, hexToBytes, getMoneroNetworkType, scReduce32, validateMoneroAddress } from './utils'
@@ -158,15 +156,16 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Get transaction fees via daemon RPC.
+   * Estimate a typical tx fee as daemon fee-per-byte × TYPICAL_TX_WEIGHT.
+   * Wallet-rpc computes the real fee at transfer time.
    */
   public async getFees(): Promise<Fees> {
     const urls = this.daemonUrls[this.getNetwork()]
 
     for (const url of urls) {
       try {
-        const feeEstimate = await daemon.getFeeEstimate(url)
-        const fee = baseAmount(feeEstimate.toString(), XMR_DECIMALS)
+        const feePerByte = await daemon.getFeeEstimate(url)
+        const fee = baseAmount((BigInt(feePerByte) * BigInt(TYPICAL_TX_WEIGHT)).toString(), XMR_DECIMALS)
 
         return {
           type: FeeType.FlatFee,
@@ -307,116 +306,36 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Transfer XMR to a recipient address.
-   * Prefers monero-wallet-rpc (local monerod). Falls back to LWS + local RingCT builder.
+   * Transfer XMR to a recipient address via monero-wallet-rpc.
+   * The in-process RingCT builder is not used: it is not consensus-compatible.
    */
   public async transfer(params: TxParams): Promise<string> {
     const { recipient, amount } = params
     if (!recipient) throw new Error('Recipient address is required')
     if (!amount) throw new Error('Amount is required')
+    if (!this.validateAddress(recipient)) {
+      throw new Error('Invalid Monero recipient address')
+    }
 
     const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
-    if (walletRpcUrls && walletRpcUrls.length > 0) {
-      if (!this.validateAddress(recipient)) {
-        throw new Error('Invalid Monero recipient address')
+    if (!walletRpcUrls || walletRpcUrls.length === 0) {
+      throw new Error(
+        'Monero transfer requires monero-wallet-rpc (set walletRpcUrls). ' +
+          'The in-process RingCT builder is not used for sending.',
+      )
+    }
+    if (!this.phrase) throw new Error('Phrase must be provided')
+
+    let lastError: unknown
+    for (const url of walletRpcUrls) {
+      try {
+        return await this.transferViaWalletRpc(url, params)
+      } catch (error) {
+        lastError = error
+        console.warn(`Wallet RPC ${url} failed for transfer:`, (error as Error).message)
       }
-      let lastError: unknown
-      for (const url of walletRpcUrls) {
-        try {
-          return await this.transferViaWalletRpc(url, params)
-        } catch (error) {
-          lastError = error
-          console.warn(`Wallet RPC ${url} failed for transfer:`, (error as Error).message)
-        }
-      }
-      throw lastError instanceof Error ? lastError : new Error('All Monero wallet RPC endpoints failed for transfer')
     }
-
-    const recipientKeys = decodeAddress(recipient)
-    const spendKey = this.getPrivateSpendKey(params.walletIndex ?? 0)
-    const keys = deriveKeyPairs(spendKey)
-
-    // Get daemon URL
-    const daemonUrls = this.daemonUrls[this.getNetwork()]
-    if (!daemonUrls || daemonUrls.length === 0) throw new Error('No daemon URLs configured')
-    const daemonUrl = daemonUrls[0]
-
-    // Get LWS URL for unspent outputs
-    const lwsUrls = this.lwsUrls[this.getNetwork()]
-    if (!lwsUrls || lwsUrls.length === 0) throw new Error('No LWS URLs configured')
-
-    const address = await this.getAddressAsync(params.walletIndex ?? 0)
-    const viewKeyHex = this.getViewKeyHex(params.walletIndex ?? 0)
-
-    if (!this.lwsLoggedIn) {
-      await lws.login(lwsUrls[0], address, viewKeyHex)
-      this.lwsLoggedIn = true
-    }
-
-    // Get unspent outputs
-    const unspent = await lws.getUnspentOuts(lwsUrls[0], address, viewKeyHex, amount.amount().toString())
-
-    // Convert LWS outputs to SpendableOutput format
-    const amountPiconero = BigInt(amount.amount().toString())
-    const fee = BigInt(unspent.per_byte_fee) * BigInt(3000) // approximate tx size * per byte fee
-
-    // Select inputs to cover amount + fee
-    const spendableOutputs: SpendableOutput[] = []
-    let selectedTotal = BigInt(0)
-    const needed = amountPiconero + fee
-
-    for (const out of unspent.outputs) {
-      if (selectedTotal >= needed) break
-      const outAmount = BigInt(out.amount)
-
-      // Parse rct field: first 64 chars = commitment, next 64 = mask
-      if (out.rct.length < 128) {
-        console.warn(`Skipping output ${out.global_index}: invalid rct data (length ${out.rct.length})`)
-        continue
-      }
-      const rctMask = hexToBytes(out.rct.substring(64, 128))
-
-      spendableOutputs.push({
-        globalIndex: out.global_index,
-        amount: outAmount,
-        mask: rctMask,
-        txPubKey: hexToBytes(out.tx_pub_key),
-        outputIndex: out.index,
-        publicKey: hexToBytes(out.public_key),
-      })
-      selectedTotal += outAmount
-    }
-
-    if (selectedTotal < needed) {
-      throw new Error(`Insufficient funds: have ${selectedTotal}, need ${needed}`)
-    }
-
-    const destinations: Destination[] = [
-      {
-        pubViewKey: recipientKeys.publicViewKey,
-        pubSpendKey: recipientKeys.publicSpendKey,
-        amount: amountPiconero,
-      },
-    ]
-
-    const changeKeys = {
-      pubViewKey: keys.publicViewKey,
-      pubSpendKey: keys.publicSpendKey,
-    }
-
-    const built = await buildTransaction(
-      spendableOutputs,
-      destinations,
-      changeKeys,
-      fee,
-      keys.privateViewKey,
-      spendKey,
-      daemonUrl,
-    )
-
-    // Broadcast
-    await this.broadcastTx(built.txHex)
-    return built.txHash
+    throw lastError instanceof Error ? lastError : new Error('All Monero wallet RPC endpoints failed for transfer')
   }
 
   /**

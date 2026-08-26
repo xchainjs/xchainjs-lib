@@ -120,7 +120,7 @@ export const getOutputDistribution = async (
   toHeight = 0,
 ): Promise<{ distribution: number[]; startHeight: number; base: number }> => {
   const result = await jsonRpc<{
-    distributions: { distribution: { amount: number; data: number[]; start_height: number; base: number } }[]
+    distributions: { amount: number; distribution: number[]; start_height: number; base: number }[]
     status: string
   }>(url, 'get_output_distribution', {
     amounts: [0],
@@ -131,8 +131,8 @@ export const getOutputDistribution = async (
   if (!result.distributions || result.distributions.length === 0) {
     throw new Error('No output distribution data returned from daemon')
   }
-  const dist = result.distributions[0].distribution
-  return { distribution: dist.data, startHeight: dist.start_height, base: dist.base }
+  const dist = result.distributions[0]
+  return { distribution: dist.distribution, startHeight: dist.start_height, base: dist.base }
 }
 
 /**
