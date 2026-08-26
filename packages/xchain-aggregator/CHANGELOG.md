@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.2
+
+### Patch Changes
+
+- 204afbe: Fix OneClick estimateSwap to populate fees.affiliateFee from echoed quoteRequest.appFees (falling back to configured affiliateBps) instead of always returning 0
+
 ## 3.0.1
 
 ### Patch Changes
