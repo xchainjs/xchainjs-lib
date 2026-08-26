@@ -284,6 +284,129 @@ describe('OneClick protocol', () => {
       const parsed = JSON.parse(capturedBody!)
       expect(parsed.dry).toBe(true)
     })
+
+    it('should populate affiliateFee from echoed quoteRequest.appFees matching affiliate address', async () => {
+      const affiliateAddress = 'bc1qydqk2n5wwm2ugg05tv482w8p42734gft0ssze8'
+      protocol = new OneClickProtocol({
+        affiliateAddress,
+        affiliateBps: 30,
+      })
+
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                quoteRequest: {
+                  appFees: [
+                    { recipient: affiliateAddress, fee: 15 },
+                    { recipient: '5880ad2b362620fadf759cbceb1cd5737ce8c6ed7fb8e9942881e6731f9247dd', fee: 25 },
+                  ],
+                },
+                quote: {
+                  depositAddress: 'bc1qfakedeposit',
+                  amountOut: '99000',
+                  timeEstimate: 600,
+                },
+              }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      // 1 ETH = 1e18 base units; echoed fee 15 bps → 1e18 * 15 / 10000 = 1.5e15
+      const quote = await protocol.estimateSwap({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        fromAddress: '0xSender',
+        destinationAddress: 'bc1qRecipient',
+      })
+
+      const parsed = JSON.parse(capturedBody!)
+      expect(parsed.appFees).toEqual([{ recipient: affiliateAddress, fee: 30 }])
+      expect(quote.fees.affiliateFee.baseAmount.amount().toString()).toBe('1500000000000000')
+      expect(assetToString(quote.fees.affiliateFee.asset)).toBe('ETH.ETH')
+      expect(quote.fees.affiliateFee.baseAmount.decimal).toBe(18)
+    })
+
+    it('should fall back to configured affiliateBps when quoteRequest.appFees is absent', async () => {
+      const affiliateAddress = 'bc1qydqk2n5wwm2ugg05tv482w8p42734gft0ssze8'
+      protocol = new OneClickProtocol({
+        affiliateAddress,
+        affiliateBps: 30,
+      })
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                quote: {
+                  depositAddress: 'bc1qfakedeposit',
+                  amountOut: '99000',
+                  timeEstimate: 600,
+                },
+              }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      // 1 BTC = 1e8 sats; 30 bps → 1e8 * 30 / 10000 = 300000
+      const quote = await protocol.estimateSwap({
+        fromAsset: AssetBTC,
+        destinationAsset: AssetETH,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 8)), AssetBTC),
+        fromAddress: 'bc1qSender',
+        destinationAddress: '0xRecipient',
+      })
+
+      expect(quote.fees.affiliateFee.baseAmount.amount().toString()).toBe('300000')
+      expect(assetToString(quote.fees.affiliateFee.asset)).toBe('BTC.BTC')
+    })
+
+    it('should leave affiliateFee at 0 when no affiliate is configured', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                quote: {
+                  depositAddress: 'bc1qfakedeposit',
+                  amountOut: '99000',
+                  timeEstimate: 600,
+                },
+              }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const quote = await protocol.estimateSwap({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        fromAddress: '0xSender',
+        destinationAddress: 'bc1qRecipient',
+      })
+
+      expect(quote.fees.affiliateFee.baseAmount.amount().toString()).toBe('0')
+    })
   })
 
   describe('doSwap', () => {

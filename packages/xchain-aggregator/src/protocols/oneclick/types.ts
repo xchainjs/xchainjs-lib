@@ -12,6 +12,11 @@ export type OneClickToken = {
   priceUpdatedAt?: string
 }
 
+export type OneClickAppFee = {
+  recipient: string
+  fee: number
+}
+
 export type OneClickQuoteRequest = {
   dry?: boolean
   swapType: 'EXACT_INPUT'
@@ -25,7 +30,7 @@ export type OneClickQuoteRequest = {
   recipient: string
   slippageTolerance?: number
   deadline?: string
-  appFees?: { recipient: string; fee: number }[]
+  appFees?: OneClickAppFee[]
 }
 
 export type OneClickQuoteInner = {
@@ -37,6 +42,8 @@ export type OneClickQuoteInner = {
 
 export type OneClickQuoteResponse = {
   quote: OneClickQuoteInner
+  /** Echo of the request; used to resolve applied appFees after server-side splits. */
+  quoteRequest?: Pick<OneClickQuoteRequest, 'appFees'>
   error?: string
   message?: string
   statusCode?: number

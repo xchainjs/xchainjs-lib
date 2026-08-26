@@ -23,7 +23,7 @@ import {
 } from '../../types'
 
 import { OneClickApi } from './api'
-import { CompatibleAsset, OneClickToken } from './types'
+import { CompatibleAsset, OneClickQuoteResponse, OneClickToken } from './types'
 import { findOneClickToken, oneClickBlockchainToXChain } from './utils'
 
 export class OneClickProtocol implements IProtocol {
@@ -123,13 +123,35 @@ export class OneClickProtocol implements IProtocol {
         slipBasisPoints: 0,
         fees: {
           asset: params.fromAsset,
-          affiliateFee: new CryptoAmount(baseAmount(0), params.fromAsset),
+          affiliateFee: this.buildAffiliateFee(params, resp),
           outboundFee: new CryptoAmount(baseAmount(0), params.destinationAsset),
         },
       }
     } catch (e) {
       return this.errorQuote(params, e instanceof Error ? e.message : 'Unknown error')
     }
+  }
+
+  /**
+   * Resolve affiliate bps from echoed quoteRequest.appFees (matching our recipient),
+   * falling back to the configured affiliateBps when appFees were sent.
+   * Fee is charged from the input asset: amountIn * bps / 10000.
+   */
+  private resolveAffiliateFeeBps(resp: OneClickQuoteResponse): number | undefined {
+    const echoed = resp.quoteRequest?.appFees?.find((fee) => fee.recipient === this.affiliateAddress)
+    if (echoed != null && Number.isFinite(echoed.fee)) return echoed.fee
+    if (this.affiliateAddress && this.affiliateBps) return this.affiliateBps
+    return undefined
+  }
+
+  private buildAffiliateFee(params: QuoteSwapParams, resp: OneClickQuoteResponse): CryptoAmount {
+    const decimals = params.amount.baseAmount.decimal
+    const feeBps = this.resolveAffiliateFeeBps(resp)
+    if (!feeBps) {
+      return new CryptoAmount(baseAmount(0, decimals), params.fromAsset)
+    }
+    const feeAmount = params.amount.baseAmount.amount().multipliedBy(feeBps).dividedToIntegerBy(10000)
+    return new CryptoAmount(baseAmount(feeAmount, decimals), params.fromAsset)
   }
 
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
