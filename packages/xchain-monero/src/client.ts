@@ -24,7 +24,13 @@ import * as lws from './lws'
 import * as walletRpc from './walletRpc'
 import { scanBlocks, computeBalance, OwnedOutput } from './scanner'
 import { Balance, Tx, TxParams, TxsPage, XMRClientParams } from './types'
-import { bytesToHex, hexToBytes, getMoneroNetworkType, scReduce32, validateMoneroAddress } from './utils'
+import {
+  bytesToHex,
+  feeOptionToWalletRpcPriority,
+  getMoneroNetworkType,
+  scReduce32,
+  validateMoneroAddress,
+} from './utils'
 
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
@@ -379,25 +385,11 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Broadcast a signed transaction hex to the network.
-   * Note: The returned hash is keccak256 of the raw tx blob, which differs from
-   * the canonical Monero txid (three-hash construction). Use transfer() for the correct txid.
+   * Not supported. Raw daemon broadcast returned a non-canonical txid and encouraged
+   * use of the experimental in-process builder. Use {@link transfer} via wallet-rpc.
    */
-  public async broadcastTx(txHex: string): Promise<TxHash> {
-    const urls = this.daemonUrls[this.getNetwork()]
-
-    for (const url of urls) {
-      try {
-        await daemon.sendRawTransaction(url, txHex)
-        const txBytes = hexToBytes(txHex)
-        return bytesToHex(keccak_256(txBytes))
-      } catch (error) {
-        console.warn(`Daemon ${url} failed for broadcastTx:`, (error as Error).message)
-        continue
-      }
-    }
-
-    throw Error('No daemon able to broadcast transaction')
+  public async broadcastTx(_txHex: string): Promise<TxHash> {
+    throw Error('broadcastTx is not supported for Monero. Use transfer() instead.')
   }
 
   /**
@@ -555,6 +547,7 @@ export class Client extends BaseXChainClient {
         walletRpc.transfer(url, {
           address: params.recipient,
           amountPiconero: amountPiconero.toString(),
+          priority: feeOptionToWalletRpcPriority(params.feeOption),
         }),
       )
     })

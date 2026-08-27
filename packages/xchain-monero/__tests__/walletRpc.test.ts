@@ -154,4 +154,28 @@ describe('wallet RPC client', () => {
     expect(body.params.destinations).toEqual([{ amount: 1000000000000, address: dest }])
     expect(body.params.priority).toBe(2)
   })
+
+  it('Should pass through custom transfer priority', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ result: { tx_hash: 'abcd'.repeat(16) } }),
+    })
+
+    const dest = '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR'
+    await walletRpc.transfer(url, { address: dest, amountPiconero: '1', priority: 4 })
+
+    const body = JSON.parse(String(mockFetch.mock.calls[0][1]?.body)) as {
+      params: { priority: number }
+    }
+    expect(body.params.priority).toBe(4)
+  })
+
+  it('Should reject amounts above JSON integer precision', async () => {
+    const dest = '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR'
+    const tooLarge = (BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1)).toString()
+    await expect(walletRpc.transfer(url, { address: dest, amountPiconero: tooLarge })).rejects.toThrow(
+      /exceeds wallet-rpc JSON integer precision/,
+    )
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
 })

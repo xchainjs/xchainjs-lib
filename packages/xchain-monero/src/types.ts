@@ -1,6 +1,7 @@
 import {
   Balance as BaseBalance,
   ExplorerProviders,
+  FeeOption,
   Network,
   Tx as BaseTx,
   TxParams as BaseTxParams,
@@ -28,6 +29,8 @@ export type Balance = BaseBalance & {
 
 export type TxParams = BaseTxParams & {
   asset?: Asset
+  /** Maps to monero-wallet-rpc transfer priority (Average=2, Fast=3, Fastest=4). */
+  feeOption?: FeeOption
 }
 
 export type Tx = BaseTx & {

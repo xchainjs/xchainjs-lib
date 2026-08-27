@@ -166,8 +166,13 @@ export async function transfer(
 ): Promise<string> {
   const amount = BigInt(params.amountPiconero)
   if (amount <= BigInt(0)) throw new Error('Transfer amount must be positive')
+  // wallet-rpc JSON encodes amounts as Number; values above 2^53-1 lose precision.
   if (amount > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error('Transfer amount exceeds wallet-rpc JSON integer precision')
+    throw new Error(
+      `Transfer amount ${amount.toString()} piconero exceeds wallet-rpc JSON integer precision (max ${
+        Number.MAX_SAFE_INTEGER
+      })`,
+    )
   }
 
   const result = await jsonRpc<{ tx_hash?: string }>(url, 'transfer', {

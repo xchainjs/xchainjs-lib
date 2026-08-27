@@ -1,7 +1,7 @@
-import { Network } from '@xchainjs/xchain-client'
+import { FeeOption, Network } from '@xchainjs/xchain-client'
 import { assetToString, baseAmount } from '@xchainjs/xchain-util'
 
-import { Client, defaultXMRParams, TYPICAL_TX_WEIGHT } from '../src'
+import { Client, defaultXMRParams, feeOptionToWalletRpcPriority, TYPICAL_TX_WEIGHT } from '../src'
 
 // Mock fetch globally for LWS tests
 const mockFetch = jest.fn()
@@ -938,9 +938,67 @@ describe('Monero client (pure JS)', () => {
       })
       expect(transferCall).toBeDefined()
       const payload = JSON.parse(String(transferCall?.[1]?.body)) as {
-        params: { destinations: { amount: number; address: string }[] }
+        params: { destinations: { amount: number; address: string }[]; priority: number }
       }
       expect(payload.params.destinations[0]).toEqual({ amount: 1000000000000, address: dest })
+      expect(payload.params.priority).toBe(2)
+    })
+
+    it('Should map feeOption to wallet-rpc priority', async () => {
+      const client = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: ['https://daemon.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        restoreHeight: 3626700,
+      })
+
+      const ownAddress = await client.getAddressAsync()
+
+      mockFetch.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+        const rawBody = typeof init?.body === 'string' ? init.body : '{}'
+        const body = JSON.parse(rawBody) as { method?: string }
+        if (url.includes('daemon.test')) {
+          return { ok: true, json: async () => ({ result: { count: 3626705, status: 'OK' } }) }
+        }
+        switch (body.method) {
+          case 'get_version':
+            return { ok: true, json: async () => ({ result: { version: 65536 } }) }
+          case 'get_address':
+            return { ok: true, json: async () => ({ result: { address: ownAddress } }) }
+          case 'refresh':
+            return { ok: true, json: async () => ({ result: { blocks_fetched: 0, received_money: false } }) }
+          case 'get_height':
+            return { ok: true, json: async () => ({ result: { height: 3626705 } }) }
+          case 'get_balance':
+            return {
+              ok: true,
+              json: async () => ({ result: { balance: 5000000000000, unlocked_balance: 5000000000000 } }),
+            }
+          case 'transfer':
+            return { ok: true, json: async () => ({ result: { tx_hash: 'ab12'.repeat(16) } }) }
+          default:
+            return { ok: false, status: 500, statusText: `unexpected ${body.method}` }
+        }
+      })
+
+      await client.transfer({
+        recipient: dest,
+        amount: baseAmount(1000000000000, 12),
+        feeOption: FeeOption.Fastest,
+      })
+
+      const transferCall = mockFetch.mock.calls.find((call) => {
+        const raw = call[1]?.body
+        return typeof raw === 'string' && raw.includes('"transfer"')
+      })
+      const payload = JSON.parse(String(transferCall?.[1]?.body)) as { params: { priority: number } }
+      expect(payload.params.priority).toBe(4)
+      expect(feeOptionToWalletRpcPriority(FeeOption.Average)).toBe(2)
+      expect(feeOptionToWalletRpcPriority(FeeOption.Fast)).toBe(3)
+      expect(feeOptionToWalletRpcPriority(FeeOption.Fastest)).toBe(4)
     })
 
     it('Should refuse transfer when amount exceeds unlocked balance', async () => {
@@ -1067,6 +1125,11 @@ describe('Monero client (pure JS)', () => {
       await expect(client.prepareTx({ recipient: 'addr', amount: baseAmount(1, 12) })).rejects.toThrow(
         'prepareTx is not supported for Monero',
       )
+    })
+
+    it('Should throw on broadcastTx', async () => {
+      const client = new Client()
+      await expect(client.broadcastTx('deadbeef')).rejects.toThrow('broadcastTx is not supported for Monero')
     })
   })
 })
