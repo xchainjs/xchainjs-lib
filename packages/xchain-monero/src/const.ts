@@ -20,6 +20,12 @@ export const XMR_DECIMALS = 12
 export const TYPICAL_TX_WEIGHT = 3000
 
 /**
+ * Max HD walletIndex scanned when resolving getBalance/getTransactions address
+ * to a derived account (gap-limit style).
+ */
+export const MAX_WALLET_INDEX = 20
+
+/**
  * Monero native asset
  */
 export const AssetXMR: Asset = {

@@ -9,8 +9,8 @@ This package is experimental. Treat it as a local-node adapter, not a general-pu
 | Capability | How |
 |---|---|
 | Address from BIP-39 | Pure JS (SLIP-10). Not a 25-word `monero-wallet-cli` seed. Sync `getAddress` / `setPhrase` supported. |
-| Balance / history | `walletRpcUrls` → `lwsUrls` → bounded daemon scan (≤ 5,000 blocks). Wallet-rpc `getBalance` returns **unlocked** (spendable); use `getWalletBalanceDetail` for total + unlocked. |
-| Transfer | **`walletRpcUrls` only.** Refuses amounts above unlocked balance. Maps `feeOption` → wallet-rpc priority. `prepareTx` / `broadcastTx` throw — use `transfer()`. |
+| Balance / history | `walletRpcUrls` → `lwsUrls` → bounded daemon scan (≤ 5,000 blocks). Wallet-rpc `getBalance` returns **unlocked** (spendable); use `getWalletBalanceDetail` for total + unlocked. Address may be any HD index 0–20; each index is a separate wallet-rpc file. |
+| Transfer | **`walletRpcUrls` only.** Uses `walletIndex` to open the matching wallet file. Refuses amounts above unlocked. Maps `feeOption` → priority. `prepareTx` / `broadcastTx` throw. |
 | Fees | Daemon fee-per-byte × a typical 2-in/2-out weight for estimates. Transfer priority: Average→2, Fast→3, Fastest→4. |
 
 A public `monerod` cannot answer “what is my balance?” or build a spend. Point the client at your own node plus `monero-wallet-rpc`.
