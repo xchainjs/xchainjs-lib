@@ -11,8 +11,8 @@ import {
   TxHistoryParams,
   TxType,
 } from '@xchainjs/xchain-client'
-import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, baseAmount } from '@xchainjs/xchain-util'
+import { getSeed, validatePhrase } from '@xchainjs/xchain-crypto'
+import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { keccak_256 } from '@noble/hashes/sha3'
 import slip10 from 'micro-key-producer/slip10.js'
 
@@ -81,21 +81,40 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Get the current address asynchronously.
-   * Derives keys from mnemonic and encodes as Monero address (pure JS, no WASM).
+   * Derive the Monero address for a wallet index (pure JS, sync).
    */
-  public async getAddressAsync(index?: number): Promise<string> {
+  public getAddress(index?: number): string {
     const spendKey = this.getPrivateSpendKey(index ?? 0)
     const keys = deriveKeyPairs(spendKey)
     const networkType = getMoneroNetworkType(this.getNetwork())
     return encodeAddress(keys.publicSpendKey, keys.publicViewKey, networkType)
   }
 
+  public async getAddressAsync(index?: number): Promise<string> {
+    return this.getAddress(index)
+  }
+
   /**
-   * @deprecated Use getAddressAsync instead
+   * Set or update the mnemonic. Clears cached scan / LWS / wallet-rpc session state
+   * when the phrase changes so a new wallet cannot reuse another wallet's cache.
    */
-  public getAddress(): string {
-    throw Error('Sync method not supported')
+  public setPhrase(phrase: string, walletIndex = 0): Address {
+    if (this.phrase !== phrase) {
+      if (!validatePhrase(phrase)) {
+        throw new Error('Invalid phrase')
+      }
+      this.phrase = phrase
+      this.resetWalletState()
+    }
+    return this.getAddress(walletIndex)
+  }
+
+  /**
+   * Clear phrase and all wallet session state (scan cache, LWS login, rpc lock).
+   */
+  public purgeClient(): void {
+    super.purgeClient()
+    this.resetWalletState()
   }
 
   public validateAddress(address: Address): boolean {
@@ -103,26 +122,14 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Get balance via wallet-rpc (local monerod), then LWS, then a bounded daemon scan.
+   * Get spendable balance via wallet-rpc (unlocked), then LWS, then a bounded daemon scan.
+   * For wallet-rpc, prefer {@link getWalletBalanceDetail} when both total and unlocked are needed.
    */
   public async getBalance(address: Address): Promise<Balance[]> {
     const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
     if (walletRpcUrls && walletRpcUrls.length > 0) {
-      const ownAddress = await this.getAddressAsync(0)
-      if (address !== ownAddress) {
-        throw new Error('Monero wallet RPC can only return the balance for the unlocked wallet address')
-      }
-      let lastError: unknown
-      for (const url of walletRpcUrls) {
-        try {
-          const amount = await this.getBalanceFromWalletRpc(url)
-          return [{ asset: AssetXMR, amount: baseAmount(amount.toString(), XMR_DECIMALS) }]
-        } catch (error) {
-          lastError = error
-          console.warn(`Wallet RPC ${url} failed for getBalance:`, (error as Error).message)
-        }
-      }
-      throw lastError instanceof Error ? lastError : new Error('All Monero wallet RPC endpoints failed for getBalance')
+      const detail = await this.getWalletBalanceDetail(address)
+      return [{ asset: AssetXMR, amount: detail.unlocked }]
     }
 
     // Try LWS next
@@ -306,6 +313,37 @@ export class Client extends BaseXChainClient {
   }
 
   /**
+   * Total and unlocked balances from monero-wallet-rpc (own address only).
+   * Unlocked is what can be spent immediately; total includes locked outputs.
+   */
+  public async getWalletBalanceDetail(address: Address): Promise<{ total: BaseAmount; unlocked: BaseAmount }> {
+    const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
+    if (!walletRpcUrls || walletRpcUrls.length === 0) {
+      throw new Error('getWalletBalanceDetail requires walletRpcUrls')
+    }
+    const ownAddress = this.getAddress(0)
+    if (address !== ownAddress) {
+      throw new Error('Monero wallet RPC can only return the balance for the unlocked wallet address')
+    }
+    let lastError: unknown
+    for (const url of walletRpcUrls) {
+      try {
+        const result = await this.getBalanceFromWalletRpc(url)
+        return {
+          total: baseAmount(result.total.toString(), XMR_DECIMALS),
+          unlocked: baseAmount(result.unlocked.toString(), XMR_DECIMALS),
+        }
+      } catch (error) {
+        lastError = error
+        console.warn(`Wallet RPC ${url} failed for getWalletBalanceDetail:`, (error as Error).message)
+      }
+    }
+    throw lastError instanceof Error
+      ? lastError
+      : new Error('All Monero wallet RPC endpoints failed for getWalletBalanceDetail')
+  }
+
+  /**
    * Transfer XMR to a recipient address via monero-wallet-rpc.
    * The in-process RingCT builder is not used: it is not consensus-compatible.
    */
@@ -484,21 +522,38 @@ export class Client extends BaseXChainClient {
     return address
   }
 
-  private async getBalanceFromWalletRpc(url: string): Promise<bigint> {
+  private resetWalletState(): void {
+    this.scanCache = null
+    this.lwsLoggedIn = false
+    this.walletRpcLock = Promise.resolve()
+  }
+
+  private async getBalanceFromWalletRpc(url: string): Promise<{ total: bigint; unlocked: bigint }> {
     return this.withWalletRpcLock(async () => {
       await this.prepareWalletRpc(url)
       const result = await walletRpc.callWithBusyRetry(() => walletRpc.getBalance(url))
-      return BigInt(result.balance)
+      return {
+        total: BigInt(result.balance),
+        unlocked: BigInt(result.unlockedBalance),
+      }
     })
   }
 
   private async transferViaWalletRpc(url: string, params: TxParams): Promise<string> {
     return this.withWalletRpcLock(async () => {
       await this.prepareWalletRpc(url, params.walletIndex ?? 0)
+      const balances = await walletRpc.callWithBusyRetry(() => walletRpc.getBalance(url))
+      const unlocked = BigInt(balances.unlockedBalance)
+      const amountPiconero = BigInt(params.amount.amount().toFixed(0))
+      if (amountPiconero > unlocked) {
+        throw new Error(
+          `Insufficient unlocked balance: need ${amountPiconero.toString()} piconero, unlocked ${unlocked.toString()}`,
+        )
+      }
       return walletRpc.callWithBusyRetry(() =>
         walletRpc.transfer(url, {
           address: params.recipient,
-          amountPiconero: params.amount.amount().toFixed(0).toString(),
+          amountPiconero: amountPiconero.toString(),
         }),
       )
     })
