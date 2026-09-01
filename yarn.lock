@@ -3213,6 +3213,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/ciphers@npm:~2.2.0":
+  version: 2.2.0
+  resolution: "@noble/ciphers@npm:2.2.0"
+  checksum: 10c0/56396fa9b2cd7863999d9d70c6cbfcc03db9644cbbac9bb9d383d18f701bee3eb09f36878d8252a763c8d1fb6f0807339e06e2d28f18b14c525133c57c14508d
+  languageName: node
+  linkType: hard
+
 "@noble/curves@npm:1.2.0":
   version: 1.2.0
   resolution: "@noble/curves@npm:1.2.0"
@@ -3228,6 +3235,15 @@ __metadata:
   dependencies:
     "@noble/hashes": "npm:1.4.0"
   checksum: 10c0/65620c895b15d46e8087939db6657b46a1a15cd4e0e4de5cd84b97a0dfe0af85f33a431bb21ac88267e3dc508618245d4cb564213959d66a84d690fe18a63419
+  languageName: node
+  linkType: hard
+
+"@noble/curves@npm:2.2.0, @noble/curves@npm:~2.2.0":
+  version: 2.2.0
+  resolution: "@noble/curves@npm:2.2.0"
+  dependencies:
+    "@noble/hashes": "npm:2.2.0"
+  checksum: 10c0/e545d3bb03ebedd5c04c2cab81342d64f5ce8a4c1019cfe207f3dc69174bc0ad7cfb50effc31bfa8616b8340900f445dd053da7454190428857c4eedd3b51413
   languageName: node
   linkType: hard
 
@@ -3309,10 +3325,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:^2.2.0":
+"@noble/hashes@npm:2.2.0, @noble/hashes@npm:^2.2.0, @noble/hashes@npm:~2.2.0":
   version: 2.2.0
   resolution: "@noble/hashes@npm:2.2.0"
   checksum: 10c0/cad8630c504d6b9271984f685cd0af9101b40988fc2dfbe17ccdf068a9941f95cc5c9957d89e9ca4b7ca94c15cb35f93510c5d53a09fbcc83ee503b93d0a1034
+  languageName: node
+  linkType: hard
+
+"@noble/post-quantum@npm:0.6.1":
+  version: 0.6.1
+  resolution: "@noble/post-quantum@npm:0.6.1"
+  dependencies:
+    "@noble/ciphers": "npm:~2.2.0"
+    "@noble/curves": "npm:~2.2.0"
+    "@noble/hashes": "npm:~2.2.0"
+  checksum: 10c0/ac0dfed583ab20aeb93b4aa734f2228c6b5ebc6bc1f32de28f7b4b97511a5bac29c6067394f8828006fdce4f10874cda088160a2f1b996e59db3313d48861940
   languageName: node
   linkType: hard
 
@@ -4742,6 +4769,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:11.11.6":
+  version: 11.11.6
+  resolution: "@types/node@npm:11.11.6"
+  checksum: 10c0/8a04d16475dc8b88031b8d9d97cbf11612802940c0514ea661c41ae02190e30fb3c69a870a523b9918477169f8c7e0d01df85d4648b9fe873d087d502fd7ba7e
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^12.12.47, @types/node@npm:^12.12.54, @types/node@npm:^12.7.1":
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
@@ -5721,6 +5755,18 @@ __metadata:
     "@xchainjs/xchain-crypto": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     micro-key-producer: "npm:^0.7.6"
+  languageName: unknown
+  linkType: soft
+
+"@xchainjs/xchain-near@workspace:packages/xchain-near":
+  version: 0.0.0-use.local
+  resolution: "@xchainjs/xchain-near@workspace:packages/xchain-near"
+  dependencies:
+    "@xchainjs/xchain-client": "workspace:*"
+    "@xchainjs/xchain-crypto": "workspace:*"
+    "@xchainjs/xchain-util": "workspace:*"
+    micro-key-producer: "npm:^0.7.6"
+    near-api-js: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
 
@@ -6725,6 +6771,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bip39-light@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "bip39-light@npm:1.0.7"
+  dependencies:
+    create-hash: "npm:^1.1.0"
+    pbkdf2: "npm:^3.0.9"
+  checksum: 10c0/44a11f046e5684fb4513be9bc6208ea27e48596df54e1a37707a64d0efa01c8605a0371b906fe4d28a960cb4ab198f8cc7fe49519ff3c2b7ed49e821f55d9850
+  languageName: node
+  linkType: hard
+
+"bip39@npm:3.0.2":
+  version: 3.0.2
+  resolution: "bip39@npm:3.0.2"
+  dependencies:
+    "@types/node": "npm:11.11.6"
+    create-hash: "npm:^1.1.0"
+    pbkdf2: "npm:^3.0.9"
+    randombytes: "npm:^2.0.1"
+  checksum: 10c0/d7febb07330ae84443ecbd52da759dc45656b5479798a256546b6b9fb5d34cee8342db53248a386055841970b3e0b25293fff697a154e83e7ea0ab91e3b75b1a
+  languageName: node
+  linkType: hard
+
 "bip39@npm:^3.1.0":
   version: 3.1.0
   resolution: "bip39@npm:3.1.0"
@@ -6880,6 +6948,13 @@ __metadata:
   version: 5.2.3
   resolution: "bn.js@npm:5.2.3"
   checksum: 10c0/eef19cb9cf5e91e91e3e0f036b799ce6c72f79463c3934d62991c3dcdb58f6c94dc3d806495d9b0bf31cd121870ed79bb2115cea71b56c03e794fb71485031fa
+  languageName: node
+  linkType: hard
+
+"borsh@npm:2.0.0":
+  version: 2.0.0
+  resolution: "borsh@npm:2.0.0"
+  checksum: 10c0/59a96dd9c707450862198510fc518dff92ac7f0ed0d228c9b38affd968bb4debec805c6e2afed8ec13efd9fad63fd47f8e6ed420253542a8d10fb59f28fc7d01
   languageName: node
   linkType: hard
 
@@ -7812,7 +7887,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-hmac@npm:^1.1.3, create-hmac@npm:^1.1.7":
+"create-hmac@npm:1.1.7, create-hmac@npm:^1.1.3, create-hmac@npm:^1.1.7":
   version: 1.1.7
   resolution: "create-hmac@npm:1.1.7"
   dependencies:
@@ -9724,6 +9799,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"generate-function@npm:^2.0.0":
+  version: 2.3.1
+  resolution: "generate-function@npm:2.3.1"
+  dependencies:
+    is-property: "npm:^1.0.2"
+  checksum: 10c0/4645cf1da90375e46a6f1dc51abc9933e5eafa4cd1a44c2f7e3909a30a4e9a1a08c14cd7d5b32da039da2dba2a085e1ed4597b580c196c3245b2d35d8bc0de5d
+  languageName: node
+  linkType: hard
+
+"generate-object-property@npm:^1.1.0":
+  version: 1.2.0
+  resolution: "generate-object-property@npm:1.2.0"
+  dependencies:
+    is-property: "npm:^1.0.0"
+  checksum: 10c0/0b30acb43283a489b1adf4655f3f413b448dbec750678cf70bfde92b04a22f85b286be004b66fd713e3060e418d7beb562f05431235ec95c044b63e324759e8c
+  languageName: node
+  linkType: hard
+
 "generator-function@npm:^2.0.0":
   version: 2.0.1
   resolution: "generator-function@npm:2.0.1"
@@ -10671,6 +10764,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-my-ip-valid@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "is-my-ip-valid@npm:1.0.1"
+  checksum: 10c0/61bc2dac50aa664b9fc9edb7aa7a68363a554dea2432e09766b6b860fcda5fc60aad6d47d273be635511346c4c4964dc1f3f96f8c8db02f1e380ad9992d67cca
+  languageName: node
+  linkType: hard
+
+"is-my-json-valid@npm:2.20.6":
+  version: 2.20.6
+  resolution: "is-my-json-valid@npm:2.20.6"
+  dependencies:
+    generate-function: "npm:^2.0.0"
+    generate-object-property: "npm:^1.1.0"
+    is-my-ip-valid: "npm:^1.0.0"
+    jsonpointer: "npm:^5.0.0"
+    xtend: "npm:^4.0.0"
+  checksum: 10c0/1f74c24db02b3ee9dc7042f828b4fb204566350d72b01ca1efa8a61e8c41fab8ef664dfeb1158c11de29a3ca87ac2645b9829e50116205919a1da91b7039d041
+  languageName: node
+  linkType: hard
+
 "is-nan@npm:^1.3.2":
   version: 1.3.2
   resolution: "is-nan@npm:1.3.2"
@@ -10716,6 +10829,13 @@ __metadata:
   version: 1.0.1
   resolution: "is-potential-custom-element-name@npm:1.0.1"
   checksum: 10c0/b73e2f22bc863b0939941d369486d308b43d7aef1f9439705e3582bfccaa4516406865e32c968a35f97a99396dac84e2624e67b0a16b0a15086a785e16ce7db9
+  languageName: node
+  linkType: hard
+
+"is-property@npm:^1.0.0, is-property@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "is-property@npm:1.0.2"
+  checksum: 10c0/33ab65a136e4ba3f74d4f7d9d2a013f1bd207082e11cedb160698e8d5394644e873c39668d112a402175ccbc58a087cef87198ed46829dbddb479115a0257283
   languageName: node
   linkType: hard
 
@@ -11702,6 +11822,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonpointer@npm:^5.0.0":
+  version: 5.0.1
+  resolution: "jsonpointer@npm:5.0.1"
+  checksum: 10c0/89929e58b400fcb96928c0504fcf4fc3f919d81e9543ceb055df125538470ee25290bb4984251e172e6ef8fcc55761eb998c118da763a82051ad89d4cb073fe7
+  languageName: node
+  linkType: hard
+
 "jssha@npm:^3.3.1":
   version: 3.3.1
   resolution: "jssha@npm:3.3.1"
@@ -12506,6 +12633,44 @@ __metadata:
   languageName: node
   linkType: hard
 
+"near-api-js@npm:^7.3.1":
+  version: 7.3.1
+  resolution: "near-api-js@npm:7.3.1"
+  dependencies:
+    "@noble/curves": "npm:2.2.0"
+    "@noble/hashes": "npm:2.2.0"
+    "@noble/post-quantum": "npm:0.6.1"
+    "@scure/base": "npm:2.2.0"
+    borsh: "npm:2.0.0"
+    is-my-json-valid: "npm:2.20.6"
+    near-seed-phrase: "npm:0.2.1"
+  checksum: 10c0/e6b3885eca5c2b2844ea271af3558907c96ce7a039c42aaefadbb48da6c2138bce0b1c5958a0114ae030624bcc48449d3a8806e69eb1ddfdde55456734f3ae1f
+  languageName: node
+  linkType: hard
+
+"near-hd-key@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "near-hd-key@npm:1.2.1"
+  dependencies:
+    bip39: "npm:3.0.2"
+    create-hmac: "npm:1.1.7"
+    tweetnacl: "npm:1.0.3"
+  checksum: 10c0/64e0a3d73ce77e1e107368c732885edb0d3f5fc464382db91420dded56b824c0e9235336f2fe026e58ef6a4e159480e73c9b7125eee75b83589517597efe6bb2
+  languageName: node
+  linkType: hard
+
+"near-seed-phrase@npm:0.2.1":
+  version: 0.2.1
+  resolution: "near-seed-phrase@npm:0.2.1"
+  dependencies:
+    bip39-light: "npm:^1.0.7"
+    bs58: "npm:^4.0.1"
+    near-hd-key: "npm:^1.2.1"
+    tweetnacl: "npm:^1.0.2"
+  checksum: 10c0/aba800bddf3df2b34e904b6d9e128e44907228adb92c35e2b6e770e5d2d78121a2c9fc37c19d1ba6912100f6289b23dd7d9f8d84585f9e494a78c8583000188d
+  languageName: node
+  linkType: hard
+
 "negotiator@npm:^0.6.3":
   version: 0.6.3
   resolution: "negotiator@npm:0.6.3"
@@ -13212,6 +13377,20 @@ __metadata:
   version: 2.0.1
   resolution: "pathval@npm:2.0.1"
   checksum: 10c0/460f4709479fbf2c45903a65655fc8f0a5f6d808f989173aeef5fdea4ff4f303dc13f7870303999add60ec49d4c14733895c0a869392e9866f1091fa64fd7581
+  languageName: node
+  linkType: hard
+
+"pbkdf2@npm:^3.0.9":
+  version: 3.1.6
+  resolution: "pbkdf2@npm:3.1.6"
+  dependencies:
+    create-hash: "npm:^1.2.0"
+    create-hmac: "npm:^1.1.7"
+    ripemd160: "npm:^2.0.3"
+    safe-buffer: "npm:^5.2.1"
+    sha.js: "npm:^2.4.12"
+    to-buffer: "npm:^1.2.2"
+  checksum: 10c0/828be4a5eed15c502dfa490247506c6abd4e539f6e1ea265d2b8a668292c9e07af4e6d4d7a5d3aa8ad12274da7cea1bf1b3dfc1f5f19bcdeee5157d1bf83f7f3
   languageName: node
   linkType: hard
 
@@ -15787,6 +15966,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tweetnacl@npm:1.0.3, tweetnacl@npm:^1.0.2":
+  version: 1.0.3
+  resolution: "tweetnacl@npm:1.0.3"
+  checksum: 10c0/069d9df51e8ad4a89fbe6f9806c68e06c65be3c7d42f0701cc43dba5f0d6064686b238bbff206c5addef8854e3ce00c643bff59432ea2f2c639feab0ee1a93f9
+  languageName: node
+  linkType: hard
+
 "type-check@npm:^0.4.0, type-check@npm:~0.4.0":
   version: 0.4.0
   resolution: "type-check@npm:0.4.0"
@@ -16992,7 +17178,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xtend@npm:^4.0.2":
+"xtend@npm:^4.0.0, xtend@npm:^4.0.2":
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: 10c0/366ae4783eec6100f8a02dff02ac907bf29f9a00b82ac0264b4d8b832ead18306797e283cf19de776538babfdcb2101375ec5646b59f08c52128ac4ab812ed0e
