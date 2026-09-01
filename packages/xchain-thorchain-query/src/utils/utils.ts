@@ -43,6 +43,8 @@ import {
   SUIChain,
   TRONChain,
   AssetTRON,
+  ZECChain,
+  AssetZEC,
 } from './const'
 
 export const getBaseAmountWithDiffDecimals = (inputAmount: CryptoAmount, outDecimals: number): BigNumber => {
@@ -99,6 +101,8 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetSUI
     case TRONChain:
       return AssetTRON
+    case ZECChain:
+      return AssetZEC
     default:
       throw Error('Unknown chain')
   }
@@ -135,6 +139,8 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
       return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetBCH)
     case LTCChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetLTC)
+    case ZECChain:
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetZEC)
     case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)
@@ -194,6 +200,8 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBCH)
     case LTCChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetLTC)
+    case ZECChain:
+      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetZEC)
     case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetDOGE)
@@ -262,6 +270,8 @@ export const getChain = (chain: string): Chain => {
       return SUIChain
     case 'TRON':
       return TRONChain
+    case 'ZEC':
+      return ZECChain
     default:
       throw Error('Unknown chain')
   }

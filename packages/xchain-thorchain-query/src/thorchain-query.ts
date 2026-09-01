@@ -647,7 +647,8 @@ export class ThorchainQuery {
       case 'BTC':
       case `BCH`:
       case `LTC`:
-        // Dust value: 10k sats
+      case 'ZEC':
+        // Dust value: 10k sats / zats (THORNode common UTXO dust)
         return {
           asset: new AssetCryptoAmount(assetToBase(assetAmount(0.0001, assetDecimals)), asset),
           rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),

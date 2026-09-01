@@ -75,6 +75,7 @@ export class MidgardQuery {
       'BCH.BCH': 8,
       'LTC.LTC': 8,
       'DOGE.DOGE': 8,
+      'ZEC.ZEC': 8,
 
       // Ethereum and tokens
       'ETH.ETH': 18,
@@ -123,6 +124,7 @@ export class MidgardQuery {
       BCH: 8,
       LTC: 8,
       DOGE: 8,
+      ZEC: 8,
       ETH: 18,
       BSC: 18,
       BNB: 8,
