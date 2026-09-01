@@ -8,6 +8,7 @@ const mockFetch = jest.fn()
 global.fetch = mockFetch
 
 const TEST_PHRASE = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+const OTHER_PHRASE = 'legal winner thank year wave sausage worth useful legal winner thank yellow'
 
 describe('Monero client (pure JS)', () => {
   describe('Asset', () => {
@@ -127,11 +128,155 @@ describe('Monero client (pure JS)', () => {
       expect(address.startsWith('4')).toBe(true)
     })
 
+    it('Should clear scanCache and LWS login on setPhrase to a different phrase', () => {
+      const c = new Client({ ...defaultXMRParams, phrase: TEST_PHRASE })
+      ;(c as any).scanCache = {
+        lastHeight: 100,
+        ownedOutputs: [],
+        spentKeyImages: new Set<string>(),
+      }
+      ;(c as any).lwsLoggedIn = true
+
+      const next = c.setPhrase(OTHER_PHRASE)
+      expect(next).toBe(c.getAddress())
+      expect(next).not.toBe(
+        '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
+      )
+      expect((c as any).scanCache).toBeNull()
+      expect((c as any).lwsLoggedIn).toBe(false)
+    })
+
     it('Should clear wallet state on purgeClient', async () => {
       const c = new Client({ ...defaultXMRParams, phrase: TEST_PHRASE })
       expect(c.getAddress()).toBeTruthy()
+      ;(c as any).scanCache = {
+        lastHeight: 100,
+        ownedOutputs: [],
+        spentKeyImages: new Set<string>(),
+      }
+      ;(c as any).lwsLoggedIn = true
       c.purgeClient()
       expect(() => c.getAddress()).toThrow(/Phrase must be provided/)
+      expect((c as any).scanCache).toBeNull()
+      expect((c as any).lwsLoggedIn).toBe(false)
+    })
+
+    it('Should preserve wallet-rpc lock serialization across setPhrase/purgeClient', async () => {
+      const c = new Client({
+        ...defaultXMRParams,
+        phrase: TEST_PHRASE,
+        walletRpcUrls: { [Network.Mainnet]: ['https://wallet.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        daemonUrls: { [Network.Mainnet]: ['https://daemon.test'], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        lwsUrls: { [Network.Mainnet]: [], [Network.Testnet]: [], [Network.Stagenet]: [] },
+        restoreHeight: 3626700,
+      })
+
+      let currentAddress = await c.getAddressAsync()
+      let releaseFirst!: () => void
+      const firstGate = new Promise<void>((resolve) => {
+        releaseFirst = resolve
+      })
+      let balanceCalls = 0
+      let inFlightBalance = 0
+      let maxInFlightBalance = 0
+      let created = false
+
+      const walletRpcResponse = async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+        const rawBody = typeof init?.body === 'string' ? init.body : '{}'
+        const body = JSON.parse(rawBody) as { method?: string }
+        if (url.includes('daemon.test')) {
+          return { ok: true, json: async () => ({ result: { count: 3626705, status: 'OK' } }) }
+        }
+        switch (body.method) {
+          case 'get_version':
+            return { ok: true, json: async () => ({ result: { version: 65536 } }) }
+          case 'get_address':
+            if (!created) {
+              return {
+                ok: true,
+                json: async () => ({ error: { code: -13, message: 'No wallet file' } }),
+              }
+            }
+            return { ok: true, json: async () => ({ result: { address: currentAddress } }) }
+          case 'open_wallet':
+            return {
+              ok: true,
+              json: async () => ({ error: { code: -1, message: 'Failed to open wallet' } }),
+            }
+          case 'generate_from_keys':
+            created = true
+            return {
+              ok: true,
+              json: async () => ({
+                result: { address: currentAddress, info: 'Wallet has been generated successfully.' },
+              }),
+            }
+          case 'refresh':
+            return { ok: true, json: async () => ({ result: { blocks_fetched: 0, received_money: false } }) }
+          case 'get_height':
+            return { ok: true, json: async () => ({ result: { height: 3626705 } }) }
+          case 'get_balance': {
+            balanceCalls++
+            inFlightBalance++
+            maxInFlightBalance = Math.max(maxInFlightBalance, inFlightBalance)
+            const callIndex = balanceCalls
+            if (callIndex === 1) {
+              await firstGate
+            }
+            inFlightBalance--
+            return {
+              ok: true,
+              json: async () => ({
+                result: {
+                  balance: callIndex === 1 ? 1000000000000 : 2000000000000,
+                  unlocked_balance: callIndex === 1 ? 1000000000000 : 2000000000000,
+                },
+              }),
+            }
+          }
+          default:
+            return { ok: false, status: 500, statusText: `unexpected ${body.method}` }
+        }
+      }
+
+      mockFetch.mockReset()
+      mockFetch.mockImplementation(walletRpcResponse)
+
+      const first = c.getBalance(currentAddress)
+      // Wait until the first op is blocked inside get_balance (lock chain updated).
+      for (let i = 0; i < 20 && balanceCalls < 1; i++) {
+        await new Promise((r) => setImmediate(r))
+      }
+      expect(balanceCalls).toBe(1)
+      const lockWhileHeld = (c as any).walletRpcLock
+
+      c.setPhrase(OTHER_PHRASE)
+      // Must not orphan the in-flight chain with a fresh Promise.resolve().
+      expect((c as any).walletRpcLock).toBe(lockWhileHeld)
+      expect((c as any).scanCache).toBeNull()
+
+      currentAddress = c.getAddress()
+      created = false
+      const second = c.getBalance(currentAddress)
+      for (let i = 0; i < 10; i++) {
+        await new Promise((r) => setImmediate(r))
+      }
+      // Second prepare/open must not run get_balance until the first op finishes.
+      expect(balanceCalls).toBe(1)
+      expect(maxInFlightBalance).toBe(1)
+
+      releaseFirst()
+      const [firstBal, secondBal] = await Promise.all([first, second])
+      expect(firstBal[0].amount.amount().toString()).toBe('1000000000000')
+      expect(secondBal[0].amount.amount().toString()).toBe('2000000000000')
+      expect(balanceCalls).toBe(2)
+      expect(maxInFlightBalance).toBe(1)
+
+      const lockAfterOps = (c as any).walletRpcLock
+      c.purgeClient()
+      expect((c as any).walletRpcLock).toBe(lockAfterOps)
+      expect((c as any).scanCache).toBeNull()
     })
 
     it('Should get full derivation path with account 0', () => {

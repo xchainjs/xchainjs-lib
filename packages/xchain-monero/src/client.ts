@@ -95,8 +95,9 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Set or update the mnemonic. Clears cached scan / LWS / wallet-rpc session state
-   * when the phrase changes so a new wallet cannot reuse another wallet's cache.
+   * Set or update the mnemonic. Clears scan cache and LWS session state when the
+   * phrase changes so a new wallet cannot reuse another wallet's cache. The
+   * wallet-rpc lock queue is preserved so in-flight ops still serialize.
    */
   public setPhrase(phrase: string, walletIndex = 0): Address {
     if (this.phrase !== phrase) {
@@ -110,7 +111,8 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Clear phrase and all wallet session state (scan cache, LWS login, rpc lock).
+   * Clear phrase and wallet session state (scan cache, LWS login). The wallet-rpc
+   * lock queue is preserved so concurrent ops cannot race onto a new wallet.
    */
   public purgeClient(): void {
     super.purgeClient()
@@ -525,7 +527,6 @@ export class Client extends BaseXChainClient {
   private resetWalletState(): void {
     this.scanCache = null
     this.lwsLoggedIn = false
-    this.walletRpcLock = Promise.resolve()
   }
 
   private async getBalanceFromWalletRpc(url: string): Promise<{ total: bigint; unlocked: bigint }> {
