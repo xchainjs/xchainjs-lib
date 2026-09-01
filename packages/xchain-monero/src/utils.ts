@@ -1,4 +1,4 @@
-import { Network } from '@xchainjs/xchain-client'
+import { FeeOption, Network } from '@xchainjs/xchain-client'
 import { keccak_256 } from '@noble/hashes/sha3'
 
 import { decodeAddress } from './crypto/address'
@@ -33,6 +33,23 @@ export const validateMoneroAddress = (address: string): boolean => {
     return true
   } catch {
     return false
+  }
+}
+
+/**
+ * Map XChain fee options to monero-wallet-rpc `priority` (0–4):
+ * default / unimportant / normal / elevated / priority.
+ * Average keeps the historical client default of normal (2).
+ */
+export const feeOptionToWalletRpcPriority = (feeOption?: FeeOption): number => {
+  switch (feeOption) {
+    case FeeOption.Fast:
+      return 3
+    case FeeOption.Fastest:
+      return 4
+    case FeeOption.Average:
+    default:
+      return 2
   }
 }
 

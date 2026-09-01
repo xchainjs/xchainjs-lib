@@ -10,8 +10,8 @@ This package is experimental. Treat it as a local-node adapter, not a general-pu
 |---|---|
 | Address from BIP-39 | Pure JS (SLIP-10). Not a 25-word `monero-wallet-cli` seed. Sync `getAddress` / `setPhrase` supported. |
 | Balance / history | `walletRpcUrls` → `lwsUrls` → bounded daemon scan (≤ 5,000 blocks). Wallet-rpc `getBalance` returns **unlocked** (spendable); use `getWalletBalanceDetail` for total + unlocked. |
-| Transfer | **`walletRpcUrls` only.** Refuses amounts above unlocked balance. The in-process RingCT builder is not used. |
-| Fees | Daemon fee-per-byte × a typical 2-in/2-out weight. Wallet-rpc sets the real fee. |
+| Transfer | **`walletRpcUrls` only.** Refuses amounts above unlocked balance. Maps `feeOption` → wallet-rpc priority. `prepareTx` / `broadcastTx` throw — use `transfer()`. |
+| Fees | Daemon fee-per-byte × a typical 2-in/2-out weight for estimates. Transfer priority: Average→2, Fast→3, Fastest→4. |
 
 A public `monerod` cannot answer “what is my balance?” or build a spend. Point the client at your own node plus `monero-wallet-rpc`.
 
@@ -131,7 +131,7 @@ src/
 ├── daemon.ts          # Monero daemon RPC client
 ├── scanner.ts         # Bounded JSON daemon scan fallback
 ├── crypto/            # Address + primitive crypto (not a send path)
-└── tx/                # Experimental RingCT builder — not used by transfer()
+└── tx/                # Experimental RingCT builder (not exported from package root; not used by transfer())
 ```
 
 ## License

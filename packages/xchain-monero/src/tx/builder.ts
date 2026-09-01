@@ -1,11 +1,12 @@
 /**
- * Monero transaction builder.
- * Orchestrates: stealth addresses, Pedersen commitments, ECDH encryption,
- * CLSAG signatures, Bulletproofs+ range proofs, and serialization.
+ * Experimental Monero RingCT builder (R&D only).
  *
- * Not used by Client.transfer. Do not broadcast builder output until it is
- * verified against monerod — RPC, CLSAG message hash, and decoy sampling are
- * not consensus-compatible.
+ * Orchestrates stealth addresses, Pedersen commitments, ECDH, CLSAG,
+ * Bulletproofs+, and serialization for local experiments.
+ *
+ * **Not a send path.** `Client.transfer` uses monero-wallet-rpc only.
+ * Do not broadcast builder output — RPC/CLSAG message hash/decoy sampling are
+ * not consensus-compatible. This module is not re-exported from the package root.
  *
  * Reference: monero/src/wallet/wallet2.cpp (create_transactions_2)
  */
@@ -45,7 +46,7 @@ export interface Destination {
   amount: bigint
 }
 
-/** Result of building a transaction */
+/** Experimental builder result — not safe to broadcast. */
 export interface BuiltTransaction {
   tx: MoneroTransaction
   txHex: string
@@ -59,16 +60,8 @@ function randomScalar(): Uint8Array {
 }
 
 /**
- * Build a complete Monero RingCT transaction.
- *
- * @param inputs - Spendable outputs to use as inputs
- * @param destinations - Recipients + amounts
- * @param changeDestination - Change address keys (pubView, pubSpend)
- * @param fee - Transaction fee in piconero
- * @param privViewKey - Sender's private view key
- * @param privSpendKey - Sender's private spend key
- * @param daemonUrl - Daemon RPC URL for decoy selection
- * @returns Built transaction ready for broadcast
+ * Build an experimental Monero RingCT transaction for research only.
+ * Output must not be broadcast or submitted via `Client.broadcastTx`.
  */
 export async function buildTransaction(
   inputs: SpendableOutput[],
