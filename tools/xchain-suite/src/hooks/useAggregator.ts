@@ -20,12 +20,12 @@ const SWAP_SUPPORTED_CHAINS: string[] = [
   'GAIA',
   'THOR',
   'MAYA',
-  'KUJI',
   'SOL',
   'SUI',
   'XRP',
   'ADA',
   'TRON',
+  'NEAR',
 ]
 
 interface UseSwapResult {

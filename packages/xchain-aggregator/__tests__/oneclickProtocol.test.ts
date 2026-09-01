@@ -36,6 +36,13 @@ const mockTokens: OneClickToken[] = [
   { assetId: 'nep141:sol.omft.near', blockchain: 'sol', symbol: 'SOL', decimals: 9 },
   { assetId: 'nep141:doge.omft.near', blockchain: 'doge', symbol: 'DOGE', decimals: 8 },
   { assetId: 'nep141:avax.omft.near', blockchain: 'avax', symbol: 'AVAX', decimals: 18 },
+  {
+    assetId: 'nep141:wrap.near',
+    blockchain: 'near',
+    symbol: 'wNEAR',
+    decimals: 24,
+    contractAddress: 'wrap.near',
+  },
 ]
 
 describe('OneClick utils', () => {
@@ -50,6 +57,7 @@ describe('OneClick utils', () => {
       expect(xChainToOneClickBlockchain('BSC')).toBe('bsc')
       expect(xChainToOneClickBlockchain('ADA')).toBe('cardano')
       expect(xChainToOneClickBlockchain('SUI')).toBe('sui')
+      expect(xChainToOneClickBlockchain('NEAR')).toBe('near')
     })
 
     it('should return null for unsupported chains', () => {
@@ -65,10 +73,10 @@ describe('OneClick utils', () => {
       expect(oneClickBlockchainToXChain('eth')).toBe('ETH')
       expect(oneClickBlockchainToXChain('sol')).toBe('SOL')
       expect(oneClickBlockchainToXChain('cardano')).toBe('ADA')
+      expect(oneClickBlockchainToXChain('near')).toBe('NEAR')
     })
 
     it('should return null for unknown blockchains', () => {
-      expect(oneClickBlockchainToXChain('near')).toBeNull()
       expect(oneClickBlockchainToXChain('ton')).toBeNull()
     })
   })
@@ -78,6 +86,14 @@ describe('OneClick utils', () => {
       const token = findOneClickToken(AssetBTC, mockTokens)
       expect(token).toBeDefined()
       expect(token?.assetId).toBe('nep141:btc.omft.near')
+    })
+
+    it('should map native NEAR to wrap.near / wNEAR', () => {
+      const near = assetFromStringEx('NEAR.NEAR')
+      const token = findOneClickToken(near, mockTokens)
+      expect(token).toBeDefined()
+      expect(token?.assetId).toBe('nep141:wrap.near')
+      expect(token?.contractAddress).toBe('wrap.near')
     })
 
     it('should find ERC20 token by contract address', () => {

@@ -14,6 +14,11 @@ const LOCAL_MONEROD = 'http://127.0.0.1:18081'
 const LOCAL_WALLET_RPC = 'http://127.0.0.1:18088'
 const ENV_DIR = fileURLToPath(new URL('.', import.meta.url))
 
+/** Skip auto-starting monero-wallet-rpc and XMR proxies (`NO_MONERO=1` / `yarn dev:nomonero`). */
+function resolveNoMonero(env: Record<string, string>): boolean {
+  return process.env.NO_MONERO === '1' || env.NO_MONERO === '1' || env.VITE_NO_MONERO === '1'
+}
+
 function isPortOpen(port: number, host = '127.0.0.1'): Promise<boolean> {
   return new Promise((resolve) => {
     const socket = net.connect({ port, host }, () => {
@@ -87,17 +92,29 @@ export default defineConfig(({ mode }) => {
   // Vite does not put .env into process.env during config eval — load it explicitly.
   // Shell-exported vars still win over .env values.
   const env = loadEnv(mode, ENV_DIR, '')
+  const noMonero = resolveNoMonero(env)
+  if (noMonero) {
+    console.log('[xmr] skipped (--nomonero / NO_MONERO=1)')
+  }
+
   const walletRpcBin = process.env.MONERO_WALLET_RPC || env.MONERO_WALLET_RPC || 'monero-wallet-rpc'
   const walletDir =
     process.env.MONERO_WALLET_DIR || env.MONERO_WALLET_DIR || join(homedir(), '.cache/xchain-suite/monero-wallets')
   const walletRpcLog =
     process.env.MONERO_WALLET_RPC_LOG || env.MONERO_WALLET_RPC_LOG || join(walletDir, 'xchain-wallet-rpc.log')
 
+  const plugins = [react(), nodePolyfills(), wasm(), topLevelAwait()]
+  if (!noMonero) {
+    plugins.push(moneroWalletRpcPlugin(walletRpcBin, walletDir, walletRpcLog))
+  }
+
   return {
-    plugins: [react(), nodePolyfills(), wasm(), topLevelAwait(), moneroWalletRpcPlugin(walletRpcBin, walletDir, walletRpcLog)],
+    plugins,
     define: {
       'process.env': {},
       global: 'globalThis',
+      // Expose to the app so sidebar/portfolio can hide XMR without a local node.
+      'import.meta.env.VITE_NO_MONERO': JSON.stringify(noMonero ? '1' : ''),
     },
     resolve: {
       alias: {
@@ -146,18 +163,22 @@ export default defineConfig(({ mode }) => {
         ],
       },
       proxy: {
-        '/xmr-daemon': {
-          target: LOCAL_MONEROD,
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/xmr-daemon/, ''),
-        },
-        '/xmr-wallet': {
-          target: LOCAL_WALLET_RPC,
-          changeOrigin: true,
-          timeout: 600_000,
-          proxyTimeout: 600_000,
-          rewrite: (path) => path.replace(/^\/xmr-wallet/, ''),
-        },
+        ...(noMonero
+          ? {}
+          : {
+              '/xmr-daemon': {
+                target: LOCAL_MONEROD,
+                changeOrigin: true,
+                rewrite: (path: string) => path.replace(/^\/xmr-daemon/, ''),
+              },
+              '/xmr-wallet': {
+                target: LOCAL_WALLET_RPC,
+                changeOrigin: true,
+                timeout: 600_000,
+                proxyTimeout: 600_000,
+                rewrite: (path: string) => path.replace(/^\/xmr-wallet/, ''),
+              },
+            }),
         // Optional browser proxies if CORS or grpc-web headers misbehave in some environments
         '/sui-grpc': {
           target: 'https://fullnode.mainnet.sui.io:443',

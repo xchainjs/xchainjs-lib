@@ -38,7 +38,7 @@ A browser-based developer suite for XChainJS packages. Test chain clients, execu
 |----------|--------|
 | **UTXO** | Bitcoin (BTC), Bitcoin Cash (BCH), Litecoin (LTC), Dogecoin (DOGE), Dash (DASH), Zcash (ZEC) |
 | **EVM** | Ethereum (ETH), Avalanche (AVAX), BNB Smart Chain (BSC), Arbitrum (ARB) |
-| **Cosmos** | Cosmos Hub (GAIA), THORChain (THOR), MAYAChain (MAYA), Kujira (KUJI) |
+| **Cosmos** | Cosmos Hub (GAIA), THORChain (THOR), MAYAChain (MAYA) |
 | **Other** | Monero (XMR), Solana (SOL), Radix (XRD), Cardano (ADA), Ripple (XRP) |
 
 ## Getting Started
@@ -90,6 +90,14 @@ yarn preview
 > **Security Note**: Phrase mode stores your mnemonic in memory only. Never use mainnet wallets with significant funds for testing.
 
 ## Monero (local node)
+
+Skip Monero entirely (no wallet-rpc spawn, no XMR proxies, XMR hidden in the UI):
+
+```bash
+yarn workspace xchain-suite dev:nomonero
+# or
+NO_MONERO=1 yarn workspace xchain-suite dev
+```
 
 `monerod` stores the chain, not wallets. The suite shows an XMR balance by talking to **`monero-wallet-rpc`**, which scans with the BIP-39 view key against your local daemon.
 

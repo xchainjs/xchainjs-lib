@@ -7,9 +7,10 @@ const ICON_OVERRIDES: Record<string, string> = {
   RUNE: '/icons/rune.svg',
   CACAO: '/icons/cacao.png',
   MAYA: '/icons/maya.png',
-  KUJI: '/icons/kuji.png',
   ARB: '/icons/arb.svg',
   XRD: '/icons/xrd.svg',
+  NEAR: '/icons/near.svg',
+  SUI: '/icons/sui.svg',
   // ERC-20 / token icons (keyed by ticker)
   USDT: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',
   USDC: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',
@@ -30,6 +31,8 @@ const CDN_SYMBOL_MAP: Record<string, string> = {
   GAIA: 'atom',
   SOL: 'sol',
   TRON: 'trx',
+  NEAR: 'near',
+  SUI: 'sui',
 }
 
 export function getAssetIconUrl(chainId: string, symbol?: string): string {

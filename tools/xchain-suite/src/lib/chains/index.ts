@@ -8,7 +8,7 @@ export interface ChainConfig {
   decimals: number
 }
 
-export const SUPPORTED_CHAINS: ChainConfig[] = [
+const ALL_SUPPORTED_CHAINS: ChainConfig[] = [
   // UTXO Chains
   { id: 'BTC', name: 'Bitcoin', symbol: 'BTC', category: 'utxo', decimals: 8 },
   { id: 'BCH', name: 'Bitcoin Cash', symbol: 'BCH', category: 'utxo', decimals: 8 },
@@ -25,9 +25,9 @@ export const SUPPORTED_CHAINS: ChainConfig[] = [
   { id: 'GAIA', name: 'Cosmos Hub', symbol: 'ATOM', category: 'cosmos', decimals: 6 },
   { id: 'THOR', name: 'THORChain', symbol: 'RUNE', category: 'cosmos', decimals: 8 },
   { id: 'MAYA', name: 'Maya Protocol', symbol: 'CACAO', category: 'cosmos', decimals: 10 },
-  { id: 'KUJI', name: 'Kujira', symbol: 'KUJI', category: 'cosmos', decimals: 6 },
   // Other Chains
   { id: 'XMR', name: 'Monero', symbol: 'XMR', category: 'other', decimals: 12 },
+  { id: 'NEAR', name: 'NEAR', symbol: 'NEAR', category: 'other', decimals: 24 },
   { id: 'SOL', name: 'Solana', symbol: 'SOL', category: 'other', decimals: 9 },
   { id: 'SUI', name: 'Sui', symbol: 'SUI', category: 'other', decimals: 9 },
   { id: 'XRD', name: 'Radix', symbol: 'XRD', category: 'other', decimals: 18 },
@@ -35,6 +35,13 @@ export const SUPPORTED_CHAINS: ChainConfig[] = [
   { id: 'XRP', name: 'Ripple', symbol: 'XRP', category: 'other', decimals: 6 },
   { id: 'TRON', name: 'Tron', symbol: 'TRX', category: 'other', decimals: 6 },
 ]
+
+/** True when suite was started with `--nomonero` / `NO_MONERO=1`. */
+export const isMoneroDisabled = (): boolean => import.meta.env.VITE_NO_MONERO === '1'
+
+export const SUPPORTED_CHAINS: ChainConfig[] = isMoneroDisabled()
+  ? ALL_SUPPORTED_CHAINS.filter((c) => c.id !== 'XMR')
+  : ALL_SUPPORTED_CHAINS
 
 export const getChainById = (id: string): ChainConfig | undefined => SUPPORTED_CHAINS.find((c) => c.id === id)
 

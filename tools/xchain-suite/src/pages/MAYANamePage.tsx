@@ -22,7 +22,7 @@ interface MAYANameDetails {
 const BLOCKS_PER_YEAR = 5_256_000
 const SECONDS_PER_BLOCK = (365.25 * 24 * 60 * 60) / BLOCKS_PER_YEAR // ~6 seconds
 
-const ALIAS_CHAINS = ['BTC', 'ETH', 'AVAX', 'BSC', 'GAIA', 'THOR', 'MAYA', 'DOGE', 'LTC', 'BCH', 'DASH', 'ARB', 'SOL', 'KUJI']
+const ALIAS_CHAINS = ['BTC', 'ETH', 'AVAX', 'BSC', 'GAIA', 'THOR', 'MAYA', 'DOGE', 'LTC', 'BCH', 'DASH', 'ARB', 'SOL']
 
 const PREFERRED_ASSET_OPTIONS = [
   { label: 'None (CACAO)', value: '' },

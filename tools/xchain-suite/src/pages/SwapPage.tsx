@@ -195,10 +195,11 @@ export default function SwapPage() {
     GAIA: 0.01,
     THOR: 0.02,
     MAYA: 0.02,
-    KUJI: 0.01,
     TRON: 2,
     // Matches xchain-sui DEFAULT_GAS_BUDGET (10_000_000 MIST = 0.01 SUI)
     SUI: 0.01,
+    // Leave headroom for NEAR storage / gas on native transfers
+    NEAR: 0.05,
   }
 
   // Set amount to percentage of balance

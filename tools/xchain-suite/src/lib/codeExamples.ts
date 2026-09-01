@@ -86,12 +86,6 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
     paramsImport: 'defaultClientConfig',
     clientInit: 'new Client({ ...defaultClientConfig, network: Network.Mainnet, phrase })',
   },
-  KUJI: {
-    packageName: '@xchainjs/xchain-kujira',
-    clientImport: 'Client',
-    paramsImport: 'defaultKujiParams',
-    clientInit: 'new Client({ ...defaultKujiParams, network: Network.Mainnet, phrase })',
-  },
   SOL: {
     packageName: '@xchainjs/xchain-solana',
     clientImport: 'Client',
