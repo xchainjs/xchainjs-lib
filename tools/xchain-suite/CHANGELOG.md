@@ -1,5 +1,18 @@
 # testing-gui
 
+## 1.0.22
+
+### Patch Changes
+
+- Updated dependencies [d9b50ad]
+- Updated dependencies [bc8d243]
+- Updated dependencies [968233e]
+  - @xchainjs/xchain-monero@0.2.8
+  - @xchainjs/xchain-thorchain-query@3.2.0
+  - @xchainjs/xchain-midgard-query@2.0.21
+  - @xchainjs/xchain-near@0.2.0
+  - @xchainjs/xchain-thorchain-amm@3.1.6
+
 ## 1.0.21
 
 ### Patch Changes

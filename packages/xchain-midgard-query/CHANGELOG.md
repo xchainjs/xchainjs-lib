@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.21
+
+### Patch Changes
+
+- bc8d243: Add ZEC gas-asset, fee, and dust helpers for THORChain; midgard decimal fallbacks for ZEC.ZEC
+
 ## 2.0.20
 
 ### Patch Changes
