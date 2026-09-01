@@ -399,9 +399,8 @@ import { Client as XmrClient, defaultXMRParams } from '@xchainjs/xchain-monero'
 import { Client as GaiaClient, defaultClientConfig as defaultGaiaParams } from '@xchainjs/xchain-cosmos'
 import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
 import { Client as MayaClient, defaultClientConfig as defaultMayaParams } from '@xchainjs/xchain-mayachain'
-import { Client as KujiClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
-
 // Other Chains
+import { Client as NearClient, defaultNearParams } from '@xchainjs/xchain-near'
 import { Client as SolClient, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import { Client as SuiClient, defaultSuiParams } from '@xchainjs/xchain-sui'
 import { Client as XrdClient } from '@xchainjs/xchain-radix'
@@ -510,11 +509,12 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       return new ThorClient({ ...defaultThorParams, network, phrase })
     case 'MAYA':
       return new MayaClient({ ...defaultMayaParams, network, phrase })
-    case 'KUJI':
-      return new KujiClient({ ...defaultKujiParams, network, phrase })
 
     // Monero — local monerod + monero-wallet-rpc via Vite proxies
     case 'XMR': {
+      if (import.meta.env.VITE_NO_MONERO === '1') {
+        throw new Error('Monero is disabled (suite started with --nomonero / NO_MONERO=1)')
+      }
       const restoreHeight = Number(import.meta.env.VITE_XMR_RESTORE_HEIGHT) || 3626700
       return new XmrClient({
         ...defaultXMRParams,
@@ -534,6 +534,8 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     }
 
     // Other Chains
+    case 'NEAR':
+      return new NearClient({ ...defaultNearParams, network, phrase })
     case 'SOL': {
       const solApiKey = import.meta.env.VITE_SOL_API_KEY
       return new SolClient({

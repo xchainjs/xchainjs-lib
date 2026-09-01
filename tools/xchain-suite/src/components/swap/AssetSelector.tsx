@@ -54,12 +54,12 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { chainId: 'THOR', chainName: 'THORChain', symbol: 'RUNE' },
       { chainId: 'MAYA', chainName: 'Maya Protocol', symbol: 'CACAO' },
       { chainId: 'MAYA', chainName: 'Maya Protocol', symbol: 'MAYA', decimals: 4, isToken: true },
-      { chainId: 'KUJI', chainName: 'Kujira', symbol: 'KUJI' },
     ],
   },
   {
     name: 'Other',
     chains: [
+      { chainId: 'NEAR', chainName: 'NEAR', symbol: 'NEAR' },
       { chainId: 'SOL', chainName: 'Solana', symbol: 'SOL' },
       { chainId: 'SUI', chainName: 'Sui', symbol: 'SUI' },
       { chainId: 'ADA', chainName: 'Cardano', symbol: 'ADA' },

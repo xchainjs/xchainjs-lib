@@ -17,6 +17,14 @@ describe('Client Factory', () => {
     expect(client).toBeDefined()
   })
 
+  it('should create NEAR client with implicit address', async () => {
+    const client = createClient('NEAR', { phrase: TEST_PHRASE, network: Network.Mainnet })
+    expect(client).toBeDefined()
+    const address = await client.getAddressAsync(0)
+    expect(address).toHaveLength(64)
+    expect(/^[0-9a-f]{64}$/.test(address)).toBe(true)
+  })
+
   it('should derive different BTC addresses for legacy vs native segwit formats', async () => {
     const native = createClient('BTC', {
       phrase: TEST_PHRASE,

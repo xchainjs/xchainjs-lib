@@ -24,6 +24,7 @@ const X_TO_ONECLICK: Record<string, string> = {
   XRP: 'xrp',
   ADA: 'cardano',
   SUI: 'sui',
+  NEAR: 'near',
 }
 
 const ONECLICK_TO_X: Record<string, string> = Object.fromEntries(Object.entries(X_TO_ONECLICK).map(([k, v]) => [v, k]))
@@ -53,6 +54,15 @@ export const findOneClickToken = (asset: AnyAsset, tokens: OneClickToken[]): One
         : false
     }
 
+    // 1Click exposes NEAR as wNEAR (wrap.near), not a contract-less native entry.
+    if (asset.chain === 'NEAR') {
+      return (
+        token.contractAddress === 'wrap.near' ||
+        token.assetId === 'nep141:wrap.near' ||
+        token.symbol.toUpperCase() === 'WNEAR'
+      )
+    }
+
     // Native asset: match by symbol, ensure no contract address on token
     return token.symbol.toUpperCase() === asset.symbol.toUpperCase() && !token.contractAddress
   })
@@ -63,6 +73,11 @@ export const oneClickTokenToXAsset = (
 ): { chain: Chain; symbol: string; ticker: string; type: AssetType } | null => {
   const chain = oneClickBlockchainToXChain(token.blockchain)
   if (!chain) return null
+
+  // Surface wrap.near as native NEAR for XChain consumers / suite UX.
+  if (chain === 'NEAR' && (token.contractAddress === 'wrap.near' || token.assetId === 'nep141:wrap.near')) {
+    return { chain, symbol: 'NEAR', ticker: 'NEAR', type: AssetType.NATIVE }
+  }
 
   if (token.contractAddress) {
     const symbol = `${token.symbol}-${token.contractAddress}`

@@ -25,7 +25,7 @@ export function GetAddress({ chainId, client }: GetAddressProps) {
         if (!client) {
           throw new Error('Client not available. Please connect wallet first.')
         }
-        // Use getAddressAsync for chains that don't support sync getAddress (SOL, XRD, ADA)
+        // Prefer getAddressAsync — works for sync and async-only chains (SOL, XRD, ADA, NEAR, …)
         const address = await client.getAddressAsync(walletIndex)
         return { address }
       },

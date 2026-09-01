@@ -19,7 +19,7 @@ interface ChainBalance {
 }
 
 // Chains that need async address retrieval
-const ASYNC_ONLY_CHAINS = new Set(['SOL', 'XRD', 'ADA', 'XMR'])
+const ASYNC_ONLY_CHAINS = new Set(['SOL', 'XRD', 'ADA', 'XMR', 'NEAR'])
 
 // EVM chains whose getBalance() enumerates ERC-20 holdings via Etherscan when called without
 // an explicit assets list. That enumeration can fail (rate limit, invalid key, NOTOK response)

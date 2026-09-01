@@ -64,6 +64,7 @@ const ONECLICK_CHAINS: Record<string, string> = {
   XRP: 'xrp',
   ADA: 'cardano',
   SUI: 'sui',
+  NEAR: 'near',
 }
 
 const ONECLICK_BASE_URL = 'https://1click.chaindefuser.com'
@@ -107,6 +108,17 @@ function findOneClickToken(asset: AnyAsset, tokens: OneClickToken[]): OneClickTo
         t.blockchain === blockchain &&
         t.contractAddress &&
         t.contractAddress.toLowerCase() === contractAddress.toLowerCase(),
+    )
+  }
+
+  // 1Click exposes NEAR as wNEAR (wrap.near), not a contract-less native entry.
+  if (asset.chain === 'NEAR') {
+    return tokens.find(
+      (t) =>
+        t.blockchain === 'near' &&
+        (t.contractAddress === 'wrap.near' ||
+          t.assetId === 'nep141:wrap.near' ||
+          t.symbol.toUpperCase() === 'WNEAR'),
     )
   }
 

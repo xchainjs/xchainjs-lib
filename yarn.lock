@@ -5758,7 +5758,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-near@workspace:packages/xchain-near":
+"@xchainjs/xchain-near@workspace:*, @xchainjs/xchain-near@workspace:packages/xchain-near":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-near@workspace:packages/xchain-near"
   dependencies:
@@ -17096,7 +17096,6 @@ __metadata:
     "@xchainjs/xchain-ethereum": "workspace:*"
     "@xchainjs/xchain-evm": "workspace:*"
     "@xchainjs/xchain-evm-providers": "workspace:*"
-    "@xchainjs/xchain-kujira": "workspace:*"
     "@xchainjs/xchain-litecoin": "workspace:*"
     "@xchainjs/xchain-mayachain": "workspace:*"
     "@xchainjs/xchain-mayachain-amm": "workspace:*"
@@ -17105,6 +17104,7 @@ __metadata:
     "@xchainjs/xchain-mayanode": "workspace:*"
     "@xchainjs/xchain-midgard-query": "workspace:*"
     "@xchainjs/xchain-monero": "workspace:*"
+    "@xchainjs/xchain-near": "workspace:*"
     "@xchainjs/xchain-radix": "workspace:*"
     "@xchainjs/xchain-ripple": "workspace:*"
     "@xchainjs/xchain-solana": "workspace:*"

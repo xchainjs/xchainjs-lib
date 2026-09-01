@@ -3,6 +3,7 @@ import {
   ArrowRightLeft, Droplets, Server, Repeat, Coins, AtSign, Shield,
   BarChart3, Tag, CalendarClock, PanelLeftClose, PanelLeftOpen, LayoutDashboard, CandlestickChart,
 } from 'lucide-react'
+import { isMoneroDisabled } from '../../lib/chains'
 
 interface ChainGroup {
   name: string
@@ -36,13 +37,13 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { id: 'GAIA', name: 'Cosmos Hub' },
       { id: 'THOR', name: 'THORChain' },
       { id: 'MAYA', name: 'Maya Protocol' },
-      { id: 'KUJI', name: 'Kujira' },
     ],
   },
   {
     name: 'Other',
     chains: [
-      { id: 'XMR', name: 'Monero' },
+      ...(isMoneroDisabled() ? [] : [{ id: 'XMR', name: 'Monero' }]),
+      { id: 'NEAR', name: 'NEAR' },
       { id: 'SOL', name: 'Solana' },
       { id: 'SUI', name: 'Sui' },
       { id: 'XRD', name: 'Radix' },
