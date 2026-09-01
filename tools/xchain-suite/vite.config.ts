@@ -14,10 +14,7 @@ const LOCAL_MONEROD = 'http://127.0.0.1:18081'
 const LOCAL_WALLET_RPC = 'http://127.0.0.1:18088'
 const ENV_DIR = fileURLToPath(new URL('.', import.meta.url))
 
-/**
- * Skip auto-starting monero-wallet-rpc and XMR proxies.
- * Prefer `NO_MONERO=1` / `yarn dev --nomonero` (wrapper sets the env before Vite/CAC runs).
- */
+/** Skip auto-starting monero-wallet-rpc and XMR proxies (`NO_MONERO=1` / `yarn dev:nomonero`). */
 function resolveNoMonero(env: Record<string, string>): boolean {
   return process.env.NO_MONERO === '1' || env.NO_MONERO === '1' || env.VITE_NO_MONERO === '1'
 }

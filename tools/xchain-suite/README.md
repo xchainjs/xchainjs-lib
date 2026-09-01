@@ -94,14 +94,10 @@ yarn preview
 Skip Monero entirely (no wallet-rpc spawn, no XMR proxies, XMR hidden in the UI):
 
 ```bash
-yarn workspace xchain-suite dev --nomonero
-# or
 yarn workspace xchain-suite dev:nomonero
 # or
 NO_MONERO=1 yarn workspace xchain-suite dev
 ```
-
-`--nomonero` is handled by `scripts/dev.mjs` (sets `NO_MONERO=1`) before Vite starts, because Vite rejects unknown CLI flags.
 
 `monerod` stores the chain, not wallets. The suite shows an XMR balance by talking to **`monero-wallet-rpc`**, which scans with the BIP-39 view key against your local daemon.
 
