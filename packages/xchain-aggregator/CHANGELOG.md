@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.1.0
+
+### Minor Changes
+
+- 227eb24: Map NEAR to OneClick (`near` / wrap.near) so NEAR Intents quotes work with the native NEAR client
+
+### Patch Changes
+
+- Updated dependencies [bc8d243]
+  - @xchainjs/xchain-thorchain-query@3.2.0
+  - @xchainjs/xchain-midgard-query@2.0.21
+  - @xchainjs/xchain-thorchain-amm@3.1.6
+
 ## 3.0.2
 
 ### Patch Changes

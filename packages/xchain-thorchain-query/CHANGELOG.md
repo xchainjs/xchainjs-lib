@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.2.0
+
+### Minor Changes
+
+- bc8d243: Add ZEC gas-asset, fee, and dust helpers for THORChain; midgard decimal fallbacks for ZEC.ZEC
+
+### Patch Changes
+
+- Updated dependencies [bc8d243]
+  - @xchainjs/xchain-midgard-query@2.0.21
+
 ## 3.1.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @xchainjs/xchain-monero
 
+## 0.2.8
+
+### Patch Changes
+
+- d9b50ad: Harden Monero client: sync getAddress/setPhrase, clear wallet state on purge, return unlocked balance from wallet-rpc getBalance, add getWalletBalanceDetail, and refuse transfers above unlocked
+
 ## 0.2.7
 
 ### Patch Changes
