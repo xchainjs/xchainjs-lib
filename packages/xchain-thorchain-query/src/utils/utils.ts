@@ -140,7 +140,8 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
     case LTCChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetLTC)
     case ZECChain:
-      return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetZEC)
+      // gasRate is already the full ZIP-317 fee (not sats/byte); do not multiply by outboundTxSize
+      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetZEC)
     case DOGEChain:
       // NOTE: UTXO chains estimate fees with a 250 byte size
       return new AssetCryptoAmount(baseAmount(inbound.gasRate.multipliedBy(inbound.outboundTxSize)), AssetDOGE)

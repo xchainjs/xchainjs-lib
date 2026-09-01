@@ -24,11 +24,11 @@ describe('ZEC chain helpers', () => {
     expect(AssetZEC.symbol).toBe('ZEC')
   })
 
-  it('Should calculate ZEC network fee like other UTXO chains', () => {
+  it('Should use gasRate alone as the ZIP-317 network fee', () => {
     const fee = calcNetworkFee(AssetZEC, mockZecInbound)
     expect(fee.asset).toEqual(AssetZEC)
-    // gasRate (10) * outboundTxSize (250) = 2500 zats
-    expect(fee.baseAmount.amount().toNumber()).toBe(2500)
+    // gasRate is already the full fee; outboundTxSize must not inflate it
+    expect(fee.baseAmount.amount().toNumber()).toBe(10)
   })
 
   it('Should calculate ZEC outbound fee', () => {
