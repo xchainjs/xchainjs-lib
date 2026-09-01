@@ -10,6 +10,19 @@ global.fetch = mockFetch
 const TEST_PHRASE = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
 const OTHER_PHRASE = 'legal winner thank year wave sausage worth useful legal winner thank yellow'
 
+/** Access private Client fields from tests without `as any`. */
+type ClientInternals = {
+  scanCache: {
+    lastHeight: number
+    ownedOutputs: unknown[]
+    spentKeyImages: Set<string>
+  } | null
+  lwsLoggedIn: boolean
+  walletRpcLock: Promise<unknown>
+}
+
+const internals = (c: Client): ClientInternals => c as unknown as ClientInternals
+
 describe('Monero client (pure JS)', () => {
   describe('Asset', () => {
     let client: Client
@@ -130,35 +143,35 @@ describe('Monero client (pure JS)', () => {
 
     it('Should clear scanCache and LWS login on setPhrase to a different phrase', () => {
       const c = new Client({ ...defaultXMRParams, phrase: TEST_PHRASE })
-      ;(c as any).scanCache = {
+      internals(c).scanCache = {
         lastHeight: 100,
         ownedOutputs: [],
         spentKeyImages: new Set<string>(),
       }
-      ;(c as any).lwsLoggedIn = true
+      internals(c).lwsLoggedIn = true
 
       const next = c.setPhrase(OTHER_PHRASE)
       expect(next).toBe(c.getAddress())
       expect(next).not.toBe(
         '44jKQv6ZKMd5ecLLmkNJGi7azgSptEq8ki7TFiat1TfLfdDQ1tQ7ZYa3cRh7X2uRwvLDjddWh97ajeyhR2seKSECQeDx1WR',
       )
-      expect((c as any).scanCache).toBeNull()
-      expect((c as any).lwsLoggedIn).toBe(false)
+      expect(internals(c).scanCache).toBeNull()
+      expect(internals(c).lwsLoggedIn).toBe(false)
     })
 
     it('Should clear wallet state on purgeClient', async () => {
       const c = new Client({ ...defaultXMRParams, phrase: TEST_PHRASE })
       expect(c.getAddress()).toBeTruthy()
-      ;(c as any).scanCache = {
+      internals(c).scanCache = {
         lastHeight: 100,
         ownedOutputs: [],
         spentKeyImages: new Set<string>(),
       }
-      ;(c as any).lwsLoggedIn = true
+      internals(c).lwsLoggedIn = true
       c.purgeClient()
       expect(() => c.getAddress()).toThrow(/Phrase must be provided/)
-      expect((c as any).scanCache).toBeNull()
-      expect((c as any).lwsLoggedIn).toBe(false)
+      expect(internals(c).scanCache).toBeNull()
+      expect(internals(c).lwsLoggedIn).toBe(false)
     })
 
     it('Should preserve wallet-rpc lock serialization across setPhrase/purgeClient', async () => {
@@ -249,12 +262,12 @@ describe('Monero client (pure JS)', () => {
         await new Promise((r) => setImmediate(r))
       }
       expect(balanceCalls).toBe(1)
-      const lockWhileHeld = (c as any).walletRpcLock
+      const lockWhileHeld = internals(c).walletRpcLock
 
       c.setPhrase(OTHER_PHRASE)
       // Must not orphan the in-flight chain with a fresh Promise.resolve().
-      expect((c as any).walletRpcLock).toBe(lockWhileHeld)
-      expect((c as any).scanCache).toBeNull()
+      expect(internals(c).walletRpcLock).toBe(lockWhileHeld)
+      expect(internals(c).scanCache).toBeNull()
 
       currentAddress = c.getAddress()
       created = false
@@ -273,10 +286,10 @@ describe('Monero client (pure JS)', () => {
       expect(balanceCalls).toBe(2)
       expect(maxInFlightBalance).toBe(1)
 
-      const lockAfterOps = (c as any).walletRpcLock
+      const lockAfterOps = internals(c).walletRpcLock
       c.purgeClient()
-      expect((c as any).walletRpcLock).toBe(lockAfterOps)
-      expect((c as any).scanCache).toBeNull()
+      expect(internals(c).walletRpcLock).toBe(lockAfterOps)
+      expect(internals(c).scanCache).toBeNull()
     })
 
     it('Should get full derivation path with account 0', () => {
