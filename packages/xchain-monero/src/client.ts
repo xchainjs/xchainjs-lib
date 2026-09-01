@@ -37,7 +37,8 @@ export class Client extends BaseXChainClient {
   private daemonUrls: Record<Network, string[]>
   private lwsUrls: Record<Network, string[]>
   private walletRpcUrls: Record<Network, string[]>
-  private lwsLoggedIn = false
+  /** Last address successfully logged in to LWS; null when no session. */
+  private lwsLoggedInAddress: string | null = null
   private restoreHeight: number
   private walletRpcLock: Promise<unknown> = Promise.resolve()
 
@@ -149,9 +150,9 @@ export class Client extends BaseXChainClient {
       const viewKeyHex = this.getViewKeyHex(walletIndex)
       for (const url of urls) {
         try {
-          if (!this.lwsLoggedIn) {
+          if (this.lwsLoggedInAddress !== address) {
             await lws.login(url, address, viewKeyHex)
-            this.lwsLoggedIn = true
+            this.lwsLoggedInAddress = address
           }
           const info = await lws.getAddressInfo(url, address, viewKeyHex)
           const received = BigInt(info.total_received)
@@ -160,7 +161,7 @@ export class Client extends BaseXChainClient {
           return [{ asset: AssetXMR, amount: baseAmount(balance.toString(), XMR_DECIMALS) }]
         } catch (error) {
           console.warn(`LWS ${url} failed for getBalance:`, (error as Error).message)
-          this.lwsLoggedIn = false
+          this.lwsLoggedInAddress = null
           continue
         }
       }
@@ -262,9 +263,9 @@ export class Client extends BaseXChainClient {
       const viewKeyHex = this.getViewKeyHex(walletIndex)
       for (const url of urls) {
         try {
-          if (!this.lwsLoggedIn) {
+          if (this.lwsLoggedInAddress !== address) {
             await lws.login(url, address, viewKeyHex)
-            this.lwsLoggedIn = true
+            this.lwsLoggedInAddress = address
           }
 
           const result = await lws.getAddressTxs(url, address, viewKeyHex)
@@ -296,7 +297,7 @@ export class Client extends BaseXChainClient {
           return { total: confirmedTxs.length, txs }
         } catch (error) {
           console.warn(`LWS ${url} failed for getTransactions:`, (error as Error).message)
-          this.lwsLoggedIn = false
+          this.lwsLoggedInAddress = null
           continue
         }
       }
@@ -529,7 +530,7 @@ export class Client extends BaseXChainClient {
 
   private resetWalletState(): void {
     this.scanCache = null
-    this.lwsLoggedIn = false
+    this.lwsLoggedInAddress = null
   }
 
   private async getBalanceFromWalletRpc(
