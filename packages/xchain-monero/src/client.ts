@@ -16,7 +16,7 @@ import { Address, BaseAmount, baseAmount } from '@xchainjs/xchain-util'
 import { keccak_256 } from '@noble/hashes/sha3'
 import slip10 from 'micro-key-producer/slip10.js'
 
-import { AssetXMR, XMRChain, XMR_DECIMALS, TYPICAL_TX_WEIGHT, defaultXMRParams } from './const'
+import { AssetXMR, MAX_WALLET_INDEX, XMRChain, XMR_DECIMALS, TYPICAL_TX_WEIGHT, defaultXMRParams } from './const'
 import { encodeAddress } from './crypto/address'
 import { deriveKeyPairs } from './crypto/keys'
 import * as daemon from './daemon'
@@ -37,12 +37,14 @@ export class Client extends BaseXChainClient {
   private daemonUrls: Record<Network, string[]>
   private lwsUrls: Record<Network, string[]>
   private walletRpcUrls: Record<Network, string[]>
-  private lwsLoggedIn = false
+  /** Last address successfully logged in to LWS; null when no session. */
+  private lwsLoggedInAddress: string | null = null
   private restoreHeight: number
   private walletRpcLock: Promise<unknown> = Promise.resolve()
 
-  /** Cached scan state for daemon fallback */
+  /** Cached scan state for daemon fallback (per walletIndex) */
   private scanCache: {
+    walletIndex: number
     lastHeight: number
     ownedOutputs: OwnedOutput[]
     spentKeyImages: Set<string>
@@ -132,8 +134,10 @@ export class Client extends BaseXChainClient {
   /**
    * Get spendable balance via wallet-rpc (unlocked), then LWS, then a bounded daemon scan.
    * For wallet-rpc, prefer {@link getWalletBalanceDetail} when both total and unlocked are needed.
+   * `address` may be any HD index 0…{@link MAX_WALLET_INDEX} derived from the phrase.
    */
   public async getBalance(address: Address): Promise<Balance[]> {
+    const walletIndex = this.findWalletIndexForAddress(address)
     const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
     if (walletRpcUrls && walletRpcUrls.length > 0) {
       const detail = await this.getWalletBalanceDetail(address)
@@ -143,12 +147,12 @@ export class Client extends BaseXChainClient {
     // Try LWS next
     const urls = this.lwsUrls[this.getNetwork()]
     if (urls && urls.length > 0) {
-      const viewKeyHex = this.getViewKeyHex(0)
+      const viewKeyHex = this.getViewKeyHex(walletIndex)
       for (const url of urls) {
         try {
-          if (!this.lwsLoggedIn) {
+          if (this.lwsLoggedInAddress !== address) {
             await lws.login(url, address, viewKeyHex)
-            this.lwsLoggedIn = true
+            this.lwsLoggedInAddress = address
           }
           const info = await lws.getAddressInfo(url, address, viewKeyHex)
           const received = BigInt(info.total_received)
@@ -157,7 +161,7 @@ export class Client extends BaseXChainClient {
           return [{ asset: AssetXMR, amount: baseAmount(balance.toString(), XMR_DECIMALS) }]
         } catch (error) {
           console.warn(`LWS ${url} failed for getBalance:`, (error as Error).message)
-          this.lwsLoggedIn = false
+          this.lwsLoggedInAddress = null
           continue
         }
       }
@@ -165,7 +169,7 @@ export class Client extends BaseXChainClient {
 
     // Fallback: daemon scanning
     console.warn('LWS unavailable, falling back to daemon scanning (this may be slow)')
-    const scanResult = await this.daemonScan()
+    const scanResult = await this.daemonScan(walletIndex)
     const balance = computeBalance(scanResult.ownedOutputs, scanResult.spentKeyImages)
     return [{ asset: AssetXMR, amount: baseAmount(balance.toString(), XMR_DECIMALS) }]
   }
@@ -232,20 +236,17 @@ export class Client extends BaseXChainClient {
    * are available when the tx was created by this wallet.
    */
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
-    const address = params?.address || (await this.getAddressAsync(0))
+    const address = params?.address || this.getAddress(0)
+    const walletIndex = this.findWalletIndexForAddress(address)
     const offset = params?.offset ?? 0
     const limit = params?.limit ?? 10
 
     const walletRpcUrls = this.walletRpcUrls[this.getNetwork()]
     if (walletRpcUrls && walletRpcUrls.length > 0) {
-      const ownAddress = await this.getAddressAsync(0)
-      if (address !== ownAddress) {
-        throw new Error('Monero wallet RPC can only return history for the unlocked wallet address')
-      }
       let lastError: unknown
       for (const url of walletRpcUrls) {
         try {
-          return await this.getTransactionsFromWalletRpc(url, address, offset, limit)
+          return await this.getTransactionsFromWalletRpc(url, address, walletIndex, offset, limit)
         } catch (error) {
           lastError = error
           console.warn(`Wallet RPC ${url} failed for getTransactions:`, (error as Error).message)
@@ -259,12 +260,12 @@ export class Client extends BaseXChainClient {
     // Try LWS next
     const urls = this.lwsUrls[this.getNetwork()]
     if (urls && urls.length > 0) {
-      const viewKeyHex = this.getViewKeyHex(0)
+      const viewKeyHex = this.getViewKeyHex(walletIndex)
       for (const url of urls) {
         try {
-          if (!this.lwsLoggedIn) {
+          if (this.lwsLoggedInAddress !== address) {
             await lws.login(url, address, viewKeyHex)
-            this.lwsLoggedIn = true
+            this.lwsLoggedInAddress = address
           }
 
           const result = await lws.getAddressTxs(url, address, viewKeyHex)
@@ -296,7 +297,7 @@ export class Client extends BaseXChainClient {
           return { total: confirmedTxs.length, txs }
         } catch (error) {
           console.warn(`LWS ${url} failed for getTransactions:`, (error as Error).message)
-          this.lwsLoggedIn = false
+          this.lwsLoggedInAddress = null
           continue
         }
       }
@@ -304,7 +305,7 @@ export class Client extends BaseXChainClient {
 
     // Fallback: daemon scanning
     console.warn('LWS unavailable, falling back to daemon scanning for tx history')
-    const scanResult = await this.daemonScan()
+    const scanResult = await this.daemonScan(walletIndex)
     const allOutputs = scanResult.ownedOutputs.sort((a, b) => b.height - a.height)
 
     const paginated = allOutputs.slice(offset, offset + limit)
@@ -321,7 +322,8 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Total and unlocked balances from monero-wallet-rpc (own address only).
+   * Total and unlocked balances from monero-wallet-rpc for a derived address
+   * (walletIndex 0…{@link MAX_WALLET_INDEX}).
    * Unlocked is what can be spent immediately; total includes locked outputs.
    */
   public async getWalletBalanceDetail(address: Address): Promise<{ total: BaseAmount; unlocked: BaseAmount }> {
@@ -329,14 +331,11 @@ export class Client extends BaseXChainClient {
     if (!walletRpcUrls || walletRpcUrls.length === 0) {
       throw new Error('getWalletBalanceDetail requires walletRpcUrls')
     }
-    const ownAddress = this.getAddress(0)
-    if (address !== ownAddress) {
-      throw new Error('Monero wallet RPC can only return the balance for the unlocked wallet address')
-    }
+    const walletIndex = this.findWalletIndexForAddress(address)
     let lastError: unknown
     for (const url of walletRpcUrls) {
       try {
-        const result = await this.getBalanceFromWalletRpc(url)
+        const result = await this.getBalanceFromWalletRpc(url, walletIndex)
         return {
           total: baseAmount(result.total.toString(), XMR_DECIMALS),
           unlocked: baseAmount(result.unlocked.toString(), XMR_DECIMALS),
@@ -424,6 +423,19 @@ export class Client extends BaseXChainClient {
   }
 
   /**
+   * Resolve HD walletIndex for a derived address (0…MAX_WALLET_INDEX).
+   * Each index is a separate Monero wallet file under wallet-rpc
+   * (`xchain-${addressPrefix}`), not a Monero account_index.
+   */
+  private findWalletIndexForAddress(address: Address): number {
+    if (!this.phrase) throw new Error('Phrase must be provided')
+    for (let i = 0; i <= MAX_WALLET_INDEX; i++) {
+      if (this.getAddress(i) === address) return i
+    }
+    throw new Error(`Address is not derived from this phrase (checked walletIndex 0–${MAX_WALLET_INDEX})`)
+  }
+
+  /**
    * Scan the blockchain via daemon RPC to find owned outputs.
    * Uses cached results and scans incrementally from the last scanned height.
    */
@@ -439,10 +451,11 @@ export class Client extends BaseXChainClient {
     const daemonUrl = daemonUrls[0]
     const currentHeight = await daemon.getHeight(daemonUrl)
 
-    const fromHeight = this.scanCache ? this.scanCache.lastHeight + 1 : this.restoreHeight
+    const cache = this.scanCache?.walletIndex === walletIndex ? this.scanCache : null
+    const fromHeight = cache ? cache.lastHeight + 1 : this.restoreHeight
 
-    if (fromHeight >= currentHeight && this.scanCache) {
-      return this.scanCache
+    if (fromHeight >= currentHeight && cache) {
+      return cache
     }
 
     // JSON daemon scanning is only viable for a short range. A local node still
@@ -467,14 +480,13 @@ export class Client extends BaseXChainClient {
       currentHeight - 1,
     )
 
-    // Merge with cached results
-    const ownedOutputs = this.scanCache ? [...this.scanCache.ownedOutputs, ...result.ownedOutputs] : result.ownedOutputs
+    // Merge with cached results for the same walletIndex
+    const ownedOutputs = cache ? [...cache.ownedOutputs, ...result.ownedOutputs] : result.ownedOutputs
 
-    const spentKeyImages = this.scanCache
-      ? new Set([...this.scanCache.spentKeyImages, ...result.spentKeyImages])
-      : result.spentKeyImages
+    const spentKeyImages = cache ? new Set([...cache.spentKeyImages, ...result.spentKeyImages]) : result.spentKeyImages
 
     this.scanCache = {
+      walletIndex,
       lastHeight: currentHeight - 1,
       ownedOutputs,
       spentKeyImages,
@@ -518,12 +530,15 @@ export class Client extends BaseXChainClient {
 
   private resetWalletState(): void {
     this.scanCache = null
-    this.lwsLoggedIn = false
+    this.lwsLoggedInAddress = null
   }
 
-  private async getBalanceFromWalletRpc(url: string): Promise<{ total: bigint; unlocked: bigint }> {
+  private async getBalanceFromWalletRpc(
+    url: string,
+    walletIndex: number,
+  ): Promise<{ total: bigint; unlocked: bigint }> {
     return this.withWalletRpcLock(async () => {
-      await this.prepareWalletRpc(url)
+      await this.prepareWalletRpc(url, walletIndex)
       const result = await walletRpc.callWithBusyRetry(() => walletRpc.getBalance(url))
       return {
         total: BigInt(result.balance),
@@ -533,8 +548,9 @@ export class Client extends BaseXChainClient {
   }
 
   private async transferViaWalletRpc(url: string, params: TxParams): Promise<string> {
+    const walletIndex = params.walletIndex ?? 0
     return this.withWalletRpcLock(async () => {
-      await this.prepareWalletRpc(url, params.walletIndex ?? 0)
+      await this.prepareWalletRpc(url, walletIndex)
       const balances = await walletRpc.callWithBusyRetry(() => walletRpc.getBalance(url))
       const unlocked = BigInt(balances.unlockedBalance)
       const amountPiconero = BigInt(params.amount.amount().toFixed(0))
@@ -556,11 +572,12 @@ export class Client extends BaseXChainClient {
   private async getTransactionsFromWalletRpc(
     url: string,
     address: string,
+    walletIndex: number,
     offset: number,
     limit: number,
   ): Promise<TxsPage> {
     const { ownAddress, transfers } = await this.withWalletRpcLock(async () => {
-      const prepared = await this.prepareWalletRpc(url)
+      const prepared = await this.prepareWalletRpc(url, walletIndex)
       const txs = await walletRpc.callWithBusyRetry(() => walletRpc.getTransfers(url))
       return { ownAddress: prepared, transfers: txs }
     })
