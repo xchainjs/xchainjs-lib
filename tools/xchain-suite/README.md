@@ -101,6 +101,8 @@ yarn workspace xchain-suite dev:nomonero
 NO_MONERO=1 yarn workspace xchain-suite dev
 ```
 
+`--nomonero` is handled by `scripts/dev.mjs` (sets `NO_MONERO=1`) before Vite starts, because Vite rejects unknown CLI flags.
+
 `monerod` stores the chain, not wallets. The suite shows an XMR balance by talking to **`monero-wallet-rpc`**, which scans with the BIP-39 view key against your local daemon.
 
 That address is **not** a `monero-wallet-cli` wallet. Official Monero seeds are 25 words; the suite derives XMR via SLIP-10 `m/44'/128'/0'` from the same BIP-39 phrase as every other chain.

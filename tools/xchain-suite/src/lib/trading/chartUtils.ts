@@ -76,7 +76,7 @@ export function getActualMidgardInterval(interval: TimeInterval): string {
 export const TRADE_ASSETS = [
   'BTC', 'ETH', 'SOL', 'AVAX', 'DOGE', 'LTC', 'BCH', 'XRP', 'ADA',
   'BNB', 'ARB', 'SUI', 'GAIA', 'THOR', 'MAYA', 'DASH', 'ZEC',
-  'XRD', 'XMR', 'NEAR',
+  'XRD', 'XMR',
 ]
 
 // Binance interval mapping

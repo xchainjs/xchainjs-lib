@@ -16,14 +16,9 @@ const ENV_DIR = fileURLToPath(new URL('.', import.meta.url))
 
 /**
  * Skip auto-starting monero-wallet-rpc and XMR proxies.
- * Accepts `--nomonero` (stripped from argv so Vite doesn't reject it) or `NO_MONERO=1`.
+ * Prefer `NO_MONERO=1` / `yarn dev --nomonero` (wrapper sets the env before Vite/CAC runs).
  */
 function resolveNoMonero(env: Record<string, string>): boolean {
-  const argvIdx = process.argv.indexOf('--nomonero')
-  if (argvIdx !== -1) {
-    process.argv.splice(argvIdx, 1)
-    return true
-  }
   return process.env.NO_MONERO === '1' || env.NO_MONERO === '1' || env.VITE_NO_MONERO === '1'
 }
 

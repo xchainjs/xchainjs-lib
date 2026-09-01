@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:nomonero": "NO_MONERO=1 vite",
+    "dev": "node ./scripts/dev.mjs",
+    "dev:nomonero": "NO_MONERO=1 node ./scripts/dev.mjs",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "echo 'Skipped - xchain-suite requires browser environment'",
