@@ -7,6 +7,7 @@ export class JsonRpcProvider {
   viewGasPrice = jest.fn()
   viewTransactionStatus = jest.fn()
   sendTransaction = jest.fn()
+  callFunction = jest.fn()
 }
 
 export class FailoverRpcProvider {
@@ -16,6 +17,7 @@ export class FailoverRpcProvider {
   viewGasPrice = jest.fn()
   viewTransactionStatus = jest.fn()
   sendTransaction = jest.fn()
+  callFunction = jest.fn()
 }
 
 export class KeyPairEd25519 {
@@ -39,15 +41,30 @@ export class KeyPairSigner {
 }
 
 export class Account {
-  transfer = jest.fn()
-  createTransaction = jest.fn()
-  createSignedTransaction = jest.fn()
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-  constructor(_accountId: string, _provider: unknown, _signer?: unknown) {}
+  // Shared mocks so tests can configure behavior without capturing instances.
+  static transfer = jest.fn()
+  static createTransaction = jest.fn()
+  static createSignedTransaction = jest.fn()
+  static callFunction = jest.fn()
+
+  transfer = Account.transfer
+  createTransaction = Account.createTransaction
+  createSignedTransaction = Account.createSignedTransaction
+  callFunction = Account.callFunction
+
+  constructor(
+    public accountId: string,
+    public provider: unknown,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _signer?: unknown,
+  ) {}
 }
 
 export const actions = {
   transfer: (deposit: bigint) => ({ transfer: { deposit } }),
+  functionCall: (methodName: string, args: unknown, gas?: bigint, deposit?: bigint) => ({
+    functionCall: { methodName, args, gas, deposit },
+  }),
 }
 
 export const baseEncode = (value: Uint8Array | string): string =>

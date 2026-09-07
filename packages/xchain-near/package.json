@@ -28,6 +28,7 @@
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
     "test": "jest",
+    "e2e": "node __e2e__/nep141.e2e.mjs",
     "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {

@@ -18,6 +18,12 @@ export const NEARAsset: Asset = {
 /** Typical gas attached to a simple native Transfer action (~0.45 TGas). */
 export const TRANSFER_GAS = BigInt('450000000000')
 
+/** Gas attached to NEP-141 `ft_transfer` / NEP-145 `storage_deposit` (~30 TGas). */
+export const FT_TRANSFER_GAS = BigInt('30000000000000')
+
+/** 1 yoctoNEAR deposit required by NEP-141 `ft_transfer`. */
+export const FT_TRANSFER_DEPOSIT = BigInt(1)
+
 const mainnetExplorer = new ExplorerProvider(
   'https://nearblocks.io',
   'https://nearblocks.io/address/%%ADDRESS%%',

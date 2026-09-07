@@ -12,7 +12,14 @@ import {
   TxType,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import { Address, TokenAsset, baseAmount, eqAsset } from '@xchainjs/xchain-util'
+import {
+  Address,
+  TokenAsset,
+  baseAmount,
+  eqAsset,
+  getContractAddressFromAsset,
+  isTokenAsset,
+} from '@xchainjs/xchain-util'
 import slip10 from 'micro-key-producer/slip10.js'
 import {
   Account,
@@ -29,6 +36,25 @@ import {
   decodeSignedTransaction,
   decodeTransaction,
 } from 'near-api-js'
+import { FungibleToken } from 'near-api-js/tokens'
+
+import {
+  FT_TRANSFER_DEPOSIT,
+  FT_TRANSFER_GAS,
+  NEARAsset,
+  NEARChain,
+  NEAR_DECIMALS,
+  TRANSFER_GAS,
+  defaultNearParams,
+} from './const'
+import { Balance, CompatibleAsset, NearClientParams, Tx, TxParams, TxsPage } from './types'
+import {
+  getNearNetworkId,
+  publicKeyToImplicitAccount,
+  resolveClientUrls,
+  resolveNearblocksUrl,
+  validateNearAddress,
+} from './utils'
 
 /** Minimal shape of near-api-js transaction RPC responses we consume. */
 type RpcTxResult = {
@@ -44,15 +70,16 @@ type RpcTxResult = {
   }
 }
 
-import { NEARAsset, NEARChain, NEAR_DECIMALS, TRANSFER_GAS, defaultNearParams } from './const'
-import { Balance, NearClientParams, Tx, TxParams, TxsPage } from './types'
-import {
-  getNearNetworkId,
-  publicKeyToImplicitAccount,
-  resolveClientUrls,
-  resolveNearblocksUrl,
-  validateNearAddress,
-} from './utils'
+type FtMetadata = {
+  name: string
+  symbol: string
+  decimals: number
+}
+
+type StorageBalanceBounds = {
+  min: string | number | bigint
+  max?: string | number | bigint | null
+}
 
 type NearblocksTxn = {
   transaction_hash?: string
@@ -95,6 +122,8 @@ export class Client extends BaseXChainClient {
   private nearblocksApiKey?: string
   private provider: Provider
   private readonly callerParams: Pick<NearClientParams, 'clientUrls' | 'nearblocksUrls'>
+  /** Cache of NEP-141 `ft_metadata` by contract id. */
+  private readonly ftMetadataCache = new Map<string, FtMetadata>()
 
   constructor(params: NearClientParams = defaultNearParams) {
     const mergedParams = { ...defaultNearParams, ...params }
@@ -163,26 +192,17 @@ export class Client extends BaseXChainClient {
     return validateNearAddress(address)
   }
 
-  public async getBalance(address: Address, _assets?: TokenAsset[]): Promise<Balance[]> {
-    try {
-      const account = await this.provider.viewAccount({ accountId: address })
-      return [
-        {
-          asset: NEARAsset,
-          amount: baseAmount(account.amount.toString(), NEAR_DECIMALS),
-        },
-      ]
-    } catch (error) {
-      if (this.isAccountDoesNotExistError(error)) {
-        return [
-          {
-            asset: NEARAsset,
-            amount: baseAmount(0, NEAR_DECIMALS),
-          },
-        ]
-      }
-      throw error
+  public async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
+    const balances: Balance[] = [await this.getNativeBalance(address)]
+
+    if (!assets?.length) return balances
+
+    for (const asset of assets) {
+      this.assertNearTokenAsset(asset)
+      balances.push(await this.getNep141Balance(address, asset))
     }
+
+    return balances
   }
 
   public async getFees(): Promise<Fees> {
@@ -236,10 +256,6 @@ export class Client extends BaseXChainClient {
   }
 
   public async transfer({ walletIndex = 0, recipient, asset, amount, memo }: TxParams): Promise<string> {
-    if (memo) throw Error('Memo is not supported for NEAR transfers')
-    if (asset && !eqAsset(asset, NEARAsset)) {
-      throw Error('Only native NEAR transfers are supported')
-    }
     if (!this.validateAddress(recipient)) {
       throw Error('Invalid recipient address')
     }
@@ -248,19 +264,43 @@ export class Client extends BaseXChainClient {
     const sender = this.getImplicitAccountId(walletIndex)
     const account = new Account(sender, this.provider, new KeyPairSigner(keyPair))
 
-    const result = await account.transfer({
-      receiverId: recipient,
-      amount: BigInt(amount.amount().toFixed(0)),
+    if (!asset || eqAsset(asset, NEARAsset)) {
+      if (memo) throw Error('Memo is not supported for NEAR transfers')
+      const result = await account.transfer({
+        receiverId: recipient,
+        amount: BigInt(amount.amount().toFixed(0)),
+      })
+      return this.extractTxHash(result as RpcTxResult)
+    }
+
+    this.assertNearTokenAsset(asset)
+    const contractId = getContractAddressFromAsset(asset)
+    const ft = await this.getFungibleToken(contractId)
+
+    const registered = await ft.isAccountRegistered({ accountId: recipient, provider: this.provider })
+    if (!registered) {
+      await ft.registerAccount({ accountIdToRegister: recipient, fundingAccount: account })
+    }
+
+    const transferArgs: { amount: string; receiver_id: string; memo?: string } = {
+      amount: amount.amount().toFixed(0),
+      receiver_id: recipient,
+    }
+    if (memo) transferArgs.memo = memo
+
+    // Use callFunction so optional NEP-141 memo is preserved (FungibleToken.transfer omits it).
+    const result = await account.callFunction({
+      contractId,
+      methodName: 'ft_transfer',
+      args: transferArgs,
+      gas: FT_TRANSFER_GAS,
+      deposit: FT_TRANSFER_DEPOSIT,
     })
 
     return this.extractTxHash(result as RpcTxResult)
   }
 
   public async prepareTx({ walletIndex = 0, recipient, asset, amount, memo }: TxParams): Promise<PreparedTx> {
-    if (memo) throw Error('Memo is not supported for NEAR transfers')
-    if (asset && !eqAsset(asset, NEARAsset)) {
-      throw Error('Only native NEAR transfers are supported')
-    }
     if (!this.validateAddress(recipient)) {
       throw Error('Invalid recipient address')
     }
@@ -269,9 +309,51 @@ export class Client extends BaseXChainClient {
     const sender = this.getImplicitAccountId(walletIndex)
     const account = new Account(sender, this.provider, new KeyPairSigner(keyPair))
 
+    if (!asset || eqAsset(asset, NEARAsset)) {
+      if (memo) throw Error('Memo is not supported for NEAR transfers')
+      const transaction = await account.createTransaction({
+        receiverId: recipient,
+        actions: [actions.transfer(BigInt(amount.amount().toFixed(0)))],
+        publicKey: keyPair.getPublicKey(),
+      })
+      return {
+        rawUnsignedTx: base64Encode(transaction.encode()),
+      }
+    }
+
+    this.assertNearTokenAsset(asset)
+    const contractId = getContractAddressFromAsset(asset)
+    const ft = await this.getFungibleToken(contractId)
+    const txActions: ReturnType<typeof actions.functionCall>[] = []
+
+    const registered = await ft.isAccountRegistered({ accountId: recipient, provider: this.provider })
+    if (!registered) {
+      const bounds = (await this.provider.callFunction({
+        contractId,
+        method: 'storage_balance_bounds',
+        args: {},
+      })) as StorageBalanceBounds
+      txActions.push(
+        actions.functionCall(
+          'storage_deposit',
+          { account_id: recipient, registration_only: true },
+          FT_TRANSFER_GAS,
+          BigInt(bounds.min),
+        ),
+      )
+    }
+
+    const transferArgs: { amount: string; receiver_id: string; memo?: string } = {
+      amount: amount.amount().toFixed(0),
+      receiver_id: recipient,
+    }
+    if (memo) transferArgs.memo = memo
+
+    txActions.push(actions.functionCall('ft_transfer', transferArgs, FT_TRANSFER_GAS, FT_TRANSFER_DEPOSIT))
+
     const transaction = await account.createTransaction({
-      receiverId: recipient,
-      actions: [actions.transfer(BigInt(amount.amount().toFixed(0)))],
+      receiverId: contractId,
+      actions: txActions,
       publicKey: keyPair.getPublicKey(),
     })
 
@@ -449,5 +531,79 @@ export class Client extends BaseXChainClient {
   private isAccountDoesNotExistError(error: unknown): boolean {
     const message = error instanceof Error ? error.message : String(error)
     return /does not exist|doesn't exist|UnknownAccount|ACCOUNT_DOES_NOT_EXIST/i.test(message)
+  }
+
+  private async getNativeBalance(address: Address): Promise<Balance> {
+    try {
+      const account = await this.provider.viewAccount({ accountId: address })
+      return {
+        asset: NEARAsset,
+        amount: baseAmount(account.amount.toString(), NEAR_DECIMALS),
+      }
+    } catch (error) {
+      if (this.isAccountDoesNotExistError(error)) {
+        return {
+          asset: NEARAsset,
+          amount: baseAmount(0, NEAR_DECIMALS),
+        }
+      }
+      throw error
+    }
+  }
+
+  private async getNep141Balance(address: Address, asset: TokenAsset): Promise<Balance> {
+    const contractId = getContractAddressFromAsset(asset)
+    const metadata = await this.getFtMetadata(contractId)
+    const ft = new FungibleToken(contractId, metadata)
+    const balance = await ft.getBalance({ accountId: address, provider: this.provider })
+    return {
+      asset,
+      amount: baseAmount(balance.toString(), metadata.decimals),
+    }
+  }
+
+  private async getFungibleToken(contractId: string): Promise<FungibleToken> {
+    const metadata = await this.getFtMetadata(contractId)
+    return new FungibleToken(contractId, metadata)
+  }
+
+  private async getFtMetadata(contractId: string): Promise<FtMetadata> {
+    const cached = this.ftMetadataCache.get(contractId)
+    if (cached) return cached
+
+    const raw = (await this.provider.callFunction({
+      contractId,
+      method: 'ft_metadata',
+      args: {},
+    })) as {
+      name?: string
+      symbol?: string
+      decimals?: number
+    }
+
+    if (typeof raw?.decimals !== 'number') {
+      throw Error(`Missing decimals in ft_metadata for ${contractId}`)
+    }
+
+    const metadata: FtMetadata = {
+      name: raw.name || contractId,
+      symbol: raw.symbol || contractId,
+      decimals: raw.decimals,
+    }
+    this.ftMetadataCache.set(contractId, metadata)
+    return metadata
+  }
+
+  private assertNearTokenAsset(asset: CompatibleAsset): asserts asset is TokenAsset {
+    if (!isTokenAsset(asset)) {
+      throw Error('Asset must be a NEP-141 TokenAsset')
+    }
+    if (asset.chain !== NEARChain) {
+      throw Error(`Asset chain must be ${NEARChain}`)
+    }
+    const contractId = getContractAddressFromAsset(asset)
+    if (!contractId) {
+      throw Error('TokenAsset is missing contract id')
+    }
   }
 }
