@@ -10,6 +10,7 @@ const ICON_OVERRIDES: Record<string, string> = {
   ARB: '/icons/arb.svg',
   XRD: '/icons/xrd.svg',
   NEAR: '/icons/near.svg',
+  wNEAR: '/icons/near.svg',
   SUI: '/icons/sui.svg',
   // ERC-20 / token icons (keyed by ticker)
   USDT: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',

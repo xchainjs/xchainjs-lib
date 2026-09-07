@@ -20,6 +20,7 @@ export const EXPLORER_TX_URLS: Record<string, string> = {
   THOR: 'https://runescan.io/tx/',
   MAYA: 'https://www.explorer.mayachain.info/tx/',
   // Other chains
+  NEAR: 'https://nearblocks.io/txns/',
   SOL: 'https://solscan.io/tx/',
   SUI: 'https://suiscan.xyz/mainnet/tx/',
   XRD: 'https://dashboard.radixdlt.com/transaction/',
