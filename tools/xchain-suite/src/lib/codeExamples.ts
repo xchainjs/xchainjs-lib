@@ -202,18 +202,36 @@ export function generateTransferCode(
   chainId: string,
   recipient: string,
   amount: string,
-  memo?: string
+  memo?: string,
+  options?: {
+    decimals?: number
+    asset?: { chain: string; symbol: string; ticker: string }
+  },
 ): string {
   const memoLine = memo ? `\n  memo: '${escapeForString(memo)}',` : ''
+  const decimals = options?.decimals
+  const amountArgs = decimals !== undefined ? `${amount}, ${decimals}` : amount
+  const asset = options?.asset
+  const utilImports = asset
+    ? ['assetAmount', 'assetToBase', 'AssetType']
+    : ['assetAmount', 'assetToBase']
+  const assetLine = asset
+    ? `\n  asset: {
+    chain: '${escapeForString(asset.chain)}',
+    symbol: '${escapeForString(asset.symbol)}',
+    ticker: '${escapeForString(asset.ticker)}',
+    type: AssetType.TOKEN,
+  },`
+    : ''
 
-  return `${generateImports(chainId, ['assetAmount', 'assetToBase'])}
+  return `${generateImports(chainId, utilImports)}
 
 ${generateClientSetup(chainId)}
 
 // Transfer funds
 const txHash = await client.transfer({
   recipient: '${escapeForString(recipient)}',
-  amount: assetToBase(assetAmount(${amount})),${memoLine}
+  amount: assetToBase(assetAmount(${amountArgs})),${assetLine}${memoLine}
 })
 
 console.log('Transaction hash:', txHash)

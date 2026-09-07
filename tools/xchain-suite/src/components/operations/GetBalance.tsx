@@ -6,6 +6,7 @@ import { CodePreview } from '../ui/CodePreview'
 import { generateGetBalanceCode } from '../../lib/codeExamples'
 import type { XChainClient, Balance } from '@xchainjs/xchain-client'
 import { assetToString, baseToAsset, formatAssetAmountCurrency, AssetType, type TokenAsset } from '@xchainjs/xchain-util'
+import { NEAR_POOL_TOKENS } from '../../lib/nearTokens'
 
 interface GetBalanceProps {
   chainId: string
@@ -53,9 +54,9 @@ export function GetBalance({ chainId, client }: GetBalanceProps) {
         }
         const queryAddress = targetAddress || await client.getAddressAsync(0)
 
-        // For EVM chains, pass known pool tokens so the provider uses
-        // direct contract.balanceOf() instead of Etherscan tokentx discovery
-        const tokens = EVM_POOL_TOKENS[chainId]
+        // EVM: known pool tokens → direct balanceOf (skip Etherscan discovery).
+        // NEAR: known NEP-141 tokens → ft_balance_of (native-only when omitted).
+        const tokens = EVM_POOL_TOKENS[chainId] ?? (chainId === 'NEAR' ? NEAR_POOL_TOKENS : undefined)
         const balances = await client.getBalance(queryAddress, tokens)
         return { balances }
       },

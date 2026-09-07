@@ -8,6 +8,7 @@ import { AssetIcon } from '../components/swap/assetIcons'
 import { PriceService, formatUsdValue, formatUsdPrice } from '../lib/pricing/PriceService'
 import { baseToAsset } from '@xchainjs/xchain-util'
 import type { Balance } from '@xchainjs/xchain-client'
+import { NEAR_POOL_TOKENS } from '../lib/nearTokens'
 
 interface ChainBalance {
   chain: ChainConfig
@@ -75,10 +76,12 @@ export default function PortfolioPage() {
         }
 
         // Get balances. For EVM chains, pass [] to skip Etherscan ERC-20 enumeration — see
-        // EVM_NATIVE_ONLY_CHAINS comment.
+        // EVM_NATIVE_ONLY_CHAINS comment. For NEAR, pass known NEP-141 tokens so USDC / wNEAR show up.
         const rawBalances: Balance[] = EVM_NATIVE_ONLY_CHAINS.has(chain.id)
           ? await client.getBalance(address, [])
-          : await client.getBalance(address)
+          : chain.id === 'NEAR'
+            ? await client.getBalance(address, NEAR_POOL_TOKENS)
+            : await client.getBalance(address)
 
         // Get prices and build balance entries
         const balanceEntries: ChainBalance['balances'] = []

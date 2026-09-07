@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { ChevronDown, X, Search } from 'lucide-react'
 import { AssetIcon, POPULAR_CHAIN_IDS } from './assetIcons'
+import { NEAR_TOKEN_ASSETS } from '../../lib/nearTokens'
 import type { ChainAsset } from '../../lib/types'
 
 interface ChainGroup {
@@ -60,6 +61,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
     name: 'Other',
     chains: [
       { chainId: 'NEAR', chainName: 'NEAR', symbol: 'NEAR' },
+      ...NEAR_TOKEN_ASSETS,
       { chainId: 'SOL', chainName: 'Solana', symbol: 'SOL' },
       { chainId: 'SUI', chainName: 'Sui', symbol: 'SUI' },
       { chainId: 'ADA', chainName: 'Cardano', symbol: 'ADA' },

@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import { CodePreview } from '../ui/CodePreview'
 import { generateTransferCode } from '../../lib/codeExamples'
 import { getExplorerTxUrl } from './constants'
 import type { XChainClient } from '@xchainjs/xchain-client'
-import { assetToBase, assetAmount, baseToAsset } from '@xchainjs/xchain-util'
+import {
+  AssetType,
+  assetToBase,
+  assetAmount,
+  baseToAsset,
+  type AnyAsset,
+  type TokenAsset,
+} from '@xchainjs/xchain-util'
 import { getChainById } from '../../lib/chains'
+import { NEAR_TOKEN_ASSETS } from '../../lib/nearTokens'
+import type { ChainAsset } from '../../lib/types'
+import { buildAsset, getDecimals } from '../../lib/assetUtils'
 
 interface TransferProps {
   chainId: string
@@ -17,7 +27,35 @@ interface TransferResult {
   txHash: string
 }
 
+type TransferAssetOption = {
+  id: string
+  label: string
+  chainAsset: ChainAsset | null
+}
+
+function buildTransferOptions(chainId: string): TransferAssetOption[] {
+  const chainInfo = getChainById(chainId)
+  const native: TransferAssetOption = {
+    id: 'native',
+    label: chainInfo?.symbol || chainId,
+    chainAsset: null,
+  }
+
+  if (chainId !== 'NEAR') return [native]
+
+  return [
+    native,
+    ...NEAR_TOKEN_ASSETS.map((token) => ({
+      id: token.contractAddress || token.symbol,
+      label: token.symbol,
+      chainAsset: token,
+    })),
+  ]
+}
+
 export function Transfer({ chainId, client }: TransferProps) {
+  const assetOptions = useMemo(() => buildTransferOptions(chainId), [chainId])
+  const [selectedAssetId, setSelectedAssetId] = useState(assetOptions[0]?.id || 'native')
   const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
   const [memo, setMemo] = useState('')
@@ -26,8 +64,23 @@ export function Transfer({ chainId, client }: TransferProps) {
   const [loadingBalance, setLoadingBalance] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<TransferResult>()
 
-  // Fetch balance when client is available
+  const selectedOption = assetOptions.find((option) => option.id === selectedAssetId) || assetOptions[0]
+  const selectedChainAsset = selectedOption?.chainAsset || null
+  const isNative = !selectedChainAsset
+  // Native NEAR rejects memos; NEP-141 ft_transfer accepts them.
+  const memoSupported = !(chainId === 'NEAR' && isNative)
+  const decimals = selectedChainAsset ? getDecimals(selectedChainAsset) : getChainById(chainId)?.decimals ?? 8
+
   useEffect(() => {
+    setSelectedAssetId(assetOptions[0]?.id || 'native')
+    setAmount('')
+    setMemo('')
+  }, [chainId, assetOptions])
+
+  // Fetch balance for the selected asset
+  useEffect(() => {
+    let cancelled = false
+
     const fetchBalance = async () => {
       if (!client) {
         setMaxBalance(null)
@@ -36,24 +89,40 @@ export function Transfer({ chainId, client }: TransferProps) {
       setLoadingBalance(true)
       try {
         const address = await client.getAddressAsync(0)
-        const balances = await client.getBalance(address)
-        if (balances.length > 0) {
-          const chainInfo = getChainById(chainId)
-          const decimals = chainInfo?.decimals ?? 8
-          const assetAmt = baseToAsset(balances[0].amount)
+        const tokenAssets: TokenAsset[] | undefined = selectedChainAsset
+          ? [buildAsset(selectedChainAsset) as TokenAsset]
+          : undefined
+        const balances = await client.getBalance(address, tokenAssets)
+        if (cancelled) return
+
+        const match = selectedChainAsset
+          ? balances.find(
+              (balance) =>
+                balance.asset.type === AssetType.TOKEN &&
+                balance.asset.ticker === selectedChainAsset.symbol &&
+                balance.asset.symbol.toLowerCase().includes(selectedChainAsset.contractAddress!.toLowerCase()),
+            )
+          : balances.find((balance) => balance.asset.type === AssetType.NATIVE) || balances[0]
+
+        if (match) {
+          const assetAmt = baseToAsset(match.amount)
           setMaxBalance(assetAmt.amount().toFixed(decimals))
         } else {
           setMaxBalance('0')
         }
       } catch (e) {
+        if (cancelled) return
         console.error('Failed to fetch balance for max:', e)
         setMaxBalance(null)
       } finally {
-        setLoadingBalance(false)
+        if (!cancelled) setLoadingBalance(false)
       }
     }
     fetchBalance()
-  }, [client, chainId])
+    return () => {
+      cancelled = true
+    }
+  }, [client, chainId, selectedAssetId, selectedChainAsset, decimals])
 
   const handleMax = () => {
     if (maxBalance) {
@@ -67,19 +136,20 @@ export function Transfer({ chainId, client }: TransferProps) {
       if (!client) {
         throw new Error('Client not available. Please connect wallet first.')
       }
-      const chainInfo = getChainById(chainId)
-      const decimals = chainInfo?.decimals ?? 8
       const baseAmt = assetToBase(assetAmount(amount, decimals))
+      const asset: AnyAsset | undefined = selectedChainAsset ? buildAsset(selectedChainAsset) : undefined
       const txHash = await client.transfer({
         recipient,
         amount: baseAmt,
-        memo: memo || undefined,
+        asset,
+        memo: memoSupported && memo ? memo : undefined,
       })
       return { txHash }
     })
   }
 
   const explorerUrl = result ? getExplorerTxUrl(chainId, result.txHash) : null
+  const assetLabel = selectedOption?.label || chainId
 
   return (
     <div className="space-y-4">
@@ -91,6 +161,32 @@ export function Transfer({ chainId, client }: TransferProps) {
       </div>
 
       <div className="space-y-4">
+        {assetOptions.length > 1 && (
+          <div>
+            <label
+              htmlFor="asset"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Asset
+            </label>
+            <select
+              id="asset"
+              value={selectedAssetId}
+              onChange={(e) => {
+                setSelectedAssetId(e.target.value)
+                setAmount('')
+              }}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            >
+              {assetOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div>
           <label
             htmlFor="recipient"
@@ -114,7 +210,7 @@ export function Transfer({ chainId, client }: TransferProps) {
               htmlFor="amount"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
-              Amount
+              Amount ({assetLabel})
             </label>
             {maxBalance !== null && (
               <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -142,22 +238,24 @@ export function Transfer({ chainId, client }: TransferProps) {
           </div>
         </div>
 
-        <div>
-          <label
-            htmlFor="memo"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            Memo (optional)
-          </label>
-          <input
-            type="text"
-            id="memo"
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
-            placeholder="Optional memo"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400 dark:placeholder-gray-500"
-          />
-        </div>
+        {memoSupported && (
+          <div>
+            <label
+              htmlFor="memo"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Memo (optional)
+            </label>
+            <input
+              type="text"
+              id="memo"
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              placeholder="Optional memo"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-400 dark:placeholder-gray-500"
+            />
+          </div>
+        )}
       </div>
 
       <div className="pt-4">
@@ -178,14 +276,20 @@ export function Transfer({ chainId, client }: TransferProps) {
             </h4>
             <div className="space-y-3 mb-6">
               <div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Asset</p>
+                <p className="text-sm font-mono text-gray-900 dark:text-gray-100">{assetLabel}</p>
+              </div>
+              <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Recipient</p>
                 <p className="text-sm font-mono break-all text-gray-900 dark:text-gray-100">{recipient}</p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Amount</p>
-                <p className="text-sm font-mono text-gray-900 dark:text-gray-100">{amount}</p>
+                <p className="text-sm font-mono text-gray-900 dark:text-gray-100">
+                  {amount} {assetLabel}
+                </p>
               </div>
-              {memo && (
+              {memoSupported && memo && (
                 <div>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Memo</p>
                   <p className="text-sm text-gray-900 dark:text-gray-100">{memo}</p>
@@ -256,7 +360,22 @@ export function Transfer({ chainId, client }: TransferProps) {
 
       {recipient.trim() && amount.trim() && (
         <CodePreview
-          code={generateTransferCode(chainId, recipient, amount, memo || undefined)}
+          code={generateTransferCode(
+            chainId,
+            recipient,
+            amount,
+            memoSupported ? memo || undefined : undefined,
+            {
+              decimals,
+              asset: selectedChainAsset
+                ? {
+                    chain: selectedChainAsset.chainId,
+                    symbol: `${selectedChainAsset.symbol}-${selectedChainAsset.contractAddress}`,
+                    ticker: selectedChainAsset.symbol,
+                  }
+                : undefined,
+            },
+          )}
           title="Code Example"
         />
       )}
