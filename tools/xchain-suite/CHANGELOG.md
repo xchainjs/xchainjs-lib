@@ -1,5 +1,12 @@
 # testing-gui
 
+## 1.0.23
+
+### Patch Changes
+
+- Updated dependencies [8a36529]
+  - @xchainjs/xchain-near@0.3.0
+
 ## 1.0.22
 
 ### Patch Changes
