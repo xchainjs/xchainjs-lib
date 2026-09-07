@@ -79,6 +79,8 @@ export function Transfer({ chainId, client }: TransferProps) {
 
   // Fetch balance for the selected asset
   useEffect(() => {
+    let cancelled = false
+
     const fetchBalance = async () => {
       if (!client) {
         setMaxBalance(null)
@@ -91,6 +93,8 @@ export function Transfer({ chainId, client }: TransferProps) {
           ? [buildAsset(selectedChainAsset) as TokenAsset]
           : undefined
         const balances = await client.getBalance(address, tokenAssets)
+        if (cancelled) return
+
         const match = selectedChainAsset
           ? balances.find(
               (balance) =>
@@ -107,13 +111,17 @@ export function Transfer({ chainId, client }: TransferProps) {
           setMaxBalance('0')
         }
       } catch (e) {
+        if (cancelled) return
         console.error('Failed to fetch balance for max:', e)
         setMaxBalance(null)
       } finally {
-        setLoadingBalance(false)
+        if (!cancelled) setLoadingBalance(false)
       }
     }
     fetchBalance()
+    return () => {
+      cancelled = true
+    }
   }, [client, chainId, selectedAssetId, selectedChainAsset, decimals])
 
   const handleMax = () => {
@@ -352,7 +360,22 @@ export function Transfer({ chainId, client }: TransferProps) {
 
       {recipient.trim() && amount.trim() && (
         <CodePreview
-          code={generateTransferCode(chainId, recipient, amount, memoSupported ? memo || undefined : undefined)}
+          code={generateTransferCode(
+            chainId,
+            recipient,
+            amount,
+            memoSupported ? memo || undefined : undefined,
+            {
+              decimals,
+              asset: selectedChainAsset
+                ? {
+                    chain: selectedChainAsset.chainId,
+                    symbol: `${selectedChainAsset.symbol}-${selectedChainAsset.contractAddress}`,
+                    ticker: selectedChainAsset.symbol,
+                  }
+                : undefined,
+            },
+          )}
           title="Code Example"
         />
       )}

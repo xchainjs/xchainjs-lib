@@ -152,6 +152,8 @@ export class Client extends BaseXChainClient {
   public setNetwork(network: Network): void {
     super.setNetwork(network)
     this.provider = this.createProvider(network)
+    // ft_metadata (especially decimals) can differ per network for the same contract id.
+    this.ftMetadataCache.clear()
   }
 
   public getAssetInfo(): AssetInfo {
