@@ -9,13 +9,18 @@ import {
   assetFromStringEx,
   assetToBase,
   assetToString,
+  baseAmount,
 } from '@xchainjs/xchain-util'
 
+import { Aggregator } from '../src'
+import { OneClickApi } from '../src/protocols/oneclick/api'
 import { OneClickProtocol } from '../src/protocols/oneclick'
 import { OneClickToken } from '../src/protocols/oneclick/types'
 import {
+  ONECLICK_PREVIEW_ADDRESS,
   findOneClickToken,
   oneClickBlockchainToXChain,
+  toOneClickAmountString,
   xChainToOneClickBlockchain,
 } from '../src/protocols/oneclick/utils'
 
@@ -42,6 +47,13 @@ const mockTokens: OneClickToken[] = [
     symbol: 'wNEAR',
     decimals: 24,
     contractAddress: 'wrap.near',
+  },
+  {
+    assetId: 'nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1',
+    blockchain: 'near',
+    symbol: 'USDC',
+    decimals: 6,
+    contractAddress: '17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1',
   },
 ]
 
@@ -127,6 +139,27 @@ describe('OneClick utils', () => {
     it('should not match native token with wrong symbol', () => {
       const fakeAsset = { chain: 'BTC', symbol: 'FAKE', ticker: 'FAKE', type: 0 }
       expect(findOneClickToken(fakeAsset, mockTokens)).toBeUndefined()
+    })
+  })
+
+  describe('toOneClickAmountString', () => {
+    it('should keep digit-only strings', () => {
+      expect(toOneClickAmountString('7700000000000000000000000')).toBe('7700000000000000000000000')
+    })
+
+    it('should expand scientific notation to an integer digit string', () => {
+      expect(toOneClickAmountString('7.7e+24')).toBe('7700000000000000000000000')
+      expect(toOneClickAmountString('1e+24')).toBe('1000000000000000000000000')
+      expect(toOneClickAmountString('1.2e+2')).toBe('120')
+    })
+
+    it('should truncate fractional base units toward zero', () => {
+      expect(toOneClickAmountString('1.9')).toBe('1')
+      expect(toOneClickAmountString('0.1')).toBe('0')
+    })
+
+    it('should not send a signed amount', () => {
+      expect(toOneClickAmountString('-7.7e+24')).toBe('0')
     })
   })
 })
@@ -299,6 +332,157 @@ describe('OneClick protocol', () => {
 
       const parsed = JSON.parse(capturedBody!)
       expect(parsed.dry).toBe(true)
+      expect(parsed.refundTo).toBe(ONECLICK_PREVIEW_ADDRESS)
+      expect(parsed.recipient).toBe(ONECLICK_PREVIEW_ADDRESS)
+      expect(parsed.referral).toBeUndefined()
+    })
+
+    it('should stay dry and canSwap from amountOut when a deposit address is absent', async () => {
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { depositAddress: null, amountOut: '99000', timeEstimate: 600 } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const quote = await protocol.estimateSwap({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        fromAddress: '0xSender',
+        destinationAddress: 'bc1qRecipient',
+      })
+
+      const parsed = JSON.parse(capturedBody!)
+      expect(parsed.dry).toBe(true)
+      expect(parsed.refundTo).toBe('0xSender')
+      expect(parsed.recipient).toBe('bc1qRecipient')
+      expect(quote.canSwap).toBe(true)
+      expect(quote.toAddress).toBe('')
+      expect(quote.expectedAmount.baseAmount.amount().toString()).toBe('99000')
+    })
+
+    it('should send NEAR 24dp amounts as digit-only base units', async () => {
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { amountOut: '100000', timeEstimate: 30 } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const near = assetFromStringEx('NEAR.NEAR')
+      const nearUsdc = assetFromStringEx('NEAR.USDC-17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1')
+      // 7.7 NEAR in 24dp base units. BigNumber#toString() is "7.7e+24".
+      const amount = new CryptoAmount(baseAmount('7700000000000000000000000', 24), near)
+      expect(amount.baseAmount.amount().toString()).toBe('7.7e+24')
+
+      const quote = await protocol.estimateSwap({
+        fromAsset: near,
+        destinationAsset: nearUsdc,
+        amount,
+      })
+
+      const parsed = JSON.parse(capturedBody!)
+      expect(parsed.amount).toBe('7700000000000000000000000')
+      expect(parsed.amount).toMatch(/^\d+$/)
+      expect(parsed.dry).toBe(true)
+      expect(parsed.originAsset).toBe('nep141:wrap.near')
+      expect(parsed.destinationAsset).toBe('nep141:17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1')
+      expect(quote.canSwap).toBe(true)
+      expect(quote.expectedAmount.baseAmount.amount().toString()).toBe('100000')
+    })
+
+    it('should set canSwap false when amountOut is zero', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { amountOut: '0', timeEstimate: 600 } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const quote = await protocol.estimateSwap({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+      })
+
+      expect(quote.canSwap).toBe(false)
+      expect(quote.errors).toHaveLength(0)
+    })
+
+    it('should include the 1Click error body when the quote request is rejected', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          return Promise.resolve({
+            ok: false,
+            status: 400,
+            json: () => Promise.resolve({ message: 'amount must match pattern' }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve({}) })
+      })
+
+      const quote = await protocol.estimateSwap({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+      })
+
+      expect(quote.canSwap).toBe(false)
+      expect(quote.errors).toContain('1Click getQuote failed: 400: amount must match pattern')
+    })
+
+    it('should stamp oneClickReferral on the quote body', async () => {
+      protocol = new OneClickProtocol({ oneClickReferral: 'asgardex' })
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { amountOut: '99000', timeEstimate: 600 } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      await protocol.estimateSwap({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        fromAddress: '0xSender',
+        destinationAddress: 'bc1qRecipient',
+      })
+
+      expect(JSON.parse(capturedBody!).referral).toBe('asgardex')
     })
 
     it('should populate affiliateFee from echoed quoteRequest.appFees matching affiliate address', async () => {
@@ -459,6 +643,12 @@ describe('OneClick protocol', () => {
     })
 
     it('should throw if swap cannot be done', async () => {
+      protocol = new OneClickProtocol({
+        wallet: {
+          transfer: jest.fn(),
+          getExplorerTxUrl: jest.fn(),
+        } as never,
+      })
       mockFetch.mockImplementation((url: string) => {
         if (url.includes('/v0/tokens')) {
           return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
@@ -481,6 +671,216 @@ describe('OneClick protocol', () => {
           destinationAddress: 'bc1qRecipient',
         }),
       ).rejects.toThrow('Can not make swap')
+    })
+
+    it('should request a wet quote and transfer to the deposit address', async () => {
+      const transfer = jest.fn().mockResolvedValue('near-tx-hash')
+      const getExplorerTxUrl = jest.fn().mockResolvedValue('https://nearblocks.io/txns/near-tx-hash')
+      protocol = new OneClickProtocol({
+        wallet: { transfer, getExplorerTxUrl } as never,
+      })
+
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                correlationId: 'corr-1',
+                quote: { depositAddress: 'bc1qwetdeposit', amountOut: '99000', timeEstimate: 600 },
+              }),
+          })
+        }
+        if (url.includes('/v0/deposit/submit')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const nearAmount = new CryptoAmount(baseAmount('7700000000000000000000000', 24), assetFromStringEx('NEAR.NEAR'))
+      const result = await protocol.doSwap({
+        fromAsset: assetFromStringEx('NEAR.NEAR'),
+        destinationAsset: AssetETH,
+        amount: nearAmount,
+        fromAddress: 'sender.near',
+        destinationAddress: '0xRecipient',
+      })
+
+      const parsed = JSON.parse(capturedBody!)
+      expect(parsed.dry).toBe(false)
+      expect(parsed.amount).toBe('7700000000000000000000000')
+      expect(parsed.refundTo).toBe('sender.near')
+      expect(parsed.recipient).toBe('0xRecipient')
+      expect(transfer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recipient: 'bc1qwetdeposit',
+          memo: '',
+        }),
+      )
+      expect(result).toEqual({ hash: 'near-tx-hash', url: 'https://nearblocks.io/txns/near-tx-hash' })
+    })
+  })
+
+  describe('requestDepositAddress', () => {
+    it('should require refund and recipient addresses', async () => {
+      await expect(
+        protocol.requestDepositAddress({
+          fromAsset: AssetETH,
+          destinationAsset: AssetBTC,
+          amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        }),
+      ).rejects.toThrow(/fromAddress is required/)
+
+      await expect(
+        protocol.requestDepositAddress({
+          fromAsset: AssetETH,
+          destinationAsset: AssetBTC,
+          fromAddress: '0xSender',
+          amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        }),
+      ).rejects.toThrow(/destinationAddress is required/)
+    })
+
+    it('should return the wet deposit address', async () => {
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                correlationId: 'corr-2',
+                quote: { depositAddress: 'bc1qwetdeposit', amountOut: '99000' },
+              }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const deposit = await protocol.requestDepositAddress({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        fromAddress: '0xSender',
+        destinationAddress: 'bc1qRecipient',
+      })
+
+      expect(JSON.parse(capturedBody!).dry).toBe(false)
+      expect(deposit.depositAddress).toBe('bc1qwetdeposit')
+      expect(deposit.correlationId).toBe('corr-2')
+      expect(deposit.expectedAmount.baseAmount.amount().toString()).toBe('99000')
+    })
+
+    it('should throw when the wet quote has no deposit address', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { amountOut: '99000' } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      await expect(
+        protocol.requestDepositAddress({
+          fromAsset: AssetETH,
+          destinationAsset: AssetBTC,
+          amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+          fromAddress: '0xSender',
+          destinationAddress: 'bc1qRecipient',
+        }),
+      ).rejects.toThrow('OneClick quote returned no deposit address')
+    })
+  })
+
+  describe('Aggregator.requestOneClickDepositAddress', () => {
+    it('should open a wet quote through the aggregator', async () => {
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          const body = JSON.parse(options?.body as string)
+          expect(body.dry).toBe(false)
+          expect(body.referral).toBe('asgardex')
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { depositAddress: 'bc1qwetdeposit', amountOut: '99000' } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const aggregator = new Aggregator({ protocols: ['OneClick'], oneClickReferral: 'asgardex' })
+      const deposit = await aggregator.requestOneClickDepositAddress({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        fromAddress: '0xSender',
+        destinationAddress: 'bc1qRecipient',
+      })
+
+      expect(deposit.depositAddress).toBe('bc1qwetdeposit')
+    })
+
+    it('should throw if OneClick is disabled', async () => {
+      const aggregator = new Aggregator({ protocols: ['Thorchain'] })
+      await expect(
+        aggregator.requestOneClickDepositAddress({
+          fromAsset: AssetETH,
+          destinationAsset: AssetBTC,
+          amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+          fromAddress: '0xSender',
+          destinationAddress: 'bc1qRecipient',
+        }),
+      ).rejects.toThrow(/OneClick protocol is not enabled/)
+    })
+  })
+
+  describe('OneClickApi.getQuote', () => {
+    it('should normalize a scientific amount at the HTTP boundary', async () => {
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { amountOut: '1' } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      const api = new OneClickApi(undefined, 'asgardex')
+      await api.getQuote({
+        dry: true,
+        swapType: 'EXACT_INPUT',
+        depositType: 'ORIGIN_CHAIN',
+        recipientType: 'DESTINATION_CHAIN',
+        refundType: 'ORIGIN_CHAIN',
+        originAsset: 'nep141:wrap.near',
+        destinationAsset: 'nep141:btc.omft.near',
+        amount: '7.7e+24',
+        refundTo: ONECLICK_PREVIEW_ADDRESS,
+        recipient: ONECLICK_PREVIEW_ADDRESS,
+      })
+
+      const parsed = JSON.parse(capturedBody!)
+      expect(parsed.amount).toBe('7700000000000000000000000')
+      expect(parsed.referral).toBe('asgardex')
     })
   })
 

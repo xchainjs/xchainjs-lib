@@ -257,7 +257,7 @@ export class ChainflipProtocol implements IProtocol {
       srcAsset: srcAssetData.asset,
       destChain: destAssetData.chain,
       destAsset: destAssetData.asset,
-      amount: params.amount.baseAmount.amount().toString(),
+      amount: params.amount.baseAmount.amount().toFixed(0),
       affiliateBrokers: this.affiliateBrokers,
     })
 

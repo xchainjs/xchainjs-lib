@@ -29,6 +29,42 @@ const X_TO_ONECLICK: Record<string, string> = {
 
 const ONECLICK_TO_X: Record<string, string> = Object.fromEntries(Object.entries(X_TO_ONECLICK).map(([k, v]) => [v, k]))
 
+/**
+ * 1Click rejects empty `refundTo` / `recipient` even on dry quotes.
+ * Named NEAR accounts such as this one are accepted for preview-only requests.
+ */
+export const ONECLICK_PREVIEW_ADDRESS = 'aurora'
+
+/**
+ * 1Click requires a digit-only integer string (base units).
+ * `BigNumber#toString()` emits scientific notation past its exponential threshold,
+ * which 24-decimal NEAR amounts cross (`"7.7e+24"`). Fractional parts truncate toward zero.
+ */
+export const toOneClickAmountString = (amount: string): string => {
+  const trimmed = amount.trim()
+  if (/^\d+$/.test(trimmed)) return trimmed
+
+  const match = trimmed.toLowerCase().match(/^([+-]?)(\d+)(?:\.(\d+))?(?:e([+-]?\d+))?$/)
+  if (!match) return trimmed
+
+  const negative = match[1] === '-'
+  const intPart = match[2]
+  const fracPart = match[3] ?? ''
+  const exp = parseInt(match[4] ?? '0', 10)
+  const digits = intPart + fracPart
+  const newExp = exp - fracPart.length
+
+  let result: string
+  if (newExp >= 0) {
+    result = digits + '0'.repeat(newExp)
+  } else {
+    const split = digits.length + newExp
+    result = split <= 0 ? '0' : digits.slice(0, split) || '0'
+  }
+  result = result.replace(/^0+(?=\d)/, '') || '0'
+  return negative ? '0' : result
+}
+
 export const xChainToOneClickBlockchain = (chain: Chain): string | null => {
   return X_TO_ONECLICK[chain] ?? null
 }

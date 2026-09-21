@@ -10,6 +10,7 @@ export const DEFAULT_CONFIG: Required<
     | 'affiliate'
     | 'brokerUrl'
     | 'oneClickApiKey'
+    | 'oneClickReferral'
     | 'thornodeConfig'
     | 'midgardConfig'
     | 'mayanodeConfig'

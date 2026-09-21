@@ -1,4 +1,4 @@
-import { Asset, TokenAsset } from '@xchainjs/xchain-util'
+import { Asset, CryptoAmount, TokenAsset } from '@xchainjs/xchain-util'
 
 export type CompatibleAsset = Asset | TokenAsset
 
@@ -31,6 +31,8 @@ export type OneClickQuoteRequest = {
   slippageTolerance?: number
   deadline?: string
   appFees?: OneClickAppFee[]
+  /** Stamped from Aggregator `oneClickReferral` when configured. */
+  referral?: string
 }
 
 export type OneClickQuoteInner = {
@@ -41,10 +43,22 @@ export type OneClickQuoteInner = {
 }
 
 export type OneClickQuoteResponse = {
-  quote: OneClickQuoteInner
+  quote?: OneClickQuoteInner
   /** Echo of the request; used to resolve applied appFees after server-side splits. */
   quoteRequest?: Pick<OneClickQuoteRequest, 'appFees'>
+  correlationId?: string
   error?: string
   message?: string
   statusCode?: number
+}
+
+/**
+ * Executable OneClick order from a wet quote (`dry: false`).
+ * Open immediately before broadcast; do not reuse the deposit address across quotes.
+ */
+export type OneClickDepositQuote = {
+  depositAddress: string
+  /** Egress amount from the wet quote bound to this deposit address. */
+  expectedAmount: CryptoAmount
+  correlationId?: string
 }

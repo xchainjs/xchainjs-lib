@@ -23,8 +23,14 @@ import {
 } from '../../types'
 
 import { OneClickApi } from './api'
-import { CompatibleAsset, OneClickQuoteResponse, OneClickToken } from './types'
-import { findOneClickToken, oneClickBlockchainToXChain } from './utils'
+import {
+  CompatibleAsset,
+  OneClickDepositQuote,
+  OneClickQuoteRequest,
+  OneClickQuoteResponse,
+  OneClickToken,
+} from './types'
+import { ONECLICK_PREVIEW_ADDRESS, findOneClickToken, oneClickBlockchainToXChain } from './utils'
 
 export class OneClickProtocol implements IProtocol {
   public readonly name = 'OneClick' as const
@@ -36,7 +42,7 @@ export class OneClickProtocol implements IProtocol {
   private tokensCache: CachedValue<OneClickToken[]>
 
   constructor(configuration?: ProtocolConfig) {
-    this.api = new OneClickApi(configuration?.oneClickApiKey)
+    this.api = new OneClickApi(configuration?.oneClickApiKey, configuration?.oneClickReferral)
     this.wallet = configuration?.wallet
     this.affiliateAddress = configuration?.affiliateAddress
     this.affiliateBps = configuration?.affiliateBps
@@ -67,57 +73,40 @@ export class OneClickProtocol implements IProtocol {
     return Array.from(chains)
   }
 
+  /**
+   * Estimate swap (quote only). Always requests a dry 1Click quote.
+   *
+   * A dry quote prices the route and often has `depositAddress: null`.
+   * `canSwap` means `amountOut` is present — call {@link requestDepositAddress}
+   * (or {@link doSwap}) immediately before broadcast to obtain a deposit address.
+   *
+   * @param {QuoteSwapParams} params Swap parameters.
+   * @returns {QuoteSwap} Quote result. `toAddress` is empty unless the dry response includes one.
+   */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
-    const tokens = await this.tokensCache.getValue()
-
-    const srcToken = findOneClickToken(params.fromAsset, tokens)
-    const destToken = findOneClickToken(params.destinationAsset, tokens)
-
-    if (!srcToken || !destToken) {
-      return this.errorQuote(params, srcToken ? 'Destination asset not supported' : 'Source asset not supported')
-    }
+    const pair = await this.resolvePair(params)
+    if ('error' in pair) return this.errorQuote(params, pair.error)
 
     try {
-      const isDry = !(params.fromAddress && params.destinationAddress)
-      const deadline = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+      const resp = await this.api.getQuote(this.buildQuoteRequest(params, pair.srcToken, pair.destToken, true))
 
-      const appFees =
-        this.affiliateAddress && this.affiliateBps
-          ? [{ recipient: this.affiliateAddress, fee: this.affiliateBps }]
-          : undefined
-
-      const resp = await this.api.getQuote({
-        dry: isDry,
-        swapType: 'EXACT_INPUT',
-        depositType: 'ORIGIN_CHAIN',
-        recipientType: 'DESTINATION_CHAIN',
-        refundType: 'ORIGIN_CHAIN',
-        originAsset: srcToken.assetId,
-        destinationAsset: destToken.assetId,
-        amount: params.amount.baseAmount.amount().toString(),
-        refundTo: params.fromAddress || '',
-        recipient: params.destinationAddress || '',
-        slippageTolerance: params.toleranceBps ?? 100,
-        deadline,
-        appFees,
-      })
-
-      if (resp.error || resp.message) {
+      if (resp.error || resp.message || !resp.quote) {
         return this.errorQuote(params, resp.error || resp.message || 'Unknown error')
       }
 
       const quote = resp.quote
-      const toAddress = quote.depositAddress ?? ''
+      const amountOut = quote.amountOut
+      const hasAmountOut = amountOut != null && String(amountOut) !== '' && String(amountOut) !== '0'
 
       return {
         protocol: this.name,
-        toAddress,
+        toAddress: quote.depositAddress ?? '',
         memo: '',
-        expectedAmount: new CryptoAmount(baseAmount(quote.amountOut, destToken.decimals), params.destinationAsset),
+        expectedAmount: new CryptoAmount(baseAmount(amountOut, pair.destToken.decimals), params.destinationAsset),
         dustThreshold: new CryptoAmount(baseAmount(0), params.fromAsset),
         totalSwapSeconds: quote.timeEstimate ?? 0,
         maxStreamingQuantity: undefined,
-        canSwap: toAddress !== '',
+        canSwap: hasAmountOut,
         warning: '',
         errors: [],
         slipBasisPoints: 0,
@@ -129,6 +118,40 @@ export class OneClickProtocol implements IProtocol {
       }
     } catch (e) {
       return this.errorQuote(params, e instanceof Error ? e.message : 'Unknown error')
+    }
+  }
+
+  /**
+   * Request a wet 1Click quote and return the deposit address for broadcast.
+   * Call immediately before sending funds. Requires real refund and recipient addresses.
+   *
+   * @param {QuoteSwapParams} params Must include `fromAddress` and `destinationAddress`
+   * @returns {OneClickDepositQuote} Deposit address and the egress amount bound to it
+   */
+  public async requestDepositAddress(params: QuoteSwapParams): Promise<OneClickDepositQuote> {
+    if (!params.fromAddress) throw new Error('fromAddress is required to request a OneClick deposit address')
+    if (!params.destinationAddress) {
+      throw new Error('destinationAddress is required to request a OneClick deposit address')
+    }
+
+    const pair = await this.resolvePair(params)
+    if ('error' in pair) throw new Error(`Can not make swap. ${pair.error}`)
+
+    const resp = await this.api.getQuote(this.buildQuoteRequest(params, pair.srcToken, pair.destToken, false))
+    if (resp.error || resp.message || !resp.quote) {
+      throw new Error(`Can not make swap. ${resp.error || resp.message || 'Unknown error'}`)
+    }
+
+    const depositAddress = resp.quote.depositAddress
+    if (!depositAddress) throw new Error('Can not make swap. OneClick quote returned no deposit address')
+
+    return {
+      depositAddress,
+      expectedAmount: new CryptoAmount(
+        baseAmount(resp.quote.amountOut, pair.destToken.decimals),
+        params.destinationAsset,
+      ),
+      correlationId: resp.correlationId,
     }
   }
 
@@ -155,25 +178,22 @@ export class OneClickProtocol implements IProtocol {
   }
 
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
-    const quoteSwap = await this.estimateSwap(params)
-    if (!quoteSwap.canSwap) {
-      throw new Error(`Can not make swap. ${quoteSwap.errors.join('\n')}`)
-    }
-
     if (!this.wallet) throw new Error('Wallet not configured. Can not do swap')
 
+    const deposit = await this.requestDepositAddress(params)
+
     const hash = await this.wallet.transfer({
-      recipient: quoteSwap.toAddress,
+      recipient: deposit.depositAddress,
       amount: params.amount.baseAmount,
       asset: params.fromAsset as CompatibleAsset,
-      memo: quoteSwap.memo,
+      memo: '',
     })
 
     // Funds are already on the wire. Awaiting submitDeposit lets callers distinguish
     // "deposit registered, swap will settle" from "registration silently failed, swap will
     // never settle" — surface the failure with the broadcast hash so it can be retried.
     try {
-      await this.api.submitDeposit(hash, quoteSwap.toAddress)
+      await this.api.submitDeposit(hash, deposit.depositAddress)
     } catch (e) {
       throw new Error(
         `1Click deposit tx ${hash} was broadcast, but submitDeposit failed: ${
@@ -191,6 +211,47 @@ export class OneClickProtocol implements IProtocol {
     }
 
     return { hash, url }
+  }
+
+  private async resolvePair(
+    params: QuoteSwapParams,
+  ): Promise<{ srcToken: OneClickToken; destToken: OneClickToken } | { error: string }> {
+    const tokens = await this.tokensCache.getValue()
+    const srcToken = findOneClickToken(params.fromAsset, tokens)
+    const destToken = findOneClickToken(params.destinationAsset, tokens)
+    if (!srcToken) return { error: 'Source asset not supported' }
+    if (!destToken) return { error: 'Destination asset not supported' }
+    return { srcToken, destToken }
+  }
+
+  private buildQuoteRequest(
+    params: QuoteSwapParams,
+    srcToken: OneClickToken,
+    destToken: OneClickToken,
+    dry: boolean,
+  ): OneClickQuoteRequest {
+    // 1Click rejects empty refundTo/recipient even on dry quotes.
+    const refundTo = params.fromAddress || (dry ? ONECLICK_PREVIEW_ADDRESS : '')
+    const recipient = params.destinationAddress || params.fromAddress || (dry ? ONECLICK_PREVIEW_ADDRESS : '')
+
+    return {
+      dry,
+      swapType: 'EXACT_INPUT',
+      depositType: 'ORIGIN_CHAIN',
+      recipientType: 'DESTINATION_CHAIN',
+      refundType: 'ORIGIN_CHAIN',
+      originAsset: srcToken.assetId,
+      destinationAsset: destToken.assetId,
+      amount: params.amount.baseAmount.amount().toFixed(0),
+      refundTo,
+      recipient,
+      slippageTolerance: params.toleranceBps ?? 100,
+      deadline: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      appFees:
+        this.affiliateAddress && this.affiliateBps
+          ? [{ recipient: this.affiliateAddress, fee: this.affiliateBps }]
+          : undefined,
+    }
   }
 
   public async getSwapHistory(_params: SwapHistoryParams): Promise<SwapHistory> {
