@@ -89,6 +89,11 @@ export type Config = Partial<{
    */
   oneClickApiKey: string
   /**
+   * Referral code stamped on OneClick quote requests (for example `'asgardex'`).
+   * Omitted from the quote body when unset.
+   */
+  oneClickReferral: string
+  /**
    * Custom THORNode client configuration (base URLs and retries) for the Thorchain protocol.
    * When omitted, the network default THORNode endpoints are used.
    */
@@ -124,6 +129,7 @@ export type ProtocolConfig = Partial<{
   }[]
   brokerUrl: string
   oneClickApiKey: string
+  oneClickReferral: string
   thornodeConfig: ThornodeConfig
   midgardConfig: MidgardConfig
   mayanodeConfig: MayanodeConfig

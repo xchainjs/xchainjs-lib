@@ -4,6 +4,7 @@ import { assetToString, isTokenAsset } from '@xchainjs/xchain-util'
 import { DEFAULT_CONFIG } from './const'
 import { ProtocolFactory } from './protocols'
 import { ChainflipDepositChannel, ChainflipProtocol } from './protocols/chainflip'
+import { OneClickDepositQuote, OneClickProtocol } from './protocols/oneclick'
 import {
   Config,
   IProtocol,
@@ -119,6 +120,37 @@ export class Aggregator {
       throw Error('Chainflip protocol is not enabled')
     }
     return protocol.openDepositChannel(params)
+  }
+
+  /**
+   * Request a wet OneClick quote and return the deposit address for broadcast.
+   * Call immediately before sending funds. OneClick `estimateSwap` is quote-only (`dry: true`).
+   *
+   * @param {QuoteSwapParams} params Must include fromAddress and destinationAddress
+   * @returns {OneClickDepositQuote} Deposit address and the egress amount bound to it
+   */
+  public async requestOneClickDepositAddress(params: QuoteSwapParams): Promise<OneClickDepositQuote> {
+    const protocol = this.protocols.find((p) => p.name === 'OneClick')
+    if (!protocol || !(protocol instanceof OneClickProtocol)) {
+      throw Error('OneClick protocol is not enabled')
+    }
+    return protocol.requestDepositAddress(params)
+  }
+
+  /**
+   * Register an already-broadcast OneClick deposit.
+   * Call after transferring to the address from {@link requestOneClickDepositAddress}.
+   * Also the retry when registration fails after broadcast. Do not transfer again.
+   *
+   * @param {string} txHash Origin-chain transaction hash
+   * @param {string} depositAddress Deposit address from the wet quote
+   */
+  public async submitOneClickDeposit(txHash: string, depositAddress: string): Promise<void> {
+    const protocol = this.protocols.find((p) => p.name === 'OneClick')
+    if (!protocol || !(protocol instanceof OneClickProtocol)) {
+      throw Error('OneClick protocol is not enabled')
+    }
+    return protocol.submitDeposit(txHash, depositAddress)
   }
 
   /**

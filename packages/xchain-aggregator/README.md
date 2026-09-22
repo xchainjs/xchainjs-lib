@@ -22,6 +22,7 @@ The current supported protocols are:
 - [Thorchain](https://thorchain.org/)
 - [Maya Protocol](https://www.mayaprotocol.com/)
 - [Chainflip](https://chainflip.io/)
+- [OneClick (NEAR Intents)](https://docs.near-intents.org/integration/distribution-channels/1click-api/quickstart/making-a-request)
 
 
 ## Installation
@@ -78,6 +79,17 @@ Do not cache deposit addresses across `expiresAt`. EVM Chainflip deposit address
 
 **Important:** Chainflip must **observe** the deposit before channel expiry. Broadcasting before `expiresAt` is not enough if the source chain (especially EVM) confirms after expiry — funds may not create a swap and may not FoK-refund. Prefer `requestChainflipDepositAddress` over `doSwap` when you need to track `expiresAt` / `depositChannelId` around slow Ledger signing or post-broadcast monitoring (`doSwap` does not return channel metadata).
 
+### OneClick deposit addresses
+
+OneClick `estimateSwap` is **quote-only** (`dry: true`). It prices the route and does **not** create an executable order. Dry responses often have no deposit address. `canSwap` means `amountOut` is present.
+
+Recommended flow:
+
+1. `aggregator.estimateSwap(...)` — price discovery / refresh (`toAddress` is empty; `canSwap` means a priced quote exists)
+2. At confirm, immediately before broadcast: `aggregator.requestOneClickDepositAddress(...)` — wet quote, returns `depositAddress` and `expectedAmount`
+3. Transfer to that deposit address with your own signer, then `aggregator.submitOneClickDeposit(txHash, depositAddress)`. `doSwap` does the wet quote, the transfer, and `submitDeposit` together. If registration fails after the transfer, retry `submitOneClickDeposit` with the same hash and deposit address. Do not transfer again.
+
+Quote amounts are integer base-unit strings, so 24-decimal NEAR amounts are not sent in scientific notation. Set `oneClickReferral` on the Aggregator config (for example `'asgardex'`) to stamp that referral on every 1Click quote. Preview quotes without wallet addresses send a placeholder `refundTo` / `recipient`, because 1Click rejects empty addresses even when `dry` is true.
 
 ## Examples
 

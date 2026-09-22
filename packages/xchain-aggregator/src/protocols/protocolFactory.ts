@@ -14,6 +14,7 @@ const getProtocolConfig = (name: Protocol, configuration: Config): ProtocolConfi
     affiliateBrokers: configuration.affiliateBrokers,
     brokerUrl: configuration.brokerUrl,
     oneClickApiKey: configuration.oneClickApiKey,
+    oneClickReferral: configuration.oneClickReferral,
     thornodeConfig: configuration.thornodeConfig,
     midgardConfig: configuration.midgardConfig,
     mayanodeConfig: configuration.mayanodeConfig,
