@@ -138,6 +138,22 @@ export class Aggregator {
   }
 
   /**
+   * Register an already-broadcast OneClick deposit.
+   * Call after transferring to the address from {@link requestOneClickDepositAddress}.
+   * Also the retry when registration fails after broadcast. Do not transfer again.
+   *
+   * @param {string} txHash Origin-chain transaction hash
+   * @param {string} depositAddress Deposit address from the wet quote
+   */
+  public async submitOneClickDeposit(txHash: string, depositAddress: string): Promise<void> {
+    const protocol = this.protocols.find((p) => p.name === 'OneClick')
+    if (!protocol || !(protocol instanceof OneClickProtocol)) {
+      throw Error('OneClick protocol is not enabled')
+    }
+    return protocol.submitDeposit(txHash, depositAddress)
+  }
+
+  /**
    * Do swap
    * @param {QuoteSwapParams & { protocol?: Protocol }} params Swap parameters. If protocol is not set,
    * estimateSwap will be call and swap will be done in protocol with the greatest expected amount

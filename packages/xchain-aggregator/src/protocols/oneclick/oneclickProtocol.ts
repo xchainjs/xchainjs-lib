@@ -189,16 +189,15 @@ export class OneClickProtocol implements IProtocol {
       memo: '',
     })
 
-    // Funds are already on the wire. Awaiting submitDeposit lets callers distinguish
-    // "deposit registered, swap will settle" from "registration silently failed, swap will
-    // never settle" — surface the failure with the broadcast hash so it can be retried.
+    // Funds are already on the wire. Registration failure must not look like success,
+    // and the retry is submitDeposit with this hash and deposit address — not another transfer.
     try {
-      await this.api.submitDeposit(hash, deposit.depositAddress)
+      await this.submitDeposit(hash, deposit.depositAddress)
     } catch (e) {
       throw new Error(
-        `1Click deposit tx ${hash} was broadcast, but submitDeposit failed: ${
+        `1Click deposit tx ${hash} was broadcast to ${deposit.depositAddress}, but submitDeposit failed: ${
           e instanceof Error ? e.message : 'unknown error'
-        }`,
+        }. Retry submitOneClickDeposit with this hash and deposit address; do not transfer again.`,
       )
     }
 
@@ -211,6 +210,17 @@ export class OneClickProtocol implements IProtocol {
     }
 
     return { hash, url }
+  }
+
+  /**
+   * Register an already-broadcast origin tx with 1Click.
+   * Wallets that sign outside `doSwap` call this after transferring to the wet quote's deposit address.
+   * Also the retry when registration fails after broadcast. Do not transfer again.
+   */
+  public async submitDeposit(txHash: string, depositAddress: string): Promise<void> {
+    if (!txHash) throw new Error('txHash is required to submit a OneClick deposit')
+    if (!depositAddress) throw new Error('depositAddress is required to submit a OneClick deposit')
+    await this.api.submitDeposit(txHash, depositAddress)
   }
 
   private async resolvePair(
@@ -231,8 +241,10 @@ export class OneClickProtocol implements IProtocol {
     dry: boolean,
   ): OneClickQuoteRequest {
     // 1Click rejects empty refundTo/recipient even on dry quotes.
+    // recipientType is DESTINATION_CHAIN, so a missing destination uses the preview
+    // placeholder rather than the origin-chain fromAddress.
     const refundTo = params.fromAddress || (dry ? ONECLICK_PREVIEW_ADDRESS : '')
-    const recipient = params.destinationAddress || params.fromAddress || (dry ? ONECLICK_PREVIEW_ADDRESS : '')
+    const recipient = params.destinationAddress || (dry ? ONECLICK_PREVIEW_ADDRESS : '')
 
     return {
       dry,

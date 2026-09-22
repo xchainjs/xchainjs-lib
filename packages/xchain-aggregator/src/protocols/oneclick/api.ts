@@ -32,12 +32,23 @@ export class OneClickApi {
       headers: this.headers,
       body: JSON.stringify(body),
     })
-    if (!resp.ok) throw new Error(await this.quoteFailureMessage(resp))
+    if (!resp.ok) throw new Error(await this.failureDetail(resp, `1Click getQuote failed: ${resp.status}`))
     return resp.json()
   }
 
-  private async quoteFailureMessage(resp: Response): Promise<string> {
-    let detail = `1Click getQuote failed: ${resp.status}`
+  async submitDeposit(txHash: string, depositAddress: string): Promise<void> {
+    const resp = await fetch(`${BASE_URL}/v0/deposit/submit`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify({ txHash, depositAddress }),
+    })
+    if (!resp.ok) {
+      throw new Error(await this.failureDetail(resp, `1Click submitDeposit failed: ${resp.status}`))
+    }
+  }
+
+  private async failureDetail(resp: Response, fallback: string): Promise<string> {
+    let detail = fallback
     try {
       const errBody = (await resp.json()) as { message?: unknown; error?: unknown }
       const message = typeof errBody?.message === 'string' ? errBody.message : undefined
@@ -48,15 +59,5 @@ export class OneClickApi {
       // Non-JSON error body
     }
     return detail
-  }
-
-  async submitDeposit(txHash: string, depositAddress: string): Promise<void> {
-    await fetch(`${BASE_URL}/v0/deposit/submit`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({ txHash, depositAddress }),
-    }).catch(() => {
-      // Fire-and-forget
-    })
   }
 }

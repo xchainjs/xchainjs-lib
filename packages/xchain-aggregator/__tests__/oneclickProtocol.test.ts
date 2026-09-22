@@ -337,6 +337,35 @@ describe('OneClick protocol', () => {
       expect(parsed.referral).toBeUndefined()
     })
 
+    it('should use the preview recipient when only fromAddress is set', async () => {
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ quote: { amountOut: '99000', timeEstimate: 600 } }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404 })
+      })
+
+      await protocol.estimateSwap({
+        fromAsset: AssetETH,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+        fromAddress: '0xSender',
+      })
+
+      const parsed = JSON.parse(capturedBody!)
+      expect(parsed.dry).toBe(true)
+      expect(parsed.refundTo).toBe('0xSender')
+      expect(parsed.recipient).toBe(ONECLICK_PREVIEW_ADDRESS)
+    })
+
     it('should stay dry and canSwap from amountOut when a deposit address is absent', async () => {
       let capturedBody: string | undefined
       mockFetch.mockImplementation((url: string, options?: RequestInit) => {
@@ -724,6 +753,52 @@ describe('OneClick protocol', () => {
       )
       expect(result).toEqual({ hash: 'near-tx-hash', url: 'https://nearblocks.io/txns/near-tx-hash' })
     })
+
+    it('should report the broadcast hash and deposit address when submitDeposit fails', async () => {
+      const transfer = jest.fn().mockResolvedValue('near-tx-hash')
+      protocol = new OneClickProtocol({
+        wallet: {
+          transfer,
+          getExplorerTxUrl: jest.fn(),
+        } as never,
+      })
+
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/v0/tokens')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTokens) })
+        }
+        if (url.includes('/v0/quote')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                quote: { depositAddress: 'bc1qwetdeposit', amountOut: '99000' },
+              }),
+          })
+        }
+        if (url.includes('/v0/deposit/submit')) {
+          return Promise.resolve({
+            ok: false,
+            status: 400,
+            json: () => Promise.resolve({ message: 'deposit not found' }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve({}) })
+      })
+
+      await expect(
+        protocol.doSwap({
+          fromAsset: AssetETH,
+          destinationAsset: AssetBTC,
+          amount: new CryptoAmount(assetToBase(assetAmount(1, 18)), AssetETH),
+          fromAddress: '0xSender',
+          destinationAddress: 'bc1qRecipient',
+        }),
+      ).rejects.toThrow(
+        '1Click deposit tx near-tx-hash was broadcast to bc1qwetdeposit, but submitDeposit failed: 1Click submitDeposit failed: 400: deposit not found. Retry submitOneClickDeposit with this hash and deposit address; do not transfer again.',
+      )
+      expect(transfer).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('requestDepositAddress', () => {
@@ -847,6 +922,49 @@ describe('OneClick protocol', () => {
           destinationAddress: 'bc1qRecipient',
         }),
       ).rejects.toThrow(/OneClick protocol is not enabled/)
+    })
+  })
+
+  describe('submitOneClickDeposit', () => {
+    it('should register a broadcast tx without requesting another quote', async () => {
+      let capturedBody: string | undefined
+      mockFetch.mockImplementation((url: string, options?: RequestInit) => {
+        if (url.includes('/v0/deposit/submit')) {
+          capturedBody = options?.body as string
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+        }
+        return Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve({}) })
+      })
+
+      const aggregator = new Aggregator({ protocols: ['OneClick'] })
+      await aggregator.submitOneClickDeposit('near-tx-hash', 'bc1qwetdeposit')
+
+      expect(JSON.parse(capturedBody!)).toEqual({ txHash: 'near-tx-hash', depositAddress: 'bc1qwetdeposit' })
+    })
+
+    it('should throw the 1Click error body when registration is rejected', async () => {
+      mockFetch.mockImplementation((url: string) => {
+        if (url.includes('/v0/deposit/submit')) {
+          return Promise.resolve({
+            ok: false,
+            status: 400,
+            json: () => Promise.resolve({ error: 'unknown deposit address' }),
+          })
+        }
+        return Promise.resolve({ ok: false, status: 404, json: () => Promise.resolve({}) })
+      })
+
+      const aggregator = new Aggregator({ protocols: ['OneClick'] })
+      await expect(aggregator.submitOneClickDeposit('near-tx-hash', 'bc1qwetdeposit')).rejects.toThrow(
+        '1Click submitDeposit failed: 400: unknown deposit address',
+      )
+    })
+
+    it('should throw if OneClick is disabled', async () => {
+      const aggregator = new Aggregator({ protocols: ['Thorchain'] })
+      await expect(aggregator.submitOneClickDeposit('near-tx-hash', 'bc1qwetdeposit')).rejects.toThrow(
+        /OneClick protocol is not enabled/,
+      )
     })
   })
 

@@ -87,7 +87,7 @@ Recommended flow:
 
 1. `aggregator.estimateSwap(...)` — price discovery / refresh (`toAddress` is empty; `canSwap` means a priced quote exists)
 2. At confirm, immediately before broadcast: `aggregator.requestOneClickDepositAddress(...)` — wet quote, returns `depositAddress` and `expectedAmount`
-3. Transfer to that deposit address (or use `doSwap`, which requests a wet quote, transfers, then calls `submitDeposit`)
+3. Transfer to that deposit address with your own signer, then `aggregator.submitOneClickDeposit(txHash, depositAddress)`. `doSwap` does the wet quote, the transfer, and `submitDeposit` together. If registration fails after the transfer, retry `submitOneClickDeposit` with the same hash and deposit address. Do not transfer again.
 
 Quote amounts are integer base-unit strings, so 24-decimal NEAR amounts are not sent in scientific notation. Set `oneClickReferral` on the Aggregator config (for example `'asgardex'`) to stamp that referral on every 1Click quote. Preview quotes without wallet addresses send a placeholder `refundTo` / `recipient`, because 1Click rejects empty addresses even when `dry` is true.
 
