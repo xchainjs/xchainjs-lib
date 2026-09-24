@@ -44,7 +44,7 @@
     "@xchainjs/xchain-utxo-providers": "workspace:*",
     "bitcoinjs-lib": "^7.0.1",
     "coinselect": "3.1.13",
-    "ecpair": "2.1.0"
+    "ecpair": "3.0.2"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-hid": "^6.28.6",
