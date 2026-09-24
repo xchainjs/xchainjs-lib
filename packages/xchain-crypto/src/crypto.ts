@@ -15,6 +15,10 @@ const dklen = 32 // Derived key length
 const c = 600000 // Iteration count (OWASP-recommended minimum for PBKDF2-HMAC-SHA256)
 const hashFunction = 'sha256' // Hash function
 const meta = 'xchain-keystore' // Metadata
+/** Keystores written by this package. v2+ MAC covers the IV (see #1721). */
+const keystoreVersion = 2
+/** First version whose MAC includes `cipherparams.iv`. */
+const macIncludesIvFromVersion = 2
 
 /**
  * The Keystore interface.
@@ -67,6 +71,27 @@ const constantTimeEqual = (a: Buffer, b: Buffer): boolean => {
   let diff = 0
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i]
   return diff === 0
+}
+
+/**
+ * Whether this keystore version's MAC authenticates the CTR IV.
+ *
+ * v1: blake2b(macKey || ciphertext) — IV not covered (CTR malleability; #1721).
+ * v2+: blake2b(macKey || iv || ciphertext)
+ */
+const keystoreMacIncludesIv = (version: number): boolean => version >= macIncludesIvFromVersion
+
+/**
+ * Compute the keystore integrity MAC.
+ *
+ * @param macKey Second half of the PBKDF2-derived key (bytes 16–32 for current layout).
+ * @param iv CTR IV bytes.
+ * @param ciphertext Encrypted payload.
+ * @param includeIv When true, bind the IV into the MAC (v2+).
+ */
+const computeKeystoreMac = (macKey: Buffer, iv: Buffer, ciphertext: Buffer, includeIv: boolean): Buffer => {
+  const parts = includeIv ? [macKey, iv, ciphertext] : [macKey, ciphertext]
+  return Buffer.from(blake2b(Buffer.concat(parts), { dkLen: 32 }))
 }
 
 /**
@@ -136,12 +161,12 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   }
 
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
-  const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
+  const encryptionKey = derivedKey.slice(0, 16)
+  const macKey = derivedKey.slice(16, 32)
+  const cipherIV = crypto.createCipheriv(cipher, encryptionKey, iv)
   const cipherText = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
-  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]), {
-    dkLen: 32,
-  })
-  const mac: string = Buffer.from(mac_bytes).toString('hex')
+  // v2+: include IV so CTR keystream offset cannot be tampered without failing the MAC (#1721)
+  const mac = computeKeystoreMac(macKey, iv, Buffer.from(cipherText), true).toString('hex')
 
   const cryptoStruct = {
     cipher: cipher,
@@ -155,7 +180,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   const keystore = {
     crypto: cryptoStruct,
     id: ID,
-    version: 1,
+    version: keystoreVersion,
     meta: meta,
   }
 
@@ -180,18 +205,16 @@ export const decryptFromKeystore = async (keystore: Keystore, password: string):
   )
 
   const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
-  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), ciphertext]), { dkLen: 32 })
-  const computedMac = Buffer.from(mac_bytes)
+  const iv = Buffer.from(keystore.crypto.cipherparams.iv, 'hex')
+  const macKey = derivedKey.slice(16, 32)
+  const includeIv = keystoreMacIncludesIv(keystore.version)
+  const computedMac = computeKeystoreMac(macKey, iv, ciphertext, includeIv)
   const expectedMac = Buffer.from(keystore.crypto.mac, 'hex')
 
   // Constant-time comparison to avoid leaking MAC bytes via timing
   if (computedMac.length !== expectedMac.length || !constantTimeEqual(computedMac, expectedMac))
     throw new Error('Invalid password')
-  const decipher = crypto.createDecipheriv(
-    keystore.crypto.cipher,
-    derivedKey.slice(0, 16),
-    Buffer.from(keystore.crypto.cipherparams.iv, 'hex'),
-  )
+  const decipher = crypto.createDecipheriv(keystore.crypto.cipher, derivedKey.slice(0, 16), iv)
 
   const phrase = Buffer.concat([decipher.update(ciphertext), decipher.final()])
   return phrase.toString('utf8')
