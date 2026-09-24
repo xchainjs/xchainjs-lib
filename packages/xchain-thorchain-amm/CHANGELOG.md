@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.1.7
+
+### Patch Changes
+
+- f9f8a33: Bump `ethers` to ^6.17.0 so these packages resolve a single ethers 6.17 install. `EtherscanProviderV2` still accepts `AbstractProvider` from that same copy.
+- Updated dependencies [f9f8a33]
+  - @xchainjs/xchain-avax@2.0.23
+  - @xchainjs/xchain-base@1.0.23
+  - @xchainjs/xchain-bsc@2.0.24
+  - @xchainjs/xchain-ethereum@2.1.1
+  - @xchainjs/xchain-evm@2.1.1
+  - @xchainjs/xchain-wallet@2.0.35
+
 ## 3.1.6
 
 ### Patch Changes

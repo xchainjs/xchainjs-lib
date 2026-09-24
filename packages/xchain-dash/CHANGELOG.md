@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.11
+
+### Patch Changes
+
+- 4f6fb70: Bump `bitcoinjs-lib` to ^7.0.1 (resolved 7.0.2). Dash address derivation and validation keep the same `payments.p2pkh` and `address.toOutputScript` calls.
+
 ## 2.2.10
 
 ### Patch Changes

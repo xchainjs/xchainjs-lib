@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.21
+
+### Patch Changes
+
+- f9f8a33: Bump `ethers` to ^6.17.0 so these packages resolve a single ethers 6.17 install. `EtherscanProviderV2` still accepts `AbstractProvider` from that same copy.
+
 ## 2.0.20
 
 ### Patch Changes

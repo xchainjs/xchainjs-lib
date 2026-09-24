@@ -1,5 +1,22 @@
 # testing-gui
 
+## 1.0.24
+
+### Patch Changes
+
+- Updated dependencies [4f6fb70]
+- Updated dependencies [f9f8a33]
+  - @xchainjs/xchain-dash@2.2.11
+  - @xchainjs/xchain-arbitrum@2.1.9
+  - @xchainjs/xchain-avax@2.0.23
+  - @xchainjs/xchain-bsc@2.0.24
+  - @xchainjs/xchain-ethereum@2.1.1
+  - @xchainjs/xchain-evm@2.1.1
+  - @xchainjs/xchain-evm-providers@2.0.21
+  - @xchainjs/xchain-mayachain-amm@4.2.6
+  - @xchainjs/xchain-thorchain-amm@3.1.7
+  - @xchainjs/xchain-wallet@2.0.35
+
 ## 1.0.23
 
 ### Patch Changes
