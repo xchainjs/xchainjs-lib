@@ -18,7 +18,7 @@ import { Contract, getAddress, ZeroAddress } from 'ethers'
 import BigNumber from 'bignumber.js'
 
 import { TxSubmitted } from './types'
-import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
+import { isFlatFeeChain, isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
 
 export type NonProtocolActionParams = {
   wallet: Wallet
@@ -73,7 +73,7 @@ export class ThorchainAction {
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     // Non EVM actions
     if (!isProtocolEVMChain(assetAmount.asset.chain)) {
-      if (isProtocolBFTChain(assetAmount.asset.chain)) {
+      if (isProtocolBFTChain(assetAmount.asset.chain) || isFlatFeeChain(assetAmount.asset.chain)) {
         const hash = await wallet.transfer({
           asset: assetAmount.asset,
           amount: assetAmount.baseAmount,

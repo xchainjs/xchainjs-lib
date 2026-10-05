@@ -12,6 +12,7 @@ const SWAP_SUPPORTED_CHAINS: string[] = [
   'LTC',
   'DOGE',
   'DASH',
+  'ZEC',
   'ADA',
   'ETH',
   'AVAX',
