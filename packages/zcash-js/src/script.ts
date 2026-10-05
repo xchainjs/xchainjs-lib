@@ -1,5 +1,4 @@
-import bs58check from 'bs58check'
-
+import { mainnetPrefix, testnetPrefix, transparentPkh } from './addr'
 import { pushData } from './writer'
 
 export function memoToScript(memo: string): Buffer {
@@ -17,9 +16,8 @@ export function memoToScript(memo: string): Buffer {
 }
 
 export function addressToScript(address: string): Buffer {
-  const addrb = bs58check.decode(address)
-  const pkh = Buffer.alloc(20)
-  Buffer.from(addrb).copy(pkh, 0, 2)
+  const pkh = transparentPkh(address, mainnetPrefix) ?? transparentPkh(address, testnetPrefix)
+  if (!pkh) throw new Error('Invalid address')
   const script = Buffer.alloc(26)
   Buffer.from('1976a914', 'hex').copy(script)
   Buffer.from(pkh).copy(script, 4)
