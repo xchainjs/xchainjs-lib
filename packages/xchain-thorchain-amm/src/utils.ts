@@ -68,6 +68,9 @@ export const isProtocolBFTChain = (chain: Chain): boolean => {
   return [AssetATOM.chain, SOLChain, SUIChain].includes(chain)
 }
 
+/** Zcash prices a transaction with the ZIP 317 flat fee. `getFeeRates` throws. */
+export const isFlatFeeChain = (chain: Chain): boolean => chain === ZECChain
+
 export const validateAddress = (network: Network, chain: Chain, address: Address): boolean => {
   switch (chain) {
     case BTCChain:
