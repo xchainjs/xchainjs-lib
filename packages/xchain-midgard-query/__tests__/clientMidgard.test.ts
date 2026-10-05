@@ -35,6 +35,7 @@ describe('Midgard Client Test', () => {
     totalDebtTor: '',
     earnings: '1006874582462',
     earningsAnnualAsPercentOfDepth: '0.23113862350837777',
+    liquidityInUSD: '',
     lpLuvi: '-0.8152153645976675',
   }
 

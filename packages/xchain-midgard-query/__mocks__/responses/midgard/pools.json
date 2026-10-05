@@ -39,6 +39,7 @@
     "assetPriceUSD": "129.74904173711747",
     "earnings": "1006874582462",
 	  "earningsAnnualAsPercentOfDepth": "0.23113862350837777",
+    "liquidityInUSD": "",
     "liquidityUnits": "21436675546946",
     "lpLuvi": "-0.8152153645976675",
     "nativeDecimal": "8",
