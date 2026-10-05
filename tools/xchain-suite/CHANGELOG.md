@@ -1,5 +1,48 @@
 # testing-gui
 
+## 1.0.25
+
+### Patch Changes
+
+- Updated dependencies [02be848]
+- Updated dependencies [b0d5b80]
+- Updated dependencies [c877dee]
+- Updated dependencies [f3da8f8]
+- Updated dependencies [b86e080]
+  - @xchainjs/xchain-bitcoin@2.4.1
+  - @xchainjs/xchain-bitcoincash@2.3.3
+  - @xchainjs/xchain-client@2.0.18
+  - @xchainjs/xchain-cosmos@3.1.2
+  - @xchainjs/xchain-dash@2.2.12
+  - @xchainjs/xchain-doge@2.3.3
+  - @xchainjs/xchain-evm@2.1.2
+  - @xchainjs/xchain-evm-providers@2.0.22
+  - @xchainjs/xchain-litecoin@2.4.3
+  - @xchainjs/xchain-mayachain@4.2.2
+  - @xchainjs/xchain-mayachain-amm@4.2.7
+  - @xchainjs/xchain-mayachain-query@2.2.4
+  - @xchainjs/xchain-mayamidgard-query@1.0.20
+  - @xchainjs/xchain-mayanode@1.2.5
+  - @xchainjs/xchain-midgard-query@2.0.22
+  - @xchainjs/xchain-thorchain@3.1.2
+  - @xchainjs/xchain-thorchain-amm@3.1.8
+  - @xchainjs/xchain-thorchain-query@3.2.1
+  - @xchainjs/xchain-thornode@1.3.0
+  - @xchainjs/xchain-zcash@1.3.11
+  - @xchainjs/xchain-wallet@2.0.36
+  - @xchainjs/xchain-arbitrum@2.1.10
+  - @xchainjs/xchain-avax@2.0.24
+  - @xchainjs/xchain-bsc@2.0.25
+  - @xchainjs/xchain-cardano@1.2.5
+  - @xchainjs/xchain-ethereum@2.1.2
+  - @xchainjs/xchain-monero@0.2.9
+  - @xchainjs/xchain-near@0.3.1
+  - @xchainjs/xchain-radix@2.0.19
+  - @xchainjs/xchain-ripple@1.0.20
+  - @xchainjs/xchain-solana@1.1.10
+  - @xchainjs/xchain-sui@0.2.2
+  - @xchainjs/xchain-tron@3.0.11
+
 ## 1.0.24
 
 ### Patch Changes

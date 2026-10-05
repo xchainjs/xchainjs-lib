@@ -1,5 +1,12 @@
 # @xchainjs/zcash-js
 
+## 1.1.7
+
+### Patch Changes
+
+- 02be848: Bump axios from 1.18.1 to 1.20.0. The root resolution is updated too, so the monorepo audit no longer resolves the high-severity axios advisories fixed in 1.20.0.
+- b86e080: Accept ZIP 320 TEX addresses (`tex1` / `textest1`) as transparent P2PKH recipients. A THORChain ZEC inbound address uses this encoding and spends with the same script as the `t1` it came from. Derived addresses stay Base58Check.
+
 ## 1.1.6
 
 ### Patch Changes

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0
+
+### Minor Changes
+
+- c877dee: Regenerate the THORNode client from OpenAPI 3.20.3, Midgard from 2.34.2, and Mayanode from 1.134.0. THORNode gains the dynamic L1 fee, stable reserve, contract, paginated swap queue, TCY protocol-owned, and keysign party routes. Midgard pool details include liquidityInUSD. Mayanode adds CACAO pool accounting fields, provider bond, and shielded memo trial decryption.
+
+### Patch Changes
+
+- 02be848: Bump axios from 1.18.1 to 1.20.0. The root resolution is updated too, so the monorepo audit no longer resolves the high-severity axios advisories fixed in 1.20.0.
+
 ## 1.2.3
 
 ### Patch Changes

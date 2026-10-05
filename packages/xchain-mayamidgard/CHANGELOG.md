@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.5
+
+### Patch Changes
+
+- 02be848: Bump axios from 1.18.1 to 1.20.0. The root resolution is updated too, so the monorepo audit no longer resolves the high-severity axios advisories fixed in 1.20.0.
+
 ## 1.1.4
 
 ### Patch Changes
