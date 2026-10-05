@@ -49,7 +49,9 @@ export const defaultZECParams: UtxoClientParams = {
   },
 }
 /**
- * Custom Zcash client (only support t-addresses)
+ * Custom Zcash client for transparent P2PKH.
+ * Recipients may be Base58Check (`t1` / `tm`) or ZIP 320 TEX (`tex1` / `textest1`).
+ * Addresses this client derives stay Base58Check.
  */
 abstract class Client extends UTXOClient {
   /**
@@ -86,7 +88,7 @@ abstract class Client extends UTXOClient {
 
   /**
    * Validate the given Zcash address.
-   * @param {string} address Zcash address to validate (only t-addresses).
+   * @param {string} address Transparent P2PKH address (`t1` / `tm` or ZIP 320 `tex1` / `textest1`).
    * @returns {boolean} `true` if the address is valid, `false` otherwise.
    */
   validateAddress(address: string): boolean {

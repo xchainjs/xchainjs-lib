@@ -1,4 +1,4 @@
-import { FeeType } from '@xchainjs/xchain-client'
+import { FeeType, Network } from '@xchainjs/xchain-client'
 import { baseAmount } from '@xchainjs/xchain-util'
 import * as bip39 from 'bip39'
 
@@ -100,6 +100,27 @@ describe('Zcash client', () => {
     expect(isValid).toBe(true)
     isValid = client.validateAddress('t1XVXWCvpMgBvUaed4XDqWtgQgJSu1Ghz7X')
     expect(isValid).toBe(false)
+  })
+
+  it('Should accept a ZIP 320 TEX recipient', async () => {
+    const tex = 'tex1nyfspsu4vaxnn025gv754njwckzm8dyuv0calv'
+    const textest = 'textest1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg36ky5kh'
+    expect(client.validateAddress(tex)).toBe(true)
+    expect(client.validateAddress('t1XpzA33okQrBQsqdbwZqZLMNao5UNjU3PD')).toBe(true)
+    expect(client.validateAddress(textest)).toBe(false)
+
+    const testnet = new Client({ ...defaultZECParams, network: Network.Testnet })
+    expect(testnet.validateAddress(textest)).toBe(true)
+    expect(testnet.validateAddress(tex)).toBe(false)
+
+    const preparedTx = await client.prepareTx({
+      sender: 't1XVXWCvpMgBvUaed4XDqWtgQgJSu1Ghz7F',
+      recipient: tex,
+      amount: baseAmount(100000000, ZEC_DECIMAL),
+      feeRate: 1,
+      memo: '=:b:bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4',
+    })
+    expect(preparedTx.rawUnsignedTx).toContain(tex)
   })
 
   it('Should get data tx', async () => {
