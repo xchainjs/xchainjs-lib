@@ -46,7 +46,7 @@
     "@xchainjs/xchain-cosmos-sdk": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",
-    "axios": "1.18.1",
+    "axios": "1.20.0",
     "bignumber.js": "^11.0.0",
     "cosmjs-types": "0.10.1",
     "protobufjs": "7.6.4"
