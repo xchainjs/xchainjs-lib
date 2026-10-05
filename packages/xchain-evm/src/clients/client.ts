@@ -757,12 +757,13 @@ export class Client extends BaseXChainClient implements EVMClient {
     if (maxFeePerGas || maxPriorityFeePerGas) {
       // Get fee info from the provider
       const block = await this.getProvider().getBlock('latest')
+      // 0n is a real EIP-1559 base fee (BSC). Only null/undefined means the chain has none.
+      const baseFee = block?.baseFeePerGas
       // Set max fee per gas
       if (maxFeePerGas) {
         // Set max priority fee per gas
         feeData.maxFeePerGas = BigInt(maxFeePerGas.amount().toFixed())
-      } else if (maxPriorityFeePerGas && block?.baseFeePerGas) {
-        const baseFee = block.baseFeePerGas
+      } else if (maxPriorityFeePerGas && baseFee != null) {
         const maxPriority = BigInt(maxPriorityFeePerGas.amount().toFixed())
         feeData.maxFeePerGas = baseFee * BigInt(2) + maxPriority
       }
@@ -812,7 +813,7 @@ export class Client extends BaseXChainClient implements EVMClient {
     tx.type = feeData.gasPrice ? 1 : 2
     tx.gasLimit = BigInt(txGasLimit.toFixed())
     tx.gasPrice = feeData.gasPrice || null
-    tx.maxFeePerGas = feeData.maxFeePerGas || null
+    tx.maxFeePerGas = feeData.maxFeePerGas != null ? feeData.maxFeePerGas : null
     tx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || null
 
     // EMULATE ethers v5 behavior https://github.com/ethers-io/ethers.js/blob/0bfa7f497dc5793b66df7adfb42c6b846c51d794/packages/abstract-signer/src.ts/index.ts#L247

@@ -391,4 +391,84 @@ describe('EVM client', () => {
       getAllowanceSpy.mockRestore()
     })
   })
+
+  describe('transfer EIP-1559 fees', () => {
+    const recipient = '0x3624525075b88B24ecc29CE226b0CEc1fFcB6976'
+    const fakeSignedTx = '0xfakesignedtx'
+    const fakeTxHash = '0xfaketxhash'
+    const tip = baseAmount(1_000_000_000, 18)
+
+    const buildMockUnsignedTx = (): string => {
+      const tx = new Transaction()
+      tx.to = recipient
+      tx.chainId = BigInt(43113)
+      tx.nonce = 0
+      tx.value = 1n
+      return tx.unsignedSerialized
+    }
+
+    const mockTransferDeps = (baseFeePerGas: bigint | null) => {
+      const provider = avaxClient.getProvider()
+      jest.spyOn(provider, 'getFeeData').mockResolvedValue({
+        gasPrice: 1n,
+        maxFeePerGas: null,
+        maxPriorityFeePerGas: null,
+        toJSON: () => ({}),
+      })
+      jest.spyOn(provider, 'getBlock').mockResolvedValue({ baseFeePerGas } as never)
+      jest.spyOn(avaxClient, 'estimateGasLimit').mockResolvedValue(new BigNumber(21000))
+      jest.spyOn(avaxClient, 'prepareTx').mockResolvedValue({ rawUnsignedTx: buildMockUnsignedTx() })
+      jest.spyOn(avaxClient, 'broadcastTx').mockResolvedValue(fakeTxHash)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const signer = (avaxClient as any).getSigner()
+      return jest.spyOn(signer, 'signTransfer').mockResolvedValue(fakeSignedTx)
+    }
+
+    const signedTx = (signSpy: jest.SpyInstance): Transaction => signSpy.mock.calls[0][0].tx
+
+    it('sets maxFeePerGas to the tip when baseFeePerGas is 0', async () => {
+      const signSpy = mockTransferDeps(0n)
+
+      await avaxClient.transfer({
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxPriorityFeePerGas: tip,
+      })
+
+      const tx = signedTx(signSpy)
+      expect(tx.type).toBe(2)
+      expect(tx.maxFeePerGas).toBe(1_000_000_000n)
+      expect(tx.maxPriorityFeePerGas).toBe(1_000_000_000n)
+    })
+
+    it('sets maxFeePerGas to twice the base fee plus the tip', async () => {
+      const signSpy = mockTransferDeps(3n)
+
+      await avaxClient.transfer({
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxPriorityFeePerGas: tip,
+      })
+
+      expect(signedTx(signSpy).maxFeePerGas).toBe(2n * 3n + 1_000_000_000n)
+    })
+
+    it('does not invent a max fee from the tip when the block has no base fee', async () => {
+      const signSpy = mockTransferDeps(null)
+
+      await avaxClient.transfer({
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxPriorityFeePerGas: tip,
+      })
+
+      const tx = signedTx(signSpy)
+      // Type 2 reports an unset max fee as 0. It must not be replaced with the tip.
+      expect(tx.maxFeePerGas).toBe(0n)
+      expect(tx.maxPriorityFeePerGas).toBe(1_000_000_000n)
+    })
+  })
 })
