@@ -1,5 +1,34 @@
 # Changelog
 
+## 3.1.8
+
+### Patch Changes
+
+- 02be848: Bump axios from 1.18.1 to 1.20.0. The root resolution is updated too, so the monorepo audit no longer resolves the high-severity axios advisories fixed in 1.20.0.
+- f3da8f8: Send a THORChain ZEC deposit without requesting a sat/vbyte fee rate. The Zcash client prices the transaction with its ZIP 317 flat fee.
+- Updated dependencies [02be848]
+- Updated dependencies [b0d5b80]
+- Updated dependencies [b86e080]
+  - @xchainjs/xchain-bitcoin@2.4.1
+  - @xchainjs/xchain-bitcoincash@2.3.3
+  - @xchainjs/xchain-client@2.0.18
+  - @xchainjs/xchain-cosmos@3.1.2
+  - @xchainjs/xchain-doge@2.3.3
+  - @xchainjs/xchain-evm@2.1.2
+  - @xchainjs/xchain-litecoin@2.4.3
+  - @xchainjs/xchain-thorchain@3.1.2
+  - @xchainjs/xchain-thorchain-query@3.2.1
+  - @xchainjs/xchain-zcash@1.3.11
+  - @xchainjs/xchain-wallet@2.0.36
+  - @xchainjs/xchain-avax@2.0.24
+  - @xchainjs/xchain-base@1.0.24
+  - @xchainjs/xchain-bsc@2.0.25
+  - @xchainjs/xchain-ethereum@2.1.2
+  - @xchainjs/xchain-ripple@1.0.20
+  - @xchainjs/xchain-solana@1.1.10
+  - @xchainjs/xchain-sui@0.2.2
+  - @xchainjs/xchain-tron@3.0.11
+
 ## 3.1.7
 
 ### Patch Changes

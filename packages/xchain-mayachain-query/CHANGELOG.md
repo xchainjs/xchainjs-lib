@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.2.4
+
+### Patch Changes
+
+- 02be848: Bump axios from 1.18.1 to 1.20.0. The root resolution is updated too, so the monorepo audit no longer resolves the high-severity axios advisories fixed in 1.20.0.
+- Updated dependencies [02be848]
+- Updated dependencies [c877dee]
+  - @xchainjs/xchain-client@2.0.18
+  - @xchainjs/xchain-mayamidgard@1.1.5
+  - @xchainjs/xchain-mayamidgard-query@1.0.20
+  - @xchainjs/xchain-mayanode@1.2.5
+
 ## 2.2.3
 
 ### Patch Changes

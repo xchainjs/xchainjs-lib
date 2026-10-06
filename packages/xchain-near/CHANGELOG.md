@@ -1,5 +1,12 @@
 # @xchainjs/xchain-near
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [02be848]
+  - @xchainjs/xchain-client@2.0.18
+
 ## 0.3.0
 
 ### Minor Changes
