@@ -1,9 +1,9 @@
-import { SuiClient as SuiJsonRpcClient, SuiTransactionBlockResponse } from '@mysten/sui/client'
 import { SuiGraphQLClient } from '@mysten/sui/graphql'
 import { SuiGrpcClient } from '@mysten/sui/grpc'
+import { SuiJsonRpcClient, SuiTransactionBlockResponse } from '@mysten/sui/jsonRpc'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { Transaction } from '@mysten/sui/transactions'
-import { fromBase64, isValidSuiAddress } from '@mysten/sui/utils'
+import { isValidSuiAddress } from '@mysten/sui/utils'
 import {
   AssetInfo,
   BaseXChainClient,
@@ -173,7 +173,7 @@ export class Client extends BaseXChainClient {
     }
 
     const suiBalance = await this.coreClient.core.getBalance({
-      address,
+      owner: address,
       coinType: SUI_TYPE_TAG,
     })
     balances.push({
@@ -185,8 +185,8 @@ export class Client extends BaseXChainClient {
     const decimalsCache = new Map<string, number>()
     // Cap pages so pathological addresses cannot hang the client.
     for (let pageNum = 0; pageNum < 20; pageNum++) {
-      const page = await this.coreClient.core.getAllBalances({
-        address,
+      const page = await this.coreClient.core.listBalances({
+        owner: address,
         cursor: cursor ?? undefined,
       })
       for (const coinBalance of page.balances) {
@@ -244,8 +244,15 @@ export class Client extends BaseXChainClient {
       return this.parseJsonRpcTransaction(txResponse)
     }
 
-    const { transaction } = await this.coreClient.core.getTransaction({ digest: txId })
-    return this.parseCoreTransaction(transaction.digest, transaction.balanceChanges, null)
+    const result = await this.coreClient.core.getTransaction({
+      digest: txId,
+      include: { balanceChanges: true },
+    })
+    const transaction = result.Transaction ?? result.FailedTransaction
+    if (!transaction) {
+      throw Error(`Transaction ${txId} not found`)
+    }
+    return this.parseCoreTransaction(transaction.digest, transaction.balanceChanges, transaction.timestampMs)
   }
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
@@ -346,7 +353,7 @@ export class Client extends BaseXChainClient {
     const suiNetwork = getSuiNetwork(network)
 
     if (this.transport === 'jsonRpc') {
-      return new SuiJsonRpcClient({ url })
+      return new SuiJsonRpcClient({ url, network: suiNetwork })
     }
 
     return new SuiGrpcClient({
@@ -412,11 +419,12 @@ export class Client extends BaseXChainClient {
     }
 
     try {
-      const { response } = await this.coreClient.stateService.getCoinInfo({ coinType })
-      return response.metadata?.decimals ?? SUI_DECIMALS
+      const { coinMetadata } = await this.coreClient.core.getCoinMetadata({ coinType })
+      if (coinMetadata?.decimals != null) return coinMetadata.decimals
     } catch {
       return SUI_DECIMALS
     }
+    return SUI_DECIMALS
   }
 
   private async getCoins(owner: string, coinType: string): Promise<GasCoinRef[]> {
@@ -429,12 +437,12 @@ export class Client extends BaseXChainClient {
       }))
     }
 
-    const page = await this.coreClient.core.getCoins({
-      address: owner,
+    const page = await this.coreClient.core.listCoins({
+      owner,
       coinType,
     })
     return page.objects.map((c) => ({
-      objectId: c.id,
+      objectId: c.objectId,
       version: c.version,
       digest: c.digest,
     }))
@@ -517,45 +525,28 @@ export class Client extends BaseXChainClient {
   }
 
   /**
-   * Execute via gRPC with a read mask compatible with current fullnodes.
-   * SDK 1.x core client requests invalid paths (`transaction.transaction`).
+   * Execute via the SDK 2 gRPC client. Its read mask requests digest and
+   * effects.status; SDK 1.x requested the invalid path `transaction.transaction`.
    */
   private async executeGrpcTransaction(transaction: Uint8Array, signature: string): Promise<string> {
     if (!(this.coreClient instanceof SuiGrpcClient)) {
       throw Error('gRPC client required for executeGrpcTransaction')
     }
 
-    const { response } = await this.coreClient.transactionExecutionService.executeTransaction({
-      transaction: {
-        bcs: {
-          value: transaction,
-        },
-      },
-      signatures: [
-        {
-          bcs: {
-            value: fromBase64(signature),
-          },
-          signature: {
-            oneofKind: undefined,
-          },
-        },
-      ],
-      readMask: {
-        // Compatible with fullnode read-mask validation (SDK default paths break).
-        paths: ['digest', 'effects'],
-      },
+    const result = await this.coreClient.executeTransaction({
+      transaction,
+      signatures: [signature],
     })
-
-    const digest = response.transaction?.digest
+    const executed = result.Transaction ?? result.FailedTransaction
+    const digest = executed?.digest
     if (!digest) {
       throw Error('Transaction execution returned no digest')
     }
 
-    const status = response.transaction?.effects?.status
-    // status may be enum number or object depending on protobuf version
-    if (isGrpcExecutionFailure(status)) {
-      // Prefer description; never JSON.stringify raw protobuf (BigInt throws).
+    // Parsed status uses `error.message`. Raw protobuf status can still carry
+    // `error.description` and BigInt fields — formatGrpcExecutionFailure handles both.
+    const status = executed.status
+    if (result.$kind === 'FailedTransaction' || isGrpcExecutionFailure(status)) {
       throw Error(formatGrpcExecutionFailure(status))
     }
 
@@ -752,7 +743,7 @@ export class Client extends BaseXChainClient {
   private parseCoreTransaction(
     digest: string,
     balanceChanges: { coinType: string; address: string; amount: string }[] | undefined,
-    timestamp: string | null,
+    timestamp: string | number | null,
   ): Tx {
     const from: TxFrom[] = []
     const to: TxTo[] = []

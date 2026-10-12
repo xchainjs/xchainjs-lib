@@ -91,20 +91,26 @@ export const isGrpcExecutionFailure = (status: unknown): boolean => {
 
 /**
  * Build a human-readable message for a failed gRPC execution status.
- * Prefers `error.description` when present; otherwise safe-stringifies the
- * whole status (handles BigInt fields such as `error.command`).
+ * Prefers protobuf `error.description`, then the SDK 2 parsed `error.message`.
+ * Otherwise safe-stringifies the whole status (handles BigInt fields such as
+ * `error.command`).
  */
 export const formatGrpcExecutionFailure = (status: unknown): string => {
   if (status && typeof status === 'object') {
-    const error = (status as { error?: { description?: string; command?: bigint | number | string } }).error
-    if (error?.description) {
+    const error = (
+      status as {
+        error?: { description?: string; message?: string; command?: bigint | number | string }
+      }
+    ).error
+    const description = error?.description || error?.message
+    if (description) {
       // Descriptions often already include "in command N" — avoid "… (command N)".
-      const alreadyHasCommand = /command\s+\d+/i.test(error.description)
+      const alreadyHasCommand = /command\s+\d+/i.test(description)
       const command =
-        !alreadyHasCommand && error.command !== undefined && error.command !== null
+        !alreadyHasCommand && error?.command !== undefined && error?.command !== null
           ? ` (command ${error.command.toString()})`
           : ''
-      return `Transaction failed: ${error.description}${command}`
+      return `Transaction failed: ${description}${command}`
     }
   }
   return `Transaction failed: ${safeJsonStringify(status)}`
