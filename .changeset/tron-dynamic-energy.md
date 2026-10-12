@@ -2,4 +2,4 @@
 '@xchainjs/xchain-tron': patch
 ---
 
-Price TRC20 transfers with the contract dynamic energy factor and the memo fee, and refuse a token send the TRX balance cannot cover
+Estimate TRC20 transfer fees using the contract's dynamic energy factor, include the memo fee and additional bandwidth, and reject transfers when the sender's TRX balance cannot cover the fast fee.

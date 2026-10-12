@@ -30,6 +30,7 @@ import {
   TRC20_TRANSFER_ENERGY,
   TRC20_TRANSFER_ENERGY_EMPTY,
   TRC20_TRANSFER_BANDWIDTH,
+  DYNAMIC_ENERGY_MAX_FACTOR,
   applyDynamicEnergy,
   TRX_FEE_LIMIT,
   MAX_APPROVAL,
@@ -202,29 +203,40 @@ export abstract class Client extends BaseXChainClient {
         bandwidthFee: paramMap.getTransactionFee || 1000, // SUN per bandwidth unit
         createAccountFee: paramMap.getCreateAccountFee || 100000, // 0.1 TRX in SUN
         energyFee: paramMap.getEnergyFee || 420, // SUN per energy unit
-        memoFee: paramMap.getMemoFee || 1_000_000, // 1 TRX
+        // 0 is a real chain value and disables the memo charge. Only a missing key takes the default.
+        memoFee: paramMap.getMemoFee ?? 1_000_000, // 1 TRX
+        dynamicEnergyMaxFactor: paramMap.getDynamicEnergyMaxFactor ?? DYNAMIC_ENERGY_MAX_FACTOR,
       }
     } catch {
       // Return default values if unable to fetch
-      return { bandwidthFee: 1000, createAccountFee: 100000, energyFee: 420, memoFee: 1_000_000 }
+      return {
+        bandwidthFee: 1000,
+        createAccountFee: 100000,
+        energyFee: 420,
+        memoFee: 1_000_000,
+        dynamicEnergyMaxFactor: DYNAMIC_ENERGY_MAX_FACTOR,
+      }
     }
   }
 
   /**
-   * Contract dynamic-energy factor. 0 means the opcode base energy is unchanged.
-   * USDT sits well above 0, so a flat 13,000-energy quote underprices the call.
+   * Raw `energy_factor` from wallet/getcontractinfo (10_000 = 1.0 extra).
+   * Undefined when the lookup fails. A present 0 means the contract has no penalty.
    */
-  private getEnergyFactor = async (contractAddress: string): Promise<number> => {
+  private getEnergyFactor = async (contractAddress: string): Promise<number | undefined> => {
     try {
       const info = await this.tronWeb.fullNode.request<{ contract_state?: { energy_factor?: number | string } }>(
         'wallet/getcontractinfo',
         { value: contractAddress, visible: true },
         'post',
       )
-      const factor = Number(info?.contract_state?.energy_factor ?? 0)
-      return Number.isFinite(factor) && factor > 0 ? factor : 0
+      const raw = info?.contract_state?.energy_factor
+      if (raw == null) return 0
+      const factor = Number(raw)
+      if (!Number.isFinite(factor) || factor < 0) return undefined
+      return factor
     } catch {
-      return 0
+      return undefined
     }
   }
 
@@ -448,7 +460,11 @@ export abstract class Client extends BaseXChainClient {
         let energyNeeded = simulated
         if (energyNeeded == null) {
           const baseEnergy = await this.trc20BaseEnergy(contractAddress, recipient)
-          energyNeeded = applyDynamicEnergy(baseEnergy, await this.getEnergyFactor(contractAddress))
+          // A failed factor lookup uses the chain maximum, the wallet default in
+          // https://developers.tron.network/docs/set-feelimit . A reported 0 stays 0.
+          const reportedFactor = await this.getEnergyFactor(contractAddress)
+          const energyFactor = reportedFactor ?? chainParams.dynamicEnergyMaxFactor
+          energyNeeded = applyDynamicEnergy(baseEnergy, energyFactor)
         }
 
         const bandwidthNeeded = TRC20_TRANSFER_BANDWIDTH + memoBytes
