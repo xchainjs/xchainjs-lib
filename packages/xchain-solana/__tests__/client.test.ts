@@ -1,3 +1,4 @@
+import { Connection } from '@solana/web3.js'
 import { Network, TxType } from '@xchainjs/xchain-client'
 import { AnyAsset, Asset, TokenAsset, assetFromStringEx, assetToString } from '@xchainjs/xchain-util'
 
@@ -177,6 +178,13 @@ describe('Solana client', () => {
       expect(assetToString(tx.to[0].asset as Asset)).toBe('SOL.SOL')
       expect(tx.to[0].amount.amount().toString()).toBe('5000000')
       expect(tx.to[0].amount.decimal).toBe(9)
+    })
+
+    it('Should request versioned transaction support', async () => {
+      const spy = jest.spyOn(Connection.prototype, 'getParsedTransaction')
+      await client.getTransactionData('fakeNativeSignature')
+      expect(spy).toHaveBeenCalledWith('fakeNativeSignature', { maxSupportedTransactionVersion: 0 })
+      spy.mockRestore()
     })
 
     it('Should get token transaction', async () => {

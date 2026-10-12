@@ -580,7 +580,9 @@ export class Client extends BaseXChainClient {
   private async roundRobinGetTransactionData(txId: string): Promise<ParsedTransactionWithMeta | null> {
     try {
       for (const provider of this.providers) {
-        const transaction = await provider.solanaProvider.getParsedTransaction(txId)
+        const transaction = await provider.solanaProvider.getParsedTransaction(txId, {
+          maxSupportedTransactionVersion: 0,
+        })
         return transaction
       }
     } catch {}
@@ -616,6 +618,7 @@ export class Client extends BaseXChainClient {
 
         const transactions = await provider.solanaProvider.getParsedTransactions(
           signatures.map(({ signature }) => signature),
+          { maxSupportedTransactionVersion: 0 },
         )
 
         const results = await Promise.allSettled(
