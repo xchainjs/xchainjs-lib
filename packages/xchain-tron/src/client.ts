@@ -28,7 +28,10 @@ import {
   TRON_USDT_CONTRACT,
   TRX_TRANSFER_BANDWIDTH,
   TRC20_TRANSFER_ENERGY,
+  TRC20_TRANSFER_ENERGY_EMPTY,
   TRC20_TRANSFER_BANDWIDTH,
+  DYNAMIC_ENERGY_MAX_FACTOR,
+  applyDynamicEnergy,
   TRX_FEE_LIMIT,
   MAX_APPROVAL,
   TRON_TOKEN_WHITELIST,
@@ -200,11 +203,83 @@ export abstract class Client extends BaseXChainClient {
         bandwidthFee: paramMap.getTransactionFee || 1000, // SUN per bandwidth unit
         createAccountFee: paramMap.getCreateAccountFee || 100000, // 0.1 TRX in SUN
         energyFee: paramMap.getEnergyFee || 420, // SUN per energy unit
+        // 0 is a real chain value and disables the memo charge. Only a missing key takes the default.
+        memoFee: paramMap.getMemoFee ?? 1_000_000, // 1 TRX
+        dynamicEnergyMaxFactor: paramMap.getDynamicEnergyMaxFactor ?? DYNAMIC_ENERGY_MAX_FACTOR,
       }
     } catch {
       // Return default values if unable to fetch
-      return { bandwidthFee: 1000, createAccountFee: 100000, energyFee: 420 }
+      return {
+        bandwidthFee: 1000,
+        createAccountFee: 100000,
+        energyFee: 420,
+        memoFee: 1_000_000,
+        dynamicEnergyMaxFactor: DYNAMIC_ENERGY_MAX_FACTOR,
+      }
     }
+  }
+
+  /**
+   * Raw `energy_factor` from wallet/getcontractinfo (10_000 = 1.0 extra).
+   * Undefined when the lookup fails. A present 0 means the contract has no penalty.
+   */
+  private getEnergyFactor = async (contractAddress: string): Promise<number | undefined> => {
+    try {
+      const info = await this.tronWeb.fullNode.request<{ contract_state?: { energy_factor?: number | string } }>(
+        'wallet/getcontractinfo',
+        { value: contractAddress, visible: true },
+        'post',
+      )
+      const raw = info?.contract_state?.energy_factor
+      if (raw == null) return 0
+      const factor = Number(raw)
+      if (!Number.isFinite(factor) || factor < 0) return undefined
+      return factor
+    } catch {
+      return undefined
+    }
+  }
+
+  /**
+   * Energy a successful TRC20 transfer actually consumes, penalty included.
+   * A reverted constant call throws, and its partial energy_used is not the cost of a real transfer.
+   */
+  private simulateTrc20TransferEnergy = async ({
+    contractAddress,
+    sender,
+    recipient,
+    amount,
+  }: {
+    contractAddress: string
+    sender: string
+    recipient?: string
+    amount?: BaseAmount
+  }): Promise<number | undefined> => {
+    if (!recipient || !amount) return undefined
+    try {
+      const res = await this.tronWeb.transactionBuilder.triggerConstantContract(
+        contractAddress,
+        'transfer(address,uint256)',
+        {},
+        [
+          { type: 'address', value: recipient },
+          { type: 'uint256', value: amount.amount().toString() },
+        ],
+        sender,
+      )
+      if (res?.result?.result && typeof res.energy_used === 'number' && res.energy_used > 0) {
+        return res.energy_used
+      }
+    } catch {
+      // Reverted simulations throw. Fall back to the factored base energy.
+    }
+    return undefined
+  }
+
+  private trc20BaseEnergy = async (contractAddress: string, recipient?: string): Promise<number> => {
+    if (!recipient) return TRC20_TRANSFER_ENERGY
+    const balance = await this.fetchTokenBalance({ contractAddress, address: recipient })
+    return balance > BigInt(0) ? TRC20_TRANSFER_ENERGY : TRC20_TRANSFER_ENERGY_EMPTY
   }
 
   /**
@@ -330,7 +405,7 @@ export abstract class Client extends BaseXChainClient {
   public async getFees(params?: TxParams): Promise<Fees> {
     if (!params) throw new Error('Params need to be passed')
 
-    const { asset, recipient, walletIndex } = params
+    const { asset, recipient, walletIndex, memo, amount } = params
     const isNative = asset?.type === AssetType.NATIVE
     let feeAmount: BaseAmount
 
@@ -344,16 +419,18 @@ export abstract class Client extends BaseXChainClient {
       const chainParams = await this.getChainParameters()
 
       // Check if recipient account exists (new accounts require activation fee)
-      const recipientExists = await this.accountExists(recipient)
+      const recipientExists = recipient ? await this.accountExists(recipient) : true
       const activationFee = recipientExists ? 0 : chainParams.createAccountFee
+      const memoBytes = memo ? Buffer.byteLength(memo, 'utf8') : 0
+      const memoFee = memo ? chainParams.memoFee : 0
 
       // Get account resources
       const resources = await this.getAccountResources(senderAddress)
+      const availableBandwidth = resources.bandwidth.free + (resources.bandwidth.total - resources.bandwidth.used)
 
       if (isNative) {
         // Calculate bandwidth needed for TRX transfer
-        const bandwidthNeeded = TRX_TRANSFER_BANDWIDTH
-        const availableBandwidth = resources.bandwidth.free + (resources.bandwidth.total - resources.bandwidth.used)
+        const bandwidthNeeded = TRX_TRANSFER_BANDWIDTH + memoBytes
 
         let bandwidthFee = 0
         if (bandwidthNeeded > availableBandwidth) {
@@ -363,15 +440,34 @@ export abstract class Client extends BaseXChainClient {
         }
 
         // Total fee in SUN
-        const totalFeeSun = activationFee + bandwidthFee
+        const totalFeeSun = activationFee + bandwidthFee + memoFee
 
         feeAmount = baseAmount(totalFeeSun, TRX_DECIMAL)
       } else {
-        // TRC20 Transfer - needs both bandwidth and energy
-        const bandwidthNeeded = TRC20_TRANSFER_BANDWIDTH
-        const energyNeeded = TRC20_TRANSFER_ENERGY
+        // TRC20 transfer. A constant call includes the dynamic energy penalty.
+        // Without a recipient or amount, scale the base energy by the contract factor.
+        const contractAddress = asset ? getTRC20AssetContractAddress(asset) : TRON_USDT_CONTRACT
+        if (!contractAddress) {
+          throw new Error('TRC20 Asset Contract Address is not valid')
+        }
 
-        const availableBandwidth = resources.bandwidth.free + (resources.bandwidth.total - resources.bandwidth.used)
+        const simulated = await this.simulateTrc20TransferEnergy({
+          contractAddress,
+          sender: senderAddress,
+          recipient,
+          amount,
+        })
+        let energyNeeded = simulated
+        if (energyNeeded == null) {
+          const baseEnergy = await this.trc20BaseEnergy(contractAddress, recipient)
+          // A failed factor lookup uses the chain maximum, the wallet default in
+          // https://developers.tron.network/docs/set-feelimit . A reported 0 stays 0.
+          const reportedFactor = await this.getEnergyFactor(contractAddress)
+          const energyFactor = reportedFactor ?? chainParams.dynamicEnergyMaxFactor
+          energyNeeded = applyDynamicEnergy(baseEnergy, energyFactor)
+        }
+
+        const bandwidthNeeded = TRC20_TRANSFER_BANDWIDTH + memoBytes
         const availableEnergy = resources.energy.total - resources.energy.used
 
         let bandwidthFee = 0
@@ -387,7 +483,7 @@ export abstract class Client extends BaseXChainClient {
         }
 
         // Total fee in SUN
-        const totalFeeSun = activationFee + bandwidthFee + energyFee
+        const totalFeeSun = activationFee + bandwidthFee + energyFee + memoFee
         feeAmount = baseAmount(totalFeeSun, TRX_DECIMAL)
       }
     }
@@ -509,7 +605,17 @@ export abstract class Client extends BaseXChainClient {
       return txid
     }
 
-    // TRC20 Token Transfer - always use createTransaction + sign pattern
+    // TRC20 Token Transfer - always use createTransaction + sign pattern.
+    // Refuse before signing when the TRX balance cannot cover energy, bandwidth, and the memo fee.
+    const fees = await this.getFees(params)
+    const requiredSun = fees.fast.amount().toNumber()
+    const trxBalanceSun = Number(await this.tronWeb.trx.getBalance(sender))
+    if (trxBalanceSun < requiredSun) {
+      throw new Error(
+        `Insufficient TRX for energy. Need ${requiredSun / 1e6} TRX, wallet has ${trxBalanceSun / 1e6} TRX.`,
+      )
+    }
+
     const transaction = await this.createTransaction(params)
 
     const signedTx = await this.signTransaction(transaction, walletIndex)
