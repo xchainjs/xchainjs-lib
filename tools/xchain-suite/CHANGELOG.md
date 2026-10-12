@@ -1,5 +1,13 @@
 # testing-gui
 
+## 1.0.26
+
+### Patch Changes
+
+- Updated dependencies [5647173]
+  - @xchainjs/xchain-tron@3.0.12
+  - @xchainjs/xchain-thorchain-amm@3.1.9
+
 ## 1.0.25
 
 ### Patch Changes
