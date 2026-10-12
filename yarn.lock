@@ -1317,10 +1317,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emurgo/cardano-serialization-lib-browser@npm:^14.1.2":
-  version: 14.1.2
-  resolution: "@emurgo/cardano-serialization-lib-browser@npm:14.1.2"
-  checksum: 10c0/354e3ee5c2df821ace0b682f045459d38dcf1df15ce73f54604cfdcd57447540143a068df2d4615598fdc339038e9b30acf8e40c9f0587a69643fca93276ac7c
+"@emurgo/cardano-serialization-lib-browser@npm:^17.0.0":
+  version: 17.0.0
+  resolution: "@emurgo/cardano-serialization-lib-browser@npm:17.0.0"
+  checksum: 10c0/d9421890095182a8d6520dc39f1309ac9c4d0a384cacb7989a480d9f6fa779fd89b2b4e5fa11336cafc95de2270865f5bf9e2d6da22f1e8f01bf64e0b4163837
   languageName: node
   linkType: hard
 
@@ -5426,7 +5426,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-cardano@workspace:packages/xchain-cardano"
   dependencies:
-    "@emurgo/cardano-serialization-lib-browser": "npm:^14.1.2"
+    "@emurgo/cardano-serialization-lib-browser": "npm:^17.0.0"
     "@types/multicoin-address-validator": "npm:^0"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-crypto": "workspace:*"
