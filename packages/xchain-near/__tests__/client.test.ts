@@ -55,7 +55,17 @@ describe('NEAR client', () => {
   describe('Defaults', () => {
     it('Should resolve public RPC and NearBlocks URLs', () => {
       expect(defaultNearParams.clientUrls).toBeUndefined()
-      expect(getDefaultClientUrls(Network.Mainnet)[0]).toContain('fastnear.com')
+      expect(getDefaultClientUrls(Network.Mainnet)).toEqual([
+        'https://rpc.mainnet.fastnear.com',
+        'https://free.rpc.fastnear.com',
+        'https://near.drpc.org',
+      ])
+      expect(getDefaultClientUrls(Network.Testnet)).toEqual([
+        'https://rpc.testnet.fastnear.com',
+        'https://test.rpc.fastnear.com',
+        'https://near-testnet.drpc.org',
+      ])
+      expect(getDefaultClientUrls(Network.Mainnet).join(' ')).not.toContain('1rpc.io')
       expect(getDefaultNearblocksUrl(Network.Mainnet)).toBe('https://api.nearblocks.io')
       expect(getDefaultNearblocksUrl(Network.Testnet)).toBe('https://api-testnet.nearblocks.io')
       expect(resolveClientUrls(Network.Mainnet)).toEqual(getDefaultClientUrls(Network.Mainnet))
