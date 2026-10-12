@@ -4,9 +4,9 @@ Radix module for XChainJS clients
 
 ## Modules
 
-- `client` - Custom client for communicating with the Radix Chain by using the [radix-engine-toolkit](https://github.com/radixdlt/typescript-radix-engine-toolkit/tree/main) and the [radix gateway api](https://radix-babylon-gateway-api.redoc.ly/)
+- `client` - Custom client for communicating with the Radix Chain by using the [radix-engine-toolkit](https://github.com/radixdlt/typescript-radix-engine-toolkit/tree/main) and the in-repo gateway client (`src/gateway-api.ts`, [Radix Gateway API](https://radix-babylon-gateway-api.redoc.ly/))
 
-- `types` - Typescript type defintions used by the client on top of the types defined by the [Typescript Gateway API SDK](https://www.npmjs.com/package/@radixdlt/babylon-gateway-api-sdk)
+- `types` - TypeScript type definitions used by the client on top of the types from the [radix-engine-toolkit](https://github.com/radixdlt/typescript-radix-engine-toolkit/tree/main) and the in-repo gateway client (`src/gateway-api.ts`)
 
 ## Installation
 
