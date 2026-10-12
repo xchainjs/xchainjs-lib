@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.1.9
+
+### Patch Changes
+
+- Updated dependencies [5647173]
+  - @xchainjs/xchain-tron@3.0.12
+
 ## 3.1.8
 
 ### Patch Changes
