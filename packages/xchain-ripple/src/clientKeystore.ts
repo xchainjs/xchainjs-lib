@@ -1,4 +1,4 @@
-import { Wallet as XrplWallet } from 'xrpl'
+import { ECDSA, Wallet as XrplWallet } from 'xrpl'
 import type { Payment } from 'xrpl'
 
 import { SignedTransaction, XRPClientParams } from './types'
@@ -19,6 +19,8 @@ export class ClientKeystore extends Client {
 
     return XrplWallet.fromMnemonic(this.phrase, {
       derivationPath: this.getFullDerivationPath(walletIndex),
+      // xrpl.js 5 defaults fromMnemonic to ed25519. Existing accounts are secp256k1.
+      algorithm: ECDSA.secp256k1,
     })
   }
 
