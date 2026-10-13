@@ -73,8 +73,8 @@ Default public RPCs (override with `clientUrls`):
 
 | Network | Defaults |
 | ------- | -------- |
-| Mainnet | `https://free.rpc.fastnear.com`, `https://near.drpc.org`, `https://1rpc.io/near` |
-| Testnet | `https://test.rpc.fastnear.com`, `https://near-testnet.drpc.org` |
+| Mainnet | `https://rpc.mainnet.fastnear.com`, `https://free.rpc.fastnear.com`, `https://near.drpc.org` |
+| Testnet | `https://rpc.testnet.fastnear.com`, `https://test.rpc.fastnear.com`, `https://near-testnet.drpc.org` |
 
 History uses NearBlocks (`nearblocksUrls` / optional `nearblocksApiKey`).
 
