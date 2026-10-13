@@ -4,11 +4,9 @@ import { ADAChain, Client as AdaClient, defaultAdaParams } from '@xchainjs/xchai
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, DASHChain, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { AssetKUJI, Client as KujiraClient, KUJIChain, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as ZecClient, ZECChain, defaultZECParams } from '@xchainjs/xchain-zcash'
 import { Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import { CompatibleAsset } from '@xchainjs/xchain-mayachain-query'
-import { Client as RadixClient, RadixChain } from '@xchainjs/xchain-radix'
 import { AssetRuneNative, Client as ThorClient, THORChain } from '@xchainjs/xchain-thorchain'
 import {
   Address,
@@ -58,16 +56,7 @@ export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCrypto
  * @returns true if chain is EVM, otherwise, false
  */
 export const isProtocolBFTChain = (chain: Chain): boolean => {
-  return [AssetKUJI.chain, AssetRuneNative.chain].includes(chain)
-}
-
-/**
- * Check if a chain is Radix chain
- * @param {Chain} chain to check
- * @returns true if chain is Radix, otherwise, false
- */
-export const isRadixChain = (chain: Chain): boolean => {
-  return chain === RadixChain
+  return chain === AssetRuneNative.chain
 }
 
 export const validateAddress = (network: Network, chain: Chain, address: Address): boolean => {
@@ -78,14 +67,10 @@ export const validateAddress = (network: Network, chain: Chain, address: Address
       return new EthClient({ ...defaultEthParams, network }).validateAddress(address)
     case DASHChain:
       return new DashClient({ ...defaultDashParams, network }).validateAddress(address)
-    case KUJIChain:
-      return new KujiraClient({ ...defaultKujiParams, network }).validateAddress(address)
     case THORChain:
       return new ThorClient({ network }).validateAddress(address)
     case MAYAChain:
       return new MayaClient({ network }).validateAddress(address)
-    case RadixChain:
-      return new RadixClient({ network }).validateAddress(address)
     case ZECChain:
       return new ZecClient({ ...defaultZECParams, network }).validateAddress(address)
     case ARBChain:

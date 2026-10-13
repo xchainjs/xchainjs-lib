@@ -3,14 +3,12 @@ import { Protocol } from '@xchainjs/xchain-client'
 import { abi } from '@xchainjs/xchain-evm'
 import { MAYAChain } from '@xchainjs/xchain-mayachain'
 import { CompatibleAsset, MayachainQuery } from '@xchainjs/xchain-mayachain-query'
-import { AssetXRD, generateAddressParam, generateBucketParam, generateStringParam } from '@xchainjs/xchain-radix'
 import {
   Address,
   Asset,
   CryptoAmount,
   TokenAsset,
   baseAmount,
-  eqAsset,
   getContractAddressFromAsset,
   isSynthAsset,
   isTradeAsset,
@@ -18,7 +16,7 @@ import {
 import { EvmTxParams, Wallet } from '@xchainjs/xchain-wallet'
 
 import { TxSubmitted } from './types'
-import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain, isRadixChain } from './utils'
+import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
 import { Contract, getAddress, ZeroAddress } from 'ethers'
 
 export type NonProtocolActionParams = {
@@ -72,8 +70,7 @@ export class MayachainAction {
     memo,
     walletIndex,
   }: NonProtocolActionParams): Promise<TxSubmitted> {
-    // Non EVM actions and non Radix action
-    if (!isProtocolEVMChain(assetAmount.asset.chain) && !eqAsset(assetAmount.asset, AssetXRD)) {
+    if (!isProtocolEVMChain(assetAmount.asset.chain)) {
       // BFT/Cosmos chains and Cardano derive their fee internally (Cardano from on-chain
       // protocol params) and do not accept a caller-supplied per-byte feeRate, unlike UTXO chains.
       if (isProtocolBFTChain(assetAmount.asset.chain) || assetAmount.asset.chain === ADAChain) {
@@ -104,36 +101,12 @@ export class MayachainAction {
       }
     }
 
-    // EVM actions and Radix go through the router
+    // EVM actions go through the router
     const mayachainQuery: MayachainQuery = new MayachainQuery()
 
     const inboundDetails = await mayachainQuery.getChainInboundDetails(assetAmount.asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router for ${assetAmount.asset.chain} chain`)
 
-    if (isRadixChain(assetAmount.asset.chain)) {
-      // Radix
-      const hash = await wallet.transfer({
-        asset: assetAmount.asset,
-        recipient: inboundDetails.router,
-        amount: assetAmount.baseAmount,
-        methodToCall: {
-          address: inboundDetails.router,
-          methodName: 'user_deposit',
-          params: [
-            generateAddressParam(await wallet.getAddress(AssetXRD.chain)),
-            generateAddressParam(recipient),
-            generateBucketParam(0),
-            generateStringParam(memo),
-          ],
-        },
-        walletIndex,
-      })
-      return {
-        hash,
-        url: await wallet.getExplorerTxUrl(assetAmount.asset.chain, hash),
-      }
-    }
-    // Evm
     const isERC20 = isProtocolERC20Asset(assetAmount.asset)
 
     const checkSummedContractAddress = isERC20

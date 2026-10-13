@@ -22,25 +22,20 @@ import {
   AssetDOGE,
   AssetETH,
   AssetLTC,
-  AssetMAYA,
   AssetXRP,
   AssetSOL,
-  AssetSUI,
   AssetRuneNative,
   BASEChain,
   BCHChain,
-  BNBChain,
   BSCChain,
   BTCChain,
   DOGEChain,
   ETHChain,
   GAIAChain,
   LTCChain,
-  MAYAChain,
   THORChain,
   XRPChain,
   SOLChain,
-  SUIChain,
   TRONChain,
   AssetTRON,
   ZECChain,
@@ -89,16 +84,12 @@ export const getChainAsset = (chain: Chain): Asset => {
       return AssetAVAX
     case BSCChain:
       return AssetBSC
-    case MAYAChain:
-      return AssetMAYA
     case BASEChain:
       return AssetBASE
     case XRPChain:
       return AssetXRP
     case SOLChain:
       return AssetSOL
-    case SUIChain:
-      return AssetSUI
     case TRONChain:
       return AssetTRON
     case ZECChain:
@@ -167,16 +158,12 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
       return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
     case BSCChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBSC)
-    case MAYAChain:
-      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetMAYA)
     case BASEChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetBASE)
     case XRPChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetXRP)
     case SOLChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetSOL)
-    case SUIChain:
-      return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetSUI)
     case TRONChain:
       return new AssetCryptoAmount(baseAmount(inbound.gasRate), AssetTRON)
   }
@@ -216,16 +203,12 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBSC)
     case THORChain:
       return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
-    case MAYAChain:
-      return new AssetCryptoAmount(baseAmount(2000000), AssetMAYA)
     case BASEChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetBASE)
     case XRPChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetXRP)
     case SOLChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetSOL)
-    case SUIChain:
-      return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetSUI)
     case TRONChain:
       return new AssetCryptoAmount(baseAmount(inbound.outboundFee), AssetTRON)
   }
@@ -241,8 +224,6 @@ export const getChain = (chain: string): Chain => {
   switch (chain) {
     case 'AVAX':
       return AVAXChain
-    case 'BNB':
-      return BNBChain
     case 'BTC':
       return BTCChain
     case 'ETH':
@@ -259,16 +240,12 @@ export const getChain = (chain: string): Chain => {
       return DOGEChain
     case 'BSC':
       return BSCChain
-    case 'MAYA':
-      return MAYAChain
     case 'BASE':
       return BASEChain
     case 'XRP':
       return XRPChain
     case 'SOL':
       return SOLChain
-    case 'SUI':
-      return SUIChain
     case 'TRON':
       return TRONChain
     case 'ZEC':

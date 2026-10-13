@@ -189,24 +189,6 @@ describe('Thorchain-query estimate Integration Tests', () => {
     printTx(estimate, swapParams.amount)
     expect(estimate).toBeTruthy()
   })
-  it('should estimate a swap of 1 sBNBETH to sETH', async () => {
-    const sBNBETH = assetFromStringEx('BNB/ETH-1C9')
-    const sETH = assetFromStringEx('ETH/ETH')
-    if (!sBNBETH || !sETH) throw Error('err')
-
-    const swapParams: QuoteSwapParams = {
-      fromAsset: sETH,
-      amount: new CryptoAmount(assetToBase(assetAmount(1)), sETH),
-      destinationAsset: sBNBETH,
-      destinationAddress: runeAddress,
-      // affiliate: affiliateAddress,
-      // affiliateBps: 30, //optional
-      toleranceBps: 20, //optional
-    }
-    const estimate = await thorchainQuery.quoteSwap(swapParams)
-    printTx(estimate, swapParams.amount)
-    expect(estimate).toBeTruthy()
-  })
   it(`Should estimate single swap of 1000 RUNE To BTC `, async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetRuneNative,

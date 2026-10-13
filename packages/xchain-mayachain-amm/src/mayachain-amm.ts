@@ -9,7 +9,6 @@ import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { MAX_APPROVAL } from '@xchainjs/xchain-evm'
-import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { AssetCacao, CACAO_DECIMAL, Client as MayaClient, MAYAChain } from '@xchainjs/xchain-mayachain'
 import {
   InboundDetail,
@@ -20,7 +19,6 @@ import {
   RegisterMAYAName,
   UpdateMAYAName,
 } from '@xchainjs/xchain-mayachain-query'
-import { Client as RadixClient } from '@xchainjs/xchain-radix'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import {
   Address,
@@ -71,11 +69,9 @@ export class MayachainAMM {
       BTC: new BtcClient({ ...defaultBtcParams, network: Network.Mainnet }),
       ETH: new EthClient({ ...defaultEthParams, network: Network.Mainnet }),
       DASH: new DashClient({ ...defaultDashParams, network: Network.Mainnet }),
-      KUJI: new KujiraClient({ ...defaultKujiParams, network: Network.Mainnet }),
       ARB: new ArbClient({ ...defaultArbParams, network: Network.Mainnet }),
       THOR: new ThorClient({ network: Network.Mainnet }),
       MAYA: new MayaClient({ network: Network.Mainnet }),
-      XRD: new RadixClient({ network: Network.Mainnet }),
       ZEC: new ZecClient({ ...defaultZECParams, network: Network.Mainnet }),
       ADA: new AdaClient({ ...defaultAdaParams, network: Network.Mainnet }),
     }),

@@ -42,10 +42,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     blockReward: 0, // No block reward for Binance Smart Chain
     avgBlockTimeInSecs: 3, // Average block time for Binance Smart Chain in seconds
   },
-  MAYA: {
-    blockReward: 0, // No block reward for MAYAChain
-    avgBlockTimeInSecs: 6, // Average block time for MAYAChain in seconds
-  },
   BASE: {
     blockReward: 0, // No block reward for base
     avgBlockTimeInSecs: 2, // Average block time for Base in seconds
@@ -57,10 +53,6 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
   SOL: {
     blockReward: 0, // No block reward for sol
     avgBlockTimeInSecs: 0.4, // Average block time for sol in seconds
-  },
-  SUI: {
-    blockReward: 0, // No block reward for SUI
-    avgBlockTimeInSecs: 0.4, // Average block time for SUI in seconds
   },
   TRON: {
     blockReward: 0, // No block reward for TRON
