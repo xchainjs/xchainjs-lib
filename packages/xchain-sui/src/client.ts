@@ -1,3 +1,4 @@
+import { SuiGrpcClient } from '@mysten/sui/grpc'
 import type { SuiJsonRpcClient, SuiTransactionBlockResponse } from '@mysten/sui/jsonRpc'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { Transaction } from '@mysten/sui/transactions'
@@ -28,7 +29,6 @@ import slip10 from 'micro-key-producer/slip10.js'
 
 import { DEFAULT_GAS_BUDGET, SUIAsset, SUIChain, SUI_DECIMALS, SUI_TYPE_TAG, defaultSuiParams } from './const'
 import { graphqlQuery, type GraphqlResult } from './graphql'
-import { createGrpcCoreClient, type SuiGrpcCore } from './sdkGrpc.mjs'
 import { Balance, SUIClientParams, SuiTransport, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 import {
   formatGrpcExecutionFailure,
@@ -79,7 +79,7 @@ export class Client extends BaseXChainClient {
   private transport: SuiTransport
   private clientUrls: Record<Network, string>
   private graphqlUrls: Record<Network, string>
-  private grpcClient: SuiGrpcCore | null
+  private grpcClient: SuiGrpcClient | null
   private jsonRpcClient: SuiJsonRpcClient | null = null
 
   constructor(params: SUIClientParams = defaultSuiParams) {
@@ -103,14 +103,18 @@ export class Client extends BaseXChainClient {
 
     const network = this.getNetwork()
     this.grpcClient =
-      this.transport === 'jsonRpc' ? null : createGrpcCoreClient(this.clientUrls[network], getSuiNetwork(network))
+      this.transport === 'jsonRpc'
+        ? null
+        : new SuiGrpcClient({ baseUrl: this.clientUrls[network], network: getSuiNetwork(network) })
   }
 
   public setNetwork(network: Network): void {
     super.setNetwork(network)
     this.jsonRpcClient = null
     this.grpcClient =
-      this.transport === 'jsonRpc' ? null : createGrpcCoreClient(this.clientUrls[network], getSuiNetwork(network))
+      this.transport === 'jsonRpc'
+        ? null
+        : new SuiGrpcClient({ baseUrl: this.clientUrls[network], network: getSuiNetwork(network) })
   }
 
   public getAssetInfo(): AssetInfo {
@@ -360,11 +364,11 @@ export class Client extends BaseXChainClient {
     return { rawUnsignedTx: Buffer.from(bytes).toString('hex') }
   }
 
-  private requireGrpc(): SuiGrpcCore {
+  private requireGrpc(): SuiGrpcClient['core'] {
     if (!this.grpcClient) {
       throw Error('gRPC client is not available for the jsonRpc transport')
     }
-    return this.grpcClient
+    return this.grpcClient.core
   }
 
   private async getJsonRpcClient(): Promise<SuiJsonRpcClient> {
