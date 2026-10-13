@@ -30,7 +30,6 @@ const ALL_SUPPORTED_CHAINS: ChainConfig[] = [
   { id: 'NEAR', name: 'NEAR', symbol: 'NEAR', category: 'other', decimals: 24 },
   { id: 'SOL', name: 'Solana', symbol: 'SOL', category: 'other', decimals: 9 },
   { id: 'SUI', name: 'Sui', symbol: 'SUI', category: 'other', decimals: 9 },
-  { id: 'XRD', name: 'Radix', symbol: 'XRD', category: 'other', decimals: 18 },
   { id: 'ADA', name: 'Cardano', symbol: 'ADA', category: 'other', decimals: 6 },
   { id: 'XRP', name: 'Ripple', symbol: 'XRP', category: 'other', decimals: 6 },
   { id: 'TRON', name: 'Tron', symbol: 'TRX', category: 'other', decimals: 6 },

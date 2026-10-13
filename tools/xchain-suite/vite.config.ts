@@ -143,6 +143,9 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 3000,
+      // Node 22 binds "localhost" to ::1 only. A short first write on that
+      // IPv6 loopback is never delivered, so the page never loads.
+      host: '127.0.0.1',
       // This machine is already at the inotify cap (~65k). Don't watch the
       // monorepo lib/ trees, and poll the small leftover set instead of ENOSPC.
       watch: {

@@ -46,7 +46,6 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { id: 'NEAR', name: 'NEAR' },
       { id: 'SOL', name: 'Solana' },
       { id: 'SUI', name: 'Sui' },
-      { id: 'XRD', name: 'Radix' },
       { id: 'ADA', name: 'Cardano' },
       { id: 'XRP', name: 'Ripple' },
       { id: 'TRON', name: 'Tron' },

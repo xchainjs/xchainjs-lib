@@ -14,7 +14,7 @@ const ASSET_TO_CHAIN: Record<string, string> = {
   BTC: 'BTC', ETH: 'ETH', SOL: 'SOL', AVAX: 'AVAX', DOGE: 'DOGE',
   LTC: 'LTC', BCH: 'BCH', XRP: 'XRP', ADA: 'ADA', BNB: 'BSC',
   ARB: 'ARB', SUI: 'SUI', GAIA: 'GAIA', THOR: 'THOR', MAYA: 'MAYA',
-  DASH: 'DASH', ZEC: 'ZEC', XRD: 'XRD', XMR: 'XMR', NEAR: 'NEAR',
+  DASH: 'DASH', ZEC: 'ZEC', XMR: 'XMR', NEAR: 'NEAR',
 }
 
 // Map UI asset names to canonical native asset symbols

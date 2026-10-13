@@ -17157,7 +17157,6 @@ __metadata:
     "@xchainjs/xchain-midgard-query": "workspace:*"
     "@xchainjs/xchain-monero": "workspace:*"
     "@xchainjs/xchain-near": "workspace:*"
-    "@xchainjs/xchain-radix": "workspace:*"
     "@xchainjs/xchain-ripple": "workspace:*"
     "@xchainjs/xchain-solana": "workspace:*"
     "@xchainjs/xchain-sui": "workspace:*"
