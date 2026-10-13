@@ -18,7 +18,8 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
   const phrase = 'patient use either flash couple jump castle true broccoli cancel brand mechanic'
   const password = '1234'
 
-  const expectedKeystore = {
+  // v1 fixture: MAC = blake2b(macKey || ciphertext) — IV not covered (#1721 legacy)
+  const expectedKeystoreV1 = {
     crypto: {
       cipher: 'aes-128-ctr',
       ciphertext:
@@ -35,6 +36,18 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
     },
     id: '9ad9ea91-22ad-46a7-9613-4f9d190e32ab',
     version: 1,
+    meta: 'xchain-keystore',
+  }
+
+  // Same salt/iv/ciphertext as v1, but MAC includes IV (v2). Ciphertext is unchanged because
+  // AES-CTR still uses the same key material layout; only the MAC binding changes.
+  const expectedKeystoreV2 = {
+    crypto: {
+      ...expectedKeystoreV1.crypto,
+      mac: '801caafeca2863d0486c00464fb954ff512e8146e331710173f2c2994068f89f',
+    },
+    id: '9ad9ea91-22ad-46a7-9613-4f9d190e32ab',
+    version: 2,
     meta: 'xchain-keystore',
   }
 
@@ -60,22 +73,28 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
     meta: 'xchain-keystore',
   }
 
-  it('encryptToKeyStore() should produce expected ciphertext and mac', async () => {
+  it('encryptToKeyStore() should produce expected v2 ciphertext and mac (IV bound into MAC)', async () => {
     jest
       .spyOn(crypto, 'randomBytes')
-      .mockImplementationOnce(() => Buffer.from(expectedKeystore.crypto.kdfparams.salt, 'hex')) // salt
-      .mockImplementationOnce(() => Buffer.from(expectedKeystore.crypto.cipherparams.iv, 'hex')) // iv
+      .mockImplementationOnce(() => Buffer.from(expectedKeystoreV2.crypto.kdfparams.salt, 'hex')) // salt
+      .mockImplementationOnce(() => Buffer.from(expectedKeystoreV2.crypto.cipherparams.iv, 'hex')) // iv
 
     const keystore = await encryptToKeyStore(phrase, password)
 
-    expect(keystore.crypto.ciphertext).toBe(expectedKeystore.crypto.ciphertext)
-    expect(keystore.crypto.mac).toBe(expectedKeystore.crypto.mac)
-    expect(keystore.crypto.kdfparams).toEqual(expectedKeystore.crypto.kdfparams)
-    expect(keystore.crypto.cipherparams).toEqual(expectedKeystore.crypto.cipherparams)
+    expect(keystore.version).toBe(2)
+    expect(keystore.crypto.ciphertext).toBe(expectedKeystoreV2.crypto.ciphertext)
+    expect(keystore.crypto.mac).toBe(expectedKeystoreV2.crypto.mac)
+    expect(keystore.crypto.kdfparams).toEqual(expectedKeystoreV2.crypto.kdfparams)
+    expect(keystore.crypto.cipherparams).toEqual(expectedKeystoreV2.crypto.cipherparams)
   })
 
-  it('decryptFromKeystore() should return original phrase', async () => {
-    const result = await decryptFromKeystore(expectedKeystore, password)
+  it('decryptFromKeystore() should return original phrase for v2 keystores', async () => {
+    const result = await decryptFromKeystore(expectedKeystoreV2, password)
+    expect(result).toBe(phrase)
+  })
+
+  it('decryptFromKeystore() should still decrypt v1 (MAC without IV) keystores', async () => {
+    const result = await decryptFromKeystore(expectedKeystoreV1, password)
     expect(result).toBe(phrase)
   })
 
@@ -85,7 +104,37 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
   })
 
   it('decryptFromKeystore() should reject an incorrect password', async () => {
-    await expect(decryptFromKeystore(expectedKeystore, 'wrong-password')).rejects.toThrow('Invalid password')
+    await expect(decryptFromKeystore(expectedKeystoreV2, 'wrong-password')).rejects.toThrow('Invalid password')
+  })
+
+  it('decryptFromKeystore() should reject a v2 keystore whose IV was tampered', async () => {
+    const tampered = {
+      ...expectedKeystoreV2,
+      crypto: {
+        ...expectedKeystoreV2.crypto,
+        cipherparams: {
+          // flip last nibble of the IV — changes CTR keystream without touching ciphertext/mac blob as stored
+          iv: 'dffdb8bbe92e9a00e173eaa20f1a3785',
+        },
+      },
+    }
+    await expect(decryptFromKeystore(tampered, password)).rejects.toThrow('Invalid password')
+  })
+
+  it('decryptFromKeystore() would not reject the same IV tamper on v1 (documents legacy gap)', async () => {
+    // CTR: same ciphertext + wrong IV decrypts to garbage, but v1 MAC does not bind IV so
+    // verification still passes — this is the #1721 issue. We assert that behavior remains
+    // for legacy files only (not a desired property for new keystores).
+    const tamperedV1 = {
+      ...expectedKeystoreV1,
+      crypto: {
+        ...expectedKeystoreV1.crypto,
+        cipherparams: { iv: 'dffdb8bbe92e9a00e173eaa20f1a3785' },
+      },
+    }
+    // MAC check passes; decrypted phrase is not the original
+    const garbled = await decryptFromKeystore(tamperedV1, password)
+    expect(garbled).not.toBe(phrase)
   })
 
   // Browsers/bundlers polyfill `crypto` with crypto-browserify, which lacks
@@ -103,12 +152,12 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
     })
 
     it('decryptFromKeystore() should return original phrase via fallback comparison', async () => {
-      const result = await decryptFromKeystore(expectedKeystore, password)
+      const result = await decryptFromKeystore(expectedKeystoreV2, password)
       expect(result).toBe(phrase)
     })
 
     it('decryptFromKeystore() should still reject an incorrect password via fallback comparison', async () => {
-      await expect(decryptFromKeystore(expectedKeystore, 'wrong-password')).rejects.toThrow('Invalid password')
+      await expect(decryptFromKeystore(expectedKeystoreV2, 'wrong-password')).rejects.toThrow('Invalid password')
     })
   })
 })
@@ -140,7 +189,7 @@ describe('Export Keystore', () => {
     expect(keystore.crypto.kdf).toEqual('pbkdf2')
     expect(keystore.crypto.kdfparams.prf).toEqual('hmac-sha256')
     expect(keystore.crypto.kdfparams.c).toEqual(600000)
-    expect(keystore.version).toEqual(1)
+    expect(keystore.version).toEqual(2)
     expect(keystore.meta).toEqual('xchain-keystore')
   })
 })
