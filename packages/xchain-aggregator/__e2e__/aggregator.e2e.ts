@@ -9,8 +9,8 @@ import {
   defaultBTCParams as defaultBtcParams,
 } from '@xchainjs/xchain-bitcoin'
 import { Network } from '@xchainjs/xchain-client'
+import { AssetDASH } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, ETHChain, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { AssetKUJI } from '@xchainjs/xchain-kujira'
 import { Client as ThorClient, THORChain, AssetRuneNative } from '@xchainjs/xchain-thorchain'
 import { Client as SolClient, SOLAsset, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import { AssetTRX, Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
@@ -167,7 +167,7 @@ describe('Aggregator', () => {
   it('Should find estimated swap with one protocol not supporting one asset', async () => {
     const estimatedSwap = await aggregator.estimateSwap({
       fromAsset: AssetBTC,
-      destinationAsset: AssetKUJI,
+      destinationAsset: AssetDASH,
       amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetBTC),
     })
     printQuoteSwap(bestSwap(estimatedSwap))
@@ -200,7 +200,7 @@ describe('Aggregator', () => {
     try {
       await aggregator.estimateSwap({
         fromAsset: AssetAVAX,
-        destinationAsset: AssetKUJI,
+        destinationAsset: assetFromStringEx('KUJI.KUJI'),
         amount: new CryptoAmount(assetToBase(assetAmount(1, BTC_DECIMAL)), AssetAVAX),
       })
     } catch (e) {

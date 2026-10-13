@@ -2,10 +2,8 @@ import { AssetBTC, Client as BtcClient, defaultBTCParams as defaultBtcParams } f
 import { Network } from '@xchainjs/xchain-client'
 import { Client as DashClient, defaultDashParams } from '@xchainjs/xchain-dash'
 import { AssetETH, Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
-import { Client as KujiraClient, defaultKujiParams } from '@xchainjs/xchain-kujira'
 import { Client as MayaClient } from '@xchainjs/xchain-mayachain'
 import { MayachainQuery } from '@xchainjs/xchain-mayachain-query'
-import { Client as RadixClient } from '@xchainjs/xchain-radix'
 import { AssetRuneNative, Client as ThorClient } from '@xchainjs/xchain-thorchain'
 import { Asset, CryptoAmount, assetToString, baseAmount } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
@@ -25,10 +23,8 @@ describe('MayachainAMM', () => {
         BTC: new BtcClient({ ...defaultBtcParams, network: Network.Mainnet }),
         ETH: new EthClient({ ...defaultEthParams, network: Network.Mainnet }),
         DASH: new DashClient({ ...defaultDashParams, network: Network.Mainnet }),
-        KUJI: new KujiraClient({ ...defaultKujiParams, network: Network.Mainnet }),
         THOR: new ThorClient({ network: Network.Mainnet }),
         MAYA: new MayaClient({ network: Network.Mainnet }),
-        XRD: new RadixClient({ network: Network.Mainnet }),
       })
       mayachainAmm = new MayachainAMM(mayaChainQuery, wallet)
     })

@@ -74,7 +74,6 @@ import {
 } from './types'
 import {
   AssetRuneNative,
-  BNBChain,
   GAIAChain,
   THORCHAIN_DECIMAL,
   THORChain,
@@ -367,7 +366,7 @@ export class ThorchainQuery {
   }
   /**
    * Finds the required confCount required for an inbound or outbound Tx to THORChain. Estimate based on Midgard data only.
-   * Finds the gas asset of the given asset (e.g. BUSD is on BNB), finds the value of asset in Gas Asset then finds the required confirmation count.
+   * Finds the gas asset of the given asset, finds the value of asset in Gas Asset then finds the required confirmation count.
    * ConfCount is then times by 6 seconds.
    * @param inbound: CryptoAmount - amount/asset of the outbound amount.
    * @returns time in seconds before a Tx is confirmed by THORChain
@@ -375,12 +374,7 @@ export class ThorchainQuery {
    */
   async confCounting(inbound: CryptoAmount): Promise<number> {
     // Check for instant finality assets or synths
-    if (
-      isAssetRuneNative(inbound.asset) ||
-      inbound.asset.chain == BNBChain ||
-      inbound.asset.chain == GAIAChain ||
-      isSynthAsset(inbound.asset)
-    ) {
+    if (isAssetRuneNative(inbound.asset) || inbound.asset.chain == GAIAChain || isSynthAsset(inbound.asset)) {
       // Return the average block time for THORChain
       return this.chainAttributes[THORChain].avgBlockTimeInSecs
     }
@@ -685,12 +679,6 @@ export class ThorchainQuery {
         }
       case 'BSC':
         // Dust value: 0 BSC
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      case 'MAYA':
-        // Dust value: 0 MAYA
         return {
           asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
           rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),

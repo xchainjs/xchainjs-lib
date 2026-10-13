@@ -5374,7 +5374,6 @@ __metadata:
     "@xchainjs/xchain-bsc": "workspace:*"
     "@xchainjs/xchain-client": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
-    "@xchainjs/xchain-kujira": "workspace:*"
     "@xchainjs/xchain-mayachain": "workspace:*"
     "@xchainjs/xchain-mayachain-amm": "workspace:*"
     "@xchainjs/xchain-mayachain-query": "workspace:*"
@@ -5656,7 +5655,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@xchainjs/xchain-kujira@workspace:*, @xchainjs/xchain-kujira@workspace:packages/xchain-kujira":
+"@xchainjs/xchain-kujira@workspace:packages/xchain-kujira":
   version: 0.0.0-use.local
   resolution: "@xchainjs/xchain-kujira@workspace:packages/xchain-kujira"
   dependencies:
@@ -5710,10 +5709,8 @@ __metadata:
     "@xchainjs/xchain-dash": "workspace:*"
     "@xchainjs/xchain-ethereum": "workspace:*"
     "@xchainjs/xchain-evm": "workspace:*"
-    "@xchainjs/xchain-kujira": "workspace:*"
     "@xchainjs/xchain-mayachain": "workspace:*"
     "@xchainjs/xchain-mayachain-query": "workspace:*"
-    "@xchainjs/xchain-radix": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-util": "workspace:*"
     "@xchainjs/xchain-wallet": "workspace:*"
@@ -5922,7 +5919,6 @@ __metadata:
     "@xchainjs/xchain-litecoin": "workspace:*"
     "@xchainjs/xchain-ripple": "workspace:*"
     "@xchainjs/xchain-solana": "workspace:*"
-    "@xchainjs/xchain-sui": "workspace:*"
     "@xchainjs/xchain-thorchain": "workspace:*"
     "@xchainjs/xchain-thorchain-query": "workspace:*"
     "@xchainjs/xchain-tron": "workspace:*"
