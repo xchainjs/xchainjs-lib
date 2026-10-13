@@ -18,6 +18,30 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
   const phrase = 'patient use either flash couple jump castle true broccoli cancel brand mechanic'
   const password = '1234'
 
+  // v2 keystore (aes-256-ctr, dklen 64) — the format written by the current encryptToKeyStore.
+  // Known-answer test: produced from the fixed salt/iv/password/phrase above.
+  const expectedKeystoreV2 = {
+    crypto: {
+      cipher: 'aes-256-ctr',
+      ciphertext:
+        '31607fd3f65a69ded1701f2f45f1bc7eba8d8ac3eb3a9c50e95ac9d5915631e34c59ba05047bfe4f1ae5639081ea705eef5e65fea253b39faa5e2c0e8b606c60606cb1e5c4081518ca4dcb472fe7d9',
+      cipherparams: { iv: 'dffdb8bbe92e9a00e173eaa20f1a3784' },
+      kdf: 'pbkdf2',
+      kdfparams: {
+        prf: 'hmac-sha256',
+        dklen: 64,
+        salt: 'ead4ad6c09f5a5586235a642fa39c95741b35283304e3fd464d942e300fe0514',
+        c: 600000,
+      },
+      mac: '7c437ee1126fe587317a32dccef99970d16384c21db28ed6d8a7dedf8a77eaf0',
+    },
+    id: '9ad9ea91-22ad-46a7-9613-4f9d190e32ab',
+    version: 2,
+    meta: 'xchain-keystore',
+  }
+
+  // v1 keystore (aes-128-ctr, dklen 32) — the format written before the AES-256 upgrade.
+  // Must remain decryptable so existing wallets keep working (backward-compatible read).
   const expectedKeystore = {
     crypto: {
       cipher: 'aes-128-ctr',
@@ -60,21 +84,28 @@ describe('Keystore regression test for encrypt/decrypt with internal migration',
     meta: 'xchain-keystore',
   }
 
-  it('encryptToKeyStore() should produce expected ciphertext and mac', async () => {
+  it('encryptToKeyStore() should produce the expected v2 (aes-256-ctr) ciphertext and mac', async () => {
     jest
       .spyOn(crypto, 'randomBytes')
-      .mockImplementationOnce(() => Buffer.from(expectedKeystore.crypto.kdfparams.salt, 'hex')) // salt
-      .mockImplementationOnce(() => Buffer.from(expectedKeystore.crypto.cipherparams.iv, 'hex')) // iv
+      .mockImplementationOnce(() => Buffer.from(expectedKeystoreV2.crypto.kdfparams.salt, 'hex')) // salt
+      .mockImplementationOnce(() => Buffer.from(expectedKeystoreV2.crypto.cipherparams.iv, 'hex')) // iv
 
     const keystore = await encryptToKeyStore(phrase, password)
 
-    expect(keystore.crypto.ciphertext).toBe(expectedKeystore.crypto.ciphertext)
-    expect(keystore.crypto.mac).toBe(expectedKeystore.crypto.mac)
-    expect(keystore.crypto.kdfparams).toEqual(expectedKeystore.crypto.kdfparams)
-    expect(keystore.crypto.cipherparams).toEqual(expectedKeystore.crypto.cipherparams)
+    expect(keystore.crypto.cipher).toBe('aes-256-ctr')
+    expect(keystore.version).toBe(2)
+    expect(keystore.crypto.ciphertext).toBe(expectedKeystoreV2.crypto.ciphertext)
+    expect(keystore.crypto.mac).toBe(expectedKeystoreV2.crypto.mac)
+    expect(keystore.crypto.kdfparams).toEqual(expectedKeystoreV2.crypto.kdfparams)
+    expect(keystore.crypto.cipherparams).toEqual(expectedKeystoreV2.crypto.cipherparams)
   })
 
-  it('decryptFromKeystore() should return original phrase', async () => {
+  it('decryptFromKeystore() should decrypt a v2 (aes-256-ctr) keystore', async () => {
+    const result = await decryptFromKeystore(expectedKeystoreV2, password)
+    expect(result).toBe(phrase)
+  })
+
+  it('decryptFromKeystore() should still decrypt a legacy v1 (aes-128-ctr) keystore', async () => {
     const result = await decryptFromKeystore(expectedKeystore, password)
     expect(result).toBe(phrase)
   })
@@ -136,11 +167,12 @@ describe('Export Keystore', () => {
     const phrase = 'flush viable fury sword mention dignity ethics secret nasty gallery teach fever'
     const password = 'thorchain'
     const keystore = await encryptToKeyStore(phrase, password)
-    expect(keystore.crypto.cipher).toEqual('aes-128-ctr')
+    expect(keystore.crypto.cipher).toEqual('aes-256-ctr')
     expect(keystore.crypto.kdf).toEqual('pbkdf2')
     expect(keystore.crypto.kdfparams.prf).toEqual('hmac-sha256')
+    expect(keystore.crypto.kdfparams.dklen).toEqual(64)
     expect(keystore.crypto.kdfparams.c).toEqual(600000)
-    expect(keystore.version).toEqual(1)
+    expect(keystore.version).toEqual(2)
     expect(keystore.meta).toEqual('xchain-keystore')
   })
 })
