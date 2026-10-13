@@ -184,8 +184,6 @@ export class MayachainCache {
       'ARB.TGT-0x429FED88F10285E61B12BDF00848315FBDFCC341': 18,
       'ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 6,
       'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
-      'KUJI.KUJI': 6,
-      'KUJI.USK': 6,
       'THOR.RUNE': 8,
 
       // Chain defaults for native assets
@@ -195,7 +193,6 @@ export class MayachainCache {
 
       // Additional pool assets (using chain defaults where decimals not specified)
       'DASH.DASH': 8,
-      'XDR.XDR': 18,
       'ZEC.ZEC': 8,
 
       // Legacy mappings for backward compatibility

@@ -44,10 +44,16 @@ export const getNearNetworkId = (network: Network): 'mainnet' | 'testnet' => {
 
 /** Default public JSON-RPC endpoints (failover order). */
 export const getDefaultClientUrls = (network: Network): string[] => {
+  // FastNear's current keyless regular RPCs first, then the older free host and dRPC.
+  // 1rpc.io/near is omitted: it answers with Cloudflare 522.
   const networkMap: { [key in Network]: string[] } = {
-    [Network.Mainnet]: ['https://free.rpc.fastnear.com', 'https://near.drpc.org', 'https://1rpc.io/near'],
-    [Network.Stagenet]: ['https://free.rpc.fastnear.com', 'https://near.drpc.org', 'https://1rpc.io/near'],
-    [Network.Testnet]: ['https://test.rpc.fastnear.com', 'https://near-testnet.drpc.org'],
+    [Network.Mainnet]: ['https://rpc.mainnet.fastnear.com', 'https://free.rpc.fastnear.com', 'https://near.drpc.org'],
+    [Network.Stagenet]: ['https://rpc.mainnet.fastnear.com', 'https://free.rpc.fastnear.com', 'https://near.drpc.org'],
+    [Network.Testnet]: [
+      'https://rpc.testnet.fastnear.com',
+      'https://test.rpc.fastnear.com',
+      'https://near-testnet.drpc.org',
+    ],
   }
   return networkMap[network]
 }

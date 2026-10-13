@@ -152,7 +152,6 @@ describe('Mayachain-query tests', () => {
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('BTC/BTC') as SynthAsset)).toBe(8)
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('ETH.ETH') as Asset)).toBe(18)
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('DASH.DASH') as Asset)).toBe(8)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.KUJI') as Asset)).toBe(6)
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('THOR.RUNE') as Asset)).toBe(8)
     expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('MAYA.CACAO') as Asset)).toBe(10)
     expect(
@@ -170,7 +169,6 @@ describe('Mayachain-query tests', () => {
         assetFromStringEx('ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0') as TokenAsset,
       ),
     ).toBe(18)
-    expect(await mayachainQuery.getAssetDecimals(assetFromStringEx('KUJI.USK') as TokenAsset)).toBe(6)
   })
 
   it('Should return the ADA dust value (1 ADA) without throwing', () => {
