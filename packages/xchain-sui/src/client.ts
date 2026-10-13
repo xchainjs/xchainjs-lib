@@ -1,6 +1,5 @@
-import { SuiGraphQLClient } from '@mysten/sui/graphql'
 import { SuiGrpcClient } from '@mysten/sui/grpc'
-import { SuiJsonRpcClient, SuiTransactionBlockResponse } from '@mysten/sui/jsonRpc'
+import type { SuiJsonRpcClient, SuiTransactionBlockResponse } from '@mysten/sui/jsonRpc'
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
 import { Transaction } from '@mysten/sui/transactions'
 import { isValidSuiAddress } from '@mysten/sui/utils'
@@ -29,6 +28,7 @@ import {
 import slip10 from 'micro-key-producer/slip10.js'
 
 import { DEFAULT_GAS_BUDGET, SUIAsset, SUIChain, SUI_DECIMALS, SUI_TYPE_TAG, defaultSuiParams } from './const'
+import { graphqlQuery, type GraphqlResult } from './graphql'
 import { Balance, SUIClientParams, SuiTransport, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 import {
   formatGrpcExecutionFailure,
@@ -38,7 +38,6 @@ import {
   resolvePrimaryUrl,
 } from './utils'
 
-type CoreClient = SuiGrpcClient | SuiJsonRpcClient
 type GasCoinRef = { objectId: string; version: string | number; digest: string }
 
 type GraphqlTxNode = {
@@ -54,6 +53,13 @@ type GraphqlTxNode = {
       }>
     } | null
   } | null
+}
+
+type GraphqlTxConnection = {
+  transactions?: {
+    nodes: GraphqlTxNode[]
+    pageInfo: { hasNextPage: boolean; endCursor: string | null }
+  }
 }
 
 /**
@@ -73,8 +79,8 @@ export class Client extends BaseXChainClient {
   private transport: SuiTransport
   private clientUrls: Record<Network, string>
   private graphqlUrls: Record<Network, string>
-  private coreClient: CoreClient
-  private graphqlClient: SuiGraphQLClient
+  private grpcClient: SuiGrpcClient | null
+  private jsonRpcClient: SuiJsonRpcClient | null = null
 
   constructor(params: SUIClientParams = defaultSuiParams) {
     const mergedParams = { ...defaultSuiParams, ...params }
@@ -96,14 +102,19 @@ export class Client extends BaseXChainClient {
     }
 
     const network = this.getNetwork()
-    this.coreClient = this.createCoreClient(network)
-    this.graphqlClient = this.createGraphqlClient(network)
+    this.grpcClient =
+      this.transport === 'jsonRpc'
+        ? null
+        : new SuiGrpcClient({ baseUrl: this.clientUrls[network], network: getSuiNetwork(network) })
   }
 
   public setNetwork(network: Network): void {
     super.setNetwork(network)
-    this.coreClient = this.createCoreClient(network)
-    this.graphqlClient = this.createGraphqlClient(network)
+    this.jsonRpcClient = null
+    this.grpcClient =
+      this.transport === 'jsonRpc'
+        ? null
+        : new SuiGrpcClient({ baseUrl: this.clientUrls[network], network: getSuiNetwork(network) })
   }
 
   public getAssetInfo(): AssetInfo {
@@ -149,14 +160,15 @@ export class Client extends BaseXChainClient {
   public async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     const balances: Balance[] = []
 
-    if (this.isJsonRpc(this.coreClient)) {
-      const suiBalance = await this.coreClient.getBalance({ owner: address })
+    if (this.transport === 'jsonRpc') {
+      const jsonRpc = await this.getJsonRpcClient()
+      const suiBalance = await jsonRpc.getBalance({ owner: address })
       balances.push({
         asset: SUIAsset,
         amount: baseAmount(suiBalance.totalBalance, SUI_DECIMALS),
       })
 
-      const allBalances = await this.coreClient.getAllBalances({ owner: address })
+      const allBalances = await jsonRpc.getAllBalances({ owner: address })
       for (const coinBalance of allBalances) {
         if (coinBalance.coinType === SUI_TYPE_TAG || this.isSuiCoinType(coinBalance.coinType)) continue
 
@@ -172,7 +184,8 @@ export class Client extends BaseXChainClient {
       return balances
     }
 
-    const suiBalance = await this.coreClient.core.getBalance({
+    const grpc = this.requireGrpc()
+    const suiBalance = await grpc.getBalance({
       owner: address,
       coinType: SUI_TYPE_TAG,
     })
@@ -185,7 +198,7 @@ export class Client extends BaseXChainClient {
     const decimalsCache = new Map<string, number>()
     // Cap pages so pathological addresses cannot hang the client.
     for (let pageNum = 0; pageNum < 20; pageNum++) {
-      const page = await this.coreClient.core.listBalances({
+      const page = await grpc.listBalances({
         owner: address,
         cursor: cursor ?? undefined,
       })
@@ -232,8 +245,9 @@ export class Client extends BaseXChainClient {
       // Fall back to primary transport for very recent txs still in fullnode window.
     }
 
-    if (this.isJsonRpc(this.coreClient)) {
-      const txResponse = await this.coreClient.getTransactionBlock({
+    if (this.transport === 'jsonRpc') {
+      const jsonRpc = await this.getJsonRpcClient()
+      const txResponse = await jsonRpc.getTransactionBlock({
         digest: txId,
         options: {
           showInput: true,
@@ -244,15 +258,15 @@ export class Client extends BaseXChainClient {
       return this.parseJsonRpcTransaction(txResponse)
     }
 
-    const result = await this.coreClient.core.getTransaction({
+    const result = await this.requireGrpc().getTransaction({
       digest: txId,
       include: { balanceChanges: true },
     })
     const transaction = result.Transaction ?? result.FailedTransaction
-    if (!transaction) {
+    if (!transaction?.digest) {
       throw Error(`Transaction ${txId} not found`)
     }
-    return this.parseCoreTransaction(transaction.digest, transaction.balanceChanges, transaction.timestampMs)
+    return this.parseCoreTransaction(transaction.digest, transaction.balanceChanges, transaction.timestampMs ?? null)
   }
 
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
@@ -295,8 +309,9 @@ export class Client extends BaseXChainClient {
 
     const { signature } = await keypair.signTransaction(bytes)
 
-    if (this.isJsonRpc(this.coreClient)) {
-      const result = await this.coreClient.executeTransactionBlock({
+    if (this.transport === 'jsonRpc') {
+      const jsonRpc = await this.getJsonRpcClient()
+      const result = await jsonRpc.executeTransactionBlock({
         transactionBlock: bytes,
         signature,
         options: { showEffects: true },
@@ -304,7 +319,7 @@ export class Client extends BaseXChainClient {
       if (result.effects?.status?.status !== 'success') {
         throw Error(`Transaction failed: ${result.effects?.status?.error || 'unknown error'}`)
       }
-      await this.coreClient.waitForTransaction({ digest: result.digest })
+      await jsonRpc.waitForTransaction({ digest: result.digest })
       return result.digest
     }
 
@@ -318,8 +333,9 @@ export class Client extends BaseXChainClient {
     const keypair = this.getKeypair(0)
     const { signature } = await keypair.signTransaction(txBytes)
 
-    if (this.isJsonRpc(this.coreClient)) {
-      const result = await this.coreClient.executeTransactionBlock({
+    if (this.transport === 'jsonRpc') {
+      const jsonRpc = await this.getJsonRpcClient()
+      const result = await jsonRpc.executeTransactionBlock({
         transactionBlock: txBytes,
         signature,
         options: { showEffects: true },
@@ -348,29 +364,27 @@ export class Client extends BaseXChainClient {
     return { rawUnsignedTx: Buffer.from(bytes).toString('hex') }
   }
 
-  private createCoreClient(network: Network): CoreClient {
-    const url = this.clientUrls[network]
-    const suiNetwork = getSuiNetwork(network)
-
-    if (this.transport === 'jsonRpc') {
-      return new SuiJsonRpcClient({ url, network: suiNetwork })
+  private requireGrpc(): SuiGrpcClient['core'] {
+    if (!this.grpcClient) {
+      throw Error('gRPC client is not available for the jsonRpc transport')
     }
-
-    return new SuiGrpcClient({
-      baseUrl: url,
-      network: suiNetwork,
-    })
+    return this.grpcClient.core
   }
 
-  private createGraphqlClient(network: Network): SuiGraphQLClient {
-    return new SuiGraphQLClient({
-      url: this.graphqlUrls[network],
+  private async getJsonRpcClient(): Promise<SuiJsonRpcClient> {
+    if (this.jsonRpcClient) return this.jsonRpcClient
+    // setNetwork can run while this import is in flight. Build the client for the
+    // network this call started on, and cache it only if that network is still current.
+    const network = this.getNetwork()
+    const { SuiJsonRpcClient: JsonRpcClient } = await import('@mysten/sui/jsonRpc')
+    const client = new JsonRpcClient({
+      url: this.clientUrls[network],
       network: getSuiNetwork(network),
     })
-  }
-
-  private isJsonRpc(client: CoreClient): client is SuiJsonRpcClient {
-    return this.transport === 'jsonRpc' && !(client instanceof SuiGrpcClient)
+    if (this.getNetwork() === network) {
+      this.jsonRpcClient = client
+    }
+    return client
   }
 
   private getKeypair(index: number): Ed25519Keypair {
@@ -384,19 +398,19 @@ export class Client extends BaseXChainClient {
   }
 
   private async getReferenceGasPrice(): Promise<bigint> {
-    if (this.isJsonRpc(this.coreClient)) {
-      return this.coreClient.getReferenceGasPrice()
+    if (this.transport === 'jsonRpc') {
+      return (await this.getJsonRpcClient()).getReferenceGasPrice()
     }
-    const { referenceGasPrice } = await this.coreClient.core.getReferenceGasPrice()
+    const { referenceGasPrice } = await this.requireGrpc().getReferenceGasPrice()
     return BigInt(referenceGasPrice)
   }
 
   private async getCoinDecimals(coinType: string): Promise<number> {
     if (this.isSuiCoinType(coinType)) return SUI_DECIMALS
 
-    if (this.isJsonRpc(this.coreClient)) {
+    if (this.transport === 'jsonRpc') {
       try {
-        const metadata = await this.coreClient.getCoinMetadata({ coinType })
+        const metadata = await (await this.getJsonRpcClient()).getCoinMetadata({ coinType })
         return metadata?.decimals ?? SUI_DECIMALS
       } catch {
         return SUI_DECIMALS
@@ -405,12 +419,13 @@ export class Client extends BaseXChainClient {
 
     // Prefer a single GraphQL metadata lookup (lighter than full CoinInfo over gRPC).
     try {
-      const response: { data?: { coinMetadata?: { decimals: number } | null } } = await this.graphqlClient.query({
-        query: `query ($coinType: String!) {
+      const response = await graphqlQuery<{ coinMetadata?: { decimals: number } | null }>(
+        this.graphqlUrls[this.getNetwork()],
+        `query ($coinType: String!) {
             coinMetadata(coinType: $coinType) { decimals }
           }`,
-        variables: { coinType },
-      })
+        { coinType },
+      )
       if (response.data?.coinMetadata?.decimals != null) {
         return response.data.coinMetadata.decimals
       }
@@ -419,7 +434,7 @@ export class Client extends BaseXChainClient {
     }
 
     try {
-      const { coinMetadata } = await this.coreClient.core.getCoinMetadata({ coinType })
+      const { coinMetadata } = await this.requireGrpc().getCoinMetadata({ coinType })
       if (coinMetadata?.decimals != null) return coinMetadata.decimals
     } catch {
       return SUI_DECIMALS
@@ -428,8 +443,8 @@ export class Client extends BaseXChainClient {
   }
 
   private async getCoins(owner: string, coinType: string): Promise<GasCoinRef[]> {
-    if (this.isJsonRpc(this.coreClient)) {
-      const page = await this.coreClient.getCoins({ owner, coinType })
+    if (this.transport === 'jsonRpc') {
+      const page = await (await this.getJsonRpcClient()).getCoins({ owner, coinType })
       return page.data.map((c) => ({
         objectId: c.coinObjectId,
         version: c.version,
@@ -437,7 +452,7 @@ export class Client extends BaseXChainClient {
       }))
     }
 
-    const page = await this.coreClient.core.listCoins({
+    const page = await this.requireGrpc().listCoins({
       owner,
       coinType,
     })
@@ -529,17 +544,13 @@ export class Client extends BaseXChainClient {
    * effects.status; SDK 1.x requested the invalid path `transaction.transaction`.
    */
   private async executeGrpcTransaction(transaction: Uint8Array, signature: string): Promise<string> {
-    if (!(this.coreClient instanceof SuiGrpcClient)) {
-      throw Error('gRPC client required for executeGrpcTransaction')
-    }
-
-    const result = await this.coreClient.executeTransaction({
+    const result = await this.requireGrpc().executeTransaction({
       transaction,
       signatures: [signature],
     })
     const executed = result.Transaction ?? result.FailedTransaction
     const digest = executed?.digest
-    if (!digest) {
+    if (!executed || !digest) {
       throw Error('Transaction execution returned no digest')
     }
 
@@ -554,32 +565,38 @@ export class Client extends BaseXChainClient {
   }
 
   private async waitForGraphqlTransaction(digest: string, timeoutMs = 60_000): Promise<void> {
-    const start = Date.now()
-    while (Date.now() - start < timeoutMs) {
+    const deadline = Date.now() + timeoutMs
+    while (Date.now() < deadline) {
+      const remaining = deadline - Date.now()
       try {
-        const response: { data?: { transaction?: { digest?: string } } } = await this.graphqlClient.query({
-          query: `query ($digest: String!) {
+        const response = await graphqlQuery<{ transaction?: { digest?: string } }>(
+          this.graphqlUrls[this.getNetwork()],
+          `query ($digest: String!) {
             transaction(digest: $digest) {
               digest
               effects { status }
             }
           }`,
-          variables: { digest },
-        })
+          { digest },
+          AbortSignal.timeout(remaining),
+        )
         if (response.data?.transaction?.digest) {
           return
         }
       } catch {
-        // keep polling
+        // keep polling, including a request aborted at the deadline
       }
-      await new Promise((r) => setTimeout(r, 1000))
+      const pause = Math.min(1000, deadline - Date.now())
+      if (pause <= 0) break
+      await new Promise((r) => setTimeout(r, pause))
     }
     throw Error(`Timed out waiting for transaction ${digest} to be indexed`)
   }
 
   private async getTransactionDataFromGraphql(txId: string): Promise<Tx> {
-    const response: { data?: { transaction?: GraphqlTxNode | null } } = await this.graphqlClient.query({
-      query: `query ($digest: String!) {
+    const response = await graphqlQuery<{ transaction?: GraphqlTxNode | null }>(
+      this.graphqlUrls[this.getNetwork()],
+      `query ($digest: String!) {
         transaction(digest: $digest) {
           digest
           effects {
@@ -595,8 +612,8 @@ export class Client extends BaseXChainClient {
           }
         }
       }`,
-      variables: { digest: txId },
-    })
+      { digest: txId },
+    )
 
     const node = response.data?.transaction
     if (!node) {
@@ -611,15 +628,11 @@ export class Client extends BaseXChainClient {
     const pageSize = Math.min(maxResults, 50)
 
     while (nodes.length < maxResults) {
-      const response: {
-        data?: {
-          transactions?: {
-            nodes: GraphqlTxNode[]
-            pageInfo: { hasNextPage: boolean; endCursor: string | null }
-          }
-        }
-      } = await this.graphqlClient.query({
-        query: `query ($address: SuiAddress!, $first: Int!, $after: String) {
+      // Copy the cursor so its later assignment from `response` is not part of this initializer.
+      const after = cursor
+      const response: GraphqlResult<GraphqlTxConnection> = await graphqlQuery<GraphqlTxConnection>(
+        this.graphqlUrls[this.getNetwork()],
+        `query ($address: SuiAddress!, $first: Int!, $after: String) {
           transactions(first: $first, after: $after, filter: { affectedAddress: $address }) {
             nodes {
               digest
@@ -638,8 +651,8 @@ export class Client extends BaseXChainClient {
             pageInfo { hasNextPage endCursor }
           }
         }`,
-        variables: { address, first: pageSize, after: cursor },
-      })
+        { address, first: pageSize, after },
+      )
 
       const page = response.data?.transactions
       if (!page) break
