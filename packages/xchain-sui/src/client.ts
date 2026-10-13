@@ -369,12 +369,18 @@ export class Client extends BaseXChainClient {
 
   private async getJsonRpcClient(): Promise<SuiJsonRpcClient> {
     if (this.jsonRpcClient) return this.jsonRpcClient
+    // setNetwork can run while this import is in flight. Build the client for the
+    // network this call started on, and cache it only if that network is still current.
+    const network = this.getNetwork()
     const { SuiJsonRpcClient: JsonRpcClient } = await import('@mysten/sui/jsonRpc')
-    this.jsonRpcClient = new JsonRpcClient({
-      url: this.clientUrls[this.getNetwork()],
-      network: getSuiNetwork(this.getNetwork()),
+    const client = new JsonRpcClient({
+      url: this.clientUrls[network],
+      network: getSuiNetwork(network),
     })
-    return this.jsonRpcClient
+    if (this.getNetwork() === network) {
+      this.jsonRpcClient = client
+    }
+    return client
   }
 
   private getKeypair(index: number): Ed25519Keypair {
@@ -555,8 +561,9 @@ export class Client extends BaseXChainClient {
   }
 
   private async waitForGraphqlTransaction(digest: string, timeoutMs = 60_000): Promise<void> {
-    const start = Date.now()
-    while (Date.now() - start < timeoutMs) {
+    const deadline = Date.now() + timeoutMs
+    while (Date.now() < deadline) {
+      const remaining = deadline - Date.now()
       try {
         const response = await graphqlQuery<{ transaction?: { digest?: string } }>(
           this.graphqlUrls[this.getNetwork()],
@@ -567,14 +574,17 @@ export class Client extends BaseXChainClient {
             }
           }`,
           { digest },
+          AbortSignal.timeout(remaining),
         )
         if (response.data?.transaction?.digest) {
           return
         }
       } catch {
-        // keep polling
+        // keep polling, including a request aborted at the deadline
       }
-      await new Promise((r) => setTimeout(r, 1000))
+      const pause = Math.min(1000, deadline - Date.now())
+      if (pause <= 0) break
+      await new Promise((r) => setTimeout(r, pause))
     }
     throw Error(`Timed out waiting for transaction ${digest} to be indexed`)
   }

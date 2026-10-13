@@ -17,6 +17,7 @@ export async function graphqlQuery<T>(
   url: string,
   query: string,
   variables?: Record<string, unknown>,
+  signal?: AbortSignal,
 ): Promise<GraphqlResult<T>> {
   const response = await fetch(url, {
     method: 'POST',
@@ -25,9 +26,20 @@ export async function graphqlQuery<T>(
       [PROTOCOL_HEADER]: PROTOCOL_VERSION,
     },
     body: JSON.stringify({ query, variables }),
+    signal,
   })
   if (!response.ok) {
     throw new Error(`GraphQL request failed: ${response.statusText} (${response.status})`)
   }
-  return (await response.json()) as GraphqlResult<T>
+  const body = (await response.json()) as GraphqlResult<T>
+  // A 200 can still carry top-level errors with partial data. Callers treat a
+  // resolved result as complete, so reject that payload here.
+  if (body.errors?.length) {
+    const message = body.errors
+      .map((error) => error.message)
+      .filter((text) => text)
+      .join('; ')
+    throw new Error(message || 'GraphQL request failed')
+  }
+  return body
 }
