@@ -27,11 +27,11 @@
     "clean": "rm -rf .turbo && rm -rf lib",
     "build": "yarn clean && rollup -c --bundleConfigAsCjs",
     "build:release": "yarn exec rm -rf release && yarn pack && yarn exec \"mkdir release && tar zxvf package.tgz --directory release && rm package.tgz\"",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
     "lint": "eslint --config ../../eslint.config.mjs \"{src,__tests__}/**/*.ts\" --fix --max-warnings 0"
   },
   "dependencies": {
-    "@mysten/sui": "^1.21.0",
+    "@mysten/sui": "^2.35.0",
     "@xchainjs/xchain-client": "workspace:*",
     "@xchainjs/xchain-crypto": "workspace:*",
     "@xchainjs/xchain-util": "workspace:*",

@@ -142,6 +142,17 @@ describe('Sui client', () => {
         throw Error(formatGrpcExecutionFailure(status))
       }).not.toThrow(/serialize a BigInt/)
     })
+
+    it('Should format SDK 2 execution status that uses message instead of description', () => {
+      const message = formatGrpcExecutionFailure({
+        success: false,
+        error: {
+          message: 'InsufficientCoinBalance',
+          command: 0,
+        },
+      })
+      expect(message).toBe('Transaction failed: InsufficientCoinBalance (command 0)')
+    })
   })
 
   describe('Explorers', () => {
@@ -228,6 +239,26 @@ describe('Sui client', () => {
 
     it('Should validate address as invalid', () => {
       expect(client.validateAddress('fakeAddress')).toBeFalsy()
+    })
+
+    it('Should derive the same SLIP-10 address after the SDK 2 upgrade', async () => {
+      const keyed = new Client({
+        ...defaultSuiParams,
+        phrase: 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about',
+      })
+      // m/44'/784'/0'/0' via Ed25519Keypair.fromSecretKey. Same pubkey as SDK 1.45 (@noble/curves 1.9).
+      await expect(keyed.getAddressAsync(0)).resolves.toBe(
+        '0xdfd6914c9e8f2d2485eb34ce3a4997d15352cd9e2fca6425717815259aeb2459',
+      )
+    })
+
+    it('Should construct a legacy JSON-RPC client', () => {
+      expect(
+        new Client({
+          ...defaultSuiParams,
+          transport: 'jsonRpc',
+        }),
+      ).toBeInstanceOf(Client)
     })
   })
 })
