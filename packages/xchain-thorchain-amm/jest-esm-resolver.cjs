@@ -10,23 +10,49 @@ const esbuild = require('esbuild')
 // Bundle each resolved file to CJS once, then let Jest load the bundle.
 const cacheDir = path.join(os.tmpdir(), 'xchain-thorchain-amm-jest-esm')
 
-const bundleMjs = (resolved) => {
-  const stat = fs.statSync(resolved)
-  const key = crypto.createHash('sha1').update(resolved).update(String(stat.mtimeMs)).update(String(stat.size)).digest('hex')
-  const outfile = path.join(cacheDir, `${key}.js`)
-  if (!fs.existsSync(outfile)) {
-    fs.mkdirSync(cacheDir, { recursive: true })
-    const temporary = `${outfile}.${process.pid}.tmp`
-    esbuild.buildSync({
-      entryPoints: [resolved],
-      bundle: true,
-      format: 'cjs',
-      platform: 'node',
-      outfile: temporary,
-      logLevel: 'silent',
-    })
-    fs.renameSync(temporary, outfile)
+const fileSignature = (filePath) => {
+  const stat = fs.statSync(filePath)
+  return `${stat.size}:${Math.round(stat.mtimeMs)}`
+}
+
+const inputsAreCurrent = (stampPath) => {
+  try {
+    const stamp = JSON.parse(fs.readFileSync(stampPath, 'utf8'))
+    const entries = Object.entries(stamp)
+    return entries.length > 0 && entries.every(([filePath, signature]) => fileSignature(filePath) === signature)
+  } catch {
+    return false
   }
+}
+
+const bundleMjs = (resolved) => {
+  const key = crypto.createHash('sha1').update(resolved).update(fileSignature(resolved)).digest('hex')
+  const outfile = path.join(cacheDir, `${key}.js`)
+  const stampPath = `${outfile}.inputs.json`
+  if (fs.existsSync(outfile) && inputsAreCurrent(stampPath)) return outfile
+
+  fs.mkdirSync(cacheDir, { recursive: true })
+  const workingDir = path.dirname(resolved)
+  const temporary = `${outfile}.${process.pid}.tmp`
+  const result = esbuild.buildSync({
+    absWorkingDir: workingDir,
+    entryPoints: [path.basename(resolved)],
+    bundle: true,
+    format: 'cjs',
+    platform: 'node',
+    outfile: temporary,
+    metafile: true,
+    logLevel: 'silent',
+  })
+  const stamp = {}
+  for (const inputPath of Object.keys(result.metafile.inputs)) {
+    const absolute = path.resolve(workingDir, inputPath)
+    stamp[absolute] = fileSignature(absolute)
+  }
+  const stampTemporary = `${stampPath}.${process.pid}.tmp`
+  fs.writeFileSync(stampTemporary, JSON.stringify(stamp))
+  fs.renameSync(temporary, outfile)
+  fs.renameSync(stampTemporary, stampPath)
   return outfile
 }
 
