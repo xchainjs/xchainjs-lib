@@ -107,7 +107,7 @@ describe('TRON Ledger Client', () => {
     console.log('Transfer transaction signed by ledger:', txHash)
     expect(txHash).toBeDefined()
     expect(typeof txHash).toBe('string')
-  }, 30000) // 30 second timeout for network operations
+  }, 30000)
 
   it('Should approve contract', async () => {
     const SunswapV3Router = 'TQAvWQpT9H916GckwWDJNhYZvQMkuRL7PN'

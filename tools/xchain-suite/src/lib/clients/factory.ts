@@ -6,7 +6,6 @@ import { AssetType } from '@xchainjs/xchain-util'
 import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
 
-// UTXO Chains
 import {
   Client as BtcClient,
   ClientLedger as BtcClientLedger,
@@ -114,7 +113,6 @@ function createEthParams(
 function createAvaxParams(network: Network, phrase: string) {
   const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
 
-  // Create providers lazily
   const mainnetProvider = new JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc', { name: 'avalanche', chainId: 43114 })
   const testnetProvider = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc', { name: 'fuji', chainId: 43113 })
 
@@ -163,7 +161,6 @@ function createAvaxParams(network: Network, phrase: string) {
 function createBscParams(network: Network, phrase: string) {
   const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
 
-  // Create providers lazily
   const mainnetProvider = new JsonRpcProvider('https://bsc-dataseed.binance.org', { name: 'bsc', chainId: 56 })
   const testnetProvider = new JsonRpcProvider('https://bsc-testnet.public.blastapi.io', { name: 'bsc-testnet', chainId: 97 })
 
@@ -297,7 +294,6 @@ function createBtcParams(
 function createLtcParams(network: Network, phrase: string) {
   const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
 
-  // If no API key, use default params
   if (!blockcypherApiKey) {
     return { ...defaultLtcParams, network, phrase }
   }
@@ -330,7 +326,6 @@ function createLtcParams(network: Network, phrase: string) {
 function createDogeParams(network: Network, phrase: string) {
   const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
 
-  // If no API key, use default params
   if (!blockcypherApiKey) {
     return { ...defaultDogeParams, network, phrase }
   }
@@ -363,7 +358,6 @@ function createDogeParams(network: Network, phrase: string) {
 function createDashParams(network: Network, phrase: string) {
   const blockcypherApiKey = import.meta.env.VITE_BLOCKCYPHER_API_KEY || ''
 
-  // If no API key, use default params
   if (!blockcypherApiKey) {
     return { ...defaultDashParams, network, phrase }
   }
@@ -392,14 +386,11 @@ function createDashParams(network: Network, phrase: string) {
   }
 }
 
-// Monero
 import { Client as XmrClient, defaultXMRParams } from '@xchainjs/xchain-monero'
 
-// Cosmos Chains
 import { Client as GaiaClient, defaultClientConfig as defaultGaiaParams } from '@xchainjs/xchain-cosmos'
 import { Client as ThorClient, defaultClientConfig as defaultThorParams } from '@xchainjs/xchain-thorchain'
 import { Client as MayaClient, defaultClientConfig as defaultMayaParams } from '@xchainjs/xchain-mayachain'
-// Other Chains
 import { Client as NearClient, defaultNearParams } from '@xchainjs/xchain-near'
 import { Client as SolClient, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import { Client as SuiClient, defaultSuiParams } from '@xchainjs/xchain-sui'
@@ -433,8 +424,6 @@ function requirePhrase(config: ClientConfig, chainId: string): string {
 }
 
 /**
- * Create a chain client for either a keystore phrase or a Ledger transport.
- *
  * Ledger mode currently supports **BTC** and **ETH** only (WebHID).
  * BTC address format, ETH derivation style, account index, and optional custom
  * root path are honoured for both wallet types so the suite can exercise path work
@@ -467,7 +456,6 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       return new BtcClientLedger({ ...params, transport })
     }
 
-    // ETH
     const params = createEthParams(network, { ethDerivationStyle, ...pathOverrides })
     // ClientLedger omits phrase/signer and injects LedgerSigner from transport
     const { phrase: _omitPhrase, ...ledgerEthParams } = params as typeof params & { phrase?: string }
@@ -477,7 +465,6 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
   const phrase = requirePhrase(config, chainId)
 
   switch (chainId) {
-    // UTXO Chains - use BlockCypher API key if available
     case 'BTC':
       return new BtcClient(createBtcParams(network, { phrase, btcAddressFormat, ...pathOverrides }))
     case 'BCH':
@@ -501,7 +488,6 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     case 'ARB':
       return new ArbClient({ ...defaultArbParams, network, phrase, feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 } })
 
-    // Cosmos Chains
     case 'GAIA':
       return new GaiaClient({ ...defaultGaiaParams, network, phrase })
     case 'THOR':
@@ -532,7 +518,6 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
       })
     }
 
-    // Other Chains
     case 'NEAR':
       return new NearClient({ ...defaultNearParams, network, phrase })
     case 'SOL': {

@@ -185,7 +185,6 @@ export function SwapTrackingModal({
   const [cfStatus, setCfStatus] = useState<ChainflipStatus | null>(null)
   const [copied, setCopied] = useState(false)
 
-  // THORChain / MAYAChain tracking
   useEffect(() => {
     // Reset status whenever the modal target changes; otherwise a previous Thor/Maya
     // status object can bleed into a subsequent Chainflip/OneClick render.
@@ -199,7 +198,6 @@ export function SwapTrackingModal({
     }
   }, [isOpen, txHash, protocol])
 
-  // Chainflip tracking
   useEffect(() => {
     if (!isOpen || protocol !== 'Chainflip' || !depositChannelId) return
 
@@ -223,7 +221,6 @@ export function SwapTrackingModal({
           error: state === 'FAILED' ? 'Swap failed' : undefined,
         })
 
-        // Stop polling on terminal states
         if (state === 'COMPLETED' || state === 'FAILED') {
           clearInterval(timer)
         }
@@ -266,7 +263,6 @@ export function SwapTrackingModal({
 
   if (!isOpen) return null
 
-  // Determine tracker URL
   const trackerUrl =
     protocol === 'Chainflip'
       ? `https://scan.chainflip.io/channels/${depositChannelId || ''}`
@@ -276,21 +272,16 @@ export function SwapTrackingModal({
       ? explorerUrl || ''
       : `https://www.explorer.mayachain.info/tx/${txHash}`
 
-  // THORChain/MAYAChain: find current active stage
   const activeStageIndex = status ? STAGE_ORDER.findIndex((key) => !status.stages[key].completed) : 0
 
-  // Chainflip: find current stage index
   const cfCurrentState = cfStatus?.state || 'WAITING'
   const cfActiveIndex = CF_STAGE_ORDER.indexOf(cfCurrentState as any)
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative z-[101] w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Transaction Progress</h2>
           <button
@@ -301,9 +292,7 @@ export function SwapTrackingModal({
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-4 space-y-4">
-          {/* Transaction Hash */}
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -325,7 +314,6 @@ export function SwapTrackingModal({
             </div>
           </div>
 
-          {/* Error Display */}
           {protocol === 'Chainflip'
             ? cfStatus?.error && (
                 <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
@@ -350,7 +338,6 @@ export function SwapTrackingModal({
                 </div>
               )}
 
-          {/* Stages */}
           <div className="space-y-2">
             {protocol === 'OneClick' ? (
               <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
@@ -383,7 +370,6 @@ export function SwapTrackingModal({
             )}
           </div>
 
-          {/* Completion Message */}
           {protocol === 'Chainflip'
             ? cfStatus?.isComplete && (
                 <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 text-center">
@@ -405,7 +391,6 @@ export function SwapTrackingModal({
                 </div>
               )}
 
-          {/* Outbound Hash (THORChain/MAYAChain only) */}
           {protocol !== 'Chainflip' && status?.outboundHash && (
             <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
               <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -418,7 +403,6 @@ export function SwapTrackingModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
           <a
             href={trackerUrl}

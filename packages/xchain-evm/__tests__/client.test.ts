@@ -20,10 +20,8 @@ const newPhrase = 'logic neutral rug brain pluck submit earth exit erode august 
 const address = '0xb8c0c226d6fe17e5d9132741836c3ae82a5b6c4e'
 const thornodeApiUrl = 'https://testnet.thornode.thorchain.info'
 
-// =====Defaults=====
 export const transferGasAssetGasLimit: BigNumber = new BigNumber(21000)
 export const transferTokenGasLimit: BigNumber = new BigNumber(100000)
-// =====Ethers providers=====
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc')
 const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc')
 
@@ -32,8 +30,6 @@ const ethersJSProviders = {
   [Network.Testnet]: AVALANCHE_TESTNET_ETHERS_PROVIDER,
   [Network.Stagenet]: AVALANCHE_MAINNET_ETHERS_PROVIDER,
 }
-// =====Ethers providers=====
-// =====ONLINE providers=====
 // const API_KEY = 'FAKE_KEY'
 
 const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
@@ -58,9 +54,7 @@ const avaxProviders = {
   [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
   [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
 }
-// =====ONLINE providers=====
 
-// =====Explorers=====
 const AVAX_MAINNET_EXPLORER = new ExplorerProvider(
   'https://snowtrace.io/',
   'https://snowtrace.io/tx/%%TX_ID%%',
@@ -76,7 +70,6 @@ const avaxExplorerProviders = {
   [Network.Testnet]: AVAX_TESTNET_EXPLORER,
   [Network.Stagenet]: AVAX_MAINNET_EXPLORER,
 }
-// =====Explorers=====
 
 // const avaxRootDerivationPaths = {
 //   [Network.Mainnet]: `m/44'/9000'/0'/0/`,
@@ -134,9 +127,6 @@ const setupCleanMocks = () => {
   mock.resetHistory()
 }
 
-/**
- * Wallet Tests
- */
 describe('EVM client', () => {
   let avaxClient: Client
 
@@ -303,7 +293,6 @@ describe('EVM client', () => {
         amount: baseAmount(5000, 18),
       })
 
-      // Should have been called to check current allowance
       expect(getAllowanceSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           contractAddress,
@@ -350,10 +339,8 @@ describe('EVM client', () => {
         amount: baseAmount(5000, 18),
       })
 
-      // broadcastTx should be called only once for the actual approval
       expect(broadcastSpy).toHaveBeenCalledTimes(1)
 
-      // signApprove called only once
       expect(signSpy).toHaveBeenCalledTimes(1)
 
       // waitForTransaction should not be called (no reset needed)
@@ -385,7 +372,6 @@ describe('EVM client', () => {
         amount: baseAmount(5000, 18),
       })
 
-      // Should still broadcast the approval despite getAllowance failure
       expect(broadcastSpy).toHaveBeenCalledTimes(1)
 
       getAllowanceSpy.mockRestore()

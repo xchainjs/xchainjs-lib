@@ -71,7 +71,6 @@ const CHAIN_GROUPS: ChainGroup[] = [
   },
 ]
 
-// Flat lookup for popular chips
 const ALL_CHAINS = CHAIN_GROUPS.flatMap((g) => g.chains)
 
 export function AssetSelector({
@@ -99,7 +98,6 @@ export function AssetSelector({
     }
   }, [isOpen])
 
-  // Escape key closes modal
   useEffect(() => {
     if (!isOpen) return
     const onKey = (e: KeyboardEvent) => {
@@ -115,7 +113,6 @@ export function AssetSelector({
   const isAvailable = (chain: ChainAsset) =>
     availableChains.includes(chain.chainId) && !(excludeAsset && isSameAsset(chain, excludeAsset))
 
-  // Filter groups by availability + search
   const query = search.toLowerCase().trim()
   const filteredGroups = CHAIN_GROUPS.map((group) => ({
     ...group,
@@ -158,7 +155,6 @@ export function AssetSelector({
         {label}
       </label>
 
-      {/* Trigger button */}
       <button
         type="button"
         onClick={openModal}
@@ -183,18 +179,14 @@ export function AssetSelector({
         <ChevronDown className="w-5 h-5 text-gray-400" />
       </button>
 
-      {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/50 animate-backdrop-in"
             onClick={() => setIsOpen(false)}
           />
 
-          {/* Panel */}
           <div className="relative z-[101] w-full max-w-md max-h-[80vh] flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-modal-in">
-            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Select Asset
@@ -207,7 +199,6 @@ export function AssetSelector({
               </button>
             </div>
 
-            {/* Search */}
             <div className="px-4 pt-3 pb-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -222,7 +213,6 @@ export function AssetSelector({
               </div>
             </div>
 
-            {/* Popular chips (hidden when searching) */}
             {!query && popularChains.length > 0 && (
               <div className="flex flex-wrap gap-2 px-4 pb-3">
                 {popularChains.map((chain) => (
@@ -242,7 +232,6 @@ export function AssetSelector({
               </div>
             )}
 
-            {/* Asset list */}
             <div className="flex-1 overflow-y-auto border-t border-gray-200 dark:border-gray-700">
               {totalResults === 0 ? (
                 <div className="py-12 text-center text-gray-400 dark:text-gray-500">

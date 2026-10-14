@@ -12,14 +12,6 @@ import {
   TxHashParams,
 } from './nownodes-api-types'
 
-/**
- * Get transaction by hash.
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} hash The transaction hash.
- * @returns {Transactions}
- */
 export const getTx = async ({ apiKey, baseUrl, hash }: TxHashParams): Promise<Transaction> => {
   const url = `${baseUrl}/tx/${hash}`
   const response = await axios.get(url, {
@@ -31,14 +23,6 @@ export const getTx = async ({ apiKey, baseUrl, hash }: TxHashParams): Promise<Tr
   return tx
 }
 
-/**
- * Get transactions
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} hash The transaction hash.
- * @returns {Transactions}
- */
 export const getTxs = async ({
   apiKey,
   address,
@@ -64,14 +48,6 @@ export const getTxs = async ({
   return txs.transactions as Transaction[]
 }
 
-/**
- * Get UTXOs
- *
- * @param {string} baseUrl The nownodes blockbook URL.
- * @param {string} address address.
- * @returns {Transactions}
- */
-
 export const getUTXOs = async ({
   apiKey,
   address,
@@ -96,15 +72,6 @@ export const getUTXOs = async ({
   return utxos
 }
 
-/**
- * Get address balance.
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} address Address
- * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
- * @returns {number}
- */
 export const getBalance = async ({
   apiKey,
   baseUrl,
@@ -126,14 +93,9 @@ export const getBalance = async ({
 }
 
 /**
- * Get the consensus branch ID for the next block from the Blockbook backend status.
- *
- * Returned by Blockbook at its API root as `backend.consensus.nextblock`, a hex string
- * (e.g. "5437f330"). Used to sign Zcash v5 transactions against the currently active
- * network upgrade so they remain valid after consensus upgrades.
- *
- * @param {string} baseUrl The nownodes blockbook URL (already includes /api/v2).
- * @returns {number | undefined} The consensus branch ID, or undefined if unavailable.
+ * Blockbook returns this at the API root as `backend.consensus.nextblock` (8 hex digits, e.g. "5437f330").
+ * Zcash v5 signatures must use the active upgrade's branch ID or they become invalid after a consensus change.
+ * `baseUrl` already includes `/api/v2`.
  */
 export const getConsensusBranchId = async ({
   apiKey,

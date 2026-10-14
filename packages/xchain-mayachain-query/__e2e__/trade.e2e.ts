@@ -8,7 +8,6 @@ describe('MayachainQuery Trade E2E Tests', () => {
   let mayachainQuery: MayachainQuery
 
   beforeAll(() => {
-    // Proper instantiation for stagenet
     const midgardApi = new MidgardApi(Network.Stagenet)
     const midgardCache = new MidgardCache(midgardApi)
     const midgardQuery = new MidgardQuery(midgardCache)

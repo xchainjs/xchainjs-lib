@@ -67,7 +67,6 @@ export function SwapTradeAsset({ thorchainAmm, mayachainAmm, wallet }: SwapTrade
   const protocolPrefix = protocol === 'thorchain' ? 'THOR' : 'MAYA'
   const native = NATIVE_CONFIG[protocol]
 
-  // Fetch trade account balance for the selected "from" asset
   const fetchBalance = useCallback(async () => {
     if (!wallet || !amm) return
     setLoadingBalance(true)
@@ -231,7 +230,6 @@ export function SwapTradeAsset({ thorchainAmm, mayachainAmm, wallet }: SwapTrade
     )
   }
 
-  // Current from/to display info
   const fromAssetInfo = fromIsNative ? native : TRADE_ASSET_OPTIONS[fromIndex]
   const toAssetInfo = toIsNative ? native : TRADE_ASSET_OPTIONS[toIndex]
 
@@ -267,7 +265,6 @@ console.log('Swap TX:', result.hash)`
 
   return (
     <div className="space-y-5">
-      {/* Protocol Selector */}
       <div className="flex rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1">
         {(['thorchain', 'mayachain'] as Protocol[]).map((p) => (
           <button
@@ -284,7 +281,6 @@ console.log('Swap TX:', result.hash)`
         ))}
       </div>
 
-      {/* From Card */}
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">From</span>
@@ -296,7 +292,6 @@ console.log('Swap TX:', result.hash)`
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Asset Selector Button */}
           <div className="relative">
             <select
               value={fromIsNative ? 'NATIVE' : String(fromIndex)}
@@ -329,7 +324,6 @@ console.log('Swap TX:', result.hash)`
             </div>
           </div>
 
-          {/* Amount Input + Max */}
           <div className="flex-1 flex items-center gap-2">
             <input
               type="text"
@@ -349,7 +343,6 @@ console.log('Swap TX:', result.hash)`
         </div>
       </div>
 
-      {/* Flip Button */}
       <div className="flex justify-center -my-2 relative z-10">
         <button
           onClick={handleFlip}
@@ -360,7 +353,6 @@ console.log('Swap TX:', result.hash)`
         </button>
       </div>
 
-      {/* To Card */}
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">To</span>
@@ -405,14 +397,12 @@ console.log('Swap TX:', result.hash)`
         </div>
       </div>
 
-      {/* Validation */}
       {fromIsNative && toIsNative && (
         <p className="text-sm text-amber-600 dark:text-amber-400 text-center">
           Cannot swap native to native. Select at least one trade asset.
         </p>
       )}
 
-      {/* Action Buttons */}
       <div className="flex gap-3">
         <button
           onClick={handleGetQuote}
@@ -430,7 +420,6 @@ console.log('Swap TX:', result.hash)`
         </button>
       </div>
 
-      {/* Quote Result */}
       <ResultPanel loading={quoteOp.loading} error={quoteOp.error} duration={quoteOp.duration}>
         {quoteOp.result && (
           <div className="space-y-2 text-sm">
@@ -456,7 +445,6 @@ console.log('Swap TX:', result.hash)`
         )}
       </ResultPanel>
 
-      {/* Swap Result */}
       <ResultPanel loading={swapOp.loading} error={swapOp.error} duration={swapOp.duration}>
         {swapOp.result && (
           <div className="space-y-2">

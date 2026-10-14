@@ -98,7 +98,7 @@ describe(`Liquidity calc tests`, () => {
       rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
-    const correctSlip = '12.3' // percent slippage
+    const correctSlip = '12.3'
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate slip on liquidity for single sided USDC add`, async () => {
@@ -108,7 +108,7 @@ describe(`Liquidity calc tests`, () => {
       rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, usdcPool)
-    const correctSlip = '0.307' // percent slippage
+    const correctSlip = '0.307'
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate slip on liquidity for single sided ETH add`, async () => {
@@ -118,7 +118,7 @@ describe(`Liquidity calc tests`, () => {
       rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, ethPool)
-    const correctSlip = '1.56' // percent slippage
+    const correctSlip = '1.56'
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate slip on liquidity for single sided RUNE add`, async () => {
@@ -128,21 +128,18 @@ describe(`Liquidity calc tests`, () => {
       rune: new CryptoAmount(assetToBase(assetAmount('9177')), AssetRuneNative),
     }
     const getSlip = getSlipOnLiquidity(liquidityOneSided, btcPool)
-    const correctSlip = '0.104' // percent slippage
+    const correctSlip = '0.104'
     expect(getSlip.times(100).toPrecision(3)).toEqual(correctSlip)
   })
   it(`Should calculate the correct ILP data symmetrical`, async () => {
-    // Starting position
     const depositValue: PostionDepositValue = {
       asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
       rune: new CryptoAmount(assetToBase(assetAmount('4000')), AssetRuneNative).baseAmount,
     }
-    // Current pool position
     const poolShare: PoolShareDetail = {
       assetShare: new CryptoAmount(assetToBase(assetAmount(`0.888889`)), AssetBTC),
       runeShare: new CryptoAmount(assetToBase(assetAmount('4444.444')), AssetRuneNative),
     }
-    // Current block data
     const block: Block = {
       current: 25744,
       lastAdded: 25600,
@@ -153,17 +150,14 @@ describe(`Liquidity calc tests`, () => {
     expect(checkILP.totalDays).toEqual('100.00')
   })
   it(`Should calculate the correct ILP data Asymetrical `, async () => {
-    // Starting position
     const depositValue: PostionDepositValue = {
       asset: new CryptoAmount(assetToBase(assetAmount(`1`)), AssetBTC).baseAmount,
       rune: new CryptoAmount(assetToBase(assetAmount('0')), AssetRuneNative).baseAmount,
     }
-    // Current pool position
     const poolShare: PoolShareDetail = {
       assetShare: new CryptoAmount(assetToBase(assetAmount(`0.499999`)), AssetBTC),
       runeShare: new CryptoAmount(assetToBase(assetAmount('6000.88')), AssetRuneNative),
     }
-    // Current block data
     const block: Block = {
       current: 25744,
       lastAdded: 25600,
@@ -180,7 +174,7 @@ describe(`Liquidity calc tests`, () => {
       rune: new CryptoAmount(assetToBase(assetAmount('50')), AssetRuneNative),
     }
     const onwershipPercent = getPoolOwnership(liquidityToAdd, BusdPool)
-    const correctOwership = 0.00000997909552651165 // percent ownership
+    const correctOwership = 0.00000997909552651165
     expect(onwershipPercent).toEqual(correctOwership)
   })
 })

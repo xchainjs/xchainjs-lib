@@ -106,7 +106,7 @@ describe('UTXO Edge Cases', () => {
           UtxoTransactionValidator.validateTransferParams({
             recipient: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
             amount: baseAmount(100000, 8),
-            feeRate: 1000001, // Too high
+            feeRate: 1000001,
           })
         }).toThrow(UtxoError)
 
@@ -124,7 +124,7 @@ describe('UTXO Edge Cases', () => {
           UtxoTransactionValidator.validateTransferParams({
             recipient: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
             amount: baseAmount(100000, 8),
-            memo: 'Test\x00memo', // Contains null byte
+            memo: 'Test\x00memo',
           })
         }).toThrow(UtxoError)
 
@@ -132,7 +132,7 @@ describe('UTXO Edge Cases', () => {
           UtxoTransactionValidator.validateTransferParams({
             recipient: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
             amount: baseAmount(100000, 8),
-            memo: 'Test\x01memo', // Contains control character
+            memo: 'Test\x01memo',
           })
         }).toThrow(UtxoError)
       })
@@ -168,7 +168,7 @@ describe('UTXO Edge Cases', () => {
           UtxoTransactionValidator.validateTransferParams({
             recipient: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
             amount: baseAmount(100000, 8),
-            walletIndex: 1.5, // Non-integer
+            walletIndex: 1.5,
           })
         }).toThrow(UtxoError)
       })
@@ -187,11 +187,11 @@ describe('UTXO Edge Cases', () => {
 
       it('should reject UTXOs with invalid transaction hashes', () => {
         const invalidUtxos = [
-          { hash: '', index: 0, value: 100000 }, // Empty hash
-          { hash: 'too-short', index: 0, value: 100000 }, // Too short
-          { hash: 'x'.repeat(63), index: 0, value: 100000 }, // Too short by 1
-          { hash: 'x'.repeat(65), index: 0, value: 100000 }, // Too long by 1
-          { hash: 'gggggggg' + 'f'.repeat(56), index: 0, value: 100000 }, // Invalid hex
+          { hash: '', index: 0, value: 100000 },
+          { hash: 'too-short', index: 0, value: 100000 },
+          { hash: 'x'.repeat(63), index: 0, value: 100000 }, // one short of 64 hex chars
+          { hash: 'x'.repeat(65), index: 0, value: 100000 }, // one over 64 hex chars
+          { hash: 'gggggggg' + 'f'.repeat(56), index: 0, value: 100000 }, // not hex
         ]
 
         invalidUtxos.forEach((utxo) => {
@@ -204,10 +204,10 @@ describe('UTXO Edge Cases', () => {
       it('should reject UTXOs with invalid output indexes', () => {
         const validHash = 'f'.repeat(64)
         const invalidUtxos = [
-          { hash: validHash, index: -1, value: 100000 }, // Negative
-          { hash: validHash, index: 4294967296, value: 100000 }, // > uint32 max
-          { hash: validHash, index: 1.5, value: 100000 }, // Non-integer
-          { hash: validHash, value: 100000 }, // Missing index
+          { hash: validHash, index: -1, value: 100000 },
+          { hash: validHash, index: 4294967296, value: 100000 }, // above uint32 max
+          { hash: validHash, index: 1.5, value: 100000 },
+          { hash: validHash, value: 100000 },
         ]
 
         invalidUtxos.forEach((utxo) => {
@@ -220,11 +220,11 @@ describe('UTXO Edge Cases', () => {
       it('should reject UTXOs with invalid values', () => {
         const validHash = 'f'.repeat(64)
         const invalidUtxos = [
-          { hash: validHash, index: 0, value: 0 }, // Zero value
-          { hash: validHash, index: 0, value: -1000 }, // Negative value
-          { hash: validHash, index: 0, value: 2100000000000001 }, // > 21M BTC
-          { hash: validHash, index: 0, value: 1.5 }, // Non-integer
-          { hash: validHash, index: 0 }, // Missing value
+          { hash: validHash, index: 0, value: 0 },
+          { hash: validHash, index: 0, value: -1000 },
+          { hash: validHash, index: 0, value: 2100000000000001 }, // above 21M BTC
+          { hash: validHash, index: 0, value: 1.5 },
+          { hash: validHash, index: 0 },
         ]
 
         invalidUtxos.forEach((utxo) => {
@@ -283,13 +283,7 @@ describe('UTXO Edge Cases', () => {
       })
 
       it('should reject invalid basic address formats', () => {
-        const invalidAddresses = [
-          '', // Empty
-          '   ', // Only whitespace
-          '12345', // Too short
-          'x'.repeat(101), // Too long
-          ' bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh ', // Leading/trailing spaces
-        ]
+        const invalidAddresses = ['', '   ', '12345', 'x'.repeat(101), ' bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh ']
 
         invalidAddresses.forEach((address) => {
           expect(() => {
@@ -332,7 +326,7 @@ describe('UTXO Edge Cases', () => {
 
         expect(result.inputs).toHaveLength(1)
         expect(result.inputs[0].value).toBe(51090)
-        expect(result.changeAmount).toBe(0) // No change needed
+        expect(result.changeAmount).toBe(0)
         expect(result.strategy).toBe('BranchAndBound')
       })
 
@@ -345,16 +339,16 @@ describe('UTXO Edge Cases', () => {
 
         const result = selector.selectOptimal(utxos, 50000, 10, { minimizeChange: true })
 
-        expect(result.changeAmount).toBeLessThan(1000) // Minimal change
-        expect(result.inputs).toHaveLength(1) // Should use single input
-        expect(result.inputs[0].value).toBeLessThanOrEqual(52000) // Should use smaller UTXO
+        expect(result.changeAmount).toBeLessThan(1000)
+        expect(result.inputs).toHaveLength(1)
+        expect(result.inputs[0].value).toBeLessThanOrEqual(52000)
       })
 
       it('should handle dust UTXOs appropriately', () => {
         const utxos: UTXO[] = [
           { hash: 'hash1', index: 0, value: 546 }, // Exactly dust threshold
           { hash: 'hash2', index: 0, value: 545 }, // Below dust threshold
-          { hash: 'hash3', index: 0, value: 2000 }, // Sufficient UTXO
+          { hash: 'hash3', index: 0, value: 2000 },
         ]
 
         // Without avoiding dust - should be able to use dust UTXOs for change/accumulation
@@ -363,7 +357,7 @@ describe('UTXO Edge Cases', () => {
 
         // With avoiding dust - should only use UTXOs above dust threshold
         const result2 = selector.selectOptimal(utxos, 500, 10, { avoidDust: true })
-        expect(result2.inputs.every((input) => input.value > 546)).toBe(true) // Avoids dust
+        expect(result2.inputs.every((input) => input.value > 546)).toBe(true)
       })
     })
 
@@ -423,7 +417,7 @@ describe('UTXO Edge Cases', () => {
         const endTime = Date.now()
 
         expect(result.inputs.length).toBeGreaterThan(0)
-        expect(endTime - startTime).toBeLessThan(5000) // Should complete within 5 seconds (CI can be slow)
+        expect(endTime - startTime).toBeLessThan(5000) // CI can be slow
       })
 
       it('should prevent excessive computation', () => {
@@ -439,7 +433,7 @@ describe('UTXO Edge Cases', () => {
         const endTime = Date.now()
 
         expect(result.inputs.length).toBeLessThanOrEqual(100)
-        expect(endTime - startTime).toBeLessThan(5000) // Should not take more than 5 seconds
+        expect(endTime - startTime).toBeLessThan(5000)
       })
     })
 
@@ -490,8 +484,8 @@ describe('UTXO Edge Cases', () => {
         const result = selector.selectOptimal(utxos, 15000, 10, { consolidateSmallUtxos: true })
 
         const smallUtxoCount = result.inputs.filter((utxo) => utxo.value < 10000).length
-        expect(smallUtxoCount).toBeGreaterThan(2) // Should use multiple small UTXOs
-        expect(result.inputs.length).toBeGreaterThan(2) // Should use multiple inputs
+        expect(smallUtxoCount).toBeGreaterThan(2)
+        expect(result.inputs.length).toBeGreaterThan(2)
       })
     })
   })
@@ -507,7 +501,6 @@ describe('UTXO Edge Cases', () => {
       const selector = new UtxoSelector()
       const initialMemory = process.memoryUsage().heapUsed
 
-      // Run multiple concurrent selections
       const promises = Array.from({ length: 50 }, (_, i) =>
         Promise.resolve(selector.selectOptimal(utxos, 5000 + i * 100, 10 + i)),
       )
@@ -535,7 +528,7 @@ describe('UTXO Edge Cases', () => {
       }).not.toThrow()
 
       const endTime = Date.now()
-      expect(endTime - startTime).toBeLessThan(1000) // Should complete within 1 second
+      expect(endTime - startTime).toBeLessThan(1000)
     })
   })
 
@@ -551,7 +544,6 @@ describe('UTXO Edge Cases', () => {
         UtxoTransactionValidator.validateAddressBasic('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa')
       }).not.toThrow()
 
-      // Test basic validation failures
       expect(() => {
         UtxoTransactionValidator.validateAddressBasic('invalid')
       }).toThrow(UtxoError)

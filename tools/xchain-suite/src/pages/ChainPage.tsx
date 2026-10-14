@@ -98,7 +98,6 @@ export function ChainPage() {
     )
   }
 
-  // Filter tabs based on chain
   const availableTabs = TABS.filter((tab) => !tab.chains || tab.chains.includes(chainId))
 
   const renderTabContent = () => {

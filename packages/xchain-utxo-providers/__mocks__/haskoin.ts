@@ -13,7 +13,6 @@ export default {
       const resp = await importjson(`./response/balances/haskoin-${address}.json`)
       return [200, resp]
     })
-    //Mock Get utxo's
     mock.onGet(/\/address\/\w+\/unspent/).reply(async (config: MockConfig) => {
       const address = config.url?.split('/')?.[6] ?? ''
       const resp = await importjson(`./response/unspent-txs/${address}.json`)

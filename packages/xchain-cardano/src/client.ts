@@ -62,11 +62,6 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get information about the native asset of the Cardano.
-   *
-   * @returns {AssetInfo} Information about the native asset.
-   */
   public getAssetInfo(): AssetInfo {
     return {
       asset: ADAAsset,
@@ -74,40 +69,18 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get the explorer URL.
-   *
-   * @returns {string} The explorer URL.
-   */
   public getExplorerUrl(): string {
     return this.explorerProviders[this.getNetwork()].getExplorerUrl()
   }
 
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address.
-   */
   public getExplorerAddressUrl(address: Address): string {
     return this.explorerProviders[this.getNetwork()].getExplorerAddressUrl(address)
   }
 
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID
-   * @returns {string} The explorer url for the given transaction id.
-   */
   public getExplorerTxUrl(txID: TxHash): string {
     return this.explorerProviders[this.getNetwork()].getExplorerTxUrl(txID)
   }
 
-  /**
-   * Get the full derivation path based on the wallet index.
-   * @param {number} walletIndex The HD wallet index
-   * @returns {string} The full derivation path
-   */
   public getFullDerivationPath(walletIndex: number): string {
     if (!this.rootDerivationPaths) {
       throw Error('Can not generate derivation path due to root derivation path is undefined')
@@ -115,13 +88,6 @@ export class Client extends BaseXChainClient {
     return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
   }
 
-  /**
-   * Get the current address asynchronously.
-   *
-   * @param {number} index The index of the address. Default 0
-   * @returns {Address} The Cardano address related to the index provided.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   */
   public async getAddressAsync(walletIndex = 0): Promise<string> {
     const accountKey = await this.generatePrivateKey(walletIndex)
 
@@ -140,10 +106,7 @@ export class Client extends BaseXChainClient {
     return baseAddress.to_address().to_bech32()
   }
 
-  /**
-   * Get the current address synchronously.
-   * @deprecated
-   */
+  /** @deprecated */
   public getAddress(): string {
     throw Error('Sync method not supported')
   }
@@ -155,23 +118,10 @@ export class Client extends BaseXChainClient {
     return WAValidator.validate(address, 'ada', this.network === Network.Mainnet ? 'mainnet' : 'testnet')
   }
 
-  /**
-   * Retrieves the balance of a given address.
-   * @param {Address} address - The address to retrieve the balance for.
-   * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
-   * @returns {Promise<Balance[]>} An array containing the balance of the address.
-   */
   public async getBalance(address: Address): Promise<Balance[]> {
     return this.roundRobinGetBalance(address)
   }
 
-  /**
-   * Get transaction fees.
-   *
-   * @param {TxParams} params - The transaction parameters.
-   * @returns {Fees} The average, fast, and fastest fees.
-   * @throws {"Params need to be passed"} Thrown if parameters are not provided.
-   */
   public async getFees(params?: FeeEstimateOptions & { amount: BaseAmount; sender: Address }): Promise<Fees> {
     if (!params) {
       throw Error('Params not provided')
@@ -201,18 +151,16 @@ export class Client extends BaseXChainClient {
     const parameters = await blockfrostClient.epochsLatestParameters()
     const rates = await blockfrostClient.getFeeRates()
 
-    // base size
     const baseTxSize = 100
     const utxoInputSize = 57
     const outputSize = 29
-    // memo size
     const memoSize = options?.memo ? Buffer.from(options.memo).length : 0
 
-    let estimatedInputs = 1 // 1 input by default
+    let estimatedInputs = 1
     if (options?.sender) {
       const utxos = await blockfrostClient.addressesUtxosAll(options.sender)
       const lovelaceUtxos = utxos.filter((u) => u.amount.some((a) => a.unit === 'lovelace'))
-      estimatedInputs = Math.max(1, Math.ceil(lovelaceUtxos.length / 2)) // Estimamos usar la mitad de los UTXOs disponibles
+      estimatedInputs = Math.max(1, Math.ceil(lovelaceUtxos.length / 2))
     }
 
     const totalSize = baseTxSize + utxoInputSize * estimatedInputs + outputSize + memoSize
@@ -234,12 +182,6 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get the transaction details of a given transaction ID.
-   *
-   * @param {string} txId The transaction ID.
-   * @returns {Tx} The transaction details.
-   */
   public async getTransactionData(txId: string): Promise<Tx> {
     const txData = await this.roundRobinGetTransactionData(txId)
     const txUtxos = await this.roundRobinGetTransactionUtxos(txId)
@@ -317,12 +259,6 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Transfers ADA
-   *
-   * @param {TxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   */
   public async transfer(params: TxParams): Promise<string> {
     if (!eqAsset(params.asset || ADAAsset, ADAAsset)) {
       throw Error(`Asset not supported`)
@@ -338,15 +274,7 @@ export class Client extends BaseXChainClient {
     return this.signAndBroadcast(rawUnsignedTx, params.walletIndex)
   }
 
-  /**
-   * Sweep the entire spendable balance to the recipient via `prepareMaxTx`, then sign and
-   * broadcast. Returns the resolved max amount and fee (lovelace) so callers can surface what
-   * was actually sent.
-   *
-   * @param {Object} params Sweep params.
-   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} Tx hash with the
-   *   swept amount and fee in lovelace.
-   */
+  /** Returned maxAmount and fee are lovelace. */
   public async transferMax(params: {
     recipient: Address
     memo?: string
@@ -397,21 +325,10 @@ export class Client extends BaseXChainClient {
     return hash.replace(/"/g, '')
   }
 
-  /**
-   * Broadcast a transaction to the network
-   * @param {string} txHex Raw transaction to broadcast
-   * @returns {TxHash} The hash of the transaction broadcasted
-   */
   public async broadcastTx(txHex: string): Promise<TxHash> {
     return this.roundRobinBroadcastTx(txHex)
   }
 
-  /**
-   * Prepares a transaction for transfer.
-   *
-   * @param {TxParams&Address} params - The transfer options.
-   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
-   */
   public async prepareTx({ sender, recipient, amount, memo }: TxParams & { sender: Address }): Promise<PreparedTx> {
     const currentSlot = await this.roundRobinGetLatestBlock()
     const utxos = await this.roundRobinGetAllAddressUTXOs(sender)
@@ -422,8 +339,7 @@ export class Client extends BaseXChainClient {
 
     const txBuilder = await this.getTransactionBuilder()
 
-    // Set TTL to +2h from currentSlot
-    // If the transaction is not included in a block before that slot it will be cancelled.
+    // 7200 slots is about 2h. The tx is cancelled if it is not included before then.
     txBuilder.set_ttl(currentSlot.slot + 7200)
 
     const cardanoLib = await getCardano()
@@ -485,15 +401,6 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Prepares a sweep transaction that sends the maximum spendable balance, after deducting the
-   * network fee, to the recipient. The output amount is computed as totalLovelace - fee and no
-   * change output is produced.
-   *
-   * @param {Object} params - Sweep params.
-   * @returns {Promise<PreparedTx & { maxAmount: BaseAmount; fee: BaseAmount }>} The raw unsigned
-   *   transaction along with the resolved max amount and fee in lovelace.
-   */
   public async prepareMaxTx({
     sender,
     recipient,
@@ -524,7 +431,7 @@ export class Client extends BaseXChainClient {
       return sum + BigInt(quantity)
     }, 0n)
 
-    // Build a sweep tx with the given output amount, all UTXOs as inputs, and no change output.
+    // No change output.
     const buildSweepBuilder = async (outputAmount: bigint): Promise<TransactionBuilder> => {
       const txBuilder = await this.getTransactionBuilder()
       txBuilder.set_ttl(currentSlot.slot + 7200)
@@ -687,16 +594,7 @@ export class Client extends BaseXChainClient {
       .derive(walletIndex | 0x80000000)
   }
 
-  /**
-   * Builds Conway-era (CBOR tag 259) auxiliary data carrying the swap memo in the CIP-20 shape MAYA's
-   * Cardano observer reads: metadata label 674 -> {"msg": [chunks]}, where each chunk is at most
-   * 64 UTF-8 bytes. {@link AuxiliaryData.set_prefer_alonzo_format} is forced on so the tag-259 form
-   * is emitted regardless of the serialization library's default.
-   *
-   * @param {Awaited<ReturnType<typeof getCardano>>} cardanoLib - The loaded serialization library.
-   * @param {string} [memo] - The memo to embed. An empty/undefined memo yields no auxiliary data.
-   * @returns {AuxiliaryData | undefined} The auxiliary data, or undefined when there is no memo.
-   */
+  /** `set_prefer_alonzo_format` forces CBOR tag 259 regardless of the library default. */
   private buildMemoAuxiliaryData(
     cardanoLib: Awaited<ReturnType<typeof getCardano>>,
     memo?: string,

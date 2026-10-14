@@ -125,7 +125,6 @@ console.log('Observe Chains:', node.observe_chains)`
       <ResultPanel loading={loading} error={error} duration={duration}>
         {result && (
           <div className="space-y-6">
-            {/* Status Banner */}
             <div className={`p-4 rounded-lg ${
               result.status === 'Active' ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700' :
               result.status === 'Standby' ? 'bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700' :
@@ -143,7 +142,6 @@ console.log('Observe Chains:', node.observe_chains)`
               </div>
             </div>
 
-            {/* Jail Warning */}
             {result.jail && (
               <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg">
                 <p className="font-medium text-red-800 dark:text-red-200">Node is Jailed</p>
@@ -152,7 +150,6 @@ console.log('Observe Chains:', node.observe_chains)`
               </div>
             )}
 
-            {/* Leave Status */}
             {(result.requestedToLeave || result.forcedToLeave) && (
               <div className="p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-lg">
                 <p className="font-medium text-amber-800 dark:text-amber-200">
@@ -161,7 +158,6 @@ console.log('Observe Chains:', node.observe_chains)`
               </div>
             )}
 
-            {/* Node Info Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Node Address</p>
@@ -189,7 +185,6 @@ console.log('Observe Chains:', node.observe_chains)`
               </div>
             </div>
 
-            {/* Bond Providers */}
             {result.bondProviders.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bond Providers</h4>
@@ -206,7 +201,6 @@ console.log('Observe Chains:', node.observe_chains)`
               </div>
             )}
 
-            {/* Observe Chains */}
             {result.observeChains.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observed Chains</h4>

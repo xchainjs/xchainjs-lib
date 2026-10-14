@@ -106,14 +106,9 @@ type NearblocksTxnDetailResponse = {
 }
 
 /**
- * NEAR Protocol client for XChainJS.
- *
- * Wallet addresses are **implicit accounts** (64-char hex of the ed25519 public key)
- * derived via SLIP-0010 at `m/44'/397'/{index}'`. Transfers may target named accounts
- * (e.g. `alice.near`) as well as implicit ids.
- *
- * History and hash-only tx lookups use NearBlocks. Balance / fees / transfer use
- * JSON-RPC via `near-api-js` with provider failover.
+ * Implicit accounts (64-char hex of the ed25519 key) at `m/44'/397'/{index}'`.
+ * Transfers may also target named accounts. History uses NearBlocks; balance, fees,
+ * and transfer use JSON-RPC via `near-api-js` with provider failover.
  */
 export class Client extends BaseXChainClient {
   private explorerProviders: ExplorerProviders
@@ -364,11 +359,7 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Broadcast a NEAR transaction.
-   * Accepts base64 of either a signed transaction, or an unsigned prepared tx
-   * (which is signed with wallet index 0).
-   */
+  /** Accepts base64 of a signed transaction, or an unsigned prepared tx signed with wallet index 0. */
   public async broadcastTx(txHex: string): Promise<TxHash> {
     const keyPair = this.getKeyPair(0)
     const sender = this.getImplicitAccountId(0)

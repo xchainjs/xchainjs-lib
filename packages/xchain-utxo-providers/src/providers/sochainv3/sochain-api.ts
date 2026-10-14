@@ -18,14 +18,6 @@ import {
   UnspentTxsDTO,
 } from './sochain-api-types'
 
-/**
- * Get address information.
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {string} network
- * @param {string} address
- * @returns {AddressDTO}
- */
 export const getAddress = async ({ apiKey, sochainUrl, network, address }: AddressParams): Promise<AddressDTO> => {
   const url = `${sochainUrl}/address_summary/${network}/${address}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
@@ -33,16 +25,6 @@ export const getAddress = async ({ apiKey, sochainUrl, network, address }: Addre
   return addressResponse.data
 }
 
-/**
- * Get transaction by hash.
- *
- * @see https://sochain.com/api#get-tx
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {string} network network id
- * @param {string} hash The transaction hash.
- * @returns {Transactions}
- */
 export const getTx = async ({ apiKey, sochainUrl, network, hash }: TxHashParams): Promise<Transaction> => {
   const url = `${sochainUrl}/transaction/${network}/${hash}`
   const response = await axios.get(url, { headers: { 'API-KEY': apiKey } })
@@ -50,16 +32,6 @@ export const getTx = async ({ apiKey, sochainUrl, network, hash }: TxHashParams)
   return tx.data
 }
 
-/**
- * Get transactions
- *
- * @see https://sochain.com/api#get-tx
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {string} network network id
- * @param {string} hash The transaction hash.
- * @returns {Transactions}
- */
 export const getTxs = async ({
   apiKey,
   address,
@@ -78,17 +50,6 @@ export const getTxs = async ({
   const txs: SochainResponse<GetTxsDTO> = response.data
   return txs.data
 }
-/**
- * Get address balance.
- *
- * @see https://sochain.com/api#get-balance
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {string} network Network
- * @param {string} address Address
- * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
- * @returns {number}
- */
 export const getBalance = async ({
   apiKey,
   sochainUrl,
@@ -107,16 +68,6 @@ export const getBalance = async ({
   return result
 }
 
-/**
- * Get unspent txs
- *
- * @see https://sochain.com/api#get-unspent-tx
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {string} network
- * @param {string} address
- * @returns {AddressUTXO[]}
- */
 export const getUnspentTxs = async ({
   apiKey,
   sochainUrl,
@@ -129,8 +80,6 @@ export const getUnspentTxs = async ({
   const response: SochainResponse<UnspentTxsDTO> = resp.data
   const txs = response.data.outputs
   if (txs.length === 10) {
-    //fetch the next batch
-
     const nextBatch = await getUnspentTxs({
       apiKey,
       sochainUrl,
@@ -144,16 +93,6 @@ export const getUnspentTxs = async ({
   }
 }
 
-/**
- * Get Tx Confirmation status
- *
- * @see https://sochain.com/api#get-is-tx-confirmed
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {Network} network
- * @param {string} hash tx id
- * @returns {TxConfirmedStatus}
- */
 export const getIsTxConfirmed = async ({
   apiKey,
   sochainUrl,
@@ -169,18 +108,9 @@ export const getIsTxConfirmed = async ({
   }
 }
 
-/**
- * List of confirmed txs
- *
- * Stores a list of confirmed txs (hashes) in memory to avoid requesting same data
- */
+// Confirmed tx hashes, cached so the same status is not requested again
 const confirmedTxs: Array<TxHash> = []
 
-/**
- * Helper to get `confirmed` status of a tx.
- *
- * It will get it from cache or try to get it from Sochain (if not cached before)
- */
 export const getConfirmedTxStatus = async ({
   apiKey,
   txHash,
@@ -192,30 +122,17 @@ export const getConfirmedTxStatus = async ({
   txHash: TxHash
   network: SochainNetwork
 }): Promise<boolean> => {
-  // try to get it from cache
   if (confirmedTxs.includes(txHash)) return true
-  // or get status from Sochain
   const { is_confirmed } = await getIsTxConfirmed({
     apiKey,
     sochainUrl,
     network,
     hash: txHash,
   })
-  // cache status
   confirmedTxs.push(txHash)
   return is_confirmed
 }
 
-/**
- * Get unspent txs and filter out pending UTXOs
- *
- * @see https://sochain.com/api#get-unspent-tx
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {Network} network
- * @param {string} address
- * @returns {AddressUTXO[]}
- */
 export const getConfirmedUnspentTxs = async ({
   apiKey,
   sochainUrl,
@@ -250,17 +167,6 @@ export const getConfirmedUnspentTxs = async ({
   return confirmedUTXOs
 }
 
-/**
- * Get address balance.
- *
- * @see https://sochain.com/api#get-balance
- *
- * @param {string} sochainUrl The sochain node url.
- * @param {string} network Network
- * @param {string} address Address
- * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
- * @returns {number}
- */
 export const broadcastTx = async ({
   apiKey,
   sochainUrl,

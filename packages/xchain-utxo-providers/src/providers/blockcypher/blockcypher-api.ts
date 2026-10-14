@@ -14,15 +14,6 @@ import {
   TxHashParams,
 } from './blockcypher-api-types'
 
-/**
- * Get transaction by hash.
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} network network id
- * @param {string} hash The transaction hash.
- * @returns {Transactions}
- */
 export const getTx = async ({ apiKey, baseUrl, network, hash, limit = 20 }: TxHashParams): Promise<Transaction> => {
   const params: Record<string, string> = { includeHex: 'true', limit: limit.toString() }
   if (apiKey) params['token'] = apiKey
@@ -32,15 +23,6 @@ export const getTx = async ({ apiKey, baseUrl, network, hash, limit = 20 }: TxHa
   return tx
 }
 
-/**
- * Get transactions
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} network network id
- * @param {string} hash The transaction hash.
- * @returns {Transactions}
- */
 export const getTxs = async ({
   apiKey,
   address,
@@ -66,16 +48,6 @@ export const getTxs = async ({
   const txs: GetTxsDTO = response.data
   return txs
 }
-/**
- * Get address balance.
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {string} network Network
- * @param {string} address Address
- * @param {boolean} confirmedOnly Flag whether to get balances of confirmed txs only or for all
- * @returns {number}
- */
 export const getBalance = async ({
   apiKey,
   baseUrl,
@@ -94,15 +66,6 @@ export const getBalance = async ({
   return confirmedOnly ? confirmedAmount : finalBalance
 }
 
-/**
- * Get Tx Confirmation status
- *
- *
- * @param {string} baseUrl The sochain node url.
- * @param {Network} network
- * @param {string} hash tx id
- * @returns {TxConfirmedStatus}
- */
 export const getIsTxConfirmed = async ({
   apiKey,
   baseUrl,
@@ -118,18 +81,9 @@ export const getIsTxConfirmed = async ({
   }
 }
 
-/**
- * List of confirmed txs
- *
- * Stores a list of confirmed txs (hashes) in memory to avoid requesting same data
- */
+// Confirmed tx hashes, cached so the same status is not requested again
 const confirmedTxs: Array<TxHash> = []
 
-/**
- * Helper to get `confirmed` status of a tx.
- *
- * It will get it from cache or try to get it from Sochain (if not cached before)
- */
 export const getConfirmedTxStatus = async ({
   apiKey,
   txHash,
@@ -141,16 +95,13 @@ export const getConfirmedTxStatus = async ({
   txHash: TxHash
   network: BlockcypherNetwork
 }): Promise<boolean> => {
-  // try to get it from cache
   if (confirmedTxs.includes(txHash)) return true
-  // or get status from Sochain
   const { is_confirmed } = await getIsTxConfirmed({
     apiKey,
     baseUrl,
     network,
     hash: txHash,
   })
-  // cache status
   confirmedTxs.push(txHash)
   return is_confirmed
 }
@@ -174,12 +125,6 @@ export const broadcastTx = async ({
   return broadcastResponse.tx.hash
 }
 
-/**
- * Get general information about a blockchain
- * @param {string} baseUrl The base url for the chain to interact with.
- * @param {string} apiKey API key provided by Blockcypher.
- * @returns {ChainResponse}
- */
 export const getBlockchainData = async ({
   baseUrl,
   apiKey,

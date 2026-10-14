@@ -69,7 +69,6 @@ export default function TradePage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4">
@@ -102,14 +101,12 @@ export default function TradePage() {
         </div>
       </div>
 
-      {/* Error state */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-sm text-red-700 dark:text-red-400">
           {error}
         </div>
       )}
 
-      {/* Chart */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
         {loading && candles.length === 0 ? (
           <div className="flex items-center justify-center h-[450px]">
@@ -131,7 +128,6 @@ export default function TradePage() {
         ) : null}
       </div>
 
-      {/* Indicator sub-charts */}
       {(indicatorState.rsi || indicatorState.macd) && candles.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
           <IndicatorPanel
@@ -143,7 +139,6 @@ export default function TradePage() {
         </div>
       )}
 
-      {/* Controls: Indicators + Trend Lines */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -162,7 +157,6 @@ export default function TradePage() {
         </div>
       </div>
 
-      {/* Bottom: Balance + History */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="space-y-4">
           <AssetBalanceCard asset={asset} />

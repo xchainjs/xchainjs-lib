@@ -5,8 +5,6 @@ import { Asset, AssetType, TokenAsset, assetAmount, assetToBase, assetToString }
 import { Client } from '../src'
 import { AssetETH, ETHChain, defaultEthParams } from '../src/const'
 
-// =====Erc-20 asset=====
-
 const assetETH: TokenAsset = {
   chain: ETHChain,
   symbol: `ETH-0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378`,
@@ -95,7 +93,6 @@ describe('xchain-evm (Eth) Integration Tests', () => {
   })
   it('should test erc-20 approvals ', async () => {
     let isApproved = false
-    // check if approved for 0.01 eth, should be false
     const params: IsApprovedParams = {
       contractAddress: '0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378', //ETH contract address
       spenderAddress: '0xdc4904b5f716Ff30d8495e35dC99c109bb5eCf81', //PancakeRouter contract on testnet
@@ -104,7 +101,6 @@ describe('xchain-evm (Eth) Integration Tests', () => {
     isApproved = await clientTestnet.isApproved(params)
     expect(isApproved).toBe(false)
 
-    //  approve for 0.01 eth
     const approveParams: ApproveParams = {
       contractAddress: '0xd66c6b4f0be8ce5b39d52e0fd1344c389929b378', //ETH contract address
       spenderAddress: '0xdc4904b5f716Ff30d8495e35dC99c109bb5eCf81', //PancakeRouter contract on testnet
@@ -114,16 +110,13 @@ describe('xchain-evm (Eth) Integration Tests', () => {
     await clientTestnet.approve(approveParams)
     await delay(10000) //wait 10 secs for block to be mined
 
-    // check if approved for eth, should be true
     isApproved = await clientTestnet.isApproved(params)
     expect(isApproved).toBe(true)
 
-    // set approve below 0.01 eth
     approveParams.amount = assetToBase(assetAmount('0.001', 18))
     await clientTestnet.approve(approveParams)
     await delay(10000) //wait 10 secs for block to be mined
 
-    // check if approved for 0.01 eth, should be false
     isApproved = await clientTestnet.isApproved(params)
     expect(isApproved).toBe(false)
   })

@@ -33,7 +33,6 @@ import 'dotenv/config'
 const thorchainCache = new ThorchainCache(new Thornode(Network.Mainnet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
-// mainnet asset
 const BUSDC = assetFromStringEx('BSC.USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D') as TokenAsset
 //const synthBTC = assetFromStringEx('BTC/BTC')
 const USDC = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48') as TokenAsset
@@ -163,9 +162,7 @@ function printliquidityPosition(liquidityPosition: LiquidityPosition) {
   console.log(expanded)
 }
 
-// Test User Functions - LP positions estimations
 describe('Thorchain-query liquidity action end to end Tests', () => {
-  // Estimate Liquidity Positions
   it(`Should estimate ADD BUSD liquidity postion for given amount`, async () => {
     const addlp: AddliquidityPosition = {
       asset: new CryptoAmount(assetToBase(assetAmount(100)), BUSDC),
@@ -240,9 +237,8 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     expect(estimateADDLP).toBeTruthy()
   })
 
-  // Estimate withrdaw lp positions
   it(`Should estimate withdraw BTC from address's position`, async () => {
-    const percentage = 100 // gets converted to basis points later
+    const percentage = 100
     const assetAddress = 'bc1qzd7uyt2ed794m270cp8vwtkp6c0ppxwqd5djc0'
     const removeLp: WithdrawLiquidityPosition = {
       asset: AssetBTC,
@@ -253,9 +249,8 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     printWithdraw(estimatRemoveLP)
     expect(estimatRemoveLP).toBeTruthy()
   })
-  // Estimate withrdaw lp positions
   it(`Should estimate withdraw RUNE from address's position`, async () => {
-    const percentage = 100 // gets converted to basis points later
+    const percentage = 100
     const removeLp: WithdrawLiquidityPosition = {
       asset: BUSDC,
       percentage: percentage,

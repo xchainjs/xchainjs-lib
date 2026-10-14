@@ -25,15 +25,7 @@ const mainnetExplorer = new ExplorerProvider(
   'https://suiscan.xyz/mainnet/tx/%%TX_ID%%',
 )
 
-/**
- * Default client params.
- *
- * Endpoint URLs are resolved in the Client constructor from caller overrides
- * (`grpcUrls` / `clientUrls` / `graphqlUrls`) with Foundation public defaults
- * as fallback. They are intentionally omitted here so spreading
- * `defaultSuiParams` does not shadow consumer `clientUrls` with baked-in
- * `grpcUrls` (shallow merge would otherwise ignore custom endpoints).
- */
+/** Endpoint URLs are omitted so spreading `defaultSuiParams` does not shadow consumer `clientUrls` with baked-in `grpcUrls`. */
 export const defaultSuiParams: SUIClientParams = {
   network: Network.Mainnet,
   transport: 'grpc',

@@ -1,40 +1,27 @@
 import bitcore from 'bitcore-lib-cash'
-import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client' // Importing getSeed function from xchain-crypto module
-import { getSeed } from '@xchainjs/xchain-crypto' // Importing the Address type from xchain-util module
-import { Address } from '@xchainjs/xchain-util' // Importing necessary types from bitcoincashjs-types module
-import { TxParams, UTXO, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
+import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-client'
+import { getSeed } from '@xchainjs/xchain-crypto'
+import { Address } from '@xchainjs/xchain-util'
+import { TxParams, UTXO, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
 
-import { Client } from './client' // Importing the base BitcoinCash client
+import { Client } from './client'
 import * as Utils from './utils'
 import { HDKey } from '@scure/bip32'
 
-/**
- * Custom Bitcoin client extended to support keystore functionality
- */
 class ClientKeystore extends Client {
   /**
    * @deprecated This function eventually will be removed. Use getAddressAsync instead.
-   * Get the address associated with the given index.
-   * @param {number} index The index of the address.
-   * @returns {Address} The Bitcoin address.
-   * @throws {"index must be greater than zero"} Thrown if the index is less than zero.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed to create the address from the phrase.
    */
   getAddress(index = 0): Address {
-    // Check if the index is valid
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
 
-    // Check if the phrase has been set
     if (this.phrase) {
       const bchKeys = this.getBCHKeys(this.phrase, this.getFullDerivationPath(index))
 
-      // Generate the address using the Bitcoinjs library
       const address = bchKeys.toAddress().toString()
 
-      // Throw an error if the address is not defined
       if (!address) {
         throw new Error('Address not defined')
       }
@@ -45,27 +32,12 @@ class ClientKeystore extends Client {
     throw new Error('Phrase must be provided')
   }
 
-  /**
-   * Get the current address asynchronously.
-   * @param {number} index The index of the address.
-   * @returns {Promise<Address>} A promise that resolves to the BitcoinCash address.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
-  /**
-   * Private function to get BCH keys.
-   * Generates a key pair from the provided phrase and derivation path.
-   * @param {string} phrase - The phrase used for generating the private key.
-   * @param {string} derivationPath - The BIP44 derivation path.
-   * @returns {PrivateKey} The key pair generated from the phrase and derivation path.
-   *
-   * @throws {"Invalid phrase"} Thrown if an invalid phrase is provided.
-   * */
   private getBCHKeys(phrase: string, derivationPath: string) {
-    const rootSeed = getSeed(phrase) // Get seed from the phrase
+    const rootSeed = getSeed(phrase)
     const root = HDKey.fromMasterSeed(Uint8Array.from(rootSeed))
     const child = root.derive(derivationPath)
 
@@ -81,11 +53,6 @@ class ClientKeystore extends Client {
     return privateKey
   }
 
-  /**
-   * Transfer BCH.
-   * @param {TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences }} params - The transfer options.
-   * @returns {Promise<TxHash>} A promise that resolves with the transaction hash.
-   */
   async transfer(
     params: TxParams & {
       feeRate?: FeeRate
@@ -93,15 +60,11 @@ class ClientKeystore extends Client {
       selectedUtxos?: UTXO[]
     },
   ): Promise<TxHash> {
-    // Set the default fee rate to 'fast'
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
-    // Check if the fee rate is within the specified bounds
     checkFeeBounds(this.feeBounds, feeRate)
 
-    // Get the index of the address to send funds from
     const fromAddressIndex = params.walletIndex || 0
 
-    // Merge default preferences
     const mergedPreferences: UtxoSelectionPreferences = {
       minimizeFee: true,
       avoidDust: true,
@@ -109,7 +72,6 @@ class ClientKeystore extends Client {
       ...params.utxoSelectionPreferences,
     }
 
-    // Prepare the transaction using enhanced UTXO selection
     const { rawUnsignedTx, inputs } = await this.prepareTxEnhanced({
       ...params,
       feeRate,
@@ -118,14 +80,12 @@ class ClientKeystore extends Client {
       selectedUtxos: params.selectedUtxos,
     })
 
-    // Get key from mnemonic and path
     const derivationPath = this.getFullDerivationPath(fromAddressIndex)
     const privateKey = this.getBCHKeys(this.phrase, derivationPath)
 
-    // Recreate the transaction from rawUnsignedTx
     const unsignedTx = new bitcore.Transaction(rawUnsignedTx)
 
-    // Rebuild the transaction with inputs enriched with UTXO values and scripts
+    // Inputs must be rebuilt with the UTXO value and script before bitcore will sign.
     const tx = new bitcore.Transaction()
 
     const sender = await this.getAddressAsync(fromAddressIndex)
@@ -162,18 +122,6 @@ class ClientKeystore extends Client {
     return await this.roundRobinBroadcastTx(txHex)
   }
 
-  /**
-   * Transfer the maximum amount of BCH (sweep).
-   *
-   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
-   * @param {Object} params The transfer parameters.
-   * @param {string} params.recipient The recipient address.
-   * @param {string} [params.memo] Optional memo for the transaction.
-   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
-   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
-   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
-   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
-   */
   async transferMax(params: {
     recipient: Address
     memo?: string
@@ -197,14 +145,12 @@ class ClientKeystore extends Client {
       selectedUtxos: params.selectedUtxos,
     })
 
-    // Get key from mnemonic and path
     const derivationPath = this.getFullDerivationPath(fromAddressIndex)
     const privateKey = this.getBCHKeys(this.phrase, derivationPath)
 
-    // Recreate the transaction from rawUnsignedTx
     const unsignedTx = new bitcore.Transaction(rawUnsignedTx)
 
-    // Rebuild the transaction with inputs enriched with UTXO values and scripts
+    // Inputs must be rebuilt with the UTXO value and script before bitcore will sign.
     const tx = new bitcore.Transaction()
 
     tx.from(

@@ -30,7 +30,6 @@ export type ConnectLedgerOptions = {
 }
 
 interface WalletContextValue {
-  // Current session
   phrase: string | null
   walletType: SuiteWalletType
   transport: Transport | null
@@ -43,7 +42,6 @@ interface WalletContextValue {
   activeWalletId: string | null
   activeWalletName: string | null
 
-  // Wallet management
   savedWallets: SavedWallet[]
   connect: (phrase: string) => { success: boolean; error?: string }
   connectWithKeystore: (keystore: Keystore, password: string, walletName?: string) => Promise<{ success: boolean; error?: string }>
@@ -54,7 +52,6 @@ interface WalletContextValue {
   setAccountIndex: (index: number) => void
   setCustomRootPath: (path: string) => void
 
-  // Keystore operations (save to storage)
   createWallet: (name: string, password: string) => Promise<{ success: boolean; error?: string; phrase?: string }>
   importFromPhrase: (name: string, phrase: string, password: string) => Promise<{ success: boolean; error?: string }>
   importFromKeystore: (name: string, keystore: Keystore, password: string) => Promise<{ success: boolean; error?: string }>
@@ -108,7 +105,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
   // Network is fixed to Mainnet
   const network = Network.Mainnet
 
-  // Load saved wallets on mount
   useEffect(() => {
     setSavedWallets(loadSavedWallets())
     const activeId = localStorage.getItem(ACTIVE_WALLET_KEY)
@@ -117,7 +113,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [])
 
-  // Save wallets when they change
   useEffect(() => {
     if (savedWallets.length > 0) {
       saveSavedWallets(savedWallets)
@@ -125,9 +120,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   }, [savedWallets])
 
   const activeWalletName = useMemo(() => {
-    // First check temp wallet name (for non-saved connections)
     if (tempWalletName) return tempWalletName
-    // Then check saved wallet
     if (!activeWalletId) return null
     const wallet = savedWallets.find(w => w.id === activeWalletId)
     return wallet?.name || null
@@ -173,13 +166,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [transport])
 
-  /**
-   * Connect a Ledger device over WebHID.
-   * Unlock the device, open the Bitcoin or Ethereum app before using those chains.
-   */
+  /** Unlock the device and open the Bitcoin or Ethereum app before using those chains. */
   const connectLedger = useCallback(async (options?: ConnectLedgerOptions): Promise<{ success: boolean; error?: string }> => {
     try {
-      // Close any previous transport first
       await closeLedgerTransport(transport)
 
       const next = await openLedgerTransport()
@@ -216,7 +205,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     localStorage.removeItem(ACTIVE_WALLET_KEY)
   }, [transport])
 
-  // Create a new wallet with generated phrase
   const createWallet = useCallback(async (name: string, password: string): Promise<{ success: boolean; error?: string; phrase?: string }> => {
     try {
       const newPhrase = generatePhrase(12)
@@ -243,7 +231,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [transport])
 
-  // Import wallet from phrase
   const importFromPhrase = useCallback(async (name: string, inputPhrase: string, password: string): Promise<{ success: boolean; error?: string }> => {
     const trimmedPhrase = inputPhrase.trim()
 
@@ -275,7 +262,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [transport])
 
-  // Import wallet from keystore file
   const importFromKeystore = useCallback(async (name: string, keystore: Keystore, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       // Verify we can decrypt the keystore
@@ -306,7 +292,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [transport])
 
-  // Unlock an existing saved wallet
   const unlockWallet = useCallback(async (walletId: string, password: string): Promise<{ success: boolean; error?: string }> => {
     const wallet = savedWallets.find(w => w.id === walletId)
     if (!wallet) {
@@ -334,7 +319,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [savedWallets, transport])
 
-  // Delete a saved wallet
   const deleteWallet = useCallback((walletId: string) => {
     setSavedWallets(prev => prev.filter(w => w.id !== walletId))
     if (activeWalletId === walletId) {
@@ -347,7 +331,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }, [activeWalletId, transport])
 
-  // Export keystore for download
   const exportKeystore = useCallback((walletId: string): Keystore | null => {
     const wallet = savedWallets.find(w => w.id === walletId)
     return wallet?.keystore || null

@@ -30,13 +30,7 @@ const mainnetExplorer = new ExplorerProvider(
   'https://nearblocks.io/txns/%%TX_ID%%',
 )
 
-/**
- * Default client params.
- *
- * RPC / NearBlocks URLs are resolved in the Client from caller overrides with
- * public defaults as fallback. They are intentionally omitted here so spreading
- * `defaultNearParams` does not shadow consumer `clientUrls`.
- */
+/** URLs are omitted so spreading `defaultNearParams` does not shadow consumer `clientUrls`. */
 export const defaultNearParams: NearClientParams = {
   network: Network.Mainnet,
   rootDerivationPaths: {

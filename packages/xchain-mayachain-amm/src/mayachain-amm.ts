@@ -1,6 +1,3 @@
-/**
- * Import necessary modules and libraries
- */
 import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
 import { Client as AdaClient, defaultAdaParams } from '@xchainjs/xchain-cardano'
 import { defaultZECParams, Client as ZecClient } from '@xchainjs/xchain-zcash'
@@ -46,23 +43,10 @@ import {
 } from './types'
 import { isProtocolERC20Asset, isTokenCryptoAmount, validateAddress } from './utils'
 
-/**
- * Mayachain Automated Market Maker (AMM) class.
- * MAYAChainAMM class for interacting with THORChain.
- * Recommended main class to use for swapping with MAYAChain
- * Has access to Midgard and MayaNode data
- */
 export class MayachainAMM {
   private mayachainQuery: MayachainQuery
   private wallet: Wallet
 
-  /**
-   * Constructor to create a MayachainAMM instance.
-   *
-   * @param {MayachainQuery} mayachainQuery An instance of the MayachainQuery class.
-   * @param {Wallet} wallet A wallet instance containing clients for various blockchains.
-   * @returns {MayachainAMM} Returns the MayachainAMM instance.
-   */
   constructor(
     mayachainQuery = new MayachainQuery(),
     wallet = new Wallet({
@@ -80,12 +64,6 @@ export class MayachainAMM {
     this.wallet = wallet
   }
 
-  /**
-   * Estimate swap by validating the swap parameters.
-   *
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
-   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
-   */
   public async estimateSwap({
     fromAsset,
     fromAddress,
@@ -155,12 +133,6 @@ export class MayachainAMM {
     })
   }
 
-  /**
-   * Validate swap parameters before performing a swap operation.
-   *
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
-   * @returns {string[]} Reasons the swap cannot be executed. Empty array if the swap is valid.
-   */
   public async validateSwap({
     fromAsset,
     fromAddress,
@@ -175,7 +147,6 @@ export class MayachainAMM {
   }: QuoteSwapParams): Promise<string[]> {
     const errors: string[] = []
 
-    // Validate destination address if provided
     if (
       destinationAddress &&
       !validateAddress(
@@ -191,7 +162,6 @@ export class MayachainAMM {
     if (affiliates && (affiliateAddress || affiliateBps !== undefined)) {
       errors.push('affiliates is mutually exclusive with affiliateAddress / affiliateBps; pass one form, not both')
     }
-    // Validate multi-affiliate array if provided
     if (affiliates) {
       if (affiliates.length === 0) {
         errors.push('affiliates array is empty; omit the field or include at least one entry')
@@ -211,7 +181,6 @@ export class MayachainAMM {
         }
       }
     } else if (affiliateAddress) {
-      // Validate single-affiliate address
       const isMayaAddress = validateAddress(this.mayachainQuery.getNetwork(), MAYAChain, affiliateAddress)
       const isMayaName = await this.isMAYAName(affiliateAddress)
       if (!(isMayaAddress || isMayaName))
@@ -221,7 +190,6 @@ export class MayachainAMM {
     if (affiliateBps !== undefined && (affiliateBps < 0 || affiliateBps > 500)) {
       errors.push(`affiliateBps ${affiliateBps} out of range [0 - 500]`)
     }
-    // Validate approval if asset is an ERC20 token and fromAddress is provided
     if (isProtocolERC20Asset(fromAsset) && fromAddress) {
       if (!isTokenCryptoAmount(amount)) {
         errors.push(`${assetToString(amount.asset)} is not Token asset amount`)
@@ -235,7 +203,6 @@ export class MayachainAMM {
       }
     }
 
-    // Validate trade asset swap restrictions
     if (!isTradeAsset(fromAsset) && !eqAsset(fromAsset, AssetCacao) && isTradeAsset(destinationAsset)) {
       errors.push(
         'Can not make swap from non trade asset or non Cacao asset to trade asset. Use addToTrade (TRADE+) operation',
@@ -259,11 +226,6 @@ export class MayachainAMM {
     return errors
   }
 
-  /**
-   * Perform a swap operation between assets.
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
-   */
   public async doSwap({
     fromAsset,
     fromAddress,
@@ -292,7 +254,6 @@ export class MayachainAMM {
       streamingInterval,
       streamingQuantity,
     })
-    // Check if the swap can be performed
     if (!quoteSwap.canSwap) throw Error(`Can not swap. ${quoteSwap.errors.join(' ')}`)
 
     return MayachainAction.makeAction({
@@ -303,33 +264,20 @@ export class MayachainAMM {
     })
   }
 
-  /**
-   * Approve the Mayachain router to spend a certain amount in the asset chain.
-   * @param {ApproveParams} approveParams Parameters for approving the router to spend
-   * @returns {Promise<TxSubmitted>} Transaction hash and URL
-   */
   public async approveRouterToSpend({ asset, amount }: ApproveParams): Promise<TxSubmitted> {
-    // Get inbound details for the asset chain
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
-    // Perform approval
     const hash = await this.wallet.approve(
       asset,
       amount?.baseAmount || baseAmount(MAX_APPROVAL.toString(), await this.mayachainQuery.getAssetDecimals(asset)),
       inboundDetails.router,
     )
-    // Return transaction hash and URL
     return {
       hash,
       url: await this.wallet.getExplorerTxUrl(asset.chain, hash),
     }
   }
 
-  /**
-   * Validate if the asset router is allowed to spend the asset amount on behalf of the address.
-   * @param {IsApprovedParams} isApprovedParams Parameters for checking approval.
-   * @returns {string[]} Reasons the asset router is not allowed to spend the amount. Empty array if the router is approved.
-   */
   public async isRouterApprovedToSpend({ asset, amount, address }: IsApprovedParams): Promise<string[]> {
     const errors: string[] = []
 
@@ -338,10 +286,8 @@ export class MayachainAMM {
       return errors
     }
 
-    // Get inbound details for the asset chain
     const inboundDetails = await this.mayachainQuery.getChainInboundDetails(asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router address for ${asset.chain}`)
-    // Check if the router is approved to spend the amount
     const isApprovedResult = await this.wallet.isApproved(asset, amount.baseAmount, address, inboundDetails.router)
 
     if (!isApprovedResult) errors.push('Maya router has not been approved to spend this amount')
@@ -349,29 +295,14 @@ export class MayachainAMM {
     return errors
   }
 
-  /**
-   * Get MAYAname details
-   * @param {string} MAYAName
-   * @returns {MAYANameDetails | undefined} MAYANames details or undefined it is does not exist
-   */
   public async getMAYANameDetails(MAYAName: string): Promise<MAYANameDetails | undefined> {
     return this.mayachainQuery.getMAYANameDetails(MAYAName)
   }
 
-  /**
-   * Get the MAYANames owned by an address
-   * @param {Address} owner - Thorchain address
-   * @returns {MAYANameDetails[]} List of MAYANames owned by the address
-   */
   public async getMAYANamesByOwner(owner: Address): Promise<MAYANameDetails[]> {
     return this.mayachainQuery.getMAYANamesByOwner(owner)
   }
 
-  /**
-   * Estimate the cost of a MAYAName registration
-   * @param {RegisterMAYAName} params Params to make the registration
-   * @returns {QuoteMAYAName} Memo to make the registration and the estimation of the operation
-   */
   public async estimateMAYANameRegistration(params: RegisterMAYAName): Promise<QuoteMAYAName> {
     const errors: string[] = []
 
@@ -411,11 +342,6 @@ export class MayachainAMM {
     }
   }
 
-  /**
-   * Estimate the cost of an update of a MAYAName
-   * @param {QuoteMAYANameParams} params Params to make the update
-   * @returns {QuoteMAYAName} Memo to make the update and the estimation of the operation
-   */
   public async estimateMAYANameUpdate(params: UpdateMAYAName): Promise<QuoteMAYAName> {
     const errors: string[] = []
 
@@ -463,11 +389,6 @@ export class MayachainAMM {
     }
   }
 
-  /**
-   * Register a MAYAName
-   * @param {RegisterMAYAName} params Params to make the registration
-   * @returns {QuoteMAYAName} Memo to make the update or the registration and the estimation of the operation
-   */
   public async registerMAYAName(params: RegisterMAYAName): Promise<TxSubmitted> {
     const quote = await this.estimateMAYANameRegistration(params)
 
@@ -480,11 +401,6 @@ export class MayachainAMM {
     })
   }
 
-  /**
-   * Update a MAYAName
-   * @param {QuoteMAYANameParams} params Params to make the update
-   * @returns {QuoteMAYAName} Memo to make the update or the registration and the estimation of the operation
-   */
   public async updateMAYAName(params: UpdateMAYAName): Promise<TxSubmitted> {
     const quote = await this.estimateMAYANameUpdate(params)
 
@@ -497,11 +413,6 @@ export class MayachainAMM {
     })
   }
 
-  /**
-   * Estimate adding trade amount to account
-   * @param {AddToTradeAccountParams} param Add to trade account params
-   * @returns {AddToTradeAccount} Estimation to add amount to trade account
-   */
   public async estimateAddToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<AddToTradeAccount> {
     const errors: string[] = []
 
@@ -535,17 +446,11 @@ export class MayachainAMM {
     }
   }
 
-  /**
-   * Add trade amount to account
-   * @param {AddToTradeAccountParams} param Add to trade account params
-   * @returns {TxSubmitted} Transaction made to add the trade amount
-   */
   public async addToTradeAccount({ amount, address }: AddToTradeAccountParams): Promise<TxSubmitted> {
     const quote = await this.estimateAddToTradeAccount({ amount, address })
 
     if (!quote.allowed) throw Error(`Can not add to trade account. ${quote.errors.join(' ')}`)
 
-    // Convert trade asset to underlying asset for the transaction
     const underlyingAsset = {
       ...quote.value.asset,
       type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
@@ -560,11 +465,6 @@ export class MayachainAMM {
     })
   }
 
-  /**
-   * Estimate withdrawing trade amount from account
-   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
-   * @returns {WithdrawFromTradeAccount} Estimation to withdraw amount from trade account
-   */
   public async estimateWithdrawFromTradeAccount({
     amount,
     address,
@@ -596,17 +496,11 @@ export class MayachainAMM {
     }
   }
 
-  /**
-   * Withdraw trade amount from account
-   * @param {WithdrawFromTradeAccountParams} param Withdraw from trade account params
-   * @returns {TxSubmitted} Estimation to withdraw amount from trade account
-   */
   public async withdrawFromTradeAccount({ amount, address }: WithdrawFromTradeAccountParams): Promise<TxSubmitted> {
     const quote = await this.estimateWithdrawFromTradeAccount({ amount, address })
 
     if (!quote.allowed) throw Error(`Can not withdraw from trade account. ${quote.errors.join(' ')}`)
 
-    // Convert trade asset to underlying asset for the transaction
     const underlyingAsset = {
       ...quote.value.asset,
       type: quote.value.asset.type === AssetType.TRADE ? AssetType.NATIVE : quote.value.asset.type,
@@ -620,11 +514,6 @@ export class MayachainAMM {
     })
   }
 
-  /**
-   * Check if a name is a valid MAYAName
-   * @param {string} name MAYAName to check
-   * @returns {boolean} True if the name is registered as a MAYAName, otherwise false
-   */
   private async isMAYAName(name: string): Promise<boolean> {
     return !!(await this.mayachainQuery.getMAYANameDetails(name))
   }

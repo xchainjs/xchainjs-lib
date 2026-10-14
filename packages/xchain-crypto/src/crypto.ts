@@ -7,19 +7,14 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { pbkdf2Async } from './utils'
 
-// Constants
-const cipher = 'aes-128-ctr' // Encryption cipher
-const kdf = 'pbkdf2' // Key derivation function
-const prf = 'hmac-sha256' // Pseudorandom function
-const dklen = 32 // Derived key length
-const c = 600000 // Iteration count (OWASP-recommended minimum for PBKDF2-HMAC-SHA256)
-const hashFunction = 'sha256' // Hash function
-const meta = 'xchain-keystore' // Metadata
+const cipher = 'aes-128-ctr'
+const kdf = 'pbkdf2'
+const prf = 'hmac-sha256'
+const dklen = 32
+const c = 600000 // OWASP-recommended minimum for PBKDF2-HMAC-SHA256
+const hashFunction = 'sha256'
+const meta = 'xchain-keystore'
 
-/**
- * The Keystore interface.
- * Represents the structure of a keystore object.
- */
 export type Keystore = {
   crypto: {
     cipher: string
@@ -41,25 +36,10 @@ export type Keystore = {
   meta: string
 }
 
-/**
- * Determines if the current environment is Node.js.
- * @returns {boolean} True if the current environment is Node.js.
- */
 const _isNode = (): boolean => {
   return typeof window === 'undefined'
 }
 
-/**
- * Constant-time comparison of two equal-length buffers.
- *
- * Uses Node's `crypto.timingSafeEqual` when available, and falls back to a
- * manual constant-time comparison for browser/bundler environments whose
- * `crypto` polyfill (e.g. `crypto-browserify`) does not implement it.
- *
- * @param {Buffer} a First buffer.
- * @param {Buffer} b Second buffer.
- * @returns {boolean} True if the buffers are equal in constant time.
- */
 const constantTimeEqual = (a: Buffer, b: Buffer): boolean => {
   if (a.length !== b.length) return false
   if (typeof crypto.timingSafeEqual === 'function') return crypto.timingSafeEqual(a, b)
@@ -69,31 +49,15 @@ const constantTimeEqual = (a: Buffer, b: Buffer): boolean => {
   return diff === 0
 }
 
-/**
- * Generates a new mnemonic phrase.
- * @param {number} size The size of the phrase in words. Default is 12.
- * @returns {string} The generated mnemonic phrase.
- */
 export const generatePhrase = (size = 12): string => {
   const strength = size === 12 ? 128 : 256
   return generateMnemonic(wordlist, strength)
 }
 
-/**
- * Validates the given mnemonic phrase.
- * @param {string} phrase The mnemonic phrase to validate.
- * @returns {boolean} True if the phrase is valid, otherwise false.
- */
 export const validatePhrase = (phrase: string): boolean => {
   return validateMnemonic(phrase, wordlist)
 }
 
-/**
- * Derives the seed from the given mnemonic phrase.
- * @param {string} phrase The mnemonic phrase.
- * @returns {Buffer} The seed derived from the phrase.
- * @throws {"Invalid BIP39 phrase"} Thrown if the phrase is invalid.
- */
 export const getSeed = (phrase: string): Uint8Array => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
@@ -101,22 +65,11 @@ export const getSeed = (phrase: string): Uint8Array => {
   return mnemonicToSeedSync(phrase)
 }
 
-/**
- * Convert a mnemonic phrase back into the entropy
- * @param {string} phrase - Phrase
- * @returns the entropy phrase
- */
 export const phraseToEntropy = (phrase: string): string => {
-  const entropyBytes = mnemonicToEntropy(phrase, wordlist) // Uint8Array
-  return bytesToHex(entropyBytes) // convert to hex string
+  const entropyBytes = mnemonicToEntropy(phrase, wordlist)
+  return bytesToHex(entropyBytes)
 }
-/**
- * Encrypts the given phrase to a keystore object using the provided password.
- * @param {string} phrase The mnemonic phrase to encrypt.
- * @param {string} password The password used for encryption.
- * @returns {Promise<Keystore>} A promise that resolves to the generated keystore object.
- * @throws {Error} Thrown if the phrase is invalid.
- */
+
 export const encryptToKeyStore = async (phrase: string, password: string): Promise<Keystore> => {
   if (!validatePhrase(phrase)) {
     throw new Error('Invalid BIP39 phrase')
@@ -162,13 +115,6 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   return keystore
 }
 
-/**
- * Decrypts the mnemonic phrase from the provided keystore using the given password.
- * @param {Keystore} keystore The keystore object containing encrypted data.
- * @param {string} password The password used for decryption.
- * @returns {Keystore} A promise that resolves to the decrypted mnemonic phrase.
- * @throws {"Invalid password"} Thrown if the password is incorrect.
- */
 export const decryptFromKeystore = async (keystore: Keystore, password: string): Promise<string> => {
   const kdfparams = keystore.crypto.kdfparams
   const derivedKey = await pbkdf2Async(

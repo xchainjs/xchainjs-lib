@@ -18,7 +18,6 @@ export function LeaveNode({ thorClient, walletConnected }: LeaveNodeProps) {
   const [showConfirm, setShowConfirm] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<LeaveResult>()
 
-  // Validate inputs
   const trimmedNodeAddress = nodeAddress.trim()
   const isFormValid = !!trimmedNodeAddress
 
@@ -28,7 +27,6 @@ export function LeaveNode({ thorClient, walletConnected }: LeaveNodeProps) {
     setShowConfirm(false)
 
     await execute(async () => {
-      // Build memo: LEAVE:<node_address>
       const memo = `LEAVE:${trimmedNodeAddress}`
 
       // Leave requires a small deposit (just for the memo)
@@ -133,7 +131,6 @@ console.log('Leave Transaction:', txHash)
         {loading ? 'Requesting Leave...' : 'Request Node Leave'}
       </button>
 
-      {/* Confirm Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">

@@ -1,7 +1,4 @@
-/**
- * Enum defining supported blockchain protocols.
- */
 export enum Protocol {
-  THORCHAIN = 1, // Protocol value for THORChain
-  MAYACHAIN = 2, // Protocol value for MAYAChain
+  THORCHAIN = 1,
+  MAYACHAIN = 2,
 }

@@ -43,7 +43,6 @@ export default function RecurringSwapPage() {
     activeCount,
   } = useRecurringSwaps(swapService, wallet)
 
-  // Form state
   const [fromAsset, setFromAsset] = useState<ChainAsset | null>(null)
   const [toAsset, setToAsset] = useState<ChainAsset | null>(null)
   const [amount, setAmount] = useState('')
@@ -54,18 +53,15 @@ export default function RecurringSwapPage() {
   const [streamingInterval, setStreamingInterval] = useState('1')
   const [streamingQuantity, setStreamingQuantity] = useState('0')
 
-  // Custom destination address
   const [destinationOverride, setDestinationOverride] = useState('')
   const [showCustomDest, setShowCustomDest] = useState(false)
   const [destValidationError, setDestValidationError] = useState<string | null>(null)
 
-  // Clear destination override when toAsset changes
   useEffect(() => {
     setDestinationOverride('')
     setDestValidationError(null)
   }, [toAsset])
 
-  // Validate destination address
   const handleDestinationChange = useCallback(
     (value: string) => {
       setDestinationOverride(value)
@@ -85,11 +81,9 @@ export default function RecurringSwapPage() {
     [wallet, toAsset],
   )
 
-  // Price for USD presets
   const fromAssetObj = fromAsset ? buildAsset(fromAsset) : null
   const { price: fromAssetPrice } = useAssetPrice(fromAssetObj)
 
-  // Fetch balance for "swaps remaining" estimate
   const [balance, setBalance] = useState<number | null>(null)
   const [balanceLoading, setBalanceLoading] = useState(false)
 
@@ -126,7 +120,6 @@ export default function RecurringSwapPage() {
     return () => { cancelled = true }
   }, [wallet, fromAsset])
 
-  // Preview quote
   const [previewQuotes, setPreviewQuotes] = useState<SwapQuote[]>([])
   const quoteOp = useOperation<SwapQuote[]>()
 
@@ -182,7 +175,6 @@ export default function RecurringSwapPage() {
       destinationAddress: destinationOverride.trim() || undefined,
     })
 
-    // Reset form
     setFromAsset(null)
     setToAsset(null)
     setAmount('')
@@ -240,7 +232,6 @@ export default function RecurringSwapPage() {
   return (
     <div className="p-6">
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Create New Schedule */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
           <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Recurring Swap</h2>
@@ -250,7 +241,6 @@ export default function RecurringSwapPage() {
           </div>
 
           <div className="p-6 space-y-5">
-            {/* Asset selectors */}
             <div className="space-y-4">
               <AssetSelector
                 label="From"
@@ -267,7 +257,6 @@ export default function RecurringSwapPage() {
                 excludeAsset={fromAsset ?? undefined}
               />
 
-              {/* Custom Destination Address */}
               {toAsset && (
                 <div>
                   <button
@@ -300,7 +289,6 @@ export default function RecurringSwapPage() {
               )}
             </div>
 
-            {/* Amount */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Amount per Execution
@@ -312,7 +300,6 @@ export default function RecurringSwapPage() {
                 placeholder="0.00"
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-mono placeholder-gray-400 dark:placeholder-gray-500"
               />
-              {/* USD presets */}
               {fromAsset && fromAssetPrice && fromAssetPrice > 0 && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {USD_PRESETS.map((usd) => {
@@ -332,7 +319,6 @@ export default function RecurringSwapPage() {
                   })}
                 </div>
               )}
-              {/* USD equivalent */}
               {amount && fromAssetPrice && fromAssetPrice > 0 && (
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   ≈ ${(parseFloat(amount) * fromAssetPrice).toFixed(2)} USD
@@ -345,7 +331,6 @@ export default function RecurringSwapPage() {
               )}
             </div>
 
-            {/* Balance & swaps remaining estimate */}
             {fromAsset && balanceLoading && balance === null && (
               <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
                 <div className="w-3 h-3 border-2 border-gray-300 dark:border-gray-600 border-t-blue-500 rounded-full animate-spin" />
@@ -367,7 +352,6 @@ export default function RecurringSwapPage() {
               </div>
             )}
 
-            {/* Protocol + Interval row */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -403,7 +387,6 @@ export default function RecurringSwapPage() {
               </div>
             </div>
 
-            {/* Max slippage */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Max Slippage (basis points)
@@ -422,7 +405,6 @@ export default function RecurringSwapPage() {
               </div>
             </div>
 
-            {/* Streaming Swap */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -476,7 +458,6 @@ export default function RecurringSwapPage() {
               )}
             </div>
 
-            {/* Preview Quote */}
             <button
               onClick={handlePreviewQuote}
               disabled={!canCreate || quoteOp.loading}
@@ -515,7 +496,6 @@ export default function RecurringSwapPage() {
               </div>
             )}
 
-            {/* Create buttons */}
             <div className="flex gap-3">
               <button
                 onClick={() => handleCreate(false)}
@@ -535,7 +515,6 @@ export default function RecurringSwapPage() {
           </div>
         </div>
 
-        {/* Active Schedules */}
         {activeSchedules.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
@@ -564,7 +543,6 @@ export default function RecurringSwapPage() {
           </div>
         )}
 
-        {/* Cancelled Schedules */}
         {cancelledSchedules.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
@@ -587,7 +565,6 @@ export default function RecurringSwapPage() {
           </div>
         )}
 
-        {/* Empty state */}
         {schedules.length === 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
             <p className="text-gray-500 dark:text-gray-400">

@@ -12,12 +12,10 @@ export type TRONClientLedgerParams = XChainClientParams & {
   transport: any
 }
 
-// Re-export TronWeb types for convenience
 export type TronTransaction = Types.Transaction
 export type TronContract = Contract
 export type TronSignedTransaction = Types.SignedTransaction
 
-// Signer interface compatible with TronWeb and wallet implementations
 export interface TronSigner {
   getAddress(): Promise<string>
   signTransaction(transaction: TronTransaction): Promise<TronSignedTransaction>

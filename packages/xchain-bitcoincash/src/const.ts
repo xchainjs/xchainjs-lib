@@ -10,36 +10,17 @@ import {
 
 import * as bchaddr from './bchaddrjs'
 
-/**
- * Lower bound for transaction fee rate.
- */
 export const LOWER_FEE_BOUND = 1
 
-/**
- * Upper bound for transaction fee rate.
- */
 export const UPPER_FEE_BOUND = 500
 
-/**
- * Decimal places for Bitcoin Cash.
- */
 export const BCH_DECIMAL = 8
 
-/**
- * Chain identifier for Bitcoin Cash.
- */
 export const BCHChain = 'BCH' as const
 
-/**
- * Base "chain" asset on Bitcoin Cash mainnet.
- * Defined according to Thorchain's asset structure.
- * @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24
- */
+/** Thorchain asset shape. @see https://gitlab.com/thorchain/thornode/-/blob/master/common/asset.go#L12-24 */
 export const AssetBCH: Asset = { chain: BCHChain, symbol: 'BCH', ticker: 'BCH', type: AssetType.NATIVE }
 
-/**
- * Explorer provider URLs for Bitcoin Cash.
- */
 const BCH_MAINNET_EXPLORER = new ExplorerProvider(
   'https://www.blockchain.com/bch/',
   'https://www.blockchain.com/bch/address/%%ADDRESS%%',
@@ -56,9 +37,6 @@ export const explorerProviders = {
   [Network.Mainnet]: BCH_MAINNET_EXPLORER,
 }
 
-/**
- * Haskoin data providers for Bitcoin Cash.
- */
 const testnetHaskoinProvider = new HaskoinProvider(
   'https://api.haskoin.com',
   BCHChain,
@@ -73,7 +51,6 @@ export const HaskoinDataProviders: UtxoOnlineDataProviders = {
   [Network.Mainnet]: mainnetHaskoinProvider,
 }
 
-// Blockbook data providers for Bitcoin Cash
 // nativeswap.io operated Blockbook instance — no SLA or API key auth - 500 requests per hour
 // Changeable to any blockbook api. For example: Nownodes
 const mainnetBchBlockbookProvider = new BlockbookProvider('https://bch.nativeswap.io/api/v2', AssetBCH, BCH_DECIMAL, {
@@ -85,9 +62,6 @@ export const BlockbookDataProviders: UtxoOnlineDataProviders = {
   [Network.Mainnet]: mainnetBchBlockbookProvider,
 }
 
-/**
- * Bitgo data providers for Bitcoin Cash.
- */
 const mainnetBitgoProvider = new BitgoProvider({
   baseUrl: 'https://app.bitgo.com',
   chain: BCHChain,

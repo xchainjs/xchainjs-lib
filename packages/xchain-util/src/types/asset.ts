@@ -1,8 +1,5 @@
 import type { Chain } from './chain'
 
-/**
- * Asset type
- */
 export enum AssetType {
   NATIVE,
   TOKEN,
@@ -11,9 +8,6 @@ export enum AssetType {
   SECURED,
 }
 
-/**
- * Any Asset XChainJS can work with
- */
 export type AnyAsset = {
   chain: Chain
   symbol: string
@@ -21,9 +15,6 @@ export type AnyAsset = {
   type: AssetType
 }
 
-/**
- * Asset type for native assets
- */
 export type Asset = {
   chain: Chain
   symbol: string
@@ -31,9 +22,7 @@ export type Asset = {
   type: AssetType.NATIVE
 }
 
-/**
- * Asset type for token assets. For example ERC20, BEP20
- */
+/** Token assets such as ERC20 and BEP20. */
 export type TokenAsset = {
   chain: Chain
   symbol: string
@@ -41,9 +30,7 @@ export type TokenAsset = {
   type: AssetType.TOKEN
 }
 
-/**
- * Asset type for synthetic assets which lives in networks like Thorchain or Mayachain
- */
+/** Synthetic assets on Thorchain or Mayachain. */
 export type SynthAsset = {
   chain: Chain
   symbol: string
@@ -51,9 +38,7 @@ export type SynthAsset = {
   type: AssetType.SYNTH
 }
 
-/**
- * Asset type for trade assets which lives in networks like Thorchain or Mayachain
- */
+/** Trade assets on Thorchain or Mayachain. */
 export type TradeAsset = {
   chain: Chain
   symbol: string
@@ -61,9 +46,7 @@ export type TradeAsset = {
   type: AssetType.TRADE
 }
 
-/**
- * Asset type for secured assets which lives in networks like Thorchain or Mayachain
- */
+/** Secured assets on Thorchain or Mayachain. */
 export type SecuredAsset = {
   chain: Chain
   symbol: string

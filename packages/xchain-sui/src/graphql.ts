@@ -1,9 +1,4 @@
-/**
- * POST a GraphQL query string.
- *
- * `SuiGraphQLClient` imports `print` from the `graphql` package even when the
- * query is already a string. These calls never need that parser.
- */
+/** `SuiGraphQLClient` imports `print` from `graphql` even for a string query. These calls never need that parser. */
 export type GraphqlResult<T> = {
   data?: T
   errors?: { message?: string }[]

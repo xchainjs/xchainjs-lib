@@ -18,7 +18,6 @@ interface THORNameDetails {
   aliases: { address: string; chain: string }[]
 }
 
-// THORChain block time constants
 const BLOCKS_PER_YEAR = 5_256_000
 const SECONDS_PER_BLOCK = (365.25 * 24 * 60 * 60) / BLOCKS_PER_YEAR // ~6 seconds
 
@@ -59,7 +58,6 @@ export default function THORNamePage() {
   const lookupOp = useOperation<THORNameDetails>()
   const ownedOp = useOperation<string[]>()
 
-  // Register tab state
   const [regMode, setRegMode] = useState<'register' | 'update'>('register')
   const [regName, setRegName] = useState('')
   const [regChain, setRegChain] = useState('BTC')
@@ -72,7 +70,6 @@ export default function THORNamePage() {
   const { wallet } = useAggregator()
   const { isConnected } = useWallet()
 
-  // Auto-populate owner address from wallet
   useEffect(() => {
     if (wallet && !regOwner) {
       wallet
@@ -90,7 +87,6 @@ export default function THORNamePage() {
         const { ThorchainQuery } = await import('@xchainjs/xchain-thorchain-query')
         const thorchainQuery = new ThorchainQuery()
 
-        // Fetch THORName details and current block height in parallel
         const [details, lastBlock] = await Promise.all([
           thorchainQuery.getThornameDetails(thorName),
           fetch('https://gateway.liquify.com/chain/thorchain_api/thorchain/lastblock').then((r) => r.json()),
@@ -100,7 +96,6 @@ export default function THORNamePage() {
           throw new Error(`THORName "${thorName}" not found`)
         }
 
-        // Calculate estimated expiry date
         const currentBlockHeight = lastBlock[0]?.thorchain || 0
         const blocksRemaining = details.expireBlockHeight - currentBlockHeight
         let estimatedExpiry: Date | null = null
@@ -364,13 +359,11 @@ if (quote.allowed) {
       <div className="max-w-2xl mx-auto">
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-            {/* Header */}
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">THORName</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Lookup THORName registrations and aliases</p>
             </div>
 
-            {/* Info Banner */}
             <div className="mx-6 mt-4 p-4 bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-lg">
               <h3 className="text-sm font-medium text-cyan-800 dark:text-cyan-200">What is THORName?</h3>
               <p className="text-sm text-cyan-700 dark:text-cyan-300 mt-1">
@@ -379,7 +372,6 @@ if (quote.allowed) {
               </p>
             </div>
 
-            {/* Tabs */}
             <div className="border-b border-gray-200 dark:border-gray-700 mt-4">
               <nav className="flex -mb-px">
                 {tabs.map((tab) => (
@@ -399,12 +391,10 @@ if (quote.allowed) {
               </nav>
             </div>
 
-            {/* Tab Content */}
             <div className="p-6">
               {activeTab === 'lookup' && (
                 <div className="space-y-6">
                   <div className="space-y-4">
-                    {/* THORName Input */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         THORName
@@ -418,7 +408,6 @@ if (quote.allowed) {
                       />
                     </div>
 
-                    {/* Lookup Button */}
                     <button
                       onClick={handleLookup}
                       disabled={!thorName || lookupOp.loading}
@@ -438,7 +427,6 @@ if (quote.allowed) {
                     </button>
                   </div>
 
-                  {/* Result */}
                   <ResultPanel loading={lookupOp.loading} error={lookupOp.error} duration={lookupOp.duration}>
                     {lookupOp.result && (
                       <div className="space-y-4">
@@ -499,7 +487,6 @@ if (quote.allowed) {
                     )}
                   </ResultPanel>
 
-                  {/* Code Example */}
                   <CodePreview code={generateLookupCode()} title="Lookup THORName Details" />
                 </div>
               )}
@@ -507,7 +494,6 @@ if (quote.allowed) {
               {activeTab === 'owned' && (
                 <div className="space-y-6">
                   <div className="space-y-4">
-                    {/* Owner Address Input */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Owner Address
@@ -521,7 +507,6 @@ if (quote.allowed) {
                       />
                     </div>
 
-                    {/* Search Button */}
                     <button
                       onClick={handleGetOwned}
                       disabled={!ownerAddress || ownedOp.loading}
@@ -541,7 +526,6 @@ if (quote.allowed) {
                     </button>
                   </div>
 
-                  {/* Result */}
                   <ResultPanel loading={ownedOp.loading} error={ownedOp.error} duration={ownedOp.duration}>
                     {ownedOp.result && (
                       <div className="space-y-4">
@@ -576,14 +560,12 @@ if (quote.allowed) {
                     )}
                   </ResultPanel>
 
-                  {/* Code Example */}
                   <CodePreview code={generateOwnedCode()} title="Get THORNames by Owner" />
                 </div>
               )}
 
               {activeTab === 'register' && (
                 <div className="space-y-6">
-                  {/* Mode Toggle */}
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
@@ -624,7 +606,6 @@ if (quote.allowed) {
                   )}
 
                   <div className="space-y-4">
-                    {/* Name */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         THORName
@@ -639,7 +620,6 @@ if (quote.allowed) {
                       />
                     </div>
 
-                    {/* Chain */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Chain {regMode === 'update' && <span className="text-gray-400">(optional)</span>}
@@ -658,7 +638,6 @@ if (quote.allowed) {
                       </select>
                     </div>
 
-                    {/* Chain Address */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Chain Address {regMode === 'update' && <span className="text-gray-400">(optional)</span>}
@@ -673,7 +652,6 @@ if (quote.allowed) {
                       />
                     </div>
 
-                    {/* Owner */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Owner {regMode === 'update' && <span className="text-gray-400">(optional)</span>}
@@ -688,7 +666,6 @@ if (quote.allowed) {
                       />
                     </div>
 
-                    {/* Expiry */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expiry</label>
                       <select
@@ -705,7 +682,6 @@ if (quote.allowed) {
                       </select>
                     </div>
 
-                    {/* Preferred Asset */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Preferred Asset <span className="text-gray-400">(optional)</span>
@@ -727,7 +703,6 @@ if (quote.allowed) {
                       </p>
                     </div>
 
-                    {/* Get Quote Button */}
                     <button
                       onClick={handleGetQuote}
                       disabled={!regName || quoteOp.loading || !isConnected}
@@ -744,7 +719,6 @@ if (quote.allowed) {
                     </button>
                   </div>
 
-                  {/* Quote Result */}
                   <ResultPanel loading={quoteOp.loading} error={quoteOp.error} duration={quoteOp.duration}>
                     {quoteOp.result && (
                       <div className="space-y-4">
@@ -804,7 +778,6 @@ if (quote.allowed) {
                     )}
                   </ResultPanel>
 
-                  {/* Tx Result */}
                   <ResultPanel loading={registerOp.loading} error={registerOp.error} duration={registerOp.duration}>
                     {registerOp.result && (
                       <div className="space-y-3">
@@ -829,7 +802,6 @@ if (quote.allowed) {
                     )}
                   </ResultPanel>
 
-                  {/* Code Example */}
                   <CodePreview
                     code={generateRegisterCode()}
                     title={`${regMode === 'register' ? 'Register' : 'Update'} THORName`}

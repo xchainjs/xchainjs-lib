@@ -50,11 +50,10 @@ describe('XRP Ledger Client', () => {
   it('Should sign transaction', async () => {
     const address = await xrpClient.getAddressAsync(0)
 
-    // Mock payment transaction
     const payment = {
       TransactionType: 'Payment',
       Account: address,
-      Destination: 'rDNvpT4ZJfG3mC5QfHi4q3wXGKpWkuSzPm', // Test destination
+      Destination: 'rDNvpT4ZJfG3mC5QfHi4q3wXGKpWkuSzPm',
       Amount: '1000000', // 1 XRP in drops
       Sequence: 1,
       LastLedgerSequence: 1000,

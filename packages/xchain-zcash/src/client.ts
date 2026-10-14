@@ -32,7 +32,6 @@ import {
 } from './const'
 import * as Utils from './utils'
 
-// Default parameters for the Zcash client
 export const defaultZECParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
@@ -48,17 +47,8 @@ export const defaultZECParams: UtxoClientParams = {
     upper: UPPER_FEE_BOUND,
   },
 }
-/**
- * Custom Zcash client for transparent P2PKH.
- * Recipients may be Base58Check (`t1` / `tm`) or ZIP 320 TEX (`tex1` / `textest1`).
- * Addresses this client derives stay Base58Check.
- */
+/** Transparent P2PKH. Recipients may be Base58Check (`t1` / `tm`) or ZIP 320 (`tex1` / `textest1`); derived addresses stay Base58Check. */
 abstract class Client extends UTXOClient {
-  /**
-   * Constructor
-   * Initializes the client with network type and other parameters.
-   * @param {UtxoClientParams} params
-   */
   constructor(
     params: UtxoClientParams = {
       ...defaultZECParams,
@@ -74,10 +64,6 @@ abstract class Client extends UTXOClient {
     })
   }
 
-  /**
-   * Get ZEC asset info.
-   * @returns {AssetInfo} ZEC asset information.
-   */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
       asset: AssetZEC,
@@ -86,33 +72,17 @@ abstract class Client extends UTXOClient {
     return assetInfo
   }
 
-  /**
-   * Validate the given Zcash address.
-   * @param {string} address Transparent P2PKH address (`t1` / `tm` or ZIP 320 `tex1` / `textest1`).
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
 
-  /**
-   * Compile memo into a buffer.
-   * @param {string} memo Memo to compile.
-   * @returns {Buffer} Compiled memo.
-   */
   protected compileMemo(memo: string): Buffer {
     return memoToScript(memo)
   }
 
   /**
-   * Get the consensus branch ID to sign transactions against.
-   *
-   * Zcash v5 transactions commit to the branch ID of the active network upgrade; signing
-   * against a stale value causes nodes to reject the broadcast (e.g. after NU6.2). This
-   * fetches the live value from the data provider so transactions stay valid across upgrades
-   * without a library change, falling back to {@link DEFAULT_CONSENSUS_BRANCH_ID} if no
-   * provider can supply it.
-   * @returns {Promise<number>} The consensus branch ID for the next block.
+   * v5 transactions commit to the active upgrade's branch ID. A stale value is rejected.
+   * Uses the live id, else {@link DEFAULT_CONSENSUS_BRANCH_ID}.
    */
   protected async getConsensusBranchId(): Promise<number> {
     for (const provider of this.dataProviders) {
@@ -130,13 +100,6 @@ abstract class Client extends UTXOClient {
     return DEFAULT_CONSENSUS_BRANCH_ID
   }
 
-  /**
-   * Get transaction fee from UTXOs.
-   * @param {UTXO[]} inputs UTXOs to calculate fee from.
-   * @param {FeeRate} feeRate Fee rate.
-   * @param {Buffer | null} data Compiled memo (Optional).
-   * @returns {number} Transaction fee.
-   */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, _data: Buffer | null = null): number {
     if (feeRate) {
       throw 'No feerate supported for this client'
@@ -145,11 +108,7 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Prepare transfer.
-   *
    * @deprecated Use `prepareMaxTx` for sweep transactions. Zcash uses flat fees.
-   * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
    */
   async prepareTx({
     sender,
@@ -163,18 +122,15 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
   }): Promise<PreparedTx> {
-    // Validate recipient address
     if (!this.validateAddress(recipient)) {
       throw new Error('Invalid recipient address')
     }
 
-    // Get UTXOs for sender
     const utxos = await this.scanUTXOs(sender, spendPendingUTXO)
     if (utxos.length === 0) {
       throw new Error('No UTXOs available for transaction')
     }
 
-    // Convert UTXOs to zcash-js format
     const zcashUtxos = utxos.map((utxo) => ({
       address: sender,
       txid: utxo.hash,
@@ -182,7 +138,6 @@ abstract class Client extends UTXOClient {
       satoshis: utxo.value,
     }))
 
-    // Build unsigned transaction
     const unsignedTx = await buildTx(
       0, // height - can be 0 for prepared tx
       sender,
@@ -193,8 +148,7 @@ abstract class Client extends UTXOClient {
       memo,
     )
 
-    // For Zcash, we return the transaction data as JSON string
-    // since zcash-js doesn't produce a standard raw transaction format
+    // zcash-js has no standard raw unsigned format.
     const rawUnsignedTx = JSON.stringify({
       height: 0,
       from: sender,
@@ -209,7 +163,7 @@ abstract class Client extends UTXOClient {
     return {
       rawUnsignedTx,
       utxos,
-      inputs: utxos, // All UTXOs are potential inputs
+      inputs: utxos,
     }
   }
 
@@ -236,13 +190,7 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  // ==================== Enhanced Transaction Methods ====================
-
-  /**
-   * Prepare max send transaction (sweep) for Zcash.
-   * Since Zcash uses flat fees, this calculates the maximum sendable amount
-   * after deducting the required fee.
-   */
+  /** Flat fee is deducted from the total; there is no change output. */
   async prepareMaxTx({
     sender,
     recipient,
@@ -257,7 +205,6 @@ abstract class Client extends UTXOClient {
     selectedUtxos?: UTXO[]
   }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
     try {
-      // Validate addresses
       if (!this.validateAddress(recipient)) {
         throw UtxoError.invalidAddress(recipient, this.network)
       }
@@ -265,7 +212,6 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
-      // Use provided UTXOs (coin control) or fetch from chain
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
         UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
@@ -277,19 +223,15 @@ abstract class Client extends UTXOClient {
         throw UtxoError.insufficientBalance('1', '0', this.network)
       }
 
-      // Calculate total value of all UTXOs
       const totalValue = utxos.reduce((sum, utxo) => sum + utxo.value, 0)
 
-      // Calculate flat fee for this transaction (1 = recipient only; getFee adds memo slots)
-      const fee = getFee(utxos.length, 1, memo)
+      const fee = getFee(utxos.length, 1, memo) // 1 = recipient only; getFee adds memo slots
 
-      // Calculate max sendable amount
       const maxAmount = totalValue - fee
       if (maxAmount <= 0) {
         throw UtxoError.insufficientBalance(String(fee), String(totalValue), this.network)
       }
 
-      // Convert UTXOs to zcash-js format
       const zcashUtxos = utxos.map((utxo) => ({
         address: sender,
         txid: utxo.hash,
@@ -297,10 +239,9 @@ abstract class Client extends UTXOClient {
         satoshis: utxo.value,
       }))
 
-      // Build max transaction (no change output) using buildMaxTx
       const maxTx = await buildMaxTx(0, sender, recipient, zcashUtxos, this.network !== Network.Testnet, memo)
 
-      // For Zcash, we return the transaction data as JSON string
+      // zcash-js has no standard raw unsigned format.
       const rawUnsignedTx = JSON.stringify({
         height: 0,
         from: sender,
@@ -310,7 +251,7 @@ abstract class Client extends UTXOClient {
         isMainnet: this.network !== Network.Testnet,
         memo,
         fee: maxTx.fee,
-        isMaxTx: true, // Flag to indicate this is a sweep transaction
+        isMaxTx: true,
       })
 
       return {

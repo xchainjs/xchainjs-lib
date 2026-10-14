@@ -1,16 +1,10 @@
 import { UTXO } from '../types'
 
-/**
- * Interface for UTXO selection strategies
- */
 export interface UtxoSelectionStrategy {
   name: string
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs?: number): UtxoSelectionResult | null
 }
 
-/**
- * Result of UTXO selection
- */
 export interface UtxoSelectionResult {
   inputs: UTXO[]
   changeAmount: number
@@ -19,9 +13,6 @@ export interface UtxoSelectionResult {
   strategy: string
 }
 
-/**
- * UTXO selection preferences
- */
 export interface UtxoSelectionPreferences {
   minimizeFee?: boolean
   minimizeInputs?: boolean

@@ -1,45 +1,25 @@
-/**
- * Module providing configuration parameters and providers for the Binance Smart Chain (BSC) client.
- */
-import { ExplorerProvider, Network } from '@xchainjs/xchain-client' // Importing ExplorerProvider and Network from xchain-client
-import { EVMClientParams } from '@xchainjs/xchain-evm' // Importing EVMClientParams from xchain-evm
-import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers' // Importing EtherscanProvider from xchain-evm-providers
-import { Asset, AssetType } from '@xchainjs/xchain-util' // Importing Asset from xchain-util
+import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
+import { EVMClientParams } from '@xchainjs/xchain-evm'
+import { EtherscanProviderV2 } from '@xchainjs/xchain-evm-providers'
+import { Asset, AssetType } from '@xchainjs/xchain-util'
 import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
 
-/**
- * Lower fee bound for BSC transactions.
- */
 export const LOWER_FEE_BOUND = 99000000
-/**
- * Upper fee bound for BSC transactions.
- */
 export const UPPER_FEE_BOUND = 1_000_000_000_000
 
-/**
- * Decimal precision for BSC gas asset.
- */
 export const BSC_GAS_ASSET_DECIMAL = 18
 
-/**
- * Chain identifier for Binance Smart Chain (BSC).
- */
 export const BSCChain = 'BSC' as const
 
-/**
- * Base "chain" asset of Binance Smart Chain (BSC).
- */
 export const AssetBSC: Asset = {
   chain: BSCChain,
   symbol: 'BNB',
   ticker: 'BNB',
   type: AssetType.NATIVE,
 }
-// Ankr api key
 const ankrApiKey = process.env.ANKR_API_KEY
 
-// Ethers providers
 const BSC_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/bsc/${ankrApiKey}`)
 const BSC_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://bsc-testnet.public.blastapi.io')
 
@@ -49,7 +29,6 @@ const ethersJSProviders = {
   [Network.Stagenet]: BSC_MAINNET_ETHERS_PROVIDER,
 }
 
-// ONLINE providers
 const BSC_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   BSC_TESTNET_ETHERS_PROVIDER,
   'https://api.etherscan.io/v2',
@@ -74,7 +53,6 @@ const bscProviders = {
   [Network.Stagenet]: BSC_ONLINE_PROVIDER_MAINNET,
 }
 
-// Explorers
 const BSC_MAINNET_EXPLORER = new ExplorerProvider(
   'https://bscscan.com/',
   'https://bscscan.com/address/%%ADDRESS%%',
@@ -91,7 +69,6 @@ const bscExplorerProviders = {
   [Network.Stagenet]: BSC_MAINNET_EXPLORER,
 }
 
-// Default parameters
 const ethRootDerivationPaths = {
   [Network.Mainnet]: "m/44'/60'/0'/0/",
   [Network.Testnet]: "m/44'/60'/0'/0/",
@@ -118,9 +95,6 @@ const defaults = {
   },
 }
 
-/**
- * Default parameters for the BSC client.
- */
 export const defaultBscParams: EVMClientParams = {
   chain: BSCChain,
   gasAsset: AssetBSC,

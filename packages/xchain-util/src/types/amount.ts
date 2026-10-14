@@ -1,13 +1,9 @@
 import BigNumber from 'bignumber.js'
 
 export enum Denomination {
-  /**
-   * values for asset amounts in base units (no decimal)
-   */
+  /** Integer base units (no decimal places). */
   Base = 'BASE',
-  /**
-   * values of asset amounts (w/ decimal)
-   */
+  /** Human amounts (decimal places allowed). */
   Asset = 'ASSET',
 }
 

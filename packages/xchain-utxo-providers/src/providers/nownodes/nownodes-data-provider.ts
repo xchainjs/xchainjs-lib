@@ -101,11 +101,7 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
     throw Error('Zcash has flat fees. Fee rates not apply')
   }
 
-  /**
-   * Get the consensus branch ID for the next block from the backend status.
-   * Used to sign Zcash transactions against the active network upgrade.
-   * @returns {number | undefined} The consensus branch ID, or undefined if unavailable.
-   */
+  /** Required to sign Zcash transactions against the active network upgrade. */
   async getConsensusBranchId(): Promise<number | undefined> {
     return await nownodes.getConsensusBranchId({
       apiKey: this._apiKey,
@@ -121,7 +117,7 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
         amount: baseAmount(i.value, this.assetDecimals),
       })),
       to: rawTx.vout
-        .filter((i) => i.isAddress) //filter out op_return outputs
+        .filter((i) => i.isAddress) // OP_RETURN outputs are not addresses
         .map((i) => ({ to: i.addresses[0], amount: baseAmount(i.value, this.assetDecimals) })),
       date: new Date(rawTx.blockTime * 1000),
       type: TxType.Transfer,
@@ -148,7 +144,7 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
 
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
-    if (offset + limit > 1000) throw Error('cannot fetch more than last 1000 txs') // note: Is possible increase the number if necessary
+    if (offset + limit > 1000) throw Error('cannot fetch more than last 1000 txs') // not a protocol cap; can be raised
     if (offset < 0 || limit < 0) throw Error('ofset and limit must be equal or greater than 0')
 
     try {
@@ -156,7 +152,7 @@ export class NownodesProvider implements UtxoOnlineDataProvider {
         apiKey: this._apiKey,
         baseUrl: this.baseUrl,
         address: `${params?.address}`,
-        limit: offset + limit || 1000, // fetch the maximum wihtout pagination
+        limit: offset + limit || 1000, // no pagination, so request through this window
       })
       return transactions.slice(offset, offset + limit)
     } catch (error) {

@@ -24,7 +24,6 @@ import {
   xChainToOneClickBlockchain,
 } from '../src/protocols/oneclick/utils'
 
-// Mock fetch globally
 const mockFetch = jest.fn()
 global.fetch = mockFetch as unknown as typeof fetch
 

@@ -11,9 +11,6 @@ import {
 } from '@xchainjs/xchain-client'
 import { Asset, BaseAmount, TokenAsset } from '@xchainjs/xchain-util'
 
-/**
- * Solana client params
- */
 export type SOLClientParams = XChainClientParams & {
   explorerProviders: ExplorerProviders
   clientUrls?: Record<Network, string[]>
@@ -32,23 +29,14 @@ export type TxParams = BaseTxParams & {
   allowOwnerOffCurve?: boolean
 }
 
-/**
- * Type definition for the sender of a Solana transaction.
- */
 export type TxFrom = BaseTxFrom & {
   asset?: Asset | TokenAsset
 }
 
-/**
- * Type definition for the recipient of a Solana transaction.
- */
 export type TxTo = BaseTxTo & {
   asset?: Asset | TokenAsset
 }
 
-/**
- * Type definition for a Solana transaction.
- */
 export type Tx = BaseTx & {
   asset: Asset | TokenAsset
   from: TxFrom[]

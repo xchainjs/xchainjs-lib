@@ -34,12 +34,9 @@ export class MayachainProtocol implements IProtocol {
   private wallet?: Wallet
 
   constructor(configuration?: ProtocolConfig) {
-    // Use network from configuration, fallback to wallet network, or default to mainnet
     const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
 
-    // Create MayachainQuery with proper network configuration.
-    // Forward optional custom Mayanode/Midgard configs when provided; otherwise the
-    // clients fall back to their per-network default endpoints.
+    // Custom Mayanode/Midgard configs are optional; clients otherwise use per-network default endpoints.
     const midgardCache = new MidgardCache(new MidgardApi(network, configuration?.mayaMidgardConfig))
     const mayachainCache = new MayachainCache(
       new MidgardQuery(midgardCache),
@@ -50,11 +47,6 @@ export class MayachainProtocol implements IProtocol {
     this.configuration = configuration
     this.wallet = configuration?.wallet
   }
-  /**
-   * Aprove tx for ERC-20
-   * @param {ApproveParams} approveParams params to approve tx
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
-   */
   async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
     const { asset, amount } = params
     const txSubmitted = await this.mayachainAmm.approveRouterToSpend({ asset, amount })
@@ -62,22 +54,12 @@ export class MayachainProtocol implements IProtocol {
     return txSubmitted
   }
 
-  /**
-   * Check if tx is approved for ERC-20
-   * @param {IsApprovedParams} isApprovedParams params to check if tx is approved
-   * @returns {string[]} array of errors
-   */
   async shouldBeApproved(params: IsApprovedParams): Promise<boolean> {
     const { asset, amount, address } = params
     const errors = await this.mayachainAmm.isRouterApprovedToSpend({ asset, amount, address })
     return errors.some((error) => error === 'Maya router has not been approved to spend this amount')
   }
 
-  /**
-   * Check if an asset is supported in the protocol
-   * @param {Asset} asset Asset to check if it is supported
-   * @returns {boolean} True if the asset is supported, otherwise false
-   */
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (isTradeAsset(asset)) return false
     if (eqAsset(asset, AssetCacao) || isSynthAsset(asset)) return true
@@ -99,21 +81,11 @@ export class MayachainProtocol implements IProtocol {
     }
   }
 
-  /**
-   * Retrieve the supported chains by the protocol
-   * @returns {Chain[]} the supported chains by the protocol
-   */
   public async getSupportedChains(): Promise<Chain[]> {
     const inboundDetails = await this.mayachainQuery.getInboundDetails()
     return [MAYAChain, ...Object.values(inboundDetails).map((inboundAddress) => inboundAddress.chain)]
   }
 
-  /**
-   * Estimate swap by validating the swap parameters.
-   *
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
-   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
-   */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const estimatedSwap = await this.mayachainAmm.estimateSwap({
       ...params,
@@ -139,11 +111,6 @@ export class MayachainProtocol implements IProtocol {
     }
   }
 
-  /**
-   * Perform a swap operation between assets.
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
-   */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     return this.mayachainAmm.doSwap({
       ...params,
@@ -155,11 +122,6 @@ export class MayachainProtocol implements IProtocol {
     })
   }
 
-  /**
-   * Get historical swaps
-   * @param {Address[]} addresses Addresses of which return their swap history
-   * @returns the swap history
-   */
   public async getSwapHistory({ chainAddresses }: SwapHistoryParams): Promise<SwapHistory> {
     const swapHistory = await this.mayachainQuery.getSwapHistory({
       addresses: Array.from(new Set(chainAddresses.map((chainAddresses) => chainAddresses.address))),

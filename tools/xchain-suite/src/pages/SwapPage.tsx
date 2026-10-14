@@ -26,14 +26,12 @@ export default function SwapPage() {
   const { swapService, wallet, loading: serviceLoading, error: serviceError, supportedChains } = useAggregator()
   const prices = usePrices()
 
-  // Form state
   const [fromAsset, setFromAsset] = useState<ChainAsset | null>(null)
   const [toAsset, setToAsset] = useState<ChainAsset | null>(null)
   const [amount, setAmount] = useState('')
   const [balance, setBalance] = useState<string | null>(null)
   const [balanceLoading, setBalanceLoading] = useState(false)
 
-  // Custom destination address
   const [destinationOverride, setDestinationOverride] = useState('')
   const [showCustomDest, setShowCustomDest] = useState(false)
   const [destValidationError, setDestValidationError] = useState<string | null>(null)
@@ -42,7 +40,6 @@ export default function SwapPage() {
   const [slippageBps, setSlippageBps] = useState(100) // 1% default
   const [customSlippage, setCustomSlippage] = useState('')
 
-  // Swap history
   const [swapHistory, setSwapHistory] = useState<SwapHistoryEntry[]>(() => getHistory())
   const [showHistory, setShowHistory] = useState(false)
 
@@ -51,11 +48,9 @@ export default function SwapPage() {
   const [streamingInterval, setStreamingInterval] = useState('1')
   const [streamingQuantity, setStreamingQuantity] = useState('0') // 0 = automatic
 
-  // Build Asset object for price lookup
   const fromAssetObj = fromAsset ? buildAsset(fromAsset) : null
   const toAssetObj = toAsset ? buildAsset(toAsset) : null
 
-  // Get USD values
   const { usdValueFormatted: balanceUsdFormatted } = useBalanceUsdValue(balance, fromAssetObj)
   const inputUsdValue = fromAssetObj && amount ? prices.calculateValue(parseFloat(amount) || 0, fromAssetObj) : null
   const fromAssetPrice = fromAssetObj ? prices.getPrice(fromAssetObj) : null
@@ -65,12 +60,10 @@ export default function SwapPage() {
   const minSwapAmount = fromAsset && !fromAsset.contractAddress ? CHAIN_MIN_SWAP_AMOUNT[fromAsset.chainId] : undefined
   const isBelowMinimum = minSwapAmount !== undefined && amountNum > 0 && amountNum < minSwapAmount
 
-  // Quote state
   const [quotes, setQuotes] = useState<SwapQuote[]>([])
   const [selectedQuote, setSelectedQuote] = useState<SwapQuote | null>(null)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
-  // Tracking state
   const [isTrackingOpen, setIsTrackingOpen] = useState(false)
   const [trackingTxHash, setTrackingTxHash] = useState<string | null>(null)
   const [trackingProtocol, setTrackingProtocol] = useState<'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'>(
@@ -79,11 +72,9 @@ export default function SwapPage() {
   const [trackingExplorerUrl, setTrackingExplorerUrl] = useState<string | undefined>()
   const [trackingDepositChannelId, setTrackingDepositChannelId] = useState<string | undefined>()
 
-  // Operations
   const quoteOp = useOperation<SwapQuote[]>()
   const swapOp = useOperation<SwapResult>()
 
-  // Fetch balance when fromAsset changes
   useEffect(() => {
     if (!wallet || !fromAsset) {
       setBalance(null)
@@ -145,13 +136,11 @@ export default function SwapPage() {
     }
   }, [wallet, fromAsset])
 
-  // Clear destination override when toAsset changes
   useEffect(() => {
     setDestinationOverride('')
     setDestValidationError(null)
   }, [toAsset])
 
-  // Validate destination address
   const handleDestinationChange = useCallback(
     (value: string) => {
       setDestinationOverride(value)
@@ -171,14 +160,12 @@ export default function SwapPage() {
     [wallet, toAsset],
   )
 
-  // Clear quotes when assets change
   useEffect(() => {
     setQuotes([])
     setSelectedQuote(null)
     quoteOp.reset()
   }, [fromAsset, toAsset])
 
-  // Swap from/to assets
   const handleSwapAssets = () => {
     const temp = fromAsset
     setFromAsset(toAsset)
@@ -202,7 +189,6 @@ export default function SwapPage() {
     NEAR: 0.05,
   }
 
-  // Set amount to percentage of balance
   const handleSetPercentage = (pct: number) => {
     if (balance && fromAsset) {
       const balanceNum = parseFloat(balance)
@@ -218,7 +204,6 @@ export default function SwapPage() {
     }
   }
 
-  // Fetch quotes
   const handleGetQuotes = async () => {
     console.log('[SwapPage] handleGetQuotes called', {
       swapService: !!swapService,
@@ -249,7 +234,6 @@ export default function SwapPage() {
 
     console.log('[SwapPage] CryptoAmount:', cryptoAmount.assetAmount.amount().toString())
 
-    // Get addresses
     const fromAddress = await wallet.getAddress(fromAsset.chainId)
     const destinationAddress = destinationOverride.trim() || (await wallet.getAddress(toAsset.chainId))
 
@@ -272,7 +256,6 @@ export default function SwapPage() {
         })
         console.log('[SwapPage] estimateSwap result:', result)
         setQuotes(result)
-        // Auto-select best quote
         if (result.length > 0) {
           const validQuotes = result.filter((q) => q.canSwap)
           console.log('[SwapPage] Valid quotes:', validQuotes.length)
@@ -289,7 +272,6 @@ export default function SwapPage() {
     )
   }
 
-  // Execute swap
   const handleExecuteSwap = async () => {
     if (!swapService || !fromAsset || !toAsset || !amount || !wallet || !selectedQuote) return
 
@@ -324,7 +306,6 @@ export default function SwapPage() {
             }),
         })
 
-        // Open tracking modal on success
         if (result.hash) {
           setTrackingTxHash(result.hash)
           setTrackingProtocol(selectedQuote.protocol)
@@ -333,7 +314,6 @@ export default function SwapPage() {
           setIsTrackingOpen(true)
         }
 
-        // Record in swap history
         const expectedOutput = baseToAsset(selectedQuote.expectedAmount.baseAmount).amount().toFixed(6)
         const entry: SwapHistoryEntry = {
           id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -361,7 +341,6 @@ export default function SwapPage() {
     )
   }
 
-  // Sort quotes by expected amount (best first)
   const sortedQuotes = [...quotes].sort((a, b) => {
     if (!a.canSwap && b.canSwap) return 1
     if (a.canSwap && !b.canSwap) return -1
@@ -405,7 +384,6 @@ export default function SwapPage() {
     <div className="p-6">
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-          {/* Header */}
           <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Swap</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -414,9 +392,7 @@ export default function SwapPage() {
           </div>
 
           <div className="p-6 space-y-6">
-            {/* Asset Selection */}
             <div className="space-y-4">
-              {/* From Asset */}
               <div>
                 <AssetSelector
                   label="From"
@@ -454,7 +430,6 @@ export default function SwapPage() {
                 )}
               </div>
 
-              {/* Swap Button */}
               <div className="flex justify-center">
                 <button
                   onClick={handleSwapAssets}
@@ -465,7 +440,6 @@ export default function SwapPage() {
                 </button>
               </div>
 
-              {/* To Asset */}
               <AssetSelector
                 label="To"
                 value={toAsset}
@@ -474,7 +448,6 @@ export default function SwapPage() {
                 excludeAsset={fromAsset ?? undefined}
               />
 
-              {/* Custom Destination Address */}
               {toAsset && (
                 <div>
                   <button
@@ -507,7 +480,6 @@ export default function SwapPage() {
               )}
             </div>
 
-            {/* Amount Input */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount</label>
               <div className="relative">
@@ -526,7 +498,6 @@ export default function SwapPage() {
                   </div>
                 )}
               </div>
-              {/* USD presets */}
               {fromAsset && fromAssetPrice && fromAssetPrice > 0 && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {USD_PRESETS.map((usd) => {
@@ -553,7 +524,6 @@ export default function SwapPage() {
               )}
             </div>
 
-            {/* Streaming Swap Options */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -607,7 +577,6 @@ export default function SwapPage() {
               )}
             </div>
 
-            {/* Slippage Tolerance */}
             <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Slippage Tolerance</label>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -655,7 +624,6 @@ export default function SwapPage() {
               </div>
             </div>
 
-            {/* Get Quote Button */}
             <button
               onClick={handleGetQuotes}
               disabled={!fromAsset || !toAsset || !amount || isBelowMinimum || quoteOp.loading}
@@ -671,14 +639,12 @@ export default function SwapPage() {
               )}
             </button>
 
-            {/* Quote Error */}
             {quoteOp.error && (
               <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
                 <p className="text-sm text-red-700 dark:text-red-300">{quoteOp.error.message}</p>
               </div>
             )}
 
-            {/* Quotes List */}
             {sortedQuotes.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -699,7 +665,6 @@ export default function SwapPage() {
               </div>
             )}
 
-            {/* Execute Swap Button */}
             {selectedQuote && selectedQuote.canSwap && (
               <button
                 onClick={() => setIsConfirmOpen(true)}
@@ -710,7 +675,6 @@ export default function SwapPage() {
               </button>
             )}
 
-            {/* Swap Result */}
             <ResultPanel loading={swapOp.loading} error={swapOp.error} duration={swapOp.duration}>
               {swapOp.result && (
                 <div className="space-y-3">
@@ -745,7 +709,6 @@ export default function SwapPage() {
           </div>
         </div>
 
-        {/* Confirm Modal */}
         {fromAsset && toAsset && selectedQuote && (
           <SwapConfirmModal
             isOpen={isConfirmOpen}
@@ -760,7 +723,6 @@ export default function SwapPage() {
           />
         )}
 
-        {/* Tracking Modal */}
         {trackingTxHash && (
           <SwapTrackingModal
             isOpen={isTrackingOpen}
@@ -772,7 +734,6 @@ export default function SwapPage() {
           />
         )}
 
-        {/* Code Examples */}
         {fromAsset &&
           toAsset &&
           amount &&
@@ -799,7 +760,6 @@ export default function SwapPage() {
               />
             </div>
           )}
-        {/* DCA Callout */}
         <Link
           to="/recurring"
           className="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors group"
@@ -816,7 +776,6 @@ export default function SwapPage() {
           </div>
         </Link>
 
-        {/* Recent Swaps */}
         {swapHistory.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             <button

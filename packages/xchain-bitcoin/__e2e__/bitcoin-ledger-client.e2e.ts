@@ -83,13 +83,11 @@ describe('Bitcoin Client Ledger', () => {
       console.log('Sender address:', senderAddress)
       console.log('Recipient address:', recipientAddress)
 
-      // Get current balance before send max
       const balance = await btcClient.getBalance(senderAddress)
       const feeRate = await btcClient.getFeesWithRates()
-      const currentBalanceBN = balance[0].amount.amount() // BigNumber
+      const currentBalanceBN = balance[0].amount.amount()
       console.log('Current balance (satoshis):', currentBalanceBN.toString())
 
-      // Calculate max sendable amount
       const maxTxData = await btcClient.prepareMaxTx({
         sender: senderAddress,
         recipient: recipientAddress,
@@ -109,7 +107,6 @@ describe('Bitcoin Client Ledger', () => {
         maxTxData.inputs.reduce((sum, utxo) => sum + utxo.value, 0),
       )
 
-      // Verify calculations
       expect(maxTxData.maxAmount).toBeGreaterThan(0)
       expect(maxTxData.fee).toBeGreaterThan(0)
       // Use BN-safe comparison
@@ -117,7 +114,6 @@ describe('Bitcoin Client Ledger', () => {
       expect(totalSpendBN.lte(currentBalanceBN)).toBeTruthy()
       expect(maxTxData.inputs.length).toBeGreaterThan(0)
 
-      // Test the actual send max transaction
       const sendMaxResult = await btcClient.sendMax({
         sender: senderAddress,
         recipient: recipientAddress,
@@ -136,7 +132,6 @@ describe('Bitcoin Client Ledger', () => {
         psbtBase64: sendMaxResult.psbt.toBase64().substring(0, 100) + '...',
       })
 
-      // Verify send max result
       expect(sendMaxResult.maxAmount).toBe(maxTxData.maxAmount)
       expect(sendMaxResult.fee).toBe(maxTxData.fee)
       expect(sendMaxResult.inputs.length).toBe(maxTxData.inputs.length)
@@ -144,7 +139,6 @@ describe('Bitcoin Client Ledger', () => {
 
       console.log('✅ Send max calculations verified successfully!')
 
-      // Note: Uncomment the next lines to actually broadcast the transaction
       // This requires user confirmation on the Ledger device
 
       const finalTxHash = await btcClient.transfer({

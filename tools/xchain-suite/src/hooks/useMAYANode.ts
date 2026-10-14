@@ -4,7 +4,6 @@ import type { NodesApi, NetworkApi, MimirApi } from '@xchainjs/xchain-mayanode'
 import type { Client as MayachainClient } from '@xchainjs/xchain-mayachain'
 import { useWallet } from '../contexts/WalletContext'
 
-// MAYANode API types and configuration
 interface MAYANodeConfig {
   nodesApi: NodesApi | null
   networkApi: NetworkApi | null
@@ -76,7 +75,6 @@ export function useMAYANode(): MAYANodeConfig {
   }
 }
 
-// Hook to get MAYAChain client for deposit operations
 export function useMAYAChainClient() {
   const { phrase, network } = useWallet()
   const [client, setClient] = useState<MayachainClient | null>(null)

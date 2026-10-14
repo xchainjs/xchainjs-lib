@@ -20,7 +20,6 @@ export function UnbondNode({ thorClient, walletConnected }: UnbondNodeProps) {
   const [showConfirm, setShowConfirm] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<UnbondResult>()
 
-  // Validate inputs
   const trimmedNodeAddress = nodeAddress.trim()
   const trimmedProviderAddress = providerAddress.trim()
   const parsedAmount = Number(amount)
@@ -178,7 +177,6 @@ console.log('Unbond Transaction:', txHash)`
         {loading ? 'Unbonding...' : 'Unbond RUNE'}
       </button>
 
-      {/* Confirm Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">

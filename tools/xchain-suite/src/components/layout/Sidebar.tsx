@@ -106,7 +106,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </button>
       </div>
       <nav className="p-4 flex-1">
-        {/* DeFi Links */}
         <div className="mb-6 space-y-1">
           {NAV_ITEMS.map((item) => (
             <NavLink
@@ -127,7 +126,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           ))}
         </div>
 
-        {/* Chain Groups */}
         {CHAIN_GROUPS.map((group) => (
           <div key={group.name} className="mb-6">
             {!collapsed && (

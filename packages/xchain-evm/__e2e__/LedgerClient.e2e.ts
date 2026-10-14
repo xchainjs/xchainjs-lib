@@ -13,10 +13,8 @@ import {
 import { JsonRpcProvider } from 'ethers'
 import { BigNumber } from 'bignumber.js'
 
-// Import necessary modules and classes from external packages and files
 import { ClientLedger, EVMClientParams, LedgerSigner } from '../src'
 
-// Define constants related to Avalanche
 const AVAX_DECIMAL = 18
 const LOWER_FEE_BOUND = 1_000_000_000
 const UPPER_FEE_BOUND = 1_000_000_000_000
@@ -24,10 +22,8 @@ const AVAX_GAS_ASSET_DECIMAL = 18
 const AVAXChain = 'AVAX' as const
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
-// Define JSON-RPC providers for mainnet and testnet
 const ankrApiKey = process.env.ANKR_API_KEY
 
-// Define JSON-RPC providers for mainnet and testnet
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche/${ankrApiKey}`, {
   name: 'avalanche',
   chainId: 43114,
@@ -37,7 +33,6 @@ const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.
   chainId: 43113,
 })
 
-// Define ethers providers for different networks
 const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
   'https://api.etherscan.io/v2',
@@ -58,14 +53,12 @@ const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   43113,
 )
 
-// Define providers for different networks
 const avaxProviders = {
   [Network.Mainnet]: AVAX_ONLINE_PROVIDER_MAINNET,
   [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
   [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
 }
 
-// Define Routescan providers for mainnet and testnet
 const ROUTESCAN_PROVIDER_MAINNET = new RoutescanProvider(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
   'https://api.routescan.io',
@@ -74,7 +67,6 @@ const ROUTESCAN_PROVIDER_MAINNET = new RoutescanProvider(
   AVAX_DECIMAL,
 )
 
-// Define Routescan providers for different networks
 const routescanProviders = {
   [Network.Mainnet]: ROUTESCAN_PROVIDER_MAINNET,
   [Network.Testnet]: new RoutescanProvider(
@@ -88,14 +80,12 @@ const routescanProviders = {
   [Network.Stagenet]: ROUTESCAN_PROVIDER_MAINNET,
 }
 
-// Define explorer providers for mainnet and testnet
 const AVAX_MAINNET_EXPLORER = new ExplorerProvider(
   'https://snowtrace.dev/',
   'https://snowtrace.dev/address/%%ADDRESS%%',
   'https://snowtrace.dev/tx/%%TX_ID%%',
 )
 
-// Define default parameters for the Avalanche client
 const defaults = {
   [Network.Mainnet]: {
     approveGasLimit: new BigNumber(200000),

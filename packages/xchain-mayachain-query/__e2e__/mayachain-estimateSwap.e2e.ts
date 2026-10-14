@@ -68,9 +68,7 @@ function printQuoteSwap(quoteSwap: QuoteSwap) {
   })
 }
 
-// Test User Functions - single and double swap using mock pool data
 describe('Estimate swap e2e tests', () => {
-  // Test estimate swaps with mock pool data
   it('should estimate a swap of 10 BTC to RUNE', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: MainnetUSDTAsset,

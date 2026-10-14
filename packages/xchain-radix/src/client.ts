@@ -50,10 +50,6 @@ const xChainJsNetworkToRadixNetworkId = (network: Network): number => {
   }
 }
 
-/**
- * Custom Radix client
- */
-
 export default class Client extends BaseXChainClient {
   private radixSpecificClient: RadixSpecificClient
   private curve: Curve
@@ -86,12 +82,6 @@ export default class Client extends BaseXChainClient {
     this.radixSpecificClient.networkId = xChainJsNetworkToRadixNetworkId(network)
   }
 
-  /**
-   * Get an estimated fee for a test transaction that involves sending
-   * XRD from one account to another
-   *
-   * @returns {Fee} An estimated fee
-   */
   async getFees(): Promise<Fees> {
     // TODO: This can fail if we use it on stokenet, we need to replace these with network aware
     // addresses.
@@ -110,7 +100,6 @@ export default class Client extends BaseXChainClient {
     // We need to add another 10% to the fees as the preview response does not include everything needed
     // to actually submit the transaction, ie: signature validation
     const feeRate1e18 = feesInXrd * 1.1 * 10 ** XRD_DECIMAL
-    // Create the fee amount with the adjusted fee rate
     const fee = baseAmount(feeRate1e18, XRD_DECIMAL)
     return singleFee(FeeType.FlatFee, fee)
   }
@@ -152,18 +141,12 @@ export default class Client extends BaseXChainClient {
   }
 
   /**
-   * Get the address for a given account.
    * @deprecated Use getAddressAsync instead.
    */
   getAddress(): string {
     throw new Error('getAddress is synchronous and cannot retrieve addresses directly. Use getAddressAsync instead.')
   }
 
-  /**
-   * Get the current address asynchronously for a given account.
-   * @returns {Address} A promise resolving to the current address.
-   * A phrase is needed to create a wallet and to derive an address from it.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     const networkId = this.getRadixNetwork()
     const radixPrivateKey = this.getRadixPrivateKey(index)
@@ -171,11 +154,6 @@ export default class Client extends BaseXChainClient {
     return address.toString()
   }
 
-  /**
-   * Get the explorer URL based on the network.
-   *
-   * @returns {string} The explorer URL based on the network.
-   */
   getExplorerUrl(): string {
     switch (this.getRadixNetwork()) {
       case NetworkId.Mainnet:
@@ -187,29 +165,14 @@ export default class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get the explorer URL for a given account address based on the network.
-   * @param {Address} address The address to generate the explorer URL for.
-   * @returns {string} The explorer URL for the given address.
-   */
   getExplorerAddressUrl(address: Address): string {
     return `${this.getExplorerUrl()}/account/${address}`
   }
 
-  /**
-   * Get the explorer URL for a given transaction ID based on the network.
-   * @param {string} txID The transaction ID to generate the explorer URL for.
-   * @returns {string} The explorer URL for the given transaction ID.
-   */
   getExplorerTxUrl(txID: string): string {
     return `${this.getExplorerUrl()}/transaction/${txID}`
   }
 
-  /**
-   *  Validate the given address.
-   * @param {Address} address The address to validate.
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
   async validateAddressAsync(address: string): Promise<boolean> {
     try {
       await RadixEngineToolkit.Address.decode(address)
@@ -241,12 +204,6 @@ export default class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Retrieves the balances of a given address.
-   * @param {Address} address - The address to retrieve the balance for.
-   * @param {Asset[]} assets - Assets to retrieve the balance for (optional).
-   * @returns {Promise<Balance[]>} An array containing the balance of the address.
-   */
   async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     const balances: Balance[] = await this.radixSpecificClient.fetchBalances(address)
 
@@ -258,7 +215,6 @@ export default class Client extends BaseXChainClient {
       })
     }
 
-    // If assets is undefined, return all balances
     if (!assets) {
       return balances
     }
@@ -270,11 +226,6 @@ export default class Client extends BaseXChainClient {
     return filteredBalances
   }
 
-  /**
-   * Get transaction history of a given address with pagination options.
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
   async getTransactions(params: TxHistoryParams): Promise<TxsPage> {
     const { address, offset = 0, limit, asset } = params
     let hasNextPage = true
@@ -320,12 +271,7 @@ export default class Client extends BaseXChainClient {
   }
 
   /**
-   * Get the transaction details of a given transaction id.
-   * This method uses LTSRadixEngineToolkit.Transaction.summarizeTransaction
-   * to convert a transaction hex to a transaction summary. If the transaction was not built with
-   * the SimpleTransactionBuilder, the method will fail to get the transaction data
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
+   * `summarizeTransaction` fails when the tx was not built with SimpleTransactionBuilder.
    */
   async getTransactionData(txId: string): Promise<Tx> {
     try {
@@ -355,13 +301,6 @@ export default class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Helper function to convert a transaction in hex, returned by the gateway to a Tx type
-   * @param transaction_hex - The raw_hex returned by the gateway for a transaction id
-   * @param confirmed_at - The confirmed_at date for the transaction
-   * @param intent_hash - The transaction intent hash
-   * @returns a transaction in Tx type
-   */
   async convertTransactionFromHex(transaction_hex: string, intent_hash: string, confirmed_at: Date): Promise<Tx> {
     const transactionBinary = Convert.HexString.toUint8Array(transaction_hex)
     try {
@@ -370,7 +309,6 @@ export default class Client extends BaseXChainClient {
       const from: TxFrom[] = []
       const to: TxTo[] = []
 
-      // Iterate over withdraws
       for (const withdrawAccount in transactionSummary.withdraws) {
         for (const withdrawResource in transactionSummary.withdraws[withdrawAccount]) {
           const withdrawAmount: number = transactionSummary.withdraws[withdrawAccount][withdrawResource].toNumber()
@@ -382,7 +320,6 @@ export default class Client extends BaseXChainClient {
         }
       }
 
-      // Iterate over deposits
       for (const depositAccount in transactionSummary.deposits) {
         for (const depositResource in transactionSummary.deposits[depositAccount]) {
           const depositAmount: number = transactionSummary.deposits[depositAccount][depositResource].toNumber()
@@ -416,12 +353,6 @@ export default class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Creates a transaction using the SimpleTransactionBuilder, signs it with the
-   * private key and returns the signed hex
-   * @param params - The transactions params
-   * @returns A signed transaction hex
-   */
   async transfer(params: TxParams): Promise<string> {
     const walletIndex = params.walletIndex ?? 0
     const intent = await this.prepareTx(params)
@@ -442,11 +373,6 @@ export default class Client extends BaseXChainClient {
     return transactionId
   }
 
-  /**
-   * Submits a transaction
-   * @param txHex - The transaction hex build with the transfer method
-   * @returns - The response from the gateway
-   */
   async broadcastTx(txHex: string): Promise<string> {
     const notarizedTransaction = await RadixEngineToolkit.NotarizedTransaction.decompile(
       Convert.HexString.toUint8Array(txHex),
@@ -455,12 +381,6 @@ export default class Client extends BaseXChainClient {
     return response[1].id
   }
 
-  /**
-   * Prepares a transaction to be used by the transfer method
-   * It will include a non signed transaction
-   * @param params - The transaction params
-   * @returns a PreparedTx
-   */
   async prepareTx(params: TxParams): Promise<PreparedTx> {
     const walletIndex = params.walletIndex ?? 0
     const from = await this.getAddressAsync()
@@ -484,10 +404,6 @@ export default class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get asset information.
-   * @returns Asset information.
-   */
   getAssetInfo(): AssetInfo {
     return {
       asset: AssetXRD,

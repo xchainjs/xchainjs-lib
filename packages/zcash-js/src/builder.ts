@@ -29,10 +29,7 @@ function calculateFee(inCount: number, outCount: number): number {
   return MARGINAL_FEE * Math.max(1, logicalActions)
 }
 
-/**
- * Write a 64-bit unsigned integer as little-endian.
- * Browser-compatible alternative to Buffer.writeBigInt64LE
- */
+/** Browser-compatible alternative to Buffer.writeBigInt64LE. */
 function writeUInt64LE(buf: Buffer, value: number | bigint, offset: number): void {
   const bigValue = typeof value === 'bigint' ? value : BigInt(value)
   const low = Number(bigValue & BigInt(0xffffffff))
@@ -67,30 +64,15 @@ function selectUTXOS(utxos: UTXO[], amount: number, memo?: string): UTXO[] {
   return selected
 }
 
-/**
- * Create a blake2b hash with personalization string
- */
 function blake2bWithPersonal(data: Uint8Array, personal: string | Uint8Array): Uint8Array {
   const personalBytes = typeof personal === 'string' ? new TextEncoder().encode(personal) : personal
-  // Pad personal to 16 bytes
   const paddedPersonal = new Uint8Array(16)
   paddedPersonal.set(personalBytes.slice(0, 16))
 
   return blake2b(data, { dkLen: 32, personalization: paddedPersonal })
 }
 
-/**
- * Build a max/sweep transaction that uses ALL UTXOs and creates NO change output.
- * This is used for sweep transactions where you want to send the maximum possible amount.
- *
- * @param height - Block height for expiry
- * @param from - Sender address
- * @param to - Recipient address
- * @param utxos - ALL UTXOs to spend (will use all of them)
- * @param isMainnet - Whether on mainnet
- * @param memo - Optional memo
- * @returns Transaction with maxAmount calculated
- */
+/** Uses every UTXO and creates no change output. */
 export async function buildMaxTx(
   height: number,
   from: string,
@@ -106,16 +88,13 @@ export async function buildMaxTx(
   if (memo && memo.length > 80) throw new Error('Memo too long')
   if (utxos.length === 0) throw new Error('No UTXOs provided')
 
-  // For max tx: NO change output, just recipient + optional memo
   const fee = getFee(utxos.length, 1, memo) // 1 = recipient only; getFee adds memo slots
 
-  // Calculate total value and max sendable amount
   const totalValue = sumBy(utxos, (u: UTXO) => u.satoshis)
   const maxAmount = totalValue - fee
   if (maxAmount <= 0) throw new Error('Not enough funds')
 
   const outputs: Output[] = []
-  // Only recipient output (NO change output for sweep)
   outputs.push({
     type: 'pkh',
     address: to,
@@ -130,7 +109,7 @@ export async function buildMaxTx(
 
   return {
     height: height,
-    inputs: utxos, // Use ALL UTXOs
+    inputs: utxos,
     outputs: outputs,
     fee: fee,
     maxAmount: maxAmount,
@@ -195,11 +174,10 @@ export async function signAndFinalize(
   const pk = secp256k1.getPublicKey(sk, true)
   let offset = 0
 
-  // HEADER with consensus branch ID
   let buf = Buffer.alloc(20)
-  buf.writeUInt32LE(TX_VERSION, 0) // Transaction version 5 with overwinter flag
-  buf.writeUInt32LE(TX_VERSION_GROUP_ID, 4) // Version group ID
-  buf.writeUInt32LE(consensusBranchId, 8) // Consensus branch ID
+  buf.writeUInt32LE(TX_VERSION, 0)
+  buf.writeUInt32LE(TX_VERSION_GROUP_ID, 4)
+  buf.writeUInt32LE(consensusBranchId, 8)
   buf.writeUInt32LE(0x00000000, 12) // Lock time
   buf.writeUInt32LE(height, 16) // Expiry height
 
@@ -222,7 +200,6 @@ export async function signAndFinalize(
 
   const sequencesHash = Buffer.from(blake2bWithPersonal(buf, 'ZTxIdSequencHash')).toString('hex')
 
-  // Calculate the actual buffer size needed for outputs
   let outputsBufferSize = 0
   for (const output of outputs) {
     if (output.type === 'pkh') {
@@ -319,10 +296,9 @@ export async function signAndFinalize(
     Buffer.from('9fbe4ed13b0c08e671c11a3407d84e1117cd45028a2eee1b9feae78b48a6e2c1', 'hex').copy(buf, offset)
     offset += 32
 
-    // Create personalization with consensus branch ID
     const personal = Buffer.alloc(16)
     Buffer.from('ZcashTxHash_').copy(personal)
-    personal.writeUInt32LE(consensusBranchId, 12) // Consensus branch ID
+    personal.writeUInt32LE(consensusBranchId, 12)
 
     const sigHash = blake2bWithPersonal(buf, personal)
     const signature = secp256k1.sign(sigHash, sk, { lowS: true, prehash: false })
@@ -330,11 +306,6 @@ export async function signAndFinalize(
     signatures.push(signatureDER)
   }
 
-  // Build final transaction - calculate required buffer size dynamically
-  // Header: 20 bytes (version + versionGroupId + consensusBranchId + lockTime + expiryHeight)
-  // Per input: 32 (txid) + 4 (vout) + ~1 (compactInt) + ~110 (sigScript: 5 + ~72 sig + 33 pubkey) + 4 (sequence) = ~151 bytes
-  // Per output: 8 (amount) + ~26-80 (script) = ~34-88 bytes
-  // Trailing: 3 bytes (empty sapling/orchard bundles)
   const maxSigScriptSize = 5 + 73 + 33 // overhead + max DER sig + compressed pubkey
   const perInputSize = 32 + 4 + 3 + maxSigScriptSize + 4 // txid + vout + compactInt + sigScript + sequence
   const perOutputSize = 8 + 80 // amount + max script size (memo can be up to 80 chars)
@@ -352,11 +323,11 @@ export async function signAndFinalize(
 
   buf = Buffer.alloc(txBufferSize)
   offset = 0
-  buf.writeUInt32LE(TX_VERSION, offset) // Transaction version
+  buf.writeUInt32LE(TX_VERSION, offset)
   offset += 4
-  buf.writeUInt32LE(TX_VERSION_GROUP_ID, offset) // Version group ID
+  buf.writeUInt32LE(TX_VERSION_GROUP_ID, offset)
   offset += 4
-  buf.writeUInt32LE(consensusBranchId, offset) // Consensus branch ID
+  buf.writeUInt32LE(consensusBranchId, offset)
   offset += 4
   buf.writeUInt32LE(0x00000000, offset) // Lock time
   offset += 4

@@ -12,7 +12,6 @@ export interface MACDPoint {
   histogram: number
 }
 
-/** Simple Moving Average */
 export function sma(candles: OHLCVCandle[], period: number): IndicatorPoint[] {
   const result: IndicatorPoint[] = []
   for (let i = period - 1; i < candles.length; i++) {
@@ -25,7 +24,6 @@ export function sma(candles: OHLCVCandle[], period: number): IndicatorPoint[] {
   return result
 }
 
-/** Exponential Moving Average */
 export function ema(candles: OHLCVCandle[], period: number): IndicatorPoint[] {
   if (candles.length < period) return []
 
@@ -56,7 +54,6 @@ export function rsi(candles: OHLCVCandle[], period = 14): IndicatorPoint[] {
   let avgGain = 0
   let avgLoss = 0
 
-  // Initial average gain/loss
   for (let i = 1; i <= period; i++) {
     const change = candles[i].close - candles[i - 1].close
     if (change > 0) avgGain += change
@@ -95,7 +92,6 @@ export function macd(
 
   if (fastEma.length === 0 || slowEma.length === 0) return []
 
-  // Align by time
   const slowTimes = new Map(slowEma.map((p) => [p.time, p.value]))
   const macdLine: IndicatorPoint[] = []
   for (const fp of fastEma) {

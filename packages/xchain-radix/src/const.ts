@@ -2,10 +2,6 @@ import { NetworkId } from '@radixdlt/radix-engine-toolkit'
 import { Network, RootDerivationPaths } from '@xchainjs/xchain-client'
 import { Asset, AssetType } from '@xchainjs/xchain-util'
 
-/**
- * Chain identifier for Radix.
- * This constant represents the identifier for the Radix Chain.
- */
 export const RadixChain = 'XRD' as const
 
 export const MAINNET_GATEWAY_URL = 'https://mainnet.radixdlt.com'

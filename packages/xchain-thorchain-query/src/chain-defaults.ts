@@ -1,68 +1,64 @@
-// Import necessary modules and types
 import { Chain } from '@xchainjs/xchain-util'
 
-// Import the custom type ChainAttributes
 import { ChainAttributes } from './types'
 
-// Default attributes for each chain
 const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
   BCH: {
-    blockReward: 6.25, // Block reward for Bitcoin Cash
-    avgBlockTimeInSecs: 600, // Average block time for Bitcoin Cash in seconds
+    blockReward: 6.25,
+    avgBlockTimeInSecs: 600,
   },
   BTC: {
-    blockReward: 6.25, // Block reward for Bitcoin
-    avgBlockTimeInSecs: 600, // Average block time for Bitcoin in seconds
+    blockReward: 6.25,
+    avgBlockTimeInSecs: 600,
   },
   ETH: {
-    blockReward: 2, // Block reward for Ethereum
-    avgBlockTimeInSecs: 13, // Average block time for Ethereum in seconds
+    blockReward: 2,
+    avgBlockTimeInSecs: 13,
   },
   AVAX: {
-    blockReward: 2, // Block reward for Avalanche
-    avgBlockTimeInSecs: 3, // Average block time for Avalanche in seconds
+    blockReward: 2,
+    avgBlockTimeInSecs: 3,
   },
   LTC: {
-    blockReward: 12.5, // Block reward for Litecoin
-    avgBlockTimeInSecs: 150, // Average block time for Litecoin in seconds
+    blockReward: 12.5,
+    avgBlockTimeInSecs: 150,
   },
   DOGE: {
-    blockReward: 10000, // Block reward for Dogecoin
-    avgBlockTimeInSecs: 60, // Average block time for Dogecoin in seconds
+    blockReward: 10000,
+    avgBlockTimeInSecs: 60,
   },
   GAIA: {
-    blockReward: 0, // No block reward for Gaia
-    avgBlockTimeInSecs: 6, // Average block time for Gaia in seconds
+    blockReward: 0,
+    avgBlockTimeInSecs: 6,
   },
   THOR: {
-    blockReward: 0, // No block reward for THORChain
-    avgBlockTimeInSecs: 6, // Average block time for THORChain in seconds
+    blockReward: 0,
+    avgBlockTimeInSecs: 6,
   },
   BSC: {
-    blockReward: 0, // No block reward for Binance Smart Chain
-    avgBlockTimeInSecs: 3, // Average block time for Binance Smart Chain in seconds
+    blockReward: 0,
+    avgBlockTimeInSecs: 3,
   },
   BASE: {
-    blockReward: 0, // No block reward for base
-    avgBlockTimeInSecs: 2, // Average block time for Base in seconds
+    blockReward: 0,
+    avgBlockTimeInSecs: 2,
   },
   XRP: {
-    blockReward: 0, // No block reward for xrp
-    avgBlockTimeInSecs: 4, // Average block time for xrp in seconds
+    blockReward: 0,
+    avgBlockTimeInSecs: 4,
   },
   SOL: {
-    blockReward: 0, // No block reward for sol
-    avgBlockTimeInSecs: 0.4, // Average block time for sol in seconds
+    blockReward: 0,
+    avgBlockTimeInSecs: 0.4,
   },
   TRON: {
-    blockReward: 0, // No block reward for TRON
-    avgBlockTimeInSecs: 3, // Average block time for TRON in seconds
+    blockReward: 0,
+    avgBlockTimeInSecs: 3,
   },
   ZEC: {
     blockReward: 1.5625, // Block reward for Zcash (post-Canopy halving)
-    avgBlockTimeInSecs: 75, // Average block time for Zcash in seconds
+    avgBlockTimeInSecs: 75,
   },
 }
 
-// Export the DefaultChainAttributes object
 export { DefaultChainAttributes }

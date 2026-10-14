@@ -33,7 +33,6 @@ import {
 import * as Utils from './utils'
 import { SignedTransaction, XRPClientParams, XRPTxParams } from './types'
 
-// Default parameters for the Ripple client
 export const defaultXRPParams: XRPClientParams = {
   network: Network.Mainnet,
   phrase: '',
@@ -59,10 +58,6 @@ export abstract class Client extends BaseXChainClient {
     this.xrplClient = new XrplClient(getNetworkWssEndpoint(xrplIdentifier) as string)
   }
 
-  /**
-   * Get XRP asset info.
-   * @returns {AssetInfo} XRP asset information.
-   */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
       asset: AssetXRP,
@@ -71,76 +66,39 @@ export abstract class Client extends BaseXChainClient {
     return assetInfo
   }
 
-  /**
-   * Get the explorer URL.
-   *
-   * @returns {string} The explorer URL.
-   */
   public getExplorerUrl(): string {
     return this.explorerProviders[this.getNetwork()].getExplorerUrl()
   }
 
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address.
-   */
   public getExplorerAddressUrl(address: Address): string {
     return this.explorerProviders[this.getNetwork()].getExplorerAddressUrl(address)
   }
 
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID
-   * @returns {string} The explorer url for the given transaction id.
-   */
   public getExplorerTxUrl(txID: TxHash): string {
     return this.explorerProviders[this.getNetwork()].getExplorerTxUrl(txID)
   }
 
-  /**
-   * Validate the given Zcash address.
-   * @param {string} address Zcash address to validate (only t-addresses).
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address)
   }
 
-  /**
-   * connect xrpl client
-   */
   async connectXrplClient() {
     if (!this.xrplClient.isConnected()) {
       await this.xrplClient.connect()
     }
   }
 
-  /**
-   * disconnect xrpl client
-   */
   async disconnectXrplClient() {
     if (this.xrplClient.isConnected()) {
       await this.xrplClient.disconnect()
     }
   }
 
-  /**
-   * get connected xrpl client
-   */
   public async getXrplClient() {
     await this.connectXrplClient()
     return this.xrplClient
   }
 
-  /**
-   * Retrieves the balance of a given address.
-   * @param {Address} address - The address to retrieve the balance for.
-   * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
-   * @returns {Promise<Balance[]>} An array containing the balance of the address.
-   */
   public async getBalance(address: Address): Promise<Balance[]> {
     const xrplClient = await this.getXrplClient()
     const response = await xrplClient
@@ -168,10 +126,6 @@ export abstract class Client extends BaseXChainClient {
     ]
   }
 
-  /**
-   * Get transaction fees.
-   * @returns {Fees} The average, fast, and fastest fees.
-   */
   public async getFees(): Promise<Fees> {
     const xrplClient = await this.getXrplClient()
 
@@ -191,11 +145,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Check if destination account requires destination tag
-   * @param {string} destination - The destination address
-   * @returns {Promise<boolean>} True if destination requires tag
-   */
   public async requiresDestinationTag(destination: string): Promise<boolean> {
     try {
       const xrplClient = await this.getXrplClient()
@@ -215,12 +164,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Prepares a transaction for transfer.
-   *
-   * @param {TxParams & { sender: Address } & XRPTxParams} params - The transfer options.
-   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
-   */
   public async prepareTxForXrpl({
     sender,
     recipient,
@@ -235,7 +178,6 @@ export abstract class Client extends BaseXChainClient {
       Amount: amount.amount().toString(),
     }
 
-    // Add destination tag if provided
     if (destinationTag !== undefined) {
       if (!Utils.validateDestinationTag(destinationTag)) {
         throw new Error(`Invalid destination tag: ${destinationTag}. Must be an integer between 0 and 4294967295.`)
@@ -256,26 +198,14 @@ export abstract class Client extends BaseXChainClient {
     return paymentTx
   }
 
-  /**
-   * Return signed tx
-   * @param payment prepared xrp payment tx
-   * @param walletIndex wallet index
-   * @returns Transaction signed by phrase
-   */
   abstract signTransaction(payment: Payment, walletIndex: number): Promise<SignedTransaction>
 
-  /**
-   * Transfer XRP
-   * @param {TxParams & XRPTxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   */
   public async transfer(params: TxParams & XRPTxParams): Promise<string> {
     if (!eqAsset(params.asset || AssetXRP, AssetXRP)) {
       throw Error(`Asset not supported`)
     }
     const sender = await this.getAddressAsync(params.walletIndex)
 
-    // Check if destination requires destination tag
     const requiresDestTag = await this.requiresDestinationTag(params.recipient)
     if (requiresDestTag && params.destinationTag === undefined) {
       throw new Error(
@@ -354,12 +284,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get the transaction details of a given transaction ID.
-   *
-   * @param {string} txId The transaction ID.
-   * @returns {Tx} The transaction details.
-   */
   public async getTransactionData(txId: string): Promise<Tx> {
     const xrplClient = await this.getXrplClient()
 

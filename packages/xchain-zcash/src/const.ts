@@ -9,17 +9,10 @@ export const ZEC_DECIMAL = 8
 export const LOWER_FEE_BOUND = 10000
 export const UPPER_FEE_BOUND = 100000
 
-/**
- * Chain identifier for Zcash mainnet
- */
 export const ZECChain = 'ZEC' as const
 
-/**
- * Base "chain" asset on Zcash main net.
- */
 export const AssetZEC: Asset = { chain: ZECChain, symbol: 'ZEC', ticker: 'ZEC', type: AssetType.NATIVE }
 
-// Explorer providers for Zcash
 const ZEC_MAINNET_EXPLORER = new ExplorerProvider(
   'https://blockchair.com/zcash/',
   'https://blockchair.com/zcash/address/%%ADDRESS%%',
@@ -80,11 +73,7 @@ export const FallbackBlockbookProviders: UtxoOnlineDataProviders | undefined = f
     }
   : undefined
 
-/**
- * Ordered data-provider list used by the default client: primary nownodes first, optional
- * fallback second. `roundRobinBroadcastTx` and `getConsensusBranchId` try each in order, so the
- * fallback only takes over when nownodes fails.
- */
+/** Primary nownodes, then the optional fallback. Round-robin uses the fallback only if nownodes fails. */
 export const zcashDataProviders: UtxoOnlineDataProviders[] = FallbackBlockbookProviders
   ? [NownodesProviders, FallbackBlockbookProviders]
   : [NownodesProviders]

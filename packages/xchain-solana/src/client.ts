@@ -95,11 +95,6 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Set or update the current network.
-   * @param {Network} network The network to set
-   * @returns {void}
-   */
   public setNetwork(network: Network): void {
     super.setNetwork(network)
     if (!this.clientUrls) {
@@ -123,11 +118,6 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get information about the native asset of the Solana.
-   *
-   * @returns {AssetInfo} Information about the native asset.
-   */
   public getAssetInfo(): AssetInfo {
     return {
       asset: SOLAsset,
@@ -135,40 +125,18 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get the explorer URL.
-   *
-   * @returns {string} The explorer URL.
-   */
   public getExplorerUrl(): string {
     return this.explorerProviders[this.getNetwork()].getExplorerUrl()
   }
 
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address.
-   */
   public getExplorerAddressUrl(address: Address): string {
     return this.explorerProviders[this.getNetwork()].getExplorerAddressUrl(address)
   }
 
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID
-   * @returns {string} The explorer url for the given transaction id.
-   */
   public getExplorerTxUrl(txID: TxHash): string {
     return this.explorerProviders[this.getNetwork()].getExplorerTxUrl(txID)
   }
 
-  /**
-   * Get the full derivation path based on the wallet index.
-   * @param {number} walletIndex The HD wallet index
-   * @returns {string} The full derivation path
-   */
   public getFullDerivationPath(walletIndex: number): string {
     if (!this.rootDerivationPaths) {
       throw Error('Can not generate derivation path due to root derivation path is undefined')
@@ -176,62 +144,28 @@ export class Client extends BaseXChainClient {
     return `${this.rootDerivationPaths[this.getNetwork()]}${walletIndex}'`
   }
 
-  /**
-   * Get the current address asynchronously.
-   *
-   * @param {number} index The index of the address. Default 0
-   * @returns {Address} The Solana address related to the index provided.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   */
   public async getAddressAsync(index?: number): Promise<string> {
     return this.getPrivateKeyPair(index || 0).publicKey.toBase58()
   }
 
-  /**
-   * Get the current address synchronously.
-   * @deprecated
-   */
+  /** @deprecated */
   public getAddress(): string {
     throw Error('Sync method not supported')
   }
 
-  /**
-   * Validate the given Solana address.
-   * @param {string} address Solana address to validate.
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
   public validateAddress(address: Address): boolean {
     return isAddress(address)
   }
 
-  /**
-   * Retrieves the balance of a given address.
-   * @param {Address} address - The address to retrieve the balance for.
-   * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
-   * @returns {Promise<Balance[]>} An array containing the balance of the address.
-   */
   public async getBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     return this.roundRobinGetBalance(address, assets)
   }
 
-  /**
-   * Get transaction fees.
-   *
-   * @param {TxParams} params - The transaction parameters.
-   * @returns {Fees} The average, fast, and fastest fees.
-   * @throws {"Params need to be passed"} Thrown if parameters are not provided.
-   */
   public async getFees(params?: TxParams): Promise<Fees> {
     if (!params) throw new Error('Params need to be passed')
     return this.roundRobinGetFees(params)
   }
 
-  /**
-   * Get the transaction details of a given transaction ID.
-   *
-   * @param {string} txId The transaction ID.
-   * @returns {Tx} The transaction details.
-   */
   public async getTransactionData(txId: string): Promise<Tx> {
     const transaction = await this.roundRobinGetTransactionData(txId)
     if (!transaction) throw Error('Can not find transaction')
@@ -239,22 +173,10 @@ export class Client extends BaseXChainClient {
     return this.parseTransaction(transaction)
   }
 
-  /**
-   * Get the transaction history of a given address with pagination options.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history.
-   * @returns {TxsPage} The transaction history.
-   */
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     return this.roundRobinGetTransactions(params)
   }
 
-  /**
-   * Transfers SOL or Solana token
-   *
-   * @param {TxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   */
   public async transfer({
     walletIndex,
     recipient,
@@ -277,21 +199,10 @@ export class Client extends BaseXChainClient {
     })
   }
 
-  /**
-   * Broadcast a transaction to the network
-   * @param {string} txHex Raw transaction to broadcast
-   * @returns {TxHash} The hash of the transaction broadcasted
-   */
   public async broadcastTx(txHex: string): Promise<TxHash> {
     return this.roundRobinBroadcastTx(txHex)
   }
 
-  /**
-   * Prepares a transaction for transfer.
-   *
-   * @param {TxParams&Address} params - The transfer options.
-   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
-   */
   public async prepareTx({
     sender,
     recipient,
@@ -350,7 +261,6 @@ export class Client extends BaseXChainClient {
       }
     })
 
-    // Tokens transfer
     if (tx.meta?.preTokenBalances && tx.meta?.postTokenBalances) {
       for (let i = 0; i < tx.meta?.postTokenBalances.length; i++) {
         const postBalance = tx.meta.postTokenBalances[i]
@@ -406,14 +316,6 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Retrieves the balance of a given address making a round robin over the providers.
-   *
-   * @param {Address} address - The address to retrieve the balance for.
-   * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
-   * @returns {Promise<Balance[]>} An array containing the balance of the address.
-   * @throws {Error} if there is no provider able to retrieve the balances
-   */
   private async roundRobinGetBalance(address: Address, assets?: TokenAsset[]): Promise<Balance[]> {
     try {
       for (const provider of this.providers) {
@@ -467,13 +369,6 @@ export class Client extends BaseXChainClient {
     throw Error('No provider able to get balances.')
   }
 
-  /**
-   * Get transaction fees making a round robin over the providers.
-   *
-   * @param {TxParams} params - The transaction parameters.
-   * @returns {Fees} The average, fast, and fastest fees.
-   * @throws {Error} if there is no provider able to retrieve the fees
-   */
   private async roundRobinGetFees(params: TxParams): Promise<Fees> {
     try {
       for (const provider of this.providers) {
@@ -489,7 +384,6 @@ export class Client extends BaseXChainClient {
 
         let createAccountTxFee = 0
         if (!params.asset || eqAsset(params.asset, this.getAssetInfo().asset)) {
-          // Native transfer
           transaction.add(
             SystemProgram.transfer({
               fromPubkey: sender.publicKey,
@@ -498,7 +392,6 @@ export class Client extends BaseXChainClient {
             }),
           )
         } else {
-          // Token transfer
           const mintAddress = new PublicKey(getContractAddressFromAsset(params.asset as TokenAsset))
           const associatedTokenAddress = getAssociatedTokenAddressSync(mintAddress, toPubkey, params.allowOwnerOffCurve)
 
@@ -570,13 +463,6 @@ export class Client extends BaseXChainClient {
     throw Error('No provider able to get fees.')
   }
 
-  /**
-   * Get the transaction details of a given transaction ID making a round robin over the providers.
-   *
-   * @param {string} txId The transaction ID.
-   * @returns {Tx} The transaction details.
-   * @throws {Error} if there is no provider able to retrieve the transaction data
-   */
   private async roundRobinGetTransactionData(txId: string): Promise<ParsedTransactionWithMeta | null> {
     try {
       for (const provider of this.providers) {
@@ -589,13 +475,6 @@ export class Client extends BaseXChainClient {
     throw Error('No provider able to get transaction data.')
   }
 
-  /**
-   * Get the transaction history of a given address with pagination options making a round robin over the providers.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history.
-   * @returns {TxsPage} The transaction history.
-   * @throws {Error} if there is no provider able to retrieve the transactions
-   */
   private async roundRobinGetTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     try {
       for (const provider of this.providers) {
@@ -609,7 +488,6 @@ export class Client extends BaseXChainClient {
           limit: fetchCount,
         })
 
-        // Apply offset by slicing
         const signatures = allSignatures.slice(offset)
 
         if (signatures.length === 0) {
@@ -645,13 +523,6 @@ export class Client extends BaseXChainClient {
     throw Error('No provider able to get transactions.')
   }
 
-  /**
-   * Transfers SOL or Solana token making a round robin over the providers
-   *
-   * @param {TxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   * @throws {Error} if there is no provider able to make the transfer
-   */
   private async roundRobinTransfer({
     walletIndex,
     recipient,
@@ -666,7 +537,6 @@ export class Client extends BaseXChainClient {
       const senderKeyPair = this.getPrivateKeyPair(walletIndex || 0)
       for (const provider of this.providers) {
         if (asset && !eqAsset(asset, this.getAssetInfo().asset)) {
-          // Check if receipt token account is created, otherwise, create it
           const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
 
           await getOrCreateAssociatedTokenAccount(
@@ -700,13 +570,6 @@ export class Client extends BaseXChainClient {
     throw Error('No provider able to transfer.')
   }
 
-  /**
-   * Broadcast a transaction to the network making a round robin over the providers
-   *
-   * @param {string} txHex Raw transaction to broadcast
-   * @returns {TxHash} The hash of the transaction broadcasted
-   * @throws {Error} if there is no provider able to broadcast transaction
-   */
   private async roundRobinBroadcastTx(txHex: string): Promise<TxHash> {
     try {
       for (const provider of this.providers) {
@@ -725,13 +588,6 @@ export class Client extends BaseXChainClient {
     throw Error('No provider able to broadcast transaction.')
   }
 
-  /**
-   * Prepares a transaction for transfer making round robin over the providers.
-   *
-   * @param {TxParams&Address} params - The transfer options.
-   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
-   * @throws {Error} if there is no provider able to prepare transaction
-   */
   private async roundRobinPrepareTx({
     sender,
     recipient,
@@ -754,7 +610,6 @@ export class Client extends BaseXChainClient {
         transaction.feePayer = new PublicKey(sender)
 
         if (!asset || eqAsset(asset, this.getAssetInfo().asset)) {
-          // Native transfer
           transaction.add(
             SystemProgram.transfer({
               fromPubkey,
@@ -763,7 +618,6 @@ export class Client extends BaseXChainClient {
             }),
           )
         } else {
-          // Token transfer
           const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
           const fromAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, fromPubkey)
           let fromTokenAccount: Account

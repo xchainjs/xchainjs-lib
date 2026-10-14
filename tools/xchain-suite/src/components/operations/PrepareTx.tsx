@@ -16,7 +16,6 @@ interface PreparedTx {
   rawUnsignedTx: string
 }
 
-// Chains that support prepareTx
 const SUPPORTED_CHAINS = ['BTC', 'BCH', 'LTC', 'DOGE', 'DASH', 'ETH', 'AVAX', 'BSC', 'ARB']
 
 export function PrepareTx({ chainId, client }: PrepareTxProps) {
@@ -31,7 +30,6 @@ export function PrepareTx({ chainId, client }: PrepareTxProps) {
   const isUtxo = ['BTC', 'BCH', 'LTC', 'DOGE', 'DASH'].includes(chainId)
   const isSupported = SUPPORTED_CHAINS.includes(chainId)
 
-  // Auto-fill sender address when client is available
   useEffect(() => {
     if (client && !sender) {
       const getAddress = async () => {
@@ -62,12 +60,10 @@ export function PrepareTx({ chainId, client }: PrepareTxProps) {
           amount: baseAmount,
         }
 
-        // UTXO chains need feeRate
         if (isUtxo && feeRate) {
           params.feeRate = parseInt(feeRate) || 1
         }
 
-        // EVM chains need asset specified
         if (!isUtxo) {
           const { AssetType } = await import('@xchainjs/xchain-util')
           params.asset = {
@@ -135,7 +131,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
 
   return (
     <div className="space-y-6">
-      {/* Info Banner */}
       <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
         <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">What is Prepare Tx?</h3>
         <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
@@ -145,7 +140,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
       </div>
 
       <div className="space-y-4">
-        {/* Sender Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Sender Address
@@ -159,7 +153,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
           />
         </div>
 
-        {/* Recipient Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Recipient Address
@@ -173,7 +166,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
           />
         </div>
 
-        {/* Amount */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Amount
@@ -192,7 +184,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
           </div>
         </div>
 
-        {/* Fee Rate (UTXO only) */}
         {isUtxo && (
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -212,7 +203,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
           </div>
         )}
 
-        {/* Prepare Button */}
         <button
           onClick={handlePrepare}
           disabled={!sender || !recipient || !amount || prepareOp.loading}
@@ -232,7 +222,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
         </button>
       </div>
 
-      {/* Result */}
       <ResultPanel loading={prepareOp.loading} error={prepareOp.error} duration={prepareOp.duration}>
         {prepareOp.result && (
           <div className="space-y-3">
@@ -266,7 +255,6 @@ console.log('Unsigned Raw TX:', unsignedTx.rawUnsignedTx)
         )}
       </ResultPanel>
 
-      {/* Code Example */}
       <CodePreview code={generateCode()} title="Prepare Unsigned Transaction" />
     </div>
   )

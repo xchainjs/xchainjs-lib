@@ -54,7 +54,6 @@ export function DepositTradeAsset({ thorchainAmm, mayachainAmm, wallet, supporte
     supportedChains.includes(asset.chain)
   )
 
-  // Fetch L1 balance for selected asset
   const fetchBalance = useCallback(async () => {
     if (!wallet) return
     setLoadingBalance(true)
@@ -144,7 +143,6 @@ console.log('Deposit TX:', result.hash)`
 
   return (
     <div className="space-y-5">
-      {/* Protocol Selector */}
       <div className="flex rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1">
         {(['thorchain', 'mayachain'] as Protocol[]).map((p) => (
           <button
@@ -161,7 +159,6 @@ console.log('Deposit TX:', result.hash)`
         ))}
       </div>
 
-      {/* Deposit Card */}
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">You Send (L1)</span>
@@ -173,7 +170,6 @@ console.log('Deposit TX:', result.hash)`
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Asset Selector */}
           <div className="relative">
             <select
               value={`${selectedAsset.chain}.${selectedAsset.symbol}`}
@@ -198,7 +194,6 @@ console.log('Deposit TX:', result.hash)`
             </div>
           </div>
 
-          {/* Amount + Max */}
           <div className="flex-1 flex items-center gap-2">
             <input
               type="text"
@@ -218,14 +213,12 @@ console.log('Deposit TX:', result.hash)`
         </div>
       </div>
 
-      {/* Arrow */}
       <div className="flex justify-center -my-2">
         <div className="p-2 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm">
           <ArrowRight size={16} className="text-emerald-500" />
         </div>
       </div>
 
-      {/* Receive Card */}
       <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/50 dark:bg-emerald-900/10 p-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">You Receive (Trade Asset)</span>
@@ -241,7 +234,6 @@ console.log('Deposit TX:', result.hash)`
         </div>
       </div>
 
-      {/* Deposit Button */}
       <button
         onClick={handleDeposit}
         disabled={!amount || depositOp.loading}
@@ -250,7 +242,6 @@ console.log('Deposit TX:', result.hash)`
         {depositOp.loading ? 'Depositing...' : `Deposit ${selectedAsset.symbol}`}
       </button>
 
-      {/* Result */}
       <ResultPanel loading={depositOp.loading} error={depositOp.error} duration={depositOp.duration}>
         {depositOp.result && (
           <div className="space-y-2">

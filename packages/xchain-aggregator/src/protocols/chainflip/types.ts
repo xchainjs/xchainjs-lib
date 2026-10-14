@@ -14,7 +14,7 @@ export type ChainflipDepositChannel = {
   depositAddress: string
   depositChannelId: string
   /**
-   * Channel expiry. Prefer SDK `estimatedDepositChannelExpiryTime` (unix seconds).
+   * Prefer SDK `estimatedDepositChannelExpiryTime` (unix seconds).
    * Broker-mode SDK responses omit that field — then a ~24h fallback is used
    * (Chainflip deposit-channel lifetime).
    */

@@ -1,6 +1,4 @@
 /**
- * Transaction Tracker for THORChain and MAYAChain swaps
- *
  * Polls the respective node APIs to track swap progress through stages:
  * 1. Inbound Observed - Transaction seen by the network
  * 2. Inbound Finalised - Transaction confirmed on source chain
@@ -30,11 +28,7 @@ export interface TxStatus {
 
 type StatusListener = (status: TxStatus) => void
 
-/**
- * Normalize transaction hash for THORNode/MAYANode API
- * - Remove 0x prefix if present
- * - Convert to uppercase
- */
+/** THORNode/MAYANode API wants the hash without 0x and in uppercase. */
 function normalizeHash(hash: string): string {
   let normalized = hash
   if (normalized.startsWith('0x') || normalized.startsWith('0X')) {
@@ -43,7 +37,6 @@ function normalizeHash(hash: string): string {
   return normalized.toUpperCase()
 }
 
-// Lazy-loaded API instances
 let thornodeApiPromise: Promise<any> | null = null
 let mayanodeApiPromise: Promise<any> | null = null
 
@@ -74,13 +67,9 @@ export class TransactionTracker {
   private polling: Map<string, NodeJS.Timeout> = new Map()
   private statuses: Map<string, TxStatus> = new Map()
 
-  /**
-   * Start tracking a transaction
-   */
   async track(hash: string, protocol: 'Thorchain' | 'Mayachain', onUpdate: StatusListener): Promise<void> {
     const key = `${protocol}:${hash}`
 
-    // Initialize status
     const initialStatus: TxStatus = {
       hash,
       protocol,
@@ -95,21 +84,15 @@ export class TransactionTracker {
 
     this.statuses.set(key, initialStatus)
 
-    // Add listener
     const listeners = this.listeners.get(key) || []
     listeners.push(onUpdate)
     this.listeners.set(key, listeners)
 
-    // Emit initial status
     onUpdate(initialStatus)
 
-    // Start polling
     this.startPolling(hash, protocol)
   }
 
-  /**
-   * Stop tracking a transaction
-   */
   stop(hash: string, protocol: 'Thorchain' | 'Mayachain'): void {
     const key = `${protocol}:${hash}`
 
@@ -123,9 +106,6 @@ export class TransactionTracker {
     this.statuses.delete(key)
   }
 
-  /**
-   * Get current status
-   */
   getStatus(hash: string, protocol: 'Thorchain' | 'Mayachain'): TxStatus | undefined {
     return this.statuses.get(`${protocol}:${hash}`)
   }
@@ -133,14 +113,12 @@ export class TransactionTracker {
   private startPolling(hash: string, protocol: 'Thorchain' | 'Mayachain'): void {
     const key = `${protocol}:${hash}`
 
-    // Don't start if already polling
     if (this.polling.has(key)) return
 
     const poll = async () => {
       try {
         const api = protocol === 'Thorchain' ? await getThornodeApi() : await getMayanodeApi()
 
-        // Normalize hash for API (remove 0x prefix, uppercase)
         const normalizedHash = normalizeHash(hash)
         const response = await api.txStatus(normalizedHash)
         const data = response.data
@@ -148,7 +126,6 @@ export class TransactionTracker {
         const currentStatus = this.statuses.get(key)
         if (!currentStatus) return
 
-        // Update stages
         const stages = data.stages || {}
 
         const newStatus: TxStatus = {
@@ -178,18 +155,15 @@ export class TransactionTracker {
           isComplete: stages.outbound_signed?.completed ?? false,
         }
 
-        // Get outbound hash if available
         if (data.out_txs && data.out_txs.length > 0) {
           newStatus.outboundHash = data.out_txs[0].id
         }
 
         this.statuses.set(key, newStatus)
 
-        // Notify listeners
         const listeners = this.listeners.get(key) || []
         listeners.forEach((listener) => listener(newStatus))
 
-        // Stop polling if complete
         if (newStatus.isComplete) {
           this.stopPolling(key)
         }
@@ -226,5 +200,4 @@ export class TransactionTracker {
   }
 }
 
-// Singleton instance
 export const transactionTracker = new TransactionTracker()

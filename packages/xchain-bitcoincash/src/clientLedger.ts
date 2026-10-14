@@ -6,23 +6,17 @@ import { TxParams, UTXO, UtxoClientParams, UtxoSelectionPreferences } from '@xch
 
 import { Client } from './client'
 
-/**
- * Custom Ledger BitcoinCash client
- */
 class ClientLedger extends Client {
-  // Reference to the Ledger transport object
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: any // TODO: Parametrize
   private app: AppBtc | undefined
 
-  // Constructor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(params: UtxoClientParams & { transport: any }) {
     super(params)
     this.transport = params.transport
   }
 
-  // Get the Ledger BTCCash application instance
   public async getApp(): Promise<AppBtc> {
     if (this.app) {
       return this.app
@@ -31,12 +25,10 @@ class ClientLedger extends Client {
     return this.app
   }
 
-  // Get the current address synchronously
   getAddress(): string {
     throw Error('Sync method not supported for Ledger')
   }
 
-  // Get the current address asynchronously
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const result = await app.getWalletPublicKey(this.getFullDerivationPath(index), {
@@ -46,16 +38,12 @@ class ClientLedger extends Client {
     return result.bitcoinAddress
   }
 
-  // Transfer BTCCash from Ledger
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
-    // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
-    // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
-    // Prepare transaction
     const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
 
     const ledgerInputs: Array<[Transaction, number, string | null, number | null]> = inputs.map(
@@ -67,9 +55,7 @@ class ClientLedger extends Client {
         return [splittedTx, index, null, null]
       },
     )
-    // Prepare associated keysets
     const associatedKeysets = ledgerInputs.map(() => this.getFullDerivationPath(fromAddressIndex))
-    // Convert the raw unsigned transaction to a Transaction object
     const newTx: Transaction = app.splitTransaction(rawUnsignedTx)
     const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
     const txHex = await app.createPaymentTransaction({
@@ -86,7 +72,6 @@ class ClientLedger extends Client {
 
     const txHash = await this.broadcastTx(txHex)
 
-    // Throw error if no transaction hash is received
     if (!txHash) {
       throw Error('No Tx hash')
     }
@@ -94,7 +79,6 @@ class ClientLedger extends Client {
     return txHash
   }
 
-  // Transfer max BCH from Ledger (sweep transaction)
   async transferMax(params: {
     recipient: Address
     memo?: string

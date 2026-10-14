@@ -14,7 +14,6 @@ export class SmallFirstStrategy implements UtxoSelectionStrategy {
   private static readonly BASE_TX_SIZE = TX_SIZE_CONSTANTS.BASE_TX_SIZE
 
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
-    // Sort by value ascending to prioritize small UTXOs
     const sortedUtxos = [...utxos].sort((a, b) => a.value - b.value)
 
     const selectedInputs: UTXO[] = []
@@ -24,7 +23,7 @@ export class SmallFirstStrategy implements UtxoSelectionStrategy {
       selectedInputs.push(utxo)
       currentValue += utxo.value
 
-      const fee = this.calculateFee(selectedInputs.length, extraOutputs + 1, feeRate) // Assume change output
+      const fee = this.calculateFee(selectedInputs.length, extraOutputs + 1, feeRate) // assume a change output
       const required = targetValue + fee
 
       if (currentValue >= required) {
@@ -47,9 +46,6 @@ export class SmallFirstStrategy implements UtxoSelectionStrategy {
     return null
   }
 
-  /**
-   * Calculate estimated transaction fee
-   */
   private calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
     const txSize =
       SmallFirstStrategy.BASE_TX_SIZE +

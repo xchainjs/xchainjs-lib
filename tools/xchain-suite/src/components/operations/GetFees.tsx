@@ -27,7 +27,6 @@ export function GetFees({ chainId, client }: GetFeesProps) {
         throw new Error('Client not available. Please connect wallet first.')
       }
 
-      // EVM chains need special handling - get gas price from provider
       if (EVM_CHAINS.includes(chainId)) {
         const evmClient = client as unknown as {
           getProvider: () => { getFeeData: () => Promise<{ gasPrice: bigint | null; maxFeePerGas: bigint | null }> }

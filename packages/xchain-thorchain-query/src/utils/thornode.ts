@@ -111,13 +111,6 @@ export class Thornode {
     this.runePoolApi = this.config.thornodeBaseUrls.map((url) => new RUNEPoolApi(new Configuration({ basePath: url })))
   }
 
-  /**
-   * Returns the oubound transactions held by THORChain due to outbound delay
-   * May be empty if there are no transactions
-   *
-   * @returns {ScheduledQueueItem} Array
-   *
-   */
   async getscheduledQueue(): Promise<TxOutItem[]> {
     for (const api of this.queueApi) {
       try {
@@ -130,13 +123,6 @@ export class Thornode {
     }
     throw Error(`THORNode not responding`)
   }
-  /**
-   * Returns queue
-   * May be empty if there are no transactions
-   *
-   * @returns {ScheduledQueueItem} Array
-   *
-   */
   async getQueue(): Promise<QueueResponse> {
     for (const api of this.queueApi) {
       try {
@@ -149,13 +135,6 @@ export class Thornode {
     }
     throw Error(`THORNode not responding`)
   }
-  /**
-   * Returns Mimir
-   * May be empty if there are no transactions
-   *
-   * @returns {ScheduledQueueItem} Array
-   *
-   */
   async getMimir(): Promise<MimirResponse> {
     for (const api of this.mimirApi) {
       try {
@@ -168,11 +147,6 @@ export class Thornode {
     }
     throw Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @param txHash - transaction hash
-   * @returns - transaction object
-   */
   async getTxData(txHash: string): Promise<TxResponse> {
     for (const api of this.transactionsApi) {
       try {
@@ -188,11 +162,6 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @param txHash - transaction hash
-   * @returns - transaction object
-   */
   async getTxDetail(txHash: string): Promise<TxDetailsResponse> {
     for (const api of this.transactionsApi) {
       try {
@@ -204,11 +173,6 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @param height - optional thorchain height only
-   * @returns - last block data || or block data pertaining to that height number
-   */
   async getLastBlock(height?: number): Promise<LastBlock[]> {
     for (const api of this.networkApi) {
       try {
@@ -220,10 +184,6 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @returns - thorchain pools
-   */
   async getPools(): Promise<Pool[]> {
     for (const api of this.poolsApi) {
       try {
@@ -235,10 +195,6 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @returns - thorchain pool
-   */
   async getPool(asset: string): Promise<Pool> {
     for (const api of this.poolsApi) {
       try {
@@ -251,10 +207,6 @@ export class Thornode {
     throw new Error(`THORNode not responding`)
   }
 
-  /**
-   *
-   * @returns  Thorchain constants
-   */
   async getTcConstants(): Promise<Record<string, string>> {
     for (const api of this.networkApi) {
       try {
@@ -269,16 +221,9 @@ export class Thornode {
     throw new Error(`THORNode not responding`)
   }
 
-  /**
-   * Function that wraps Mimir and Constants to return the value from a given constant name. Searchs Mimir first.
-   *
-   * @param networkValueName the network value to be used to search the contsants
-   * @returns the mimir or constants value
-   */
   async getNetworkValues(): Promise<Record<string, number>> {
     const [mimirDetails, constantDetails] = await Promise.all([this.getMimir(), this.getTcConstants()])
     const retVal: Record<string, number> = {}
-    // insert constants first
 
     for (const [key, value] of Object.entries(constantDetails)) {
       retVal[key.toUpperCase()] = parseInt(value)
@@ -289,13 +234,6 @@ export class Thornode {
     }
     return retVal
   }
-  /**
-   *
-   * @param asset - asset string
-   * @param address - address
-   * @param height - optional block height, defaults to current tip
-   * @returns
-   */
   async getLiquidityProvider(
     asset: string,
     address: string,
@@ -311,13 +249,6 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @param asset - asset string
-   * @param address - address
-   * @param height - optional block height, defaults to current tip
-   * @returns
-   */
   async getInboundAddresses(): Promise<InboundAddress[]> {
     for (const api of this.networkApi) {
       try {
@@ -329,12 +260,6 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @param asset - asset string
-   * @param height - optional thorchain block height parameter
-   * @returns - Liquidity Provider Object
-   */
   async getSavers(asset: string, height?: number): Promise<SaversResponse> {
     for (const api of this.saversApi) {
       try {
@@ -346,12 +271,6 @@ export class Thornode {
     }
     throw new Error(`THORNode not responding`)
   }
-  /**
-   *
-   * @param asset - asset string
-   * @param height - optional thorchain block height parameter
-   * @returns - Liquidity Provider Object
-   */
   async getSaver(asset: string, address: string, height?: number): Promise<Saver> {
     for (const api of this.saversApi) {
       try {
@@ -364,18 +283,6 @@ export class Thornode {
     throw new Error(`THORNode not responding`)
   }
 
-  /**
-   *
-   * @param fromAsset - input asset
-   * @param toAsset - output asset
-   * @param amount - amount to swap
-   * @param destination - vault address
-   * @param toleranceBps - slip percent
-   * @param affiliateBps - affiliate percent
-   * @param affiliate - affiliate address
-   * @param height - block height
-   * @returns quotes swap object response
-   */
   async getSwapQuote(
     fromAsset: string,
     toAsset: string,
@@ -430,12 +337,6 @@ export class Thornode {
     throw new Error(`THORNode is not responding`)
   }
 
-  /*
-   * Returns the total units and depth of a trade asset
-   * @param {string} asset Trade asset
-   * @param {number} height Optional - Block height
-   * @returns Returns the total units and depth of a trade asset
-   */
   public async getTradeAssetUnits(asset: string, height?: number): Promise<TradeUnitResponse> {
     for (const api of this.tradeUnitApi) {
       try {
@@ -446,11 +347,6 @@ export class Thornode {
     throw new Error(`THORNode is not responding. Can not get asset trade units`)
   }
 
-  /**
-   * Returns the total units and depth for each trade asset
-   * @param {number} height Block height
-   * @returns Returns the total units and depth for each trade asset
-   */
   public async getTradeAssetsUnits(height?: number): Promise<TradeUnitsResponse> {
     for (const api of this.tradeUnitsApi) {
       try {
@@ -461,12 +357,6 @@ export class Thornode {
     throw new Error(`THORNode is not responding. Can not get trade units`)
   }
 
-  /**
-   * Returns the units and depth of a trade account address
-   * @param {Address} address Thorchain address
-   * @param {number} height Optional - Block height
-   * @returns Returns the units and depth of a trade account
-   */
   public async getTradeAssetAccount(address: Address, height?: number): Promise<TradeAccountsResponse> {
     for (const api of this.tradeAccountApi) {
       try {
@@ -477,12 +367,6 @@ export class Thornode {
     throw new Error(`THORNode is not responding. Can not get trade asset account`)
   }
 
-  /**
-   * Returns all trade accounts for an asset
-   * @param {Address} address Thorchain address
-   * @param {number} height Optional - Block height
-   * @returns Returns all trade accounts for an asset
-   */
   public async getTradeAssetAccounts(asset: string, height?: number): Promise<TradeAccountsResponse> {
     for (const api of this.tradeAccountsApi) {
       try {
@@ -493,11 +377,6 @@ export class Thornode {
     throw new Error(`THORNode is not responding. Can not get trade asset accounts`)
   }
 
-  /**
-   * Get rune pool information
-   * @param {number} height block height
-   * @returns {RUNEPoolResponse} the pool information for the RUNE pool.
-   */
   async getRunePool(height?: number): Promise<RUNEPoolResponse> {
     for (const api of this.runePoolApi) {
       try {
@@ -508,12 +387,6 @@ export class Thornode {
     throw new Error(`THORNode is not responding. Can not get Rune pool`)
   }
 
-  /**
-   * Get Rune pool provider information
-   * @param {string} address of which return the info
-   * @param {number} height block height
-   * @returns {RUNEProvider} the RUNE Provider information for an address.
-   */
   async getRunePoolProvider(address: string, height?: number): Promise<RUNEProvider> {
     for (const api of this.runePoolApi) {
       try {
@@ -524,11 +397,6 @@ export class Thornode {
     throw new Error(`THORNode is not responding. Can not get Rune pool provider info`)
   }
 
-  /**
-   * Get all Rune pool providers information
-   * @param {number} height block height
-   * @returns {RUNEProvidersResponse} all Rune Providers.
-   */
   async getRunePoolProviders(height?: number): Promise<RUNEProvidersResponse> {
     for (const api of this.runePoolApi) {
       try {

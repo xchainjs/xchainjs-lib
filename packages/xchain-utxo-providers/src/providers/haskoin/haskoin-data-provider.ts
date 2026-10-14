@@ -64,13 +64,6 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
     return [{ amount, asset: this.asset }]
   }
 
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
@@ -100,7 +93,7 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
         amount: baseAmount(i.value, this.assetDecimals),
       })),
       to: rawTx.outputs
-        .filter((i) => i.script !== 'null-data') //filter out op_return outputs
+        .filter((i) => i.script !== 'null-data') // OP_RETURN
         .map((i) => ({ to: i.address, amount: baseAmount(i.value, this.assetDecimals) })),
       date: new Date(rawTx.time),
       type: TxType.Transfer,
@@ -108,12 +101,6 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
   async getTransactionData(txId: string): Promise<Tx> {
     try {
       const rawTx = await haskoin.getTx({
@@ -128,18 +115,10 @@ export class HaskoinProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  /**
-   *  @throws {Error} Method not implemented.
-   */
   getFeeRates(): Promise<FeeRates> {
     throw new Error('Method not implemented.')
   }
 
-  /**
-   *
-   * @param utxos
-   * @returns utxo array
-   */
   private async mapUTXOs(utxos: TxUnspent[]): Promise<UTXO[]> {
     return await Promise.all(
       utxos.map(async (utxo) => ({

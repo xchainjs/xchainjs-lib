@@ -3,37 +3,22 @@ import { FeeOption, FeeRate, TxHash, checkFeeBounds } from '@xchainjs/xchain-cli
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { Address } from '@xchainjs/xchain-util'
 import { TxParams, UTXO, UtxoSelectionPreferences } from '@xchainjs/xchain-utxo'
-import * as Dogecoin from 'bitcoinjs-lib' // Importing the base Doge client
+import * as Dogecoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 import { HDKey } from '@scure/bip32'
 
-import { Client } from './client' // Importing utility functions
+import { Client } from './client'
 import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
-/**
- * Custom Doge client extended to support keystore functionality
- */
 class ClientKeystore extends Client {
-  /**
-   * Get the Dogecoin address.
-   *
-   * Generates a Dogecoin address using the provided phrase and index.
-   * @param {number} index The index of the address to retrieve. Default is 0.
-   * @returns {Address} The Dogecoin address.
-   * @throws {"index must be greater than zero"} Thrown if the index is less than zero.
-   * @throws {"Phrase must be provided"} Thrown if the phrase is not provided.
-   * @throws {"Address not defined"} Thrown if failed to create the address from the phrase.
-   */
   getAddress(index = 0): Address {
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
     if (this.phrase) {
-      // Get Dogecoin network and keys
       const dogeNetwork = Utils.dogeNetwork(this.network)
       const dogeKeys = this.getDogeKeys(this.phrase, index)
-      // Generate Dogecoin address
       const { address } = Dogecoin.payments.p2pkh({
         pubkey: dogeKeys.publicKey,
         network: dogeNetwork,
@@ -45,17 +30,6 @@ class ClientKeystore extends Client {
     }
     throw new Error('Phrase must be provided')
   }
-  /**
-   * @private
-   * Get private key.
-   *
-   * Private function to get keyPair from the this.phrase
-   *
-   * @param {string} phrase The phrase to be used for generating privkey
-   * @returns {ECPairInterface} The privkey generated from the given phrase
-   *
-   * @throws {"Could not get private key from phrase"} Throws an error if failed creating Doge keys from the given phrase
-   * */
   private getDogeKeys(phrase: string, index = 0): ECPairInterface {
     const dogeNetwork = Utils.dogeNetwork(this.network)
 
@@ -71,28 +45,10 @@ class ClientKeystore extends Client {
     return ECPair.fromPrivateKey(Buffer.from(master.privateKey), { network: dogeNetwork })
   }
 
-  /**
-   * Get the current address.
-   * Asynchronous version of getAddress method.
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   * @returns {Address} The current address.
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
-  /**
-   * Asynchronously transfers Dogecoin.
-   *
-   * Builds, signs, and broadcasts a Dogecoin transaction with the specified parameters.
-   *
-   * @param {Object} params The transfer parameters.
-   * @returns {Promise<TxHash>} The transaction hash.
-   */
   async transfer(
     params: TxParams & {
       feeRate?: FeeRate
@@ -130,18 +86,6 @@ class ClientKeystore extends Client {
     return await this.roundRobinBroadcastTx(txHex)
   }
 
-  /**
-   * Transfer the maximum amount of Dogecoin (sweep).
-   *
-   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
-   * @param {Object} params The transfer parameters.
-   * @param {string} params.recipient The recipient address.
-   * @param {string} [params.memo] Optional memo for the transaction.
-   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
-   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
-   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
-   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
-   */
   async transferMax(params: {
     recipient: Address
     memo?: string

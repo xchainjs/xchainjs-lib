@@ -149,7 +149,6 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
       const amount = assetToBase(assetAmount('0.00119375'))
       const feeRate = await btcClient.getFeesWithRates()
 
-      // Test enhanced transaction preparation
       const enhancedTx = await btcClient.prepareTxEnhanced({
         sender: from,
         recipient: to,
@@ -175,7 +174,6 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
 
       // Only broadcast if explicitly enabled (costs real fees on mainnet)
       if (process.env.ALLOW_MAINNET_TXS === 'true') {
-        // Actually send the prepared enhanced transaction
         const txHash = await btcClient.transfer({
           asset: AssetBTC,
           recipient: to,
@@ -187,7 +185,6 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
         console.log('Enhanced TX broadcast successful!')
         console.log('Transaction hash:', txHash)
 
-        // Verify transaction hash format
         expect(txHash).toBeDefined()
         expect(typeof txHash).toBe('string')
         expect(txHash.length).toBeGreaterThan(0)
@@ -213,7 +210,6 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
       console.log('Sender address:', senderAddress)
       console.log('Recipient address:', recipientAddress)
 
-      // Get current balance before send max
       const balance = await btcClient.getBalance(senderAddress)
       if (!balance || balance.length === 0) {
         console.log('No balance found for sender address, skipping test')
@@ -228,12 +224,10 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
         return
       }
 
-      // Get fee rates
       const feeRates = await btcClient.getFeesWithRates()
       const feeRate = feeRates.rates.average
       console.log('Using fee rate:', feeRate, 'sat/byte')
 
-      // Calculate max sendable amount using enhanced method
       const maxTxData = await btcClient.prepareMaxTx({
         sender: senderAddress,
         recipient: recipientAddress,
@@ -254,13 +248,11 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
         maxTxData.inputs.reduce((sum, utxo) => sum + utxo.value, 0),
       )
 
-      // Verify calculations
       expect(maxTxData.maxAmount).toBeGreaterThan(0)
       expect(maxTxData.fee).toBeGreaterThan(0)
       expect(maxTxData.maxAmount + maxTxData.fee).toBeLessThanOrEqual(currentBalance)
       expect(maxTxData.inputs.length).toBeGreaterThan(0)
 
-      // Test the actual send max transaction building
       const sendMaxResult = await btcClient.sendMax({
         sender: senderAddress,
         recipient: recipientAddress,
@@ -280,13 +272,11 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
         psbtBase64: sendMaxResult.psbt.toBase64().substring(0, 100) + '...',
       })
 
-      // Verify send max result matches preparation
       expect(sendMaxResult.maxAmount).toBe(maxTxData.maxAmount)
       expect(sendMaxResult.fee).toBe(maxTxData.fee)
       expect(sendMaxResult.inputs.length).toBe(maxTxData.inputs.length)
       expect(sendMaxResult.psbt).toBeDefined()
 
-      // Verify PSBT structure
       const psbtInputs = sendMaxResult.psbt.data.inputs
       const psbtOutputs = sendMaxResult.psbt.txOutputs
       expect(psbtInputs.length).toBe(sendMaxResult.inputs.length)
@@ -294,8 +284,7 @@ describe('Bitcoin Integration Tests for BlockCypher', () => {
 
       console.log('✅ Send max calculations and PSBT generation verified successfully!')
 
-      // Optional: Actually broadcast the transaction (commented out for safety)
-      // Uncomment the following to actually send the transaction
+      // Broadcast is commented out for safety.
       // console.log('Broadcasting transaction...')
       // const txHash = await btcClient.transfer({
       //   walletIndex: 0,

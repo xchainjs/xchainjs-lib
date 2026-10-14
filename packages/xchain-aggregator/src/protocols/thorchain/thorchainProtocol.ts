@@ -33,12 +33,9 @@ export class ThorchainProtocol implements IProtocol {
   private wallet?: Wallet
 
   constructor(configuration?: ProtocolConfig) {
-    // Use network from configuration, fallback to wallet network, or default to mainnet
     const network = configuration?.network || configuration?.wallet?.getNetwork() || Network.Mainnet
 
-    // Create ThorchainQuery with proper network configuration.
-    // Forward optional custom Thornode/Midgard configs when provided; otherwise the
-    // clients fall back to their per-network default endpoints.
+    // Custom Thornode/Midgard configs are optional; clients otherwise use per-network default endpoints.
     const midgardCache = new MidgardCache(new Midgard(network, configuration?.midgardConfig))
     const thorchainCache = new ThorchainCache(
       new Thornode(network, configuration?.thornodeConfig),
@@ -50,11 +47,6 @@ export class ThorchainProtocol implements IProtocol {
     this.wallet = configuration?.wallet
   }
 
-  /**
-   * Aprove tx for ERC-20 and wait until tx is confirmed
-   * @param {ApproveParams} approveParams params to approve tx
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
-   */
   async approveRouterToSpend(params: ApproveParams): Promise<TxSubmitted> {
     const { asset, amount } = params
     const txSubmitted = await this.thorchainAmm.approveRouterToSpend({ asset, amount })
@@ -62,22 +54,12 @@ export class ThorchainProtocol implements IProtocol {
     return txSubmitted
   }
 
-  /**
-   * Check if tx should be approved for ERC-20
-   * @param {IsApprovedParams} isApprovedParams params to check if tx is approved
-   * @returns {boolean} array of errors
-   */
   async shouldBeApproved(params: IsApprovedParams): Promise<boolean> {
     const { asset, amount, address } = params
     const errors = await this.thorchainAmm.isRouterApprovedToSpend({ asset, amount, address })
     return errors.some((error) => error === 'Thorchain router has not been approved to spend this amount')
   }
 
-  /**
-   * Check if an asset is supported in the protocol
-   * @param {Asset} asset Asset to check if it is supported
-   * @returns {boolean} True if the asset is supported, otherwise false
-   */
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (eqAsset(asset, AssetRuneNative) || isTradeAsset(asset) || isSynthAsset(asset) || isSecuredAsset(asset))
       return true
@@ -99,21 +81,11 @@ export class ThorchainProtocol implements IProtocol {
     }
   }
 
-  /**
-   * Retrieve the supported chains by the protocol
-   * @returns {Chain[]} the supported chains by the protocol
-   */
   public async getSupportedChains(): Promise<Chain[]> {
     const inboundDetails = await this.thorchainQuery.thorchainCache.getInboundDetails()
     return [THORChain, ...Object.values(inboundDetails).map((inboundAddress) => inboundAddress.chain)]
   }
 
-  /**
-   * Estimate swap by validating the swap parameters.
-   *
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
-   * @returns {QuoteSwap} Quote swap result. If swap cannot be done, it returns an empty QuoteSwap with reasons.
-   */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const estimatedSwap = await this.thorchainAmm.estimateSwap({
       ...params,
@@ -137,11 +109,6 @@ export class ThorchainProtocol implements IProtocol {
     }
   }
 
-  /**
-   * Perform a swap operation between assets.
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
-   */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     return this.thorchainAmm.doSwap({
       ...params,
@@ -150,11 +117,6 @@ export class ThorchainProtocol implements IProtocol {
     })
   }
 
-  /**x
-   * Get historical swaps
-   * @param {Address[]} addresses Addresses of which return their swap history
-   * @returns the swap history
-   */
   public async getSwapHistory({ chainAddresses }: SwapHistoryParams): Promise<SwapHistory> {
     const swapHistory = await this.thorchainQuery.getSwapHistory({
       addresses: Array.from(new Set(chainAddresses.map((chainAddresses) => chainAddresses.address))),

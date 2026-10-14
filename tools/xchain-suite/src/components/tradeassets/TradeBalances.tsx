@@ -21,7 +21,6 @@ interface TradeBalance {
 
 // Extract chainId from trade asset string like "THOR.BTC~BTC" or "BTC~BTC"
 function parseChainFromAsset(assetStr: string): { chainId: string; symbol: string } {
-  // Remove protocol prefix if present (THOR. or MAYA.)
   const withoutPrefix = assetStr.includes('.') ? assetStr.split('.')[1] : assetStr
   // Trade symbols are like BTC~BTC, GAIA~ATOM
   const parts = withoutPrefix.split('~')

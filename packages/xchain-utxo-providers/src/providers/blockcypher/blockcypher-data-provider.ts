@@ -69,13 +69,6 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     return [{ amount, asset: this.asset }]
   }
 
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
   async getTransactions(params?: TxHistoryParams, unspentOnly = false): Promise<TxsPage> {
     const rawTxs = await this.getRawTransactions(params, unspentOnly)
     const txs = rawTxs.map((i) => this.mapTransactionToTx(i))
@@ -86,12 +79,6 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     return result
   }
 
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
   async getTransactionData(txId: string): Promise<Tx> {
     try {
       const rawTx = await blockcypher.getTx({
@@ -107,10 +94,6 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  /**
-   * Returns a fee rate estimation from Blockcypher API service.
-   * @returns {FeeRates} Estimated fee rates
-   */
   async getFeeRates(): Promise<FeeRates> {
     const chainResponse = await blockcypher.getBlockchainData({
       baseUrl: `${this.baseUrl}/${this.blockcypherNetwork}`,
@@ -132,7 +115,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         amount: baseAmount(i.output_value, this.assetDecimals),
       })),
       to: rawTx.outputs
-        .filter((i) => i.script_type !== 'null-data') //filter out op_return outputs
+        .filter((i) => i.script_type !== 'null-data') // OP_RETURN
         .map((i) => ({ to: i.addresses[0], amount: baseAmount(i.value, this.assetDecimals) })),
       date: new Date(rawTx.confirmed),
       type: TxType.Transfer,
@@ -165,13 +148,6 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     return utxosOut
   }
 
-  /**
-   * helper function tto limit adding to an array
-   *
-   * @param arr array to be added to
-   * @param toAdd elements to add
-   * @param limit do not add more than this limit
-   */
   private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
     for (let index = 0; index < toAdd.length; index++) {
       const element = toAdd[index]
@@ -184,13 +160,6 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
     return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
   private async getRawTransactions(params?: TxHistoryParams, unspentOnly = false): Promise<Transaction[]> {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
@@ -204,11 +173,10 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
         baseUrl: this.baseUrl,
         network: this.blockcypherNetwork,
         address: `${params?.address}`,
-        limit: 2000, // fetch the maximum
+        limit: 2000, // BlockCypher maximum page size
         unspentOnly,
       })
 
-      //remove duplicates
       const txs: string[] = []
       if (response.txrefs) {
         txs.push(...response.txrefs.map((i) => i.tx_hash))
@@ -225,7 +193,7 @@ export class BlockcypherProvider implements UtxoOnlineDataProvider {
       this.addArrayUpToLimit(txHashesToFetch, txsToFetch, limit)
     } catch (error) {
       console.error(error)
-      //an errors means no more results
+      // An error means there are no further results
     }
 
     //note: blockcypher has rate of 3 req/sec --> https://www.blockcypher.com/dev/bitcoin/#rate-limits-and-tokens

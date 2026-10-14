@@ -26,7 +26,7 @@ function logOperationError(error: Error, context: OperationContext, duration: nu
     chainId: context.chainId || 'unknown',
     operation: context.operation || 'unknown',
     error: error.message,
-    stack: error.stack?.split('\n').slice(0, 5).join('\n'), // First 5 lines of stack
+    stack: error.stack?.split('\n').slice(0, 5).join('\n'),
     params: context.params,
     duration: Math.round(duration),
   }
@@ -34,10 +34,7 @@ function logOperationError(error: Error, context: OperationContext, duration: nu
   console.error('[XChainJS Error]', JSON.stringify(errorLog, null, 2))
 }
 
-/**
- * Generic hook for executing async operations with loading, error, and timing tracking.
- * Supports optional context for structured error logging (see SELF_FEEDBACK_LOOP.md).
- */
+/** Supports optional context for structured error logging (see SELF_FEEDBACK_LOOP.md). */
 export function useOperation<T>(): UseOperationResult<T> {
   const [state, setState] = useState<OperationState<T>>({
     loading: false,

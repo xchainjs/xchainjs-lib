@@ -1,8 +1,3 @@
-/**
- * Price Service for Testing GUI
- *
- * Uses Midgard API for USD prices (assetPriceUSD field).
- */
 
 import type { AnyAsset, CryptoAmount } from '@xchainjs/xchain-util'
 import { Network } from '@xchainjs/xchain-client'
@@ -13,7 +8,6 @@ export interface PriceData {
   timestamp: number
 }
 
-// Midgard endpoints
 const MIDGARD_URLS: Record<Network, string> = {
   [Network.Mainnet]: 'https://gateway.liquify.com/chain/thorchain_midgard/v2',
   [Network.Stagenet]: '',
@@ -26,13 +20,11 @@ const MAYA_MIDGARD_URLS: Record<Network, string> = {
   [Network.Testnet]: 'https://testnet-midgard.mayachain.info/v2',
 }
 
-// Pool data from Midgard
 interface MidgardPool {
   asset: string
   assetPriceUSD: string
 }
 
-// Price cache
 interface PriceCache {
   prices: Map<string, number>
   timestamp: number
@@ -42,9 +34,6 @@ let thorchainCache: PriceCache | null = null
 let mayachainCache: PriceCache | null = null
 const CACHE_DURATION = 30 * 1000 // 30 seconds
 
-/**
- * Fetch prices from THORChain Midgard
- */
 async function fetchThorchainPrices(network: Network): Promise<Map<string, number>> {
   if (thorchainCache && Date.now() - thorchainCache.timestamp < CACHE_DURATION) {
     return thorchainCache.prices
@@ -70,17 +59,10 @@ async function fetchThorchainPrices(network: Network): Promise<Map<string, numbe
       }
     }
 
-    // Add RUNE price (derived from stablecoin pools)
     const usdcPrice = prices.get('AVAX.USDC') ?? prices.get('ETH.USDC')
     if (usdcPrice) {
-      // Find a stablecoin pool to get RUNE price
       const stablecoinPool = pools.find((p) => p.asset.includes('USDC') || p.asset.includes('USDT'))
       if (stablecoinPool) {
-        // assetPrice is in RUNE terms, so RUNE price = 1 / assetPrice * assetPriceUSD
-        // But actually, assetPriceUSD already accounts for this, so we can derive:
-        // For stablecoin: assetPriceUSD ≈ 1, assetPrice = RUNE per asset
-        // So RUNE price = assetPriceUSD / assetPrice ≈ 1 / assetPrice
-        // But simpler: just use any pool's ratio
       }
     }
 
@@ -93,9 +75,6 @@ async function fetchThorchainPrices(network: Network): Promise<Map<string, numbe
   }
 }
 
-/**
- * Fetch prices from MAYAChain Midgard
- */
 async function fetchMayachainPrices(network: Network): Promise<Map<string, number>> {
   if (mayachainCache && Date.now() - mayachainCache.timestamp < CACHE_DURATION) {
     return mayachainCache.prices
@@ -129,9 +108,6 @@ async function fetchMayachainPrices(network: Network): Promise<Map<string, numbe
   }
 }
 
-/**
- * Normalize asset key - strip contract addresses for lookup
- */
 function normalizeAssetKey(asset: string): string {
   // "ETH.USDC-0xA0B86991..." -> "ETH.USDC"
   // "BTC.BTC" -> "BTC.BTC"
@@ -142,9 +118,6 @@ function normalizeAssetKey(asset: string): string {
   return asset
 }
 
-/**
- * Get asset key for lookup
- */
 function getAssetKey(asset: AnyAsset): string {
   return `${asset.chain}.${asset.ticker}`
 }
@@ -156,13 +129,9 @@ export class PriceService {
     this.network = network
   }
 
-  /**
-   * Get USD price for a single asset
-   */
   async getAssetPrice(asset: AnyAsset): Promise<PriceData> {
     const key = getAssetKey(asset)
 
-    // Try THORChain first
     const thorPrices = await fetchThorchainPrices(this.network)
     let price = thorPrices.get(key)
     if (price !== undefined) {
@@ -173,7 +142,6 @@ export class PriceService {
       }
     }
 
-    // Fallback to MAYAChain
     const mayaPrices = await fetchMayachainPrices(this.network)
     price = mayaPrices.get(key)
     if (price !== undefined) {
@@ -191,9 +159,6 @@ export class PriceService {
     }
   }
 
-  /**
-   * Get USD prices for multiple assets at once
-   */
   async getAssetPrices(assets: AnyAsset[]): Promise<Map<string, PriceData>> {
     const [thorPrices, mayaPrices] = await Promise.all([
       fetchThorchainPrices(this.network),
@@ -235,9 +200,6 @@ export class PriceService {
     return results
   }
 
-  /**
-   * Calculate USD value for a CryptoAmount
-   */
   async getUsdValue(cryptoAmount: CryptoAmount): Promise<number | null> {
     const priceData = await this.getAssetPrice(cryptoAmount.asset)
     if (priceData.usdPrice === null) {
@@ -248,9 +210,6 @@ export class PriceService {
     return assetAmount * priceData.usdPrice
   }
 
-  /**
-   * Force refresh prices
-   */
   async refreshPrices(): Promise<void> {
     thorchainCache = null
     mayachainCache = null
@@ -258,9 +217,6 @@ export class PriceService {
   }
 }
 
-/**
- * Format USD value for display
- */
 export function formatUsdValue(value: number | null | undefined): string {
   if (value === null || value === undefined) {
     return ''
@@ -285,9 +241,6 @@ export function formatUsdValue(value: number | null | undefined): string {
   return `$${(value / 1000000).toFixed(2)}M`
 }
 
-/**
- * Format USD price for display
- */
 export function formatUsdPrice(price: number | null | undefined): string {
   if (price === null || price === undefined) {
     return ''
@@ -312,7 +265,6 @@ export function formatUsdPrice(price: number | null | undefined): string {
   return `$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`
 }
 
-// Singleton instance
 let priceServiceInstance: PriceService | null = null
 
 export function getPriceService(network: Network = Network.Mainnet): PriceService {

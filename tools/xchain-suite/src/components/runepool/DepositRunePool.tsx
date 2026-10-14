@@ -26,7 +26,6 @@ export function DepositRunePool({ thorchainAmm, wallet }: DepositRunePoolProps) 
 
     await depositOp.execute(
       async () => {
-        // Import AssetCryptoAmount and AssetRuneNative dynamically
         const { AssetCryptoAmount } = await import('@xchainjs/xchain-util')
         const { AssetRuneNative } = await import('@xchainjs/xchain-thorchain')
 
@@ -73,7 +72,6 @@ console.log('Deposit TX:', result.hash)`
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        {/* Amount Input */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Amount (RUNE)
@@ -95,7 +93,6 @@ console.log('Deposit TX:', result.hash)`
           </p>
         </div>
 
-        {/* Deposit Button */}
         <button
           onClick={handleDeposit}
           disabled={!amount || depositOp.loading}
@@ -105,7 +102,6 @@ console.log('Deposit TX:', result.hash)`
         </button>
       </div>
 
-      {/* Result */}
       <ResultPanel loading={depositOp.loading} error={depositOp.error} duration={depositOp.duration}>
         {depositOp.result && (
           <div className="space-y-2">
@@ -130,7 +126,6 @@ console.log('Deposit TX:', result.hash)`
         )}
       </ResultPanel>
 
-      {/* Code Example */}
       <CodePreview code={generateCode()} title="Deposit to RUNEPool" />
     </div>
   )

@@ -10,7 +10,6 @@ import { Thornode } from '../src/utils/thornode'
 const thorchainCache = new ThorchainCache(new Thornode(Network.Stagenet))
 const thorchainQuery = new ThorchainQuery(thorchainCache)
 
-// addresses
 const btcAddress = 'bc1qy7yxaun8hzmue5ggktqqy3dw2tt8yppf3qaxt0'
 const ethAddress = '0xf155e9cdD77A5d77073aB43d17F661507C08E23d'
 
@@ -73,7 +72,6 @@ function printClose(quote: LoanCloseQuote) {
   console.log(expanded)
 }
 
-// Testing lending queries
 describe('Thorchain-query Loan Integration Tests', () => {
   it(`Should fetch a loan quote for BTC`, async () => {
     const loanQuoteParams: LoanOpenParams = {

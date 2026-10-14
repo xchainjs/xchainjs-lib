@@ -62,46 +62,21 @@ import {
   getCryptoAmountWithNotation,
 } from './utils'
 
-/**
- * MAYAChain Class for interacting with MAYAChain.
- * Recommended main class to use for swapping with MAYAChain
- * Has access to Midgard and MAYANode data
- */
 export class MayachainQuery {
   private mayachainCache: MayachainCache
 
-  /**
-   * Constructor to create a MayachainAMM
-   * @param mayachainCache - an instance of the MayachainCache (could be pointing to stagenet,testnet,mainnet)
-   * @param chainAttributes - attributes used to calculate waitTime & conf counting
-   * @returns MayachainAMM
-   */
   constructor(mayachainCache = new MayachainCache()) {
-    // Initialize MayachainCache instance
     this.mayachainCache = mayachainCache
   }
 
-  /**
-   * Get the MayachainCache instance
-   * @returns MayachainCache instance
-   */
   public getMayachainCache(): MayachainCache {
     return this.mayachainCache
   }
 
-  /**
-   * Get the Mayachain network.
-   * @returns
-   */
   public getNetwork(): Network {
     return this.mayachainCache.midgardQuery.getNetwork()
   }
 
-  /**
-   *  Quote a swap operation.
-   * @param {QuoteSwapParams} quoteSwapParams - Parameters for the quote swap operation.
-   * @returns {QuoteSwap} A quote for the swap operation.
-   */
   public async quoteSwap({
     fromAsset,
     destinationAsset,
@@ -143,7 +118,6 @@ export class MayachainQuery {
       height,
     )
 
-    // Check if the response indicates an error by examining memo and other required field
     const response: { error?: string } = JSON.parse(JSON.stringify(swapQuote))
     if (response.error) {
       return {
@@ -227,10 +201,6 @@ export class MayachainQuery {
     }
   }
 
-  /**
-   * Return mayachain supported chains dust amounts
-   * @returns a map where chain is the key and dust amount cryptoAmount as value
-   */
   public getDustValues(): Record<string, AssetCryptoAmount> {
     // TODO: Find out how to fetch native asset decimals
     return {
@@ -246,22 +216,12 @@ export class MayachainQuery {
     }
   }
 
-  /**
-   * Return the dust crypto amount from the given chain
-   * @param {string} chain Chain to retrieve the dust amount of
-   * @returns a map where chain is the key and dust amount cryptoAmount as value
-   */
   public getChainDustValue(chain: string): AssetCryptoAmount {
     const dustValue = this.getDustValues()[chain]
     if (!dustValue) throw Error(`No dust value known for ${chain} chain`)
     return dustValue
   }
 
-  /**
-   * Get MAYAname details
-   * @param {string} MAYAName
-   * @returns {MAYANameDetails | undefined} MAYANames details or undefined it is does not exist
-   */
   public async getMAYANameDetails(MAYAName: string): Promise<MAYANameDetails | undefined> {
     const details = await this.mayachainCache.midgardQuery.getMAYANameDetails(MAYAName)
     if (!details) return undefined
@@ -276,30 +236,16 @@ export class MayachainQuery {
     }
   }
 
-  /**
-   * Get inbound addresses details
-   * @returns Inbound details
-   */
   public async getInboundDetails(): Promise<Record<string, InboundDetail>> {
     return this.mayachainCache.getInboundDetails()
   }
 
-  /**
-   * Get chain inbound address details
-   * @returns Inbound details
-   */
   public async getChainInboundDetails(chain: string): Promise<InboundDetail> {
     const inboundDetails = await this.getInboundDetails()
     if (!inboundDetails[chain]) throw Error(`No inbound details known for ${chain} chain`)
     return inboundDetails[chain]
   }
 
-  /**
-   * Get asset decimals
-   * @param {Asset} asset
-   * @returns the asset decimals
-   * @throws {Error} if the asset is not supported in Mayachain
-   */
   public async getAssetDecimals(asset: CompatibleAsset): Promise<number> {
     if (isSynthAsset(asset)) return DEFAULT_MAYACHAIN_DECIMALS
 
@@ -311,21 +257,14 @@ export class MayachainQuery {
         return assetsDecimals[assetNotation]
       }
 
-      // Fallback for unknown assets: use chain defaults
       console.warn(`No decimal mapping found for ${assetNotation}, using chain default`)
       return this.getChainDefaultDecimals(asset.chain)
     } catch (error) {
-      // Fallback if asset decimals cache fails entirely
       console.warn(`Failed to get asset decimals for ${assetNotation}, using chain default:`, error)
       return this.getChainDefaultDecimals(asset.chain)
     }
   }
 
-  /**
-   * Get default decimal places for a chain when specific asset data is unavailable
-   * @param chain - The chain to get default decimals for
-   * @returns Default decimal places for the chain
-   */
   private getChainDefaultDecimals(chain: string): number {
     const chainDefaults: Record<string, number> = {
       BTC: 8,
@@ -337,23 +276,13 @@ export class MayachainQuery {
       ZEC: 8,
     }
 
-    return chainDefaults[chain] || 8 // Ultimate fallback to 8 decimals
+    return chainDefaults[chain] || 8
   }
 
-  /**
-   * Get pools details
-   * @returns {PoolDetail[]} pools details
-   */
   public async getPools(): Promise<PoolDetail[]> {
     return this.mayachainCache.getPools()
   }
 
-  /**
-   * Get swap addresses swap history
-   * @param {SwapHistoryParams} params Swap history params
-   * @param {Address[]} params.addresses - List of addresses
-   * @returns {SwapsHistory} Swap history
-   */
   public async getSwapHistory({ addresses }: SwapHistoryParams): Promise<SwapsHistory> {
     const actionsResume = await this.mayachainCache.midgardQuery.getActions({
       address: addresses.join(','),
@@ -368,7 +297,6 @@ export class MayachainQuery {
       amount: string,
     ): CryptoAmount<CompatibleAsset> => {
       const decimals = asset in assetDecimals ? assetDecimals[asset] : DEFAULT_MAYACHAIN_DECIMALS
-      // Ensure decimals is valid (not negative or undefined)
       const validDecimals = typeof decimals === 'number' && decimals >= 0 ? decimals : DEFAULT_MAYACHAIN_DECIMALS
       const assetFormatted = assetFromStringEx(asset) as CompatibleAsset
       return validDecimals === DEFAULT_MAYACHAIN_DECIMALS || eqAsset(CacaoAsset, assetFormatted)
@@ -379,7 +307,6 @@ export class MayachainQuery {
     return {
       count: actionsResume.count ? Number(actionsResume.count) : 0,
       swaps: actionsResume.actions
-        // Merge duplicated swaps in just one
         .reduce((prev, current) => {
           const index = prev.findIndex((action) => action.in[0].txID === current.in[0].txID)
           if (index === -1) return [...prev, current]
@@ -464,11 +391,6 @@ export class MayachainQuery {
         throw Error(`Get asset from memo unsupported for ${attributes[0]} operation`)
     }
   }
-  /**
-   * Get the MAYANames owned by an address
-   * @param {Address} owner - Thorchain address
-   * @returns {MAYANameDetails[]} List of MAYANames owned by the address
-   */
   public async getMAYANamesByOwner(owner: Address): Promise<MAYANameDetails[]> {
     const mayaNames = await this.mayachainCache.midgardQuery.getMAYANameReverseLookup(owner)
 
@@ -480,11 +402,6 @@ export class MayachainQuery {
     return mayaNamesDetails.filter((mayaNameDetails) => mayaNameDetails !== undefined) as MAYANameDetails[]
   }
 
-  /**
-   * Estimate the cost of an update or MAYAName registration
-   * @param {QuoteMAYANameParams} params Params to make the update or the registration
-   * @returns {QuoteMAYAName} Memo to make the update or the registration and the estimation of the operation
-   */
   public async estimateMAYAName({
     name,
     owner,
@@ -512,8 +429,6 @@ export class MayachainQuery {
       numberOfBlocksToAddToExpiry = Math.round(numberOfSecondsToExpire / 6) // 1 block every 6 seconds
     }
 
-    // Calculate fee
-
     const constantsDetails = await this.mayachainCache.mayanode.getMimir()
     const assetDecimals = await this.mayachainCache.getAssetDecimals()
     const oneTimeFee = isUpdate
@@ -535,11 +450,6 @@ export class MayachainQuery {
     }
   }
 
-  /**
-   * Get trade asset units
-   * @param {TradeAssetUnitsParams} params Trade asset units params
-   * @returns {TradeAssetUnits} Trade asset units
-   */
   public async getTradeAssetUnits({ asset, height }: TradeAssetUnitsParams): Promise<TradeAssetUnits> {
     const assetString = assetToString(asset)
     const response = await this.mayachainCache.mayanode.getTradeAssetUnits(assetString, height)
@@ -551,11 +461,6 @@ export class MayachainQuery {
     }
   }
 
-  /**
-   * Get all trade assets units
-   * @param {TradeAssetsUnitsParams} params Trade assets units params
-   * @returns {TradeAssetUnits[]} Array of trade asset units
-   */
   public async getTradeAssetsUnits({ height }: TradeAssetsUnitsParams = {}): Promise<TradeAssetUnits[]> {
     const response = await this.mayachainCache.mayanode.getTradeAssetsUnits(height)
 
@@ -569,11 +474,6 @@ export class MayachainQuery {
     })
   }
 
-  /**
-   * Get trade accounts for an address
-   * @param {AddressTradeAccountsParams} params Address trade accounts params
-   * @returns {AddressTradeAccounts} Trade accounts for the address
-   */
   public async getAddressTradeAccounts({ address, height }: AddressTradeAccountsParams): Promise<AddressTradeAccounts> {
     const response = await this.mayachainCache.mayanode.getTradeAssetAccount(address, height)
 
@@ -589,11 +489,6 @@ export class MayachainQuery {
     })
   }
 
-  /**
-   * Get all trade accounts for an asset
-   * @param {TradeAssetAccountsParams} params Trade asset accounts params
-   * @returns {TradeAssetAccounts} All trade accounts for the asset
-   */
   public async getTradeAssetAccounts({ asset, height }: TradeAssetAccountsParams): Promise<TradeAssetAccounts> {
     const assetString = assetToString(asset)
     const response = await this.mayachainCache.mayanode.getTradeAssetAccounts(assetString, height)
@@ -610,11 +505,7 @@ export class MayachainQuery {
     })
   }
 
-  /**
-   * Get the hardcoded decimal precision for quote calculations
-   * @param asset The asset to get decimals for
-   * @returns 10 for Cacao, 4 for Maya, 8 for other assets (used in quote calculations)
-   */
+  // Cacao 10, Maya 4, other assets 8
   private getQuoteAssetDecimals(asset: CompatibleAsset): number {
     if (eqAsset(asset, CacaoAsset)) return CACAO_DECIMAL
     if (eqAsset(asset, MayaAsset)) return MAYA_DECIMAL

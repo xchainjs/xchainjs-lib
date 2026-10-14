@@ -1,8 +1,3 @@
-/**
- * Simplified Swap Service for Testing GUI
- *
- * Uses THORChain AMM, MAYAChain AMM, and Chainflip SDK directly.
- */
 
 import { Network } from '@xchainjs/xchain-client'
 import {
@@ -13,7 +8,6 @@ import {
   baseAmount as baseAmountFn,
 } from '@xchainjs/xchain-util'
 
-// Types for swap quotes
 export interface SwapQuote {
   protocol: 'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'
   toAddress: string
@@ -100,7 +94,6 @@ function findOneClickToken(asset: AnyAsset, tokens: OneClickToken[]): OneClickTo
   const blockchain = ONECLICK_CHAINS[asset.chain]
   if (!blockchain) return undefined
 
-  // Token asset: match by contract address
   if (asset.symbol.includes('-')) {
     const contractAddress = asset.symbol.split('-')[1]
     return tokens.find(
@@ -122,7 +115,6 @@ function findOneClickToken(asset: AnyAsset, tokens: OneClickToken[]): OneClickTo
     )
   }
 
-  // Native asset: match by symbol, no contract address
   return tokens.find(
     (t) => t.blockchain === blockchain && !t.contractAddress && t.symbol.toUpperCase() === asset.symbol.toUpperCase(),
   )
@@ -132,7 +124,6 @@ function isOneClickCompatible(chain: string): boolean {
   return chain in ONECLICK_CHAINS
 }
 
-// Chainflip chain mapping
 const CHAINFLIP_CHAINS: Record<string, string> = {
   BTC: 'Bitcoin',
   ETH: 'Ethereum',
@@ -145,7 +136,6 @@ function isChainflipCompatible(chain: string): boolean {
   return chain in CHAINFLIP_CHAINS
 }
 
-// Fetch best Chainflip quote for a given swap params
 async function fetchBestChainflipQuote(params: SwapParams) {
   const srcChain = params.fromAsset.chain
   const destChain = params.destinationAsset.chain
@@ -180,7 +170,6 @@ async function fetchBestChainflipQuote(params: SwapParams) {
   return { sdk, bestQuote, affiliateBrokers }
 }
 
-// Lazy-loaded AMM instances
 let thorchainAmmPromise: Promise<any> | null = null
 let mayachainAmmPromise: Promise<any> | null = null
 let chainflipSdkPromise: Promise<any> | null = null
@@ -255,7 +244,6 @@ export class SwapService {
 
     const quotes: SwapQuote[] = []
 
-    // Try THORChain
     try {
       console.log('[SwapService] Getting THORChain AMM...')
       const thorchainAmm = await getThorchainAmm(this.wallet)
@@ -268,7 +256,6 @@ export class SwapService {
         destinationAddress: params.destinationAddress,
         affiliateAddress: 'xc',
         affiliateBps: 0,
-        // Streaming swap parameters
         ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
         ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
       })
@@ -294,7 +281,6 @@ export class SwapService {
       console.error('[SwapService] THORChain estimate failed:', e)
     }
 
-    // Try MAYAChain
     try {
       console.log('[SwapService] Getting MAYAChain AMM...')
       const mayachainAmm = await getMayachainAmm(this.wallet)
@@ -307,7 +293,6 @@ export class SwapService {
         destinationAddress: params.destinationAddress,
         affiliateAddress: 'dx',
         affiliateBps: 0,
-        // Streaming swap parameters
         ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
         ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
       })
@@ -334,7 +319,6 @@ export class SwapService {
       console.error('[SwapService] MAYAChain estimate failed:', e)
     }
 
-    // Try Chainflip (only if both chains are supported)
     if (isChainflipCompatible(params.fromAsset.chain) && isChainflipCompatible(params.destinationAsset.chain)) {
       try {
         console.log('[SwapService] Getting Chainflip quote...')
@@ -576,7 +560,6 @@ export class SwapService {
           destinationAddress: params.destinationAddress,
           affiliateAddress: 'xc',
           affiliateBps: 0,
-          // Streaming swap parameters
           ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
           ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
         })
@@ -593,7 +576,6 @@ export class SwapService {
           destinationAddress: params.destinationAddress,
           affiliateAddress: 'dx',
           affiliateBps: 0,
-          // Streaming swap parameters
           ...(params.streamingInterval !== undefined && { streamingInterval: params.streamingInterval }),
           ...(params.streamingQuantity !== undefined && { streamingQuantity: params.streamingQuantity }),
         })

@@ -78,20 +78,7 @@ export class Mayanode {
     axiosRetry(axios, { retries: this.config.apiRetries, retryDelay: axiosRetry.exponentialDelay })
   }
 
-  /**
-   * TODO
-   * @param fromAsset - input asset
-   * @param toAsset - output asset
-   * @param amount - amount to swap
-   * @param destinationAddress - destination address for the swap
-   * @param streamingInterval - the interval in which streaming swaps are swapped
-   * @param streamingQuantity - the quantity of swaps within a streaming swap
-   * @param toleranceBps - slip percent
-   * @param affiliateBps - affiliate percent
-   * @param affiliate - affiliate address
-   * @param height - block height
-   * @returns quotes swap object response
-   */
+  // TODO
   public async getSwapQuote(
     fromAsset: string,
     toAsset: string,
@@ -130,10 +117,6 @@ export class Mayanode {
     throw new Error(`MAYANode not responding`)
   }
 
-  /**
-   * Get current active mimir configuration.
-   * @returns mimir configuration
-   */
   public async getMimir(): Promise<MimirResponse> {
     for (const api of this.mimirApis) {
       try {
@@ -143,10 +126,6 @@ export class Mayanode {
     throw Error(`MAYANode not responding`)
   }
 
-  /**
-   * Get the set of asgard addresses that should be used for inbound transactions.
-   * @returns MAYA inbound addresses
-   */
   public async getInboundAddresses(): Promise<InboundAddress[]> {
     for (const api of this.networkApis) {
       try {
@@ -157,11 +136,6 @@ export class Mayanode {
     throw new Error(`MAYANode not responding`)
   }
 
-  /**
-   * Return the last block of every chain at a certain MAYAChain height
-   * @param height - optional MAYAChain height, default, latest block
-   * @returns - last block data or block data pertaining to that height number
-   */
   public async getLatestBlock(height?: number): Promise<LastBlock[]> {
     for (const api of this.networkApis) {
       try {
@@ -171,12 +145,6 @@ export class Mayanode {
     throw Error(`MAYANode not responding`)
   }
 
-  /**
-   * Returns the total units and depth of a trade asset
-   * @param {string} asset Trade asset (e.g., ETH~ETH)
-   * @param {number} height Optional - Block height
-   * @returns Returns the total units and depth of a trade asset
-   */
   public async getTradeAssetUnits(asset: string, height?: number): Promise<TradeUnitResponse> {
     for (const api of this.tradeUnitApis) {
       try {
@@ -187,11 +155,6 @@ export class Mayanode {
     throw new Error(`MAYANode not responding. Can not get asset trade units`)
   }
 
-  /**
-   * Returns the total units and depth for each trade asset
-   * @param {number} height Block height
-   * @returns Returns the total units and depth for each trade asset
-   */
   public async getTradeAssetsUnits(height?: number): Promise<TradeUnitsResponse> {
     for (const api of this.tradeUnitsApis) {
       try {
@@ -202,12 +165,6 @@ export class Mayanode {
     throw new Error(`MAYANode not responding. Can not get trade units`)
   }
 
-  /**
-   * Returns the units and depth of a trade account address
-   * @param {Address} address Maya address
-   * @param {number} height Optional - Block height
-   * @returns Returns the units and depth of a trade account
-   */
   public async getTradeAssetAccount(address: Address, height?: number): Promise<TradeAccountsResponse> {
     for (const api of this.tradeAccountApis) {
       try {
@@ -218,12 +175,6 @@ export class Mayanode {
     throw new Error(`MAYANode not responding. Can not get trade asset account`)
   }
 
-  /**
-   * Returns all trade accounts for an asset
-   * @param {string} asset Trade asset (e.g., ETH~ETH)
-   * @param {number} height Optional - Block height
-   * @returns Returns all trade accounts for an asset
-   */
   public async getTradeAssetAccounts(asset: string, height?: number): Promise<TradeAccountsResponse> {
     for (const api of this.tradeAccountsApis) {
       try {
@@ -234,11 +185,6 @@ export class Mayanode {
     throw new Error(`MAYANode not responding. Can not get trade asset accounts`)
   }
 
-  /**
-   * Get all available pools.
-   * @param height - optional MAYAChain height, default, latest block
-   * @returns pool data
-   */
   public async getPools(height?: number): Promise<PoolsResponse> {
     for (const api of this.poolsApis) {
       try {

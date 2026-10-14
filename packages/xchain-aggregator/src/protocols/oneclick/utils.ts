@@ -83,7 +83,6 @@ export const findOneClickToken = (asset: AnyAsset, tokens: OneClickToken[]): One
     if (token.blockchain !== blockchain) return false
 
     if (isTokenAsset(asset)) {
-      // Match by contract address (case-insensitive)
       const assetContract = asset.symbol.includes('-') ? asset.symbol.split('-')[1] : undefined
       return assetContract && token.contractAddress
         ? token.contractAddress.toLowerCase() === assetContract.toLowerCase()
@@ -99,7 +98,6 @@ export const findOneClickToken = (asset: AnyAsset, tokens: OneClickToken[]): One
       )
     }
 
-    // Native asset: match by symbol, ensure no contract address on token
     return token.symbol.toUpperCase() === asset.symbol.toUpperCase() && !token.contractAddress
   })
 }

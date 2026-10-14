@@ -19,11 +19,9 @@ type BondType = 'lp' | 'whitelist'
 
 export function BondNode({ mayaClient, walletConnected }: BondNodeProps) {
   const [bondType, setBondType] = useState<BondType>('lp')
-  // LP Bond fields
   const [assetPool, setAssetPool] = useState('')
   const [lpUnits, setLpUnits] = useState('')
   const [nodeAddress, setNodeAddress] = useState('')
-  // Whitelist fields
   const [whitelistNodeAddress, setWhitelistNodeAddress] = useState('')
   const [providerAddress, setProviderAddress] = useState('')
   const [operatorFee, setOperatorFee] = useState('')
@@ -37,7 +35,6 @@ export function BondNode({ mayaClient, walletConnected }: BondNodeProps) {
       let memo: string
 
       if (bondType === 'lp') {
-        // LP Bond: BOND:<asset_pool>:<lp_units>:<node_address>
         const trimmedPool = assetPool.trim()
         const trimmedUnits = lpUnits.trim()
         const trimmedNode = nodeAddress.trim()
@@ -48,7 +45,6 @@ export function BondNode({ mayaClient, walletConnected }: BondNodeProps) {
 
         memo = `BOND:${trimmedPool}:${trimmedUnits}:${trimmedNode}`
       } else {
-        // Whitelist: BOND::<node_address>:<provider_address>:<fee>
         const trimmedNode = whitelistNodeAddress.trim()
         const trimmedProvider = providerAddress.trim()
         const trimmedFee = operatorFee.trim()
@@ -149,7 +145,6 @@ console.log('Whitelist TX:', txHash)`
         </div>
       )}
 
-      {/* Bond Type Selector */}
       <div className="flex gap-4">
         <button
           onClick={() => setBondType('lp')}

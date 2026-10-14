@@ -1,6 +1,3 @@
-/**
- * UTXO-specific error codes for better error handling and debugging
- */
 export enum UtxoErrorCode {
   INSUFFICIENT_BALANCE = 'INSUFFICIENT_BALANCE',
   INVALID_ADDRESS = 'INVALID_ADDRESS',
@@ -17,9 +14,6 @@ export enum UtxoErrorCode {
   SIGNING_ERROR = 'SIGNING_ERROR',
 }
 
-/**
- * Enhanced error class for UTXO operations with detailed context
- */
 export class UtxoError extends Error {
   public readonly isUtxoError = true
 
@@ -31,9 +25,6 @@ export class UtxoError extends Error {
     Object.setPrototypeOf(this, UtxoError.prototype)
   }
 
-  /**
-   * Create an insufficient balance error
-   */
   static insufficientBalance(required: string, available: string, chain?: string): UtxoError {
     return new UtxoError(
       UtxoErrorCode.INSUFFICIENT_BALANCE,
@@ -42,9 +33,6 @@ export class UtxoError extends Error {
     )
   }
 
-  /**
-   * Create an invalid address error
-   */
   static invalidAddress(address: string, network?: string): UtxoError {
     return new UtxoError(
       UtxoErrorCode.INVALID_ADDRESS,
@@ -53,32 +41,20 @@ export class UtxoError extends Error {
     )
   }
 
-  /**
-   * Create an invalid amount error
-   */
   static invalidAmount(amount: string | number, reason?: string): UtxoError {
     const message = `Invalid amount: ${amount}${reason ? ` (${reason})` : ''}`
     return new UtxoError(UtxoErrorCode.INVALID_AMOUNT, message, { amount, reason })
   }
 
-  /**
-   * Create an invalid fee rate error
-   */
   static invalidFeeRate(feeRate: number, reason?: string): UtxoError {
     const message = `Invalid fee rate: ${feeRate}${reason ? ` (${reason})` : ''}`
     return new UtxoError(UtxoErrorCode.INVALID_FEE_RATE, message, { feeRate, reason })
   }
 
-  /**
-   * Create an invalid memo error
-   */
   static invalidMemo(memo: string, reason: string): UtxoError {
     return new UtxoError(UtxoErrorCode.INVALID_MEMO, `Invalid memo: ${reason}`, { memo, reason })
   }
 
-  /**
-   * Create a provider error
-   */
   static providerError(providerName: string, originalError: Error): UtxoError {
     return new UtxoError(UtxoErrorCode.PROVIDER_ERROR, `Provider ${providerName} error: ${originalError.message}`, {
       providerName,
@@ -86,9 +62,6 @@ export class UtxoError extends Error {
     })
   }
 
-  /**
-   * Create a network error
-   */
   static networkError(operation: string, originalError: Error): UtxoError {
     return new UtxoError(UtxoErrorCode.NETWORK_ERROR, `Network error during ${operation}: ${originalError.message}`, {
       operation,
@@ -96,16 +69,10 @@ export class UtxoError extends Error {
     })
   }
 
-  /**
-   * Create a validation error
-   */
   static validationError(message: string, details?: Record<string, unknown>): UtxoError {
     return new UtxoError(UtxoErrorCode.VALIDATION_ERROR, `Validation failed: ${message}`, details)
   }
 
-  /**
-   * Create a transaction too large error
-   */
   static transactionTooLarge(currentSize: number, maxSize: number): UtxoError {
     return new UtxoError(
       UtxoErrorCode.TRANSACTION_TOO_LARGE,
@@ -114,9 +81,6 @@ export class UtxoError extends Error {
     )
   }
 
-  /**
-   * Create a UTXO selection failed error
-   */
   static utxoSelectionFailed(targetAmount: number, availableAmount: number, strategy?: string): UtxoError {
     const message = `UTXO selection failed: need ${targetAmount}, have ${availableAmount}${
       strategy ? ` using ${strategy}` : ''
@@ -124,9 +88,6 @@ export class UtxoError extends Error {
     return new UtxoError(UtxoErrorCode.UTXO_SELECTION_FAILED, message, { targetAmount, availableAmount, strategy })
   }
 
-  /**
-   * Create a broadcast error
-   */
   static broadcastError(txHash: string, originalError: Error): UtxoError {
     return new UtxoError(
       UtxoErrorCode.BROADCAST_ERROR,
@@ -135,23 +96,16 @@ export class UtxoError extends Error {
     )
   }
 
-  /**
-   * Create a signing error
-   */
   static signingError(reason: string, details?: Record<string, unknown>): UtxoError {
     return new UtxoError(UtxoErrorCode.SIGNING_ERROR, `Transaction signing failed: ${reason}`, details)
   }
 
-  /**
-   * Convert unknown errors to typed UTXO errors
-   */
   static fromUnknown(error: unknown, context?: string): UtxoError {
     if (error instanceof UtxoError) {
       return error
     }
 
     if (error instanceof Error) {
-      // Try to categorize common error patterns
       const message = error.message.toLowerCase()
 
       if (message.includes('insufficient')) {
@@ -180,17 +134,11 @@ export class UtxoError extends Error {
     })
   }
 
-  /**
-   * Check if an error is a UTXO error
-   */
   static isUtxoError(error: unknown): error is UtxoError {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return error instanceof Error && (error as any).isUtxoError === true
   }
 
-  /**
-   * Get a user-friendly error message
-   */
   getUserFriendlyMessage(): string {
     switch (this.code) {
       case UtxoErrorCode.INSUFFICIENT_BALANCE:
@@ -225,9 +173,6 @@ export class UtxoError extends Error {
     }
   }
 
-  /**
-   * Convert to JSON for logging
-   */
   toJSON(): Record<string, unknown> {
     return {
       name: this.name,

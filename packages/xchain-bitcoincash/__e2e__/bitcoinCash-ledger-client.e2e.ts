@@ -14,20 +14,19 @@ import {
 } from '../src/const'
 jest.setTimeout(200000)
 
-// Default parameters for Bitcoin Cash (BCH) client
 const defaultBchParams: UtxoClientParams = {
-  network: Network.Mainnet, // Default network is Mainnet
-  phrase: '', // Default empty phrase
-  explorerProviders: explorerProviders, // Default explorer providers
-  dataProviders: [HaskoinDataProviders, BitgoProviders], // Default data providers
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [HaskoinDataProviders, BitgoProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `m/44'/145'/0'/0/`, // Default root derivation path for Mainnet
-    [Network.Testnet]: `m/44'/1'/0'/0/`, // Default root derivation path for Testnet
-    [Network.Stagenet]: `m/44'/145'/0'/0/`, // Default root derivation path for Stagenet
+    [Network.Mainnet]: `m/44'/145'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+    [Network.Stagenet]: `m/44'/145'/0'/0/`,
   },
   feeBounds: {
-    lower: LOWER_FEE_BOUND, // Default lower fee bound
-    upper: UPPER_FEE_BOUND, // Default upper fee bound
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
   },
 }
 

@@ -106,11 +106,9 @@ describe('XRP client e2e test', () => {
     const baseTx = await client.prepareTxForXrpl({ ...txParams, sender })
     const prepared = await xrplClient.autofill(baseTx)
 
-    // get signed tx
     const signed = await client.signTransaction(prepared, txParams.walletIndex || 0)
     console.log('signed tx:', signed.tx_blob)
 
-    // broadcast
     const hash = await client.broadcastTx(signed.tx_blob)
     console.log('tx hash:', hash)
   })

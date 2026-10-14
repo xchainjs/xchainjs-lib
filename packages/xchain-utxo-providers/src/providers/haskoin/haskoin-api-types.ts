@@ -1,7 +1,3 @@
-/**
- * Haskoin API types
- */
-
 import { TxHash } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
 

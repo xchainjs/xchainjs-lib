@@ -9,23 +9,19 @@ export interface ChainConfig {
 }
 
 const ALL_SUPPORTED_CHAINS: ChainConfig[] = [
-  // UTXO Chains
   { id: 'BTC', name: 'Bitcoin', symbol: 'BTC', category: 'utxo', decimals: 8 },
   { id: 'BCH', name: 'Bitcoin Cash', symbol: 'BCH', category: 'utxo', decimals: 8 },
   { id: 'LTC', name: 'Litecoin', symbol: 'LTC', category: 'utxo', decimals: 8 },
   { id: 'DOGE', name: 'Dogecoin', symbol: 'DOGE', category: 'utxo', decimals: 8 },
   { id: 'DASH', name: 'Dash', symbol: 'DASH', category: 'utxo', decimals: 8 },
   { id: 'ZEC', name: 'Zcash', symbol: 'ZEC', category: 'utxo', decimals: 8 },
-  // EVM Chains
   { id: 'ETH', name: 'Ethereum', symbol: 'ETH', category: 'evm', decimals: 18 },
   { id: 'AVAX', name: 'Avalanche', symbol: 'AVAX', category: 'evm', decimals: 18 },
   { id: 'BSC', name: 'BNB Smart Chain', symbol: 'BNB', category: 'evm', decimals: 18 },
   { id: 'ARB', name: 'Arbitrum', symbol: 'ETH', category: 'evm', decimals: 18 },
-  // Cosmos Chains
   { id: 'GAIA', name: 'Cosmos Hub', symbol: 'ATOM', category: 'cosmos', decimals: 6 },
   { id: 'THOR', name: 'THORChain', symbol: 'RUNE', category: 'cosmos', decimals: 8 },
   { id: 'MAYA', name: 'Maya Protocol', symbol: 'CACAO', category: 'cosmos', decimals: 10 },
-  // Other Chains
   { id: 'XMR', name: 'Monero', symbol: 'XMR', category: 'other', decimals: 12 },
   { id: 'NEAR', name: 'NEAR', symbol: 'NEAR', category: 'other', decimals: 24 },
   { id: 'SOL', name: 'Solana', symbol: 'SOL', category: 'other', decimals: 9 },

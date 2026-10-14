@@ -48,7 +48,6 @@ describe('asset', () => {
       const amount = assetAmount(10)
       expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('10'))
-      // default decimal == 8
       expect(amount.decimal).toEqual(8)
     })
     it('should creates asset amount by given value and decimal', () => {
@@ -196,7 +195,6 @@ describe('asset', () => {
       const amount = baseToAsset(baseAmount(123))
       expect(amount.type).toEqual(Denomination.Asset)
       expect(amount.amount()).toEqual(bn('0.00000123'))
-      // 8 decimal by default
       expect(amount.decimal).toEqual(8)
     })
     it('should return asset by given base amounts and decimal', () => {

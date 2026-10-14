@@ -20,7 +20,6 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippag
   const canSwap = quote.canSwap && quote.errors.length === 0
   const exceedsSlippageTolerance = slippageToleranceBps !== undefined && quote.slipBasisPoints > slippageToleranceBps
 
-  // Calculate USD value of expected output
   const expectedUsdValue = prices.getValue(quote.expectedAmount)
 
   return (
@@ -36,7 +35,6 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippag
           : 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 cursor-not-allowed opacity-75'
       }`}
     >
-      {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="font-semibold text-gray-900 dark:text-gray-100">{quote.protocol}</span>
@@ -61,7 +59,6 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippag
         </div>
       </div>
 
-      {/* Expected Output */}
       <div className="mb-3">
         <div className="text-sm text-gray-500 dark:text-gray-400">Expected Output</div>
         <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -74,7 +71,6 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippag
         )}
       </div>
 
-      {/* Stats Row */}
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="flex items-center gap-2">
           <Percent className="w-4 h-4 text-gray-400" />
@@ -100,7 +96,6 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippag
         </div>
       </div>
 
-      {/* Fees */}
       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-500 dark:text-gray-400">Affiliate Fee:</span>
@@ -116,7 +111,6 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippag
         </div>
       </div>
 
-      {/* Warning */}
       {quote.warning && (
         <div className="mt-3 flex items-start gap-2 p-2 bg-yellow-50 dark:bg-yellow-900/30 rounded text-sm">
           <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
@@ -124,7 +118,6 @@ export function QuoteCard({ quote, isSelected, onSelect, isBest = false, slippag
         </div>
       )}
 
-      {/* Errors */}
       {quote.errors.length > 0 && (
         <div className="mt-3 space-y-1">
           {quote.errors.map((error, i) => (

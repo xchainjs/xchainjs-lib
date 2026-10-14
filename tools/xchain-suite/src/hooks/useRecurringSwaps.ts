@@ -36,7 +36,6 @@ export function useRecurringSwaps(swapService: SwapService | null, wallet: any):
   const [schedules, setSchedules] = useState<RecurringSchedule[]>([])
   const [isReady, setIsReady] = useState(false)
 
-  // Initialize or dispose scheduler when swapService/wallet change
   useEffect(() => {
     if (!swapService || !wallet) {
       if (schedulerRef.current) {

@@ -1,9 +1,4 @@
-/**
- * Lightweight Radix Gateway API client replacing the heavy
- * @radixdlt/babylon-gateway-api-sdk (~2.7 MB).
- *
- * Only implements the endpoints actually used by xchain-radix.
- */
+/** Replaces `@radixdlt/babylon-gateway-api-sdk` (~2.7 MB). Only the endpoints this package calls. */
 
 // #region Types
 

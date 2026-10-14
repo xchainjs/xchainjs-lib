@@ -47,10 +47,7 @@ type PartialTransactionPreviewResponse = {
     }
   }
 }
-/**
- * The main client for the Radix network which is then wrapped by the {Client} adapting it to have
- * a {BaseXChainClient} interface.
- */
+/** Wrapped by `Client` to match `BaseXChainClient`. */
 export class RadixSpecificClient {
   private innerNetwork: number
   private innerGateway: RadixGatewayApi
@@ -102,7 +99,6 @@ export class RadixSpecificClient {
     const balances: Balance[] = []
     const BATCH_SIZE = 50
 
-    // Split resources into batches of up to 50 items
     const resourceBatches = []
     for (let i = 0; i < resources.length; i += BATCH_SIZE) {
       resourceBatches.push(resources.slice(i, i + BATCH_SIZE))
@@ -145,7 +141,6 @@ export class RadixSpecificClient {
         }
       })
     }
-    // Iterate through resources
     return balances
   }
 
@@ -235,12 +230,10 @@ export class RadixSpecificClient {
     )
 
     const previewReceipt = (await this.previewIntent(intentWithHardcodedFee)) as PartialTransactionPreviewResponse
-    // Ensure that the preview was successful.
     if (previewReceipt.receipt.status !== 'Succeeded') {
       throw new Error(`Preview for fees was not successful.`)
     }
 
-    // Calculate the total fees
     const totalFees = [
       previewReceipt.receipt.fee_summary.xrd_total_execution_cost,
       previewReceipt.receipt.fee_summary.xrd_total_finalization_cost,
@@ -255,7 +248,6 @@ export class RadixSpecificClient {
     // to actually submit the transaction, ie: signature validation
     const totalFeesPlus10Percent = totalFees * 1.1
 
-    // Construct a new intent with the calculated fees.
     const manifest = methodsToCall
       ? RadixSpecificClient.createCustomTransferManifest(
           from,

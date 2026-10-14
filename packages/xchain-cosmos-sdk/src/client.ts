@@ -36,85 +36,54 @@ import {
 import { isAlreadyBroadcastError, roundRobinGetTx, roundRobinTry, tendermintTxHash } from './roundRobin'
 import { Balance, CompatibleAsset, Tx, TxFrom, TxParams, TxTo, TxsPage } from './types'
 
-/**
- * Represents the parameters required to configure a Cosmos SDK client.
- */
 export type CosmosSdkClientParams = XChainClientParams & {
-  chain: Chain // The chain identifier
-  clientUrls: Record<Network, string[]> // URLs for connecting to the chain's client
-  prefix: string // The prefix used for generating addresses
-  defaultDecimals: number // Default number of decimals for assets
-  defaultFee: BaseAmount // Default fee structure
-  baseDenom: string // Base denomination
-  registryTypes: Iterable<[string, GeneratedType]> // Custom registry types
+  chain: Chain
+  clientUrls: Record<Network, string[]>
+  prefix: string
+  defaultDecimals: number
+  defaultFee: BaseAmount
+  baseDenom: string
+  registryTypes: Iterable<[string, GeneratedType]>
 }
-/**
- * Enum representing different message types for transactions.
- */
 export enum MsgTypes {
   TRANSFER = 'transfer',
 }
 
-/**
- * Abstract class representing a generic implementation of an XChainClient interface for chains built with Cosmos SDK.
- * Uses dependencies from the official @cosmjs monorepo.
- */
 export default abstract class Client extends BaseXChainClient implements XChainClient {
-  private readonly defaultFee: BaseAmount // Default fee structure
+  private readonly defaultFee: BaseAmount
   private txLock: Promise<void> = Promise.resolve() // Serializes sign-and-broadcast operations
-  protected stargateClients: CachedValue<StargateClient[]> // Cached instance of StargateClient
-  protected prefix: string // Address prefix
-  protected readonly defaultDecimals: number // Default number of decimals for assets
-  protected readonly clientUrls: Record<Network, string[]> // URLs for connecting to the chain's client
-  protected readonly baseDenom: string // Base denomination
-  protected readonly registry: Registry // Registry instance for encoding and decoding data
+  protected stargateClients: CachedValue<StargateClient[]>
+  protected prefix: string
+  protected readonly defaultDecimals: number
+  protected readonly clientUrls: Record<Network, string[]>
+  protected readonly baseDenom: string
+  protected readonly registry: Registry
 
-  /**
-   * Constructor for initializing the Cosmos SDK client.
-   * @param {CosmosSdkClientParams} params Configuration parameters for the client
-   */
   constructor(params: CosmosSdkClientParams) {
-    super(params.chain, params) // Call the constructor of the superclass (BaseXChainClient)
-    this.clientUrls = params.clientUrls // Assign client URLs
-    this.prefix = this.getPrefix(this.getNetwork()) // Assign address prefix based on network
-    this.defaultDecimals = params.defaultDecimals // Assign default number of decimals
-    this.defaultFee = params.defaultFee // Assign default fee structure
-    this.baseDenom = params.baseDenom // Assign base denomination
-    this.registry = new Registry([...defaultRegistryTypes, ...params.registryTypes]) // Create a new registry
+    super(params.chain, params)
+    this.clientUrls = params.clientUrls
+    this.prefix = this.getPrefix(this.getNetwork())
+    this.defaultDecimals = params.defaultDecimals
+    this.defaultFee = params.defaultFee
+    this.baseDenom = params.baseDenom
+    this.registry = new Registry([...defaultRegistryTypes, ...params.registryTypes])
     this.stargateClients = new CachedValue<StargateClient[]>(() => {
       return this.connectToClientUrls(this.clientUrls[params.network || Network.Mainnet])
-    }) // Initialize StargateClient
+    })
   }
-  /**
-   * Connects the client to a given client URL.
-   * @private
-   * @param {string} clientUrl The URL of the client to connect to
-   * @returns {Promise<StargateClient>} The connected StargateClient instance
-   */
   private async connectClient(clientUrl: string) {
     return StargateClient.connect(clientUrl)
   }
 
-  /**
-   * Sets the network for the client to work with.
-   * @param {Network} network The network to set
-   * @returns {void}
-   */
   public setNetwork(network: Network): void {
-    super.setNetwork(network) // Call the superclass method to set the network
+    super.setNetwork(network)
     this.stargateClients = new CachedValue<StargateClient[]>(() => {
       return this.connectToClientUrls(this.clientUrls[network])
     })
-    // Reconnect with the new network
-    this.prefix = this.getPrefix(network) // Update the address prefix
+    this.prefix = this.getPrefix(network)
   }
 
-  /**
-   * Splits the amount and denomination strings.
-   * @private
-   * @param {string[]} amountsAndDenoms The strings in the format '3000uatom'
-   * @returns {Array} An array of objects containing the amount and denomination
-   */
+  /** Amount strings are `{amount}{denom}`, e.g. `3000uatom`. */
   private splitAmountAndDenom(amountsAndDenoms: string[]) {
     const amounAndDenomParsed: { amount: string; denom: string }[] = []
     amountsAndDenoms.forEach((amountAndDenom) => {
@@ -122,20 +91,14 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       const match = amountAndDenom.match(regex)
 
       if (match) {
-        const amount = match[1] // Extract the amount
-        const denom = match[2] // Extract the denomination
+        const amount = match[1]
+        const denom = match[2]
         amounAndDenomParsed.push({ amount, denom })
       }
     })
     return amounAndDenomParsed
   }
 
-  /**
-   * Maps the indexed transaction to the transaction type used by xchainjs.
-   * @private
-   * @param {IndexedTx} indexedTx The indexed transaction to transform
-   * @returns {Promise<Tx>} The transformed transaction
-   */
   private async mapIndexedTxToTx(indexedTx: IndexedTx): Promise<Tx> {
     const mapTo: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
     const mapFrom: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
@@ -164,11 +127,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
         }
 
         try {
-          // Split amount and denomination strings
           const allTokensInEvent = keyAmount.value.split(',') // More than one asset per event (kuji faucet example)
           const amounts = this.splitAmountAndDenom(allTokensInEvent)
           const denomAmountMap: Record<string, BaseAmount> = {}
-          // Calculate total amounts for each denomination
           amounts.forEach((amount) => {
             if (amount.denom in denomAmountMap) {
               denomAmountMap[amount.denom] = denomAmountMap[amount.denom].plus(
@@ -179,7 +140,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
             }
           })
           Object.entries(denomAmountMap).forEach(([denom, amount]) => {
-            // Fill to
             const asset = this.assetFromDenom(denom)
             if (asset) {
               const recipientAssetKey = `${keyRecipient.value}${assetToString(asset)}`
@@ -198,7 +158,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
                   address: keyRecipient.value,
                 })
               }
-              // Fill from
               const senderAssetKey = `${keySender.value}${assetToString(asset)}`
               if (mapFrom.has(senderAssetKey)) {
                 const currentTo = mapFrom.get(senderAssetKey) as {
@@ -222,7 +181,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
         }
       }
     })
-    // Initialize arrays to hold 'to' and 'from' transactions
     const txTo: TxTo[] = []
     for (const value of mapTo.values()) {
       const txToObj: TxTo = {
@@ -232,7 +190,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       }
       txTo.push(txToObj)
     }
-    // Populate 'to' and 'from' arrays from maps
     const txFrom: TxFrom[] = []
     for (const value of mapFrom.values()) {
       const txFromObj: TxFrom = {
@@ -250,7 +207,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     } catch {
       txDate = new Date(0)
     }
-    // Return the mapped transaction object
     return {
       asset:
         txFrom[0]?.asset ??
@@ -283,19 +239,10 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     })
   }
 
-  /**
-   * Returns the fee object in a generalized way for a simple transfer function.
-   * @returns {Fees} fees estimation for average, fast and fastests scenarios.
-   */
   getFees(): Promise<Fees> {
     return Promise.resolve(singleFee(FeeType.FlatFee, this.defaultFee))
   }
 
-  /**
-   * Validates the format of the provided address.
-   * @param {string} address The address to be validated.
-   * @returns {boolean} Returns true if the address is valid, otherwise false.
-   */
   public validateAddress(address: string): boolean {
     try {
       const { prefix: decodedPrefix } = fromBech32(address)
@@ -308,12 +255,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
   }
 
-  /**
-   * Obtains the balances of the specified address for all assets on the network.
-   * @param {string} address The address for which balances are to be retrieved.
-   * @param {Asset[] | undefined} assets An array of assets. Ignored in this implementation.
-   * @returns {Balance[]} A promise that resolves to an array of balances.
-   */
   public async getBalance(address: string, assets?: CompatibleAsset[]): Promise<Balance[]> {
     const results = await this.roundRobinGetBalance(address)
     const nativeAssetInfo = this.getAssetInfo()
@@ -356,11 +297,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return requestedBalances
   }
 
-  /**
-   * Retrieves transactions filtered using specified parameters.
-   * @param {TxHistoryParams | undefined} params Parameters for filtering transactions. Only the 'address' parameter is supported in this client.
-   * @returns {TxsPage} A promise that resolves to an array of transactions.
-   */
   public async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     // TODO: Use all filters
     if (params?.startTime || params?.limit || params?.offset) {
@@ -397,12 +333,6 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     }
   }
 
-  /**
-   * Retrieves transaction data using the transaction ID.
-   * @param {string} txId The identifier of the transaction.
-   * @param {string | undefined} _assetAddress Ignored parameter.
-   * @returns {Tx} A promise that resolves to transaction data.
-   */
   public async getTransactionData(txId: string, _assetAddress?: string): Promise<Tx> {
     const tx = await this.roundRobinGetTransaction(txId)
     return this.mapIndexedTxToTx(tx)
@@ -413,33 +343,16 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return txResponse.transactionHash
   }
 
-  /**
-   * Get the chain id of the network connected the client is connected
-   * @returns {string} - The chain id
-   * @throws {Error} If the chain id can not be retrieved
-   */
   protected async getChainId(): Promise<string> {
     return this.roundRobinGetChainId()
   }
 
-  /**
-   * Get the account of an address
-   * @param {Address} address - The address of which return the account
-   * @returns {Account} - The address account
-   * @throws {Error} If the account can not be retrieved
-   */
   protected async getAccount(address: Address): Promise<Account> {
     const account = await this.roundRobinGetAccount(address)
     if (!account) throw Error('Con not retrieve account. Account is null')
     return account
   }
 
-  /**
-   * Connect to each url provided
-   *
-   * @param {string[]} urls URLs of the providers to connect
-   * @returns {StargateClient[]} List of the providers that can be used to interact with the blockchain
-   */
   private async connectToClientUrls(urls: string[]): Promise<StargateClient[]> {
     const results = await Promise.allSettled(
       urls.map((url) => {
@@ -456,23 +369,11 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     return clients
   }
 
-  /**
-   * Retrieve the balance of an address making a round robin over the clients urls provided to the client
-   * @param {string} address The address for which balances are to be retrieved.
-   * @returns {Coin[]} List of balances of the address
-   * @throws {Error} if balance can not be retrieved
-   */
   private async roundRobinGetBalance(address: Address): Promise<readonly Coin[]> {
     const clients = await this.stargateClients.getValue()
     return roundRobinTry(clients, `retrieve balances for ${address}`, (client) => client.getAllBalances(address))
   }
 
-  /**
-   * Retrieve a block making a round robin over the clients urls provided to the client
-   * @param {number} height The height of the block to be retrieved.
-   * @returns {Block} The block linked to the height provided
-   * @throws {Error} if the block can not be retrieved
-   */
   private async roundRobinGetBlock(height: number): Promise<Block> {
     const clients = await this.stargateClients.getValue()
     return roundRobinTry(clients, `retrieve block ${height}`, (client) => client.getBlock(height), {
@@ -483,23 +384,14 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   /**
-   * Retrieve a transaction making a round robin over the clients urls provided to the client
-   * @param {string} txId The hash of the transaction to be retrieved.
-   * @returns {IndexedTx} The transaction linked to the hash provided
-   * @throws {TxNotFoundError} if no client returns the tx (distinct from RPC unavailability)
-   * @throws {Error} if no client is reachable
+   * @throws {TxNotFoundError} if no client returns the tx (distinct from RPC unavailability).
+   * @throws {Error} if no client is reachable.
    */
   private async roundRobinGetTransaction(txId: string): Promise<IndexedTx> {
     const clients = await this.stargateClients.getValue()
     return roundRobinGetTx(clients, txId, (client) => client.getTx(txId))
   }
 
-  /**
-   * Broadcast a raw signed transaction making a round robin over the clients urls provided to the client
-   * @param {Uint8Array} txHex The raw signed transaction to be broadcast.
-   * @returns {DeliverTxResponse} The broadcasted transaction
-   * @throws {Error} if the transaction can not be broadcasted
-   */
   private async roundRobinBroadcast(txHex: Uint8Array): Promise<DeliverTxResponse> {
     const clients = await this.stargateClients.getValue()
     const knownHash = tendermintTxHash(txHex)
@@ -516,34 +408,16 @@ export default abstract class Client extends BaseXChainClient implements XChainC
     })
   }
 
-  /**
-   * Search transactions by the filters provided making a round robin over the clients urls provided to the client
-   * @param {{ key: string; value: string }[]} filters The raw signed transaction to be broadcast.
-   * @returns {IndexedTx[]} The broadcasted transaction
-   * @throws {Error} if the transaction can not be broadcasted
-   */
   private async roundRobinSearchTx(filters: { key: string; value: string }[]): Promise<IndexedTx[]> {
     const clients = await this.stargateClients.getValue()
     return roundRobinTry(clients, 'search transaction', (client) => client.searchTx(filters))
   }
 
-  /**
-   * Get the account of an address making a round robin system over the stargate clients
-   * @param {Address} address - The address of which return the account
-   * @returns {Account | null} - The account if it is found
-   * @throws {Error} If the account can not be retrieved from the stargate clients
-   */
   private async roundRobinGetAccount(address: Address): Promise<Account | null> {
     const clients = await this.stargateClients.getValue()
     return roundRobinTry(clients, 'get address account', (client) => client.getAccount(address))
   }
 
-  /**
-   * Get the chain id of the network connected the client is connected making a round robin over
-   * the stargate clients
-   * @returns {string} - The chain id
-   * @throws {Error} If the chain id can not be retrieved from the stargate clients
-   */
   private async roundRobinGetChainId(): Promise<string> {
     const clients = await this.stargateClients.getValue()
     return roundRobinTry(clients, 'get chain id', (client) => client.getChainId())

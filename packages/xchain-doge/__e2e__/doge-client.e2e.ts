@@ -129,7 +129,6 @@ describe('Dogecoin Integration Tests', () => {
 
       const recipient = 'testaddress'
 
-      // Use transferMax - handles signing and broadcasting internally
       const { hash, maxAmount, fee } = await dogeclient.transferMax({
         recipient,
         memo: 'sweep',

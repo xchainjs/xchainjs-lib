@@ -32,39 +32,24 @@ type TransactionFlag = {
   skip_epoch_check: boolean
 }
 
-/**
- * Radix balance
- */
 export type Balance = BaseBalance & {
   asset: CompatibleAsset
 }
 
-/**
- * Type definition for the sender of a Radix transaction.
- */
 export type TxFrom = BaseTxFrom & {
   asset?: CompatibleAsset
 }
 
-/**
- * Type definition for the recipient of a Radix transaction.
- */
 export type TxTo = BaseTxTo & {
   asset?: CompatibleAsset
 }
 
-/**
- * Type definition for a Radix transaction.
- */
 export type Tx = BaseTx & {
   asset: CompatibleAsset
   from: TxFrom[]
   to: TxTo[]
 }
 
-/**
- * Type definition for a page of Radix transactions.
- */
 export type TxsPage = BaseTxsPage & {
   txs: Tx[]
 }

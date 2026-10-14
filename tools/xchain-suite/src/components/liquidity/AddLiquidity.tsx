@@ -33,23 +33,19 @@ export function AddLiquidity({ thorchainAmm, wallet, supportedChains }: AddLiqui
   const [showConfirm, setShowConfirm] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<AddLpResult>()
 
-  // Get chain from pool
   const poolChain = pool.split('.')[0]
 
-  // Fetch balances
   useEffect(() => {
     if (!wallet) return
 
     const fetchBalances = async () => {
       try {
-        // RUNE balance
         const runeBalances = await wallet.getBalance('THOR')
         const rune = runeBalances.find((b: any) => b.asset.symbol === 'RUNE')
         if (rune) {
           setRuneBalance(baseToAsset(rune.amount).amount().toFixed(4))
         }
 
-        // Asset balance
         const assetBalances = await wallet.getBalance(poolChain)
         if (assetBalances.length > 0) {
           setAssetBalance(baseToAsset(assetBalances[0].amount).amount().toFixed(8))
@@ -71,7 +67,6 @@ export function AddLiquidity({ thorchainAmm, wallet, supportedChains }: AddLiqui
       const runeAsset = assetFromStringEx('THOR.RUNE') as Asset
       const poolAsset = assetFromStringEx(pool) as Asset | TokenAsset
 
-      // Get decimals for the pool asset
       const decimals = poolChain === 'ETH' || poolChain === 'AVAX' || poolChain === 'BSC' ? 18 : 8
 
       const rune = new AssetCryptoAmount(
@@ -217,7 +212,6 @@ console.log('Transaction:', result)`
         {loading ? 'Adding Liquidity...' : 'Add Liquidity'}
       </button>
 
-      {/* Confirm Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">

@@ -93,7 +93,6 @@ interface ScheduleCardProps {
 export function ScheduleCard({ schedule, history, onPause, onResume, onCancel, wallet }: ScheduleCardProps) {
   const [expanded, setExpanded] = useState(false)
 
-  // Fetch balance to show swaps remaining
   const [swapsRemaining, setSwapsRemaining] = useState<number | null>(null)
 
   useEffect(() => {
@@ -138,7 +137,6 @@ export function ScheduleCard({ schedule, history, onPause, onResume, onCancel, w
 
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-      {/* Header */}
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -159,7 +157,6 @@ export function ScheduleCard({ schedule, history, onPause, onResume, onCancel, w
           <StatusBadge status={schedule.status} />
         </div>
 
-        {/* Details row */}
         <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
           <span>{INTERVAL_LABELS[schedule.interval]}</span>
           <span>via {schedule.protocol}</span>
@@ -171,7 +168,6 @@ export function ScheduleCard({ schedule, history, onPause, onResume, onCancel, w
           )}
         </div>
 
-        {/* Stats row */}
         <div className="flex items-center gap-4 mt-2 text-xs">
           <span className="text-gray-500 dark:text-gray-400">
             Total: {schedule.totalExecutions}
@@ -186,7 +182,6 @@ export function ScheduleCard({ schedule, history, onPause, onResume, onCancel, w
           )}
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2 mt-3">
           {schedule.status === 'active' && (
             <button
@@ -224,7 +219,6 @@ export function ScheduleCard({ schedule, history, onPause, onResume, onCancel, w
         </div>
       </div>
 
-      {/* History table */}
       {expanded && history.length > 0 && (
         <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3 bg-gray-50 dark:bg-gray-900/50 max-h-60 overflow-y-auto">
           <table className="w-full">

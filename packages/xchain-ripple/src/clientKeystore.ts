@@ -11,9 +11,6 @@ export class ClientKeystore extends Client {
     super(clientParams)
   }
 
-  /**
-   * get xrpl wallet by mnemonic phrase and derivation path
-   */
   public getXrplWallet(walletIndex = 0) {
     if (!this.phrase) throw new Error('Phrase must be provided')
 
@@ -24,31 +21,15 @@ export class ClientKeystore extends Client {
     })
   }
 
-  /**
-   * Get the current address synchronously.
-   */
   public getAddress(walletIndex = 0): string {
     const wallet = this.getXrplWallet(walletIndex)
     return wallet.address
   }
 
-  /**
-   * Get the current address asynchronously.
-   *
-   * @param {number} index The index of the address. Default 0
-   * @returns {Address} The XRP address related to the index provided.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   */
   public async getAddressAsync(walletIndex = 0): Promise<string> {
     return this.getAddress(walletIndex)
   }
 
-  /**
-   * Return signed tx
-   * @param payment prepared xrp payment tx
-   * @param walletIndex wallet index
-   * @returns Transaction signed by phrase
-   */
   public async signTransaction(payment: Payment, walletIndex = 0): Promise<SignedTransaction> {
     const xrplAccount = this.getXrplWallet(walletIndex)
     return xrplAccount.sign(payment)

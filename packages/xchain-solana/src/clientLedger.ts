@@ -19,9 +19,6 @@ import { SOLClientParams, TxParams } from './types'
 
 export type SOLClientLedgerParams = SOLClientParams & { transport: Transport }
 
-/**
- * Custom Tron Ledger client extending the base Tron client
- */
 class ClientLedger extends Client {
   private transport: Transport
   private ledgerApp: SolanaLedgerApp | undefined
@@ -42,32 +39,23 @@ class ClientLedger extends Client {
     return this.ledgerApp
   }
 
-  // Get the current address synchronously - not supported for Ledger Client
   getAddress(): string {
     throw Error('Sync method not supported for Ledger')
   }
 
-  // get derivation path for ledger
   getDerivationPath(index = 0): string {
     const derivationPath = this.getFullDerivationPath(index)
     return derivationPath.replace(/^m\//, '')
   }
 
-  // Get the current address asynchronously
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const derivationPath = this.getDerivationPath(index)
     const result = await this.getApp().getAddress(derivationPath, verify)
 
     const publicKey = new PublicKey(Buffer.from(result.address))
-    return publicKey.toBase58() // return base58 solana address format
+    return publicKey.toBase58()
   }
 
-  /**
-   * Transfers SOL or Solana token using ledger
-   *
-   * @param {TxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   */
   public async transfer({
     walletIndex = 0,
     recipient,
@@ -92,7 +80,6 @@ class ClientLedger extends Client {
         transaction.feePayer = new PublicKey(sender)
 
         if (!asset || eqAsset(asset, this.getAssetInfo().asset)) {
-          // Native transfer
           transaction.add(
             SystemProgram.transfer({
               fromPubkey,
@@ -101,7 +88,6 @@ class ClientLedger extends Client {
             }),
           )
         } else {
-          // Token transfer
           const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
           const fromAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, fromPubkey)
           let fromTokenAccount: Account
@@ -168,15 +154,13 @@ class ClientLedger extends Client {
           throw new Error('failed signing tx by ledger')
         }
 
-        // Attach Ledger signature
         transaction.addSignature(new PublicKey(sender), Buffer.from(signature))
 
-        // Verify it's valid (optional, sanity check)
+        // Optional sanity check.
         if (!transaction.verifySignatures()) {
           throw new Error('Signature verification failed')
         }
 
-        // Serialize the signed transaction
         const signedTx = transaction.serialize()
 
         return this.broadcastTx(bs58.encode(signedTx))

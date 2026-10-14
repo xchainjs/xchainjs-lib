@@ -15,20 +15,19 @@ import {
   explorerProviders,
 } from '../src/const'
 
-// Default parameters for Bitcoin Cash (BCH) client
 export const defaultBchParams: UtxoClientParams = {
-  network: Network.Mainnet, // Default network is Mainnet
-  phrase: '', // Default empty phrase
-  explorerProviders: explorerProviders, // Default explorer providers
-  dataProviders: [BitgoProviders, HaskoinDataProviders], // Default data providers
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [BitgoProviders, HaskoinDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `m/44'/145'/0'/0/`, // Default root derivation path for Mainnet
-    [Network.Testnet]: `m/44'/1'/0'/0/`, // Default root derivation path for Testnet
-    [Network.Stagenet]: `m/44'/145'/0'/0/`, // Default root derivation path for Stagenet
+    [Network.Mainnet]: `m/44'/145'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+    [Network.Stagenet]: `m/44'/145'/0'/0/`,
   },
   feeBounds: {
-    lower: LOWER_FEE_BOUND, // Default lower fee bound
-    upper: UPPER_FEE_BOUND, // Default upper fee bound
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
   },
 }
 
@@ -203,11 +202,9 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     const { fees, rates } = await bchClient.getFeesWithRates()
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -218,11 +215,9 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     const { fees, rates } = await bchClient.getFeesWithRates()
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -233,11 +228,9 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     const { fees, rates } = await bchClient.getFeesWithRates({ memo: 'SWAP:THOR.RUNE' })
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()

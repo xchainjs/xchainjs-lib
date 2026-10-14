@@ -64,7 +64,6 @@ export function Sweep({ chainId, client }: SweepProps) {
     }
   }, [client, decimals])
 
-  // Fetch balance and fee rate when client is available
   useEffect(() => {
     const fetchInfo = async () => {
       if (!client) {
@@ -74,7 +73,6 @@ export function Sweep({ chainId, client }: SweepProps) {
       }
       setLoadingInfo(true)
 
-      // Fetch balance
       await fetchBalance()
 
       // Fetch fee rate separately so balance still shows if this fails. Skip when the
@@ -96,7 +94,6 @@ export function Sweep({ chainId, client }: SweepProps) {
     fetchInfo()
   }, [client, chainId, fetchBalance])
 
-  // Reset balance to 0 after successful sweep
   useEffect(() => {
     if (result) {
       setBalance('0')
@@ -116,7 +113,6 @@ export function Sweep({ chainId, client }: SweepProps) {
         feeRate: feeRate ?? undefined,
       })
 
-      // Convert satoshis to asset amount for display
       const amountAsset = baseToAsset(baseAmount(txResult.maxAmount, decimals))
       const feeAsset = baseToAsset(baseAmount(txResult.fee, decimals))
 
@@ -139,7 +135,6 @@ export function Sweep({ chainId, client }: SweepProps) {
         </p>
       </div>
 
-      {/* Balance Info */}
       <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600 dark:text-gray-400">Available Balance</span>

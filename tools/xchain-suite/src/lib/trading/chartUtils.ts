@@ -71,14 +71,12 @@ export function getActualMidgardInterval(interval: TimeInterval): string {
   return MIDGARD_INTERVALS[interval]
 }
 
-// All tradeable assets
 export const TRADE_ASSETS = [
   'BTC', 'ETH', 'SOL', 'AVAX', 'DOGE', 'LTC', 'BCH', 'XRP', 'ADA',
   'BNB', 'ARB', 'SUI', 'GAIA', 'THOR', 'MAYA', 'DASH', 'ZEC',
   'XMR',
 ]
 
-// Binance interval mapping
 export const BINANCE_INTERVALS: Record<TimeInterval, string> = {
   '1m': '1m',
   '5m': '5m',
@@ -100,7 +98,6 @@ export const MIDGARD_INTERVALS: Record<TimeInterval, string> = {
   '1W': 'week',
 }
 
-// Trend line localStorage
 const TREND_LINE_KEY_PREFIX = 'xchain-suite-trend-lines-'
 
 export function loadTrendLines(asset: string): TrendLine[] {

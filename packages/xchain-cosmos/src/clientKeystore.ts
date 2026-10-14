@@ -17,20 +17,10 @@ export class ClientKeystore extends Client {
   constructor(params: CosmosClientParams = defaultClientConfig) {
     super(params)
   }
-  /**
-   * Asynchronous version of getAddress method.
-   * @param {number} index Derivation path index of the address to be generated.
-   * @returns {string} A promise that resolves to the generated address.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
-  /**
-   * Get the address derived from the provided phrase.
-   * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
-   * @returns {string} The user address at the specified walletIndex.
-   */
   public getAddress(walletIndex?: number): string {
     const seed = getSeed(this.phrase)
     const node = HDKey.fromMasterSeed(new Uint8Array(seed))
@@ -72,11 +62,7 @@ export class ClientKeystore extends Client {
     return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
   }
 
-  /**
-   * Hashes a buffer using SHA256 followed by RIPEMD160 or RMD160.
-   * @param {Uint8Array} buffer The buffer to hash
-   * @returns {Uint8Array} The hashed buffer
-   */
+  /** Hashes a buffer using SHA256 followed by RIPEMD160 or RMD160. */
   private hash160(buffer: Uint8Array): Buffer {
     const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
     try {
@@ -87,14 +73,8 @@ export class ClientKeystore extends Client {
   }
 
   /**
-   * Sign a transfer making a round robin over the clients urls provided to the client.
    * Does not broadcast — callers must broadcast the signed bytes once via broadcastTx.
    * Named separately from Client.roundRobinSign to avoid a private-member subclass clash.
-   *
-   * @param {string} sender Sender address
-   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
-   * @param {DirectSecp256k1HdWallet} signer Signer
-   * @returns {TxRaw} The raw signed transaction
    */
   private async roundRobinSignTransfer(
     sender: string,
@@ -110,12 +90,7 @@ export class ClientKeystore extends Client {
         return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
       })
 
-      return signingClient.sign(
-        sender,
-        messages,
-        this.getStandardFee(this.getAssetInfo().asset),
-        unsignedTx.body.memo,
-      )
+      return signingClient.sign(sender, messages, this.getStandardFee(this.getAssetInfo().asset), unsignedTx.body.memo)
     })
   }
 }

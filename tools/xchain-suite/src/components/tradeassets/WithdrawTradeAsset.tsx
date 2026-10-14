@@ -42,7 +42,6 @@ export function WithdrawTradeAsset({ thorchainAmm, mayachainAmm, wallet }: Withd
   const amm = protocol === 'thorchain' ? thorchainAmm : mayachainAmm
   const protocolPrefix = protocol === 'thorchain' ? 'THOR' : 'MAYA'
 
-  // Fetch trade account balance
   const fetchBalance = useCallback(async () => {
     if (!wallet || !amm) return
     setLoadingBalance(true)
@@ -146,7 +145,6 @@ console.log('Withdraw TX:', result.hash)`
 
   return (
     <div className="space-y-5">
-      {/* Protocol Selector */}
       <div className="flex rounded-lg bg-gray-100 dark:bg-gray-700/50 p-1">
         {(['thorchain', 'mayachain'] as Protocol[]).map((p) => (
           <button
@@ -163,7 +161,6 @@ console.log('Withdraw TX:', result.hash)`
         ))}
       </div>
 
-      {/* From (Trade Asset) Card */}
       <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">You Send (Trade Asset)</span>
@@ -175,7 +172,6 @@ console.log('Withdraw TX:', result.hash)`
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Asset Selector */}
           <div className="relative">
             <select
               value={selectedAsset.tradeSymbol}
@@ -199,7 +195,6 @@ console.log('Withdraw TX:', result.hash)`
             </div>
           </div>
 
-          {/* Amount + Max */}
           <div className="flex-1 flex items-center gap-2">
             <input
               type="text"
@@ -219,14 +214,12 @@ console.log('Withdraw TX:', result.hash)`
         </div>
       </div>
 
-      {/* Arrow */}
       <div className="flex justify-center -my-2">
         <div className="p-2 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm">
           <ArrowRight size={16} className="text-orange-500" />
         </div>
       </div>
 
-      {/* Receive (L1) Card */}
       <div className="rounded-xl border border-orange-200 dark:border-orange-800/50 bg-orange-50/50 dark:bg-orange-900/10 p-4">
         <div className="flex items-center justify-between mb-3">
           <span className="text-xs font-medium text-orange-600 dark:text-orange-400 uppercase tracking-wide">You Receive (L1)</span>
@@ -242,7 +235,6 @@ console.log('Withdraw TX:', result.hash)`
         </div>
       </div>
 
-      {/* Withdraw Button */}
       <button
         onClick={handleWithdraw}
         disabled={!amount || withdrawOp.loading}
@@ -251,7 +243,6 @@ console.log('Withdraw TX:', result.hash)`
         {withdrawOp.loading ? 'Withdrawing...' : `Withdraw ${selectedAsset.tradeSymbol}`}
       </button>
 
-      {/* Result */}
       <ResultPanel loading={withdrawOp.loading} error={withdrawOp.error} duration={withdrawOp.duration}>
         {withdrawOp.result && (
           <div className="space-y-2">

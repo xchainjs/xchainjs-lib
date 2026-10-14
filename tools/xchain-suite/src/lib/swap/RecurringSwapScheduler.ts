@@ -223,7 +223,6 @@ export class RecurringSwapScheduler {
 
       const fromAddress = await this.wallet.getAddress(schedule.fromAsset.chainId)
 
-      // Check balance before attempting swap
       try {
         const assets = schedule.fromAsset.contractAddress ? [fromAssetObj] : undefined
         const balances = await this.wallet.getBalance(schedule.fromAsset.chainId, assets)
@@ -265,7 +264,6 @@ export class RecurringSwapScheduler {
         ...streamingParams,
       }
 
-      // Get quote for the selected protocol
       const quotes = await this.swapService.estimateSwap(swapParams)
       const quote = quotes.find((q: SwapQuote) => q.protocol === schedule.protocol)
 
@@ -288,7 +286,6 @@ export class RecurringSwapScheduler {
         return
       }
 
-      // Execute the swap
       const result = await this.swapService.doSwap({ ...swapParams, protocol: schedule.protocol })
 
       schedule.consecutiveFailures = 0
@@ -337,7 +334,6 @@ export class RecurringSwapScheduler {
       ...record,
     })
 
-    // Cap history
     if (history.length > MAX_HISTORY) {
       history.length = MAX_HISTORY
     }
@@ -372,12 +368,10 @@ export class RecurringSwapScheduler {
       if (!raw) return
       const data: RecurringSchedule[] = JSON.parse(raw)
       for (const schedule of data) {
-        // Validate critical numeric fields
         const amount = Number(schedule.amount)
         if (!schedule.id || !Number.isFinite(amount) || amount <= 0) continue
         if (!INTERVAL_MS[schedule.interval]) continue
 
-        // Sanitize numeric fields
         schedule.consecutiveFailures = Math.max(0, Number(schedule.consecutiveFailures) || 0)
         schedule.totalExecutions = Math.max(0, Number(schedule.totalExecutions) || 0)
         schedule.maxSlippageBps = Math.max(1, Math.min(Number(schedule.maxSlippageBps) || 300, 10000))

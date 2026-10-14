@@ -209,11 +209,9 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const { fees, rates } = await dogeClient.getFeesWithRates()
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -223,11 +221,9 @@ describe('DogecoinClient Test', () => {
     dogeClient.setNetwork(Network.Testnet)
     dogeClient.setPhrase(phraseOne)
     const { fees, rates } = await dogeClient.getFeesWithRates({ memo: MEMO })
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -320,7 +316,6 @@ describe('DogecoinClient Test', () => {
   it('should get address transactions with limit', async () => {
     dogeClient.setNetwork(Network.Testnet)
 
-    // Limit should work
     const txPages = await dogeClient.getTransactions({ address: 'nVhTSAcDWg5PihJA7FCx6G6jLexRz7qhsB', limit: 1 })
     return expect(txPages.txs.length).toEqual(1)
   })

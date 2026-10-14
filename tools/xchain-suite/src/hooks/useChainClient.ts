@@ -9,10 +9,7 @@ interface UseChainClientResult {
   error: Error | null
 }
 
-/**
- * Hook that creates a client for the given chain ID.
- * Supports phrase/keystore wallets and Ledger (BTC + ETH only).
- */
+/** Supports phrase/keystore wallets and Ledger (BTC + ETH only). */
 export function useChainClient(chainId: string): UseChainClientResult {
   const {
     phrase,
