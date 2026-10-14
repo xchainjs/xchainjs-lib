@@ -1,4 +1,3 @@
-// Import necessary modules and classes from external packages and files
 import { ExplorerProvider, Network } from '@xchainjs/xchain-client'
 import { EVMClientParams } from '@xchainjs/xchain-evm'
 import { RoutescanProvider } from '@xchainjs/xchain-evm-providers'
@@ -6,7 +5,6 @@ import { Asset, AssetType, TokenAsset } from '@xchainjs/xchain-util'
 import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
 
-// Define constants related to Arbitrum
 export const ARB_DECIMAL = 18
 export const LOWER_FEE_BOUND = 100_000_00
 export const UPPER_FEE_BOUND = 1_000_000_000
@@ -15,7 +13,6 @@ export const ARBChain = 'ARB' as const
 // ARB ETH Gas asset
 export const AssetAETH: Asset = { chain: ARBChain, symbol: 'ETH', ticker: 'ETH', type: AssetType.NATIVE }
 
-// ARB
 export const AssetARB: TokenAsset = {
   chain: ARBChain,
   symbol: 'ARB-0x912ce59144191c1204e64559fe8253a0e49e6548',
@@ -23,11 +20,9 @@ export const AssetARB: TokenAsset = {
   type: AssetType.TOKEN,
 }
 
-// Define JSON-RPC providers for mainnet and testnet
 const ARBITRUM_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider('https://arb1.arbitrum.io/rpc')
 const ARBITRUM_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://goerli-rollup.arbitrum.io/rpc')
 
-// Define ethers providers for different networks
 const ethersJSProviders = {
   [Network.Mainnet]: ARBITRUM_MAINNET_ETHERS_PROVIDER,
   [Network.Testnet]: ARBITRUM_TESTNET_ETHERS_PROVIDER,
@@ -59,7 +54,6 @@ const routescanProviders = {
   [Network.Stagenet]: ROUTESCAN_PROVIDER_MAINNET,
 }
 
-// Define explorer providers for mainnet and testnet
 const ARB_MAINNET_EXPLORER = new ExplorerProvider(
   'https://arbiscan.io/',
   'https://arbiscan.io/address/%%ADDRESS%%',
@@ -72,21 +66,18 @@ const ARB_TESTNET_EXPLORER = new ExplorerProvider(
   'https://goerli.arbiscan.io/tx/%%TX_ID%%',
 )
 
-// Define explorer providers for different networks
 const arbExplorerProviders = {
   [Network.Mainnet]: ARB_MAINNET_EXPLORER,
   [Network.Testnet]: ARB_TESTNET_EXPLORER,
   [Network.Stagenet]: ARB_MAINNET_EXPLORER,
 }
 
-// Define root derivation paths for different networks
 const ethRootDerivationPaths = {
   [Network.Mainnet]: `m/44'/60'/0'/0/`,
   [Network.Testnet]: `m/44'/60'/0'/0/`,
   [Network.Stagenet]: `m/44'/60'/0'/0/`,
 }
 
-// Define default parameters for the Arbitrum client
 const defaults = {
   [Network.Mainnet]: {
     approveGasLimit: new BigNumber(200000),
@@ -108,7 +99,6 @@ const defaults = {
   },
 }
 
-// Define the default parameters for the Arbitrum client
 export const defaultArbParams: EVMClientParams = {
   chain: ARBChain,
   gasAsset: AssetAETH,

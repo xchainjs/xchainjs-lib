@@ -5,76 +5,36 @@ import { Asset, AssetType, TokenAsset, baseAmount, BaseAmount } from '@xchainjs/
 import types from './types/proto/MsgCompiled'
 import { getDefaultClientUrls, getDefaultRootDerivationPaths } from './utils'
 
-/**
- * Number of decimals for the CACAO asset.
- */
 export const CACAO_DECIMAL = 10
 
-/**
- * Denomination for the CACAO asset.
- */
 export const CACAO_DENOM = 'cacao'
 
-/**
- * Denomination for the MAYA asset.
- */
 export const MAYA_DENOM = 'maya'
 
-/**
- * Number of decimals for the MAYA asset.
- */
 export const MAYA_DECIMAL = 4
 
-/**
- * Number of decimals for the synthetic assets.
- */
 export const SYNTH_DECIMAL = 8
 
-/**
- * Default gas limit value for transactions.
- */
 export const DEFAULT_GAS_LIMIT_VALUE = '4000000'
 
-/**
- * Gas limit value for deposit transactions.
- */
 export const DEPOSIT_GAS_LIMIT_VALUE = '600000000'
 
-/**
- * Chain identifier for MayaChain.
- */
 export const MAYAChain = 'MAYA' as const
 
-/**
- * Default fee for MayaChain transactions.
- */
 export const DEFAULT_FEE: BaseAmount = baseAmount(2000000000, CACAO_DECIMAL)
 
 /**
- * Base "chain" asset on MayaChain main net.
  * Based on definition in mayachain `common`
  * @see https://gitlab.com/mayachain/mayanode
  */
 export const AssetCacao: Asset = { chain: MAYAChain, symbol: 'CACAO', ticker: 'CACAO', type: AssetType.NATIVE }
 
-/**
- * Maya asset.
- */
 export const AssetMaya: TokenAsset = { chain: MAYAChain, symbol: 'MAYA', ticker: 'MAYA', type: AssetType.TOKEN }
 
-/**
- * Message type URL used to send transactions.
- */
 export const MSG_SEND_TYPE_URL = '/types.MsgSend' as const
 
-/**
- * Message type URL used for deposit transactions.
- */
 export const MSG_DEPOSIT_TYPE_URL = '/types.MsgDeposit' as const
 
-/**
- * Default configuration parameters used by the client.
- */
 export const defaultClientConfig: CosmosSdkClientParams = {
   chain: AssetCacao.chain,
   network: Network.Mainnet,

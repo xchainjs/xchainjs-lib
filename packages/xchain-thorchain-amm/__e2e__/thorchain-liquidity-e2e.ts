@@ -30,7 +30,6 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 
 import { ThorchainAMM } from '../src/thorchain-amm'
 
-// mainnet asset
 const BUSDC = assetFromStringEx('BSC.USDC-0X8AC76A51CC950D9822D68B83FE1AD97B32CD580D') as TokenAsset
 
 function printLiquidityPosition(liquidityPosition: LiquidityPosition) {
@@ -69,7 +68,6 @@ describe('ThorchainAmm e2e tests', () => {
       thorchainAmm = new ThorchainAMM(thorchainQuery, wallet)
     })
 
-    // Check liquidity position
     it(`Should check liquidity position`, async () => {
       const lpPosition = await thorchainQuery.checkLiquidityPosition(
         BUSDC,
@@ -78,7 +76,6 @@ describe('ThorchainAmm e2e tests', () => {
       printLiquidityPosition(lpPosition)
     })
 
-    // Add liquidity positions
     it(`Should add BUSDC liquidity asymmetrically to BUSDC pool`, async () => {
       const hash = await thorchainAmm.addLiquidityPosition({
         asset: new CryptoAmount(assetToBase(assetAmount(2)), BUSDC),
@@ -89,7 +86,6 @@ describe('ThorchainAmm e2e tests', () => {
       expect(hash).toBeTruthy()
     })
 
-    // Add liquidity positions
     it(`Should add Atom liquidity asymmetrically to Atom pool`, async () => {
       const hash = await thorchainAmm.addLiquidityPosition({
         asset: new CryptoAmount(assetToBase(assetAmount(0.1, COSMOS_DECIMAL)), AssetATOM),
@@ -134,7 +130,6 @@ describe('ThorchainAmm e2e tests', () => {
 
     it(`Should add BUSDC & RUNE liquidity symmetrically to BUSDC pool`, async () => {
       const poolRatio = await thorchainQuery.getPoolRatios(BUSDC)
-      // get ratios for pool and retrieve rune amount
       const busdtAmount = poolRatio.assetToRune.times(3)
       const runeAmount = poolRatio.runeToAsset.times(busdtAmount)
       const hash = await thorchainAmm.addLiquidityPosition({
@@ -146,9 +141,8 @@ describe('ThorchainAmm e2e tests', () => {
       expect(hash).toBeTruthy()
     })
 
-    // Remove Liquidity Positions
     it(`Should remove BUSD only liquidity asymmetrically from the BUSD pool`, async () => {
-      const percentage = 100 // gets converted to basis points later
+      const percentage = 100
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
         asset: BUSDC,
@@ -160,7 +154,7 @@ describe('ThorchainAmm e2e tests', () => {
     })
 
     it(`Should remove Rune liquidity asymetrically from the BUSD pool`, async () => {
-      const percentage = 100 // gets converted to basis points later
+      const percentage = 100
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
         asset: BUSDC,
@@ -172,7 +166,7 @@ describe('ThorchainAmm e2e tests', () => {
     })
 
     it(`Should remove BUSDT & RUNE symmetrically from symmetrical lp`, async () => {
-      const percentage = 100 // gets converted to basis points later
+      const percentage = 100
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
         asset: BUSDC,
@@ -185,7 +179,7 @@ describe('ThorchainAmm e2e tests', () => {
     })
 
     it(`Should remove ETH liquidity asymetrically from the ETH pool`, async () => {
-      const percentage = 100 // gets converted to basis points later
+      const percentage = 100
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
         asset: AssetETH,
@@ -197,7 +191,7 @@ describe('ThorchainAmm e2e tests', () => {
     })
 
     it(`Should remove BTC liquidity asymetrically from the BTC pool`, async () => {
-      const percentage = 100 // gets converted to basis points later
+      const percentage = 100
       const removeLp: WithdrawLiquidityPosition = {
         percentage: percentage,
         asset: AssetBTC,

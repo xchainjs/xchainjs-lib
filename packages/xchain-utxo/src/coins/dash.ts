@@ -1,7 +1,4 @@
-/*
-  info from:
-    https://github.com/dashpay/dash/blob/master/src/chainparams.cpp
-*/
+// https://github.com/dashpay/dash/blob/master/src/chainparams.cpp
 
 const common = {
   name: 'Dash',

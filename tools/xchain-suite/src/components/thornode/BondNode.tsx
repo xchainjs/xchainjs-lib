@@ -21,7 +21,6 @@ export function BondNode({ thorClient, walletConnected }: BondNodeProps) {
   const [showConfirm, setShowConfirm] = useState(false)
   const { execute, result, error, loading, duration } = useOperation<BondResult>()
 
-  // Fetch RUNE balance
   useEffect(() => {
     if (!thorClient) {
       setRuneBalance(null)
@@ -44,7 +43,6 @@ export function BondNode({ thorClient, walletConnected }: BondNodeProps) {
     fetchBalance()
   }, [thorClient])
 
-  // Validate inputs
   const trimmedNodeAddress = nodeAddress.trim()
   const parsedAmount = Number(amount)
   const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0
@@ -60,7 +58,6 @@ export function BondNode({ thorClient, walletConnected }: BondNodeProps) {
       // Build memo: BOND:<node_address> or BOND:<node_address>:<provider_address>:<operator_fee>
       let memo = `BOND:${trimmedNodeAddress}`
 
-      // If operator fee is specified, include provider address and fee
       if (operatorFee && isOperatorFeeValid) {
         const senderAddress = await thorClient.getAddressAsync()
         memo = `BOND:${trimmedNodeAddress}:${senderAddress}:${operatorFee.trim()}`
@@ -194,7 +191,6 @@ console.log('Bond Transaction:', txHash)`
         {loading ? 'Bonding...' : 'Bond RUNE'}
       </button>
 
-      {/* Confirm Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">

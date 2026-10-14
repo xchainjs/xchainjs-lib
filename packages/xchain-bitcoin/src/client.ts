@@ -28,7 +28,6 @@ import {
 import { AddressFormat } from './types'
 import * as Utils from './utils'
 
-// Default parameters for the Bitcoin UTXO client
 export const defaultBTCParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
@@ -44,16 +43,8 @@ export const defaultBTCParams: UtxoClientParams = {
     upper: UPPER_FEE_BOUND,
   },
 }
-/**
- * Custom Bitcoin client
- */
 abstract class Client extends UTXOClient {
   protected addressFormat: AddressFormat
-  /**
-   * Constructor
-   * Initializes the client with network type and other parameters.
-   * @param {UtxoClientParams} params
-   */
   constructor(
     params: UtxoClientParams & { addressFormat?: AddressFormat } = {
       ...defaultBTCParams,
@@ -89,10 +80,6 @@ abstract class Client extends UTXOClient {
     Bitcoin.initEccLib(ecc)
   }
 
-  /**
-   * Get BTC asset info.
-   * @returns {AssetInfo} BTC asset information.
-   */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
       asset: AssetBTC,
@@ -101,39 +88,20 @@ abstract class Client extends UTXOClient {
     return assetInfo
   }
 
-  /**
-   * Validate the given Bitcoin address.
-   * @param {string} address Bitcoin address to validate.
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
 
-  /**
-   * Compile memo into a buffer.
-   * @param {string} memo Memo to compile.
-   * @returns {Buffer} Compiled memo.
-   */
   protected compileMemo(memo: string): Buffer {
-    const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-    return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+    const data = Buffer.from(memo, 'utf8')
+    return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data])
   }
 
-  /**
-   * Get transaction fee from UTXOs.
-   * @param {UTXO[]} inputs UTXOs to calculate fee from.
-   * @param {FeeRate} feeRate Fee rate.
-   * @param {Buffer | null} data Compiled memo (Optional).
-   * @returns {number} Transaction fee.
-   */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-    // Calculate input size based on inputs
     const inputSizeBasedOnInputs =
       inputs.length > 0
         ? inputs.reduce((a, x) => a + Utils.inputBytes(x), 0) + inputs.length // +1 byte for each input signature
         : 0
-    // Calculate sum
     let sum =
       Utils.TX_EMPTY_SIZE +
       inputSizeBasedOnInputs +
@@ -145,20 +113,15 @@ abstract class Client extends UTXOClient {
     if (data) {
       sum += Utils.TX_OUTPUT_BASE + data.length
     }
-    // Calculate fee
     const fee = sum * feeRate
     return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
   }
 
   /**
-   * Add inputs to a PSBT according to the configured address format.
-   * - P2WPKH / P2SH-P2WPKH use `witnessUtxo` (the P2SH redeem script is attached later by the
-   *   keystore signer, which holds the public key; the Ledger client rebuilds inputs from `txHex`).
-   * - P2TR uses `witnessUtxo` + `tapInternalKey` reconstructed from the sender address.
-   * - P2PKH (legacy) uses `nonWitnessUtxo` built from the full previous transaction hex.
-   * @param {Bitcoin.Psbt} psbt The PSBT to add inputs to.
-   * @param {UTXO[]} inputs The selected UTXOs.
-   * @param {Address} sender The sender address (used to reconstruct the Taproot internal key).
+   * P2WPKH / P2SH-P2WPKH use `witnessUtxo` (the P2SH redeem script is attached later by the
+   * keystore signer, which holds the public key; the Ledger client rebuilds inputs from `txHex`).
+   * P2TR uses `witnessUtxo` + `tapInternalKey` reconstructed from the sender address.
+   * P2PKH (legacy) uses `nonWitnessUtxo` built from the full previous transaction hex.
    */
   protected addInputsToPsbt(psbt: Bitcoin.Psbt, inputs: UTXO[], sender: Address): void {
     switch (this.addressFormat) {
@@ -210,11 +173,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Enhanced Bitcoin transaction builder with comprehensive validation and optimal UTXO selection
-   * @param params Transaction parameters
-   * @returns Enhanced transaction build result with PSBT, UTXOs, and inputs
-   */
   async buildTxEnhanced({
     amount,
     recipient,
@@ -232,7 +190,6 @@ abstract class Client extends UTXOClient {
     selectedUtxos?: UTXO[]
   }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
     try {
-      // Comprehensive input validation
       this.validateTransactionInputs({
         amount,
         recipient,
@@ -241,7 +198,6 @@ abstract class Client extends UTXOClient {
         feeRate,
       })
 
-      // Use provided UTXOs (coin control) or fetch from chain
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
         UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
@@ -255,7 +211,6 @@ abstract class Client extends UTXOClient {
       const targetValue = amount.amount().toNumber()
       const extraOutputs = 1 + (compiledMemo ? 1 : 0) // recipient + optional memo (change calculated separately)
 
-      // Enhanced UTXO selection
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
@@ -266,16 +221,13 @@ abstract class Client extends UTXOClient {
 
       const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
 
-      // Add inputs based on selection
       this.addInputsToPsbt(psbt, selectionResult.inputs, sender)
 
-      // Add recipient output
       psbt.addOutput({
         address: recipient,
         value: targetValue,
       })
 
-      // Add change output if needed
       if (selectionResult.changeAmount > 0) {
         psbt.addOutput({
           address: sender,
@@ -283,7 +235,6 @@ abstract class Client extends UTXOClient {
         })
       }
 
-      // Add memo output if present
       if (compiledMemo) {
         psbt.addOutput({ script: compiledMemo, value: 0 })
       }
@@ -297,11 +248,7 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Build a Bitcoin transaction with enhanced validation and performance.
-   * Now uses the enhanced logic internally while maintaining the same API.
-   * @param param0
-   */
+  /** Delegates to `buildTxEnhanced` so the original API stays in place. */
   async buildTx({
     amount,
     recipient,
@@ -315,7 +262,6 @@ abstract class Client extends UTXOClient {
     spendPendingUTXO?: boolean
     withTxHex?: boolean
   }): Promise<{ psbt: Bitcoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
-    // Use the enhanced logic internally while maintaining the same API
     return this.buildTxEnhanced({
       amount,
       recipient,
@@ -326,11 +272,6 @@ abstract class Client extends UTXOClient {
     })
   }
 
-  /**
-   * Send maximum possible amount (sweep) with optimal fee calculation
-   * @param params Send max parameters
-   * @returns Transaction details with maximum sendable amount
-   */
   async sendMax({
     sender,
     recipient,
@@ -355,7 +296,7 @@ abstract class Client extends UTXOClient {
     fee: number
   }> {
     try {
-      // Basic validation (skip amount validation since we're calculating max)
+      // Skip amount validation since we're calculating the max.
       if (!recipient?.trim()) {
         throw UtxoError.invalidAddress(recipient, this.network)
       }
@@ -369,7 +310,6 @@ abstract class Client extends UTXOClient {
 
       // Memo validation is handled by validateTransactionInputs
 
-      // Use provided UTXOs (coin control) or fetch from chain
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
         UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
@@ -379,22 +319,19 @@ abstract class Client extends UTXOClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      // Calculate maximum sendable amount
       const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
 
-      // Add inputs
       this.addInputsToPsbt(psbt, maxCalc.inputs, sender)
 
-      // Add recipient output (max amount - no change)
+      // Recipient gets the max; no change output.
       psbt.addOutput({
         address: recipient,
         value: maxCalc.amount,
       })
 
-      // Add memo output if present
       if (compiledMemo) {
         psbt.addOutput({ script: compiledMemo, value: 0 })
       }
@@ -414,11 +351,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Prepare maximum amount transfer (sweep transaction)
-   * @param params Send max parameters
-   * @returns Prepared transaction with maximum sendable amount
-   */
   async prepareMaxTx({
     sender,
     recipient,
@@ -463,12 +395,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Enhanced prepare transfer with comprehensive validation and optimal UTXO selection.
-   *
-   * @param params The transfer options with enhanced UTXO selection preferences.
-   * @returns The raw unsigned transaction with enhanced error handling.
-   */
   async prepareTxEnhanced({
     sender,
     memo,
@@ -508,12 +434,7 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Prepare transfer with enhanced validation and performance.
-   * Now uses the enhanced logic internally while maintaining the same API.
-   *
    * @deprecated Use `prepareTxEnhanced` directly for explicit enhanced UTXO selection.
-   * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
-   * @returns {PreparedTx} The raw unsigned transaction.
    */
   async prepareTx({
     sender,
@@ -527,7 +448,6 @@ abstract class Client extends UTXOClient {
     feeRate: FeeRate
     spendPendingUTXO?: boolean
   }): Promise<PreparedTx> {
-    // Use the enhanced logic internally while maintaining the same API
     return this.prepareTxEnhanced({
       sender,
       recipient,

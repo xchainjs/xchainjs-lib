@@ -24,20 +24,10 @@ import {
   isSynthAsset,
 } from '@xchainjs/xchain-util'
 
-/**
- * Check if a chain is EVM and supported by the protocol
- * @param {Chain} chain to check
- * @returns true if chain is EVM, otherwise, false
- */
 export const isProtocolEVMChain = (chain: Chain): boolean => {
   return [AssetETH.chain, AssetBSC.chain, AssetAVAX.chain, AssetBETH.chain].includes(chain)
 }
 
-/**
- * Check if asset is ERC20
- * @param {Asset} asset to check
- * @returns true if asset is ERC20, otherwise, false
- */
 export const isProtocolERC20Asset = (asset: CompatibleAsset): asset is TokenAsset => {
   return isProtocolEVMChain(asset.chain)
     ? [AssetETH, AssetAVAX, AssetBSC, AssetBETH].findIndex((nativeEVMAsset) => eqAsset(nativeEVMAsset, asset)) === -1 &&
@@ -45,11 +35,6 @@ export const isProtocolERC20Asset = (asset: CompatibleAsset): asset is TokenAsse
     : false
 }
 
-/**
- * Check if asset is ERC20
- * @param {Asset} asset to check
- * @returns true if asset is ERC20, otherwise, false
- */
 export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCryptoAmount => {
   return isProtocolEVMChain(amount.asset.chain)
     ? [AssetETH, AssetAVAX, AssetBSC, AssetBETH].findIndex((nativeEVMAsset) =>
@@ -58,11 +43,6 @@ export const isTokenCryptoAmount = (amount: CryptoAmount): amount is TokenCrypto
     : false
 }
 
-/**
- * Check if a chain is EVM and supported by the protocol
- * @param {Chain} chain to check
- * @returns true if chain is EVM, otherwise, false
- */
 export const isProtocolBFTChain = (chain: Chain): boolean => {
   return [AssetATOM.chain, SOLChain].includes(chain)
 }

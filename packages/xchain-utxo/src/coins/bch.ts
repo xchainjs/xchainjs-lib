@@ -1,7 +1,4 @@
-/*
-  info from:
-    https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/chainparams.cpp
-*/
+// https://github.com/Bitcoin-ABC/bitcoin-abc/blob/master/src/chainparams.cpp
 
 const common = {
   name: 'BitcoinCash',

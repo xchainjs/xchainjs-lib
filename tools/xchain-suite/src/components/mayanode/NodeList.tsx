@@ -30,7 +30,6 @@ export function NodeList({ nodesApi }: NodeListProps) {
       const response = await nodesApi.nodes()
       const nodes = response.data as Node[]
 
-      // Filter by status if needed
       const filtered = statusFilter === 'all'
         ? nodes
         : nodes.filter((n) => n.status === statusFilter)

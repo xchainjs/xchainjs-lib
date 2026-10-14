@@ -5,10 +5,8 @@ import { Asset, AssetType, baseAmount, assetToString } from '@xchainjs/xchain-ut
 import Client, { CosmosSdkClientParams } from '../src/client'
 import { CompatibleAsset } from '../src/types'
 
-// --- Test asset ---
 const AssetATOM: Asset = { chain: 'GAIA', symbol: 'ATOM', ticker: 'ATOM', type: AssetType.NATIVE }
 
-// --- Concrete subclass for testing the abstract Client ---
 class TestClient extends Client {
   getAssetDecimals(): number {
     return 6
@@ -55,8 +53,6 @@ class TestClient extends Client {
     return ''
   }
 }
-
-// --- Helpers ---
 
 const mockBlock: Block = {
   id: 'blockid',
@@ -131,7 +127,6 @@ function createClient(): TestClient {
   return new TestClient(params)
 }
 
-// --- Mock StargateClient ---
 const mockGetTx = jest.fn()
 const mockGetBlock = jest.fn()
 

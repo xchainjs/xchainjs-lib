@@ -42,7 +42,6 @@ export default function PortfolioPage() {
     const currentFetchId = ++fetchIdRef.current
     setRefreshing(true)
 
-    // Initialize all chains as loading
     const initial = new Map<string, ChainBalance>()
     for (const chain of SUPPORTED_CHAINS) {
       initial.set(chain.id, {
@@ -58,12 +57,10 @@ export default function PortfolioPage() {
 
     const priceService = new PriceService(network)
 
-    // Fetch each chain independently
     const promises = SUPPORTED_CHAINS.map(async (chain) => {
       try {
         const client = createClient(chain.id, { phrase, network })
 
-        // Get address
         let address: string
         try {
           if (ASYNC_ONLY_CHAINS.has(chain.id)) {
@@ -83,7 +80,6 @@ export default function PortfolioPage() {
             ? await client.getBalance(address, NEAR_POOL_TOKENS)
             : await client.getBalance(address)
 
-        // Get prices and build balance entries
         const balanceEntries: ChainBalance['balances'] = []
         let totalUsd = 0
         let hasAnyPrice = false
@@ -107,7 +103,6 @@ export default function PortfolioPage() {
           })
         }
 
-        // Sort by USD value (highest first), then by amount
         balanceEntries.sort((a, b) => (b.usdValue ?? 0) - (a.usdValue ?? 0))
 
         if (currentFetchId !== fetchIdRef.current) return
@@ -168,7 +163,6 @@ export default function PortfolioPage() {
     )
   }
 
-  // Compute totals
   const entries = Array.from(chainBalances.values())
   const loadedEntries = entries.filter((e) => !e.loading)
   const totalUsd = loadedEntries.reduce((sum, e) => sum + (e.totalUsd ?? 0), 0)
@@ -176,7 +170,6 @@ export default function PortfolioPage() {
   const chainsLoading = entries.filter((e) => e.loading).length
   const chainsWithErrors = loadedEntries.filter((e) => e.error)
 
-  // Group by category
   const groups = [
     { name: 'UTXO', chains: entries.filter((e) => e.chain.category === 'utxo') },
     { name: 'EVM', chains: entries.filter((e) => e.chain.category === 'evm') },
@@ -186,7 +179,6 @@ export default function PortfolioPage() {
 
   return (
     <div className="h-full">
-      {/* Header */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
@@ -196,7 +188,6 @@ export default function PortfolioPage() {
             </p>
           </div>
           <div className="flex items-center gap-6">
-            {/* Total Value */}
             <div className="text-right">
               <p className="text-sm text-gray-500 dark:text-gray-400">Total Value</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -222,7 +213,6 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="p-6 space-y-6">
         {groups.map((group) => (
           <div key={group.name}>
@@ -237,7 +227,6 @@ export default function PortfolioPage() {
           </div>
         ))}
 
-        {/* Errors Summary */}
         {chainsWithErrors.length > 0 && !refreshing && (
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
             <div className="flex items-start gap-2">

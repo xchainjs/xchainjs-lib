@@ -4,8 +4,6 @@ import { JsonRpcProvider, Network, EtherscanProvider } from 'ethers'
 
 import { EtherscanProviderV2 } from '../lib'
 
-// =====Erc-20 asset=====
-
 // const assetRIP: Asset = {
 //   chain: AVAXChain,
 //   symbol: `RIP-0x224695Ba2a98E4a096a519B503336E06D9116E48`,

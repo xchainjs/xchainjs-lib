@@ -72,7 +72,6 @@ export default function LiquidityPage() {
       <div className="max-w-2xl mx-auto">
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-            {/* Header */}
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Liquidity</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -80,7 +79,6 @@ export default function LiquidityPage() {
               </p>
             </div>
 
-            {/* Tabs */}
             <div className="border-b border-gray-200 dark:border-gray-700">
               <nav className="flex -mb-px">
                 {tabs.map((tab) => (
@@ -99,7 +97,6 @@ export default function LiquidityPage() {
               </nav>
             </div>
 
-            {/* Tab Content */}
             <div className="p-6">
               {activeTab === 'check' && (
                 <CheckPosition

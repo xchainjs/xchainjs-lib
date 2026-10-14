@@ -7,8 +7,6 @@ import { AVAXChain, AssetAVAX, defaultAvaxParams } from '../src/const'
 
 // import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '../src/types'
 
-// =====Erc-20 asset=====
-
 const assetRIP: TokenAsset = {
   chain: AVAXChain,
   symbol: `RIP-0x224695ba2a98e4a096a519b503336e06d9116e48`,
@@ -108,7 +106,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   it('should transfer 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
-    //ERC20 address The Crypt (RIP)
 
     const txHash = await client.transfer({ amount, recipient, asset: assetRIP })
     console.log(txHash)
@@ -116,7 +113,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   it('should approve 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
     const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 6))
-    //ERC20 address The Crypt (RIP)
 
     const txHash = await client.approve({
       amount,
@@ -127,7 +123,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   })
   it('should test erc-20 approvals ', async () => {
     let isApproved = false
-    // check if approved for 1 RIP, should be false
     const params: IsApprovedParams = {
       contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
       spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
@@ -136,7 +131,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     isApproved = await client.isApproved(params)
     expect(isApproved).toBe(false)
 
-    //  approve for 1 RIP
     const approveParams: ApproveParams = {
       contractAddress: '0x224695Ba2a98E4a096a519B503336E06D9116E48', //ERC20 address The Crypt (RIP)
       spenderAddress: '0x688d21b0b8dc35971af58cff1f7bf65639937860', //PangolinRouter contract on testnet
@@ -146,16 +140,13 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     await client.approve(approveParams)
     await delay(10_000) //wait 10 secs for block to be mined
 
-    // check if approved for 1 RIP, should be true
     isApproved = await client.isApproved(params)
     expect(isApproved).toBe(true)
 
-    // set approve below 1 rip
     approveParams.amount = assetToBase(assetAmount('0.1', 18))
     await client.approve(approveParams)
     await delay(10_000) //wait 10 secs for block to be mined
 
-    // check if approved for 1 RIP, should be false
     isApproved = await client.isApproved(params)
     expect(isApproved).toBe(false)
   })

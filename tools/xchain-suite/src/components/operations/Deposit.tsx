@@ -17,7 +17,6 @@ interface DepositResult {
   txHash: string
 }
 
-// Common memo templates for THORChain/MAYAChain
 const MEMO_TEMPLATES: Record<string, { label: string; template: string; description: string }[]> = {
   THOR: [
     { label: 'THORName Register', template: '~:{name}:{chain}:{address}:{owner}:THOR.RUNE', description: 'Register a new THORName' },
@@ -69,7 +68,6 @@ export function Deposit({ chainId, client }: DepositProps) {
   const nativeAsset = chainId === 'THOR' ? 'RUNE' : chainId === 'MAYA' ? 'CACAO' : ''
   const memoTemplates = MEMO_TEMPLATES[chainId] || []
 
-  // Fetch balance when client is available
   useEffect(() => {
     const fetchBalance = async () => {
       if (!client) {
@@ -116,7 +114,6 @@ export function Deposit({ chainId, client }: DepositProps) {
         throw new Error('Client not available. Please connect wallet first.')
       }
 
-      // Check if client has deposit method
       if (!('deposit' in client) || typeof (client as any).deposit !== 'function') {
         throw new Error('Deposit not supported for this chain')
       }
@@ -159,7 +156,6 @@ console.log('Deposit tx:', txHash)`
     )
   }
 
-  // Only show for THOR and MAYA
   if (chainId !== 'THOR' && chainId !== 'MAYA') {
     return (
       <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
@@ -172,7 +168,6 @@ console.log('Deposit tx:', txHash)`
 
   return (
     <div className="space-y-6">
-      {/* Info Banner */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">Network Deposit</h3>
         <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
@@ -182,7 +177,6 @@ console.log('Deposit tx:', txHash)`
       </div>
 
       <div className="space-y-4">
-        {/* Amount Input */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Amount ({nativeAsset})
@@ -210,7 +204,6 @@ console.log('Deposit tx:', txHash)`
           )}
         </div>
 
-        {/* Memo Input */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -233,7 +226,6 @@ console.log('Deposit tx:', txHash)`
           />
         </div>
 
-        {/* Memo Helper Dropdown */}
         {showMemoHelper && (
           <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
             <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700">
@@ -265,7 +257,6 @@ console.log('Deposit tx:', txHash)`
           </div>
         )}
 
-        {/* Submit Button */}
         {!showConfirm ? (
           <button
             onClick={() => setShowConfirm(true)}
@@ -300,7 +291,6 @@ console.log('Deposit tx:', txHash)`
         )}
       </div>
 
-      {/* Result */}
       <ResultPanel loading={loading} error={error} duration={duration}>
         {result && (
           <div className="space-y-2">
@@ -325,7 +315,6 @@ console.log('Deposit tx:', txHash)`
         )}
       </ResultPanel>
 
-      {/* Code Example */}
       <CodePreview code={generateDepositCode()} title="Deposit with Memo" />
     </div>
   )

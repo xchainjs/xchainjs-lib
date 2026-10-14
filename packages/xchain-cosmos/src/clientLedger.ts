@@ -23,7 +23,6 @@ export class ClientLedger extends Client {
     this.transport = params.transport
   }
 
-  // Get the current address synchronously
   public getAddress(): string {
     throw Error('Sync method not supported for Ledger')
   }
@@ -42,12 +41,6 @@ export class ClientLedger extends Client {
     return result.address
   }
 
-  /**
-   * Transfer Cosmos.
-   *
-   * @param {TxParams} params The transfer options including the fee rate.
-   * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
-   */
   async transfer({
     walletIndex,
     asset,
@@ -70,14 +63,8 @@ export class ClientLedger extends Client {
   }
 
   /**
-   * Sign a transfer making a round robin over the clients urls provided to the client.
    * Does not broadcast — callers must broadcast the signed bytes once via broadcastTx.
    * Named separately from Client.roundRobinSign to avoid a private-member subclass clash.
-   *
-   * @param {string} sender Sender address
-   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
-   * @param {OfflineAminoSigner} signer Signer
-   * @returns {TxRaw} The raw signed transaction
    */
   private async roundRobinSignTransfer(
     sender: string,
@@ -93,12 +80,7 @@ export class ClientLedger extends Client {
         return { typeUrl: this.getMsgTypeUrlByType(MsgTypes.TRANSFER), value: signingClient.registry.decode(message) }
       })
 
-      return signingClient.sign(
-        sender,
-        messages,
-        this.getStandardFee(this.getAssetInfo().asset),
-        unsignedTx.body.memo,
-      )
+      return signingClient.sign(sender, messages, this.getStandardFee(this.getAssetInfo().asset), unsignedTx.body.memo)
     })
   }
 }

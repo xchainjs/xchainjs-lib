@@ -40,7 +40,6 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [selectedWallet, setSelectedWallet] = useState<SavedWallet | null>(null)
 
-  // Form state
   const [walletName, setWalletName] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -205,7 +204,6 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
     }
   }
 
-  // Quick connect handlers (connect without saving)
   const handleQuickConnectKeystore = async () => {
     setError(null)
 
@@ -322,7 +320,6 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
 
   const renderWalletList = () => (
     <>
-      {/* Ledger */}
       <div className="mb-3">
         <button
           onClick={() => { resetForm(); setViewMode('ledger') }}
@@ -340,7 +337,6 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
         </button>
       </div>
 
-      {/* Quick Connect Option */}
       <div className="mb-4">
         <button
           onClick={() => { resetForm(); setViewMode('quick-connect') }}
@@ -717,7 +713,6 @@ export function WalletConnect({ onClose }: WalletConnectProps) {
 
   const renderQuickConnectForm = () => (
     <div className="space-y-4">
-      {/* Mode Toggle */}
       <div className="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
         <button
           onClick={() => setQuickConnectMode('keystore')}

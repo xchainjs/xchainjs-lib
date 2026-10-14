@@ -63,15 +63,9 @@ type GraphqlTxConnection = {
 }
 
 /**
- * Sui client for XChainJS.
- *
- * Defaults to **gRPC** against Sui Foundation public fullnodes. Foundation JSON-RPC on
- * `fullnode.*.sui.io` is deprecated (disabled week of 2026-07-27). Historical transaction
- * queries use GraphQL (`graphql.*.sui.io`).
- *
- * Optional `transport: 'jsonRpc'` keeps the legacy JSON-RPC path for private nodes that
- * still enable it.
- *
+ * Defaults to gRPC on Foundation fullnodes. Foundation JSON-RPC is deprecated
+ * (disabled week of 2026-07-27); history uses GraphQL. `transport: 'jsonRpc'` is only
+ * for private nodes that still enable JSON-RPC.
  * @see https://docs.sui.io/develop/accessing-data/json-rpc-migration
  */
 export class Client extends BaseXChainClient {
@@ -463,10 +457,7 @@ export class Client extends BaseXChainClient {
     }))
   }
 
-  /**
-   * Build a signed-ready transfer PTB with explicit gas payment.
-   * Avoids transaction resolution (unsupported on public gRPC/GraphQL clients).
-   */
+  /** Explicit gas payment. Public gRPC/GraphQL clients cannot resolve transactions. */
   private async buildTransferTransaction({
     sender,
     recipient,

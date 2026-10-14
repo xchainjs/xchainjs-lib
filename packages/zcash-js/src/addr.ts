@@ -13,10 +13,7 @@ const TESTNET_TEX_HRP = 'textest'
 
 type Prefix = number[] | Buffer | Uint8Array
 
-/**
- * ZIP 320 HRP for a transparent P2PKH version prefix.
- * Mainnet `0x1cb8` is `tex`; testnet `0x1d25` is `textest`.
- */
+/** Mainnet `0x1cb8` is ZIP 320 `tex`; testnet `0x1d25` is `textest`. */
 function texHrpForPrefix(prefix: Buffer): string | undefined {
   if (prefix.length === mainnetPrefix.length && prefix[0] === mainnetPrefix[0] && prefix[1] === mainnetPrefix[1]) {
     return MAINNET_TEX_HRP
@@ -46,7 +43,7 @@ function decodeBase58Pkh(address: string, prefix: Buffer): Uint8Array | undefine
   }
 }
 
-/** Bech32m-decode a ZIP 320 address. The payload is the 20-byte validating key hash. */
+/** ZIP 320 payload is the 20-byte validating key hash. */
 function decodeTexPkh(address: string, hrp: string): Uint8Array | undefined {
   try {
     const decoded = bech32m.decode(address)
@@ -59,10 +56,7 @@ function decodeTexPkh(address: string, hrp: string): Uint8Array | undefined {
   }
 }
 
-/**
- * 20-byte validating key hash of a transparent P2PKH address.
- * Accepts Base58Check (`t1` / `tm`) and ZIP 320 Bech32m (`tex1` / `textest1`) for `prefix`.
- */
+/** 20-byte P2PKH hash. Accepts Base58Check (`t1` / `tm`) and ZIP 320 (`tex1` / `textest1`). */
 export function transparentPkh(address: string, prefix: Prefix): Uint8Array | undefined {
   const prefixBuf = Buffer.from(prefix)
   const claimedHrp = texHrpOf(address)

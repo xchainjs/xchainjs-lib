@@ -95,14 +95,7 @@ export const broadcastTx = async ({
   return (response.data as BroadcastDTO).result
 }
 
-/**
- * Fetches fee estimate using Blockbook's V2 REST endpoint.
- *
- * Docs: https://github.com/trezor/blockbook/blob/master/docs/api.md
- *
- * @param numberOfBlocks Target block confirmation count
- * @returns Estimated fee rate in sat/byte
- */
+/** https://github.com/trezor/blockbook/blob/master/docs/api.md — returns sat/byte. */
 export const getFeeEstimate = async ({
   apiKey,
   baseUrl,

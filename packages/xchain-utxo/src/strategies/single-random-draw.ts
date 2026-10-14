@@ -14,7 +14,7 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
   private static readonly BASE_TX_SIZE = TX_SIZE_CONSTANTS.BASE_TX_SIZE
 
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
-    // Shuffle UTXOs using Fisher-Yates for unbiased randomness
+    // Fisher-Yates shuffle for unbiased randomness
     const shuffledUtxos = [...utxos]
     for (let i = shuffledUtxos.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
@@ -22,21 +22,20 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
     }
 
     for (const utxo of shuffledUtxos) {
-      // Calculate fee without change output first
+      // Fee with no change output
       const feeNoChange = this.calculateFee(1, extraOutputs, feeRate)
       const requiredNoChange = targetValue + feeNoChange
 
       if (utxo.value >= requiredNoChange) {
         const potentialChange = utxo.value - requiredNoChange
 
-        // Check if change would be above dust threshold
         if (potentialChange > SingleRandomDrawStrategy.DUST_THRESHOLD) {
-          // Recalculate fee WITH change output
+          // Adding a change output increases the fee
           const feeWithChange = this.calculateFee(1, extraOutputs + 1, feeRate)
           const requiredWithChange = targetValue + feeWithChange
           const actualChange = utxo.value - requiredWithChange
 
-          // Verify change is still above dust after recalculation
+          // Fee grew, so change may have dropped to dust
           if (actualChange > SingleRandomDrawStrategy.DUST_THRESHOLD) {
             return {
               inputs: [utxo],
@@ -48,7 +47,7 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
           }
         }
 
-        // No change output - add dust to fee
+        // Dust change is added to the fee
         return {
           inputs: [utxo],
           changeAmount: 0,
@@ -62,9 +61,6 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
     return null
   }
 
-  /**
-   * Calculate estimated transaction fee
-   */
   private calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
     const txSize =
       SingleRandomDrawStrategy.BASE_TX_SIZE +

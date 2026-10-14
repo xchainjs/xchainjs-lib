@@ -24,20 +24,19 @@ export class AccumulativeStrategy implements UtxoSelectionStrategy {
       selectedInputs.push(utxo)
       currentValue += utxo.value
 
-      // First check with no change output (minimum fee)
+      // Minimum fee is with no change output
       const feeNoChange = this.calculateFee(selectedInputs.length, extraOutputs, feeRate)
       const requiredNoChange = targetValue + feeNoChange
 
       if (currentValue >= requiredNoChange) {
         const potentialChange = currentValue - requiredNoChange
 
-        // Check if we need a change output
         if (potentialChange > AccumulativeStrategy.DUST_THRESHOLD) {
-          // Recalculate with change output
+          // Adding a change output increases the fee
           const feeWithChange = this.calculateFee(selectedInputs.length, extraOutputs + 1, feeRate)
           const finalChange = currentValue - targetValue - feeWithChange
 
-          // Verify change is still above dust after recalculation
+          // Fee grew, so change may have dropped to dust
           if (finalChange > AccumulativeStrategy.DUST_THRESHOLD) {
             return {
               inputs: [...selectedInputs],
@@ -49,7 +48,7 @@ export class AccumulativeStrategy implements UtxoSelectionStrategy {
           }
         }
 
-        // No change output - absorb dust into fee
+        // Dust change is not an output; it is added to the fee
         return {
           inputs: [...selectedInputs],
           changeAmount: 0,
@@ -63,9 +62,6 @@ export class AccumulativeStrategy implements UtxoSelectionStrategy {
     return null
   }
 
-  /**
-   * Calculate estimated transaction fee
-   */
   private calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
     const txSize =
       AccumulativeStrategy.BASE_TX_SIZE +

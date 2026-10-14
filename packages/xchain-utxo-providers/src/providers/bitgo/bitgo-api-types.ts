@@ -1,12 +1,12 @@
 export type GetFeeEstimateRequest = {
-  numBlocks?: number // target number of blocks
+  numBlocks?: number
 }
 
 export type GetFeeEstimateResponse = {
-  feePerKb: number // Fee per kilobyte for a transaction to be confirmed across two or more blocks.
-  cpfpFeePerKb?: number // Child pays for parent (CPFP) fee per kilobyte where the fee includes the fees for all unconfirmed transactions dependent on this transaction.
-  numBlocks: string // The target block confirmation.
-  confidence?: number // (BTC only) Confidence, as a percentage, in the accuracy of the fee estimate
-  multiplier?: number // (BTC only) Three decimal value used to estimate fees when the mempool is congested; otherwise defaults to 1
-  feeByBlockTarget?: Record<string, number> // (BTC only) Fee estimates are stored as a key-value pair where the key is the block target (between 1 and 1000) and the value is the corresponding fee estimate (in baseunits per kilobyte)
+  feePerKb: number // per kilobyte, for confirmation in two or more blocks
+  cpfpFeePerKb?: number // includes fees of unconfirmed ancestors (child-pays-for-parent)
+  numBlocks: string
+  confidence?: number // BTC only, percent
+  multiplier?: number // BTC only; three decimals, defaults to 1 when the mempool is not congested
+  feeByBlockTarget?: Record<string, number> // BTC only; block target 1-1000 -> base units per kilobyte
 }

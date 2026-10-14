@@ -14,14 +14,7 @@ const ECPair = ECPairFactory(ecc)
 
 export class ClientKeystore extends Client {
   /**
-   * [DEPRECATED] Retrieves the address at the specified index.
-   *
    * @deprecated Use `getAddressAsync` instead.
-   * @param {number} index The index of the address.
-   * @returns {Address} The address at the specified index.
-   * @throws {Error} Thrown when the index is less than zero.
-   * @throws {Error} Thrown when the phrase has not been set.
-   * @throws {Error} Thrown when the address cannot be defined.
    */
   public getAddress(index = 0): Address {
     if (index < 0) {
@@ -43,27 +36,10 @@ export class ClientKeystore extends Client {
     throw new Error('Phrase must be provided')
   }
 
-  /**
-   * Retrieves the current address asynchronously.
-   *
-   * Generates a network-specific key-pair by first converting the buffer to a Wallet-Import-Format (WIF)
-   * The address is then decoded into type P2WPKH and returned.
-   *
-   * @returns {Address} A promise that resolves to the current address
-   *
-   * @throws {"Phrase must be provided"} Thrown if phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed creating account from phrase.
-   */
   public async getAddressAsync(walletIndex = 0): Promise<Address> {
     return this.getAddress(walletIndex)
   }
 
-  /**
-   * Transfers Litecoin (LTC) from one address to another.
-   *
-   * @param {Object} params The transfer options.
-   * @returns {Promise<TxHash>} The transaction hash.
-   */
   public async transfer(
     params: TxParams & {
       feeRate?: FeeRate
@@ -101,18 +77,6 @@ export class ClientKeystore extends Client {
     return await this.broadcastTx(txHex)
   }
 
-  /**
-   * Transfer the maximum amount of Litecoin (sweep).
-   *
-   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
-   * @param {Object} params The transfer parameters.
-   * @param {string} params.recipient The recipient address.
-   * @param {string} [params.memo] Optional memo for the transaction.
-   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
-   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
-   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
-   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
-   */
   public async transferMax(params: {
     recipient: Address
     memo?: string
@@ -146,17 +110,6 @@ export class ClientKeystore extends Client {
     return { hash, maxAmount, fee }
   }
 
-  /**
-   * @private
-   * [PRIVATE] Retrieves the private key.
-   *
-   * Private function to get keyPair from the this.phrase
-   *
-   * @param {string} phrase The phrase used to generate the private key.
-   * @returns {ECPairInterface} The privkey generated from the given phrase
-   *
-   * @throws {"Could not get private key from phrase"} Throws an error if failed creating LTC keys from the given phrase
-   * */
   private getLtcKeys(phrase: string, index = 0): ECPairInterface {
     const ltcNetwork = Utils.ltcNetwork(this.network)
 

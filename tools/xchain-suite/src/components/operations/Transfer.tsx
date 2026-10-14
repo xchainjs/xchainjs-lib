@@ -77,7 +77,6 @@ export function Transfer({ chainId, client }: TransferProps) {
     setMemo('')
   }, [chainId, assetOptions])
 
-  // Fetch balance for the selected asset
   useEffect(() => {
     let cancelled = false
 

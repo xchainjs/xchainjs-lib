@@ -26,9 +26,6 @@ import {
   explorerProviders,
 } from './const'
 import * as Utils from './utils'
-/**
- * Default parameters for the Litecoin client.
- */
 export const defaultLtcParams: UtxoClientParams = {
   network: Network.Mainnet,
   phrase: '',
@@ -45,15 +42,7 @@ export const defaultLtcParams: UtxoClientParams = {
   },
 }
 
-/**
- * Custom Litecoin client.
- */
 abstract class Client extends UTXOClient {
-  /**
-   * Constructs a new `Client` with the provided parameters.
-   *
-   * @param {UtxoClientParams} params The parameters for initializing the client.
-   */
   constructor(params = defaultLtcParams) {
     super(LTCChain, {
       network: params.network,
@@ -65,11 +54,6 @@ abstract class Client extends UTXOClient {
     })
   }
 
-  /**
-   * Returns information about the asset used by the client.
-   *
-   * @returns {AssetInfo} Information about the asset.
-   */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
       asset: AssetLTC,
@@ -78,21 +62,11 @@ abstract class Client extends UTXOClient {
     return assetInfo
   }
 
-  /**
-   * Validates the given Litecoin address.
-   *
-   * @param {string} address The Litecoin address to validate.
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
 
   /**
-   * Builds a Litecoin (LTC) transaction.
-   *
-   * @param {BuildParams} params The transaction build options.
-   * @returns {Transaction} A promise that resolves to the PSBT (Partially Signed Bitcoin Transaction) and UTXOs (Unspent Transaction Outputs).
    * @deprecated This function will eventually be removed. Use `prepareTx` instead.
    */
   async buildTx({
@@ -115,12 +89,10 @@ abstract class Client extends UTXOClient {
 
     const targetOutputs = []
 
-    //1. add output amount and recipient to targets
     targetOutputs.push({
       address: recipient,
       value: amount.amount().toNumber(),
     })
-    //2. add output memo to targets (optional)
     if (compiledMemo) {
       targetOutputs.push({ script: compiledMemo, value: 0 })
     }
@@ -129,8 +101,7 @@ abstract class Client extends UTXOClient {
     // .inputs and .outputs will be undefined if no solution was found
     if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
 
-    const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) }) // Network-specific
-    // psbt add input from accumulative inputs
+    const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) })
     inputs.forEach((utxo: UTXO) =>
       psbt.addInput({
         hash: utxo.hash,
@@ -139,7 +110,6 @@ abstract class Client extends UTXOClient {
       }),
     )
 
-    // Outputs
     outputs.forEach((output: Litecoin.PsbtTxOutput) => {
       if (!output.address) {
         //an empty address means this is the  change address
@@ -160,11 +130,7 @@ abstract class Client extends UTXOClient {
   }
 
   /**
-   * Prepares a Litecoin (LTC) transaction.
-   *
    * @deprecated Use `prepareTxEnhanced` instead for better UTXO selection and error handling.
-   * @param {TxParams&Address&FeeRate&boolean} params The transfer options.
-   * @returns {PreparedTx} A promise that resolves to the raw unsigned transaction.
    */
   async prepareTx({
     sender,
@@ -187,27 +153,12 @@ abstract class Client extends UTXOClient {
 
     return { rawUnsignedTx: psbt.toBase64(), utxos, inputs }
   }
-  /**
-   * Compile memo.
-   *
-   * @param {string} memo The memo to be compiled.
-   * @returns {Buffer} The compiled memo.
-   */
   protected compileMemo(memo: string): Buffer {
-    const data = Buffer.from(memo, 'utf8') // converts MEMO to buffer
-    return Litecoin.script.compile([Litecoin.opcodes.OP_RETURN, data]) // Compile OP_RETURN script
+    const data = Buffer.from(memo, 'utf8')
+    return Litecoin.script.compile([Litecoin.opcodes.OP_RETURN, data])
   }
 
-  /**
-   * Calculates the transaction fee based on the provided UTXOs, fee rate, and optional compiled memo.
-   *
-   * @param {UTXO[]} inputs The The UTXOs used as inputs in the transaction.
-   * @param {FeeRate} feeRate The fee rate.
-   * @param {Buffer} data The compiled memo (Optional).
-   * @returns {number} The calculated  fee amount.
-   */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-    // Calculate transaction size based on inputs and outputs
     const inputSizeBasedOnInputs =
       inputs.length > 0
         ? inputs.reduce((a, x) => a + Utils.inputBytes(x), 0) + inputs.length // +1 byte for each input signature
@@ -220,20 +171,13 @@ abstract class Client extends UTXOClient {
       Utils.TX_OUTPUT_PUBKEYHASH +
       Utils.TX_OUTPUT_BASE +
       Utils.TX_OUTPUT_PUBKEYHASH
-    // Add additional output size if memo is provided
     if (data) {
       sum += Utils.TX_OUTPUT_BASE + data.length
     }
-    // Calculate fee
     const fee = sum * feeRate
     return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
   }
 
-  // ==================== Enhanced Transaction Methods ====================
-
-  /**
-   * Build transaction with enhanced UTXO selection
-   */
   async buildTxEnhanced({
     amount,
     recipient,
@@ -251,7 +195,6 @@ abstract class Client extends UTXOClient {
     selectedUtxos?: UTXO[]
   }): Promise<{ psbt: Litecoin.Psbt; utxos: UTXO[]; inputs: UTXO[] }> {
     try {
-      // Validate inputs using base class method
       this.validateTransactionInputs({
         amount,
         recipient,
@@ -260,7 +203,6 @@ abstract class Client extends UTXOClient {
         feeRate,
       })
 
-      // Use provided UTXOs (coin control) or fetch from chain
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
         UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
@@ -274,7 +216,6 @@ abstract class Client extends UTXOClient {
       const targetValue = amount.amount().toNumber()
       const extraOutputs = 1 + (compiledMemo ? 1 : 0)
 
-      // Use base class UTXO selection
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
@@ -285,7 +226,6 @@ abstract class Client extends UTXOClient {
 
       const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) })
 
-      // Add inputs
       selectionResult.inputs.forEach((utxo: UTXO) =>
         psbt.addInput({
           hash: utxo.hash,
@@ -294,13 +234,11 @@ abstract class Client extends UTXOClient {
         }),
       )
 
-      // Add recipient output
       psbt.addOutput({
         address: recipient,
         value: targetValue,
       })
 
-      // Add change output if needed
       if (selectionResult.changeAmount > 0) {
         psbt.addOutput({
           address: sender,
@@ -308,7 +246,6 @@ abstract class Client extends UTXOClient {
         })
       }
 
-      // Add memo output if present
       if (compiledMemo) {
         psbt.addOutput({ script: compiledMemo, value: 0 })
       }
@@ -322,9 +259,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Prepare transaction with enhanced UTXO selection
-   */
   async prepareTxEnhanced({
     sender,
     memo,
@@ -362,9 +296,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Send maximum possible amount (sweep)
-   */
   async sendMax({
     sender,
     recipient,
@@ -389,7 +320,6 @@ abstract class Client extends UTXOClient {
     fee: number
   }> {
     try {
-      // Validate addresses
       if (!this.validateAddress(recipient)) {
         throw UtxoError.invalidAddress(recipient, this.network)
       }
@@ -397,7 +327,6 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
-      // Use provided UTXOs (coin control) or fetch from chain
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
         UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
@@ -407,13 +336,11 @@ abstract class Client extends UTXOClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      // Calculate max using base class method
       const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) })
 
-      // Add inputs
       maxCalc.inputs.forEach((utxo: UTXO) =>
         psbt.addInput({
           hash: utxo.hash,
@@ -422,13 +349,12 @@ abstract class Client extends UTXOClient {
         }),
       )
 
-      // Add recipient output (max amount - no change)
+      // Recipient gets the max; no change output.
       psbt.addOutput({
         address: recipient,
         value: maxCalc.amount,
       })
 
-      // Add memo output if present
       if (compiledMemo) {
         psbt.addOutput({ script: compiledMemo, value: 0 })
       }
@@ -448,9 +374,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Prepare max send transaction
-   */
   async prepareMaxTx({
     sender,
     recipient,

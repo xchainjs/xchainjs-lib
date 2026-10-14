@@ -15,13 +15,7 @@ import * as Utils from './utils'
 const ECPair = ECPairFactory(ecc)
 export class ClientKeystore extends Client {
   /**
-   * Get the DASH address corresponding to the given index.
    * @deprecated This function will be removed eventually. Use getAddressAsync instead.
-   * @param {number} index The index of the address.
-   * @returns {Address} The DASH address.
-   * @throws {"index must be greater than zero"} Thrown if index is less than zero.
-   * @throws {"Phrase must be provided"} Thrown if phrase is not provided.
-   * @throws {"Address not defined"} Thrown if address is not defined.
    */
   public getAddress(index = 0): Address {
     if (index < 0) {
@@ -46,22 +40,10 @@ export class ClientKeystore extends Client {
     return address
   }
 
-  /**
-   * Asynchronously get the DASH address corresponding to the given index.
-   * @param {number} index The index of the address.
-   * @returns {Promise<string>} A promise resolving to the DASH address.
-   */
   public async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
-  /**
-   * Get the private and public keys for DASH.
-   * @param {string} phrase The phrase used to derive keys.
-   * @param {number} index The index for key derivation.
-   * @returns {Dash.ECPairInterface} The DASH ECPairInterface object.
-   * @throws {"Could not get private key from phrase"} Thrown if private key cannot be obtained from the phrase.
-   */
   public getDashKeys(phrase: string, index = 0): ECPairInterface {
     const dashNetwork = Utils.dashNetwork(this.network)
 
@@ -77,11 +59,6 @@ export class ClientKeystore extends Client {
     return ECPair.fromPrivateKey(Buffer.from(master.privateKey), { network: dashNetwork })
   }
 
-  /**
-   * Asynchronously transfers assets between addresses.
-   * @param {TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences }} params - Parameters for the transfer.
-   * @returns {Promise<TxHash>} A promise resolving to the transaction hash.
-   */
   async transfer(
     params: TxParams & {
       feeRate?: FeeRate
@@ -94,7 +71,6 @@ export class ClientKeystore extends Client {
 
     const fromAddressIndex = params.walletIndex || 0
 
-    // Merge default preferences
     const mergedPreferences: UtxoSelectionPreferences = {
       minimizeFee: true,
       avoidDust: true,
@@ -143,18 +119,6 @@ export class ClientKeystore extends Client {
     return await this.broadcastTx(txHex)
   }
 
-  /**
-   * Transfer the maximum amount of DASH (sweep).
-   *
-   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
-   * @param {Object} params The transfer parameters.
-   * @param {string} params.recipient The recipient address.
-   * @param {string} [params.memo] Optional memo for the transaction.
-   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'average' rate.
-   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
-   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
-   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
-   */
   async transferMax(params: {
     recipient: Address
     memo?: string

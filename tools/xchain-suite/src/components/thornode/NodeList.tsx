@@ -29,7 +29,6 @@ export function NodeList({ nodesApi }: NodeListProps) {
       const response = await nodesApi.nodes()
       const nodes = response.data as any[]
 
-      // Filter by status if needed
       const filtered = statusFilter === 'all'
         ? nodes
         : nodes.filter((n: any) => n.status === statusFilter)

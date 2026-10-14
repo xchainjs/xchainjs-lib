@@ -26,9 +26,6 @@ interface UseLiquidityResult {
   supportedChains: string[]
 }
 
-/**
- * Hook that provides THORChain AMM and Query for liquidity operations.
- */
 export function useLiquidity(): UseLiquidityResult {
   const { phrase, isConnected, network } = useWallet()
   const [wallet, setWallet] = useState<any | null>(null)
@@ -55,7 +52,6 @@ export function useLiquidity(): UseLiquidityResult {
       try {
         console.log('[useLiquidity] Initializing liquidity service...')
 
-        // Dynamic imports
         const [
           { Wallet },
           { ThorchainAMM },
@@ -68,7 +64,6 @@ export function useLiquidity(): UseLiquidityResult {
 
         if (cancelled) return
 
-        // Create clients for LP-supported chains
         const clients: Record<Chain, XChainClient> = {}
         const failedChains: string[] = []
 
@@ -88,7 +83,6 @@ export function useLiquidity(): UseLiquidityResult {
           throw new Error('Failed to create any chain clients')
         }
 
-        // Create instances
         const walletInstance = new Wallet(clients)
         const queryInstance = new ThorchainQuery()
         const ammInstance = new ThorchainAMM(queryInstance, walletInstance)

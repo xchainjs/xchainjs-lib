@@ -43,7 +43,6 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
     this.nativeAssetDecimals = nativeAssetDecimals
   }
   async getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]> {
-    //validate assets are for the correct chain
     assets?.forEach((i) => {
       if (i.chain !== this.chain) throw new Error(`${assetToString(i)} is not an asset of ${this.chain}`)
     })
@@ -58,7 +57,6 @@ export class EtherscanProvider implements EvmOnlineDataProvider {
         balances.push(await this.getTokenBalance(address, contractAddress, tokenSymbol))
       }
     } else {
-      // Get All Erc-20 txs
       const response = (
         await axios.get<GetERC20TxsResponse>(
           `${this.baseUrl}/api?module=account&action=tokentx&address=${address}&sort=asc&apikey=${this.apiKey}`,

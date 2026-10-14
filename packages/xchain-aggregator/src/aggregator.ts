@@ -17,7 +17,6 @@ import {
   TxSubmitted,
 } from './types'
 
-// Class definition for an Aggregator
 export class Aggregator {
   private protocols: IProtocol[]
   private config: Config & { protocols: Protocol[] }
@@ -25,7 +24,6 @@ export class Aggregator {
   constructor(config?: Config) {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
 
-    // Determine network: explicit config.network > wallet network > default
     let network = config?.network || Network.Mainnet
     if (!config?.network && config?.wallet) {
       network = config.wallet.getNetwork()
@@ -40,22 +38,13 @@ export class Aggregator {
     this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
-  /**
-   * Get the current Aggregator configuration
-   * @returns {Omit<Config, 'wallet'>} the current Aggregator configuration
-   */
   public getConfiguration(): Omit<Config & { protocols: Protocol[] }, 'wallet'> {
     return { protocols: this.config.protocols, affiliate: this.config.affiliate, network: this.config.network }
   }
 
-  /**
-   * Update the Aggregator configuration
-   * @param {Config} config
-   */
   public setConfiguration(config: Config) {
     const fConfig = { ...DEFAULT_CONFIG, ...config }
 
-    // Determine network: explicit config.network > wallet network > mainnet default
     let network = config.network || Network.Mainnet
     if (!config.network && config.wallet) {
       network = config.wallet.getNetwork()
@@ -70,11 +59,6 @@ export class Aggregator {
     this.config = { ...configWithNetwork, protocols: this.protocols.map((protocol) => protocol.name) }
   }
 
-  /**
-   * Estimate swap
-   * @param {QuoteSwapParams} params Swap parameters
-   * @returns the swap with the greatest expected amount estimated in the supported protocols
-   */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap[]> {
     const estimateTask = async (protocol: IProtocol, params: QuoteSwapParams) => {
       const [isFromAssetSupported, isDestinationAssetSupported] = await Promise.all([
@@ -107,12 +91,9 @@ export class Aggregator {
   }
 
   /**
-   * Open a Chainflip deposit channel for the given swap params.
    * Call immediately before broadcast; do not cache across expiry.
    * Chainflip `estimateSwap` is quote-only and does not open a channel.
-   *
-   * @param {QuoteSwapParams} params Must include fromAddress and destinationAddress
-   * @returns {ChainflipDepositChannel} Deposit address, channel id, and expiry
+   * `params` must include fromAddress and destinationAddress.
    */
   public async requestChainflipDepositAddress(params: QuoteSwapParams): Promise<ChainflipDepositChannel> {
     const protocol = this.protocols.find((p) => p.name === 'Chainflip')
@@ -123,11 +104,9 @@ export class Aggregator {
   }
 
   /**
-   * Request a wet OneClick quote and return the deposit address for broadcast.
-   * Call immediately before sending funds. OneClick `estimateSwap` is quote-only (`dry: true`).
-   *
-   * @param {QuoteSwapParams} params Must include fromAddress and destinationAddress
-   * @returns {OneClickDepositQuote} Deposit address and the egress amount bound to it
+   * Wet quote for the deposit address. Call immediately before sending funds.
+   * OneClick `estimateSwap` is quote-only (`dry: true`).
+   * `params` must include fromAddress and destinationAddress.
    */
   public async requestOneClickDepositAddress(params: QuoteSwapParams): Promise<OneClickDepositQuote> {
     const protocol = this.protocols.find((p) => p.name === 'OneClick')
@@ -138,12 +117,8 @@ export class Aggregator {
   }
 
   /**
-   * Register an already-broadcast OneClick deposit.
-   * Call after transferring to the address from {@link requestOneClickDepositAddress}.
+   * Call after transferring to the wet-quote deposit address.
    * Also the retry when registration fails after broadcast. Do not transfer again.
-   *
-   * @param {string} txHash Origin-chain transaction hash
-   * @param {string} depositAddress Deposit address from the wet quote
    */
   public async submitOneClickDeposit(txHash: string, depositAddress: string): Promise<void> {
     const protocol = this.protocols.find((p) => p.name === 'OneClick')
@@ -154,24 +129,19 @@ export class Aggregator {
   }
 
   /**
-   * Do swap
-   * @param {QuoteSwapParams & { protocol?: Protocol }} params Swap parameters. If protocol is not set,
-   * estimateSwap will be call and swap will be done in protocol with the greatest expected amount
-   * Approve the tx if needed
-   * @returns the swap with the greatest expected amount estimated in the supported protocols
+   * If `protocol` is unset, swap on the quote with the greatest expected amount.
+   * Approves the router when a token spend is not yet approved.
    */
   public async doSwap(params: QuoteSwapParams & { protocol?: Protocol }): Promise<TxSubmitted> {
     let successfulQuotes: QuoteSwap[] = []
 
     if (params.protocol) {
-      // Use the specified protocol
       const protocol = this.protocols.find((protocol) => protocol.name === params.protocol)
       if (!protocol) {
         throw Error(`${params.protocol} protocol is not supported`)
       }
       successfulQuotes = [await protocol.estimateSwap(params)]
     } else {
-      // Fetch quotes from all protocols
       const results = await Promise.allSettled(this.protocols.map((protocol) => protocol.estimateSwap(params)))
 
       successfulQuotes = results
@@ -185,7 +155,6 @@ export class Aggregator {
       )
     }
 
-    // Select the quote with the highest expected amount
     const bestQuote = successfulQuotes.reduce((best, current) =>
       current.expectedAmount.gt(best.expectedAmount) ? current : best,
     )
@@ -210,11 +179,6 @@ export class Aggregator {
     return protocol.doSwap(params)
   }
 
-  /**
-   * Get historical swaps
-   * @param {Address[]} addresses Addresses of which return their swap history
-   * @returns the swap history
-   */
   public async getSwapHistory(params: SwapHistoryParams): Promise<SwapHistory> {
     const getProtocolSwapHistory = async (protocol: IProtocol, params: SwapHistoryParams): Promise<SwapHistory> => {
       const supportedChains = await protocol.getSupportedChains()

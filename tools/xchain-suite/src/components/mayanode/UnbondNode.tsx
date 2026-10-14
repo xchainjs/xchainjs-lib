@@ -19,11 +19,9 @@ type UnbondType = 'lp' | 'unwhitelist'
 
 export function UnbondNode({ mayaClient, walletConnected }: UnbondNodeProps) {
   const [unbondType, setUnbondType] = useState<UnbondType>('lp')
-  // LP Unbond fields
   const [assetPool, setAssetPool] = useState('')
   const [lpUnits, setLpUnits] = useState('')
   const [nodeAddress, setNodeAddress] = useState('')
-  // Unwhitelist fields
   const [unwhitelistNodeAddress, setUnwhitelistNodeAddress] = useState('')
   const [providerAddress, setProviderAddress] = useState('')
 
@@ -36,7 +34,6 @@ export function UnbondNode({ mayaClient, walletConnected }: UnbondNodeProps) {
       let memo: string
 
       if (unbondType === 'lp') {
-        // LP Unbond: UNBOND:<asset_pool>:<lp_units>:<node_address>
         const trimmedPool = assetPool.trim()
         const trimmedUnits = lpUnits.trim()
         const trimmedNode = nodeAddress.trim()
@@ -47,7 +44,6 @@ export function UnbondNode({ mayaClient, walletConnected }: UnbondNodeProps) {
 
         memo = `UNBOND:${trimmedPool}:${trimmedUnits}:${trimmedNode}`
       } else {
-        // Unwhitelist: UNBOND::<node_address>:<provider_address>
         const trimmedNode = unwhitelistNodeAddress.trim()
         const trimmedProvider = providerAddress.trim()
 
@@ -147,7 +143,6 @@ console.log('Unwhitelist TX:', txHash)`
         </div>
       )}
 
-      {/* Unbond Type Selector */}
       <div className="flex gap-4">
         <button
           onClick={() => setUnbondType('lp')}

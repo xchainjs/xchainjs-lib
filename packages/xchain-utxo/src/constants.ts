@@ -1,8 +1,4 @@
 /**
- * Standard UTXO constants used across the library
- */
-
-/**
  * Bitcoin's standard dust threshold (546 satoshis)
  *
  * This is the minimum value for a UTXO to be considered economically spendable.
@@ -16,9 +12,6 @@
  */
 export const DUST_THRESHOLD = 546 // satoshis
 
-/**
- * Transaction size constants for fee calculation
- */
 export const TX_SIZE_CONSTANTS = {
   /** Base transaction overhead in virtual bytes */
   BASE_TX_SIZE: 10,

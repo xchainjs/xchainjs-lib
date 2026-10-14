@@ -1,5 +1,3 @@
-// Code example generators for each operation
-// These generate copy-paste ready code snippets showing how to use xchainjs
 
 // Escape single quotes in user input to prevent broken code syntax
 function escapeForString(value: string): string {

@@ -41,7 +41,6 @@ export class CovalentProvider implements EvmOnlineDataProvider {
     ).data
     for (const balance of response.data.items) {
       let symbol: string
-      // console.log(JSON.stringify(balance, null, 2))
       if (balance.contract_address === '0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') {
         //gas token, no contract associated
         symbol = balance.contract_ticker_symbol
@@ -55,7 +54,6 @@ export class CovalentProvider implements EvmOnlineDataProvider {
           amount: baseAmount(balance.balance, balance.contract_decimals),
         })
       } else {
-        //different token
         symbol = `${balance.contract_ticker_symbol}-${balance.contract_address}`
         balances.push({
           asset: {
@@ -184,7 +182,6 @@ export class CovalentProvider implements EvmOnlineDataProvider {
         //native tx
         return this.buildNativeTx(item)
       } else {
-        //non native txs
         const tx = this.buildNonNativeTx(item)
         if (!tx) {
           throw new Error('Non transfer transaction')

@@ -3,7 +3,7 @@ import { JSONRPCClient } from 'json-rpc-2.0'
 
 import { Config, UTXO } from './types'
 
-const RPC_TIMEOUT = 30_000 // 30 seconds
+const RPC_TIMEOUT = 30_000
 
 function makeClient(config: Config): JSONRPCClient {
   const client = new JSONRPCClient(async (jsonRPCRequest) => {

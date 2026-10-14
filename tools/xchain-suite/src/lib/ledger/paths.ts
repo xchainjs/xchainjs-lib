@@ -39,9 +39,6 @@ export type DerivationPathOverrides = {
   customRootPath?: string
 }
 
-/**
- * Apply account-index rewrite and/or a custom root path to a RootDerivationPaths map.
- */
 export function applyDerivationOverrides(
   roots: RootDerivationPaths | undefined,
   overrides: DerivationPathOverrides,

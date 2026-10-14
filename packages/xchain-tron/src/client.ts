@@ -49,7 +49,6 @@ import {
 } from './types'
 import { TronGrid } from './utils/trongrid'
 
-// Default parameters for the Tron client
 export const defaultTRONParams: TRONClientParams = {
   network: Network.Mainnet,
   phrase: '',
@@ -75,10 +74,6 @@ export abstract class Client extends BaseXChainClient {
     this.tronGrid = new TronGrid()
   }
 
-  /**
-   * Get TRX asset info.
-   * @returns {AssetInfo} TRX asset information.
-   */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
       asset: AssetTRX,
@@ -87,64 +82,35 @@ export abstract class Client extends BaseXChainClient {
     return assetInfo
   }
 
-  /**
-   * Get the explorer URL.
-   *
-   * @returns {string} The explorer URL.
-   */
   public getExplorerUrl(): string {
     return this.explorerProviders[this.getNetwork()].getExplorerUrl()
   }
 
-  /**
-   * Get the explorer url for the given address.
-   *
-   * @param {Address} address
-   * @returns {string} The explorer url for the given address.
-   */
   public getExplorerAddressUrl(address: Address): string {
     return this.explorerProviders[this.getNetwork()].getExplorerAddressUrl(address)
   }
 
-  /**
-   * Get the explorer url for the given transaction id.
-   *
-   * @param {string} txID
-   * @returns {string} The explorer url for the given transaction id.
-   */
   public getExplorerTxUrl(txID: TxHash): string {
     return this.explorerProviders[this.getNetwork()].getExplorerTxUrl(txID)
   }
 
-  /**
-   * Validate the given Tron address.
-   * @param {string} address Tron address to validate.
-   * @returns {boolean} `true` if the address is valid, `false` otherwise.
-   */
   validateAddress(address: string): boolean {
     return validateAddress(address)
   }
 
-  /**
-   * Get token metadata from whitelist if available
-   */
   private getTokenFromWhitelist(contractAddress: string): TokenMetadata | null {
     return TRON_TOKEN_WHITELIST[contractAddress] || null
   }
 
-  /**
-   * Get token balance and info directly from contract
-   */
   public fetchTokenMetadata = async ({ contractAddress }: { contractAddress: string }) => {
-    // First check whitelist for known tokens - faster and more reliable
+    // Whitelist avoids a contract call for known tokens.
     const whitelistData = this.getTokenFromWhitelist(contractAddress)
     if (whitelistData) {
       return whitelistData
     }
 
-    // Try contract calls for unknown tokens
     try {
-      // Set address if available to avoid owner_address error
+      // TronWeb contract calls fail without owner_address.
       const address = await this.getAddressAsync().catch(() => null)
       if (address) {
         this.tronWeb.setAddress(address)
@@ -167,9 +133,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get token balance and info directly from contract
-   */
   public fetchTokenBalance = async ({ contractAddress, address }: { contractAddress: string; address: string }) => {
     try {
       const contract = this.tronWeb.contract(trc20ABI, contractAddress)
@@ -187,9 +150,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get current chain parameters including resource prices
-   */
   getChainParameters = async () => {
     try {
       const parameters = await this.tronWeb.trx.getChainParameters()
@@ -208,7 +168,6 @@ export abstract class Client extends BaseXChainClient {
         dynamicEnergyMaxFactor: paramMap.getDynamicEnergyMaxFactor ?? DYNAMIC_ENERGY_MAX_FACTOR,
       }
     } catch {
-      // Return default values if unable to fetch
       return {
         bandwidthFee: 1000,
         createAccountFee: 100000,
@@ -219,10 +178,7 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Raw `energy_factor` from wallet/getcontractinfo (10_000 = 1.0 extra).
-   * Undefined when the lookup fails. A present 0 means the contract has no penalty.
-   */
+  /** `energy_factor` from wallet/getcontractinfo (10_000 = 1.0 extra). Undefined if the lookup fails; 0 means no penalty. */
   private getEnergyFactor = async (contractAddress: string): Promise<number | undefined> => {
     try {
       const info = await this.tronWeb.fullNode.request<{ contract_state?: { energy_factor?: number | string } }>(
@@ -240,10 +196,7 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Energy a successful TRC20 transfer actually consumes, penalty included.
-   * A reverted constant call throws, and its partial energy_used is not the cost of a real transfer.
-   */
+  /** Includes the dynamic energy penalty. A reverted constant call's partial energy_used is not a real transfer cost. */
   private simulateTrc20TransferEnergy = async ({
     contractAddress,
     sender,
@@ -282,9 +235,6 @@ export abstract class Client extends BaseXChainClient {
     return balance > BigInt(0) ? TRC20_TRANSFER_ENERGY : TRC20_TRANSFER_ENERGY_EMPTY
   }
 
-  /**
-   * Check if an address exists on the blockchain
-   */
   accountExists = async (address: string) => {
     try {
       const account = await this.tronWeb.trx.getAccount(address)
@@ -294,9 +244,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get account resources (bandwidth and energy)
-   */
   getAccountResources = async (address: string) => {
     try {
       const resources = await this.tronWeb.trx.getAccountResources(address)
@@ -310,7 +257,6 @@ export abstract class Client extends BaseXChainClient {
         energy: { total: resources.EnergyLimit || 0, used: resources.EnergyUsed || 0 },
       }
     } catch {
-      // Return default structure if unable to fetch
       return {
         bandwidth: { free: 600, total: 0, used: 0 }, // 600 free bandwidth daily
         energy: { total: 0, used: 0 },
@@ -318,12 +264,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Retrieves the balance of a given address.
-   * @param {Address} address - The address to retrieve the balance for.
-   * @param {TokenAsset[]} assets - Assets to retrieve the balance for (optional).
-   * @returns {Promise<Balance[]>} An array containing the balance of the address.
-   */
   public async getBalance(address: Address): Promise<Balance[]> {
     const ZeroBalance = [
       {
@@ -332,19 +272,16 @@ export abstract class Client extends BaseXChainClient {
       },
     ]
 
-    // Try get balance from TronGrid
     try {
       const accountData = await this.tronGrid.getAccount(address)
 
       if (!accountData) return ZeroBalance
       const balances: Balance[] = []
-      // Add TRX balance
       balances.push({
         asset: AssetTRX,
         amount: baseAmount(accountData.balance, TRX_DECIMAL),
       })
 
-      // Add TRC20 balances
       for (const token of accountData.trc20) {
         const entries = Object.entries(token)
         if (entries.length !== 1) continue
@@ -397,11 +334,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Get transaction fees.
-   * @param {TxParams} params - Tx param
-   * @returns {Fees} The average, fast, and fastest fees.
-   */
   public async getFees(params?: TxParams): Promise<Fees> {
     if (!params) throw new Error('Params need to be passed')
 
@@ -409,27 +341,22 @@ export abstract class Client extends BaseXChainClient {
     const isNative = asset?.type === AssetType.NATIVE
     let feeAmount: BaseAmount
 
-    // Get sender address
     const senderAddress = await this.getAddressAsync(walletIndex)
     if (!senderAddress) {
-      // If no signer, return default fee
       feeAmount = isNative ? baseAmount(0.1 * 10 ** 6, TRX_DECIMAL) : baseAmount(15 * 10 ** 6, TRX_DECIMAL)
     } else {
-      // Get chain parameters for current resource prices
       const chainParams = await this.getChainParameters()
 
-      // Check if recipient account exists (new accounts require activation fee)
+      // New accounts pay the activation fee.
       const recipientExists = recipient ? await this.accountExists(recipient) : true
       const activationFee = recipientExists ? 0 : chainParams.createAccountFee
       const memoBytes = memo ? Buffer.byteLength(memo, 'utf8') : 0
       const memoFee = memo ? chainParams.memoFee : 0
 
-      // Get account resources
       const resources = await this.getAccountResources(senderAddress)
       const availableBandwidth = resources.bandwidth.free + (resources.bandwidth.total - resources.bandwidth.used)
 
       if (isNative) {
-        // Calculate bandwidth needed for TRX transfer
         const bandwidthNeeded = TRX_TRANSFER_BANDWIDTH + memoBytes
 
         let bandwidthFee = 0
@@ -439,7 +366,6 @@ export abstract class Client extends BaseXChainClient {
           bandwidthFee = bandwidthToBuy * chainParams.bandwidthFee
         }
 
-        // Total fee in SUN
         const totalFeeSun = activationFee + bandwidthFee + memoFee
 
         feeAmount = baseAmount(totalFeeSun, TRX_DECIMAL)
@@ -482,7 +408,6 @@ export abstract class Client extends BaseXChainClient {
           energyFee = energyToBuy * chainParams.energyFee
         }
 
-        // Total fee in SUN
         const totalFeeSun = activationFee + bandwidthFee + energyFee + memoFee
         feeAmount = baseAmount(totalFeeSun, TRX_DECIMAL)
       }
@@ -519,7 +444,6 @@ export abstract class Client extends BaseXChainClient {
       throw new Error('TRC20 Asset Contract Address is not valid')
     }
 
-    // Build TRC20 transfer transaction
     const functionSelector = 'transfer(address,uint256)'
     const parameter = [
       { type: 'address', value: recipient },
@@ -540,7 +464,6 @@ export abstract class Client extends BaseXChainClient {
       throw new Error(res?.result?.message)
     }
 
-    // Attach memo if requested
     const tx = memo
       ? await this.tronWeb.transactionBuilder.addUpdateData(res.transaction, memo, 'utf8')
       : res.transaction
@@ -548,19 +471,8 @@ export abstract class Client extends BaseXChainClient {
     return tx
   }
 
-  /**
-   * Return signed tx
-   * @param transaction TronTransaction
-   * @param walletIndex wallet index
-   * @returns Transaction signed by phrase
-   */
   abstract signTransaction(transaction: TronTransaction, walletIndex?: number): Promise<TronSignedTransaction>
 
-  /**
-   * Decode TRON error message from hex to UTF-8
-   * @param message Hex-encoded error message from TRON node
-   * @returns Decoded error message or fallback
-   */
   private decodeTronError(message?: string): string {
     if (!message) return 'Transaction failed'
     try {
@@ -570,11 +482,6 @@ export abstract class Client extends BaseXChainClient {
     }
   }
 
-  /**
-   * Transfer TRON Asset
-   * @param {TxParams} params The transfer options.
-   * @returns {TxHash} The transaction hash.
-   */
   public async transfer(params: TxParams): Promise<string> {
     const { asset, amount: baseValue, recipient, memo, walletIndex } = params
     if (!asset) throw Error('Asset not provided')
@@ -605,8 +512,7 @@ export abstract class Client extends BaseXChainClient {
       return txid
     }
 
-    // TRC20 Token Transfer - always use createTransaction + sign pattern.
-    // Refuse before signing when the TRX balance cannot cover energy, bandwidth, and the memo fee.
+    // Refuse before signing when TRX cannot cover energy, bandwidth, and the memo fee.
     const fees = await this.getFees(params)
     const requiredSun = fees.fast.amount().toNumber()
     const trxBalanceSun = Number(await this.tronWeb.trx.getBalance(sender))
@@ -626,9 +532,6 @@ export abstract class Client extends BaseXChainClient {
     return txid
   }
 
-  /**
-   * Check the current allowance for a spender on a token
-   */
   public getApprovedAmount = async ({ contractAddress, spenderAddress, from }: TronGetApprovedParams) => {
     this.tronWeb.setAddress(from)
 
@@ -643,44 +546,22 @@ export abstract class Client extends BaseXChainClient {
     return allowance ? (typeof allowance === 'bigint' ? allowance : BigInt(allowance)) : BigInt(0)
   }
 
-  /**
-   * Check TRC20 allowance.
-   * @param {Address} contractAddress The contract address.
-   * @param {Address} spenderAddress The spender address.
-   * @param {BaseAmount} amount The amount to check if it's allowed to spend or not (optional).
-   * @param {number} walletIndex (optional) HD wallet index
-   * @param {IsApprovedParams} params - Parameters for checking allowance.
-   * @returns {boolean} `true` if the allowance is approved, `false` otherwise.
-   */
   async isApproved({ contractAddress, spenderAddress, amount, walletIndex }: IsApprovedParams): Promise<boolean> {
     const from = await this.getAddressAsync(walletIndex)
 
     const allowance = await this.getApprovedAmount({ contractAddress, from, spenderAddress })
 
     if (!amount) {
-      // If no amount specified, check if there's any approval
       return allowance > BigInt(0)
     }
 
     return allowance >= BigInt(amount.amount().toString())
   }
 
-  /**
-   * Approves an allowance for spending tokens.
-   *
-   * @param {ApproveParams} params - Parameters for approving an allowance.
-   * @param {Address} contractAddress The contract address.
-   * @param {Address} spenderAddress The spender address.
-   * @param {BaseAmount} amount The amount of token. By default, it will be unlimited token allowance. (optional)
-   * @param {number} walletIndex (optional) HD wallet index
-   * @returns {TransactionResponse} The result of the approval transaction.
-   * @throws Error If gas estimation fails.
-   */
   public async approve({ contractAddress, spenderAddress, amount, walletIndex = 0 }: ApproveParams): Promise<string> {
     const fromAddress = await this.getAddressAsync(walletIndex)
     const approvalAmount = amount !== undefined ? amount.amount().toString() : MAX_APPROVAL
 
-    // Build approve transaction using triggerSmartContract
     const functionSelector = 'approve(address,uint256)'
     const parameter = [
       { type: 'address', value: spenderAddress },
@@ -725,12 +606,6 @@ export abstract class Client extends BaseXChainClient {
     return this.tronGrid.getTransactions({ address, limit, offset })
   }
 
-  /**
-   * Get the transaction details of a given transaction ID.
-   *
-   * @param {string} txId The transaction ID.
-   * @returns {Tx} The transaction details.
-   */
   public async getTransactionData(txId: string): Promise<Tx> {
     return this.tronGrid.getTransactionData(txId)
   }

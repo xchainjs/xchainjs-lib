@@ -7,9 +7,6 @@ interface TradeAssetIconProps {
   className?: string
 }
 
-/**
- * Chain icon with a green "trade" overlay badge in the bottom-right corner.
- */
 export function TradeAssetIcon({ chainId, symbol, size = 32, className = '' }: TradeAssetIconProps) {
   const badgeSize = Math.max(12, Math.round(size * 0.4))
 

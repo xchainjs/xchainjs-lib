@@ -17,7 +17,6 @@ export function CandlestickChart({ candles, indicators, trendLines, height = 450
   const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null)
   const lineSeriesRefs = useRef<ISeriesApi<'Line'>[]>([])
 
-  // Create chart once
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -63,7 +62,6 @@ export function CandlestickChart({ candles, indicators, trendLines, height = 450
     candleSeriesRef.current = candleSeries
     volumeSeriesRef.current = volumeSeries
 
-    // Handle resize
     const resizeObserver = new ResizeObserver((entries) => {
       const { width } = entries[0].contentRect
       chart.applyOptions({ width })
@@ -80,7 +78,6 @@ export function CandlestickChart({ candles, indicators, trendLines, height = 450
     }
   }, [height])
 
-  // Update candle + volume data
   useEffect(() => {
     if (!candleSeriesRef.current || !volumeSeriesRef.current || candles.length === 0) return
 
@@ -106,12 +103,10 @@ export function CandlestickChart({ candles, indicators, trendLines, height = 450
     volumeSeriesRef.current.setData(volumeData)
   }, [candles])
 
-  // Update indicator overlays + trend lines
   useEffect(() => {
     const chart = chartRef.current
     if (!chart) return
 
-    // Remove old line series
     for (const series of lineSeriesRefs.current) {
       chart.removeSeries(series)
     }
@@ -130,13 +125,11 @@ export function CandlestickChart({ candles, indicators, trendLines, height = 450
       lineSeriesRefs.current.push(series)
     }
 
-    // Indicator overlays
     addLine(indicators.sma20, '#eab308', 1)  // yellow
     addLine(indicators.sma50, '#f97316', 1)  // orange
     addLine(indicators.ema12, '#06b6d4', 1)  // cyan
     addLine(indicators.ema26, '#a855f7', 1)  // purple
 
-    // Trend lines
     for (const tl of trendLines) {
       addLine(
         [

@@ -12,119 +12,86 @@ import {
   TradeCryptoAmount,
 } from '@xchainjs/xchain-util'
 
-/**
- * Represents the balance information for all assets on a particular chain.
- */
 export type AllBalances = {
-  chain: Chain // The chain associated with the balances
-  address: string // The address for which balances are provided
-  balances: Balance[] | string // An array of asset balances or a string indicating an error
+  chain: Chain
+  address: string
+  balances: Balance[] | string // string is an error
 }
 
-/**
- * Represents the parameters for executing a swap transaction.
- */
 export type ExecuteSwap = {
-  input: CryptoAmount<Asset | TokenAsset | SynthAsset> // The amount to swap
-  destinationAsset: Asset | TokenAsset | SynthAsset // The asset to receive after swapping
-  destinationAddress?: Address // The address to receive the swapped asset (optional)
-  memo: string // Memo to include with the transaction
-  feeOption?: FeeOption // Fee option for the transaction (optional)
-  walletIndex: number // Index of the wallet to use for the transaction
+  input: CryptoAmount<Asset | TokenAsset | SynthAsset>
+  destinationAsset: Asset | TokenAsset | SynthAsset
+  destinationAddress?: Address
+  memo: string
+  feeOption?: FeeOption
+  walletIndex: number
 }
 
-/**
- * Represents a submitted transaction.
- */
 export type TxSubmitted = {
-  hash: string // Transaction hash
-  url: string // URL of the transaction on the block explorer
+  hash: string
+  url: string // block explorer
 }
 
-/**
- * Represents a liquidity position in a liquidity pool.
- */
 export type LiquidityPosition = {
-  assetPool: LiquidityPool // The liquidity pool in which the position exists
-  assetAmount: CryptoAmount<Asset | TokenAsset> // The amount of asset in the position
-  runeAmount: AssetCryptoAmount // The amount of RUNE in the position
-  impermanentLossProtection: number // The level of impermanent loss protection
+  assetPool: LiquidityPool
+  assetAmount: CryptoAmount<Asset | TokenAsset>
+  runeAmount: AssetCryptoAmount
+  impermanentLossProtection: number
 }
 
-/**
- * Represents the parameters for adding liquidity to a pool.
- */
 export type AddLiquidity = {
-  asset: CryptoAmount<Asset | TokenAsset> // The amount of asset to add to the pool
-  rune: AssetCryptoAmount // The amount of RUNE to add to the pool
-  waitTimeSeconds: number // Estimated wait time for the transaction to be processed
-  assetPool: string // The pool's asset address
+  asset: CryptoAmount<Asset | TokenAsset>
+  rune: AssetCryptoAmount
+  waitTimeSeconds: number
+  assetPool: string
 }
 
-/**
- * Represents the parameters for withdrawing liquidity from a pool.
- */
 export type WithdrawLiquidity = {
-  assetFee: CryptoAmount<Asset | TokenAsset> // The fee in asset for withdrawing liquidity
-  runeFee: AssetCryptoAmount // The fee in RUNE for withdrawing liquidity
-  waitTimeSeconds: number // Estimated wait time for the transaction to be processed
-  percentage: number // Percentage of liquidity to withdraw
-  assetPool: string // The pool's asset address
-  assetAddress?: string // The address to receive withdrawn assets (optional)
-  runeAddress?: string // The address to receive withdrawn RUNE (optional)
+  assetFee: CryptoAmount<Asset | TokenAsset>
+  runeFee: AssetCryptoAmount
+  waitTimeSeconds: number
+  percentage: number
+  assetPool: string
+  assetAddress?: string
+  runeAddress?: string
 }
 
-/**
- * Represents the parameters for depositing an asset.
- */
 export type DepositParams = {
-  walletIndex?: number // Index of the wallet to use for the deposit (optional)
-  asset: Asset // The asset to deposit
-  amount: BaseAmount // The amount to deposit
-  feeOption: FeeOption // Fee option for the transaction
-  memo: string // Memo to include with the transaction
+  walletIndex?: number
+  asset: Asset
+  amount: BaseAmount
+  feeOption: FeeOption
+  memo: string
 }
 
-/**
- * Represents the parameters for opening a loan.
- */
 export type LoanOpenParams = {
-  memo: string // Memo to include with the loan transaction
-  amount: CryptoAmount // The amount of asset to loan
-  toAddress: Address // The address to receive the loan
+  memo: string
+  amount: CryptoAmount
+  toAddress: Address
 }
 
-/**
- * Represents the parameters for closing a loan.
- */
 export type LoanCloseParams = {
-  memo: string // Memo to include with the loan transaction
-  amount: CryptoAmount // The amount of asset to repay
-  toAddress: Address // The address to repay the loan
+  memo: string
+  amount: CryptoAmount
+  toAddress: Address
 }
 
-/**
- * Represents the parameters for registering a THORName.
- */
 export type RegisterThornameParams = {
-  thorname: string // The THORName to register
-  owner?: string // The owner of the THORName (optional)
-  chain?: string // The chain associated with the THORName (optional)
-  chainAddress?: string // The address associated with the THORName (optional)
-  preferredAsset?: Asset // Preferred asset associated with the THORName (optional)
-  expirity?: Date // Expiry date for the THORName (optional)
+  thorname: string
+  owner?: string
+  chain?: string
+  chainAddress?: string
+  preferredAsset?: Asset
+  expirity?: Date
 }
 
-/**
- * Represents the parameters for updating a THORName.
- */
 export type UpdateThornameParams = {
-  thorname: string // The THORName to update
-  owner?: string // The new owner of the THORName (optional)
-  chain?: string // The new chain associated with the THORName (optional)
-  chainAddress?: string // The new address associated with the THORName (optional)
-  preferredAsset?: Asset // New preferred asset associated with the THORName (optional)
-  expirity?: Date // New expiry date for the THORName (optional)
+  thorname: string
+  owner?: string
+  chain?: string
+  chainAddress?: string
+  preferredAsset?: Asset
+  expirity?: Date
 }
 
 export type IsApprovedParams = {
@@ -133,174 +100,62 @@ export type IsApprovedParams = {
   address: Address
 }
 
-// Object representing parameters for approving a transaction
 export type ApproveParams = {
-  asset: TokenAsset // The asset to approve
-  amount?: CryptoAmount<TokenAsset> // The amount to approve, or undefined for an infinite approval
+  asset: TokenAsset
+  amount?: CryptoAmount<TokenAsset> // undefined means infinite approval
 }
 
-/**
- * Estimation quote to register or update a THORName
- */
 export type QuoteTHORName = BaseQuoteTHORName & {
-  /**
-   * If the action can be or not can be done
-   */
   allowed: boolean
-  /**
-   * If any, list of errors with the reason the operation is not allowed
-   */
   errors: string[]
 }
 
-/**
- * Add to trade account params
- */
 export type AddToTradeAccountParams = {
-  /**
-   * Amount to add to the account
-   */
   amount: CryptoAmount<Asset | TokenAsset>
-  /**
-   * Trade account address
-   */
   address: Address
 }
 
-/**
- * Estimation to add amount to trade account
- */
 export type AddToTradeAccount = {
-  /**
-   * Address to send transaction
-   */
   toAddress: string
-  /**
-   * Memo to add to the transaction to add the trade amount
-   */
   memo: string
-  /**
-   * Amount to send to the address
-   */
   value: CryptoAmount<Asset | TokenAsset>
-  /**
-   * If the action can be or not can be done
-   */
   allowed: boolean
-  /**
-   * If any, list of errors with the reason the operation is not allowed
-   */
   errors: string[]
 }
 
-/**
- * Withdraw from trade account params
- */
 export type WithdrawFromTradeAccountParams = {
-  /**
-   * Amount to withdraw from the account
-   */
   amount: TradeCryptoAmount
-  /**
-   * Address to make to the withdraw to
-   */
   address: Address
 }
 
-/**
- * Estimation to add amount to trade account
- */
 export type WithdrawFromTradeAccount = {
-  /**
-   * Memo to add to the transaction to add the trade amount
-   */
   memo: string
-  /**
-   * Amount to send to the address
-   */
   value: TradeCryptoAmount
-  /**
-   * If the action can be or not can be done
-   */
   allowed: boolean
-  /**
-   * If any, list of errors with the reason the operation is not allowed
-   */
   errors: string[]
 }
 
-/**
- * Estimation to quote to deposit to Rune pool
- */
 export type EstimateDepositToRunePool = {
-  /**
-   * Amount to send in the transaction to make the deposit
-   */
   amount: AssetCryptoAmount
-  /**
-   * Memo to send in the transaction to make the deposit
-   */
   memo: string
-  /**
-   * Number of blocks from the last deposit that a withdraw is allowed
-   */
-  maturityBlocks: number
-  /**
-   * If the action can be or not can be done
-   */
+  maturityBlocks: number // blocks after last deposit before withdraw is allowed
   allowed: boolean
-  /**
-   * If any, list of errors with the reason the operation is not allowed
-   */
   errors: string[]
 }
 
-/**
- * Deposit to Rune pool params
- */
 export type DepositToRunePoolParams = {
-  /**
-   * Rune amount to deposit to the Rune pool
-   */
   amount: AssetCryptoAmount
 }
 
-/**
- * Estimation to quote to withdraw from Rune pool
- */
 export type EstimateWithdrawFromRunePool = {
-  /**
-   * Amount to send in the transaction to make the withdraw
-   */
   amount: AssetCryptoAmount
-  /**
-   * Memo to send in the transaction to make the withdraw
-   */
   memo: string
-  /**
-   * If the action can be or not can be done
-   */
   allowed: boolean
-  /**
-   * If any, list of errors with the reason the operation is not allowed
-   */
   errors: string[]
 }
 
-/**
- * Withdraw from Rune pool params
- */
 export type WithdrawFromRunePoolParams = {
-  /**
-   * Basis points to retrieve from the Rune pool position. Range 0-10000, where 10000 = 100%.
-   */
-  withdrawBps: number
-  /**
-   * Affiliate address
-   */
+  withdrawBps: number // 0-10000, where 10000 = 100%
   affiliate?: Address
-  /**
-   * Basis points to send to the affiliate address. Ranges from 0 to 1000 Basis Points.
-   */
-  feeBps?: number
+  feeBps?: number // affiliate bps, 0-1000
 }

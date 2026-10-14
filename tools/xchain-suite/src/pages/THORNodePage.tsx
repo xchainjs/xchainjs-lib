@@ -65,14 +65,12 @@ export default function THORNodePage() {
     <div className="p-6">
       <div className="max-w-2xl mx-auto">
         <div className="space-y-6">
-          {/* Header */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">THORNode Operations</h2>
             <p className="text-gray-500 dark:text-gray-400 mt-1">
               Manage and query THORChain validator nodes
             </p>
 
-            {/* Connection Status */}
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${nodesApi ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -89,7 +87,6 @@ export default function THORNodePage() {
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             <div className="border-b border-gray-200 dark:border-gray-700">
               <nav className="flex -mb-px overflow-x-auto">
@@ -109,14 +106,12 @@ export default function THORNodePage() {
               </nav>
             </div>
 
-            {/* Tab Description */}
             <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {TABS.find((t) => t.id === activeTab)?.description}
               </p>
             </div>
 
-            {/* Tab Content */}
             <div className="p-6">
               {activeTab === 'list' && <NodeList nodesApi={nodesApi} />}
               {activeTab === 'details' && <NodeDetails nodesApi={nodesApi} />}
@@ -126,7 +121,6 @@ export default function THORNodePage() {
             </div>
           </div>
 
-          {/* Info Panel */}
           <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
             <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">About THORChain Node Operations</h3>
             <div className="text-sm text-blue-700 dark:text-blue-300 space-y-2">

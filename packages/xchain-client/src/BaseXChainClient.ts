@@ -1,10 +1,6 @@
 import { validatePhrase } from '@xchainjs/xchain-crypto'
 import { Address, AnyAsset, Chain } from '@xchainjs/xchain-util'
 import axios from 'axios'
-/**
- * This abstract class serves as the base for XChain clients.
- * It provides common functionality and abstract methods that concrete XChain clients must implement.
- */
 import {
   AssetInfo,
   Balance,
@@ -32,31 +28,21 @@ const STAGENET_MAYANODE_API_BASE = 'https://stagenet.mayanode.mayachain.info/may
 const TESTNET_MAYANODE_API_BASE = 'https://testnet.mayanode.mayachain.info/mayachain'
 
 export abstract class BaseXChainClient implements XChainClient {
-  protected chain: Chain // The blockchain chain identifier
-  protected network: Network // The network (e.g., Mainnet, Testnet, Stagenet)
-  protected feeBounds: FeeBounds // The fee bounds for transactions
-  protected phrase = '' // The mnemonic phrase used for wallet generation
-  protected rootDerivationPaths: RootDerivationPaths | undefined // The root derivation paths for HD wallets
+  protected chain: Chain
+  protected network: Network
+  protected feeBounds: FeeBounds
+  protected phrase = '' // Mnemonic used for wallet derivation
+  protected rootDerivationPaths: RootDerivationPaths | undefined
 
-  /**
-   * Constructor for the BaseXChainClient class.
-   * Initializes the client with the provided chain and parameters.
-   * @param {Chain} chain The blockchain chain identifier
-   * @param {XChainClientParams} params The client parameters, including network, fee bounds, and root derivation paths
-   * @throws {"Invalid phrase"} Thrown if an invalid mnemonic phrase is provided
-   */
   constructor(chain: Chain, params: XChainClientParams) {
-    // Initialize class properties
     this.chain = chain
     this.network = params.network || Network.Testnet
     this.feeBounds = params.feeBounds || { lower: 1, upper: Infinity }
 
-    // Warn if using Stagenet for real assets
     if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
 
     if (params.rootDerivationPaths) this.rootDerivationPaths = params.rootDerivationPaths
 
-    // Set the mnemonic phrase if provided
     if (params.phrase) {
       if (!validatePhrase(params.phrase)) {
         throw new Error('Invalid phrase')
@@ -65,34 +51,19 @@ export abstract class BaseXChainClient implements XChainClient {
     }
   }
 
-  /**
-   * Set or update the current network.
-   * @param {Network} network The network to set
-   * @returns {void}
-   * @throws {"Network must be provided"} Thrown if no network is provided
-   */
   public setNetwork(network: Network): void {
     if (!network) {
       throw new Error('Network must be provided')
     }
     this.network = network
 
-    // Warn if using Stagenet for real assets
     if (this.network === Network.Stagenet) console.warn('WARNING: This is using stagenet! Real assets are being used!')
   }
 
-  /**
-   * Get the current network.
-   * @returns {Network} The current network
-   */
   public getNetwork(): Network {
     return this.network
   }
 
-  /**
-   * Get the fee rate from the Thorchain API.
-   * @returns {Promise<FeeRate>} The fee rate in the expected unit for each chain type
-   */
   protected async getFeeRateFromThorchain(): Promise<FeeRate> {
     const respData = await this.thornodeAPIGet('/inbound_addresses')
     if (!Array.isArray(respData)) throw new Error('bad response from Thornode API')
@@ -108,18 +79,15 @@ export abstract class BaseXChainClient implements XChainClient {
     const gasRate = Number(chainData.gas_rate)
     const gasRateUnits = chainData.gas_rate_units || ''
 
-    // Convert gas_rate based on gas_rate_units to the expected unit for each chain type
-    // EVM clients expect values in gwei and will multiply by 10^9 to get wei
-    // UTXO clients expect satoshis per byte directly
-
-    // First, try unit-based conversion for common patterns
+    // EVM clients expect gwei and multiply by 10^9 to get wei.
+    // UTXO clients expect satoshis per byte directly.
     switch (gasRateUnits) {
       case 'gwei':
         return gasRate // Already in gwei for EVM chains
       case 'mwei':
-        return gasRate / 1e3 // Convert mwei to gwei (1 mwei = 0.001 gwei)
+        return gasRate / 1e3 // mwei to gwei (1 mwei = 0.001 gwei)
       case 'centigwei':
-        return gasRate / 100 // Convert centigwei to gwei
+        return gasRate / 100 // centigwei to gwei
       case 'satsperbyte':
         return gasRate // UTXO chains use this directly
       case 'drop':
@@ -131,7 +99,6 @@ export abstract class BaseXChainClient implements XChainClient {
         break
     }
 
-    // Chain-specific handling for special cases
     switch (this.chain) {
       case 'AVAX':
         // nAVAX = nano AVAX = 10^-9 AVAX = gwei equivalent
@@ -142,26 +109,21 @@ export abstract class BaseXChainClient implements XChainClient {
         return gasRate
 
       default:
-        // For nano-prefixed units (nETH, nBSC, etc.), treat as gwei equivalent
+        // Nano-prefixed units (nETH, nBSC, etc.) are gwei equivalent
         if (gasRateUnits.startsWith('n') && gasRateUnits.length > 1) {
-          return gasRate // nano units = gwei equivalent for EVM chains
+          return gasRate
         }
-        // For micro-prefixed units (uatom, etc.), return as-is for Cosmos chains
+        // Micro-prefixed units (uatom, etc.) are returned as-is for Cosmos chains
         if (gasRateUnits.startsWith('u') && gasRateUnits.length > 1) {
-          return gasRate // micro units for Cosmos chains
+          return gasRate
         }
         break
     }
 
-    // If we reach here, log a warning but return the raw value
     console.warn(`Unknown gas_rate_units "${gasRateUnits}" for chain ${this.chain}. Using raw value.`)
     return gasRate
   }
 
-  /**
-   * Get the fee rate from the Mayachain API.
-   * @returns {Promise<FeeRate>} The fee rate in the expected unit for each chain type
-   */
   protected async getFeeRateFromMayachain(): Promise<FeeRate> {
     const respData = await this.mayanodeAPIGet('/inbound_addresses')
     if (!Array.isArray(respData)) throw new Error('bad response from Mayanode API')
@@ -177,7 +139,6 @@ export abstract class BaseXChainClient implements XChainClient {
     const gasRate = Number(chainData.gas_rate)
     const gasRateUnits = chainData.gas_rate_units || ''
 
-    // Log for debugging
     if (gasRateUnits) {
       console.debug(`Mayachain gas_rate for ${this.chain}: ${gasRate} ${gasRateUnits}`)
     }
@@ -205,11 +166,6 @@ export abstract class BaseXChainClient implements XChainClient {
     }
   }
 
-  /**
-   * Make a GET request to the Thorchain API.
-   * @param {string} endpoint The API endpoint
-   * @returns {Promise<unknown>} The response data
-   */
   protected async thornodeAPIGet(endpoint: string): Promise<unknown> {
     const url = (() => {
       switch (this.network) {
@@ -224,11 +180,6 @@ export abstract class BaseXChainClient implements XChainClient {
     return (await axios.get(url + endpoint)).data
   }
 
-  /**
-   * Make a GET request to the Mayachain API.
-   * @param {string} endpoint The API endpoint
-   * @returns {Promise<unknown>} The response data
-   */
   protected async mayanodeAPIGet(endpoint: string): Promise<unknown> {
     const url = (() => {
       switch (this.network) {
@@ -243,13 +194,6 @@ export abstract class BaseXChainClient implements XChainClient {
     return (await axios.get(url + endpoint)).data
   }
 
-  /**
-   * Set or update the mnemonic phrase.
-   * @param {string} phrase The new mnemonic phrase
-   * @param {number} walletIndex (Optional) The HD wallet index
-   * @returns {Address} The address derived from the provided phrase
-   * @throws {"Invalid phrase"} Thrown if an invalid mnemonic phrase is provided
-   */
   public setPhrase(phrase: string, walletIndex = 0): Address {
     if (this.phrase !== phrase) {
       if (!validatePhrase(phrase)) {
@@ -261,24 +205,14 @@ export abstract class BaseXChainClient implements XChainClient {
     return this.getAddress(walletIndex)
   }
 
-  /**
-   * Get the full derivation path based on the wallet index.
-   * @param {number} walletIndex The HD wallet index
-   * @returns {string} The full derivation path
-   */
   protected getFullDerivationPath(walletIndex: number): string {
     return this.rootDerivationPaths ? `${this.rootDerivationPaths[this.network]}${walletIndex}` : ''
   }
 
-  /**
-   * Purge the client by clearing the mnemonic phrase.
-   * @returns {void}
-   */
   public purgeClient(): void {
     this.phrase = ''
   }
 
-  // Abstract methods that must be implemented by concrete XChain clients
   abstract getFees(): Promise<Fees>
   abstract getAddress(walletIndex?: number): string
   abstract getAddressAsync(walletIndex?: number): Promise<string>

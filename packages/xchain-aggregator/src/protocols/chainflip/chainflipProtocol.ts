@@ -48,9 +48,6 @@ type SelectedQuoteContext = {
   isUsingBoost: boolean
 }
 
-/**
- * Chainflip protocol
- */
 export class ChainflipProtocol implements IProtocol {
   public readonly name = 'Chainflip'
   private sdk: SwapSDK
@@ -83,11 +80,6 @@ export class ChainflipProtocol implements IProtocol {
     return Promise.resolve(false)
   }
 
-  /**
-   * Check if an asset is supported in the protocol
-   * @param {Asset} asset Asset to check if it is supported
-   * @returns {boolean} True if the asset is supported, otherwise false
-   */
   public async isAssetSupported(asset: AnyAsset): Promise<boolean> {
     if (isSynthAsset(asset) || isTradeAsset(asset)) return false
     try {
@@ -98,22 +90,15 @@ export class ChainflipProtocol implements IProtocol {
     }
   }
 
-  /**
-   * Retrieve the supported chains by the protocol
-   * @returns {Chain[]} the supported chains by the protocol
-   */
   public async getSupportedChains(): Promise<Chain[]> {
     const chains = await this.sdk.getChains()
     return chains.map((chain) => cChainToXChain(chain.chain)).filter((chain) => chain !== null) as Chain[]
   }
 
   /**
-   * Estimate swap (quote only). Does **not** open a deposit channel.
-   *
-   * Call {@link openDepositChannel} (or {@link doSwap}) immediately before broadcast.
-   *
-   * @param {QuoteSwapParams} quoteSwapParams Swap parameters.
-   * @returns {QuoteSwap} Quote swap result. `toAddress` / `depositChannelId` are empty until a channel is opened.
+   * Quote only. Does not open a deposit channel.
+   * Call openDepositChannel or doSwap immediately before broadcast.
+   * `toAddress` and `depositChannelId` stay empty until a channel is opened.
    */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const srcAssetData = await this.getAssetData(params.fromAsset)
@@ -133,11 +118,8 @@ export class ChainflipProtocol implements IProtocol {
   }
 
   /**
-   * Open a Chainflip deposit channel for the current quote.
    * Open immediately before broadcast; do not cache across `expiresAt`.
-   *
-   * @param {QuoteSwapParams} params Must include `fromAddress` and `destinationAddress`
-   * @returns {ChainflipDepositChannel} Deposit address, channel id, and expiry
+   * `params` must include `fromAddress` and `destinationAddress`.
    */
   public async openDepositChannel(params: QuoteSwapParams): Promise<ChainflipDepositChannel> {
     if (!params.fromAddress) throw Error('fromAddress is required to open a Chainflip deposit channel')
@@ -187,14 +169,9 @@ export class ChainflipProtocol implements IProtocol {
   }
 
   /**
-   * Perform a swap: open a deposit channel, then transfer to the deposit address.
-   *
-   * Prefer {@link openDepositChannel} when the UI must track `expiresAt` /
-   * `depositChannelId` around slow signing (e.g. Ledger) or post-broadcast
-   * monitoring — `doSwap` does not return channel metadata.
-   *
-   * @param {QuoteSwapParams} params Swap parameters
-   * @returns {TxSubmitted} Transaction hash and URL of the swap
+   * Prefer openDepositChannel when the UI must track `expiresAt` and `depositChannelId`
+   * around slow signing (for example Ledger) or post-broadcast monitoring.
+   * `doSwap` does not return channel metadata.
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
     if (!this.wallet) throw Error('Wallet not configured. Can not do swap')
@@ -214,21 +191,10 @@ export class ChainflipProtocol implements IProtocol {
     }
   }
 
-  /**
-   * Get historical swaps
-   * @throws {Error} - Method not implemented.
-   * @returns the swap history
-   */
   public async getSwapHistory(): Promise<SwapHistory> {
     throw new Error('Method not implemented.')
   }
 
-  /**
-   * Get asset data
-   * @param {Asset} asset - Asset of which return data
-   * @throws {Error} - If asset is not supported in Chainflip
-   * @returns the asset data
-   */
   private async getAssetData(asset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset): Promise<AssetData> {
     if (isSynthAsset(asset)) {
       throw Error('Synth asset not supported in Chainflip protocol')

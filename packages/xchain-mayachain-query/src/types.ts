@@ -15,97 +15,56 @@ import type BigNumber from 'bignumber.js'
 
 export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
 
-/**
- * Represents fees associated with a swap.
- */
 export type Fees = {
-  asset: CompatibleAsset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount<CompatibleAsset> // The affiliate fee amount
-  outboundFee: CryptoAmount<CompatibleAsset> // The outbound fee amount
-  /**
-   * The liquidity fees paid to pools
-   */
+  asset: CompatibleAsset
+  affiliateFee: CryptoAmount<CompatibleAsset>
+  outboundFee: CryptoAmount<CompatibleAsset>
   liquidityFee: CryptoAmount<CompatibleAsset>
-  /**
-   * Total fees
-   */
   totalFee: CryptoAmount<CompatibleAsset>
 }
 
-/**
- * Represents a quote for a swap operation.
- */
 export type QuoteSwap = {
-  toAddress: Address // The destination address for the swap
-  memo: string // The memo associated with the swap
-  expectedAmount: CryptoAmount<CompatibleAsset> // The expected amount to be received after the swap
-  dustThreshold: AssetCryptoAmount // The dust threshold for the swap
-  fees: Fees // The fees associated with the swap
-  inboundConfirmationSeconds?: number // The inbound confirmation time in seconds
-  inboundConfirmationBlocks?: number // The inbound confirmation time in blocks
-  outboundDelaySeconds: number // The outbound delay time in seconds
-  outboundDelayBlocks: number // The outbound delay time in blocks
-  totalSwapSeconds: number // The total time for the swap operation
-  slipBasisPoints: number // The slip basis points for the swap
-  /**
-   * The EVM chain router contract address
-   */
-  router?: string
-  /**
-   * Expiration timestamp in unix seconds
-   */
-  expiry: number
-  /**
-   * The recommended minimum inbound amount for this transaction type & inbound asset. Sending less than this amount could result in failed refunds.
-   */
+  toAddress: Address
+  memo: string
+  expectedAmount: CryptoAmount<CompatibleAsset>
+  dustThreshold: AssetCryptoAmount
+  fees: Fees
+  inboundConfirmationSeconds?: number
+  inboundConfirmationBlocks?: number
+  outboundDelaySeconds: number
+  outboundDelayBlocks: number
+  totalSwapSeconds: number
+  slipBasisPoints: number
+  router?: string // EVM router contract
+  expiry: number // unix seconds
+  // sending less can fail the refund
   recommendedMinAmountIn?: CryptoAmount
-  /**
-   * The recommended gas rate to use for the inbound to ensure timely confirmation
-   */
   recommendedGasRate?: string
-  /**
-   * The units of the recommended gas rate
-   */
   gasRateUnits?: string
-  /**
-   * The maximum amount of trades a streaming swap can do for a trade
-   */
   streamingSwapSeconds?: number
-  /**
-   * The number of blocks the streaming swap will execute over
-   */
   streamingSwapBlocks?: number
-  /**
-   * Approx the number of seconds the streaming swap will execute over
-   */
   maxStreamingQuantity?: number
-  canSwap: boolean // Indicates whether the swap can be performed
-  errors: string[] // Any errors encountered during the swap operation
-  warning: string // Any warning messages associated with the swap
+  canSwap: boolean
+  errors: string[]
+  warning: string
 }
 
-/**
- * A single affiliate entry. Used by the multi-affiliate `affiliates` field on QuoteSwapParams.
- */
 export type Affiliate = {
-  address: string // The affiliate address or MAYAName
-  bps: number // The affiliate basis points (0-500 on MAYAChain)
+  address: string // address or MAYAName
+  bps: number // affiliate bps, 0-500 on MAYAChain
 }
 
-/**
- * Represents parameters for quoting a swap operation.
- */
 export type QuoteSwapParams = {
-  fromAsset: CompatibleAsset // The asset to swap from
-  destinationAsset: CompatibleAsset // The asset to swap to
-  amount: CryptoAmount<CompatibleAsset> // The amount to swap
-  fromAddress?: string // The source address for the swap
-  destinationAddress?: string // The destination address for the swap
-  height?: number // The block height for the swap
+  fromAsset: CompatibleAsset
+  destinationAsset: CompatibleAsset
+  amount: CryptoAmount<CompatibleAsset>
+  fromAddress?: string
+  destinationAddress?: string
+  height?: number
   liquidityToleranceBps?: number
-  toleranceBps?: number // The tolerance basis points for the swap
-  affiliateBps?: number // Single-affiliate basis points. Mutually exclusive with `affiliates`.
-  affiliateAddress?: string // Single-affiliate address. Mutually exclusive with `affiliates`.
+  toleranceBps?: number
+  affiliateBps?: number // mutually exclusive with affiliates
+  affiliateAddress?: string // mutually exclusive with affiliates
   // Multi-affiliate form. MAYAChain accepts up to 5 affiliates per swap with per-affiliate bps;
   // each bps must be 0-500. Mutually exclusive with the singular affiliateAddress / affiliateBps.
   affiliates?: Affiliate[]
@@ -113,29 +72,23 @@ export type QuoteSwapParams = {
   streamingQuantity?: number
 }
 
-/**
- * Represents details about an inbound address.
- */
 export type InboundDetail = {
-  chain: Chain // The chain associated with the inbound address
-  address: Address // The inbound address
-  router?: Address // The router address
-  gasRate: BigNumber // The gas rate
-  gasRateUnits: string // The units of the gas rate
-  outboundTxSize: BigNumber // The outbound transaction size
-  outboundFee: BigNumber // The outbound fee
-  haltedChain: boolean // Indicates if the chain is halted
-  haltedTrading: boolean // Indicates if trading is halted
-  haltedLP: boolean // Indicates if LP (liquidity provision) is halted
+  chain: Chain
+  address: Address
+  router?: Address
+  gasRate: BigNumber
+  gasRateUnits: string
+  outboundTxSize: BigNumber
+  outboundFee: BigNumber
+  haltedChain: boolean
+  haltedTrading: boolean
+  haltedLP: boolean
 }
 
 export type SwapHistoryParams = {
   addresses: Address[]
 }
 
-/**
- * Transaction action
- */
 export type TransactionAction = {
   hash: TxHash
   address: Address
@@ -159,241 +112,85 @@ export type PendingSwap = {
   inboundTx: TransactionAction
 }
 
-/**
- * Swap resume
- */
 export type Swap = SuccessSwap | PendingSwap
 
-/**
- * Swap history
- */
 export type SwapsHistory = {
   swaps: Swap[]
   count: number
 }
 
-/**
- * Represents an alias for a MAYAName.
- */
 export type MAYANameAlias = {
-  /**
-   * The chain of the alias
-   */
   chain: Chain
-  /**
-   * The address of the alias
-   */
   address: Address
 }
 
-/**
- * Represents details about a MAYAName.
- */
 export type MAYANameDetails = {
-  /**
-   * The MAYAName
-   */
   name: string
-  /**
-   * The expiry block height
-   */
   expireBlockHeight: number
-  /**
-   * The owner of the MAYAName
-   */
   owner: string
-  /**
-   * The preferred asset
-   */
   preferredAsset?: string
-  /**
-   * The affiliate collector CACAO
-   */
   affiliateCollectorCacao?: string
-  /**
-   * List of MAYAName aliases
-   */
   aliases: MAYANameAlias[]
 }
 
-/**
- * Register MAYAName parameters
- */
 export type RegisterMAYAName = {
-  /**
-   * MAYAName to register
-   */
   name: string
-  /**
-   * MAYAName owner
-   */
   owner: Address
-  /**
-   * MAYAName expiry time, by default, it will be one year more or less
-   */
-  expiry?: Date
-  /**
-   * Chain on which create the alias of the MAYAName
-   */
+  expiry?: Date // defaults to about one year
   chain: Chain
-  /**
-   * Address of the chain provided to create the alias of the MAYAName
-   */
   chainAddress: Address
-  /**
-   * Preferred asset for the MAYAName owner to receive fees in
-   */
-  preferredAsset?: Asset
+  preferredAsset?: Asset // asset fees are received in
 }
 
-/**
- * Update MAYAName parameters
- */
 export type UpdateMAYAName = {
-  /**
-   * MAYAName to update
-   */
   name: string
-  /**
-   * MAYAName owner, if not provided, memo response will have the current owner
-   */
-  owner?: Address
-  /**
-   * MAYAName expiry
-   */
+  owner?: Address // omitted: memo uses the current owner
   expiry?: Date
-  /**
-   * Chain on which update the alias of the MAYAName, if not provided, memo response will have one of the already registered chains of the MAYAName
-   */
-  chain?: Chain
-  /**
-   * Address of the chain provided to update the alias of the MAYAName, if not provided, memo response will have the address of the chain returned
-   */
-  chainAddress?: Address
-  /**
-   * Preferred asset for the MAYAName owner to receive fees in
-   */
-  preferredAsset?: Asset
+  chain?: Chain // omitted: memo uses a registered chain
+  chainAddress?: Address // omitted: memo uses the returned chain's address
+  preferredAsset?: Asset // asset fees are received in
 }
 
 export type QuoteMAYANameParams = (RegisterMAYAName & { isUpdate?: false }) | (UpdateMAYAName & { isUpdate: true })
 
-/**
- * Estimation quote to register or update a MAYAName
- */
 export type QuoteMAYAName = {
-  /**
-   * Memo for the deposit transaction
-   */
   memo: string
-  /**
-   * Estimation of the update or the registration of the MAYAName
-   */
   value: AssetCryptoAmount
 }
 
-/**
- * Trade asset units parameters
- */
 export type TradeAssetUnitsParams = {
-  /**
-   * Trade asset to get units for
-   */
   asset: TradeAsset
-  /**
-   * Optional block height
-   */
   height?: number
 }
 
-/**
- * Trade asset units response
- */
 export type TradeAssetUnits = {
-  /**
-   * Trade asset
-   */
   asset: TradeAsset
-  /**
-   * Total units of the trade asset
-   */
   units: TradeCryptoAmount
-  /**
-   * Total depth of the trade asset
-   */
   depth: TradeCryptoAmount
 }
 
-/**
- * Trade assets units parameters
- */
 export type TradeAssetsUnitsParams = {
-  /**
-   * Optional block height
-   */
   height?: number
 }
 
-/**
- * Address trade accounts parameters
- */
 export type AddressTradeAccountsParams = {
-  /**
-   * Maya address to get trade accounts for
-   */
   address: Address
-  /**
-   * Optional block height
-   */
   height?: number
 }
 
-/**
- * Address trade account
- */
 export type AddressTradeAccount = {
-  /**
-   * Trade asset
-   */
   asset: TradeAsset
-  /**
-   * Units of trade asset belonging to this owner
-   */
   units: TradeCryptoAmount
-  /**
-   * Maya address of trade account owner
-   */
   owner: Address
-  /**
-   * Last mayachain height trade assets were added
-   */
-  lastAddHeight?: number
-  /**
-   * Last mayachain height trade assets were withdrawn
-   */
-  lastWithdrawHeight?: number
+  lastAddHeight?: number // MAYAChain height of last add
+  lastWithdrawHeight?: number // MAYAChain height of last withdraw
 }
 
-/**
- * Address trade accounts response
- */
 export type AddressTradeAccounts = AddressTradeAccount[]
 
-/**
- * Trade asset accounts parameters
- */
 export type TradeAssetAccountsParams = {
-  /**
-   * Trade asset to get accounts for
-   */
   asset: TradeAsset
-  /**
-   * Optional block height
-   */
   height?: number
 }
 
-/**
- * Trade asset accounts response
- */
 export type TradeAssetAccounts = AddressTradeAccount[]

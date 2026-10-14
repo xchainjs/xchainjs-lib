@@ -6,7 +6,6 @@ import { Aggregator } from '../src'
 
 describe('Network Configuration Tests', () => {
   it('Should create aggregator with explicit network configuration', () => {
-    // Test that aggregator accepts network parameter
     const stagenetAggregator = new Aggregator({
       protocols: ['Thorchain'],
       network: Network.Stagenet,
@@ -23,12 +22,10 @@ describe('Network Configuration Tests', () => {
   })
 
   it('Should infer network from wallet when network not explicitly set', () => {
-    // Create a wallet with stagenet clients
     const stagenetWallet = new Wallet({
       THOR: new ThorClient({ network: Network.Stagenet }),
     })
 
-    // Create aggregator without explicit network - should infer from wallet
     const aggregator = new Aggregator({
       protocols: ['Thorchain'],
       wallet: stagenetWallet,
@@ -38,16 +35,14 @@ describe('Network Configuration Tests', () => {
   })
 
   it('Should prefer explicit network over wallet network', () => {
-    // Create wallet with mainnet
     const mainnetWallet = new Wallet({
       THOR: new ThorClient({ network: Network.Mainnet }),
     })
 
-    // Create aggregator with explicit stagenet - should use stagenet, not mainnet from wallet
     const aggregator = new Aggregator({
       protocols: ['Thorchain'],
       wallet: mainnetWallet,
-      network: Network.Stagenet, // This should take precedence
+      network: Network.Stagenet,
     })
 
     expect(aggregator).toBeDefined()

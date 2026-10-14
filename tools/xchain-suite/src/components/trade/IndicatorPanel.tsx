@@ -32,7 +32,6 @@ export function IndicatorPanel({ rsiData, macdData, showRsi, showMacd }: Props) 
     crosshair: { mode: 0 as const },
   }
 
-  // RSI chart
   useEffect(() => {
     if (!showRsi || !rsiRef.current || rsiData.length === 0) return
 
@@ -47,7 +46,6 @@ export function IndicatorPanel({ rsiData, macdData, showRsi, showMacd }: Props) 
       priceLineVisible: false,
     })
 
-    // Add 70/30 reference lines
     const line70 = chart.addLineSeries({ color: '#ef4444', lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false })
     const line30 = chart.addLineSeries({ color: '#22c55e', lineWidth: 1, lineStyle: 2, priceLineVisible: false, lastValueVisible: false })
 
@@ -68,7 +66,6 @@ export function IndicatorPanel({ rsiData, macdData, showRsi, showMacd }: Props) 
     return () => { ro.disconnect(); chart.remove(); rsiChartRef.current = null }
   }, [showRsi, rsiData])
 
-  // MACD chart
   useEffect(() => {
     if (!showMacd || !macdRef.current || macdData.length === 0) return
 

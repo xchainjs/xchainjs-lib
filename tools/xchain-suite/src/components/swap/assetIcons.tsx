@@ -11,7 +11,6 @@ const ICON_OVERRIDES: Record<string, string> = {
   NEAR: '/icons/near.svg',
   wNEAR: '/icons/near.svg',
   SUI: '/icons/sui.svg',
-  // ERC-20 / token icons (keyed by ticker)
   USDT: 'https://assets.coingecko.com/coins/images/325/standard/Tether.png',
   USDC: 'https://assets.coingecko.com/coins/images/6319/standard/usdc.png',
   DAI: 'https://assets.coingecko.com/coins/images/9956/standard/Badge_Dai.png',

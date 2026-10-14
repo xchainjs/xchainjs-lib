@@ -15,14 +15,13 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
   private static readonly BASE_TX_SIZE = TX_SIZE_CONSTANTS.BASE_TX_SIZE
 
   select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
-    // Sort UTXOs by descending value for better branch and bound performance
+    // Descending value improves branch-and-bound pruning
     const sortedUtxos = [...utxos].sort((a, b) => b.value - a.value)
 
-    // Try to find exact match first (pass targetValue, not target+fee to avoid double counting)
+    // Pass targetValue, not target+fee, so the fee is not counted twice
     const exactResult = this.findExactMatch(sortedUtxos, targetValue, feeRate, extraOutputs)
     if (exactResult) return exactResult
 
-    // Run branch and bound algorithm
     return this.branchAndBound(sortedUtxos, targetValue, feeRate, extraOutputs)
   }
 
@@ -32,35 +31,32 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     feeRate: number,
     extraOutputs: number,
   ): UtxoSelectionResult | null {
-    // Calculate fee for single input (no change output)
+    // Single input, no change output
     const singleInputFee = this.calculateFee(1, extraOutputs, feeRate)
     const requiredWithFee = targetValue + singleInputFee
 
-    // Sort by how close they are to the exact target
     const sortedByExactness = [...utxos].sort((a, b) => {
       const aDiff = Math.abs(a.value - requiredWithFee)
       const bDiff = Math.abs(b.value - requiredWithFee)
       return aDiff - bDiff
     })
 
-    // Look for single UTXO that matches exactly or closely
     for (const utxo of sortedByExactness) {
       const change = utxo.value - requiredWithFee
 
-      // If change is exactly 0 or less than dust (which we absorb into fee)
+      // Change at or below dust is absorbed into the fee
       if (change >= 0 && change <= BranchAndBoundStrategy.DUST_THRESHOLD) {
         return {
           inputs: [utxo],
           changeAmount: 0,
           fee: singleInputFee + change, // Absorb dust into fee
-          efficiency: 1.0, // Perfect efficiency for exact match
+          efficiency: 1.0,
           strategy: this.name,
         }
       }
 
-      // If we have reasonable change (not too much excess)
+      // Skip a change output that is more than 10% of the target
       if (change > BranchAndBoundStrategy.DUST_THRESHOLD && change < targetValue * 0.1) {
-        // Add change output fee
         const feeWithChange = this.calculateFee(1, extraOutputs + 1, feeRate)
         const finalChange = utxo.value - targetValue - feeWithChange
 
@@ -69,7 +65,7 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
             inputs: [utxo],
             changeAmount: finalChange,
             fee: feeWithChange,
-            efficiency: 0.95, // Very good efficiency
+            efficiency: 0.95,
             strategy: this.name,
           }
         }
@@ -92,7 +88,6 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     const search = (index: number, currentInputs: UTXO[], currentValue: number, depth: number): void => {
       if (tries++ >= BranchAndBoundStrategy.MAX_TRIES) return
 
-      // Calculate current fee and requirements
       const inputCount = currentInputs.length
       const outputCount =
         extraOutputs +
@@ -103,7 +98,6 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
       const fee = this.calculateFee(inputCount, outputCount, feeRate)
       const required = target + fee
 
-      // Check if we have a solution
       if (currentValue >= required) {
         const change = currentValue - required
         const finalFee = change > BranchAndBoundStrategy.DUST_THRESHOLD ? fee : fee + change
@@ -128,17 +122,16 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
         return
       }
 
-      // Pruning conditions
       if (index >= utxos.length) return
-      if (depth > 50) return // Prevent too deep recursion (supports wallets with many UTXOs)
+      if (depth > 50) return // Cap depth so wallets with many UTXOs stay tractable
 
       const remainingValue = utxos.slice(index).reduce((sum, utxo) => sum + utxo.value, 0)
-      if (currentValue + remainingValue < required) return // Not enough remaining value
+      if (currentValue + remainingValue < required) return
 
-      // Branch 1: Include current UTXO
+      // Include current UTXO
       search(index + 1, [...currentInputs, utxos[index]], currentValue + utxos[index].value, depth + 1)
 
-      // Branch 2: Exclude current UTXO (if we haven't found a good solution yet)
+      // Exclude current UTXO until a good solution exists
       if (!bestResult || currentInputs.length < 3) {
         search(index + 1, currentInputs, currentValue, depth + 1)
       }
@@ -161,9 +154,6 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     return Math.min(1, efficiency)
   }
 
-  /**
-   * Calculate estimated transaction fee
-   */
   private calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
     const txSize =
       BranchAndBoundStrategy.BASE_TX_SIZE +

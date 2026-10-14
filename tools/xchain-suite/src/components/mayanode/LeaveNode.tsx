@@ -24,7 +24,6 @@ export function LeaveNode({ mayaClient, walletConnected }: LeaveNodeProps) {
     if (!mayaClient || !trimmedNodeAddress) return
 
     await execute(async () => {
-      // Build memo: LEAVE:<node_address>
       const memo = `LEAVE:${trimmedNodeAddress}`
 
       // Leave uses a minimal amount deposit (just for the memo)

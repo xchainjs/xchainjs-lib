@@ -71,7 +71,6 @@ export class ThorchainAction {
     memo,
     walletIndex,
   }: NonProtocolActionParams): Promise<TxSubmitted> {
-    // Non EVM actions
     if (!isProtocolEVMChain(assetAmount.asset.chain)) {
       if (isProtocolBFTChain(assetAmount.asset.chain) || isFlatFeeChain(assetAmount.asset.chain)) {
         const hash = await wallet.transfer({
@@ -101,7 +100,6 @@ export class ThorchainAction {
       }
     }
 
-    // EVM actions
     const thorchainQuery: ThorchainQuery = new ThorchainQuery(new ThorchainCache(new Thornode(wallet.getNetwork())))
 
     const inboundDetails = await thorchainQuery.getChainInboundDetails(assetAmount.asset.chain)

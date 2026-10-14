@@ -16,12 +16,6 @@ import { validateAddress } from './utils'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
-/**
- * Filter self txs
- *
- * @returns {T[]}
- *
- **/
 export const filterSelfTxs = <T extends { from: string; to: string; hash: string }>(txs: T[]): T[] => {
   const filterTxs = txs.filter((tx) => tx.from !== tx.to)
   let selfTxs = txs.filter((tx) => tx.from === tx.to)
@@ -34,20 +28,8 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
   return filterTxs
 }
 
-/**
- * Check if the symbol is valid.
- *
- * @param {string|null|undefined} symbol
- * @returns {boolean} `true` or `false`.
- */
 export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
-/**
- * Get transactions from ETH transaction
- *
- * @param {ETHTransactionInfo} tx
- * @returns {Tx} The parsed transaction.
- */
 export const getTxFromEthTransaction = (tx: ETHTransactionInfoV2, gasAsset: Asset, decimals: number): Tx => {
   return {
     asset: gasAsset,
@@ -69,12 +51,6 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfoV2, gasAsset: Asse
   }
 }
 
-/**
- * Get transactions from token tx
- *
- * @param {TokenTransactionInfo} tx
- * @returns {Tx|null} The parsed transaction.
- */
 export const getTxFromTokenTransaction = (tx: TokenTransactionInfoV2, chain: Chain, decimals: number): Tx | null => {
   const decimal = parseInt(tx.tokenDecimal) || decimals
   const symbol = tx.tokenSymbol
@@ -108,14 +84,9 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfoV2, chain: Cha
 }
 
 /**
- * SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
- *
+ * SafeGasPrice, ProposeGasPrice and FastGasPrice are gwei strings.
  * @see https://etherscan.io/apis#gastracker
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {number} chainId The chain id identifier https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {GasOracleResponse} LastBlock, SafeGasPrice, ProposeGasPrice, FastGasPrice
+ * chainId values: https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains
  */
 export const getGasOracle = async (baseUrl: string, chainId: number, apiKey?: string): Promise<GasOracleResponseV2> => {
   const url = baseUrl + `/api?chainid=${chainId}&module=gastracker&action=gasoracle`
@@ -127,16 +98,8 @@ export const getGasOracle = async (baseUrl: string, chainId: number, apiKey?: st
 }
 
 /**
- * Get token balance
- *
  * @see https://etherscan.io/apis#tokens
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {string} address The address.
- * @param {string} assetAddress The token contract address.
- * @param {number} chainId The chain id identifier https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {BigNumberish} The token balance
+ * chainId values: https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains
  */
 export const getTokenBalance = async ({
   baseUrl,
@@ -153,16 +116,8 @@ export const getTokenBalance = async ({
 }
 
 /**
- * Get ETH transaction history
- *
  * @see https://etherscan.io/apis#accounts
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {string} address The address.
- * @param {TransactionHistoryParam} params The search options.
- * @param {number} chainId The chain id identifier https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {ETHTransactionInfo[]} The ETH transaction history
+ * chainId values: https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains
  */
 export const getGasAssetTransactionHistory = async ({
   gasAsset,
@@ -193,17 +148,7 @@ export const getGasAssetTransactionHistory = async ({
     .map((tx) => getTxFromEthTransaction(tx, gasAsset, gasDecimals))
 }
 
-/**
- * Get token transaction history
- *
- * @see https://etherscan.io/apis#accounts
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {string} address The address.
- * @param {TransactionHistoryParam} params The search options.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {Tx[]} The token transaction history
- */
+/** @see https://etherscan.io/apis#accounts */
 export const getTokenTransactionHistory = async ({
   gasDecimals,
   baseUrl,

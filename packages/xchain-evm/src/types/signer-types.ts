@@ -12,14 +12,14 @@ export type SignApproveParams = {
 }
 
 export interface ISigner {
-  getAddressAsync(walletIndex?: number, verify?: boolean): Promise<Address> // Get address asynchronously
-  signTransfer(params: SignTransferParams): Promise<string> // Transfer
+  getAddressAsync(walletIndex?: number, verify?: boolean): Promise<Address>
+  signTransfer(params: SignTransferParams): Promise<string>
   signApprove(params: SignApproveParams): Promise<string>
   getFullDerivationPath(walletIndex: number): string
-  purge(): void // Purge client
+  purge(): void
 }
 
 export interface IKeystoreSigner extends ISigner {
-  setPhrase(phrase: string, walletIndex?: number): Address // Set phrase
-  getAddress(walletIndex?: number): Address // Get address
+  setPhrase(phrase: string, walletIndex?: number): Address
+  getAddress(walletIndex?: number): Address
 }

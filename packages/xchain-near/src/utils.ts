@@ -67,11 +67,7 @@ export const getDefaultNearblocksUrl = (network: Network): string => {
   return networkMap[network]
 }
 
-/**
- * Resolve RPC URL list for a network.
- * Precedence: caller `clientUrls` → public defaults.
- * Pass **caller** params only (not a shallow-merge with defaults).
- */
+/** Precedence: caller `clientUrls`, then public defaults. Pass caller params only, not a shallow merge with defaults. */
 export const resolveClientUrls = (network: Network, params: Pick<NearClientParams, 'clientUrls'> = {}): string[] => {
   const urls = params.clientUrls?.[network]
   if (urls && urls.length > 0) return urls

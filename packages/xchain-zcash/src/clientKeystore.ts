@@ -11,9 +11,6 @@ import { Client, defaultZECParams } from './client'
 import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
-/**
- * Custom Bitcoin client extended to support keystore functionality
- */
 class ClientKeystore extends Client {
   constructor(
     params: UtxoClientParams = {
@@ -24,19 +21,12 @@ class ClientKeystore extends Client {
   }
   /**
    * @deprecated This function eventually will be removed. Use getAddressAsync instead.
-   * Get the address associated with the given index.
-   * @param {number} index The index of the address.
-   * @returns {Address} The Bitcoin address.
-   * @throws {"index must be greater than zero"} Thrown if the index is less than zero.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
    */
   getAddress(index = 0): Address {
-    // Check if the index is valid
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
 
-    // Check if the phrase has been set
     if (this.phrase) {
       const zecKeys = this.getZecKeys(this.phrase, index)
       if (!zecKeys.privateKey) {
@@ -50,25 +40,10 @@ class ClientKeystore extends Client {
     throw new Error('Phrase must be provided')
   }
 
-  /**
-   * Get the current address asynchronously.
-   * @param {number} index The index of the address.
-   * @returns {Promise<Address>} A promise that resolves to the Bitcoin address.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
-  /**
-   * @private
-   * Get the keys derived from the given phrase.
-   *
-   * @param {string} phrase The phrase to be used for generating the keys.
-   * @param {number} index The index of the address.
-   * @returns {Bitcoin.ECPair.ECPairInterface} The Bitcoin key pair.
-   * @throws {"Could not get private key from phrase"} Thrown if failed to create BTC keys from the given phrase.
-   */
   private getZecKeys(phrase: string, index = 0): ECPairInterface {
     const seed = getSeed(phrase)
 
@@ -81,15 +56,7 @@ class ClientKeystore extends Client {
     return ECPair.fromPrivateKey(Buffer.from(master.privateKey)) // Be carefull missing zcash network due to this error: https://github.com/iancoleman/bip39/issues/94
   }
 
-  /**
-   * Transfer ZEC.
-   *
-   * @param {TxParams&FeeRate} params The transfer options including the fee rate.
-   * @returns {Promise<TxHash|string>} A promise that resolves to the transaction hash or an error message.
-   * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
-   */
   async transfer(params: TxParams & { selectedUtxos?: UTXO[] }): Promise<TxHash> {
-    // Get the address index from the parameters or use the default value
     const fromAddressIndex = params?.walletIndex || 0
 
     const zecKeys = this.getZecKeys(this.phrase, fromAddressIndex)
@@ -141,17 +108,6 @@ class ClientKeystore extends Client {
     return txId
   }
 
-  /**
-   * Transfer the maximum amount of ZEC (sweep).
-   *
-   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
-   * Note: Zcash uses flat fees, so feeRate is ignored.
-   * @param {Object} params The transfer parameters.
-   * @param {string} params.recipient The recipient address.
-   * @param {string} [params.memo] Optional memo for the transaction.
-   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
-   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
-   */
   async transferMax(params: {
     recipient: Address
     memo?: string
@@ -182,7 +138,7 @@ class ClientKeystore extends Client {
       satoshis: utxo.value,
     }))
 
-    // Use buildMaxTx which creates NO change output (sweep transaction)
+    // buildMaxTx creates no change output.
     const tx = await buildMaxTx(0, sender, params.recipient, zcashUtxos, this.network !== Network.Testnet, params.memo)
 
     checkFeeBounds(this.feeBounds, tx.fee)

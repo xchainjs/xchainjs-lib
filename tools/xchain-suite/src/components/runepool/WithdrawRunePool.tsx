@@ -32,7 +32,6 @@ export function WithdrawRunePool({ thorchainAmm, wallet }: WithdrawRunePoolProps
           withdrawBps,
         }
 
-        // Add affiliate params if provided
         if (affiliate) {
           params.affiliate = affiliate
           params.feeBps = parseInt(affiliateFee) || 0
@@ -74,7 +73,6 @@ console.log('Withdraw TX:', result.hash)`
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        {/* Withdraw Percentage */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Withdraw Percentage
@@ -101,7 +99,6 @@ console.log('Withdraw TX:', result.hash)`
           </p>
         </div>
 
-        {/* Quick Percentage Buttons */}
         <div className="flex gap-2">
           {[25, 50, 75, 100].map((pct) => (
             <button
@@ -118,7 +115,6 @@ console.log('Withdraw TX:', result.hash)`
           ))}
         </div>
 
-        {/* Optional Affiliate Settings */}
         <details className="border border-gray-200 dark:border-gray-700 rounded-lg">
           <summary className="px-4 py-3 cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
             Affiliate Settings (Optional)
@@ -156,7 +152,6 @@ console.log('Withdraw TX:', result.hash)`
           </div>
         </details>
 
-        {/* Withdraw Button */}
         <button
           onClick={handleWithdraw}
           disabled={withdrawBps <= 0 || withdrawBps > 10000 || withdrawOp.loading}
@@ -166,7 +161,6 @@ console.log('Withdraw TX:', result.hash)`
         </button>
       </div>
 
-      {/* Result */}
       <ResultPanel loading={withdrawOp.loading} error={withdrawOp.error} duration={withdrawOp.duration}>
         {withdrawOp.result && (
           <div className="space-y-2">
@@ -191,7 +185,6 @@ console.log('Withdraw TX:', result.hash)`
         )}
       </ResultPanel>
 
-      {/* Code Example */}
       <CodePreview code={generateCode()} title="Withdraw from RUNEPool" />
     </div>
   )

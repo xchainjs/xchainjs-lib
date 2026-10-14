@@ -70,7 +70,6 @@ export default function RunePoolPage() {
       <div className="max-w-2xl mx-auto">
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-            {/* Header */}
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">RUNEPool</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -78,7 +77,6 @@ export default function RunePoolPage() {
               </p>
             </div>
 
-            {/* Info Banner */}
             <div className="mx-6 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">What is RUNEPool?</h3>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
@@ -88,7 +86,6 @@ export default function RunePoolPage() {
               </p>
             </div>
 
-            {/* Tabs */}
             <div className="border-b border-gray-200 dark:border-gray-700 mt-4">
               <nav className="flex -mb-px">
                 {tabs.map((tab) => (
@@ -107,7 +104,6 @@ export default function RunePoolPage() {
               </nav>
             </div>
 
-            {/* Tab Content */}
             <div className="p-6">
               {activeTab === 'deposit' && (
                 <DepositRunePool thorchainAmm={thorchainAmm} wallet={wallet} />

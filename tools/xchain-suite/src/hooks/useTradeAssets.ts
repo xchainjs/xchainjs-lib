@@ -29,9 +29,6 @@ interface UseTradeAssetsResult {
   supportedChains: string[]
 }
 
-/**
- * Hook that provides THORChain and MAYAChain AMM/Query for trade asset operations.
- */
 export function useTradeAssets(): UseTradeAssetsResult {
   const { phrase, isConnected, network } = useWallet()
   const [wallet, setWallet] = useState<any | null>(null)
@@ -78,7 +75,6 @@ export function useTradeAssets(): UseTradeAssetsResult {
 
         if (cancelled) return
 
-        // Create clients for supported chains
         const clients: Record<Chain, XChainClient> = {}
         for (const chainId of TRADE_SUPPORTED_CHAINS) {
           try {

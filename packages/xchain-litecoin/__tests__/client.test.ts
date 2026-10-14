@@ -198,11 +198,9 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
     const { fees, rates } = await ltcClient.getFeesWithRates()
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -212,11 +210,9 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
     const { fees, rates } = await ltcClient.getFeesWithRates({ memo: MEMO })
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -307,7 +303,6 @@ describe('LitecoinClient Test', () => {
 
   it('should get address transactions with limit', async () => {
     ltcClient.setNetwork(Network.Testnet)
-    // Limit should work
     const txPages = await ltcClient.getTransactions({ address: addyThree, limit: 1 })
     return expect(txPages.total).toEqual(1) //there 1 tx in addyThree
   })

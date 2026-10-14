@@ -38,10 +38,7 @@ interface UseSwapResult {
   aggregator?: SwapService | null // Backwards compatibility alias
 }
 
-/**
- * Hook that creates a SwapService with a Wallet instance for cross-chain swaps.
- * Uses THORChain AMM, MAYAChain AMM, and Chainflip SDK directly.
- */
+/** Uses THORChain AMM, MAYAChain AMM, and Chainflip SDK directly. */
 export function useAggregator(): UseSwapResult {
   const { phrase, isConnected, network } = useWallet()
   const [wallet, setWallet] = useState<any | null>(null)
@@ -73,7 +70,6 @@ export function useAggregator(): UseSwapResult {
 
         console.log('[useAggregator] Creating clients for swap-supported chains...')
 
-        // Create clients for all swap-supported chains
         const clients: Record<Chain, XChainClient> = {}
         const failedChains: string[] = []
 
@@ -97,11 +93,9 @@ export function useAggregator(): UseSwapResult {
           console.warn(`[useAggregator] Some chains unavailable: ${failedChains.join(', ')}`)
         }
 
-        // Create Wallet instance
         const walletInstance = new Wallet(clients)
         setWallet(walletInstance)
 
-        // Create SwapService
         const service = new SwapService(walletInstance)
         setSwapService(service)
 
@@ -133,11 +127,9 @@ export function useAggregator(): UseSwapResult {
     loading,
     error,
     supportedChains,
-    // Alias for backwards compatibility
     get aggregator() { return swapService }
   }
 }
 
-// Re-export types
 export type { SwapQuote }
 export type { SwapResult as TxSubmitted, SwapParams as QuoteSwapParams } from '../lib/swap/SwapService'

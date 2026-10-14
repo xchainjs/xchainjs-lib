@@ -3,19 +3,10 @@ import { Asset, AssetType } from '@xchainjs/xchain-util'
 
 import { SOLClientParams } from './types'
 
-/**
- * Solana chain symbol
- */
 export const SOLChain = 'SOL' as const
 
-/**
- * Solana native asset decimals
- */
 export const SOL_DECIMALS = 9
 
-/**
- * Solana native asset
- */
 export const SOLAsset: Asset = {
   chain: 'SOL',
   ticker: 'SOL',

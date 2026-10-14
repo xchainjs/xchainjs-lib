@@ -17,7 +17,6 @@ const AssetBASE = assetFromStringEx('BASE.ETH')
 
 // const ETHChain = 'ETH'
 
-// Addresses
 const affiliateAddress = 'x'
 const btcAddress = 'bc1q3q6gfcg2n4c7hdzjsvpq5rp9rfv5t59t5myz5v'
 const bnbAddress = 'bnb1mtvk4jm2a9m7lfdnvfc2vz9r9qgavs4xfc6dtx'
@@ -63,9 +62,7 @@ function printTx(txDetails: TxDetails, amount: CryptoAmount) {
 const BTCB = assetFromStringEx('BSC.BTCB-1DE')
 //const USDCETH = assetFromStringEx('ETH.USDC-0XA0B86991C6218B36C1D19D4A2E9EB0CE3606EB48')
 
-// Test User Functions - single and double swap using mock pool data
 describe('Thorchain-query estimate Integration Tests', () => {
-  // Test estimate swaps with mock pool data
   it('should estimate a swap of 10 BTC to RUNE with 0.3 affiliate fee', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
@@ -75,7 +72,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       streamingInterval: 1,
       streamingQuantity: 0,
       affiliateAddress: 'dx',
-      affiliateBps: 30, //optional
+      affiliateBps: 30,
     }
 
     const estimate = await thorchainQuery.quoteSwap(swapParams)
@@ -147,7 +144,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       destinationAddress: runeAddress,
       //affiliate: affiliateAddress, //
       //affiliateBps: 30, //optional
-      toleranceBps: 300, //optional
+      toleranceBps: 300,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
@@ -164,7 +161,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       destinationAsset: sETH,
       destinationAddress: runeAddress,
       affiliateAddress: affiliateAddress,
-      affiliateBps: 30, //optional
+      affiliateBps: 30,
       //toleranceBps: 20, //optional\
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
@@ -183,7 +180,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       destinationAddress: 'xxx',
       // affiliate: affiliateAddress,
       // affiliateBps: 30, //optional
-      toleranceBps: 20, //optional,
+      toleranceBps: 20,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
@@ -195,7 +192,7 @@ describe('Thorchain-query estimate Integration Tests', () => {
       amount: new CryptoAmount(assetToBase(assetAmount(1000, 8)), AssetRuneNative),
       destinationAsset: AssetBTC,
       destinationAddress: btcAddress,
-      toleranceBps: 200, //optional
+      toleranceBps: 200,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
     printTx(estimate, swapParams.amount)
@@ -227,7 +224,6 @@ describe('Thorchain-query estimate Integration Tests', () => {
     expect(estimate).toBeTruthy()
   })
 
-  // Test Conditions - Test to make sure the swap has no amount errors
   it('Should fail estimate swap from BTC to BTC if source asset is the same as destination asset', async () => {
     const swapParams: QuoteSwapParams = {
       fromAsset: AssetBTC,
@@ -294,8 +290,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
       amount: new CryptoAmount(assetToBase(assetAmount('20')), AssetBTC),
       destinationAsset: AssetETH,
       destinationAddress: ethAddress,
-      streamingInterval: 10, // time between swaps
-      streamingQuantity: 10, // how many swaps in this stream
+      streamingInterval: 10,
+      streamingQuantity: 10,
       toleranceBps: 10000,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)
@@ -308,8 +304,8 @@ describe('Thorchain-query estimate Integration Tests', () => {
       amount: new CryptoAmount(assetToBase(assetAmount('40', 8)), assetUSDC),
       destinationAsset: AssetETH,
       destinationAddress: ethAddress,
-      streamingInterval: 10, // time between swaps
-      streamingQuantity: 10, // how many swaps in this stream
+      streamingInterval: 10,
+      streamingQuantity: 10,
       toleranceBps: 10000,
     }
     const estimate = await thorchainQuery.quoteSwap(swapParams)

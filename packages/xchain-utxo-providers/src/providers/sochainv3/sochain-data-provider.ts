@@ -52,7 +52,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
       address,
       page: 1,
     })
-    const confirmedUnspent = allUnspent.filter((i) => i.block) //if it has a block noumber it's been confirmed
+    const confirmedUnspent = allUnspent.filter((i) => i.block) // a block number means confirmed
     return this.mapUTXOs(confirmedUnspent)
   }
   async getUnspentTxs(address: string): Promise<UTXO[]> {
@@ -82,13 +82,6 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  /**
-   * Get transaction history of a given address with pagination options.
-   * By default it will return the transaction history of the current wallet.
-   *
-   * @param {TxHistoryParams} params The options to get transaction history. (optional)
-   * @returns {TxsPage} The transaction history.
-   */
   async getTransactions(params?: TxHistoryParams): Promise<TxsPage> {
     const offset = params?.offset ?? 0
     const limit = params?.limit || 10
@@ -111,7 +104,6 @@ export class SochainProvider implements UtxoOnlineDataProvider {
         })
         if (response.transactions.length === 0) break
         if (page === firstPage && response.transactions.length > offsetOnFirstPage) {
-          //start from offset
           const txsToGet = response.transactions.slice(offsetOnFirstPage)
           this.addArrayUpToLimit(
             txHashesToFetch,
@@ -129,7 +121,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
       }
     } catch (error) {
       console.error(error)
-      //an errors means no more results
+      // An error means there are no further pages
     }
 
     const total = txHashesToFetch.length
@@ -142,12 +134,6 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     return result
   }
 
-  /**
-   * Get the transaction details of a given transaction id.
-   *
-   * @param {string} txId The transaction id.
-   * @returns {Tx} The transaction details of the given transaction id.
-   */
   async getTransactionData(txId: string): Promise<Tx> {
     try {
       const rawTx = await sochain.getTx({
@@ -163,7 +149,7 @@ export class SochainProvider implements UtxoOnlineDataProvider {
           amount: assetToBase(assetAmount(i.value, this.assetDecimals)),
         })),
         to: rawTx.outputs
-          .filter((i) => i.type !== 'nulldata') //filter out op_return outputs
+          .filter((i) => i.type !== 'nulldata') // OP_RETURN
           .map((i) => ({ to: i.address, amount: assetToBase(assetAmount(i.value, this.assetDecimals)) })),
         date: new Date(rawTx.time * 1000),
         type: TxType.Transfer,
@@ -175,9 +161,6 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     }
   }
 
-  /**
-   *  @throws {Error} Method not implemented.
-   */
   getFeeRates(): Promise<FeeRates> {
     throw new Error('Method not implemented.')
   }
@@ -195,13 +178,6 @@ export class SochainProvider implements UtxoOnlineDataProvider {
     }))
   }
 
-  /**
-   * helper function tto limit adding to an array
-   *
-   * @param arr array to be added to
-   * @param toAdd elements to add
-   * @param limit do not add more than this limit
-   */
   private addArrayUpToLimit(arr: string[], toAdd: string[], limit: number) {
     for (let index = 0; index < toAdd.length; index++) {
       const element = toAdd[index]

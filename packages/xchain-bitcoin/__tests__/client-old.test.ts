@@ -196,7 +196,6 @@ describe('BitcoinClient Test', () => {
         feeRate: 1,
       })
       fail()
-      // Disable @typescript-eslint/no-explicit-any for this block of code
       /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (err: any) {
       const message = err.message as string
@@ -268,11 +267,9 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const { fees, rates } = await btcClient.getFeesWithRates()
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -282,11 +279,9 @@ describe('BitcoinClient Test', () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const { fees, rates } = await btcClient.getFeesWithRates({ memo: MEMO })
-    // check fees
     expect(fees.fast).toBeDefined()
     expect(fees.fastest).toBeDefined()
     expect(fees.average).toBeDefined()
-    // check rates
     expect(rates.fast).toBeDefined()
     expect(rates.fastest).toBeDefined()
     expect(rates.average).toBeDefined()
@@ -379,7 +374,6 @@ describe('BitcoinClient Test', () => {
 
   it('should get address transactions with limit', async () => {
     btcClient.setNetwork(Network.Testnet)
-    // Limit should work
     const txPages = await btcClient.getTransactions({ address: addyThreePath0, limit: 3 })
     return expect(txPages.total).toEqual(3) //there 4 tx in addyThreePath0
   })

@@ -2,17 +2,11 @@ import { Provider } from 'ethers'
 
 import { ISigner, SignApproveParams, SignTransferParams } from '../types'
 
-/**
- * Signer parameters
- */
 export type SignerParams = {
   provider: Provider
   derivationPath: string
 }
 
-/**
- * Abstraction of EVM Account
- */
 export abstract class Signer implements ISigner {
   protected provider: Provider
   protected derivationPath: string
@@ -26,13 +20,8 @@ export abstract class Signer implements ISigner {
   }
 
   /**
-   * Get the full derivation path based on the wallet index.
-   *
-   * If the configured path contains an `{index}` placeholder (e.g. Ledger Live's
-   * `m/44'/60'/{index}'/0/0`), the wallet index is substituted into that position.
-   * Otherwise the index is appended, preserving the default `m/44'/60'/0'/0/{index}` behavior.
-   * @param {number} walletIndex The HD wallet index
-   * @returns {string} The full derivation path
+   * If the path contains `{index}` (Ledger Live `m/44'/60'/{index}'/0/0`), substitute the wallet index there.
+   * Otherwise append it, keeping the default `m/44'/60'/0'/0/{index}` behavior.
    */
   public getFullDerivationPath(walletIndex: number): string {
     return this.derivationPath.includes('{index}')
@@ -40,10 +29,6 @@ export abstract class Signer implements ISigner {
       : `${this.derivationPath}/${walletIndex}`
   }
 
-  /**
-   * Get the provider the signer is using to be connected with the blockchain.
-   * @returns {Provider} The provider the signer is using
-   */
   protected getProvider(): Provider {
     return this.provider
   }

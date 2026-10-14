@@ -5,9 +5,6 @@ export const TRX_DECIMAL = 6
 
 export const TRON_DERIVATION_PATH = "m/44'/195'/0'/0/"
 
-/**
- * Chain identifier for Tron mainnet
- */
 export const TRONChain = 'TRON' as const
 
 export const AssetTRX: Asset = {
@@ -23,7 +20,7 @@ export const AssetTRONUSDT: AnyAsset = {
   ticker: 'USDT',
   type: AssetType.TOKEN,
 }
-// Explorer providers for Tron
+
 const TRON_MAINNET_EXPLORER = new ExplorerProvider(
   'https://tronscan.org/',
   'https://tronscan.org/#/address/%%ADDRESS%%',

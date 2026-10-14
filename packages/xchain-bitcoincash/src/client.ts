@@ -1,7 +1,6 @@
-// Import statements for necessary modules and types
 import bitcore from 'bitcore-lib-cash'
-import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client' // Importing various types and constants from xchain-client module
-import { Address } from '@xchainjs/xchain-util' // Importing the Address type from xchain-util module
+import { AssetInfo, FeeRate, Network } from '@xchainjs/xchain-client'
+import { Address } from '@xchainjs/xchain-util'
 import {
   Client as UTXOClient,
   PreparedTx,
@@ -11,8 +10,8 @@ import {
   UtxoError,
   UtxoSelectionPreferences,
   UtxoTransactionValidator,
-} from '@xchainjs/xchain-utxo' // Importing necessary types and the UTXOClient class from xchain-utxo module
-import accumulative from 'coinselect/accumulative.js' // Importing accumulative function from coinselect/accumulative.js module
+} from '@xchainjs/xchain-utxo'
+import accumulative from 'coinselect/accumulative.js'
 
 import {
   AssetBCH,
@@ -24,36 +23,26 @@ import {
   LOWER_FEE_BOUND,
   UPPER_FEE_BOUND,
   explorerProviders,
-} from './const' // Importing various constants from the const module
-import { BchPreparedTx } from './types' // Importing the BchPreparedTx type from types module
-import * as Utils from './utils' // Importing utility functions from utils module
-// Default parameters for Bitcoin Cash (BCH) client
+} from './const'
+import { BchPreparedTx } from './types'
+import * as Utils from './utils'
 export const defaultBchParams: UtxoClientParams = {
-  network: Network.Mainnet, // Default network is Mainnet
-  phrase: '', // Default empty phrase
-  explorerProviders: explorerProviders, // Default explorer providers
-  dataProviders: [BitgoProviders, HaskoinDataProviders, BlockbookDataProviders], // Default data providers
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: explorerProviders,
+  dataProviders: [BitgoProviders, HaskoinDataProviders, BlockbookDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `m/44'/145'/0'/0/`, // Default root derivation path for Mainnet
-    [Network.Testnet]: `m/44'/1'/0'/0/`, // Default root derivation path for Testnet
-    [Network.Stagenet]: `m/44'/145'/0'/0/`, // Default root derivation path for Stagenet
+    [Network.Mainnet]: `m/44'/145'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
+    [Network.Stagenet]: `m/44'/145'/0'/0/`,
   },
   feeBounds: {
-    lower: LOWER_FEE_BOUND, // Default lower fee bound
-    upper: UPPER_FEE_BOUND, // Default upper fee bound
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
   },
 }
-/**
- * Custom Bitcoin Cash client class.
- */
 abstract class Client extends UTXOClient {
-  /**
-   * Constructor for the Client class.
-   *
-   * @param {UtxoClientParams} params - Parameters for initializing the client.
-   */
   constructor(params = defaultBchParams) {
-    // Call the constructor of the parent class (UTXOClient) with BCHChain as the chain and provided parameters
     super(BCHChain, {
       network: params.network,
       rootDerivationPaths: params.rootDerivationPaths,
@@ -64,34 +53,19 @@ abstract class Client extends UTXOClient {
     })
   }
 
-  /**
-   * Get information about the BCH asset.
-   * @returns Information about the BCH asset.
-   */
   getAssetInfo(): AssetInfo {
     const assetInfo: AssetInfo = {
-      asset: AssetBCH, // Asset symbol
-      decimal: BCH_DECIMAL, // Decimal precision
+      asset: AssetBCH,
+      decimal: BCH_DECIMAL,
     }
     return assetInfo
   }
 
-  /**
-   * Validate the given address.
-   *
-   * @param {Address} address
-   * @returns {boolean} `true` or `false`
-   */
   validateAddress(address: string): boolean {
     return Utils.validateAddress(address, this.network)
   }
 
-  /**
-   * Build a BCH transaction.
-   * @param {BuildParams} params - The transaction build options.
-   * @returns {Transaction} A promise that resolves with the transaction builder, UTXOs, and inputs.
-   * @deprecated
-   */
+  /** @deprecated */
   async buildTx({
     amount,
     recipient,
@@ -106,33 +80,25 @@ abstract class Client extends UTXOClient {
     utxos: UTXO[]
     inputs: UTXO[]
   }> {
-    // Convert recipient address to CashAddress format
     const recipientCashAddress = Utils.toCashAddress(recipient)
-    // Validate recipient address
     if (!this.validateAddress(recipientCashAddress)) throw new Error('Invalid address')
 
-    // Scan UTXOs for the sender address
     const utxos = await this.scanUTXOs(sender, false)
-    // Throw error if no UTXOs are found
     if (utxos.length === 0) throw new Error('No utxos to send')
 
-    // Convert fee rate to a whole number
     const feeRateWhole = Number(feeRate.toFixed(0))
-    // Compile memo if provided
     const compiledMemo = memo ? this.compileMemo(memo) : null
 
     const targetOutputs = []
 
-    // Add output amount and recipient to target outputs (bitcore requires CashAddr / BCH legacy byte — not BTC-style 1…)
+    // bitcore requires CashAddr / BCH legacy byte — not BTC-style 1…
     targetOutputs.push({
       address: recipientCashAddress,
       value: amount.amount().toNumber(),
     })
 
-    // Calculate transaction inputs and outputs
     const { inputs, outputs } = accumulative(utxos, targetOutputs, feeRateWhole)
 
-    // Throw error if no solution is found
     if (!inputs || !outputs) throw new Error('Insufficient Balance for transaction')
 
     const tx = new bitcore.Transaction().from(
@@ -163,7 +129,6 @@ abstract class Client extends UTXOClient {
       )
     }
 
-    // Return transaction builder, UTXOs, and inputs
     return {
       builder: tx,
       utxos,
@@ -171,10 +136,7 @@ abstract class Client extends UTXOClient {
     }
   }
   /**
-   * Prepare a BCH transaction.
    * @deprecated Use `prepareTxEnhanced` instead for better UTXO selection and error handling.
-   * @param {TxParams&Address&FeeRate} params - The transaction preparation options.
-   * @returns {PreparedTx} A promise that resolves with the prepared transaction and UTXOs.
    */
   async prepareTx({
     sender,
@@ -186,7 +148,6 @@ abstract class Client extends UTXOClient {
     sender: Address
     feeRate: FeeRate
   }): Promise<BchPreparedTx> {
-    // Build the transaction using provided options
     const { builder, utxos, inputs } = await this.buildTx({
       sender,
       recipient,
@@ -194,29 +155,15 @@ abstract class Client extends UTXOClient {
       memo,
       feeRate,
     })
-    // Return the raw unsigned transaction and UTXOs
-    // ESLint disabled: Bitcoin transaction builder has proper toString() method that returns hex string
-    // Left as-is during ESLint 8 upgrade as this core crypto functionality is tested and working
+    // Bitcoin transaction builder toString() returns hex. Left as-is during the ESLint 8 upgrade.
     // eslint-disable-next-line @typescript-eslint/no-base-to-string
     return { rawUnsignedTx: builder.toString(), utxos, inputs }
   }
-  /**
-   * Compile a memo.
-   * @param {string} memo - The memo to be compiled.
-   * @returns {Buffer} - The compiled memo.
-   */
   protected compileMemo(memo: string): Buffer {
     const data = Buffer.from(memo, 'utf8')
     const script = bitcore.Script.buildDataOut(data)
     return script.toBuffer()
   }
-  /**
-   * Calculate the transaction fee.
-   * @param {UTXO[]} inputs - The UTXOs.
-   * @param {FeeRate} feeRate - The fee rate.
-   * @param {Buffer | null} data - The compiled memo (optional).
-   * @returns {number} - The fee amount.
-   */
   protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
     let totalWeight = Utils.TX_EMPTY_SIZE
     totalWeight += (Utils.TX_INPUT_PUBKEYHASH + Utils.TX_INPUT_BASE) * inputs.length
@@ -227,11 +174,6 @@ abstract class Client extends UTXOClient {
     return Math.ceil(totalWeight * feeRate)
   }
 
-  // ==================== Enhanced Transaction Methods ====================
-
-  /**
-   * Build transaction with enhanced UTXO selection
-   */
   async buildTxEnhanced({
     amount,
     recipient,
@@ -253,7 +195,6 @@ abstract class Client extends UTXOClient {
     inputs: UTXO[]
   }> {
     try {
-      // Validate inputs using base class method
       this.validateTransactionInputs({
         amount,
         recipient,
@@ -262,13 +203,11 @@ abstract class Client extends UTXOClient {
         feeRate,
       })
 
-      // Convert recipient address to CashAddress format
       const recipientCashAddress = Utils.toCashAddress(recipient)
       if (!this.validateAddress(recipientCashAddress)) {
         throw UtxoError.invalidAddress(recipient, this.network)
       }
 
-      // Use provided UTXOs (coin control) or fetch from chain
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
         UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
@@ -282,7 +221,6 @@ abstract class Client extends UTXOClient {
       const targetValue = amount.amount().toNumber()
       const extraOutputs = 1 + (compiledMemo ? 1 : 0)
 
-      // Use base class UTXO selection
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
@@ -291,7 +229,6 @@ abstract class Client extends UTXOClient {
         utxoSelectionPreferences,
       )
 
-      // Build transaction using bitcore-lib-cash
       const tx = new bitcore.Transaction().from(
         selectionResult.inputs.map(
           (utxo: UTXO) =>
@@ -305,15 +242,13 @@ abstract class Client extends UTXOClient {
         ),
       )
 
-      // Add recipient output (must be CashAddr for bitcore; BTC-style legacy 1…/3… is rejected)
+      // Must be CashAddr; bitcore rejects BTC-style legacy 1…/3….
       tx.to(recipientCashAddress, targetValue)
 
-      // Add change output if needed
       if (selectionResult.changeAmount > 0) {
         tx.to(Utils.toCashAddress(sender), selectionResult.changeAmount)
       }
 
-      // Add memo output if present
       if (compiledMemo) {
         tx.addOutput(
           new bitcore.Transaction.Output({
@@ -332,9 +267,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Prepare transaction with enhanced UTXO selection
-   */
   async prepareTxEnhanced({
     sender,
     memo,
@@ -363,7 +295,7 @@ abstract class Client extends UTXOClient {
         selectedUtxos,
       })
 
-      // ESLint disabled: Bitcoin Cash transaction builder has proper toString() method
+      // Bitcoin Cash transaction builder toString() returns hex.
       // eslint-disable-next-line @typescript-eslint/no-base-to-string
       return { rawUnsignedTx: builder.toString(), utxos, inputs }
     } catch (error) {
@@ -374,9 +306,6 @@ abstract class Client extends UTXOClient {
     }
   }
 
-  /**
-   * Prepare max send transaction
-   */
   async prepareMaxTx({
     sender,
     recipient,
@@ -395,7 +324,6 @@ abstract class Client extends UTXOClient {
     selectedUtxos?: UTXO[]
   }): Promise<PreparedTx & { maxAmount: number; fee: number }> {
     try {
-      // Validate addresses
       const recipientCashAddress = Utils.toCashAddress(recipient)
       if (!this.validateAddress(recipientCashAddress)) {
         throw UtxoError.invalidAddress(recipient, this.network)
@@ -404,7 +332,6 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
-      // Use provided UTXOs (coin control) or fetch from chain
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
         UtxoTransactionValidator.validateUtxoSet(selectedUtxos)
@@ -414,12 +341,10 @@ abstract class Client extends UTXOClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      // Calculate max using base class method
       const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
 
-      // Build transaction using bitcore-lib-cash
       const tx = new bitcore.Transaction().from(
         maxCalc.inputs.map(
           (utxo: UTXO) =>
@@ -433,10 +358,9 @@ abstract class Client extends UTXOClient {
         ),
       )
 
-      // Add recipient output (max amount - no change)
+      // Recipient gets the max; no change output.
       tx.to(recipientCashAddress, maxCalc.amount)
 
-      // Add memo output if present
       if (compiledMemo) {
         tx.addOutput(
           new bitcore.Transaction.Output({
@@ -446,7 +370,7 @@ abstract class Client extends UTXOClient {
         )
       }
 
-      // ESLint disabled: Bitcoin Cash transaction builder has proper toString() method
+      // Bitcoin Cash transaction builder toString() returns hex.
       return {
         // eslint-disable-next-line @typescript-eslint/no-base-to-string
         rawUnsignedTx: tx.toString(),

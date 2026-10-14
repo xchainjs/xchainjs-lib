@@ -5,13 +5,7 @@ import { TxParams, UTXO } from './types'
 import { UtxoError } from './errors'
 import { DUST_THRESHOLD, MAX_REASONABLE_AMOUNT, MAX_UTXO_DECIMALS } from './constants'
 
-/**
- * Comprehensive input validation for UTXO transactions
- */
 export class UtxoTransactionValidator {
-  /**
-   * Validate transaction parameters
-   */
   static validateTransferParams(
     params: TxParams & {
       sender?: Address
@@ -21,8 +15,7 @@ export class UtxoTransactionValidator {
   ): void {
     const errors: string[] = []
 
-    // Address validation - basic checks only
-    // Chain-specific validation should be done by the respective client packages
+    // Chain-specific validation is done by the chain client
     try {
       this.validateAddressBasic(params.recipient)
     } catch (error) {
@@ -41,7 +34,6 @@ export class UtxoTransactionValidator {
       }
     }
 
-    // Amount validation
     if (!params.amount) {
       errors.push('Amount is required')
     } else {
@@ -52,17 +44,14 @@ export class UtxoTransactionValidator {
           errors.push('Amount must be greater than zero')
         }
 
-        // Check for reasonable maximum (21M BTC equivalent in satoshis)
         if (amount.gt(MAX_REASONABLE_AMOUNT)) {
           errors.push('Amount exceeds maximum possible value')
         }
 
-        // Check for dust amount using the standard UTXO dust threshold
         if (amount.lt(DUST_THRESHOLD)) {
           errors.push(`Amount is below dust threshold (${DUST_THRESHOLD} satoshis)`)
         }
 
-        // Validate decimal precision for UTXO chains
         const decimals = params.amount.decimal
         if (decimals < 0 || decimals > MAX_UTXO_DECIMALS) {
           errors.push(`Invalid decimal precision: ${decimals} (UTXO chains support max ${MAX_UTXO_DECIMALS} decimals)`)
@@ -72,7 +61,6 @@ export class UtxoTransactionValidator {
       }
     }
 
-    // Fee rate validation
     if (params.feeRate !== undefined) {
       if (!Number.isFinite(params.feeRate)) {
         errors.push('Fee rate must be a finite number')
@@ -86,25 +74,22 @@ export class UtxoTransactionValidator {
       }
     }
 
-    // Memo validation (TypeScript ensures string type at compile time)
+    // TypeScript already requires memo to be a string
     if (params.memo !== undefined) {
       const memoBytes = Buffer.byteLength(params.memo, 'utf8')
       if (memoBytes > 80) {
         errors.push(`Memo too long: ${memoBytes} bytes (max 80 bytes)`)
       }
 
-      // Check for potentially problematic characters
       if (this.containsControlCharacters(params.memo)) {
         errors.push('Memo contains invalid control characters')
       }
 
-      // Check for null bytes
       if (params.memo.includes('\0')) {
         errors.push('Memo cannot contain null bytes')
       }
     }
 
-    // Wallet index validation
     if (params.walletIndex !== undefined) {
       if (!Number.isInteger(params.walletIndex)) {
         errors.push('Wallet index must be an integer')
@@ -123,9 +108,6 @@ export class UtxoTransactionValidator {
     }
   }
 
-  /**
-   * Validate UTXO set for consistency and correctness
-   */
   static validateUtxoSet(utxos: UTXO[]): void {
     if (!Array.isArray(utxos)) {
       throw UtxoError.validationError('UTXOs must be an array')
@@ -137,13 +119,11 @@ export class UtxoTransactionValidator {
     for (const [index, utxo] of utxos.entries()) {
       const prefix = `UTXO[${index}]`
 
-      // Validate UTXO structure
       if (!utxo || typeof utxo !== 'object') {
         errors.push(`${prefix}: UTXO must be an object`)
         continue
       }
 
-      // Validate transaction hash
       if (!utxo.hash) {
         errors.push(`${prefix}: Transaction hash is required`)
       } else if (typeof utxo.hash !== 'string') {
@@ -152,7 +132,6 @@ export class UtxoTransactionValidator {
         errors.push(`${prefix}: Invalid transaction hash format`)
       }
 
-      // Validate output index
       if (utxo.index === undefined || utxo.index === null) {
         errors.push(`${prefix}: Output index is required`)
       } else if (!Number.isInteger(utxo.index)) {
@@ -164,14 +143,12 @@ export class UtxoTransactionValidator {
         errors.push(`${prefix}: Output index exceeds maximum value`)
       }
 
-      // Check for duplicate UTXOs
       const outpoint = `${utxo.hash}:${utxo.index}`
       if (seenOutpoints.has(outpoint)) {
         errors.push(`${prefix}: Duplicate UTXO ${outpoint}`)
       }
       seenOutpoints.add(outpoint)
 
-      // Validate value
       if (utxo.value === undefined || utxo.value === null) {
         errors.push(`${prefix}: UTXO value is required`)
       } else if (!Number.isInteger(utxo.value)) {
@@ -185,7 +162,6 @@ export class UtxoTransactionValidator {
 
       // Note: height property not available in current UTXO type definition
 
-      // Validate witness UTXO if present
       if (utxo.witnessUtxo) {
         if (typeof utxo.witnessUtxo !== 'object') {
           errors.push(`${prefix}: witnessUtxo must be an object`)
@@ -210,10 +186,7 @@ export class UtxoTransactionValidator {
     }
   }
 
-  /**
-   * Basic address validation - checks for null/empty and basic format
-   * NOTE: Chain-specific validation should be done by the respective client packages
-   */
+  /** Chain-specific checks belong in the chain client. */
   static validateAddressBasic(address: string): void {
     if (!address) {
       throw UtxoError.validationError('Address cannot be empty')
@@ -229,9 +202,6 @@ export class UtxoTransactionValidator {
     }
   }
 
-  /**
-   * Validate fee rate against network conditions
-   */
   static validateFeeRate(
     feeRate: number,
     networkConditions?: {
@@ -256,7 +226,6 @@ export class UtxoTransactionValidator {
       throw UtxoError.invalidFeeRate(feeRate, `Above maximum fee rate ${maxFee} sat/byte`)
     }
 
-    // Warn if outside recommended range
     if (conditions.recommendedRange) {
       const [recMin, recMax] = conditions.recommendedRange
       if (feeRate < recMin || feeRate > recMax) {
@@ -265,9 +234,6 @@ export class UtxoTransactionValidator {
     }
   }
 
-  /**
-   * Validate transaction size limits
-   */
   static validateTransactionSize(
     estimatedSize: number,
     maxSize: number = 100000, // Default 100KB limit
@@ -280,25 +246,20 @@ export class UtxoTransactionValidator {
       throw UtxoError.transactionTooLarge(estimatedSize, maxSize)
     }
 
-    // Warn for large transactions
     if (estimatedSize > maxSize * 0.8) {
       console.warn(`Transaction size ${estimatedSize} bytes is approaching limit ${maxSize} bytes`)
     }
   }
 
-  // Private helper methods
-
   private static containsControlCharacters(str: string): boolean {
-    // Check for control characters that might cause issues
-    // Ranges: 0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F, 0x7F
     for (let i = 0; i < str.length; i++) {
       const code = str.charCodeAt(i)
       if (
-        (code >= 0x00 && code <= 0x08) || // \x00-\x08
-        code === 0x0b || // \x0B (vertical tab)
-        code === 0x0c || // \x0C (form feed)
-        (code >= 0x0e && code <= 0x1f) || // \x0E-\x1F
-        code === 0x7f // \x7F (DEL)
+        (code >= 0x00 && code <= 0x08) ||
+        code === 0x0b || // vertical tab
+        code === 0x0c || // form feed
+        (code >= 0x0e && code <= 0x1f) ||
+        code === 0x7f // DEL
       ) {
         return true
       }
@@ -309,7 +270,6 @@ export class UtxoTransactionValidator {
   private static sanitizeParamsForLogging(
     params: TxParams & { sender?: Address; feeRate?: number },
   ): Record<string, unknown> {
-    // Remove sensitive data from params for safe logging
     const sanitized: Record<string, unknown> = { ...params }
     if (params.amount) {
       sanitized.amount = params.amount.amount().toString()

@@ -7,12 +7,7 @@ import { Block, ILProtectionData, LiquidityToAdd, PoolShareDetail, PostionDeposi
 import { AssetRuneNative } from './const'
 import { getBaseAmountWithDiffDecimals } from './utils'
 
-/**
- * https://dev.thorchain.org/thorchain-dev/interface-guide/math#lp-units-add
- * @param liquidity - asset amount added
- * @param pool  - pool depths
- * @returns liquidity units - ownership of pool
- */
+/** @see https://dev.thorchain.org/thorchain-dev/interface-guide/math#lp-units-add */
 export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
   const baseAmount8decimals = getBaseAmountWithDiffDecimals(liquidity.asset, 8)
   const P = new BigNumber(pool.thornodeDetails.LP_units)
@@ -28,12 +23,6 @@ export const getLiquidityUnits = (liquidity: LiquidityToAdd, pool: LiquidityPool
   const result = numerator.div(denominator)
   return result
 }
-/**
- *
- * @param unitData - units for both asset and rune
- * @param pool - pool that the asset is bound to
- * @returns - pool share of both asset and rune in percentage
- */
 export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShareDetail => {
   // formula: (rune * part) / total; (asset * part) / total
   const units = unitData.liquidityUnits
@@ -49,12 +38,6 @@ export const getPoolShare = (unitData: UnitData, pool: LiquidityPool): PoolShare
   return poolShareDetail
 }
 
-/**
- *
- * @param poolShare - the share of asset and rune added to the pool
- * @param pool - Pool that the asset is attached to
- * @returns - returns bignumber representing a slip percentage
- */
 export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): BigNumber => {
   const baseAmount8decimals = getBaseAmountWithDiffDecimals(stake.asset, 8)
   // formula: (t * R - T * r)/ (T*r + R*T)
@@ -68,14 +51,8 @@ export const getSlipOnLiquidity = (stake: LiquidityToAdd, pool: LiquidityPool): 
   return result
 }
 
-/**
- * https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#impermanent-loss-protection
- * @param poolShare - the share of asset and rune added to the pool
- * @param pool - Pool that the asset is attached to
- * @param block - blockl object with current, last added and the constant blocksforlossProtection
- * @returns
- */
-// Blocks for full protection 1440000 // 100 days
+/** @see https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#impermanent-loss-protection */
+// 1440000 blocks = 100 days of full protection
 export const getLiquidityProtectionData = (
   depositValue: PostionDepositValue,
   poolShare: PoolShareDetail,
@@ -92,11 +69,11 @@ export const getLiquidityProtectionData = (
   const part2 = A0.times(R1.div(A1)).plus(R0).minus(R1.plus(R1)) // different way to check position
   const coverage = part1 >= part2 ? part1 : part2 // Coverage represents how much ILP a LP is entitled to
   const currentHeight = block.current
-  const heightLastAdded = block.lastAdded || 0 //default to zero if undefined
+  const heightLastAdded = block.lastAdded || 0
   const blocksforfullprotection = block.fullProtection
   const fractionOfFullILPProtection = (currentHeight - heightLastAdded) / blocksforfullprotection
-  const protectionProgress = Math.min(fractionOfFullILPProtection, 1) // percentage of entitlement, max 100%
-  const result = coverage.times(protectionProgress) // impermanent loss protection result
+  const protectionProgress = Math.min(fractionOfFullILPProtection, 1)
+  const result = coverage.times(protectionProgress)
   const maxILP = result.lt(0) ? new BigNumber(0) : result // max negative ILP to 0
   const ILProtection: ILProtectionData = {
     ILProtection: new CryptoAmount(baseAmount(maxILP), AssetRuneNative),
@@ -105,12 +82,7 @@ export const getLiquidityProtectionData = (
   return ILProtection
 }
 
-/**
- * https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#calculating-pool-ownership
- * @param liquidity - asset amount added
- * @param pool  - pool depths
- * @returns liquidity units - % ownership of pool
- */
+/** @see https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#calculating-pool-ownership */
 export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): number => {
   const P = new BigNumber(pool.thornodeDetails.LP_units)
   const r = liquidity.rune.baseAmount.amount()

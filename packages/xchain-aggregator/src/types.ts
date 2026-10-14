@@ -16,108 +16,55 @@ import {
 } from '@xchainjs/xchain-util'
 import { Wallet } from '@xchainjs/xchain-wallet'
 
-/**
- * TxSubmitted
- */
 type TxSubmitted = {
   hash: string
   url: string
 }
 
-/**
- * Fees
- */
 type Fees = {
-  asset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset for which fees are calculated
-  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The affiliate fee amount
-  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The outbound fee amount
-  networkFee?: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The network fee amount
+  asset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
+  affiliateFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>
+  outboundFee: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>
+  networkFee?: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>
 }
 
-/**
- * Protocols supported by the Aggregator
- */
 type Protocol = 'Thorchain' | 'Mayachain' | 'Chainflip' | 'OneClick'
 
-/**
- * Affiliate config for the aggregator
- */
 type AffiliateConfig = {
-  /**
-   * Basis points for the affiliate fee calculation. Value must be between 0 and 10000
-   */
+  /** Value must be between 0 and 10000 */
   basisPoints: number
-  /**
-   * Affiliate address by protocol. ThorNames and MayaNames are supported for Thorchain and Mayachain protocols
-   */
+  /** ThorNames and MayaNames are supported for Thorchain and Mayachain */
   affiliates: Partial<Record<Protocol, string>>
 }
 
-/**
- * Aggregator config
- */
 export type Config = Partial<{
-  /**
-   * List of protocols to enable. Undefined value means all protocols enabled
-   */
+  /** Undefined means all protocols are enabled */
   protocols: Protocol[]
-  /**
-   * Affiliate config
-   */
   affiliate: AffiliateConfig
-  /**
-   * Wallet
-   */
   wallet: Wallet
-  /**
-   * Network to use for protocols. If not specified, will be inferred from wallet or default to mainnet
-   */
+  /** If omitted, inferred from the wallet, otherwise mainnet */
   network: Network
-  /**
-   * Affiliate brokers configuration for Chainflip protocol
-   */
+  /** Chainflip only */
   affiliateBrokers: {
     account: `cF${string}` | `0x${string}`
     commissionBps: number
   }[]
-  /**
-   * Broker URL for Chainflip protocol
-   */
+  /** Chainflip only */
   brokerUrl: string
-  /**
-   * API key for OneClick (NEAR Intents) protocol
-   */
+  /** NEAR Intents */
   oneClickApiKey: string
-  /**
-   * Referral code stamped on OneClick quote requests (for example `'asgardex'`).
-   * Omitted from the quote body when unset.
-   */
+  /** Omitted from the quote body when unset */
   oneClickReferral: string
-  /**
-   * Custom THORNode client configuration (base URLs and retries) for the Thorchain protocol.
-   * When omitted, the network default THORNode endpoints are used.
-   */
+  /** When omitted, the network default THORNode endpoints are used */
   thornodeConfig: ThornodeConfig
-  /**
-   * Custom Midgard client configuration (base URLs and retries) for the Thorchain protocol.
-   * When omitted, the network default Midgard endpoints are used.
-   */
+  /** When omitted, the network default Midgard endpoints are used */
   midgardConfig: MidgardConfig
-  /**
-   * Custom MAYANode client configuration (base URLs and retries) for the Mayachain protocol.
-   * When omitted, the network default MAYANode endpoints are used.
-   */
+  /** When omitted, the network default MAYANode endpoints are used */
   mayanodeConfig: MayanodeConfig
-  /**
-   * Custom Maya Midgard client configuration (base URLs and retries) for the Mayachain protocol.
-   * When omitted, the network default Maya Midgard endpoints are used.
-   */
+  /** When omitted, the network default Maya Midgard endpoints are used */
   mayaMidgardConfig: MayaMidgardConfig
 }>
 
-/**
- * Protocol config
- */
 export type ProtocolConfig = Partial<{
   wallet: Wallet
   affiliateBps: number
@@ -136,41 +83,35 @@ export type ProtocolConfig = Partial<{
   mayaMidgardConfig: MayaMidgardConfig
 }>
 
-/**
- * Represents a quote for a swap operation.
- */
 type QuoteSwap = {
   protocol: Protocol
-  toAddress: Address // The destination address for the swap
-  memo: string // The memo associated with the swap
-  expectedAmount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The expected amount to be received after the swap
-  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The dust threshold for the swap
+  toAddress: Address
+  memo: string
+  expectedAmount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>
+  dustThreshold: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>
   // TODO: Update type to return an array of the fees
-  fees: Fees // The fees associated with the swap
-  totalSwapSeconds: number // The total time for the swap operation
-  slipBasisPoints: number // The slip basis points for the swap
+  fees: Fees
+  totalSwapSeconds: number
+  slipBasisPoints: number
   maxStreamingQuantity: number | undefined
-  canSwap: boolean // Indicates whether the swap can be performed
-  errors: string[] // Any errors encountered during the swap operation
-  warning: string // Any warning messages associated with the swap
+  canSwap: boolean
+  errors: string[]
+  warning: string
   depositChannelId?: string
 }
 
-/**
- * Represents parameters for quoting a swap operation.
- */
 type QuoteSwapParams = {
-  fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset to swap from
-  destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset // The asset to swap to
-  amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset> // The amount to swap
-  fromAddress?: string // The source address for the swap (also used as refund address)
-  destinationAddress?: string // The destination address for the swap
-  height?: number // The block height for the swap
-  toleranceBps?: number // The tolerance basis points for the swap
-  liquidityToleranceBps?: number // The pool swing tolerance points (optional)
-  streamingQuantity?: number // The streaming quantity for the swap
-  streamingInterval?: number // The streaming interval for the swap
-  enableBoost?: boolean // Enable boost for faster processing (Chainflip only)
+  fromAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
+  destinationAsset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
+  amount: CryptoAmount<Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset>
+  fromAddress?: string // Also used as refund address
+  destinationAddress?: string
+  height?: number
+  toleranceBps?: number
+  liquidityToleranceBps?: number // Pool swing tolerance
+  streamingQuantity?: number
+  streamingInterval?: number
+  enableBoost?: boolean // Chainflip only
 }
 
 type SwapHistoryParams = {

@@ -180,7 +180,7 @@ describe('MayachainAMM', () => {
             chain: 'ETH',
             symbol: 'ETH',
             ticker: 'ETH',
-            type: AssetType.NATIVE, // Converted from TRADE to NATIVE
+            type: AssetType.NATIVE,
           }),
         }),
         memo: 'TRADE-:0x09383137C1eEe3E1A8bc781228E4199f6b4A9bbf',
@@ -232,14 +232,11 @@ describe('MayachainAMM', () => {
         destinationAsset: toAsset,
       })
 
-      // Verify that the method returns a quote object with expected properties
       expect(quote).toBeDefined()
       expect(typeof quote.toAddress).toBe('string')
       expect(typeof quote.memo).toBe('string')
       expect(quote.memo).toContain('=:BTC.BTC')
 
-      // Verify that the estimate swap functionality is working
-      // Based on the actual structure returned
       expect(quote).toHaveProperty('dustThreshold')
       expect(quote).toHaveProperty('canSwap')
       expect(quote).toHaveProperty('errors')
@@ -249,7 +246,6 @@ describe('MayachainAMM', () => {
       expect(quote).toHaveProperty('outboundDelayBlocks')
       expect(quote).toHaveProperty('totalSwapSeconds')
 
-      // Verify types
       expect(typeof quote.canSwap).toBe('boolean')
       expect(Array.isArray(quote.errors)).toBe(true)
       expect(typeof quote.slipBasisPoints).toBe('number')

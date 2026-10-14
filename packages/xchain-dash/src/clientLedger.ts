@@ -9,23 +9,17 @@ import { Client } from './client'
 import { getRawTx } from './insight-api'
 import { NodeAuth, NodeUrls } from './types'
 
-/**
- * Custom Ledger Dash client
- */
 class ClientLedger extends Client {
-  // Reference to the Ledger transport object
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: any // TODO: Parametrize
   private app: AppBtc | undefined
 
-  // Constructor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(params: UtxoClientParams & { transport: any; nodeUrls: NodeUrls; nodeAuth?: NodeAuth }) {
     super(params)
     this.transport = params.transport
   }
 
-  // Get the Ledger BTC application instance
   public async getApp(): Promise<AppBtc> {
     if (this.app) {
       return this.app
@@ -34,12 +28,10 @@ class ClientLedger extends Client {
     return this.app
   }
 
-  // Get the current address synchronously
   getAddress(): string {
     throw Error('Sync method not supported for Ledger')
   }
 
-  // Get the current address asynchronously
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const result = await app.getWalletPublicKey(this.getFullDerivationPath(index), {
@@ -49,16 +41,12 @@ class ClientLedger extends Client {
     return result.bitcoinAddress
   }
 
-  // Transfer DASH from Ledger
   async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
-    // Get fee rate
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
-    // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
-    // Prepare transaction
     const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
 
     const tx = new dashcore.Transaction(rawUnsignedTx)
@@ -78,12 +66,9 @@ class ClientLedger extends Client {
       ledgerInputs.push([splittedTx, input.outputIndex, null, null])
     }
 
-    // Prepare associated keysets
     const associatedKeysets = tx.inputs.map(() => this.getFullDerivationPath(fromAddressIndex))
-    // Serialize unsigned transaction
     const newTx = app.splitTransaction(tx.toString(), true)
     const outputScriptHex = app.serializeTransactionOutputs(newTx).toString('hex')
-    // Create payment transaction
     const txHex = await app.createPaymentTransaction({
       inputs: ledgerInputs,
       associatedKeysets,
@@ -93,7 +78,6 @@ class ClientLedger extends Client {
       additionals: [],
     })
 
-    // Broadcast transaction via the configured data providers
     const txHash = await this.broadcastTx(txHex)
     if (!txHash) {
       throw Error('No Tx hash')
@@ -102,7 +86,6 @@ class ClientLedger extends Client {
     return txHash
   }
 
-  // Transfer max DASH from Ledger (sweep transaction)
   async transferMax(params: {
     recipient: Address
     memo?: string

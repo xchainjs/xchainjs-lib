@@ -17,7 +17,6 @@ interface SwapConfirmModalProps {
   slippageToleranceBps?: number
 }
 
-// Helper to build Asset from ChainAsset
 function buildAssetFromChain(chainAsset: ChainAsset): Asset {
   return {
     chain: chainAsset.chainId,
@@ -45,19 +44,15 @@ export function SwapConfirmModal({
   const expectedOutput = formatExpectedAmount(quote)
   const slippagePercent = (quote.slipBasisPoints / 100).toFixed(2)
 
-  // Calculate USD values
   const fromAssetObj = buildAssetFromChain(fromAsset)
   const inputUsdValue = prices.calculateValue(parseFloat(amount) || 0, fromAssetObj)
   const outputUsdValue = prices.getValue(quote.expectedAmount)
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50" onClick={!isExecuting ? onClose : undefined} />
 
-      {/* Modal */}
       <div className="relative z-[101] w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Confirm Swap</h2>
           {!isExecuting && (
@@ -70,9 +65,7 @@ export function SwapConfirmModal({
           )}
         </div>
 
-        {/* Content */}
         <div className="p-4 space-y-4">
-          {/* Swap Visual */}
           <div className="flex items-center justify-center gap-4">
             <div className="text-center">
               <AssetIcon chainId={fromAsset.chainId} symbol={fromAsset.symbol} size={48} className="mx-auto" />
@@ -97,7 +90,6 @@ export function SwapConfirmModal({
             </div>
           </div>
 
-          {/* Details Table */}
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500 dark:text-gray-400">Protocol</span>
@@ -137,7 +129,6 @@ export function SwapConfirmModal({
             </div>
           </div>
 
-          {/* Fees */}
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-2 text-sm">
             <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Fees
@@ -156,7 +147,6 @@ export function SwapConfirmModal({
             </div>
           </div>
 
-          {/* Slippage tolerance warning */}
           {slippageToleranceBps !== undefined && quote.slipBasisPoints > slippageToleranceBps && (
             <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
@@ -169,7 +159,6 @@ export function SwapConfirmModal({
             </div>
           )}
 
-          {/* Warning */}
           {quote.warning && (
             <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
               <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
@@ -178,7 +167,6 @@ export function SwapConfirmModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex gap-3 p-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}

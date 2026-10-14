@@ -51,10 +51,7 @@ export const resolvePrimaryUrl = (
   return params.grpcUrls?.[network] ?? params.clientUrls?.[network] ?? getDefaultGrpcUrl(network)
 }
 
-/**
- * Resolve GraphQL URL for a network.
- * Precedence: `graphqlUrls` → Foundation default.
- */
+/** Precedence: `graphqlUrls`, then the Foundation default. */
 export const resolveGraphqlUrl = (network: Network, params: Pick<SUIClientParams, 'graphqlUrls'> = {}): string => {
   return params.graphqlUrls?.[network] ?? getDefaultGraphqlUrl(network)
 }

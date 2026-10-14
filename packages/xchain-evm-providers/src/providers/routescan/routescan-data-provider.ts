@@ -45,10 +45,7 @@ export class RoutescanProvider extends EtherscanProvider {
       })
       transactions.push(...txs)
     } else {
-      /**
-       * Due to endpoint constrains, a single request can not query more than 100 txs per page, with this approach,
-       * etherscan approach can be simulate, but there is no form to get the total number of transactions
-       * */
+      // At most 100 txs per request, and no total count, so pages are fetched to mimic Etherscan.
       const maxTxsPerPage = 100
       const startPage =
         Number((offset / maxTxsPerPage).toFixed(0)) !== 0 ? Number((offset / maxTxsPerPage).toFixed(0)) : 1
@@ -80,12 +77,7 @@ export class RoutescanProvider extends EtherscanProvider {
     }
   }
 
-  /**
-   * Override getFeeRates to handle Routescan's API response format correctly.
-   * Routescan returns gas prices in wei (not gwei), so we don't multiply by 10^9.
-   *
-   * @returns {Promise<FeeRates>} The fee rates in wei
-   */
+  /** Routescan gas prices are wei, not gwei, so they are not multiplied by 10^9. */
   async getFeeRates(): Promise<FeeRates> {
     const gasOracleResponse = await etherscanAPI.getGasOracle(this.baseUrl, this.apiKey)
 

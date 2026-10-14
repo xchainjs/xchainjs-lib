@@ -103,7 +103,6 @@ describe('util/bn', () => {
     it('returns 0, if given value is invalid', () => {
       // bignumber.js v10 throws on invalid input, so bn('xyz') throws
       expect(() => bn('xyz')).toThrow()
-      // validBNOrZero handles undefined gracefully
       expect(validBNOrZero(undefined)).toEqual(bn(0))
     })
   })

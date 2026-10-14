@@ -3,22 +3,13 @@ import { Asset, AssetType } from '@xchainjs/xchain-util'
 
 import { DefaultADAClientParams } from './types'
 
-/**
- * Cardano chain symbol
- */
 export const ADAChain = 'ADA' as const
 
-/**
- * Cardano native asset decimals
- */
 export const ADA_DECIMALS = 6
 
 export const LOWER_FEE_BOUND = 150_000
 export const UPPER_FEE_BOUND = 3_000_000
 
-/**
- * Cardano native asset
- */
 export const ADAAsset: Asset = {
   chain: 'ADA',
   ticker: 'ADA',

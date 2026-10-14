@@ -27,17 +27,14 @@ export class TronGrid {
         throw new Error('Invalid response from TronGrid API')
       }
 
-      // Convert search address to hex format for comparison
       let searchAddressHex: string
       try {
-        // If address is base58, convert to hex
         searchAddressHex = TronWeb.address.toHex(address).toLowerCase()
       } catch {
         // If conversion fails, assume it's already hex
         searchAddressHex = address.toLowerCase()
       }
 
-      // Find the account that matches the requested address
       const account = data.data.find((acc) => {
         return acc.address.toLowerCase() === searchAddressHex
       })
@@ -63,7 +60,6 @@ export class TronGrid {
     for (const tx of data) {
       const contract = tx.raw_data.contract[0]
 
-      // Case 1: Native TRX transfer
       if (contract.type === 'TransferContract') {
         const amount = baseAmount(contract.parameter.value.amount, TRX_DECIMAL)
         const from: TxFrom[] = [{ from: TronWeb.address.fromHex(contract.parameter.value.owner_address), amount }]
@@ -80,29 +76,24 @@ export class TronGrid {
         continue
       }
 
-      // Case 2: TRC20 transfer (TriggerSmartContract)
       if (contract.type === 'TriggerSmartContract') {
         const { contract_address, data: inputData, owner_address } = contract.parameter.value
 
-        // `inputData` starts with 4-byte method selector (transfer(address,uint256))
-        // and then encoded params
         try {
           const decoded = TW.utils.abi.decodeParams(
-            ['_to', '_value'], // parameter names
-            ['address', 'uint256'], // parameter types
-            inputData, // full input data (with selector)
-            true, // ignoreMethodHash -  automatically skip selector
+            ['_to', '_value'],
+            ['address', 'uint256'],
+            inputData,
+            true, // ignoreMethodHash skips the 4-byte selector
           )
 
           const toAddress = decoded._to
           const fromAddress = TronWeb.address.fromHex(owner_address)
           const rawValue = decoded._value.toString()
 
-          // Get token contract instance
           const contractHex = TronWeb.address.fromHex(contract_address)
           const tokenContract = await this.tronWeb.contract().at(contractHex)
 
-          // Call symbol() and decimals()
           const symbol: string = await tokenContract.symbol().call()
           const decimals: number = await tokenContract.decimals().call()
 
@@ -152,7 +143,6 @@ export class TronGrid {
 
     const contract = tx.raw_data.contract[0]
 
-    // Case 1: Native TRX transfer
     if (contract.type === 'TransferContract') {
       const amount = baseAmount(contract.parameter.value.amount, TRX_DECIMAL)
       const from: TxFrom[] = [{ from: TronWeb.address.fromHex(contract.parameter.value.owner_address), amount }]
@@ -168,17 +158,17 @@ export class TronGrid {
       }
     }
 
-    // Case 2: TRC20 transfer (must decode ABI input manually)
+    // walletsolidity does not pre-parse TRC20 transfers.
     if (contract.type === 'TriggerSmartContract') {
       const { owner_address, contract_address, data: inputData } = contract.parameter.value
 
       // ERC20 transfer selector = a9059cbb
       if (inputData.startsWith('a9059cbb')) {
         const decoded = TW.utils.abi.decodeParams(
-          ['_to', '_value'], // parameter names
-          ['address', 'uint256'], // parameter types
-          inputData, // full input data (with selector)
-          true, // ignoreMethodHash -  automatically skip selector
+          ['_to', '_value'],
+          ['address', 'uint256'],
+          inputData,
+          true, // ignoreMethodHash skips the 4-byte selector
         )
 
         const toAddress = TronWeb.address.fromHex(decoded._to)
@@ -187,11 +177,9 @@ export class TronGrid {
 
         // should set owner_address
         this.tronWeb.setAddress(fromAddress)
-        // Get token contract instance
         const contract = TronWeb.address.fromHex(contract_address)
         const tokenContract = await this.tronWeb.contract().at(contract)
 
-        // Call symbol() and decimals()
         const symbol: string = await tokenContract.symbol().call()
         const decimals: number = await tokenContract.decimals().call()
 

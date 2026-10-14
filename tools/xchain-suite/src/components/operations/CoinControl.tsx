@@ -76,7 +76,6 @@ export function CoinControl({ chainId, client }: CoinControlProps) {
     }
   }, [client])
 
-  // Fetch UTXOs and fee rate on mount / client change
   useEffect(() => {
     void fetchUtxos()
     if (client) {
@@ -144,7 +143,6 @@ export function CoinControl({ chainId, client }: CoinControlProps) {
         </p>
       </div>
 
-      {/* UTXO Table */}
       <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">UTXOs ({utxos.length})</span>
@@ -236,7 +234,6 @@ export function CoinControl({ chainId, client }: CoinControlProps) {
         )}
       </div>
 
-      {/* Summary */}
       {selectedIndices.size > 0 && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <div className="flex justify-between items-center">
@@ -256,7 +253,6 @@ export function CoinControl({ chainId, client }: CoinControlProps) {
         </div>
       )}
 
-      {/* Transfer Form */}
       <div className="space-y-4">
         <div>
           <label htmlFor="cc-recipient" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -321,7 +317,6 @@ export function CoinControl({ chainId, client }: CoinControlProps) {
         </button>
       </div>
 
-      {/* Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">

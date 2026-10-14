@@ -59,11 +59,6 @@ export const getCryptoAmountWithNotation = <T extends CompatibleAsset>(
   return new CryptoAmount<T>(baseAmount(inputAmountBaseNotation.times(10 ** decimalsDiff), notation), amount.asset)
 }
 
-/**
- * Returns the native asset for a given chain
- * @param chain
- * @returns the gas asset type for the given chain
- */
 export const getChainAsset = (chain: Chain): Asset => {
   switch (chain) {
     case BTCChain:
@@ -99,29 +94,15 @@ export const getChainAsset = (chain: Chain): Asset => {
   }
 }
 
-/**
- *
- * @param asset
- * @returns a boolean based on Assets being compared are equal
- */
 export const isNativeChainAsset = (asset: CompatibleAsset): asset is Asset => {
   return eqAsset(asset, getChainAsset(asset.chain))
 }
 
-/**
- * Works out the required inbound fee based on the chain.
- * Call getInboundDetails to get the current gasRate
- *
- * @param sourceAsset
- * @param gasRate
- * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
- * @returns
- */
+/** @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain */
 export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): AssetCryptoAmount => {
   // synths are always 0.02R fee
   if (isSynthAsset(asset)) return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
-  // if you are swapping a non-gas asset  on a multiAsset chain (ex. ERC-20 on ETH), the
-  // gas fees will be paid in a diff asset than the one you are swapping
+  // non-gas assets (e.g. ERC-20) pay gas in a different asset
 
   switch (asset.chain) {
     case BTCChain:
@@ -170,15 +151,7 @@ export const calcNetworkFee = (asset: CompatibleAsset, inbound: InboundDetail): 
   throw new Error(`could not calculate inbound fee for ${asset.chain}`)
 }
 
-/**
- * Works out the required outbound fee based on the chain.
- * Call getInboundDetails to get the current outbound fee
- *
- * @param sourceAsset
- * @param inbound detail
- * @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain
- * @returns
- */
+/** @see https://dev.thorchain.org/thorchain-dev/thorchain-and-fees#fee-calcuation-by-chain */
 export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail): AssetCryptoAmount => {
   if (isSynthAsset(asset)) return new AssetCryptoAmount(baseAmount(2000000), AssetRuneNative)
   switch (asset.chain) {
@@ -215,11 +188,6 @@ export const calcOutboundFee = (asset: CompatibleAsset, inbound: InboundDetail):
   throw new Error(`could not calculate outbound fee for ${asset.chain}`)
 }
 
-/**
- *
- * @param chain - input chain string
- * @returns - returns correct chain from string
- */
 export const getChain = (chain: string): Chain => {
   switch (chain) {
     case 'AVAX':

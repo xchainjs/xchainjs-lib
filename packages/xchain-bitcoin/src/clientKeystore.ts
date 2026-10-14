@@ -7,14 +7,11 @@ import { HDKey } from '@scure/bip32'
 import * as Bitcoin from 'bitcoinjs-lib'
 import { ECPairFactory, ECPairInterface } from 'ecpair'
 
-import { Client, defaultBTCParams } from './client' // Importing the base Bitcoin client
+import { Client, defaultBTCParams } from './client'
 import { AddressFormat } from './types'
 import * as Utils from './utils'
 
 const ECPair = ECPairFactory(ecc)
-/**
- * Custom Bitcoin client extended to support keystore functionality
- */
 class ClientKeystore extends Client {
   constructor(
     params: UtxoClientParams & { addressFormat?: AddressFormat } = {
@@ -26,28 +23,18 @@ class ClientKeystore extends Client {
   }
   /**
    * @deprecated This function eventually will be removed. Use getAddressAsync instead.
-   * Get the address associated with the given index.
-   * @param {number} index The index of the address.
-   * @returns {Address} The Bitcoin address.
-   * @throws {"index must be greater than zero"} Thrown if the index is less than zero.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   * @throws {"Address not defined"} Thrown if failed to create the address from the phrase.
    */
   getAddress(index = 0): Address {
-    // Check if the index is valid
     if (index < 0) {
       throw new Error('index must be greater than zero')
     }
 
-    // Check if the phrase has been set
     if (this.phrase) {
       const btcNetwork = Utils.btcNetwork(this.network)
       const btcKeys = this.getBtcKeys(this.phrase, index)
 
-      // Generate the address using the Bitcoinjs library
       const address = Utils.getPaymentForFormat(this.addressFormat, btcKeys.publicKey, btcNetwork).address
 
-      // Throw an error if the address is not defined
       if (!address) {
         throw new Error('Address not defined')
       }
@@ -58,23 +45,13 @@ class ClientKeystore extends Client {
     throw new Error('Phrase must be provided')
   }
 
-  /**
-   * Get the current address asynchronously.
-   * @param {number} index The index of the address.
-   * @returns {Promise<Address>} A promise that resolves to the Bitcoin address.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
   /**
-   * @private
-   * Sign and finalize all PSBT inputs according to the configured address format.
    * P2TR inputs are signed with a tweaked key; P2SH-P2WPKH inputs need the redeem
    * script attached before signing; P2WPKH and P2PKH sign with the plain key.
-   * @param {Bitcoin.Psbt} psbt The PSBT to sign.
-   * @param {ECPairInterface} btcKeys The signing key pair.
    */
   private signPsbt(psbt: Bitcoin.Psbt, btcKeys: ECPairInterface): void {
     if (this.addressFormat === AddressFormat.P2SH_P2WPKH) {
@@ -96,15 +73,6 @@ class ClientKeystore extends Client {
     psbt.finalizeAllInputs()
   }
 
-  /**
-   * @private
-   * Get the Bitcoin keys derived from the given phrase.
-   *
-   * @param {string} phrase The phrase to be used for generating the keys.
-   * @param {number} index The index of the address.
-   * @returns {Bitcoin.ECPair.ECPairInterface} The Bitcoin key pair.
-   * @throws {"Could not get private key from phrase"} Thrown if failed to create BTC keys from the given phrase.
-   */
   private getBtcKeys(phrase: string, index = 0): ECPairInterface {
     const btcNetwork = Utils.btcNetwork(this.network)
     const seed = getSeed(phrase)
@@ -117,13 +85,6 @@ class ClientKeystore extends Client {
     return ECPair.fromPrivateKey(Buffer.from(master.privateKey), { network: btcNetwork })
   }
 
-  /**
-   * Transfer BTC.
-   *
-   * @param {TxParams&FeeRate} params The transfer options including the fee rate.
-   * @returns {Promise<TxHash>} A promise that resolves to the transaction hash.
-   * @throws {"memo too long"} Thrown if the memo is longer than 80 characters.
-   */
   async transfer(
     params: TxParams & {
       feeRate?: FeeRate
@@ -131,19 +92,14 @@ class ClientKeystore extends Client {
       selectedUtxos?: UTXO[]
     },
   ): Promise<TxHash> {
-    // Set the default fee rate to `fast`
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
 
-    // Check if the fee rate is within the fee bounds
     checkFeeBounds(this.feeBounds, feeRate)
 
-    // Get the address index from the parameters or use the default value
     const fromAddressIndex = params?.walletIndex || 0
 
-    // Get the Bitcoin keys
     const btcKeys = this.getBtcKeys(this.phrase, fromAddressIndex)
 
-    // Merge default preferences with caller-provided preferences
     const mergedUtxoSelectionPreferences = {
       minimizeFee: true,
       avoidDust: true,
@@ -151,7 +107,6 @@ class ClientKeystore extends Client {
       ...params.utxoSelectionPreferences,
     }
 
-    // Prepare the transaction
     const { rawUnsignedTx } = await this.prepareTxEnhanced({
       ...params,
       sender: this.getAddress(fromAddressIndex),
@@ -160,31 +115,15 @@ class ClientKeystore extends Client {
       selectedUtxos: params.selectedUtxos,
     })
 
-    // Build the PSBT
     const psbt = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
 
-    // Sign and finalize all inputs according to the address format
     this.signPsbt(psbt, btcKeys)
 
-    // Extract the transaction hex
     const txHex = psbt.extractTransaction().toHex()
 
-    // Broadcast the transaction and return the transaction hash
     return await this.roundRobinBroadcastTx(txHex)
   }
 
-  /**
-   * Transfer the maximum amount of Bitcoin (sweep).
-   *
-   * Calculates the maximum sendable amount after fees, signs, and broadcasts the transaction.
-   * @param {Object} params The transfer parameters.
-   * @param {string} params.recipient The recipient address.
-   * @param {string} [params.memo] Optional memo for the transaction.
-   * @param {FeeRate} [params.feeRate] Optional fee rate. Defaults to 'fast' rate.
-   * @param {number} [params.walletIndex] Optional wallet index. Defaults to 0.
-   * @param {UtxoSelectionPreferences} [params.utxoSelectionPreferences] Optional UTXO selection preferences.
-   * @returns {Promise<{ hash: TxHash; maxAmount: number; fee: number }>} The transaction hash, amount sent, and fee.
-   */
   async transferMax(params: {
     recipient: Address
     memo?: string

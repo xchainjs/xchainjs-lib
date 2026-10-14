@@ -51,47 +51,15 @@ import {
   parseAssetToMayanodeAsset,
 } from './utils'
 
-/**
- * Interface representing a MayaChain client.
- */
 export interface MayachainClient {
-  /**
-   * Deposit funds into the MayaChain.
-   *
-   * @param {DepositParam} params Parameters for the deposit.
-   * @returns {Promise<TxHash>} The transaction hash of the deposit.
-   */
   deposit(params: DepositParam): Promise<TxHash>
-  /**
-   * Get the deposit transaction details.
-   *
-   * @param {string} txId The transaction ID.
-   * @returns {Promise<DepositTx>} The deposit transaction details.
-   */
   getDepositTransaction(txId: string): Promise<DepositTx>
-  /**
-   * Transfer funds offline within the MayaChain.
-   *
-   * @param {TxOfflineParams} params Parameters for the offline transfer.
-   * @returns {Promise<string>} The result of the offline transfer.
-   */
   transferOffline(params: TxOfflineParams): Promise<string>
 }
 
-/**
- * Parameters to instantiate the MayaChain client.
- */
 export type MayachainClientParams = Partial<CosmosSdkClientParams>
 
-/**
- * Custom MayaChain client.
- */
 export class Client extends CosmosSDKClient implements MayachainClient {
-  /**
-   * Constructor for the MayaChain client.
-   *
-   * @param {MayachainClientParams} config Optional configuration for the client. Default values will be used if not provided.
-   */
   constructor(config: MayachainClientParams = defaultClientConfig) {
     super({
       ...defaultClientConfig,
@@ -99,20 +67,10 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     })
   }
 
-  /**
-   * Asynchronous version of getAddress method.
-   * @param {number} index Derivation path index of the address to be generated.
-   * @returns {string} A promise that resolves to the generated address.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
-  /**
-   * Get the address derived from the provided phrase.
-   * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
-   * @returns {string} The user address at the specified walletIndex.
-   */
   public getAddress(walletIndex?: number): string {
     const seed = getSeed(this.phrase)
     const node = HDKey.fromMasterSeed(seed)
@@ -150,32 +108,16 @@ export class Client extends CosmosSDKClient implements MayachainClient {
 
       // Sign once, then round-robin only the broadcast. Retrying signAndBroadcast after a
       // transport timeout can re-sign with a new sequence and submit a second transaction.
-      const rawTx = await this.roundRobinSign(
-        sender,
-        unsignedTx,
-        signer,
-        new BigNumber(this.getStandardFee().gas),
-      )
+      const rawTx = await this.roundRobinSign(sender, unsignedTx, signer, new BigNumber(this.getStandardFee().gas))
 
       return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
     })
   }
 
-  /**
-   * Get the address prefix for the given network.
-   *
-   * @param {Network} network The network identifier.
-   * @returns {string} The address prefix.
-   */
   protected getPrefix(network: Network): string {
     return getPrefix(network)
   }
 
-  /**
-   * Get information about the native asset of the MayaChain.
-   *
-   * @returns {AssetInfo} Information about the native asset.
-   */
   public getAssetInfo(): AssetInfo {
     return {
       asset: AssetCacao,
@@ -183,12 +125,6 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     }
   }
 
-  /**
-   * Get the number of decimals for a given asset.
-   *
-   * @param {CompatibleAsset} asset The asset for which to retrieve the decimals.
-   * @returns {number} The number of decimals.
-   */
   public getAssetDecimals(asset: CompatibleAsset): number {
     if (eqAsset(asset, AssetCacao)) return CACAO_DECIMAL
     if (eqAsset(asset, AssetMaya)) return MAYA_DECIMAL
@@ -196,64 +132,28 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     return this.defaultDecimals
   }
 
-  /**
-   * Get the explorer URL for the current network.
-   *
-   * @returns {string} The explorer URL for the current network.
-   */
   public getExplorerUrl(): string {
     return getDefaultExplorers()[this.network]
   }
 
-  /**
-   * Get the explorer URL for the given address.
-   *
-   * @param {Address} address The address for which to retrieve the explorer URL.
-   * @returns {string} The explorer URL for the given address.
-   */
   public getExplorerAddressUrl(address: string): string {
     return getExplorerAddressUrl(address)[this.network]
   }
 
-  /**
-   * Get the explorer URL for the given transaction ID.
-   *
-   * @param {string} txID The transaction ID for which to retrieve the explorer URL.
-   * @returns {string} The explorer URL for the given transaction ID.
-   */
   public getExplorerTxUrl(txID: string): string {
     return getExplorerTxUrl(txID)[this.network]
   }
 
-  /**
-   * Get the asset corresponding to the provided denomination.
-   *
-   * @param {string} denom The denomination for which to retrieve the asset.
-   * @returns {CompatibleAsset|null} The asset corresponding to the denomination, or null if not found.
-   */
   public assetFromDenom(denom: string): CompatibleAsset | null {
     if (denom === CACAO_DENOM) return AssetCacao
     if (denom === MAYA_DENOM) return AssetMaya
     return assetFromString(denom.toUpperCase())
   }
 
-  /**
-   * Get the denomination of the provided asset.
-   *
-   * @param {CompatibleAsset} asset The asset for which to retrieve the denomination.
-   * @returns {string|null} The denomination of the asset, or null if not found.
-   */
   public getDenom(asset: CompatibleAsset): string | null {
     return getDenom(asset)
   }
 
-  /**
-   * Prepare a transaction for transfer.
-   *
-   * @param {TxParams&Address} params The transfer options.
-   * @returns {Promise<PreparedTx>} The raw unsigned transaction.
-   * @throws {Error} If sender or recipient addresses are invalid, or if the asset symbol is invalid.
-   */
   public async prepareTx({
     sender,
     recipient,
@@ -293,19 +193,6 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     return { rawUnsignedTx: toBase64(TxRaw.encode(rawTx).finish()) }
   }
 
-  /**
-   * Deposit assets into the Mayachain network.
-   *
-   * @param {number} param.walletIndex Optional - The index to use to generate the address from the transaction will be done.
-   * If it is not set, address associated with index 0 will be used
-   * @param {Asset} param.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
-   * used
-   * @param {BaseAmount} param.amount The amount that will be deposit
-   * @param {string} param.memo Optional - The memo associated with the deposit
-   * @param {BigNumber} param.gasLimit Optional - The limit amount of gas allowed to spend in the deposit. If not set, default
-   * value of 600000000 will be used
-   * @returns {string} The deposit hash
-   */
   public async deposit({
     walletIndex = 0,
     asset = AssetCacao,
@@ -314,9 +201,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
   }: DepositParam): Promise<string> {
     return this.withTxLock(async () => {
-      // Get the sender's address
       const sender = await this.getAddressAsync(walletIndex)
-      // Create a signer from the mnemonic
       const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
         prefix: this.prefix,
         hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex || 0))],
@@ -329,13 +214,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     })
   }
 
-  /**
-   * Create and sign a transaction without broadcasting it.
-   *
-   * @deprecated Use prepareTx instead.
-   * @param {TxOfflineParams} params The offline transaction parameters.
-   * @returns {Promise<string>} The raw unsigned transaction.
-   */
+  /** @deprecated Use prepareTx instead. */
   public async transferOffline({
     walletIndex = 0,
     recipient,
@@ -344,9 +223,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
   }: TxOfflineParams & { gasLimit?: BigNumber }): Promise<string> {
-    // Get the sender's address
     const sender = await this.getAddressAsync(walletIndex)
-    // Prepare the transaction
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient,
@@ -354,32 +231,18 @@ export class Client extends CosmosSDKClient implements MayachainClient {
       amount,
       memo,
     })
-    // Decode the unsigned transaction
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
-    // Create a signer from the mnemonic
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
       prefix: this.prefix,
       hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex))],
     })
-    // Connect to the signing client
     const rawTx = await this.roundRobinSign(sender, unsignedTx, signer, gasLimit)
-    // Return the raw unsigned transaction
     return toBase64(TxRaw.encode(rawTx).finish())
   }
 
-  /**
-   * Retrieve the private key associated with the specified index.
-   *
-   * @param {number} index Optional - The index to use to generate the private key. If it is not set, address associated with
-   * index 0 will be used
-   * @returns {Uint8Array} The private key
-   */
   public async getPrivateKey(index = 0): Promise<Uint8Array> {
-    // Generate a mnemonic object from the provided mnemonic phrase
     const mnemonicChecked = new EnglishMnemonic(this.phrase)
-    // Derive the seed from the mnemonic
     const seed = await Bip39.mnemonicToSeed(mnemonicChecked)
-    // Derive the private key from the seed and derivation path
     const { privkey } = Slip10.derivePath(
       Slip10Curve.Secp256k1,
       seed,
@@ -388,60 +251,29 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     return privkey
   }
 
-  /**
-   * Retrieve the compressed public key associated with the specified index.
-   *
-   * @param {number} index Optional - The index to use to generate the public key. If not set, the address associated with index 0 will be used.
-   * @returns {Uint8Array} The compressed public key
-   */
   public async getPubKey(index = 0): Promise<Uint8Array> {
-    // Retrieve the private key associated with the specified index
     const privateKey = await this.getPrivateKey(index)
-    // Derive the public key from the private key
     const { pubkey } = await Secp256k1.makeKeypair(privateKey)
-    // Compress the public key
     return Secp256k1.compressPubkey(pubkey)
   }
 
-  /**
-   * Retrieve the deposit transaction information.
-   *
-   * @deprecated Use getTransactionData instead
-   * @param txId The transaction ID.
-   */
+  /** @deprecated Use getTransactionData instead */
   public async getDepositTransaction(txId: string): Promise<DepositTx> {
     return this.getTransactionData(txId)
   }
 
-  /**
-   * Retrieve the message type URL by type used by the Cosmos SDK client to make certain actions.
-   *
-   * @param {MsgTypes} msgType The message type of which to return the type URL.
-   * @returns {string} The type URL of the message.
-   */
   protected getMsgTypeUrlByType(msgType: MsgTypes): string {
-    // Define message type URLs for known message types
     const messageTypeUrls: Record<MsgTypes, string> = {
       [MsgTypes.TRANSFER]: MSG_SEND_TYPE_URL,
     }
-    // Return the type URL for the specified message type
     return messageTypeUrls[msgType]
   }
 
-  /**
-   * Retrieve the standard fee used by the client.
-   *
-   * @returns {StdFee} The standard fee.
-   */
   protected getStandardFee(): StdFee {
     return { amount: [], gas: '4000000' }
   }
 
-  /**
-   * Hashes a buffer using SHA256 followed by RIPEMD160 or RMD160.
-   * @param {Uint8Array} buffer The buffer to hash
-   * @returns {Uint8Array} The hashed buffer
-   */
+  /** Hashes a buffer using SHA256 followed by RIPEMD160 or RMD160. */
   private hash160(buffer: Uint8Array): Buffer {
     const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
     try {
@@ -451,15 +283,6 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     }
   }
 
-  /**
-   * Sign a transaction making a round robin over the clients urls provided to the client
-   *
-   * @param {string} sender Sender address
-   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
-   * @param {DirectSecp256k1HdWallet} signer Signer
-   * @param {BigNumber} gasLimit Transaction gas limit
-   * @returns {TxRaw} The raw signed transaction
-   */
   private async roundRobinSign(
     sender: string,
     unsignedTx: DecodedTxRaw,
@@ -486,18 +309,7 @@ export class Client extends CosmosSDKClient implements MayachainClient {
     })
   }
 
-  /**
-   * Sign a deposit transaction making a round robin over the clients urls provided to the client.
-   * Does not broadcast — callers must broadcast the signed bytes once via broadcastTx.
-   *
-   * @param {string} sender Sender address
-   * @param {DirectSecp256k1HdWallet} signer Signer
-   * @param {BigNumber} gasLimit Gas limit for the transaction
-   * @param {BaseAmount} amount Amount to deposit
-   * @param {string} memo Deposit memo
-   * @param {CompatibleAsset} asset Asset to deposit
-   * @returns {TxRaw} The raw signed transaction
-   */
+  /** Does not broadcast — callers must broadcast the signed bytes once via broadcastTx. */
   private async roundRobinSignDeposit(
     sender: string,
     signer: DirectSecp256k1HdWallet,

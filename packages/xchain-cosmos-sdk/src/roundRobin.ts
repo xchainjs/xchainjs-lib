@@ -68,9 +68,6 @@ export function isRetryableRpcError(error: unknown): boolean {
   return RETRYABLE_RPC_ERROR_PATTERNS.some((pattern) => pattern.test(msg))
 }
 
-/**
- * Build the exhausted-round-robin error, attaching the last underlying failure.
- */
 export function createRoundRobinExhaustedError(operation: string, lastError?: unknown): Error {
   const last = lastError !== undefined ? errorMessage(lastError) : undefined
   const message = last

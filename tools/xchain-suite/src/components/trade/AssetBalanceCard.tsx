@@ -9,7 +9,6 @@ interface Props {
   asset: string
 }
 
-// Map trade asset ID to chain ID for client creation
 const ASSET_TO_CHAIN: Record<string, string> = {
   BTC: 'BTC', ETH: 'ETH', SOL: 'SOL', AVAX: 'AVAX', DOGE: 'DOGE',
   LTC: 'LTC', BCH: 'BCH', XRP: 'XRP', ADA: 'ADA', BNB: 'BSC',
@@ -17,7 +16,6 @@ const ASSET_TO_CHAIN: Record<string, string> = {
   DASH: 'DASH', ZEC: 'ZEC', XMR: 'XMR', NEAR: 'NEAR',
 }
 
-// Map UI asset names to canonical native asset symbols
 const CANONICAL_SYMBOL: Record<string, string> = {
   GAIA: 'ATOM', THOR: 'RUNE', MAYA: 'CACAO',
 }
@@ -48,7 +46,6 @@ export function AssetBalanceCard({ asset }: Props) {
         const balances = await client!.getBalance(address)
         if (cancelled) return
 
-        // Find native asset balance
         const native = balances.find((b) => b.asset.symbol === nativeSymbol || b.asset.ticker === nativeSymbol)
         if (native) {
           setBalance(baseToAsset(native.amount).amount().toFixed(6))

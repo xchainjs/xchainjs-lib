@@ -25,7 +25,6 @@ describe('Chainflip protocol with broker - E2E', () => {
       }),
     })
 
-    // Protocol with broker configuration
     protocolWithBroker = new ChainflipProtocol({
       wallet,
       brokerUrl: 'https://broker.url.',
@@ -37,7 +36,6 @@ describe('Chainflip protocol with broker - E2E', () => {
       ],
     })
 
-    // Protocol without broker for comparison
     protocolWithoutBroker = new ChainflipProtocol({ wallet })
   })
 

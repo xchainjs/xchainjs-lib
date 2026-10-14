@@ -2,13 +2,7 @@ import { Bip39, EnglishMnemonic, Secp256k1, Slip10, Slip10Curve } from '@cosmjs/
 import { fromBase64, toBase64 } from '@cosmjs/encoding'
 import { DecodedTxRaw, DirectSecp256k1HdWallet, EncodeObject, decodeTxRaw } from '@cosmjs/proto-signing'
 import { Account, SigningStargateClient } from '@cosmjs/stargate'
-import {
-  // Import client-related types and functions from @xchainjs/xchain-cosmos-sdk for Cosmos SDK client configuration.
-  MsgTypes,
-  bech32ToBase64,
-  makeClientPath,
-  roundRobinTry,
-} from '@xchainjs/xchain-cosmos-sdk'
+import { MsgTypes, bech32ToBase64, makeClientPath, roundRobinTry } from '@xchainjs/xchain-cosmos-sdk'
 import { getSeed } from '@xchainjs/xchain-crypto'
 import { BaseAmount } from '@xchainjs/xchain-util'
 import { bech32 } from '@scure/base'
@@ -28,24 +22,11 @@ import {
 import { CompatibleAsset, DepositParam, TxOfflineParams, TxParams } from './types'
 import { parseAssetToTHORNodeAsset } from './utils'
 
-/**
- * Thorchain Keystore client
- */
 export class ClientKeystore extends Client {
-  /**
-   * Asynchronous version of getAddress method.
-   * @param {number} index Derivation path index of the address to be generated.
-   * @returns {string} A promise that resolves to the generated address.
-   */
   async getAddressAsync(index = 0): Promise<string> {
     return this.getAddress(index)
   }
 
-  /**
-   * Get the address derived from the provided phrase.
-   * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
-   * @returns {string} The user address at the specified walletIndex.
-   */
   public getAddress(walletIndex?: number): string {
     const seed = getSeed(this.phrase)
     const node = HDKey.fromMasterSeed(seed)
@@ -62,28 +43,14 @@ export class ClientKeystore extends Client {
     return address
   }
 
-  /**
-   * Get the Account frmom Address.
-   * @param {number | undefined} walletIndex The index of the address derivation path. Default is 0.
-   * @returns {Account} The Account holder details or error if account does not exist
-   */
   async getAccountDetails(walletIndex?: number): Promise<Account> {
     const account = await this.getAccount(this.getAddress(walletIndex))
     return account
   }
 
-  /**
-   * Returns the private key associated with an index
-   *
-   * @param {number} index Optional - The index to use to generate the private key. If it is not set, address associated with
-   * index 0 will be used
-   * @returns {Uint8Array} The private key
-   */
   public async getPrivateKey(index = 0): Promise<Uint8Array> {
-    // Generate seed from mnemonic
     const mnemonicChecked = new EnglishMnemonic(this.phrase)
     const seed = await Bip39.mnemonicToSeed(mnemonicChecked)
-    // Derive private key
     const { privkey } = Slip10.derivePath(
       Slip10Curve.Secp256k1,
       seed,
@@ -92,17 +59,8 @@ export class ClientKeystore extends Client {
     return privkey
   }
 
-  /**
-   * Returns the compressed public key associated with an index
-   *
-   * @param {number} index Optional - The index to use to generate the private key. If it is not set, address associated with
-   * index 0 will be used
-   * @returns {Uint8Array} The public key
-   */
   public async getPubKey(index = 0): Promise<Uint8Array> {
-    // Get private key
     const privateKey = await this.getPrivateKey(index)
-    // Derive public key
     const { pubkey } = await Secp256k1.makeKeypair(privateKey)
     return Secp256k1.compressPubkey(pubkey)
   }
@@ -128,30 +86,12 @@ export class ClientKeystore extends Client {
 
       // Sign once, then round-robin only the broadcast. Retrying signAndBroadcast after a
       // transport timeout can re-sign with a new sequence and submit a second transaction.
-      const rawTx = await this.roundRobinSign(
-        sender,
-        unsignedTx,
-        signer,
-        new BigNumber(this.getStandardFee().gas),
-      )
+      const rawTx = await this.roundRobinSign(sender, unsignedTx, signer, new BigNumber(this.getStandardFee().gas))
 
       return this.broadcastTx(toBase64(TxRaw.encode(rawTx).finish()))
     })
   }
 
-  /**
-   * Make a deposit
-   *
-   * @param {number} param.walletIndex Optional - The index to use to generate the address from the transaction will be done.
-   * If it is not set, address associated with index 0 will be used
-   * @param {CompatibleAsset} param.asset Optional - The asset that will be deposit. If it is not set, Thorchain native asset will be
-   * used
-   * @param {BaseAmount} param.amount The amount that will be deposit
-   * @param {string} param.memo Optional - The memo associated with the deposit
-   * @param {BigNumber} param.gasLimit Optional - The limit amount of gas allowed to spend in the deposit. If not set, default
-   * value of 600000000 will be used
-   * @returns {string} The deposit hash
-   */
   public async deposit({
     walletIndex = 0,
     asset = AssetRUNE,
@@ -160,9 +100,7 @@ export class ClientKeystore extends Client {
     gasLimit = new BigNumber(DEPOSIT_GAS_LIMIT_VALUE),
   }: DepositParam): Promise<string> {
     return this.withTxLock(async () => {
-      // Get sender address
       const sender = await this.getAddressAsync(walletIndex)
-      // Create signer
       const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
         prefix: this.prefix,
         hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex || 0))],
@@ -175,11 +113,7 @@ export class ClientKeystore extends Client {
     })
   }
 
-  /**
-   * Create and sign transaction without broadcasting it
-   *
-   * @deprecated Use prepare Tx instead
-   */
+  /** @deprecated Use prepare Tx instead */
   public async transferOffline({
     walletIndex = 0,
     recipient,
@@ -188,9 +122,7 @@ export class ClientKeystore extends Client {
     memo,
     gasLimit = new BigNumber(DEFAULT_GAS_LIMIT_VALUE),
   }: TxOfflineParams & { gasLimit?: BigNumber }): Promise<string> {
-    // Get sender address
     const sender = await this.getAddressAsync(walletIndex)
-    // Prepare unsigned transaction
     const { rawUnsignedTx } = await this.prepareTx({
       sender,
       recipient: recipient,
@@ -199,10 +131,8 @@ export class ClientKeystore extends Client {
       memo: memo,
     })
 
-    // Decode unsigned transaction
     const unsignedTx: DecodedTxRaw = decodeTxRaw(fromBase64(rawUnsignedTx))
 
-    // Create signer
     const signer = await DirectSecp256k1HdWallet.fromMnemonic(this.phrase as string, {
       prefix: this.prefix,
       hdPaths: [makeClientPath(this.getFullDerivationPath(walletIndex))],
@@ -210,15 +140,10 @@ export class ClientKeystore extends Client {
 
     const rawTx = await this.roundRobinSign(sender, unsignedTx, signer, gasLimit)
 
-    // Return encoded signed transaction
     return toBase64(TxRaw.encode(rawTx).finish())
   }
 
-  /**
-   * Hashes a buffer using SHA256 followed by RIPEMD160 or RMD160.
-   * @param {Uint8Array} buffer The buffer to hash
-   * @returns {Uint8Array} The hashed buffer
-   */
+  /** Hashes a buffer using SHA256 followed by RIPEMD160 or RMD160. */
   private hash160(buffer: Uint8Array): Buffer {
     const sha256Hash: Buffer = createHash('sha256').update(buffer).digest()
     try {
@@ -228,15 +153,6 @@ export class ClientKeystore extends Client {
     }
   }
 
-  /**
-   * Sign a transaction making a round robin over the clients urls provided to the client
-   *
-   * @param {string} sender Sender address
-   * @param {DecodedTxRaw} unsignedTx Unsigned transaction
-   * @param {DirectSecp256k1HdWallet} signer Signer
-   * @param {BigNumber} gasLimit Transaction gas limit
-   * @returns {TxRaw} The raw signed transaction
-   */
   private async roundRobinSign(
     sender: string,
     unsignedTx: DecodedTxRaw,
@@ -264,18 +180,7 @@ export class ClientKeystore extends Client {
     })
   }
 
-  /**
-   * Sign a deposit transaction making a round robin over the clients urls provided to the client.
-   * Does not broadcast — callers must broadcast the signed bytes once via broadcastTx.
-   *
-   * @param {string} sender Sender address
-   * @param {DirectSecp256k1HdWallet} signer Signer
-   * @param {BigNumber} gasLimit Gas limit for the transaction
-   * @param {BaseAmount} amount Amount to deposit
-   * @param {string} memo Deposit memo
-   * @param {CompatibleAsset} asset Asset to deposit
-   * @returns {TxRaw} The raw signed transaction
-   */
+  /** Does not broadcast — callers must broadcast the signed bytes once via broadcastTx. */
   private async roundRobinSignDeposit(
     sender: string,
     signer: DirectSecp256k1HdWallet,

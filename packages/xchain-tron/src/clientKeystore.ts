@@ -36,26 +36,16 @@ export class ClientKeystore extends Client {
     return {
       getAddress: () => (typeof address === 'string' ? address : ''),
       signTransaction: async (transaction: TronTransaction) => {
-        // Use isolated instance - no shared state
+        // Isolated instance: no shared TronWeb state.
         const signedTx = await isolatedTronWeb.trx.sign(transaction)
         return signedTx
       },
     }
   }
-  /**
-   * Get the current address synchronously.
-   */
   public getAddress(walletIndex = 0): string {
     return this.getSigner(walletIndex).getAddress()
   }
 
-  /**
-   * Get the current address asynchronously.
-   *
-   * @param {number} index The index of the address. Default 0
-   * @returns {Address} The TRON address related to the index provided.
-   * @throws {"Phrase must be provided"} Thrown if the phrase has not been set before.
-   */
   public async getAddressAsync(walletIndex = 0): Promise<string> {
     return this.getAddress(walletIndex)
   }

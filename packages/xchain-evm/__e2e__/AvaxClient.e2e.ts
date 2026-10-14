@@ -24,13 +24,10 @@ import { getAddress, JsonRpcProvider } from 'ethers'
 const AVAXChain: Chain = 'AVAX'
 const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
 
-// =====Defaults=====
 export const transferGasAssetGasLimit: BigNumber = new BigNumber(21000)
 export const transferTokenGasLimit: BigNumber = new BigNumber(100000)
-// =====Ethers providers=====
 const ankrApiKey = process.env.ANKR_API_KEY
 
-// Define JSON-RPC providers for mainnet and testnet
 const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche/${ankrApiKey}`, {
   name: 'avalanche',
   chainId: 43114,
@@ -45,8 +42,6 @@ const ethersJSProviders = {
   [Network.Testnet]: AVALANCHE_TESTNET_ETHERS_PROVIDER,
   [Network.Stagenet]: AVALANCHE_MAINNET_ETHERS_PROVIDER,
 }
-// =====Ethers providers=====
-// =====ONLINE providers=====
 // const API_KEY = 'FAKE_KEY'
 const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   AVALANCHE_TESTNET_ETHERS_PROVIDER,
@@ -72,9 +67,7 @@ const avaxProviders = {
   [Network.Testnet]: AVAX_ONLINE_PROVIDER_TESTNET,
   [Network.Stagenet]: AVAX_ONLINE_PROVIDER_MAINNET,
 }
-// =====ONLINE providers=====
 
-// =====Explorers=====
 const AVAX_MAINNET_EXPLORER = new ExplorerProvider(
   'https://snowtrace.io/',
   'https://snowtrace.io/tx/%%TX_ID%%',
@@ -90,7 +83,6 @@ const avaxExplorerProviders = {
   [Network.Testnet]: AVAX_TESTNET_EXPLORER,
   [Network.Stagenet]: AVAX_MAINNET_EXPLORER,
 }
-// =====Explorers=====
 
 // const avaxRootDerivationPaths = {
 //   [Network.Mainnet]: `m/44'/9000'/0'/0/`,
@@ -144,8 +136,6 @@ const avaxParams: EVMKeystoreClientParams = {
 }
 
 // import { ApproveParams, EstimateApproveParams, IsApprovedParams } from '../src/types'
-
-// =====Erc-20 asset=====
 
 const assetRIP: TokenAsset = {
   chain: AVAXChain,
@@ -252,7 +242,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   it('should transfer 0.1 USDC between wallet 0 and 1', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.1', 6))
-    //ERC20 address The Crypt (RIP)
 
     const txHash = await client.transfer({ amount, recipient, asset: assetUSDC })
     console.log(txHash)
@@ -260,7 +249,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   it('should transfer 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
     const recipient = client.getAddress(1)
     const amount = assetToBase(assetAmount('0.01', 18))
-    //ERC20 address The Crypt (RIP)
 
     const txHash = await client.transfer({ amount, recipient, asset: assetRIP })
     console.log(txHash)
@@ -269,7 +257,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
     const spender = '0x8F66c4AE756BEbC49Ec8B81966DD8bba9f127549'
     const contractAddress = '0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e'
     const amount = assetToBase(assetAmount('10', 6))
-    //ERC20 address The Crypt (RIP)
 
     const txHash = await client.approve({
       amount,
@@ -281,7 +268,6 @@ describe('xchain-evm (Avax) Integration Tests', () => {
   it('should approve 0.01 RIP(ERC-20) between wallet 0 and 1', async () => {
     const recipient = await client.getAddressAsync(1)
     const amount = assetToBase(assetAmount('0.01', 6))
-    //ERC20 address The Crypt (RIP)
 
     const txHash = await client.approve({
       amount,

@@ -4,7 +4,6 @@ import type { NodesApi, NetworkApi, MimirApi } from '@xchainjs/xchain-thornode'
 import type { Client as ThorchainClient } from '@xchainjs/xchain-thorchain'
 import { useWallet } from '../contexts/WalletContext'
 
-// THORNode API types and configuration
 interface THORNodeConfig {
   nodesApi: NodesApi | null
   networkApi: NetworkApi | null
@@ -78,7 +77,6 @@ export function useTHORNode(): THORNodeConfig {
   }
 }
 
-// Hook to get THORChain client for deposit operations
 export function useTHORChainClient() {
   const { phrase, network } = useWallet()
   const [client, setClient] = useState<ThorchainClient | null>(null)

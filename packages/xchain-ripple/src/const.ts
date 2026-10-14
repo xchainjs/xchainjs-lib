@@ -5,17 +5,10 @@ export const XRP_DECIMAL = 6
 
 export const XRPL_DERIVATION_PATH = "m/44'/144'/0'/0/"
 
-/**
- * Chain identifier for Ripple mainnet
- */
 export const XRPChain = 'XRP' as const
 
-/**
- * Base "chain" asset on Ripple main net.
- */
 export const AssetXRP: Asset = { chain: XRPChain, symbol: 'XRP', ticker: 'XRP', type: AssetType.NATIVE }
 
-// Explorer providers for Ripple
 const XRP_MAINNET_EXPLORER = new ExplorerProvider(
   'https://livenet.xrpl.org/',
   'https://livenet.xrpl.org/accounts/%%ADDRESS%%',
@@ -59,7 +52,6 @@ export type XRPLIdentifierString = XRPLStandardIdentifier | XRPLReserverdIdentif
 export const getXRPLIdentifierByNetwork = (network: Network) => {
   if (network === Network.Mainnet) return 'xrpl:mainnet'
   if (network === Network.Stagenet) return 'xrpl:devnet'
-  // testnet
   return 'xrpl:testnet'
 }
 

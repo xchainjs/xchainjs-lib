@@ -12,20 +12,15 @@ import BigNumber from 'bignumber.js'
 
 const UNLIMITED_THRESHOLD = new BigNumber(2).pow(128)
 
-// Common ERC-20 tokens on supported EVM chains
 const EVM_TOKENS = [
-  // Ethereum
   { chain: 'ETH', symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
   { chain: 'ETH', symbol: 'USDC', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6 },
   { chain: 'ETH', symbol: 'WBTC', address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
   { chain: 'ETH', symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EesdfgDCB61C2', decimals: 18 },
-  // Avalanche
   { chain: 'AVAX', symbol: 'USDC', address: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E', decimals: 6 },
   { chain: 'AVAX', symbol: 'USDT', address: '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7', decimals: 6 },
-  // BSC
   { chain: 'BSC', symbol: 'USDT', address: '0x55d398326f99059fF775485246999027B3197955', decimals: 18 },
   { chain: 'BSC', symbol: 'USDC', address: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', decimals: 18 },
-  // Arbitrum
   { chain: 'ARB', symbol: 'USDC', address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', decimals: 6 },
   { chain: 'ARB', symbol: 'USDT', address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', decimals: 6 },
 ]
@@ -57,10 +52,8 @@ export default function RouterApprovalPage() {
   const allowanceOp = useOperation<AllowanceResult>()
   const { client: evmClient } = useChainClient(selectedChain)
 
-  // Filter tokens by selected chain
   const availableTokens = EVM_TOKENS.filter((t) => t.chain === selectedChain)
 
-  // Update selected token when chain changes
   const handleChainChange = (chain: string) => {
     setSelectedChain(chain)
     const firstToken = EVM_TOKENS.find((t) => t.chain === chain)
@@ -72,7 +65,6 @@ export default function RouterApprovalPage() {
 
     await allowanceOp.execute(
       async () => {
-        // Get the router address from the appropriate protocol's query
         let routerAddress: string
         if (protocol === 'THORChain') {
           if (!thorchainQuery) throw new Error('THORChain Query not initialized')
@@ -87,7 +79,6 @@ export default function RouterApprovalPage() {
           routerAddress = inbound.router
         }
 
-        // Get user address and provider from the EVM client
         const fromAddress = await evmClient.getAddressAsync()
         if (!('getProvider' in evmClient)) throw new Error(`${selectedChain} client does not expose getProvider()`)
         const provider = (evmClient as unknown as { getProvider: () => import('ethers').Provider }).getProvider()
@@ -122,7 +113,6 @@ export default function RouterApprovalPage() {
 
     await approveOp.execute(
       async () => {
-        // Build the token asset with correct type
         const tokenAsset: TokenAsset = {
           chain: selectedToken.chain,
           symbol: `${selectedToken.symbol}-${selectedToken.address}`,
@@ -140,7 +130,6 @@ export default function RouterApprovalPage() {
           })
           return result
         } else {
-          // Initialize MAYAChain AMM
           const { MayachainAMM } = await import('@xchainjs/xchain-mayachain-amm')
           const { MayachainQuery } = await import('@xchainjs/xchain-mayachain-query')
           const mayachainAmm = new MayachainAMM(new MayachainQuery(), wallet)
@@ -275,7 +264,6 @@ console.log('Approval TX:', result.hash)`
       <div className="max-w-2xl mx-auto">
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-            {/* Header */}
             <div className="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">Router Approval</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -283,7 +271,6 @@ console.log('Approval TX:', result.hash)`
               </p>
             </div>
 
-            {/* Info Banner */}
             <div className="mx-6 mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
               <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Why is approval needed?</h3>
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
@@ -294,7 +281,6 @@ console.log('Approval TX:', result.hash)`
 
             <div className="p-6 space-y-6">
               <div className="space-y-4">
-                {/* Protocol Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Protocol</label>
                   <div className="grid grid-cols-2 gap-3">
@@ -314,7 +300,6 @@ console.log('Approval TX:', result.hash)`
                   </div>
                 </div>
 
-                {/* Chain Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chain</label>
                   <div className="grid grid-cols-4 gap-2">
@@ -334,7 +319,6 @@ console.log('Approval TX:', result.hash)`
                   </div>
                 </div>
 
-                {/* Token Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Token</label>
                   <select
@@ -354,7 +338,6 @@ console.log('Approval TX:', result.hash)`
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 font-mono">{selectedToken.address}</p>
                 </div>
 
-                {/* Amount Input */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Amount to Approve
@@ -376,7 +359,6 @@ console.log('Approval TX:', result.hash)`
                   </p>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={() => void handleCheckAllowance()}
@@ -431,7 +413,6 @@ console.log('Approval TX:', result.hash)`
                   </button>
                 </div>
 
-                {/* Allowance Result */}
                 <ResultPanel loading={allowanceOp.loading} error={allowanceOp.error} duration={allowanceOp.duration}>
                   {allowanceOp.result && (
                     <div className="space-y-1">
@@ -449,7 +430,6 @@ console.log('Approval TX:', result.hash)`
                 </ResultPanel>
               </div>
 
-              {/* Approve Result */}
               <ResultPanel loading={approveOp.loading} error={approveOp.error} duration={approveOp.duration}>
                 {approveOp.result && (
                   <div className="space-y-2">
@@ -477,7 +457,6 @@ console.log('Approval TX:', result.hash)`
                 )}
               </ResultPanel>
 
-              {/* Revoke Result */}
               <ResultPanel loading={revokeOp.loading} error={revokeOp.error} duration={revokeOp.duration}>
                 {revokeOp.result && (
                   <div className="space-y-2">
@@ -505,7 +484,6 @@ console.log('Approval TX:', result.hash)`
                 )}
               </ResultPanel>
 
-              {/* Code Example */}
               <CodePreview code={generateCode()} title="Approve Router to Spend" />
             </div>
           </div>

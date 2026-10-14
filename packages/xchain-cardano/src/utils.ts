@@ -19,12 +19,7 @@ export const getCardanoNetwork = async (network: Network): Promise<NetworkInfo> 
 export const MEMO_CHUNK_MAX_BYTES = 64
 
 /**
- * Splits a memo into chunks of at most {@link MEMO_CHUNK_MAX_BYTES} UTF-8 bytes without splitting
- * a multi-byte codepoint across a chunk boundary. The boundary is governed by UTF-8 byte length,
- * not character count, so multi-byte characters are kept whole.
- *
- * @param {string} memo - The memo to split.
- * @returns {string[]} The memo split into <=64-byte chunks. Empty for an empty memo.
+ * Chunks on UTF-8 byte length, not character count, so a multi-byte codepoint is never split.
  */
 export const chunkMemoUtf8 = (memo: string): string[] => {
   const encoder = new TextEncoder()

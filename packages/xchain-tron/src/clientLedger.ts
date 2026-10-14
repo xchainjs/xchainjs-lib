@@ -4,11 +4,7 @@ import { Address } from '@xchainjs/xchain-util'
 import { Client, defaultTRONParams } from './client'
 import { TronTransaction, TronSignedTransaction, TRONClientLedgerParams } from './types'
 
-/**
- * Custom Tron Ledger client extending the base Tron client
- */
 class ClientLedger extends Client {
-  // Reference to the Ledger transport object
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: any
   private ledgerApp: TronLedgerApp | undefined
@@ -22,12 +18,10 @@ class ClientLedger extends Client {
     this.ledgerApp = new TronLedgerApp(this.transport)
   }
 
-  // Get the current address synchronously - not supported for Ledger Client
   getAddress(): string {
     throw Error('Sync method not supported for Ledger')
   }
 
-  // Get the current address asynchronously
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     if (!this.ledgerApp) throw Error('ledger not connected')
 
@@ -36,7 +30,6 @@ class ClientLedger extends Client {
     return result.address
   }
 
-  // Sign transaction using Ledger
   async signTransaction(transaction: TronTransaction, walletIndex = 0): Promise<TronSignedTransaction> {
     if (!this.ledgerApp) throw Error('ledger not connected')
 

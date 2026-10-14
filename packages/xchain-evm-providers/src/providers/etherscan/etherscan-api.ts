@@ -16,12 +16,6 @@ import { validateAddress } from './utils'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
 
-/**
- * Filter self txs
- *
- * @returns {T[]}
- *
- **/
 export const filterSelfTxs = <T extends { from: string; to: string; hash: string }>(txs: T[]): T[] => {
   const filterTxs = txs.filter((tx) => tx.from !== tx.to)
   let selfTxs = txs.filter((tx) => tx.from === tx.to)
@@ -34,20 +28,8 @@ export const filterSelfTxs = <T extends { from: string; to: string; hash: string
   return filterTxs
 }
 
-/**
- * Check if the symbol is valid.
- *
- * @param {string|null|undefined} symbol
- * @returns {boolean} `true` or `false`.
- */
 export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
-/**
- * Get transactions from ETH transaction
- *
- * @param {ETHTransactionInfo} tx
- * @returns {Tx} The parsed transaction.
- */
 export const getTxFromEthTransaction = (tx: ETHTransactionInfo, gasAsset: Asset, decimals: number): Tx => {
   return {
     asset: gasAsset,
@@ -69,12 +51,6 @@ export const getTxFromEthTransaction = (tx: ETHTransactionInfo, gasAsset: Asset,
   }
 }
 
-/**
- * Get transactions from token tx
- *
- * @param {TokenTransactionInfo} tx
- * @returns {Tx|null} The parsed transaction.
- */
 export const getTxFromTokenTransaction = (tx: TokenTransactionInfo, chain: Chain, decimals: number): Tx | null => {
   const decimal = parseInt(tx.tokenDecimal) || decimals
   const symbol = tx.tokenSymbol
@@ -108,13 +84,8 @@ export const getTxFromTokenTransaction = (tx: TokenTransactionInfo, chain: Chain
 }
 
 /**
- * SafeGasPrice, ProposeGasPrice And FastGasPrice returned in string-Gwei
- *
+ * SafeGasPrice, ProposeGasPrice and FastGasPrice are gwei strings.
  * @see https://etherscan.io/apis#gastracker
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {GasOracleResponse} LastBlock, SafeGasPrice, ProposeGasPrice, FastGasPrice
  */
 export const getGasOracle = async (baseUrl: string, apiKey?: string): Promise<GasOracleResponse> => {
   const url = baseUrl + '/api?module=gastracker&action=gasoracle'
@@ -125,17 +96,7 @@ export const getGasOracle = async (baseUrl: string, apiKey?: string): Promise<Ga
   return result
 }
 
-/**
- * Get token balance
- *
- * @see https://etherscan.io/apis#tokens
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {string} address The address.
- * @param {string} assetAddress The token contract address.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {BigNumberish} The token balance
- */
+/** @see https://etherscan.io/apis#tokens */
 export const getTokenBalance = async ({
   baseUrl,
   address,
@@ -147,17 +108,7 @@ export const getTokenBalance = async ({
   return (await axios.get(url + getApiKeyQueryParameter(apiKey))).data.result
 }
 
-/**
- * Get ETH transaction history
- *
- * @see https://etherscan.io/apis#accounts
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {string} address The address.
- * @param {TransactionHistoryParam} params The search options.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {ETHTransactionInfo[]} The ETH transaction history
- */
+/** @see https://etherscan.io/apis#accounts */
 export const getGasAssetTransactionHistory = async ({
   gasAsset,
   gasDecimals,
@@ -186,17 +137,7 @@ export const getGasAssetTransactionHistory = async ({
     .map((tx) => getTxFromEthTransaction(tx, gasAsset, gasDecimals))
 }
 
-/**
- * Get token transaction history
- *
- * @see https://etherscan.io/apis#accounts
- *
- * @param {string} baseUrl The etherscan node url.
- * @param {string} address The address.
- * @param {TransactionHistoryParam} params The search options.
- * @param {string} apiKey The etherscan API key. (optional)
- * @returns {Tx[]} The token transaction history
- */
+/** @see https://etherscan.io/apis#accounts */
 export const getTokenTransactionHistory = async ({
   gasDecimals,
   baseUrl,

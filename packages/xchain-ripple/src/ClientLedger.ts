@@ -6,23 +6,17 @@ import { encode, type Payment } from 'xrpl'
 import { Client } from './client'
 import { SignedTransaction, XRPClientParams, XRPTxParams } from './types'
 
-/**
- * Custom Ledger XRP client extending the base XRP client
- */
 class ClientLedger extends Client {
-  // Reference to the Ledger transport object
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private transport: any
   private app: AppXrp | undefined
 
-  // Constructor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(params: XRPClientParams & { transport: any }) {
     super(params)
     this.transport = params.transport
   }
 
-  // Get the Ledger XRP application instance
   public async getApp(): Promise<AppXrp> {
     if (this.app) {
       return this.app
@@ -31,12 +25,10 @@ class ClientLedger extends Client {
     return this.app
   }
 
-  // Get the current address synchronously - not supported for Ledger
   getAddress(): string {
     throw Error('Sync method not supported for Ledger')
   }
 
-  // Get the current address asynchronously
   async getAddressAsync(index = 0, verify = false): Promise<Address> {
     const app = await this.getApp()
     const derivationPath = this.getFullDerivationPath(index)
@@ -44,34 +36,27 @@ class ClientLedger extends Client {
     return result.address
   }
 
-  // Sign transaction with Ledger (required by abstract Client class)
   async signTransaction(payment: Payment, walletIndex: number): Promise<SignedTransaction> {
     const app = await this.getApp()
 
-    // Get derivation path for signing
     const derivationPath = this.getFullDerivationPath(walletIndex)
 
-    // Get the public key first
     const addressInfo = await app.getAddress(derivationPath, false)
 
-    // Prepare transaction with SigningPubKey BEFORE encoding
+    // SigningPubKey must be set before encode.
     const preparedTx = {
       ...payment,
       SigningPubKey: addressInfo.publicKey.toUpperCase(),
     }
 
-    // Encode the prepared transaction
     const txBlob = encode(preparedTx)
 
-    // Sign the transaction with Ledger
     const signature = await app.signTransaction(derivationPath, txBlob)
 
-    // Validate signature exists
     if (!signature) {
       throw new Error('No signature received from Ledger device')
     }
 
-    // Create final signed transaction with signature
     const signedTx = {
       ...preparedTx,
       TxnSignature: signature.toUpperCase(),
@@ -80,17 +65,13 @@ class ClientLedger extends Client {
     return { tx_blob: encode(signedTx) }
   }
 
-  // Transfer XRP from Ledger
   async transfer(params: TxParams & XRPTxParams & { feeRate?: FeeRate }): Promise<TxHash> {
     const fromAddressIndex = params?.walletIndex || 0
 
-    // Get sender address
     const sender = await this.getAddressAsync(fromAddressIndex)
 
-    // Build a simple transaction structure like in the Ledger examples
     const xrplClient = await this.getXrplClient()
 
-    // Build basic transaction structure for autofill
     const baseTx: Payment = {
       TransactionType: 'Payment',
       Account: sender,
@@ -98,12 +79,10 @@ class ClientLedger extends Client {
       Amount: params.amount.amount().toString(),
     }
 
-    // Add destination tag if provided
     if (params.destinationTag !== undefined) {
       baseTx.DestinationTag = params.destinationTag
     }
 
-    // Add memo if provided
     if (params.memo) {
       baseTx.Memos = [
         {
@@ -114,10 +93,9 @@ class ClientLedger extends Client {
       ]
     }
 
-    // Use autofill to get the required fields
     const autofilledTx = await xrplClient.autofill(baseTx)
 
-    // Create a clean transaction object for Ledger signing with only the fields it expects
+    // Ledger signs only these fields.
     const ledgerTx: Record<string, unknown> = {
       TransactionType: 'Payment',
       Account: sender,
@@ -128,7 +106,6 @@ class ClientLedger extends Client {
       LastLedgerSequence: autofilledTx.LastLedgerSequence,
     }
 
-    // Add optional fields
     if (params.destinationTag !== undefined) {
       ledgerTx.DestinationTag = params.destinationTag
     }
@@ -145,7 +122,6 @@ class ClientLedger extends Client {
 
     const signed = await this.signTransaction(ledgerTx as Payment, fromAddressIndex)
 
-    // Submit the signed transaction blob
     const response = await xrplClient.request({
       command: 'submit',
       tx_blob: signed.tx_blob,

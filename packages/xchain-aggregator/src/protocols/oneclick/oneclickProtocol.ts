@@ -74,14 +74,9 @@ export class OneClickProtocol implements IProtocol {
   }
 
   /**
-   * Estimate swap (quote only). Always requests a dry 1Click quote.
-   *
-   * A dry quote prices the route and often has `depositAddress: null`.
-   * `canSwap` means `amountOut` is present — call {@link requestDepositAddress}
-   * (or {@link doSwap}) immediately before broadcast to obtain a deposit address.
-   *
-   * @param {QuoteSwapParams} params Swap parameters.
-   * @returns {QuoteSwap} Quote result. `toAddress` is empty unless the dry response includes one.
+   * Dry quote (`dry: true`). Prices the route and often has no deposit address.
+   * `canSwap` means `amountOut` is present — call requestDepositAddress or doSwap
+   * immediately before broadcast. `toAddress` stays empty unless the dry response includes one.
    */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
     const pair = await this.resolvePair(params)
@@ -122,11 +117,8 @@ export class OneClickProtocol implements IProtocol {
   }
 
   /**
-   * Request a wet 1Click quote and return the deposit address for broadcast.
-   * Call immediately before sending funds. Requires real refund and recipient addresses.
-   *
-   * @param {QuoteSwapParams} params Must include `fromAddress` and `destinationAddress`
-   * @returns {OneClickDepositQuote} Deposit address and the egress amount bound to it
+   * Wet quote. Call immediately before sending funds.
+   * Requires real refund and recipient addresses.
    */
   public async requestDepositAddress(params: QuoteSwapParams): Promise<OneClickDepositQuote> {
     if (!params.fromAddress) throw new Error('fromAddress is required to request a OneClick deposit address')

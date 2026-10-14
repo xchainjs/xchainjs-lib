@@ -13,18 +13,18 @@ import {
 } from '../src/const'
 
 const defaultDogeParams: UtxoClientParams = {
-  network: Network.Mainnet, // Default network is Mainnet
-  phrase: '', // Default empty phrase
-  explorerProviders: blockstreamExplorerProviders, // Default explorer providers
-  dataProviders: [blockcypherDataProviders], // Default data providers
+  network: Network.Mainnet,
+  phrase: '',
+  explorerProviders: blockstreamExplorerProviders,
+  dataProviders: [blockcypherDataProviders],
   rootDerivationPaths: {
-    [Network.Mainnet]: `m/44'/3'/0'/0/`, // Default root derivation path for Mainnet
-    [Network.Stagenet]: `m/44'/3'/0'/0/`, // Default root derivation path for Stagenet
-    [Network.Testnet]: `m/44'/1'/0'/0/`, // Default root derivation path for Testnet
+    [Network.Mainnet]: `m/44'/3'/0'/0/`,
+    [Network.Stagenet]: `m/44'/3'/0'/0/`,
+    [Network.Testnet]: `m/44'/1'/0'/0/`,
   },
   feeBounds: {
-    lower: LOWER_FEE_BOUND, // Default lower fee bound
-    upper: UPPER_FEE_BOUND, // Default upper fee bound
+    lower: LOWER_FEE_BOUND,
+    upper: UPPER_FEE_BOUND,
   },
 }
 

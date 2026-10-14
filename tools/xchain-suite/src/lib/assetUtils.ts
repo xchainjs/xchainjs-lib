@@ -2,7 +2,6 @@ import { AssetType, type AnyAsset } from '@xchainjs/xchain-util'
 import type { ChainAsset } from './types'
 import { getChainById } from './chains'
 
-/** Convert a ChainAsset (UI type) to an AnyAsset (xchainjs type) */
 export function buildAsset(chainAsset: ChainAsset): AnyAsset {
   if (chainAsset.contractAddress) {
     return {
@@ -20,7 +19,6 @@ export function buildAsset(chainAsset: ChainAsset): AnyAsset {
   }
 }
 
-/** Get decimals — use token-specific decimals when available, else chain default */
 export function getDecimals(chainAsset: ChainAsset): number {
   if (chainAsset.decimals !== undefined) return chainAsset.decimals
   const chain = getChainById(chainAsset.chainId)
