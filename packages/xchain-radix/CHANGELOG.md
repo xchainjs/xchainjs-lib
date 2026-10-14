@@ -1,5 +1,11 @@
 # @xchainjs/xchain-radix
 
+## 2.0.20
+
+### Patch Changes
+
+- 3988c75: Bump `@radixdlt/radix-engine-toolkit` to ^1.0.6.
+
 ## 2.0.19
 
 ### Patch Changes

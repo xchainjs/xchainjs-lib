@@ -1,5 +1,11 @@
 # @xchainjs/xchain-near
 
+## 0.3.2
+
+### Patch Changes
+
+- 85b4b7f: Prefer FastNear's current keyless RPC hosts and drop 1rpc.io/near, which times out with Cloudflare 522. near-api-js stays on 7.3.1.
+
 ## 0.3.1
 
 ### Patch Changes

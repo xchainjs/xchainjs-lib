@@ -1,5 +1,11 @@
 # @xchainjs/xchain-ripple
 
+## 1.0.21
+
+### Patch Changes
+
+- 32abdab: Upgrade xrpl.js to 5.3.0. Mnemonic derivation stays secp256k1 so existing addresses do not change.
+
 ## 1.0.20
 
 ### Patch Changes

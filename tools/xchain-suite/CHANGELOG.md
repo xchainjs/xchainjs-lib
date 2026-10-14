@@ -1,5 +1,27 @@
 # testing-gui
 
+## 1.0.27
+
+### Patch Changes
+
+- Updated dependencies [ef9051f]
+- Updated dependencies [24ea005]
+- Updated dependencies [85b4b7f]
+- Updated dependencies [32abdab]
+- Updated dependencies [90f934b]
+- Updated dependencies [4984c62]
+- Updated dependencies [76aaf0f]
+  - @xchainjs/xchain-cardano@1.2.6
+  - @xchainjs/xchain-thorchain-query@4.0.0
+  - @xchainjs/xchain-thorchain-amm@4.0.0
+  - @xchainjs/xchain-mayachain-query@3.0.0
+  - @xchainjs/xchain-mayachain-amm@5.0.0
+  - @xchainjs/xchain-near@0.3.2
+  - @xchainjs/xchain-ripple@1.0.21
+  - @xchainjs/xchain-solana@1.1.11
+  - @xchainjs/xchain-sui@0.2.3
+  - @xchainjs/xchain-wallet@2.0.37
+
 ## 1.0.26
 
 ### Patch Changes
