@@ -1,5 +1,12 @@
 # @xchainjs/xchain-sui
 
+## 0.2.3
+
+### Patch Changes
+
+- 4984c62: Upgrade `@mysten/sui` to 2.35. Legacy JSON-RPC now comes from `@mysten/sui/jsonRpc`, and gRPC balance, coin, and execution calls use the stabilized core API.
+- 76aaf0f: Send Sui GraphQL history as plain query strings instead of through `SuiGraphQLClient`. Responses that include errors are rejected, and a hung history poll aborts at its deadline. Legacy JSON-RPC still loads on first use.
+
 ## 0.2.2
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.0.0
+
+### Major Changes
+
+- 24ea005: Drop protocol chains that THORChain and MAYAChain no longer list. THORChain query and AMM no longer treat BNB beacon, Sui, or Maya as swap chains. MAYAChain query and AMM no longer treat Kujira or Radix as swap chains. Removed exports include `BNBChain`, `SUIChain`, `AssetSUI`, `AssetMAYA`, `MAYAChain`, `KujiraAsset`, `KujiraChain`, `XdrAsset`, `XdrChain`, and `isRadixChain`.
+
+### Patch Changes
+
+- Updated dependencies [24ea005]
+- Updated dependencies [32abdab]
+- Updated dependencies [90f934b]
+  - @xchainjs/xchain-thorchain-query@4.0.0
+  - @xchainjs/xchain-ripple@1.0.21
+  - @xchainjs/xchain-solana@1.1.11
+  - @xchainjs/xchain-wallet@2.0.37
+
 ## 3.1.9
 
 ### Patch Changes

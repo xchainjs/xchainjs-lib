@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.11
+
+### Patch Changes
+
+- 90f934b: web3.js 1.99 and spl-token 0.4.15, and history/detail fetches accept versioned transactions.
+
 ## 1.1.10
 
 ### Patch Changes
