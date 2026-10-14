@@ -403,7 +403,6 @@ import { Client as MayaClient, defaultClientConfig as defaultMayaParams } from '
 import { Client as NearClient, defaultNearParams } from '@xchainjs/xchain-near'
 import { Client as SolClient, defaultSolanaParams } from '@xchainjs/xchain-solana'
 import { Client as SuiClient, defaultSuiParams } from '@xchainjs/xchain-sui'
-import { Client as XrdClient } from '@xchainjs/xchain-radix'
 import { Client as AdaClient, defaultAdaParams } from '@xchainjs/xchain-cardano'
 import { Client as XrpClient, defaultXRPParams } from '@xchainjs/xchain-ripple'
 import { Client as TronClient, defaultTRONParams } from '@xchainjs/xchain-tron'
@@ -553,8 +552,6 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     }
     case 'SUI':
       return new SuiClient({ ...defaultSuiParams, network, phrase })
-    case 'XRD':
-      return new XrdClient({ network, phrase })
     case 'ADA': {
       const adaApiKey = import.meta.env.VITE_ADA_API_KEY
       return new AdaClient({

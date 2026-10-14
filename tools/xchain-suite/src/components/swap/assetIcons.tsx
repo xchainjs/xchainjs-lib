@@ -8,7 +8,6 @@ const ICON_OVERRIDES: Record<string, string> = {
   CACAO: '/icons/cacao.png',
   MAYA: '/icons/maya.png',
   ARB: '/icons/arb.svg',
-  XRD: '/icons/xrd.svg',
   NEAR: '/icons/near.svg',
   wNEAR: '/icons/near.svg',
   SUI: '/icons/sui.svg',

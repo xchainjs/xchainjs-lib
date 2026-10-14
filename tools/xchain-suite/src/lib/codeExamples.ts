@@ -98,11 +98,6 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
     paramsImport: 'defaultSuiParams',
     clientInit: 'new Client({ ...defaultSuiParams, network: Network.Mainnet, phrase })',
   },
-  XRD: {
-    packageName: '@xchainjs/xchain-radix',
-    clientImport: 'Client',
-    clientInit: 'new Client({ network: Network.Mainnet, phrase })',
-  },
   ADA: {
     packageName: '@xchainjs/xchain-cardano',
     clientImport: 'Client',

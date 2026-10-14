@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:nomonero": "NO_MONERO=1 vite",
-    "build": "tsc && vite build",
+    "build": "tsc && NODE_OPTIONS=--max-old-space-size=6144 vite build",
     "preview": "vite preview",
     "test": "echo 'Skipped - xchain-suite requires browser environment'",
     "test:run": "vitest run"
@@ -38,7 +38,6 @@
     "@xchainjs/xchain-midgard-query": "workspace:*",
     "@xchainjs/xchain-monero": "workspace:*",
     "@xchainjs/xchain-near": "workspace:*",
-    "@xchainjs/xchain-radix": "workspace:*",
     "@xchainjs/xchain-ripple": "workspace:*",
     "@xchainjs/xchain-solana": "workspace:*",
     "@xchainjs/xchain-sui": "workspace:*",

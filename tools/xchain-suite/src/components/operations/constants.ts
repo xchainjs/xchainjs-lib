@@ -23,7 +23,6 @@ export const EXPLORER_TX_URLS: Record<string, string> = {
   NEAR: 'https://nearblocks.io/txns/',
   SOL: 'https://solscan.io/tx/',
   SUI: 'https://suiscan.xyz/mainnet/tx/',
-  XRD: 'https://dashboard.radixdlt.com/transaction/',
   ADA: 'https://cardanoscan.io/transaction/',
   TRON: 'https://tronscan.org/#/transaction/',
 }
