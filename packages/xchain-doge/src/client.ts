@@ -4,6 +4,7 @@ import {
   Client as UTXOClient,
   PreparedTx,
   TxParams,
+  TxSizeConstants,
   UTXO,
   UtxoClientParams,
   UtxoError,
@@ -20,7 +21,6 @@ import {
   DOGEChain,
   DOGE_DECIMAL,
   LOWER_FEE_BOUND,
-  MIN_TX_FEE,
   UPPER_FEE_BOUND,
   blockcypherDataProviders,
   blockstreamExplorerProviders,
@@ -167,24 +167,13 @@ abstract class Client extends UTXOClient {
     return Dogecoin.script.compile([Dogecoin.opcodes.OP_RETURN, data])
   }
 
-  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-    const inputSizeBasedOnInputs =
-      inputs.length > 0
-        ? inputs.reduce((a) => a + Utils.inputBytes(), 0) + inputs.length // +1 byte for each input signature
-        : 0
-    let sum =
-      Utils.TX_EMPTY_SIZE +
-      inputSizeBasedOnInputs +
-      Utils.TX_OUTPUT_BASE +
-      Utils.TX_OUTPUT_PUBKEYHASH +
-      Utils.TX_OUTPUT_BASE +
-      Utils.TX_OUTPUT_PUBKEYHASH
+  protected getTxSizeConstants(): TxSizeConstants {
+    return { BASE_TX_SIZE: 10, BYTES_PER_INPUT: 148, BYTES_PER_OUTPUT: 34 }
+  }
 
-    if (data) {
-      sum += Utils.TX_OUTPUT_BASE + data.length
-    }
-    const fee = sum * feeRate
-    return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
+  /** Dogecoin soft dust limit: 0.01 DOGE (the hard limit is 0.001 DOGE). */
+  protected getDustThreshold(): number {
+    return 1000000
   }
 
   /**
@@ -226,14 +215,13 @@ abstract class Client extends UTXOClient {
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
-      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
-
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
         Math.ceil(feeRate),
-        extraOutputs,
+        0,
         utxoSelectionPreferences,
+        this.getSendSizes(recipient, compiledMemo?.length),
       )
 
       const psbt = new Dogecoin.Psbt({ network: Utils.dogeNetwork(this.network) })
@@ -349,9 +337,15 @@ abstract class Client extends UTXOClient {
         const confirmedOnly = !spendPendingUTXO
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
-      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
-
       const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      const maxCalc = this.calculateMaxSendableAmount(
+        utxos,
+        Math.ceil(feeRate),
+        compiledMemo?.length ?? 0,
+        utxoSelectionPreferences,
+        recipient,
+      )
       const psbt = new Dogecoin.Psbt({ network: Utils.dogeNetwork(this.network) })
       psbt.setMaximumFeeRate(7500000)
 

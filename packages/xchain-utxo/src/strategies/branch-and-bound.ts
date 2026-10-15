@@ -1,5 +1,6 @@
 import { UTXO } from '../types'
-import { DUST_THRESHOLD, TX_SIZE_CONSTANTS } from '../constants'
+import { DUST_THRESHOLD, TX_SIZE_CONSTANTS, TxSizeConstants } from '../constants'
+import { calculateTxFee } from '../fee'
 import { UtxoSelectionStrategy, UtxoSelectionResult } from './types'
 
 /**
@@ -9,20 +10,23 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
   name = 'BranchAndBound'
 
   private static readonly MAX_TRIES = 100000
-  private static readonly DUST_THRESHOLD = DUST_THRESHOLD
-  private static readonly BYTES_PER_INPUT = TX_SIZE_CONSTANTS.BYTES_PER_INPUT
-  private static readonly BYTES_PER_OUTPUT = TX_SIZE_CONSTANTS.BYTES_PER_OUTPUT
-  private static readonly BASE_TX_SIZE = TX_SIZE_CONSTANTS.BASE_TX_SIZE
 
-  select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
+  select(
+    utxos: UTXO[],
+    targetValue: number,
+    feeRate: number,
+    extraOutputs: number = 1,
+    sizes: TxSizeConstants = TX_SIZE_CONSTANTS,
+    dustThreshold: number = DUST_THRESHOLD,
+  ): UtxoSelectionResult | null {
     // Descending value improves branch-and-bound pruning
     const sortedUtxos = [...utxos].sort((a, b) => b.value - a.value)
 
     // Pass targetValue, not target+fee, so the fee is not counted twice
-    const exactResult = this.findExactMatch(sortedUtxos, targetValue, feeRate, extraOutputs)
+    const exactResult = this.findExactMatch(sortedUtxos, targetValue, feeRate, extraOutputs, sizes, dustThreshold)
     if (exactResult) return exactResult
 
-    return this.branchAndBound(sortedUtxos, targetValue, feeRate, extraOutputs)
+    return this.branchAndBound(sortedUtxos, targetValue, feeRate, extraOutputs, sizes, dustThreshold)
   }
 
   private findExactMatch(
@@ -30,9 +34,11 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     targetValue: number,
     feeRate: number,
     extraOutputs: number,
+    sizes: TxSizeConstants,
+    dustThreshold: number,
   ): UtxoSelectionResult | null {
     // Single input, no change output
-    const singleInputFee = this.calculateFee(1, extraOutputs, feeRate)
+    const singleInputFee = calculateTxFee(1, extraOutputs, feeRate, sizes)
     const requiredWithFee = targetValue + singleInputFee
 
     const sortedByExactness = [...utxos].sort((a, b) => {
@@ -45,7 +51,7 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
       const change = utxo.value - requiredWithFee
 
       // Change at or below dust is absorbed into the fee
-      if (change >= 0 && change <= BranchAndBoundStrategy.DUST_THRESHOLD) {
+      if (change >= 0 && change <= dustThreshold) {
         return {
           inputs: [utxo],
           changeAmount: 0,
@@ -56,11 +62,11 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
       }
 
       // Skip a change output that is more than 10% of the target
-      if (change > BranchAndBoundStrategy.DUST_THRESHOLD && change < targetValue * 0.1) {
-        const feeWithChange = this.calculateFee(1, extraOutputs + 1, feeRate)
+      if (change > dustThreshold && change < targetValue * 0.1) {
+        const feeWithChange = calculateTxFee(1, extraOutputs + 1, feeRate, sizes)
         const finalChange = utxo.value - targetValue - feeWithChange
 
-        if (finalChange > BranchAndBoundStrategy.DUST_THRESHOLD) {
+        if (finalChange > dustThreshold) {
           return {
             inputs: [utxo],
             changeAmount: finalChange,
@@ -80,6 +86,8 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     targetValue: number,
     feeRate: number,
     extraOutputs: number,
+    sizes: TxSizeConstants,
+    dustThreshold: number,
   ): UtxoSelectionResult | null {
     const target = targetValue
     let bestResult: UtxoSelectionResult | null = null
@@ -91,27 +99,25 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
       const inputCount = currentInputs.length
       const outputCount =
         extraOutputs +
-        (currentValue >
-        target + this.calculateFee(inputCount, extraOutputs, feeRate) + BranchAndBoundStrategy.DUST_THRESHOLD
-          ? 1
-          : 0)
-      const fee = this.calculateFee(inputCount, outputCount, feeRate)
+        (currentValue > target + calculateTxFee(inputCount, extraOutputs, feeRate, sizes) + dustThreshold ? 1 : 0)
+      const fee = calculateTxFee(inputCount, outputCount, feeRate, sizes)
       const required = target + fee
 
       if (currentValue >= required) {
         const change = currentValue - required
-        const finalFee = change > BranchAndBoundStrategy.DUST_THRESHOLD ? fee : fee + change
+        const finalFee = change > dustThreshold ? fee : fee + change
 
         const result: UtxoSelectionResult = {
           inputs: [...currentInputs],
-          changeAmount: change > BranchAndBoundStrategy.DUST_THRESHOLD ? change : 0,
+          changeAmount: change > dustThreshold ? change : 0,
           fee: finalFee,
           efficiency: this.calculateEfficiency(
             currentInputs,
             target,
             finalFee,
             change,
-            change <= BranchAndBoundStrategy.DUST_THRESHOLD,
+            dustThreshold,
+            change <= dustThreshold,
           ),
           strategy: this.name,
         }
@@ -146,19 +152,12 @@ export class BranchAndBoundStrategy implements UtxoSelectionStrategy {
     target: number,
     fee: number,
     change: number,
+    dustThreshold: number,
     changeAbsorbed: boolean = false,
   ): number {
     const totalValue = inputs.reduce((sum, utxo) => sum + utxo.value, 0)
-    const wastedValue = changeAbsorbed ? 0 : change > BranchAndBoundStrategy.DUST_THRESHOLD ? 0 : change
+    const wastedValue = changeAbsorbed ? 0 : change > dustThreshold ? 0 : change
     const efficiency = target / (totalValue + fee + wastedValue)
     return Math.min(1, efficiency)
-  }
-
-  private calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
-    const txSize =
-      BranchAndBoundStrategy.BASE_TX_SIZE +
-      inputCount * BranchAndBoundStrategy.BYTES_PER_INPUT +
-      outputCount * BranchAndBoundStrategy.BYTES_PER_OUTPUT
-    return Math.ceil(txSize * feeRate)
   }
 }

@@ -38,13 +38,35 @@ class ClientLedger extends Client {
     return result.bitcoinAddress
   }
 
-  async transfer(params: TxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+  async transfer(
+    params: TxParams & {
+      feeRate?: FeeRate
+      utxoSelectionPreferences?: UtxoSelectionPreferences
+      selectedUtxos?: UTXO[]
+    },
+  ): Promise<TxHash> {
     const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0
     const feeRate = params.feeRate || (await this.getFeeRates())[FeeOption.Fast]
     checkFeeBounds(this.feeBounds, feeRate)
     const sender = await this.getAddressAsync(fromAddressIndex)
-    const { rawUnsignedTx, inputs } = await this.prepareTx({ ...params, sender, feeRate })
+
+    const defaults = {
+      minimizeFee: true,
+      avoidDust: true,
+      minimizeInputs: false,
+    }
+    const mergedUtxoSelectionPreferences = {
+      ...defaults,
+      ...params.utxoSelectionPreferences,
+    }
+
+    const { rawUnsignedTx, inputs } = await this.prepareTxEnhanced({
+      ...params,
+      sender,
+      feeRate,
+      utxoSelectionPreferences: mergedUtxoSelectionPreferences,
+    })
 
     const ledgerInputs: Array<[Transaction, number, string | null, number | null]> = inputs.map(
       ({ txHex, hash, index }) => {

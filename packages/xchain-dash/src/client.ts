@@ -5,6 +5,7 @@ import {
   Client as UTXOClient,
   PreparedTx,
   TxParams,
+  TxSizeConstants,
   UTXO,
   UtxoClientParams,
   UtxoError,
@@ -104,35 +105,16 @@ abstract class Client extends UTXOClient {
     return { rawUnsignedTx: tx.toString(), utxos, inputs }
   }
   protected compileMemo(memo: string): Buffer {
-    return dashcore.Script.buildDataOut(memo)
+    return dashcore.Script.buildDataOut(memo).toBuffer()
   }
 
-  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-    let sum =
-      Utils.TransactionBytes.Version +
-      Utils.TransactionBytes.Type +
-      Utils.TransactionBytes.InputCount +
-      inputs.length *
-        (Utils.TransactionBytes.InputPrevOutputHash +
-          Utils.TransactionBytes.InputPrevOutputIndex +
-          Utils.TransactionBytes.InputScriptLength +
-          Utils.TransactionBytes.InputPubkeyHash +
-          Utils.TransactionBytes.InputSequence) +
-      Utils.TransactionBytes.OutputCount +
-      2 *
-        (Utils.TransactionBytes.OutputValue +
-          Utils.TransactionBytes.OutputScriptLength +
-          Utils.TransactionBytes.OutputPubkeyHash) +
-      Utils.TransactionBytes.LockTime
-    if (data) {
-      sum +=
-        Utils.TransactionBytes.OutputValue +
-        Utils.TransactionBytes.OutputScriptLength +
-        Utils.TransactionBytes.OutputOpReturn +
-        data.length
-    }
-    const fee = sum * feeRate
-    return fee > Utils.TX_MIN_FEE ? fee : Utils.TX_MIN_FEE
+  /** dashcore's `Transaction.DUST_AMOUNT`: change at or below it is added to the fee. */
+  protected getDustThreshold(): number {
+    return 5460
+  }
+
+  protected getTxSizeConstants(): TxSizeConstants {
+    return { BASE_TX_SIZE: 10, BYTES_PER_INPUT: 148, BYTES_PER_OUTPUT: 34 }
   }
 
   private getUtxoScriptHex(utxo: UTXO): string {
@@ -180,16 +162,17 @@ abstract class Client extends UTXOClient {
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
-      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
 
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
         Math.ceil(feeRate),
-        extraOutputs,
+        0,
         utxoSelectionPreferences,
+        this.getSendSizes(recipient, compiledMemo?.length),
       )
 
+      // Outputs come from the selection, so the fee is the implicit `inputs - outputs` = the selector fee
       const tx = new dashcore.Transaction().to(recipient, targetValue)
 
       for (const utxo of selectionResult.inputs) {
@@ -207,8 +190,9 @@ abstract class Client extends UTXOClient {
         tx.uncheckedAddInput(input)
       }
 
-      const senderAddress = dashcore.Address.fromString(sender, this.network)
-      tx.change(senderAddress)
+      if (selectionResult.changeAmount > 0) {
+        tx.to(dashcore.Address.fromString(sender, this.network), selectionResult.changeAmount)
+      }
 
       if (memo) {
         tx.addData(memo)
@@ -258,7 +242,15 @@ abstract class Client extends UTXOClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
+      const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      const maxCalc = this.calculateMaxSendableAmount(
+        utxos,
+        Math.ceil(feeRate),
+        compiledMemo?.length ?? 0,
+        utxoSelectionPreferences,
+        recipient,
+      )
 
       const tx = new dashcore.Transaction().to(recipient, maxCalc.amount)
 

@@ -1,5 +1,6 @@
 import { UTXO } from '../types'
-import { DUST_THRESHOLD, TX_SIZE_CONSTANTS } from '../constants'
+import { DUST_THRESHOLD, TX_SIZE_CONSTANTS, TxSizeConstants } from '../constants'
+import { calculateTxFee } from '../fee'
 import { UtxoSelectionStrategy, UtxoSelectionResult } from './types'
 
 /**
@@ -8,12 +9,14 @@ import { UtxoSelectionStrategy, UtxoSelectionResult } from './types'
 export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
   name = 'SingleRandomDraw'
 
-  private static readonly DUST_THRESHOLD = DUST_THRESHOLD
-  private static readonly BYTES_PER_INPUT = TX_SIZE_CONSTANTS.BYTES_PER_INPUT
-  private static readonly BYTES_PER_OUTPUT = TX_SIZE_CONSTANTS.BYTES_PER_OUTPUT
-  private static readonly BASE_TX_SIZE = TX_SIZE_CONSTANTS.BASE_TX_SIZE
-
-  select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
+  select(
+    utxos: UTXO[],
+    targetValue: number,
+    feeRate: number,
+    extraOutputs: number = 1,
+    sizes: TxSizeConstants = TX_SIZE_CONSTANTS,
+    dustThreshold: number = DUST_THRESHOLD,
+  ): UtxoSelectionResult | null {
     // Fisher-Yates shuffle for unbiased randomness
     const shuffledUtxos = [...utxos]
     for (let i = shuffledUtxos.length - 1; i > 0; i--) {
@@ -23,20 +26,20 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
 
     for (const utxo of shuffledUtxos) {
       // Fee with no change output
-      const feeNoChange = this.calculateFee(1, extraOutputs, feeRate)
+      const feeNoChange = calculateTxFee(1, extraOutputs, feeRate, sizes)
       const requiredNoChange = targetValue + feeNoChange
 
       if (utxo.value >= requiredNoChange) {
         const potentialChange = utxo.value - requiredNoChange
 
-        if (potentialChange > SingleRandomDrawStrategy.DUST_THRESHOLD) {
+        if (potentialChange > dustThreshold) {
           // Adding a change output increases the fee
-          const feeWithChange = this.calculateFee(1, extraOutputs + 1, feeRate)
+          const feeWithChange = calculateTxFee(1, extraOutputs + 1, feeRate, sizes)
           const requiredWithChange = targetValue + feeWithChange
           const actualChange = utxo.value - requiredWithChange
 
           // Fee grew, so change may have dropped to dust
-          if (actualChange > SingleRandomDrawStrategy.DUST_THRESHOLD) {
+          if (actualChange > dustThreshold) {
             return {
               inputs: [utxo],
               changeAmount: actualChange,
@@ -59,13 +62,5 @@ export class SingleRandomDrawStrategy implements UtxoSelectionStrategy {
     }
 
     return null
-  }
-
-  private calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
-    const txSize =
-      SingleRandomDrawStrategy.BASE_TX_SIZE +
-      inputCount * SingleRandomDrawStrategy.BYTES_PER_INPUT +
-      outputCount * SingleRandomDrawStrategy.BYTES_PER_OUTPUT
-    return Math.ceil(txSize * feeRate)
   }
 }

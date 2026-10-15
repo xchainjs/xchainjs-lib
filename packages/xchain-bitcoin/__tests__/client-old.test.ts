@@ -11,7 +11,6 @@ import {
   AssetBTC,
   BitgoProviders,
   LOWER_FEE_BOUND,
-  MIN_TX_FEE,
   SochainDataProviders,
   UPPER_FEE_BOUND,
   blockstreamExplorerProviders,
@@ -292,41 +291,29 @@ describe('BitcoinClient Test', () => {
     btcClient.setPhrase(phraseOne)
     // Estimate without provider request
     const estimates = await btcClient.getFees()
-    expect(estimates.fast.amount().toString()).toEqual('3588')
-    expect(estimates.fastest.amount().toString()).toEqual('17940')
-    expect(estimates.average.amount().toString()).toEqual('1794')
+    // 141 vbytes (one P2WPKH input, recipient and change) × rates 46 / 230 / 23
+    expect(estimates.fast.amount().toString()).toEqual('6486')
+    expect(estimates.fastest.amount().toString()).toEqual('32430')
+    expect(estimates.average.amount().toString()).toEqual('3243')
     // Estimate with max preccission
     const estimatesWithSender = await btcClient.getFees({
       sender: await btcClient.getAddressAsync(0),
     })
-    expect(estimatesWithSender.fast.amount().toString()).toEqual('9476')
-    expect(estimatesWithSender.fastest.amount().toString()).toEqual('47380')
-    expect(estimatesWithSender.average.amount().toString()).toEqual('4738')
+    // 209 vbytes (two P2WPKH inputs, recipient and change)
+    expect(estimatesWithSender.fast.amount().toString()).toEqual('9614')
+    expect(estimatesWithSender.fastest.amount().toString()).toEqual('48070')
+    expect(estimatesWithSender.average.amount().toString()).toEqual('4807')
   })
 
-  it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
+  it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
     btcClient.setNetwork(Network.Testnet)
     btcClient.setPhrase(phraseOne)
     const normalTx = await btcClient.getFees()
     const vaultTx = await btcClient.getFees({ memo: MEMO })
 
-    if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
-      expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
-    } else {
-      expect(vaultTx.average.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
-    }
-
-    if (vaultTx.fast.amount().isGreaterThan(MIN_TX_FEE)) {
-      expect(vaultTx.fast.amount().isGreaterThan(normalTx.fast.amount())).toBeTruthy()
-    } else {
-      expect(vaultTx.fast.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
-    }
-
-    if (vaultTx.fastest.amount().isGreaterThan(MIN_TX_FEE)) {
-      expect(vaultTx.fastest.amount().isGreaterThan(normalTx.fastest.amount())).toBeTruthy()
-    } else {
-      expect(vaultTx.fastest.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
-    }
+    expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
+    expect(vaultTx.fast.amount().isGreaterThan(normalTx.fast.amount())).toBeTruthy()
+    expect(vaultTx.fastest.amount().isGreaterThan(normalTx.fastest.amount())).toBeTruthy()
   })
 
   it('returns different fee rates for a normal tx', async () => {
