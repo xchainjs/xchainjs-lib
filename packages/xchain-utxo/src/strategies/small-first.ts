@@ -1,5 +1,6 @@
 import { UTXO } from '../types'
-import { DUST_THRESHOLD, TX_SIZE_CONSTANTS } from '../constants'
+import { DUST_THRESHOLD, TX_SIZE_CONSTANTS, TxSizeConstants } from '../constants'
+import { calculateTxFee } from '../fee'
 import { UtxoSelectionStrategy, UtxoSelectionResult } from './types'
 
 /**
@@ -8,12 +9,14 @@ import { UtxoSelectionStrategy, UtxoSelectionResult } from './types'
 export class SmallFirstStrategy implements UtxoSelectionStrategy {
   name = 'SmallFirst'
 
-  private static readonly DUST_THRESHOLD = DUST_THRESHOLD
-  private static readonly BYTES_PER_INPUT = TX_SIZE_CONSTANTS.BYTES_PER_INPUT
-  private static readonly BYTES_PER_OUTPUT = TX_SIZE_CONSTANTS.BYTES_PER_OUTPUT
-  private static readonly BASE_TX_SIZE = TX_SIZE_CONSTANTS.BASE_TX_SIZE
-
-  select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs: number = 1): UtxoSelectionResult | null {
+  select(
+    utxos: UTXO[],
+    targetValue: number,
+    feeRate: number,
+    extraOutputs: number = 1,
+    sizes: TxSizeConstants = TX_SIZE_CONSTANTS,
+    dustThreshold: number = DUST_THRESHOLD,
+  ): UtxoSelectionResult | null {
     const sortedUtxos = [...utxos].sort((a, b) => a.value - b.value)
 
     const selectedInputs: UTXO[] = []
@@ -23,34 +26,33 @@ export class SmallFirstStrategy implements UtxoSelectionStrategy {
       selectedInputs.push(utxo)
       currentValue += utxo.value
 
-      const fee = this.calculateFee(selectedInputs.length, extraOutputs + 1, feeRate) // assume a change output
-      const required = targetValue + fee
+      const feeNoChange = calculateTxFee(selectedInputs.length, extraOutputs, feeRate, sizes)
+      if (currentValue < targetValue + feeNoChange) continue
 
-      if (currentValue >= required) {
-        const change = currentValue - required
-        const hasChange = change > SmallFirstStrategy.DUST_THRESHOLD
-        const finalOutputs = hasChange ? extraOutputs + 1 : extraOutputs
-        const finalFee = this.calculateFee(selectedInputs.length, finalOutputs, feeRate)
-        const finalChange = currentValue - targetValue - finalFee
+      // Change is kept only if it is still above dust once the change output is priced
+      const feeWithChange = calculateTxFee(selectedInputs.length, extraOutputs + 1, feeRate, sizes)
+      const change = currentValue - targetValue - feeWithChange
 
+      if (change > dustThreshold) {
         return {
           inputs: [...selectedInputs],
-          changeAmount: finalChange > SmallFirstStrategy.DUST_THRESHOLD ? finalChange : 0,
-          fee: finalChange > SmallFirstStrategy.DUST_THRESHOLD ? finalFee : finalFee + finalChange,
-          efficiency: targetValue / (currentValue + finalFee),
+          changeAmount: change,
+          fee: feeWithChange,
+          efficiency: targetValue / (currentValue + feeWithChange),
           strategy: this.name,
         }
+      }
+
+      // Dust change is not an output; it is added to the fee
+      return {
+        inputs: [...selectedInputs],
+        changeAmount: 0,
+        fee: currentValue - targetValue,
+        efficiency: targetValue / (currentValue + feeNoChange),
+        strategy: this.name,
       }
     }
 
     return null
-  }
-
-  private calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
-    const txSize =
-      SmallFirstStrategy.BASE_TX_SIZE +
-      inputCount * SmallFirstStrategy.BYTES_PER_INPUT +
-      outputCount * SmallFirstStrategy.BYTES_PER_OUTPUT
-    return Math.ceil(txSize * feeRate)
   }
 }

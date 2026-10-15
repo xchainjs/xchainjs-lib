@@ -215,12 +215,13 @@ export class Wallet {
       return client.estimateGasPrices(protocol)
     }
     if (this.isUtxoClient(client)) {
+      // Round up: `baseAmount` rounds half-up, which would pay less than the requested rate
       const feeRates = await client.getFeeRates(protocol)
       const nativeDecimals = client.getAssetInfo().decimal
       return {
-        [FeeOption.Average]: baseAmount(feeRates[FeeOption.Average], nativeDecimals),
-        [FeeOption.Fast]: baseAmount(feeRates[FeeOption.Fast], nativeDecimals),
-        [FeeOption.Fastest]: baseAmount(feeRates[FeeOption.Fastest], nativeDecimals),
+        [FeeOption.Average]: baseAmount(Math.ceil(feeRates[FeeOption.Average]), nativeDecimals),
+        [FeeOption.Fast]: baseAmount(Math.ceil(feeRates[FeeOption.Fast]), nativeDecimals),
+        [FeeOption.Fastest]: baseAmount(Math.ceil(feeRates[FeeOption.Fastest]), nativeDecimals),
       }
     }
     throw Error(`getFeeRates method not supported in ${chain} chain`)
@@ -236,12 +237,7 @@ export class Wallet {
     }
     if (this.isUtxoClient(client)) {
       if (!this.isUtxoTxParams(params)) throw Error(`Invalid params for estimating ${params.asset.chain} transfer`)
-      let sender: Address | undefined
-      try {
-        sender = await this.getAddress(params.asset.chain)
-      } catch {
-        /* Empty */
-      }
+      const sender = await client.getAddressAsync(params.walletIndex)
       return client.getFees({ sender, memo: params.memo })
     }
     return client.getFees()

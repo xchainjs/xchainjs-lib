@@ -241,16 +241,17 @@ describe('BCHClient Test', () => {
     bchClient.setPhrase(phrase)
 
     const estimates = await bchClient.getFees()
-    expect(estimates.fast.amount().toString()).toEqual('234')
-    expect(estimates.fastest.amount().toString()).toEqual('1170')
-    expect(estimates.average.amount().toString()).toEqual('117')
+    // 226 vbytes (one P2PKH input, recipient and change) × rates 3 / 15 / ceil(1.5)
+    expect(estimates.fast.amount().toString()).toEqual('678')
+    expect(estimates.fastest.amount().toString()).toEqual('3390')
+    expect(estimates.average.amount().toString()).toEqual('452')
 
     const estimatesWithSender = await bchClient.getFees({
       sender: await bchClient.getAddressAsync(0),
     })
     expect(estimatesWithSender.fast.amount().toString()).toEqual('678')
     expect(estimatesWithSender.fastest.amount().toString()).toEqual('3390')
-    expect(estimatesWithSender.average.amount().toString()).toEqual('339')
+    expect(estimatesWithSender.average.amount().toString()).toEqual('452')
   })
 
   it('returns different fee rates for a normal tx', async () => {
