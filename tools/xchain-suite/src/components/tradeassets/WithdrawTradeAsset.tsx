@@ -24,6 +24,7 @@ const TRADE_ASSETS = [
   { chain: 'LTC', symbol: 'LTC', tradeSymbol: 'LTC~LTC', decimals: 8 },
   { chain: 'DOGE', symbol: 'DOGE', tradeSymbol: 'DOGE~DOGE', decimals: 8 },
   { chain: 'GAIA', symbol: 'ATOM', tradeSymbol: 'GAIA~ATOM', decimals: 8 },
+  { chain: 'BASE', symbol: 'ETH', tradeSymbol: 'BASE~ETH', decimals: 8 },
 ]
 
 interface WithdrawResult {
@@ -41,6 +42,13 @@ export function WithdrawTradeAsset({ thorchainAmm, mayachainAmm, wallet }: Withd
 
   const amm = protocol === 'thorchain' ? thorchainAmm : mayachainAmm
   const protocolPrefix = protocol === 'thorchain' ? 'THOR' : 'MAYA'
+  const visibleTradeAssets = TRADE_ASSETS.filter((asset) => protocol === 'thorchain' || asset.chain !== 'BASE')
+
+  useEffect(() => {
+    if (protocol === 'mayachain' && selectedAsset.chain === 'BASE') {
+      setSelectedAsset(TRADE_ASSETS[0])
+    }
+  }, [protocol, selectedAsset.chain])
 
   const fetchBalance = useCallback(async () => {
     if (!wallet || !amm) return
@@ -181,7 +189,7 @@ console.log('Withdraw TX:', result.hash)`
               }}
               className="appearance-none pl-10 pr-8 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer hover:border-gray-300 dark:hover:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             >
-              {TRADE_ASSETS.map((asset) => (
+              {visibleTradeAssets.map((asset) => (
                 <option key={asset.tradeSymbol} value={asset.tradeSymbol}>
                   {asset.tradeSymbol}
                 </option>

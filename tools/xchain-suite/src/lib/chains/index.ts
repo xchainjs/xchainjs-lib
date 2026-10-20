@@ -19,6 +19,7 @@ const ALL_SUPPORTED_CHAINS: ChainConfig[] = [
   { id: 'AVAX', name: 'Avalanche', symbol: 'AVAX', category: 'evm', decimals: 18 },
   { id: 'BSC', name: 'BNB Smart Chain', symbol: 'BNB', category: 'evm', decimals: 18 },
   { id: 'ARB', name: 'Arbitrum', symbol: 'ETH', category: 'evm', decimals: 18 },
+  { id: 'BASE', name: 'Base', symbol: 'ETH', category: 'evm', decimals: 18 },
   { id: 'GAIA', name: 'Cosmos Hub', symbol: 'ATOM', category: 'cosmos', decimals: 6 },
   { id: 'THOR', name: 'THORChain', symbol: 'RUNE', category: 'cosmos', decimals: 8 },
   { id: 'MAYA', name: 'Maya Protocol', symbol: 'CACAO', category: 'cosmos', decimals: 10 },
@@ -39,6 +40,12 @@ export const SUPPORTED_CHAINS: ChainConfig[] = isMoneroDisabled()
   : ALL_SUPPORTED_CHAINS
 
 export const getChainById = (id: string): ChainConfig | undefined => SUPPORTED_CHAINS.find((c) => c.id === id)
+
+/** THORChain pool id for the chain gas asset, e.g. BASE → BASE.ETH, BSC → BSC.BNB. */
+export const nativePoolId = (chainId: string): string => {
+  const chain = getChainById(chainId)
+  return `${chainId}.${chain?.symbol ?? chainId}`
+}
 
 export const getChainsByCategory = (category: ChainCategory): ChainConfig[] =>
   SUPPORTED_CHAINS.filter((c) => c.category === category)

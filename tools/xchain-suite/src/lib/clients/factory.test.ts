@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest'
 import { createClient } from './factory'
 import { Network } from '@xchainjs/xchain-client'
@@ -15,6 +16,14 @@ describe('Client Factory', () => {
   it('should create ETH client', () => {
     const client = createClient('ETH', { phrase: TEST_PHRASE, network: Network.Mainnet })
     expect(client).toBeDefined()
+  })
+
+  it('should create BASE client', async () => {
+    const client = createClient('BASE', { phrase: TEST_PHRASE, network: Network.Mainnet })
+    expect(client).toBeDefined()
+    const address = await client.getAddressAsync(0)
+    expect(address.startsWith('0x')).toBe(true)
+    expect(address).toHaveLength(42)
   })
 
   it('should create NEAR client with implicit address', async () => {
@@ -68,10 +77,7 @@ describe('Client Factory', () => {
     })
 
     // Index 1 differs: default uses address index; Ledger Live uses account index
-    const [defaultAddr, liveAddr] = await Promise.all([
-      defaultClient.getAddressAsync(1),
-      ledgerLive.getAddressAsync(1),
-    ])
+    const [defaultAddr, liveAddr] = await Promise.all([defaultClient.getAddressAsync(1), ledgerLive.getAddressAsync(1)])
     expect(defaultAddr.toLowerCase()).not.toEqual(liveAddr.toLowerCase())
   })
 
@@ -89,10 +95,7 @@ describe('Client Factory', () => {
       accountIndex: 1,
     })
 
-    const [addr0, addr1] = await Promise.all([
-      account0.getAddressAsync(0),
-      account1.getAddressAsync(0),
-    ])
+    const [addr0, addr1] = await Promise.all([account0.getAddressAsync(0), account1.getAddressAsync(0)])
     expect(addr0).not.toEqual(addr1)
     expect(addr0.startsWith('bc1')).toBe(true)
     expect(addr1.startsWith('bc1')).toBe(true)
@@ -111,10 +114,7 @@ describe('Client Factory', () => {
       customRootPath: "m/84'/0'/5'/0/",
     })
 
-    const [defaultAddr, customAddr] = await Promise.all([
-      defaultAccount.getAddressAsync(0),
-      custom.getAddressAsync(0),
-    ])
+    const [defaultAddr, customAddr] = await Promise.all([defaultAccount.getAddressAsync(0), custom.getAddressAsync(0)])
     expect(customAddr).not.toEqual(defaultAddr)
     expect(customAddr.startsWith('bc1')).toBe(true)
   })
@@ -132,10 +132,7 @@ describe('Client Factory', () => {
       customRootPath: "m/44'/60'/3'/0/",
     })
 
-    const [defaultAddr, customAddr] = await Promise.all([
-      defaultClient.getAddressAsync(0),
-      custom.getAddressAsync(0),
-    ])
+    const [defaultAddr, customAddr] = await Promise.all([defaultClient.getAddressAsync(0), custom.getAddressAsync(0)])
     expect(customAddr.toLowerCase()).not.toEqual(defaultAddr.toLowerCase())
   })
 
@@ -151,17 +148,15 @@ describe('Client Factory', () => {
   })
 
   it('should throw for ledger mode without transport', () => {
-    expect(() =>
-      createClient('BTC', { network: Network.Mainnet, walletType: 'ledger' }),
-    ).toThrow(/transport/i)
+    expect(() => createClient('BTC', { network: Network.Mainnet, walletType: 'ledger' })).toThrow(/transport/i)
   })
 
   it('should throw for unsupported ledger chain', () => {
     // Minimal fake transport — only used to pass the presence check
     const transport = { close: async () => undefined } as never
-    expect(() =>
-      createClient('THOR', { network: Network.Mainnet, walletType: 'ledger', transport }),
-    ).toThrow(/only supported/i)
+    expect(() => createClient('THOR', { network: Network.Mainnet, walletType: 'ledger', transport })).toThrow(
+      /only supported/i,
+    )
   })
 
   it('should throw for unsupported chain', () => {

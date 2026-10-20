@@ -16,7 +16,7 @@ interface FeesResult {
 }
 
 // EVM chains require tx params for fee estimation
-const EVM_CHAINS = ['ETH', 'AVAX', 'BSC', 'ARB']
+const EVM_CHAINS = ['ETH', 'AVAX', 'BSC', 'ARB', 'BASE']
 
 export function GetFees({ chainId, client }: GetFeesProps) {
   const { execute, result, error, loading, duration } = useOperation<FeesResult>()

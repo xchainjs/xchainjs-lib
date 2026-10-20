@@ -12,12 +12,12 @@ interface Props {
 const ASSET_TO_CHAIN: Record<string, string> = {
   BTC: 'BTC', ETH: 'ETH', SOL: 'SOL', AVAX: 'AVAX', DOGE: 'DOGE',
   LTC: 'LTC', BCH: 'BCH', XRP: 'XRP', ADA: 'ADA', BNB: 'BSC',
-  ARB: 'ARB', SUI: 'SUI', GAIA: 'GAIA', THOR: 'THOR', MAYA: 'MAYA',
+  ARB: 'ARB', BASE: 'BASE', SUI: 'SUI', GAIA: 'GAIA', THOR: 'THOR', MAYA: 'MAYA',
   DASH: 'DASH', ZEC: 'ZEC', XMR: 'XMR', NEAR: 'NEAR',
 }
 
 const CANONICAL_SYMBOL: Record<string, string> = {
-  GAIA: 'ATOM', THOR: 'RUNE', MAYA: 'CACAO',
+  GAIA: 'ATOM', THOR: 'RUNE', MAYA: 'CACAO', BASE: 'ETH',
 }
 
 export function AssetBalanceCard({ asset }: Props) {

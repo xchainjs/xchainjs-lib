@@ -179,6 +179,7 @@ export default function SwapPage() {
     AVAX: 0.01,
     BSC: 0.001,
     ARB: 0.0001,
+    BASE: 0.0001,
     GAIA: 0.01,
     THOR: 0.02,
     MAYA: 0.02,

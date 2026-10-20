@@ -15,6 +15,23 @@ describe('AssetSelector', () => {
     expect(onChange).toHaveBeenCalledWith({ chainId: 'ZEC', chainName: 'Zcash', symbol: 'ZEC' })
   })
 
+  it('lists Base ETH and Ripple when those chains are swappable', () => {
+    const onChange = vi.fn()
+    render(<AssetSelector label="From" value={null} onChange={onChange} availableChains={['BASE', 'XRP']} />)
+
+    fireEvent.click(screen.getByText('Select asset...'))
+    fireEvent.change(screen.getByPlaceholderText('Search by name or symbol...'), { target: { value: 'base' } })
+    fireEvent.click(screen.getAllByText('Base')[0])
+
+    expect(onChange).toHaveBeenCalledWith({ chainId: 'BASE', chainName: 'Base', symbol: 'ETH' })
+
+    fireEvent.click(screen.getByText('Select asset...'))
+    fireEvent.change(screen.getByPlaceholderText('Search by name or symbol...'), { target: { value: 'xrp' } })
+    fireEvent.click(screen.getByText('Ripple'))
+
+    expect(onChange).toHaveBeenLastCalledWith({ chainId: 'XRP', chainName: 'Ripple', symbol: 'XRP' })
+  })
+
   it('hides Zcash when ZEC is not a swap chain', () => {
     render(<AssetSelector label="From" value={null} onChange={vi.fn()} availableChains={['BTC']} />)
 

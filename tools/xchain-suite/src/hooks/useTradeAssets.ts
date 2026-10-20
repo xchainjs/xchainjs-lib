@@ -13,6 +13,7 @@ const TRADE_SUPPORTED_CHAINS: string[] = [
   'ETH',
   'AVAX',
   'BSC',
+  'BASE',
   'GAIA',
   'THOR',
   'MAYA',
@@ -59,19 +60,14 @@ export function useTradeAssets(): UseTradeAssetsResult {
       try {
         console.log('[useTradeAssets] Initializing trade assets service...')
 
-        const [
-          { Wallet },
-          { ThorchainAMM },
-          { ThorchainQuery },
-          { MayachainAMM },
-          { MayachainQuery },
-        ] = await Promise.all([
-          import('@xchainjs/xchain-wallet'),
-          import('@xchainjs/xchain-thorchain-amm'),
-          import('@xchainjs/xchain-thorchain-query'),
-          import('@xchainjs/xchain-mayachain-amm'),
-          import('@xchainjs/xchain-mayachain-query'),
-        ])
+        const [{ Wallet }, { ThorchainAMM }, { ThorchainQuery }, { MayachainAMM }, { MayachainQuery }] =
+          await Promise.all([
+            import('@xchainjs/xchain-wallet'),
+            import('@xchainjs/xchain-thorchain-amm'),
+            import('@xchainjs/xchain-thorchain-query'),
+            import('@xchainjs/xchain-mayachain-amm'),
+            import('@xchainjs/xchain-mayachain-query'),
+          ])
 
         if (cancelled) return
 
