@@ -24,11 +24,19 @@ function bestSwap(allQuotes: QuoteSwap[]) {
   return bestQuote
 }
 
+// 1Click quotes use fetch and are not covered by the axios mocks. A live call can hang the 5s test.
+const previousFetch = global.fetch
+
 describe('Aggregator', () => {
   let aggregator: Aggregator
 
   beforeAll(() => {
+    global.fetch = jest.fn(async () => new Response('', { status: 503 })) as unknown as typeof fetch
     aggregator = new Aggregator()
+  })
+
+  afterAll(() => {
+    global.fetch = previousFetch
   })
 
   beforeEach(() => {
