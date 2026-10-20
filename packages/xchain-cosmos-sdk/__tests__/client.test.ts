@@ -334,7 +334,7 @@ describe('CosmosSDKClient mapIndexedTxToTx', () => {
     expect(tx.from[0].amount.amount().toString()).toBe('300')
   })
 
-  it('should throw when no transfer events are found (empty results)', async () => {
+  it('should return the native asset with empty from/to when no transfer events are found', async () => {
     const indexedTx = makeIndexedTx([
       makeTxEvent(),
       // Only non-transfer events
@@ -343,9 +343,11 @@ describe('CosmosSDKClient mapIndexedTxToTx', () => {
 
     mockGetTx.mockResolvedValue(indexedTx)
 
-    await expect(client.getTransactionData('ABCDEF1234567890')).rejects.toThrow(
-      'No transfer events found in tx ABCDEF1234567890',
-    )
+    const tx = await client.getTransactionData('ABCDEF1234567890')
+
+    expect(tx.from).toHaveLength(0)
+    expect(tx.to).toHaveLength(0)
+    expect(tx.asset).toEqual(client.getAssetInfo().asset)
   })
 
   it('should handle multi-denom transfers in a single event', async () => {
