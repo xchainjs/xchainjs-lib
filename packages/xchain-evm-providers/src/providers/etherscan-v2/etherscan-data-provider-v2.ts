@@ -14,7 +14,7 @@ import { AbstractProvider, Contract } from 'ethers'
 
 import { Balance, CompatibleAsset, EvmOnlineDataProvider, Tx, TxsPage } from '../../types'
 
-import erc20ABI from './erc20.json'
+import erc20ABI from '../erc20.json'
 import * as etherscanAPI from './etherscan-api-v2'
 import { ERC20TxV2, GetERC20TxsResponseV2 } from './types-v2'
 

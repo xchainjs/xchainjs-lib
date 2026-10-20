@@ -15,7 +15,7 @@ import BigNumber from 'bignumber.js'
 
 import { Balance, CompatibleAsset, EvmOnlineDataProvider, Tx, TxsPage } from '../../types'
 
-import erc20ABI from './erc20.json'
+import erc20ABI from '../erc20.json'
 import * as etherscanAPI from './etherscan-api'
 import { ERC20Tx, GetERC20TxsResponse } from './types'
 

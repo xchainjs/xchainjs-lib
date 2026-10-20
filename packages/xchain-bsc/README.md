@@ -27,26 +27,28 @@ yarn add @xchainjs/xchain-evm @xchainjs/xchain-client @xchainjs/xchain-crypto @x
 
 This package uses the following service providers:
 
-| Function                  | Service | Notes                                                                            |
-| ------------------------- | ------- | -------------------------------------------------------------------------------- |
-| ETH balances              | BscScan | https://api.bscscan.com/api#accounts (module=`account`, action=`balance`)        |
-| Token balances            | BscScan | https://api.bscscan.com/api#tokens (module=`account`, action=`tokenbalance`)     |
-| ETH transaction history   | BscScan | https://api.bscscan.com/api#accounts (module=`account`, action=`txlistinternal`) |
-| Token transaction history | BscScan | https://api.bscscan.com/api#accounts (module=`account`, action=`tokentx`)        |
-| Explorer                  | BscScan | https://bscscan.com/                                                             |
+| Function                  | Service   | Notes                                                                       |
+| ------------------------- | --------- | --------------------------------------------------------------------------- |
+| BNB balances              | Ankr RPC  | https://rpc.ankr.com/bsc (`ANKR_API_KEY`)                                   |
+| Token balances            | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokenbalance (chainid `56`) |
+| BNB transaction history   | Etherscan | https://docs.etherscan.io/api-reference/endpoint/txlist (chainid `56`)      |
+| Token transaction history | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokentx (chainid `56`)     |
+| Explorer                  | BscScan   | https://bscscan.com/                                                        |
 
-BscScan API rate limits: https://bscscan.com/apis
+History and token balances use Etherscan API v2 (`https://api.etherscan.io/v2`). Etherscan API rate limits: https://docs.etherscan.io/resources/rate-limits
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
 
 ### Enviroment variables
 
 ```sh
-BSCSCAN_API_KEY={YOUR_BSCSCAN_API_KEY}
+ETHERSCAN_API_KEY={YOUR_ETHERSCAN_API_KEY}
+ANKR_API_KEY={YOUR_ANKR_API_KEY}
 ```
 
 Default config can access.
 
 ```sh
-process.env.BSCSCAN_API_KEY
+process.env.ETHERSCAN_API_KEY
+process.env.ANKR_API_KEY
 ```

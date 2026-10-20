@@ -12,23 +12,9 @@ import {
   TokenTransactionInfoV2,
   TransactionHistoryParamV2,
 } from './etherscan-api-types-v2'
-import { validateAddress } from './utils'
+import { filterSelfTxs, validateAddress, validateSymbol } from '../utils'
 
 const getApiKeyQueryParameter = (apiKey?: string): string => (!!apiKey ? `&apiKey=${apiKey}` : '')
-
-export const filterSelfTxs = <T extends { from: string; to: string; hash: string }>(txs: T[]): T[] => {
-  const filterTxs = txs.filter((tx) => tx.from !== tx.to)
-  let selfTxs = txs.filter((tx) => tx.from === tx.to)
-  while (selfTxs.length) {
-    const selfTx = selfTxs[0]
-    filterTxs.push(selfTx)
-    selfTxs = selfTxs.filter((tx) => tx.hash !== selfTx.hash)
-  }
-
-  return filterTxs
-}
-
-export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
 
 export const getTxFromEthTransaction = (tx: ETHTransactionInfoV2, gasAsset: Asset, decimals: number): Tx => {
   return {

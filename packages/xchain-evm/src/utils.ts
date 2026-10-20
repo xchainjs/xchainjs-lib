@@ -23,8 +23,6 @@ export const getTokenAddress = (asset: TokenAsset): Address | null => {
   }
 }
 
-export const validateSymbol = (symbol?: string | null): boolean => (symbol ? symbol.length >= 3 : false)
-
 export const getFee = ({
   gasPrice,
   gasLimit,
@@ -36,18 +34,6 @@ export const getFee = ({
 }): BaseAmount => baseAmount(gasPrice.amount().multipliedBy(gasLimit.toString()), decimals)
 
 export const getPrefix = () => '0x'
-
-export const filterSelfTxs = <T extends { from: string; to: string; hash: string }>(txs: T[]): T[] => {
-  const filterTxs = txs.filter((tx) => tx.from !== tx.to)
-  let selfTxs = txs.filter((tx) => tx.from === tx.to)
-  while (selfTxs.length) {
-    const selfTx = selfTxs[0]
-    filterTxs.push(selfTx)
-    selfTxs = selfTxs.filter((tx) => tx.hash !== selfTx.hash)
-  }
-
-  return filterTxs
-}
 
 /**
  * If amount is omitted, returns `MAX_APPROVAL`.
@@ -95,18 +81,6 @@ export const call = async <T>({
     contract = contract.connect(signer)
   }
   return contract.getFunction(funcName)(...funcParams)
-}
-
-export const getContract = async ({
-  provider,
-  contractAddress,
-  abi,
-}: {
-  provider: Provider
-  contractAddress: Address
-  abi: InterfaceAbi
-}): Promise<Contract> => {
-  return new Contract(contractAddress, abi, provider)
 }
 
 /** Omitted amount approves the unlimited token allowance. */

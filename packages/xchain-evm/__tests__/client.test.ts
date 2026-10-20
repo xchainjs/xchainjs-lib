@@ -34,7 +34,7 @@ const ethersJSProviders = {
 
 const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
   AVALANCHE_TESTNET_ETHERS_PROVIDER,
-  'https://api-testnet.snowtrace.io',
+  'https://api.etherscan.io/v2',
   'fake',
   AVAXChain,
   AssetAVAX,
@@ -42,7 +42,7 @@ const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProvider(
 )
 const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProvider(
   AVALANCHE_MAINNET_ETHERS_PROVIDER,
-  'https://api.snowtrace.io',
+  'https://api.etherscan.io/v2',
   'fake',
   AVAXChain,
   AssetAVAX,
@@ -238,7 +238,7 @@ describe('EVM client', () => {
       await importjson('../__mocks__/responses/inbound_addresses_testnet.json'),
     )
 
-    mock_gas_oracle_custom('https://api-testnet.snowtrace.io', 43113, {
+    mock_gas_oracle_custom('https://api.etherscan.io/v2', 43113, {
       SafeGasPrice: '12.5',
       ProposeGasPrice: '25',
       FastGasPrice: '125',
@@ -441,20 +441,18 @@ describe('EVM client', () => {
       expect(signedTx(signSpy).maxFeePerGas).toBe(2n * 3n + 1_000_000_000n)
     })
 
-    it('does not invent a max fee from the tip when the block has no base fee', async () => {
+    it('rejects a positive priority fee when the block has no base fee', async () => {
       const signSpy = mockTransferDeps(null)
 
-      await avaxClient.transfer({
-        asset: AssetAVAX,
-        amount: baseAmount(1, 18),
-        recipient,
-        maxPriorityFeePerGas: tip,
-      })
-
-      const tx = signedTx(signSpy)
-      // Type 2 reports an unset max fee as 0. It must not be replaced with the tip.
-      expect(tx.maxFeePerGas).toBe(0n)
-      expect(tx.maxPriorityFeePerGas).toBe(1_000_000_000n)
+      await expect(
+        avaxClient.transfer({
+          asset: AssetAVAX,
+          amount: baseAmount(1, 18),
+          recipient,
+          maxPriorityFeePerGas: tip,
+        }),
+      ).rejects.toThrow('maxPriorityFeePerGas requires a block base fee or maxFeePerGas')
+      expect(signSpy).not.toHaveBeenCalled()
     })
   })
 })
