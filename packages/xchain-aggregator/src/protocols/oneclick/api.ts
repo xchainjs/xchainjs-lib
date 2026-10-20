@@ -2,6 +2,9 @@ import { OneClickQuoteRequest, OneClickQuoteResponse, OneClickToken } from './ty
 import { toOneClickAmountString } from './utils'
 
 const BASE_URL = 'https://1click.chaindefuser.com'
+// The quote endpoint can accept the socket and never respond. Without this,
+// Aggregator.estimateSwap waits forever because Promise.allSettled does too.
+const REQUEST_TIMEOUT_MS = 15_000
 
 export class OneClickApi {
   private headers: Record<string, string>
@@ -15,8 +18,16 @@ export class OneClickApi {
     if (referral) this.referral = referral
   }
 
+  private request(url: string, init?: RequestInit): Promise<Response> {
+    return fetch(url, {
+      ...init,
+      headers: this.headers,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
+  }
+
   async getTokens(): Promise<OneClickToken[]> {
-    const resp = await fetch(`${BASE_URL}/v0/tokens`, { headers: this.headers })
+    const resp = await this.request(`${BASE_URL}/v0/tokens`)
     if (!resp.ok) throw new Error(`1Click getTokens failed: ${resp.status}`)
     return resp.json()
   }
@@ -27,9 +38,8 @@ export class OneClickApi {
       amount: toOneClickAmountString(params.amount),
       ...(this.referral ? { referral: this.referral } : {}),
     }
-    const resp = await fetch(`${BASE_URL}/v0/quote`, {
+    const resp = await this.request(`${BASE_URL}/v0/quote`, {
       method: 'POST',
-      headers: this.headers,
       body: JSON.stringify(body),
     })
     if (!resp.ok) throw new Error(await this.failureDetail(resp, `1Click getQuote failed: ${resp.status}`))
@@ -37,9 +47,8 @@ export class OneClickApi {
   }
 
   async submitDeposit(txHash: string, depositAddress: string): Promise<void> {
-    const resp = await fetch(`${BASE_URL}/v0/deposit/submit`, {
+    const resp = await this.request(`${BASE_URL}/v0/deposit/submit`, {
       method: 'POST',
-      headers: this.headers,
       body: JSON.stringify({ txHash, depositAddress }),
     })
     if (!resp.ok) {
