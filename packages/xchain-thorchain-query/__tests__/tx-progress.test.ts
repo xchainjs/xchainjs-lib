@@ -83,6 +83,14 @@ describe('TransactionStage', () => {
     expect(progress.swapInfo?.affliateFee.baseAmount.amount().toString()).toBe('0')
   })
 
+  it('fills swap progress for a limit-swap memo', async () => {
+    const progress = await stageFor(observedTx('=<:BTC.BTC:bc1qdest:100000')).checkTxProgress('hash')
+
+    expect(progress.txType).toBe(TxType.Swap)
+    expect(progress.swapInfo?.status).toBe(SwapStatus.Incomplete)
+    expect(progress.swapInfo?.minimumAmountOut.baseAmount.amount().toString()).toBe('100000')
+  })
+
   it('sums completed outbounds and reports the affiliate fee from basis points', async () => {
     const progress = await stageFor(
       observedTx('=:BTC.BTC:bc1qdest:1000:dx:100', [outTx('4000', 'OUT:one'), outTx('5900', 'OUT:two')]),
@@ -93,6 +101,17 @@ describe('TransactionStage', () => {
     expect(progress.swapInfo?.affliateFee.baseAmount.amount().toString()).toBe('100')
     expect(progress.swapInfo?.minimumAmountOut.baseAmount.amount().toString()).toBe('1000')
     expect(assetToString(progress.swapInfo!.actualAmountOut!.asset)).toBe('BTC.BTC')
+  })
+
+  it('scales an ETH outbound from 1e8 to wei', async () => {
+    const progress = await stageFor(
+      observedTx('=:ETH.ETH:0xdest:100000000:dx:100', [outTx('100000000', 'OUT:one', 'ETH.ETH')]),
+    ).checkTxProgress('hash')
+
+    expect(progress.swapInfo?.actualAmountOut?.baseAmount.decimal).toBe(18)
+    expect(progress.swapInfo?.actualAmountOut?.baseAmount.amount().toString()).toBe('1000000000000000000')
+    expect(progress.swapInfo?.affliateFee.baseAmount.decimal).toBe(18)
+    expect(progress.swapInfo?.affliateFee.baseAmount.amount().toString()).toBe('10101010101010101')
   })
 
   it('marks a refund outbound as refunded', async () => {
@@ -145,5 +164,26 @@ describe('TransactionStage', () => {
 
     expect(progress.withdrawLpInfo?.status).toBe(WithdrawStatus.Complete)
     expect(progress.withdrawLpInfo?.withdrawalAmount.baseAmount.amount().toString()).toBe('5000')
+  })
+
+  it('scales a withdraw outbound from 1e8 to native decimals', async () => {
+    const inbound = observedTx('-:ETH.ETH:1000').tx
+    inbound.status = 'done'
+    const progress = await stageFor(
+      observedTx('-:ETH.ETH:1000', [outTx('100000000', 'OUT:one', 'ETH.ETH')], { tx: inbound }),
+    ).checkTxProgress('hash')
+
+    expect(progress.withdrawLpInfo?.withdrawalAmount.baseAmount.decimal).toBe(18)
+    expect(progress.withdrawLpInfo?.withdrawalAmount.baseAmount.amount().toString()).toBe('1000000000000000000')
+  })
+
+  it('scales a saver withdraw from 1e8 to native decimals', async () => {
+    const progress = await stageFor(
+      observedTx('-:ETH/ETH:1000', [outTx('100000000', 'OUT:one', 'ETH/ETH')]),
+    ).checkTxProgress('hash')
+
+    expect(progress.txType).toBe(TxType.WithdrawSaver)
+    expect(progress.withdrawSaverInfo?.withdrawalAmount.baseAmount.decimal).toBe(18)
+    expect(progress.withdrawSaverInfo?.withdrawalAmount.baseAmount.amount().toString()).toBe('1000000000000000000')
   })
 })

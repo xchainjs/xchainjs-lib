@@ -185,12 +185,13 @@ export class MayachainCache {
       const synthUnits = pool.synth_units || '0'
       const cacao = new BigNumber(pool.balance_cacao || 0)
       const assetBalance = new BigNumber(pool.balance_asset || 0)
+      // balance_asset is 1e8. assetDecimals is native precision and is not the price divisor.
       const assetPrice =
         cacao.isZero() || assetBalance.isZero()
           ? '0'
           : cacao
               .div(new BigNumber(10).pow(CACAO_DECIMAL))
-              .div(assetBalance.div(new BigNumber(10).pow(assetDecimals)))
+              .div(assetBalance.div(new BigNumber(10).pow(8)))
               .toString()
 
       return {

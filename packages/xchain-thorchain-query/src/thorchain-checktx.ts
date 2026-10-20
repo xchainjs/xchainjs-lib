@@ -34,6 +34,7 @@ export const txTypeFromMemo = (memo: string): TxType => {
   const synth = asset.includes('/')
   switch (action) {
     case '=':
+    case '=<':
     case 's':
     case 'swap':
       return TxType.Swap
@@ -257,7 +258,7 @@ export class TransactionStage {
     return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
   }
 
-  // Swap limits in the memo are 1e8, including on chains whose native decimals are not 8.
+  // Memo limits and observed coin amounts are 1e8, including on chains whose native decimals are not 8.
   private async protocolAmount(amount1e8: string, asset: CompatibleAsset): Promise<CryptoAmount<CompatibleAsset>> {
     const protocol = new CryptoAmount(baseAmount(amount1e8, 8), asset)
     if (asset.chain === THORChain) return protocol
@@ -270,7 +271,7 @@ export class TransactionStage {
     const wanted = assetToString(asset).toUpperCase()
     const amounts = txs.flatMap((tx) => tx.coins ?? []).filter((coin) => coin.asset.toUpperCase() === wanted)
     const total = amounts.reduce((sum, coin) => sum.plus(coin.amount), new BigNumber(0))
-    return this.getCryptoAmount(total.toFixed(0), asset)
+    return this.protocolAmount(total.toFixed(0), asset)
   }
 
   // The memo fee field is basis points taken from the output. The outbound is what the user receives.
@@ -377,7 +378,7 @@ export class TransactionStage {
         outboundBlock > currentTCHeight
           ? (outboundBlock - currentTCHeight) * this.chainAttributes[THORChain].avgBlockTimeInSecs
           : 0
-      const withdrawalAmount = await this.getCryptoAmount(outAmount, asset)
+      const withdrawalAmount = await this.protocolAmount(outAmount, asset)
       const withdrawLpInfo: WithdrawInfo = {
         status,
         withdrawalAmount,
@@ -427,7 +428,7 @@ export class TransactionStage {
           : 0
 
       const status = txData.out_txs ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
-      const withdrawalAmount = await this.getCryptoAmount(outAmount, asset)
+      const withdrawalAmount = await this.protocolAmount(outAmount, asset)
       const withdrawSaverInfo: WithdrawSaverInfo = {
         status,
         withdrawalAmount,

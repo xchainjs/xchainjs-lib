@@ -51,7 +51,21 @@ describe('MayachainCache pool conversion', () => {
 
     expect(converted.status).toBe('staged')
     expect(converted.nativeDecimal).toBe('6')
-    // 100 CACAO / 2 ADA
+    // 100 CACAO / 0.02 of 1e8 asset depth
+    expect(converted.assetPrice).toBe('5000')
+  })
+
+  it('prices 1e8 depth when the node reports zero decimals', async () => {
+    const [converted] = await cacheWith([
+      pool({
+        asset: 'ETH.ETH',
+        decimals: 0,
+        balance_cacao: '1000000000000',
+        balance_asset: '200000000',
+      }),
+    ]).getPools()
+
+    expect(converted.nativeDecimal).toBe('0')
     expect(converted.assetPrice).toBe('50')
   })
 

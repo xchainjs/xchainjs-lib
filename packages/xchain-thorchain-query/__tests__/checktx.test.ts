@@ -3,6 +3,7 @@ import { TxType, txTypeFromMemo } from '../src/thorchain-checktx'
 describe('txTypeFromMemo', () => {
   it('classifies a swap from the action field alone', () => {
     expect(txTypeFromMemo('=:BTC.BTC:bc1qaddress')).toBe(TxType.Swap)
+    expect(txTypeFromMemo('=<:BTC.BTC:bc1qaddress:100000')).toBe(TxType.Swap)
     expect(txTypeFromMemo('s:BTC.BTC:bc1qaddress')).toBe(TxType.Swap)
     expect(txTypeFromMemo('swap:BTC.BTC:bc1qaddress')).toBe(TxType.Swap)
     expect(txTypeFromMemo('SWAP:ETH.ETH:0xabc')).toBe(TxType.Swap)
