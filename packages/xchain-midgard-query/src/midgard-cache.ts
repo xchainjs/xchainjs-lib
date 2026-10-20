@@ -4,27 +4,24 @@ import { CachedValue } from '@xchainjs/xchain-util'
 import { Midgard } from './utils/midgard'
 
 const MILLISECOND_CACHE_POOLS = 5000
-const MILLISECOND_CACHE_SAVERS = 5000
 
 const defaultMidgard = new Midgard()
 
 export class MidgardCache {
   readonly midgard: Midgard
   private readonly cachedPools: CachedValue<PoolDetail[]>
-  private readonly cachedSavers: CachedValue<SaverDetails>
 
   constructor(midgard = defaultMidgard) {
     this.midgard = midgard
     this.cachedPools = new CachedValue<PoolDetail[]>(() => this.midgard.getPools(), MILLISECOND_CACHE_POOLS)
-    this.cachedSavers = new CachedValue<SaverDetails>(() => this.midgard.getSavers(''), MILLISECOND_CACHE_SAVERS)
   }
 
   public async getPools(): Promise<PoolDetail[]> {
     return this.cachedPools.getValue()
   }
 
-  // address is a comma-separated list
+  // One cache slot cannot key by address, so a hit would return another member's savers.
   public async getSavers(address: string): Promise<SaverDetails> {
-    return this.cachedSavers.getValue(address)
+    return this.midgard.getSavers(address)
   }
 }

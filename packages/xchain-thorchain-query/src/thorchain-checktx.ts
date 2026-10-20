@@ -23,6 +23,35 @@ export enum TxType {
   Other = 'Other',
   Unknown = 'Unknown',
 }
+
+// The action is the first memo field. Match that whole field. A letter inside another
+// action, such as the "s" in "swap", is not itself an action.
+export const txTypeFromMemo = (memo: string): TxType => {
+  const [operation = '', asset = ''] = memo.split(':')
+  const action = operation.trim().toLowerCase()
+  const synth = asset.includes('/')
+  switch (action) {
+    case '=':
+    case 's':
+    case 'swap':
+      return TxType.Swap
+    case '+':
+    case 'a':
+    case 'add':
+      return synth ? TxType.AddSaver : TxType.AddLP
+    case '-':
+    case 'wd':
+    case 'withdraw':
+      return synth ? TxType.WithdrawSaver : TxType.WithdrawLP
+    case 'refund':
+      return TxType.Refund
+    case 'out':
+    case 'outbound':
+      return TxType.Other
+    default:
+      return TxType.Unknown
+  }
+}
 export enum InboundStatus {
   Observed_Consensus = 'Observed_Consensus',
   Observed_Incomplete = 'Observed_Incomplete',
@@ -229,8 +258,6 @@ export class TransactionStage {
 
     if (txData.tx) {
       const memo = txData.tx.tx.memo ?? ''
-      const parts = memo?.split(`:`)
-      const operation = parts && parts[0] ? parts[0] : ''
       const assetIn = assetFromStringEx(txData.tx.tx.coins?.[0].asset)
       const inboundAmount = txData.tx.tx.coins?.[0].amount
       const fromAddress = txData.tx.tx.from_address ?? 'unknkown'
@@ -241,15 +268,7 @@ export class TransactionStage {
 
       const status = txData.tx.status === 'done' ? InboundStatus.Observed_Consensus : InboundStatus.Observed_Incomplete
 
-      if (operation.match(/swap|s|=/gi)) progress.txType = TxType.Swap
-      if ((operation.match(/add/gi) && parts[1].match(`/`)) || (operation.match(/a|[+]/) && parts[1].match(/[/]/)))
-        progress.txType = TxType.AddSaver
-      if ((operation.match(/add/gi) && parts[1].match(`.`)) || (operation.match(/a|[+]/) && parts[1].match(/[.]/)))
-        progress.txType = TxType.AddLP
-      if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[/]/)) progress.txType = TxType.WithdrawSaver
-      if (operation.match(/withdraw|wd|-/gi) && parts[1].match(/[.]/)) progress.txType = TxType.WithdrawLP
-      if (operation.match(/refund/gi)) progress.txType = TxType.Refund
-      if (operation.match(/out/gi)) progress.txType = TxType.Other
+      progress.txType = txTypeFromMemo(memo)
 
       const amount = await this.getCryptoAmount(inboundAmount, assetIn)
 

@@ -58,8 +58,9 @@ export class MidgardQuery {
 
       'BSC.BNB': 18,
       'BSC.BUSD-0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56': 18,
-      'BSC.USDT-0x55d398326f99059fF775485246999027B3197955': 6,
-      'BSC.USDC-0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d': 6,
+      // Binance-peg USDT and USDC are 18 decimals. THORNode omits decimals on these pools.
+      'BSC.USDT-0x55d398326f99059fF775485246999027B3197955': 18,
+      'BSC.USDC-0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d': 18,
 
       'GAIA.ATOM': 6,
 
@@ -70,16 +71,17 @@ export class MidgardQuery {
       'BASE.USDC-0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913': 6,
 
       'TRON.TRX': 6,
-      'TRON.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
+      'TRON.USDT-TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t': 6,
 
       'XRP.XRP': 6,
 
       'SOL.SOL': 9,
     }
 
-    if (fallbackDecimalMap[assetString]) {
-      return fallbackDecimalMap[assetString]
-    }
+    const known = Object.keys(fallbackDecimalMap).find(
+      (candidate) => candidate.toUpperCase() === assetString.toUpperCase(),
+    )
+    if (known !== undefined) return fallbackDecimalMap[known]
 
     const chainDefaults: Record<string, number> = {
       BTC: 8,
@@ -170,7 +172,7 @@ export class MidgardQuery {
   }
 
   /**
-   * Paginated by 50. address, asset, type, and affiliate are comma-separated; asset also accepts synth, nosynth, norune.
+   * Paginated by 50. address, asset, type, txType, and affiliate are comma-separated; asset also accepts synth, nosynth, norune.
    * timestamp/height are older-than; fromTimestamp/fromHeight are newer-than. limit defaults to 50, offset to 0.
    */
   public async getActions({
@@ -178,6 +180,7 @@ export class MidgardQuery {
     txid,
     asset,
     type,
+    txType,
     affiliate,
     limit,
     offset,
@@ -193,6 +196,7 @@ export class MidgardQuery {
       txid,
       asset,
       type,
+      txType,
       affiliate,
       limit,
       offset,

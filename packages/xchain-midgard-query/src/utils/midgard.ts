@@ -22,9 +22,10 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
     apiRetries: 3,
     midgardBaseUrls: [],
   },
+  // THORChain has no testnet. An empty list fails the lookup instead of requesting a host named deprecated.
   testnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['deprecated'],
+    midgardBaseUrls: [],
   },
 }
 
