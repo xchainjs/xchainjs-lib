@@ -1,5 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Action, PoolDetail, SwapMetadata, Transaction } from '@xchainjs/xchain-mayamidgard'
+import BigNumber from 'bignumber.js'
+import { Action, PoolDetail, SwapMetadata } from '@xchainjs/xchain-mayamidgard'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
   Address,
@@ -314,9 +315,9 @@ export class MayachainQuery {
           if (index === -1) return [...prev, current]
 
           for (let i = 0; i < current.in.length; i++) {
-            prev[index].in[i].coins[0].amount = String(
-              Number(prev[index].in[i].coins[0].amount) + Number(current.in[i].coins[0].amount),
-            )
+            prev[index].in[i].coins[0].amount = new BigNumber(prev[index].in[i].coins[0].amount)
+              .plus(current.in[i].coins[0].amount)
+              .toFixed(0)
           }
           return prev
         }, [] as Action[])
@@ -343,9 +344,20 @@ export class MayachainQuery {
             }
           }
 
-          const transaction: Transaction = action.out
-            .filter((out) => out.coins[0].asset === assetToString(toAsset))
+          const transaction = (action.out ?? [])
+            .filter((out) => out.coins?.[0]?.asset === assetToString(toAsset))
             .sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+
+          // A refund pays the source asset back, so it has no outbound of the destination asset.
+          if (!transaction?.coins?.[0]) {
+            return {
+              date: new Date(Number(action.date) / 10 ** 6),
+              status: 'pending' as const,
+              fromAsset,
+              toAsset,
+              inboundTx,
+            }
+          }
 
           return {
             date: new Date(Number(action.date) / 10 ** 6),

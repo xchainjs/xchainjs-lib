@@ -94,6 +94,12 @@ export class Mayanode {
     affiliate?: string,
     height?: number,
   ): Promise<QuoteSwapResponse> {
+    // BPS without an affiliate name is rejected: the name and bps counts must match.
+    // A name with 0 bps is kept so the affiliate can still be tracked.
+    const affiliateName = affiliate?.trim() ?? ''
+    const quoteAffiliate = affiliateName.length > 0 ? affiliateName : undefined
+    const quoteAffiliateBps = quoteAffiliate !== undefined ? affiliateBps : undefined
+
     for (const api of this.quoteApis) {
       try {
         return (
@@ -108,8 +114,8 @@ export class Mayanode {
             streamingQuantity,
             toleranceBps,
             liquidityToleranceBps,
-            typeof affiliateBps === 'number' ? affiliateBps.toString() : affiliateBps,
-            affiliate,
+            typeof quoteAffiliateBps === 'number' ? quoteAffiliateBps.toString() : quoteAffiliateBps,
+            quoteAffiliate,
           )
         ).data
       } catch (_e) {}

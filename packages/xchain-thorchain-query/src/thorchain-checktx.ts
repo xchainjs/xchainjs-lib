@@ -1,18 +1,20 @@
-import { Saver, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
+import { Saver, Tx, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   Chain,
   CryptoAmount,
   TokenAsset,
   assetFromStringEx,
+  assetToString,
   baseAmount,
   isSynthAsset,
 } from '@xchainjs/xchain-util'
+import BigNumber from 'bignumber.js'
 
 import { DefaultChainAttributes } from './chain-defaults'
 import { ThorchainCache } from './thorchain-cache'
 import { ChainAttributes, CompatibleAsset } from './types'
-import { AssetRuneNative, THORChain, isAssetRuneNative } from './utils'
+import { AssetRuneNative, THORChain, getCryptoAmountWithNotation, isAssetRuneNative } from './utils'
 export enum TxType {
   Swap = 'Swap',
   AddLP = 'AddLP',
@@ -208,40 +210,43 @@ export class TransactionStage {
       const memo = txData.tx.tx.memo ?? ''
       const memoFields = this.parseSwapMemo(memo)
       const assetOut = assetFromStringEx(memoFields.asset.toUpperCase())
-      const swapStatus = txData.out_txs[0].memo?.match('OUT') ? SwapStatus.Complete : SwapStatus.Complete_Refunded
+      const outTxs = txData.out_txs ?? []
+      const outboundTxs = outTxs.filter((tx) => tx.memo?.toUpperCase().includes('OUT'))
+      const refunded = outTxs.some((tx) => tx.memo?.toUpperCase().includes('REFUND'))
+      let swapStatus = SwapStatus.Incomplete
+      if (outboundTxs.length > 0) swapStatus = SwapStatus.Complete
+      else if (refunded) swapStatus = SwapStatus.Complete_Refunded
       const chainHeight = await this.blockHeight(AssetRuneNative)
 
       const outboundHeight = Number(txData.outbound_height ?? txData.finalised_height)
-      const expectedOutBlock = Number(txData.outbound_height ?? txData.finalised_height)
       const expectedOutDate = await this.blockToDate(THORChain, txData, outboundHeight)
       const confirmations = chainHeight > outboundHeight ? chainHeight - outboundHeight : 0
-      const minimumAmountOut = memoFields.limit
-        ? await this.getCryptoAmount(memoFields.limit, assetOut)
-        : await this.getCryptoAmount('0', assetOut)
-
-      const affliateFee = memoFields.affiliateFee
-        ? await this.getCryptoAmount(memoFields.affiliateFee, assetOut)
-        : await this.getCryptoAmount('0', assetOut)
+      const minimumAmountOut = await this.protocolAmount(memoFields.limit ?? '0', assetOut)
+      const actualAmountOut = outboundTxs.length > 0 ? await this.outboundTotal(outboundTxs, assetOut) : undefined
+      const affliateFee = await this.affiliateFeeAmount(memoFields.affiliateFee, actualAmountOut, assetOut)
       const swapInfo: SwapInfo = {
         status: swapStatus,
-        expectedOutBlock,
+        expectedOutBlock: outboundHeight,
         expectedOutDate,
         expectedAmountOut: minimumAmountOut, // TODO call estimateSwap()
         confirmations,
         minimumAmountOut,
         affliateFee,
         toAddress: memoFields.destAddress,
+        actualAmountOut,
       }
       progress.swapInfo = swapInfo
     }
   }
   private parseSwapMemo(memo: string) {
-    //SWAP:ASSET:DESTADDR:LIM:AFFILIATE:FEE
+    // SWAP:ASSET:DESTADDR:LIM/INTERVAL/QUANTITY:AFFILIATE:FEE
+    // LIM is 1e8. INTERVAL and QUANTITY are not amounts, and FEE is basis points.
     const parts = memo.split(`:`)
     const action = parts[0]
     const asset = parts[1]
     const destAddress = parts[2]
-    const limit = parts.length > 3 && parts[3].length > 0 ? parts[3] : undefined
+    const limitPart = parts.length > 3 ? parts[3].split('/')[0] : ''
+    const limit = limitPart.length > 0 ? limitPart : undefined
     const affiliateAddress = parts.length > 4 && parts[4].length > 0 ? parts[4] : undefined
     const affiliateFee = parts.length > 5 && parts[5].length > 0 ? parts[5] : undefined
     return { action, asset, destAddress, limit, affiliateAddress, affiliateFee }
@@ -250,6 +255,41 @@ export class TransactionStage {
     const decimals =
       THORChain === asset.chain ? 8 : Number(await this.thorchainCache.midgardQuery.getDecimalForAsset(asset))
     return new CryptoAmount(baseAmount(baseAmt, decimals), asset)
+  }
+
+  // Swap limits in the memo are 1e8, including on chains whose native decimals are not 8.
+  private async protocolAmount(amount1e8: string, asset: CompatibleAsset): Promise<CryptoAmount<CompatibleAsset>> {
+    const protocol = new CryptoAmount(baseAmount(amount1e8, 8), asset)
+    if (asset.chain === THORChain) return protocol
+    const decimals = Number(await this.thorchainCache.midgardQuery.getDecimalForAsset(asset))
+    if (!Number.isFinite(decimals) || decimals < 0 || decimals === 8) return protocol
+    return getCryptoAmountWithNotation(protocol, decimals)
+  }
+
+  private async outboundTotal(txs: Tx[], asset: CompatibleAsset): Promise<CryptoAmount<CompatibleAsset>> {
+    const wanted = assetToString(asset).toUpperCase()
+    const amounts = txs.flatMap((tx) => tx.coins ?? []).filter((coin) => coin.asset.toUpperCase() === wanted)
+    const total = amounts.reduce((sum, coin) => sum.plus(coin.amount), new BigNumber(0))
+    return this.getCryptoAmount(total.toFixed(0), asset)
+  }
+
+  // The memo fee field is basis points taken from the output. The outbound is what the user receives.
+  private async affiliateFeeAmount(
+    feeField: string | undefined,
+    actual: CryptoAmount<CompatibleAsset> | undefined,
+    assetOut: CompatibleAsset,
+  ): Promise<CryptoAmount<CompatibleAsset>> {
+    const bps = (feeField ?? '').split('/').reduce((sum, part) => {
+      const value = Number(part)
+      return Number.isFinite(value) ? sum + value : sum
+    }, 0)
+    if (!actual || bps <= 0 || bps >= 10000) return this.getCryptoAmount('0', assetOut)
+    const fee = actual.baseAmount
+      .amount()
+      .times(bps)
+      .div(10000 - bps)
+      .integerValue(BigNumber.ROUND_DOWN)
+    return new CryptoAmount(baseAmount(fee, actual.baseAmount.decimal), assetOut)
   }
   private async determineObserved(txData: TxSignersResponse): Promise<TXProgress> {
     const progress: TXProgress = {
@@ -330,15 +370,14 @@ export class TransactionStage {
       const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
 
       const status = txData.tx.status === 'done' ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
-      const outAmount =
-        status === WithdrawStatus.Complete ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
+      const outAmount = status === WithdrawStatus.Complete ? txData.out_txs?.[0]?.coins?.[0]?.amount ?? '0' : '0'
       const outboundBlock = Number(txData.outbound_height ?? txData.finalised_height)
       const currentTCHeight = Number(`${currentHeight?.thorchain}`)
       const estimatedWaitTime =
         outboundBlock > currentTCHeight
           ? (outboundBlock - currentTCHeight) * this.chainAttributes[THORChain].avgBlockTimeInSecs
           : 0
-      const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
+      const withdrawalAmount = await this.getCryptoAmount(outAmount, asset)
       const withdrawLpInfo: WithdrawInfo = {
         status,
         withdrawalAmount,
@@ -377,7 +416,7 @@ export class TransactionStage {
       const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
 
       const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
-      const outAmount = txData.out_txs ? JSON.stringify(txData.out_txs).split(`"amount":"`)[1].split(`"`) : ''
+      const outAmount = txData.out_txs?.[0]?.coins?.[0]?.amount ?? '0'
       const outboundBlock = Number(txData.outbound_height)
       const finalisedHeight = Number(txData.finalised_height)
       const currentTCHeight = Number(`${currentHeight?.thorchain}`)
@@ -388,7 +427,7 @@ export class TransactionStage {
           : 0
 
       const status = txData.out_txs ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
-      const withdrawalAmount = await this.getCryptoAmount(outAmount[0], asset)
+      const withdrawalAmount = await this.getCryptoAmount(outAmount, asset)
       const withdrawSaverInfo: WithdrawSaverInfo = {
         status,
         withdrawalAmount,
@@ -466,17 +505,11 @@ export class TransactionStage {
     const chainHeight = Number(`${currentHeight?.last_observed_in}`)
     const recordedChainHeight = Number(`${txData.consensus_height}`)
     if (outboundBlock) {
-      const currentHeight = lastBlockObj.find((obj) => obj)
-      const thorchainHeight = Number(`${currentHeight?.thorchain}`)
-      if (outboundBlock > thorchainHeight) {
-        blockDifference = outboundBlock - thorchainHeight
-        time.setSeconds(time.getSeconds() + blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        console.log(time)
-      } else {
-        blockDifference = thorchainHeight - outboundBlock // already processed find the date it was completed
-        time.setSeconds(time.getSeconds() - blockDifference * this.chainAttributes[chain].avgBlockTimeInSecs)
-        return time
-      }
+      // outbound_height is a THORChain height. Apply that difference once.
+      const thorchainHeight = Number(`${lastBlockObj.find((obj) => obj)?.thorchain}`)
+      blockDifference = outboundBlock - thorchainHeight
+      time.setSeconds(time.getSeconds() + blockDifference * this.chainAttributes[THORChain].avgBlockTimeInSecs)
+      return time
     }
     if (chain == THORChain) {
       const currentHeight = lastBlockObj.find((obj) => obj)

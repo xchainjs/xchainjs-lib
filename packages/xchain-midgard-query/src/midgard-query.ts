@@ -118,33 +118,30 @@ export class MidgardQuery {
     const errors: string[] = []
 
     const saversPositions: SaversPosition[] = []
-    const allPositionsPromises = saversDetail.pools.map(async (saver) => {
+    for (const saver of saversDetail.pools) {
       const asset = assetFromString(saver.pool) as Asset | TokenAsset
+      if (!asset) continue
 
-      if (asset) {
-        const poolDetail = await this.getPool(saver.pool)
-        const depositAmount = new CryptoAmount(baseAmount(saver.assetAdded).minus(saver.assetWithdrawn), asset)
-        const ownerUnits = Number(saver?.saverUnits)
-        const saverUnits = Number(poolDetail.saversUnits)
-        const assetDepth = Number(poolDetail.saversDepth)
-        const redeemableValue = (ownerUnits / saverUnits) * assetDepth
-        const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), asset)
-        const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
-        const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
+      // assetRedeem is the 1e8 amount Midgard already calculated. Rebuilding it from
+      // units and depth with Number() drops integers past 2^53.
+      const depositAmount = new CryptoAmount(baseAmount(saver.assetAdded).minus(saver.assetWithdrawn), asset)
+      const redeemableAssetAmount = new CryptoAmount(baseAmount(saver.assetRedeem ? saver.assetRedeem : '0'), asset)
+      const saverGrowth = depositAmount.baseAmount.amount().gt(0)
+        ? redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
+        : undefined
+      const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
 
-        saversPositions.push({
-          depositValue: depositAmount,
-          redeemableValue: redeemableAssetAmount,
-          lastAddHeight: -1,
-          percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
-          ageInYears: saversAge,
-          ageInDays: saversAge * 365,
-          asset,
-          errors,
-        })
-      }
-    })
-    await Promise.all(allPositionsPromises)
+      saversPositions.push({
+        depositValue: depositAmount,
+        redeemableValue: redeemableAssetAmount,
+        lastAddHeight: -1,
+        percentageGrowth: saverGrowth ? saverGrowth.assetAmount.amount().toNumber() : 0,
+        ageInYears: saversAge,
+        ageInDays: saversAge * 365,
+        asset,
+        errors,
+      })
+    }
     return saversPositions
   }
 

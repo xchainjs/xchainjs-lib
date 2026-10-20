@@ -1,4 +1,4 @@
-import { SwapMetadata, Transaction } from '@xchainjs/xchain-midgard'
+import { SwapMetadata } from '@xchainjs/xchain-midgard'
 import { LastBlock, TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
 import {
   Address,
@@ -757,9 +757,20 @@ export class ThorchainQuery {
           }
         }
 
-        const transaction: Transaction = action.out
-          .filter((out) => out.coins[0].asset === assetToString(toAsset))
+        const transaction = (action.out ?? [])
+          .filter((out) => out.coins?.[0]?.asset === assetToString(toAsset))
           .sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+
+        // A refund pays the source asset back, so it has no outbound of the destination asset.
+        if (!transaction?.coins?.[0]) {
+          return {
+            date: new Date(Number(action.date) / 10 ** 6),
+            status: 'pending' as const,
+            fromAsset,
+            toAsset,
+            inboundTx,
+          }
+        }
 
         return {
           date: new Date(Number(action.date) / 10 ** 6),
