@@ -9,6 +9,7 @@ export const EXPLORER_TX_URLS: Record<string, string> = {
   AVAX: 'https://snowtrace.io/tx/',
   BSC: 'https://bscscan.com/tx/',
   ARB: 'https://arbiscan.io/tx/',
+  BASE: 'https://basescan.org/tx/',
   GAIA: 'https://www.mintscan.io/cosmos/txs/',
   THOR: 'https://runescan.io/tx/',
   MAYA: 'https://www.explorer.mayachain.info/tx/',
@@ -16,6 +17,7 @@ export const EXPLORER_TX_URLS: Record<string, string> = {
   SOL: 'https://solscan.io/tx/',
   SUI: 'https://suiscan.xyz/mainnet/tx/',
   ADA: 'https://cardanoscan.io/transaction/',
+  XRP: 'https://xrpscan.com/tx/',
   TRON: 'https://tronscan.org/#/transaction/',
 }
 

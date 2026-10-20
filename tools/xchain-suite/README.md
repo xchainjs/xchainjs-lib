@@ -37,9 +37,9 @@ A browser-based developer suite for XChainJS packages. Test chain clients, execu
 | Category | Chains |
 |----------|--------|
 | **UTXO** | Bitcoin (BTC), Bitcoin Cash (BCH), Litecoin (LTC), Dogecoin (DOGE), Dash (DASH), Zcash (ZEC) |
-| **EVM** | Ethereum (ETH), Avalanche (AVAX), BNB Smart Chain (BSC), Arbitrum (ARB) |
+| **EVM** | Ethereum (ETH), Avalanche (AVAX), BNB Smart Chain (BSC), Arbitrum (ARB), Base (BASE) |
 | **Cosmos** | Cosmos Hub (GAIA), THORChain (THOR), MAYAChain (MAYA) |
-| **Other** | Monero (XMR), Solana (SOL), Cardano (ADA), Ripple (XRP) |
+| **Other** | Monero (XMR), NEAR, Solana (SOL), Sui (SUI), Cardano (ADA), Ripple (XRP), Tron (TRON) |
 
 ## Getting Started
 

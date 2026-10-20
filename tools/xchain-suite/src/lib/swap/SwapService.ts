@@ -1,4 +1,3 @@
-
 import { Network } from '@xchainjs/xchain-client'
 import {
   type AnyAsset,
@@ -50,6 +49,7 @@ const ONECLICK_CHAINS: Record<string, string> = {
   ARB: 'arb',
   AVAX: 'avax',
   BSC: 'bsc',
+  BASE: 'base',
   SOL: 'sol',
   DOGE: 'doge',
   DASH: 'dash',
@@ -109,9 +109,7 @@ function findOneClickToken(asset: AnyAsset, tokens: OneClickToken[]): OneClickTo
     return tokens.find(
       (t) =>
         t.blockchain === 'near' &&
-        (t.contractAddress === 'wrap.near' ||
-          t.assetId === 'nep141:wrap.near' ||
-          t.symbol.toUpperCase() === 'WNEAR'),
+        (t.contractAddress === 'wrap.near' || t.assetId === 'nep141:wrap.near' || t.symbol.toUpperCase() === 'WNEAR'),
     )
   }
 

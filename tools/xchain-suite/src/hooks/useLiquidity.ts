@@ -5,15 +5,21 @@ import type { XChainClient } from '@xchainjs/xchain-client'
 import type { Chain } from '@xchainjs/xchain-util'
 
 // Chains supported for liquidity on THORChain
+// Native assets accepted by ThorchainAMM (see xchain-thorchain-amm validateAddress).
 const LP_SUPPORTED_CHAINS: string[] = [
   'BTC',
   'BCH',
   'LTC',
   'DOGE',
+  'ZEC',
   'ETH',
   'AVAX',
   'BSC',
+  'BASE',
   'GAIA',
+  'XRP',
+  'SOL',
+  'TRON',
   'THOR',
 ]
 
@@ -52,11 +58,7 @@ export function useLiquidity(): UseLiquidityResult {
       try {
         console.log('[useLiquidity] Initializing liquidity service...')
 
-        const [
-          { Wallet },
-          { ThorchainAMM },
-          { ThorchainQuery },
-        ] = await Promise.all([
+        const [{ Wallet }, { ThorchainAMM }, { ThorchainQuery }] = await Promise.all([
           import('@xchainjs/xchain-wallet'),
           import('@xchainjs/xchain-thorchain-amm'),
           import('@xchainjs/xchain-thorchain-query'),

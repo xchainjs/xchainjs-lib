@@ -47,6 +47,8 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { chainId: 'ARB', chainName: 'Arbitrum', symbol: 'ETH' },
       { chainId: 'ARB', chainName: 'Arbitrum', symbol: 'USDC', contractAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', decimals: 6 },
       { chainId: 'ARB', chainName: 'Arbitrum', symbol: 'USDT', contractAddress: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', decimals: 6 },
+      { chainId: 'BASE', chainName: 'Base', symbol: 'ETH' },
+      { chainId: 'BASE', chainName: 'Base', symbol: 'USDC', contractAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
     ],
   },
   {
@@ -66,6 +68,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { chainId: 'SOL', chainName: 'Solana', symbol: 'SOL' },
       { chainId: 'SUI', chainName: 'Sui', symbol: 'SUI' },
       { chainId: 'ADA', chainName: 'Cardano', symbol: 'ADA' },
+      { chainId: 'XRP', chainName: 'Ripple', symbol: 'XRP' },
       { chainId: 'TRON', chainName: 'Tron', symbol: 'TRX' },
     ],
   },

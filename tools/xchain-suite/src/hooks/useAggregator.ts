@@ -18,13 +18,13 @@ const SWAP_SUPPORTED_CHAINS: string[] = [
   'AVAX',
   'BSC',
   'ARB',
+  'BASE',
   'GAIA',
   'THOR',
   'MAYA',
   'SOL',
   'SUI',
   'XRP',
-  'ADA',
   'TRON',
   'NEAR',
 ]
@@ -127,7 +127,9 @@ export function useAggregator(): UseSwapResult {
     loading,
     error,
     supportedChains,
-    get aggregator() { return swapService }
+    get aggregator() {
+      return swapService
+    },
   }
 }
 

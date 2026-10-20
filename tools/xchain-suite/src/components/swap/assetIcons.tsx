@@ -26,6 +26,7 @@ const CDN_SYMBOL_MAP: Record<string, string> = {
   DASH: 'dash',
   ZEC: 'zec',
   ETH: 'eth',
+  BASE: 'eth',
   AVAX: 'avax',
   BSC: 'bnb',
   GAIA: 'atom',

@@ -1,4 +1,3 @@
-
 // Escape single quotes in user input to prevent broken code syntax
 function escapeForString(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
@@ -42,6 +41,12 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
     paramsImport: 'defaultDashParams',
     clientInit: 'new Client({ ...defaultDashParams, network: Network.Mainnet, phrase })',
   },
+  ZEC: {
+    packageName: '@xchainjs/xchain-zcash',
+    clientImport: 'Client',
+    paramsImport: 'defaultZECParams',
+    clientInit: 'new Client({ ...defaultZECParams, network: Network.Mainnet, phrase })',
+  },
   ETH: {
     packageName: '@xchainjs/xchain-ethereum',
     clientImport: 'Client',
@@ -65,6 +70,12 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
     clientImport: 'Client',
     paramsImport: 'defaultArbParams',
     clientInit: 'new Client({ ...defaultArbParams, network: Network.Mainnet, phrase })',
+  },
+  BASE: {
+    packageName: '@xchainjs/xchain-base',
+    clientImport: 'Client',
+    paramsImport: 'defaultBaseParams',
+    clientInit: 'new Client({ ...defaultBaseParams, network: Network.Mainnet, phrase })',
   },
   GAIA: {
     packageName: '@xchainjs/xchain-cosmos',
@@ -114,14 +125,28 @@ const CHAIN_CONFIGS: Record<string, ChainConfig> = {
     paramsImport: 'defaultTRONParams',
     clientInit: 'new Client({ ...defaultTRONParams, network: Network.Mainnet, phrase })',
   },
+  NEAR: {
+    packageName: '@xchainjs/xchain-near',
+    clientImport: 'Client',
+    paramsImport: 'defaultNearParams',
+    clientInit: 'new Client({ ...defaultNearParams, network: Network.Mainnet, phrase })',
+  },
+  XMR: {
+    packageName: '@xchainjs/xchain-monero',
+    clientImport: 'Client',
+    paramsImport: 'defaultXMRParams',
+    clientInit: 'new Client({ ...defaultXMRParams, network: Network.Mainnet, phrase })',
+  },
 }
 
 function getChainConfig(chainId: string): ChainConfig {
-  return CHAIN_CONFIGS[chainId] || {
-    packageName: `@xchainjs/xchain-${chainId.toLowerCase()}`,
-    clientImport: 'Client',
-    clientInit: `new Client({ network: Network.Mainnet, phrase })`,
-  }
+  return (
+    CHAIN_CONFIGS[chainId] || {
+      packageName: `@xchainjs/xchain-${chainId.toLowerCase()}`,
+      clientImport: 'Client',
+      clientInit: `new Client({ network: Network.Mainnet, phrase })`,
+    }
+  )
 }
 
 function generateImports(chainId: string, additionalImports: string[] = []): string {
@@ -205,9 +230,7 @@ export function generateTransferCode(
   const decimals = options?.decimals
   const amountArgs = decimals !== undefined ? `${amount}, ${decimals}` : amount
   const asset = options?.asset
-  const utilImports = asset
-    ? ['assetAmount', 'assetToBase', 'AssetType']
-    : ['assetAmount', 'assetToBase']
+  const utilImports = asset ? ['assetAmount', 'assetToBase', 'AssetType'] : ['assetAmount', 'assetToBase']
   const assetLine = asset
     ? `\n  asset: {
     chain: '${escapeForString(asset.chain)}',
@@ -275,7 +298,7 @@ export function generateSwapEstimateCode(
   fromChain: string,
   toChain: string,
   amount: string,
-  protocol: 'THORChain' | 'MAYAChain' = 'THORChain'
+  protocol: 'THORChain' | 'MAYAChain' = 'THORChain',
 ): string {
   const isMAYA = protocol === 'MAYAChain'
   const ammPackage = isMAYA ? '@xchainjs/xchain-mayachain-amm' : '@xchainjs/xchain-thorchain-amm'
@@ -325,7 +348,7 @@ export function generateSwapExecuteCode(
   fromChain: string,
   toChain: string,
   amount: string,
-  protocol: 'THORChain' | 'MAYAChain' = 'THORChain'
+  protocol: 'THORChain' | 'MAYAChain' = 'THORChain',
 ): string {
   const isMAYA = protocol === 'MAYAChain'
   const ammPackage = isMAYA ? '@xchainjs/xchain-mayachain-amm' : '@xchainjs/xchain-thorchain-amm'

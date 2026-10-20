@@ -1,7 +1,6 @@
 import react from '@vitejs/plugin-react'
 import nodePolyfills from 'vite-plugin-node-stdlib-browser'
 import wasm from 'vite-plugin-wasm'
-import topLevelAwait from 'vite-plugin-top-level-await'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import { spawn, type ChildProcess } from 'node:child_process'
@@ -103,7 +102,7 @@ export default defineConfig(({ mode }) => {
   const walletRpcLog =
     process.env.MONERO_WALLET_RPC_LOG || env.MONERO_WALLET_RPC_LOG || join(walletDir, 'xchain-wallet-rpc.log')
 
-  const plugins = [react(), nodePolyfills(), wasm(), topLevelAwait()]
+  const plugins = [react(), nodePolyfills(), wasm()]
   if (!noMonero) {
     plugins.push(moneroWalletRpcPlugin(walletRpcBin, walletDir, walletRpcLog))
   }
@@ -196,6 +195,12 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/sui-graphql/, ''),
         },
       },
+    },
+    // Cardano WASM glue uses top-level await. es2022 emits that natively.
+    // vite-plugin-top-level-await instead parses every chunk through SWC and
+    // runs the production build out of memory on this graph.
+    build: {
+      target: 'es2022',
     },
     test: {
       globals: true,

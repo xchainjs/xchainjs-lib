@@ -38,6 +38,9 @@ const EVM_POOL_TOKENS: Record<string, TokenAsset[]> = {
     { chain: 'ARB', symbol: 'USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831', ticker: 'USDC', type: AssetType.TOKEN },
     { chain: 'ARB', symbol: 'USDT-0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', ticker: 'USDT', type: AssetType.TOKEN },
   ],
+  BASE: [
+    { chain: 'BASE', symbol: 'USDC-0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', ticker: 'USDC', type: AssetType.TOKEN },
+  ],
 }
 
 export function GetBalance({ chainId, client }: GetBalanceProps) {

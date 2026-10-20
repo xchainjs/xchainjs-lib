@@ -29,6 +29,7 @@ const TRADE_ASSET_OPTIONS = [
   { label: 'LTC', chain: 'LTC', symbol: 'LTC', tradeSymbol: 'LTC~LTC' },
   { label: 'DOGE', chain: 'DOGE', symbol: 'DOGE', tradeSymbol: 'DOGE~DOGE' },
   { label: 'ATOM', chain: 'GAIA', symbol: 'ATOM', tradeSymbol: 'GAIA~ATOM' },
+  { label: 'ETH', chain: 'BASE', symbol: 'ETH', tradeSymbol: 'BASE~ETH' },
 ]
 
 const NATIVE_CONFIG: Record<Protocol, { label: string; key: string; chain: string; symbol: string }> = {
@@ -62,6 +63,18 @@ export function SwapTradeAsset({ thorchainAmm, mayachainAmm, wallet }: SwapTrade
 
   const quoteOp = useOperation<QuoteResult>()
   const swapOp = useOperation<SwapResult>()
+
+  useEffect(() => {
+    if (protocol !== 'mayachain') return
+    if (TRADE_ASSET_OPTIONS[fromIndex]?.chain === 'BASE') {
+      setFromIsNative(false)
+      setFromIndex(0)
+    }
+    if (TRADE_ASSET_OPTIONS[toIndex]?.chain === 'BASE') {
+      setToIsNative(false)
+      setToIndex(1)
+    }
+  }, [protocol, fromIndex, toIndex])
 
   const amm = protocol === 'thorchain' ? thorchainAmm : mayachainAmm
   const protocolPrefix = protocol === 'thorchain' ? 'THOR' : 'MAYA'
@@ -308,9 +321,11 @@ console.log('Swap TX:', result.hash)`
             >
               <option value="NATIVE">{native.label}</option>
               {TRADE_ASSET_OPTIONS.map((opt, i) => (
-                <option key={opt.tradeSymbol} value={i} disabled={!toIsNative && i === toIndex}>
-                  {opt.tradeSymbol}
-                </option>
+                protocol === 'mayachain' && opt.chain === 'BASE' ? null : (
+                  <option key={opt.tradeSymbol} value={i} disabled={!toIsNative && i === toIndex}>
+                    {opt.tradeSymbol}
+                  </option>
+                )
               ))}
             </select>
             <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -375,9 +390,11 @@ console.log('Swap TX:', result.hash)`
             >
               <option value="NATIVE">{native.label}</option>
               {TRADE_ASSET_OPTIONS.map((opt, i) => (
-                <option key={opt.tradeSymbol} value={i} disabled={!fromIsNative && i === fromIndex}>
-                  {opt.tradeSymbol}
-                </option>
+                protocol === 'mayachain' && opt.chain === 'BASE' ? null : (
+                  <option key={opt.tradeSymbol} value={i} disabled={!fromIsNative && i === fromIndex}>
+                    {opt.tradeSymbol}
+                  </option>
+                )
               ))}
             </select>
             <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">

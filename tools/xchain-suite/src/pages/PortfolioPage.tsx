@@ -27,7 +27,7 @@ const ASYNC_ONLY_CHAINS = new Set(['SOL', 'ADA', 'XMR', 'NEAR'])
 // and currently bubbles up, dropping the native balance with it. Passing an empty assets array
 // skips the enumeration and returns only the native asset, which is what the portfolio shows
 // as a per-chain summary anyway.
-const EVM_NATIVE_ONLY_CHAINS = new Set(['ETH', 'AVAX', 'BSC', 'ARB'])
+const EVM_NATIVE_ONLY_CHAINS = new Set(['ETH', 'AVAX', 'BSC', 'ARB', 'BASE'])
 
 export default function PortfolioPage() {
   const { isConnected, phrase, network } = useWallet()

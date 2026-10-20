@@ -16,7 +16,7 @@ interface PreparedTx {
   rawUnsignedTx: string
 }
 
-const SUPPORTED_CHAINS = ['BTC', 'BCH', 'LTC', 'DOGE', 'DASH', 'ETH', 'AVAX', 'BSC', 'ARB']
+const SUPPORTED_CHAINS = ['BTC', 'BCH', 'LTC', 'DOGE', 'DASH', 'ETH', 'AVAX', 'BSC', 'ARB', 'BASE']
 
 export function PrepareTx({ chainId, client }: PrepareTxProps) {
   const [sender, setSender] = useState('')

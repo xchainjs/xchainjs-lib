@@ -3,6 +3,7 @@ import { useOperation } from '../../hooks/useOperation'
 import { ResultPanel } from '../ui/ResultPanel'
 import { CodePreview } from '../ui/CodePreview'
 import { assetFromStringEx, type Asset, type TokenAsset } from '@xchainjs/xchain-util'
+import { nativePoolId } from '../../lib/chains'
 
 interface WithdrawLiquidityProps {
   thorchainAmm: any
@@ -95,8 +96,8 @@ console.log('Transaction:', result)`
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {supportedChains.filter(c => c !== 'THOR').map((chain) => (
-              <option key={chain} value={`${chain}.${chain}`}>
-                {chain}.{chain}
+              <option key={chain} value={nativePoolId(chain)}>
+                {nativePoolId(chain)}
               </option>
             ))}
           </select>

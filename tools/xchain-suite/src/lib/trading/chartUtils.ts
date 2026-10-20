@@ -52,6 +52,7 @@ const MIDGARD_ASSETS: Record<string, string> = {
   MAYA: 'MAYA.CACAO',
   DASH: 'DASH.DASH',
   ZEC: 'ZEC.ZEC',
+  BASE: 'BASE.ETH',
   XMR: 'XMR.XMR',
 }
 
@@ -72,8 +73,24 @@ export function getActualMidgardInterval(interval: TimeInterval): string {
 }
 
 export const TRADE_ASSETS = [
-  'BTC', 'ETH', 'SOL', 'AVAX', 'DOGE', 'LTC', 'BCH', 'XRP', 'ADA',
-  'BNB', 'ARB', 'SUI', 'GAIA', 'THOR', 'MAYA', 'DASH', 'ZEC',
+  'BTC',
+  'ETH',
+  'SOL',
+  'AVAX',
+  'DOGE',
+  'LTC',
+  'BCH',
+  'XRP',
+  'ADA',
+  'BNB',
+  'ARB',
+  'BASE',
+  'SUI',
+  'GAIA',
+  'THOR',
+  'MAYA',
+  'DASH',
+  'ZEC',
   'XMR',
 ]
 

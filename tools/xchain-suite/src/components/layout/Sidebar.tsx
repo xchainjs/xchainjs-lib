@@ -29,6 +29,7 @@ const CHAIN_GROUPS: ChainGroup[] = [
       { id: 'AVAX', name: 'Avalanche' },
       { id: 'BSC', name: 'BNB Smart Chain' },
       { id: 'ARB', name: 'Arbitrum' },
+      { id: 'BASE', name: 'Base' },
     ],
   },
   {

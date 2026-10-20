@@ -32,6 +32,7 @@ const DEPOSITABLE_ASSETS = [
   { chain: 'LTC', symbol: 'LTC', decimals: 8 },
   { chain: 'DOGE', symbol: 'DOGE', decimals: 8 },
   { chain: 'GAIA', symbol: 'ATOM', decimals: 6 },
+  { chain: 'BASE', symbol: 'ETH', decimals: 18 },
 ]
 
 interface DepositResult {
@@ -51,7 +52,7 @@ export function DepositTradeAsset({ thorchainAmm, mayachainAmm, wallet, supporte
   const protocolChain = protocol === 'thorchain' ? 'THOR' : 'MAYA'
 
   const availableAssets = DEPOSITABLE_ASSETS.filter(asset =>
-    supportedChains.includes(asset.chain)
+    supportedChains.includes(asset.chain) && (protocol === 'thorchain' || asset.chain !== 'BASE')
   )
 
   const fetchBalance = useCallback(async () => {
@@ -78,6 +79,12 @@ export function DepositTradeAsset({ thorchainAmm, mayachainAmm, wallet, supporte
   useEffect(() => {
     fetchBalance()
   }, [fetchBalance])
+
+  useEffect(() => {
+    if (protocol === 'mayachain' && selectedAsset.chain === 'BASE') {
+      setSelectedAsset(DEPOSITABLE_ASSETS[0])
+    }
+  }, [protocol, selectedAsset.chain])
 
   const handleMax = () => {
     if (maxBalance) setAmount(maxBalance)

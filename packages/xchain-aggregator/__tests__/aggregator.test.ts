@@ -17,6 +17,22 @@ import mockMayanodeApi from '../__mocks__/thorchain/thornode/api'
 import { Aggregator, QuoteSwap, SuccessSwap } from '../src'
 import { SupportedProtocols } from '../src/const'
 
+// Chainflip's manual mock. The real SDK calls the state-chain RPC.
+jest.mock('@chainflip/sdk/swap')
+
+// 1Click's quote endpoint can hang with no response. This test checks the
+// mocked THORChain and MAYAChain amounts, so it must not wait on that API.
+global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+  const url = String(input)
+  if (url.includes('1click.chaindefuser.com/v0/tokens')) {
+    return new Response('[]', { status: 200, headers: { 'Content-Type': 'application/json' } })
+  }
+  return new Response(JSON.stringify({ message: 'mocked' }), {
+    status: 400,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}) as unknown as typeof fetch
+
 function bestSwap(allQuotes: QuoteSwap[]) {
   const bestQuote = allQuotes.reduce((best, current) =>
     current.expectedAmount.gt(best.expectedAmount) ? current : best,

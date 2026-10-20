@@ -22,7 +22,13 @@ import { Client as BchClient, defaultBchParams } from '@xchainjs/xchain-bitcoinc
 import { Client as LtcClient, defaultLtcParams, AssetLTC, LTC_DECIMAL, LTCChain } from '@xchainjs/xchain-litecoin'
 import { Client as DogeClient, defaultDogeParams, AssetDOGE, DOGE_DECIMAL, DOGEChain } from '@xchainjs/xchain-doge'
 import { Client as DashClient, defaultDashParams, AssetDASH, DASH_DECIMAL, DASHChain } from '@xchainjs/xchain-dash'
-import { Client as ZecClient, defaultZECParams, AssetZEC, ZEC_DECIMAL, zcashExplorerProviders } from '@xchainjs/xchain-zcash'
+import {
+  Client as ZecClient,
+  defaultZECParams,
+  AssetZEC,
+  ZEC_DECIMAL,
+  zcashExplorerProviders,
+} from '@xchainjs/xchain-zcash'
 import { NownodesProvider, BlockcypherProvider, BlockcypherNetwork } from '@xchainjs/xchain-utxo-providers'
 
 // EVM Chains - import only the Client classes, not the default params (they trigger broken module-level code)
@@ -38,6 +44,7 @@ import {
 import { Client as AvaxClient } from '@xchainjs/xchain-avax'
 import { Client as BscClient } from '@xchainjs/xchain-bsc'
 import { Client as ArbClient, defaultArbParams } from '@xchainjs/xchain-arbitrum'
+import { Client as BaseClient } from '@xchainjs/xchain-base'
 
 import {
   type BtcAddressFormatOption,
@@ -76,7 +83,10 @@ function createEthParams(
   const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
 
   const mainnetProvider = new JsonRpcProvider('https://ethereum.publicnode.com', 'homestead')
-  const testnetProvider = new JsonRpcProvider('https://ethereum-sepolia-rpc.publicnode.com', { name: 'sepolia', chainId: 11155111 })
+  const testnetProvider = new JsonRpcProvider('https://ethereum-sepolia-rpc.publicnode.com', {
+    name: 'sepolia',
+    chainId: 11155111,
+  })
 
   const providers = {
     [Network.Mainnet]: mainnetProvider,
@@ -84,11 +94,37 @@ function createEthParams(
     [Network.Stagenet]: mainnetProvider,
   }
 
-  const dataProviders = [{
-    [Network.Mainnet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, ETHChain, AssetETH, ETH_GAS_ASSET_DECIMAL, 1),
-    [Network.Testnet]: new EtherscanProviderV2(testnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, ETHChain, AssetETH, ETH_GAS_ASSET_DECIMAL, 11155111),
-    [Network.Stagenet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, ETHChain, AssetETH, ETH_GAS_ASSET_DECIMAL, 1),
-  }]
+  const dataProviders = [
+    {
+      [Network.Mainnet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        ETHChain,
+        AssetETH,
+        ETH_GAS_ASSET_DECIMAL,
+        1,
+      ),
+      [Network.Testnet]: new EtherscanProviderV2(
+        testnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        ETHChain,
+        AssetETH,
+        ETH_GAS_ASSET_DECIMAL,
+        11155111,
+      ),
+      [Network.Stagenet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        ETHChain,
+        AssetETH,
+        ETH_GAS_ASSET_DECIMAL,
+        1,
+      ),
+    },
+  ]
 
   const baseRoots =
     options.ethDerivationStyle === 'ledgerLive' ? ledgerLiveDerivationPaths : defaultEthParams.rootDerivationPaths
@@ -113,8 +149,14 @@ function createEthParams(
 function createAvaxParams(network: Network, phrase: string) {
   const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
 
-  const mainnetProvider = new JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc', { name: 'avalanche', chainId: 43114 })
-  const testnetProvider = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc', { name: 'fuji', chainId: 43113 })
+  const mainnetProvider = new JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc', {
+    name: 'avalanche',
+    chainId: 43114,
+  })
+  const testnetProvider = new JsonRpcProvider('https://api.avax-test.network/ext/bc/C/rpc', {
+    name: 'fuji',
+    chainId: 43113,
+  })
 
   const AssetAVAX = { chain: 'AVAX' as const, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE as const }
 
@@ -125,21 +167,74 @@ function createAvaxParams(network: Network, phrase: string) {
   }
 
   const explorerProviders = {
-    [Network.Mainnet]: new ExplorerProvider('https://snowtrace.dev/', 'https://snowtrace.dev/address/%%ADDRESS%%', 'https://snowtrace.dev/tx/%%TX_ID%%'),
-    [Network.Testnet]: new ExplorerProvider('https://testnet.snowtrace.dev/', 'https://testnet.snowtrace.dev/address/%%ADDRESS%%', 'https://testnet.snowtrace.dev/tx/%%TX_ID%%'),
-    [Network.Stagenet]: new ExplorerProvider('https://snowtrace.dev/', 'https://snowtrace.dev/address/%%ADDRESS%%', 'https://snowtrace.dev/tx/%%TX_ID%%'),
+    [Network.Mainnet]: new ExplorerProvider(
+      'https://snowtrace.dev/',
+      'https://snowtrace.dev/address/%%ADDRESS%%',
+      'https://snowtrace.dev/tx/%%TX_ID%%',
+    ),
+    [Network.Testnet]: new ExplorerProvider(
+      'https://testnet.snowtrace.dev/',
+      'https://testnet.snowtrace.dev/address/%%ADDRESS%%',
+      'https://testnet.snowtrace.dev/tx/%%TX_ID%%',
+    ),
+    [Network.Stagenet]: new ExplorerProvider(
+      'https://snowtrace.dev/',
+      'https://snowtrace.dev/address/%%ADDRESS%%',
+      'https://snowtrace.dev/tx/%%TX_ID%%',
+    ),
   }
 
-  const dataProviders = [{
-    [Network.Mainnet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, 'AVAX', AssetAVAX, 18, 43114),
-    [Network.Testnet]: new EtherscanProviderV2(testnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, 'AVAX', AssetAVAX, 18, 43113),
-    [Network.Stagenet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, 'AVAX', AssetAVAX, 18, 43114),
-  }]
+  const dataProviders = [
+    {
+      [Network.Mainnet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'AVAX',
+        AssetAVAX,
+        18,
+        43114,
+      ),
+      [Network.Testnet]: new EtherscanProviderV2(
+        testnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'AVAX',
+        AssetAVAX,
+        18,
+        43113,
+      ),
+      [Network.Stagenet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'AVAX',
+        AssetAVAX,
+        18,
+        43114,
+      ),
+    },
+  ]
 
   const defaults = {
-    [Network.Mainnet]: { approveGasLimit: new BigNumber(200000), transferGasAssetGasLimit: new BigNumber(23000), transferTokenGasLimit: new BigNumber(100000), gasPrice: new BigNumber(30 * 10 ** 9) },
-    [Network.Testnet]: { approveGasLimit: new BigNumber(200000), transferGasAssetGasLimit: new BigNumber(23000), transferTokenGasLimit: new BigNumber(100000), gasPrice: new BigNumber(30 * 10 ** 9) },
-    [Network.Stagenet]: { approveGasLimit: new BigNumber(200000), transferGasAssetGasLimit: new BigNumber(23000), transferTokenGasLimit: new BigNumber(100000), gasPrice: new BigNumber(30 * 10 ** 9) },
+    [Network.Mainnet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(30 * 10 ** 9),
+    },
+    [Network.Testnet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(30 * 10 ** 9),
+    },
+    [Network.Stagenet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(30 * 10 ** 9),
+    },
   }
 
   return {
@@ -153,7 +248,11 @@ function createAvaxParams(network: Network, phrase: string) {
     network,
     phrase,
     feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
-    rootDerivationPaths: { [Network.Mainnet]: "m/44'/60'/0'/0/", [Network.Testnet]: "m/44'/60'/0'/0/", [Network.Stagenet]: "m/44'/60'/0'/0/" },
+    rootDerivationPaths: {
+      [Network.Mainnet]: "m/44'/60'/0'/0/",
+      [Network.Testnet]: "m/44'/60'/0'/0/",
+      [Network.Stagenet]: "m/44'/60'/0'/0/",
+    },
   }
 }
 
@@ -162,7 +261,10 @@ function createBscParams(network: Network, phrase: string) {
   const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
 
   const mainnetProvider = new JsonRpcProvider('https://bsc-dataseed.binance.org', { name: 'bsc', chainId: 56 })
-  const testnetProvider = new JsonRpcProvider('https://bsc-testnet.public.blastapi.io', { name: 'bsc-testnet', chainId: 97 })
+  const testnetProvider = new JsonRpcProvider('https://bsc-testnet.public.blastapi.io', {
+    name: 'bsc-testnet',
+    chainId: 97,
+  })
 
   const AssetBSC = { chain: 'BSC' as const, symbol: 'BNB', ticker: 'BNB', type: AssetType.NATIVE as const }
 
@@ -173,21 +275,74 @@ function createBscParams(network: Network, phrase: string) {
   }
 
   const explorerProviders = {
-    [Network.Mainnet]: new ExplorerProvider('https://bscscan.com/', 'https://bscscan.com/address/%%ADDRESS%%', 'https://bscscan.com/tx/%%TX_ID%%'),
-    [Network.Testnet]: new ExplorerProvider('https://testnet.bscscan.com/', 'https://testnet.bscscan.com/address/%%ADDRESS%%', 'https://testnet.bscscan.com/tx/%%TX_ID%%'),
-    [Network.Stagenet]: new ExplorerProvider('https://bscscan.com/', 'https://bscscan.com/address/%%ADDRESS%%', 'https://bscscan.com/tx/%%TX_ID%%'),
+    [Network.Mainnet]: new ExplorerProvider(
+      'https://bscscan.com/',
+      'https://bscscan.com/address/%%ADDRESS%%',
+      'https://bscscan.com/tx/%%TX_ID%%',
+    ),
+    [Network.Testnet]: new ExplorerProvider(
+      'https://testnet.bscscan.com/',
+      'https://testnet.bscscan.com/address/%%ADDRESS%%',
+      'https://testnet.bscscan.com/tx/%%TX_ID%%',
+    ),
+    [Network.Stagenet]: new ExplorerProvider(
+      'https://bscscan.com/',
+      'https://bscscan.com/address/%%ADDRESS%%',
+      'https://bscscan.com/tx/%%TX_ID%%',
+    ),
   }
 
-  const dataProviders = [{
-    [Network.Mainnet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, 'BSC', AssetBSC, 18, 56),
-    [Network.Testnet]: new EtherscanProviderV2(testnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, 'BSC', AssetBSC, 18, 97),
-    [Network.Stagenet]: new EtherscanProviderV2(mainnetProvider, 'https://api.etherscan.io/v2', etherscanApiKey, 'BSC', AssetBSC, 18, 56),
-  }]
+  const dataProviders = [
+    {
+      [Network.Mainnet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'BSC',
+        AssetBSC,
+        18,
+        56,
+      ),
+      [Network.Testnet]: new EtherscanProviderV2(
+        testnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'BSC',
+        AssetBSC,
+        18,
+        97,
+      ),
+      [Network.Stagenet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'BSC',
+        AssetBSC,
+        18,
+        56,
+      ),
+    },
+  ]
 
   const defaults = {
-    [Network.Mainnet]: { approveGasLimit: new BigNumber(200000), transferGasAssetGasLimit: new BigNumber(23000), transferTokenGasLimit: new BigNumber(100000), gasPrice: new BigNumber(30 * 10 ** 9) },
-    [Network.Testnet]: { approveGasLimit: new BigNumber(200000), transferGasAssetGasLimit: new BigNumber(23000), transferTokenGasLimit: new BigNumber(100000), gasPrice: new BigNumber(30 * 10 ** 9) },
-    [Network.Stagenet]: { approveGasLimit: new BigNumber(200000), transferGasAssetGasLimit: new BigNumber(23000), transferTokenGasLimit: new BigNumber(100000), gasPrice: new BigNumber(30 * 10 ** 9) },
+    [Network.Mainnet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(30 * 10 ** 9),
+    },
+    [Network.Testnet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(30 * 10 ** 9),
+    },
+    [Network.Stagenet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(30 * 10 ** 9),
+    },
   }
 
   return {
@@ -201,7 +356,120 @@ function createBscParams(network: Network, phrase: string) {
     network,
     phrase,
     feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
-    rootDerivationPaths: { [Network.Mainnet]: "m/44'/60'/0'/0/", [Network.Testnet]: "m/44'/60'/0'/0/", [Network.Stagenet]: "m/44'/60'/0'/0/" },
+    rootDerivationPaths: {
+      [Network.Mainnet]: "m/44'/60'/0'/0/",
+      [Network.Testnet]: "m/44'/60'/0'/0/",
+      [Network.Stagenet]: "m/44'/60'/0'/0/",
+    },
+  }
+}
+
+// Lazy creation of BASE config. Do not import defaultBaseParams: it constructs
+// providers at module load and reads process.env, which breaks in the browser.
+function createBaseParams(network: Network, phrase: string) {
+  const etherscanApiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || ''
+
+  const mainnetProvider = new JsonRpcProvider('https://1rpc.io/base', { name: 'base', chainId: 8453 })
+  const testnetProvider = new JsonRpcProvider('https://base-sepolia-rpc.publicnode.com', {
+    name: 'base-sepolia',
+    chainId: 84532,
+  })
+
+  const AssetBETH = { chain: 'BASE' as const, symbol: 'ETH', ticker: 'ETH', type: AssetType.NATIVE as const }
+
+  const providers = {
+    [Network.Mainnet]: mainnetProvider,
+    [Network.Testnet]: testnetProvider,
+    [Network.Stagenet]: mainnetProvider,
+  }
+
+  const explorerProviders = {
+    [Network.Mainnet]: new ExplorerProvider(
+      'https://basescan.org/',
+      'https://basescan.org/address/%%ADDRESS%%',
+      'https://basescan.org/tx/%%TX_ID%%',
+    ),
+    [Network.Testnet]: new ExplorerProvider(
+      'https://sepolia.basescan.org/',
+      'https://sepolia.basescan.org/address/%%ADDRESS%%',
+      'https://sepolia.basescan.org/tx/%%TX_ID%%',
+    ),
+    [Network.Stagenet]: new ExplorerProvider(
+      'https://basescan.org/',
+      'https://basescan.org/address/%%ADDRESS%%',
+      'https://basescan.org/tx/%%TX_ID%%',
+    ),
+  }
+
+  const dataProviders = [
+    {
+      [Network.Mainnet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'BASE',
+        AssetBETH,
+        18,
+        8453,
+      ),
+      [Network.Testnet]: new EtherscanProviderV2(
+        testnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'BASE',
+        AssetBETH,
+        18,
+        84532,
+      ),
+      [Network.Stagenet]: new EtherscanProviderV2(
+        mainnetProvider,
+        'https://api.etherscan.io/v2',
+        etherscanApiKey,
+        'BASE',
+        AssetBETH,
+        18,
+        8453,
+      ),
+    },
+  ]
+
+  const defaults = {
+    [Network.Mainnet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(0.03 * 10 ** 9),
+    },
+    [Network.Testnet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(0.03 * 10 ** 9),
+    },
+    [Network.Stagenet]: {
+      approveGasLimit: new BigNumber(200000),
+      transferGasAssetGasLimit: new BigNumber(23000),
+      transferTokenGasLimit: new BigNumber(100000),
+      gasPrice: new BigNumber(0.2 * 10 ** 9),
+    },
+  }
+
+  return {
+    chain: 'BASE' as const,
+    gasAsset: AssetBETH,
+    gasAssetDecimals: 18,
+    defaults,
+    providers,
+    explorerProviders,
+    dataProviders,
+    network,
+    phrase,
+    feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
+    rootDerivationPaths: {
+      [Network.Mainnet]: "m/44'/60'/0'/0/",
+      [Network.Testnet]: "m/44'/60'/0'/0/",
+      [Network.Stagenet]: "m/44'/60'/0'/0/",
+    },
   }
 }
 
@@ -217,11 +485,13 @@ function createZecParams(network: Network, phrase: string) {
     nownodesApiKey,
   )
 
-  const dataProviders = [{
-    [Network.Testnet]: undefined,
-    [Network.Stagenet]: mainnetNownodesProvider,
-    [Network.Mainnet]: mainnetNownodesProvider,
-  }]
+  const dataProviders = [
+    {
+      [Network.Testnet]: undefined,
+      [Network.Stagenet]: mainnetNownodesProvider,
+      [Network.Mainnet]: mainnetNownodesProvider,
+    },
+  ]
 
   return {
     ...defaultZECParams,
@@ -278,11 +548,13 @@ function createBtcParams(
     blockcypherApiKey,
   )
 
-  const dataProviders = [{
-    [Network.Mainnet]: mainnetBlockcypherProvider,
-    [Network.Testnet]: testnetBlockcypherProvider,
-    [Network.Stagenet]: mainnetBlockcypherProvider,
-  }]
+  const dataProviders = [
+    {
+      [Network.Mainnet]: mainnetBlockcypherProvider,
+      [Network.Testnet]: testnetBlockcypherProvider,
+      [Network.Stagenet]: mainnetBlockcypherProvider,
+    },
+  ]
 
   return {
     ...base,
@@ -308,11 +580,13 @@ function createLtcParams(network: Network, phrase: string) {
   )
 
   // BlockCypher doesn't have LTC testnet, preserve default testnet provider
-  const dataProviders = [{
-    [Network.Mainnet]: mainnetBlockcypherProvider,
-    [Network.Testnet]: defaultLtcParams.dataProviders?.[0]?.[Network.Testnet],
-    [Network.Stagenet]: mainnetBlockcypherProvider,
-  }]
+  const dataProviders = [
+    {
+      [Network.Mainnet]: mainnetBlockcypherProvider,
+      [Network.Testnet]: defaultLtcParams.dataProviders?.[0]?.[Network.Testnet],
+      [Network.Stagenet]: mainnetBlockcypherProvider,
+    },
+  ]
 
   return {
     ...defaultLtcParams,
@@ -340,11 +614,13 @@ function createDogeParams(network: Network, phrase: string) {
   )
 
   // BlockCypher doesn't have DOGE testnet, preserve default testnet provider
-  const dataProviders = [{
-    [Network.Mainnet]: mainnetBlockcypherProvider,
-    [Network.Testnet]: defaultDogeParams.dataProviders?.[0]?.[Network.Testnet],
-    [Network.Stagenet]: mainnetBlockcypherProvider,
-  }]
+  const dataProviders = [
+    {
+      [Network.Mainnet]: mainnetBlockcypherProvider,
+      [Network.Testnet]: defaultDogeParams.dataProviders?.[0]?.[Network.Testnet],
+      [Network.Stagenet]: mainnetBlockcypherProvider,
+    },
+  ]
 
   return {
     ...defaultDogeParams,
@@ -372,11 +648,13 @@ function createDashParams(network: Network, phrase: string) {
   )
 
   // BlockCypher doesn't have DASH testnet, preserve default testnet provider
-  const dataProviders = [{
-    [Network.Mainnet]: mainnetBlockcypherProvider,
-    [Network.Testnet]: defaultDashParams.dataProviders?.[0]?.[Network.Testnet],
-    [Network.Stagenet]: mainnetBlockcypherProvider,
-  }]
+  const dataProviders = [
+    {
+      [Network.Mainnet]: mainnetBlockcypherProvider,
+      [Network.Testnet]: defaultDashParams.dataProviders?.[0]?.[Network.Testnet],
+      [Network.Stagenet]: mainnetBlockcypherProvider,
+    },
+  ]
 
   return {
     ...defaultDashParams,
@@ -447,7 +725,9 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     }
     if (!isLedgerSupportedChain(chainId)) {
       throw new Error(
-        `Ledger is only supported for ${LEDGER_SUPPORTED_CHAINS.join(' and ')} in xchain-suite (got ${chainId}). Open the Bitcoin or Ethereum app on the device and select that chain.`,
+        `Ledger is only supported for ${LEDGER_SUPPORTED_CHAINS.join(
+          ' and ',
+        )} in xchain-suite (got ${chainId}). Open the Bitcoin or Ethereum app on the device and select that chain.`,
       )
     }
 
@@ -486,7 +766,14 @@ export function createClient(chainId: string, config: ClientConfig): XChainClien
     case 'BSC':
       return new BscClient(createBscParams(network, phrase))
     case 'ARB':
-      return new ArbClient({ ...defaultArbParams, network, phrase, feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 } })
+      return new ArbClient({
+        ...defaultArbParams,
+        network,
+        phrase,
+        feeBounds: { lower: 1_000_000, upper: 1_000_000_000_000 },
+      })
+    case 'BASE':
+      return new BaseClient(createBaseParams(network, phrase))
 
     case 'GAIA':
       return new GaiaClient({ ...defaultGaiaParams, network, phrase })
