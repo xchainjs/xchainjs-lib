@@ -2,7 +2,7 @@ import { ADAChain } from '@xchainjs/xchain-cardano'
 import { Protocol } from '@xchainjs/xchain-client'
 import { abi } from '@xchainjs/xchain-evm'
 import { MAYAChain } from '@xchainjs/xchain-mayachain'
-import { CompatibleAsset, MayachainQuery } from '@xchainjs/xchain-mayachain-query'
+import { CompatibleAsset, MayachainCache, MayachainQuery, Mayanode } from '@xchainjs/xchain-mayachain-query'
 import {
   Address,
   Asset,
@@ -16,7 +16,7 @@ import {
 import { EvmTxParams, Wallet } from '@xchainjs/xchain-wallet'
 
 import { TxSubmitted } from './types'
-import { isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
+import { isFlatFeeChain, isProtocolBFTChain, isProtocolERC20Asset, isProtocolEVMChain } from './utils'
 import { Contract, getAddress, ZeroAddress } from 'ethers'
 
 export type NonProtocolActionParams = {
@@ -71,9 +71,12 @@ export class MayachainAction {
     walletIndex,
   }: NonProtocolActionParams): Promise<TxSubmitted> {
     if (!isProtocolEVMChain(assetAmount.asset.chain)) {
-      // BFT/Cosmos chains and Cardano derive their fee internally (Cardano from on-chain
-      // protocol params) and do not accept a caller-supplied per-byte feeRate, unlike UTXO chains.
-      if (isProtocolBFTChain(assetAmount.asset.chain) || assetAmount.asset.chain === ADAChain) {
+      // BFT, Cardano, and Zcash derive the fee internally. Zcash getFeeRates throws (ZIP 317).
+      if (
+        isProtocolBFTChain(assetAmount.asset.chain) ||
+        isFlatFeeChain(assetAmount.asset.chain) ||
+        assetAmount.asset.chain === ADAChain
+      ) {
         const hash = await wallet.transfer({
           asset: assetAmount.asset,
           amount: assetAmount.baseAmount,
@@ -102,7 +105,7 @@ export class MayachainAction {
     }
 
     // EVM actions go through the router
-    const mayachainQuery: MayachainQuery = new MayachainQuery()
+    const mayachainQuery = new MayachainQuery(new MayachainCache(undefined, new Mayanode(wallet.getNetwork())))
 
     const inboundDetails = await mayachainQuery.getChainInboundDetails(assetAmount.asset.chain)
     if (!inboundDetails.router) throw Error(`Unknown router for ${assetAmount.asset.chain} chain`)

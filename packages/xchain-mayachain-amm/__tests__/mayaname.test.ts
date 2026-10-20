@@ -127,7 +127,7 @@ describe('MayachainAMM', () => {
       expect(estimated.allowed).toBeTruthy()
       expect(estimated.errors.length).toBe(0)
       expect(estimated.memo).toBe(
-        '~:eld:BTC:bc1qslx5546zjfqa027ate6j0seg8lla5k9z278g86:maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09:MAYA.CACAO',
+        '~:eld:BTC:bc1qslx5546zjfqa027ate6j0seg8lla5k9z278g86:maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09:',
       )
       expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
       expect(estimated.value.assetAmount.amount().toString()).toBe('0.5')
@@ -142,7 +142,7 @@ describe('MayachainAMM', () => {
       expect(estimated.allowed).toBeTruthy()
       expect(estimated.errors.length).toBe(0)
       expect(estimated.memo).toBe(
-        '~:eld:BTC:bc1qdjqcm3fsadjn9zth9wk30gy5su6hkwkhfr0re9:maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09:MAYA.CACAO',
+        '~:eld:BTC:bc1qdjqcm3fsadjn9zth9wk30gy5su6hkwkhfr0re9:maya1gnehec7mf4uytuw3wj4uwpptvkyvzclgq2lj09:',
       )
       expect(assetToString(estimated.value.asset)).toBe('MAYA.CACAO')
     })

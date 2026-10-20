@@ -108,6 +108,8 @@ export type InboundDetail = {
   haltedChain: boolean
   haltedTrading: boolean
   haltedLP: boolean
+  // Inbound dust_threshold, in 1e8. XRP's 100000000 is 1 XRP, not 100 XRP of drops.
+  dustThreshold?: BigNumber
 }
 
 export type ChainAttributes = {

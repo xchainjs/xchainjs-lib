@@ -155,7 +155,7 @@ export class OneClickProtocol implements IProtocol {
   private resolveAffiliateFeeBps(resp: OneClickQuoteResponse): number | undefined {
     const echoed = resp.quoteRequest?.appFees?.find((fee) => fee.recipient === this.affiliateAddress)
     if (echoed != null && Number.isFinite(echoed.fee)) return echoed.fee
-    if (this.affiliateAddress && this.affiliateBps) return this.affiliateBps
+    if (this.affiliateAddress && this.affiliateBps != null) return this.affiliateBps
     return undefined
   }
 
@@ -252,7 +252,7 @@ export class OneClickProtocol implements IProtocol {
       slippageTolerance: params.toleranceBps ?? 100,
       deadline: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
       appFees:
-        this.affiliateAddress && this.affiliateBps
+        this.affiliateAddress && this.affiliateBps != null
           ? [{ recipient: this.affiliateAddress, fee: this.affiliateBps }]
           : undefined,
     }

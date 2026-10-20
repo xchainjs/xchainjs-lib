@@ -107,8 +107,8 @@ export class ThorchainAMM {
     amount,
     destinationAsset,
     destinationAddress,
-    affiliateAddress = '',
-    affiliateBps = 0,
+    affiliateAddress,
+    affiliateBps,
     affiliates,
     toleranceBps,
     liquidityToleranceBps,
@@ -121,6 +121,11 @@ export class ThorchainAMM {
       amount,
       destinationAsset,
       destinationAddress,
+      affiliateAddress,
+      affiliateBps,
+      affiliates,
+      streamingInterval,
+      streamingQuantity,
     })
     const estimate = await this.thorchainQuery.quoteSwap({
       fromAsset,
@@ -248,38 +253,14 @@ export class ThorchainAMM {
     }
   }
 
-  public async doSwap({
-    fromAsset,
-    fromAddress,
-    amount,
-    destinationAsset,
-    destinationAddress,
-    affiliateAddress,
-    affiliateBps,
-    affiliates,
-    toleranceBps,
-    streamingInterval,
-    streamingQuantity,
-  }: QuoteSwapParams): Promise<TxSubmitted> {
-    const txDetails = await this.thorchainQuery.quoteSwap({
-      fromAsset,
-      fromAddress,
-      amount,
-      destinationAsset,
-      destinationAddress,
-      affiliateAddress,
-      affiliateBps,
-      affiliates,
-      toleranceBps,
-      streamingInterval,
-      streamingQuantity,
-    })
+  public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
+    const txDetails = await this.estimateSwap(params)
     if (!txDetails.txEstimate.canSwap) {
       throw Error(txDetails.txEstimate.errors.join('\n'))
     }
     return ThorchainAction.makeAction({
       wallet: this.wallet,
-      assetAmount: amount,
+      assetAmount: params.amount,
       memo: txDetails.memo,
       recipient: txDetails.toAddress,
     })
@@ -379,7 +360,7 @@ export class ThorchainAMM {
         await ThorchainAction.makeAction({
           wallet: this.wallet,
           memo: `+:${checkLPAdd.assetPool}`,
-          assetAmount: addLiquidity.asset,
+          assetAmount: addLiquidity.rune,
         }),
       )
       return txSubmitted
@@ -387,11 +368,14 @@ export class ThorchainAMM {
   }
 
   public async withdrawLiquidityPosition(params: WithdrawLiquidityPosition): Promise<TxSubmitted[]> {
-    // Caution Dust Limits: BTC, BCH, LTC chains: 10k sats; DOGE: 1m Sats; ETH: 0 wei; THOR: 0 RUNE.
+    // A memo below the chain dust threshold is ignored, so the carrier is at least that amount.
     const withdrawParams = await this.thorchainQuery.estimateWithdrawLP(params)
+    const assetCarrier = withdrawParams.inbound.minToSend.asset.gt(withdrawParams.inbound.fees.asset)
+      ? withdrawParams.inbound.minToSend.asset
+      : withdrawParams.inbound.fees.asset
 
     const withdrawLiquidity: WithdrawLiquidity = {
-      assetFee: withdrawParams.inbound.fees.asset,
+      assetFee: assetCarrier,
       runeFee: withdrawParams.inbound.fees.rune,
       waitTimeSeconds: withdrawParams.estimatedWaitSeconds,
       percentage: params.percentage,

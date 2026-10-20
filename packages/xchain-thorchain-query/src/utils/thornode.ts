@@ -117,8 +117,7 @@ export class Thornode {
         const queueScheduled = await api.queueScheduled()
         return queueScheduled.data
       } catch (_e) {
-        //console.error(_e)
-        throw new Error(`THORNode not responding`)
+        // try the next THORNode
       }
     }
     throw Error(`THORNode not responding`)
@@ -129,8 +128,7 @@ export class Thornode {
         const queue = await api.queue()
         return queue.data
       } catch (_e) {
-        //console.error(_e)
-        throw new Error(`THORNode not responding`)
+        // try the next THORNode
       }
     }
     throw Error(`THORNode not responding`)
@@ -141,8 +139,7 @@ export class Thornode {
         const queue = await api.mimir()
         return queue.data
       } catch (_e) {
-        //console.error(_e)
-        throw new Error(`THORNode not responding`)
+        // try the next THORNode
       }
     }
     throw Error(`THORNode not responding`)
@@ -153,11 +150,7 @@ export class Thornode {
         const txResponse = await api.tx(txHash)
         return txResponse.data
       } catch (_e) {
-        const txR: TxResponse = {
-          observed_tx: undefined,
-          keysign_metric: undefined,
-        }
-        return txR
+        // A failed node is not "tx not found". Try the next URL.
       }
     }
     throw new Error(`THORNode not responding`)
@@ -168,7 +161,7 @@ export class Thornode {
         const txResponse = await api.txSigners(txHash)
         return txResponse.data
       } catch (_e) {
-        throw new Error(`THORNode not responding`)
+        // try the next THORNode
       }
     }
     throw new Error(`THORNode not responding`)
@@ -299,6 +292,12 @@ export class Thornode {
     height?: number,
     refundAddress?: string,
   ): Promise<QuoteSwapResponse> {
+    // BPS without an affiliate name is rejected: "bad affiliate params".
+    // A name with 0 bps is kept so the affiliate can still be tracked.
+    const affiliateName = affiliate?.trim() ?? ''
+    const quoteAffiliate = affiliateName.length > 0 ? affiliateName : undefined
+    const quoteAffiliateBps = quoteAffiliate !== undefined ? affiliateBps : undefined
+
     for (const api of this.quoteApi) {
       try {
         const resp = (
@@ -315,8 +314,8 @@ export class Thornode {
             liquidityToleranceBps,
             // Generated client types this as `number`; axios serializes either number or string
             // identically into the query string, so the runtime accepts both.
-            affiliateBps as number | undefined,
-            affiliate,
+            quoteAffiliateBps as number | undefined,
+            quoteAffiliate,
           )
         ).data
         return resp

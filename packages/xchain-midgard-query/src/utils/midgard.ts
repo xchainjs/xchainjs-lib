@@ -77,7 +77,7 @@ export class Midgard {
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (e.response.status == 404) {
+        if (e?.response?.status == 404) {
           return undefined
         }
       }
@@ -96,7 +96,7 @@ export class Midgard {
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (e.response.status == 404) {
+        if (e?.response?.status == 404) {
           return []
         }
       }

@@ -5,7 +5,7 @@ import { CachedValue } from '@xchainjs/xchain-util'
 import BigNumber from 'bignumber.js'
 
 import { InboundDetail } from './types'
-import { MayaChain, Mayanode } from './utils'
+import { CACAO_DECIMAL, MayaChain, Mayanode } from './utils'
 
 export type MayachainCacheConf = {
   expirationTimeInboundAddress: number
@@ -136,29 +136,33 @@ export class MayachainCache {
   }
 
   // static decimals when Mayamidgard is down; https://mayanode.mayachain.info/mayachain/pools
+  // Keys are matched case-insensitively. Live asset strings uppercase the contract.
   private getFallbackAssetDecimals(): Record<string, number> {
     return {
       'BTC.BTC': 8,
+      'ADA.ADA': 6,
       'ARB.USDC-0xaf88d065e77c8cC2239327C5EDb3A432268e5831': 6,
       'ARB.USDT-0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9': 6,
-      'ARB.LEO-0x5985D2Dc68E67aeE82F4e30e8e74F1ea8e532a3c': 3,
-      'ARB.TGT-0X429FED88F10285E61B12BDF00848315FBDFCC341': 18,
+      'ARB.LEO-0X93864D81175095DD93360FFA2A529B8642F76A6E': 3,
       'ARB.TGT-0x429FED88F10285E61B12BDF00848315FBDFCC341': 18,
       'ETH.USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': 6,
       'ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
       'THOR.RUNE': 8,
-
       'ETH.ETH': 18,
       'ARB.ETH': 18,
       'MAYA.CACAO': 10,
-
-      // Additional pool assets (using chain defaults where decimals not specified)
       'DASH.DASH': 8,
       'ZEC.ZEC': 8,
-
-      // Legacy mappings for backward compatibility
       'ETH.WSTETH-0X7F39C581F595B53C5CB19BD0B3F8DA6C935E2CA0': 18,
     }
+  }
+
+  private fallbackDecimal(asset: string): number {
+    const table = this.getFallbackAssetDecimals()
+    if (table[asset] !== undefined) return table[asset]
+    const upper = asset.toUpperCase()
+    const key = Object.keys(table).find((candidate) => candidate.toUpperCase() === upper)
+    return key !== undefined ? table[key] : 8
   }
 
   private async refreshPoolsCache(): Promise<PoolDetail[]> {
@@ -175,36 +179,39 @@ export class MayachainCache {
 
   private convertMayanodePoolsToMidgardFormat(pools: Pool[]): PoolDetail[] {
     return pools.map((pool): PoolDetail => {
-      const fallbackDecimals = this.getFallbackAssetDecimals()
-      const nativeDecimal = fallbackDecimals[pool.asset]?.toString() || '8'
-
-      const liquidityUnits = pool.LP_units
-      const synthUnits = '0'
+      const assetDecimals =
+        pool.decimals !== undefined && pool.decimals >= 0 ? pool.decimals : this.fallbackDecimal(pool.asset)
+      const liquidityUnits = pool.LP_units || '0'
+      const synthUnits = pool.synth_units || '0'
+      const cacao = new BigNumber(pool.balance_cacao || 0)
+      const assetBalance = new BigNumber(pool.balance_asset || 0)
+      const assetPrice =
+        cacao.isZero() || assetBalance.isZero()
+          ? '0'
+          : cacao
+              .div(new BigNumber(10).pow(CACAO_DECIMAL))
+              .div(assetBalance.div(new BigNumber(10).pow(assetDecimals)))
+              .toString()
 
       return {
         asset: pool.asset,
         assetDepth: pool.balance_asset,
         runeDepth: pool.balance_cacao,
         liquidityUnits,
-        status: 'available', // Assume available if returned by Mayanode
-
-        assetPrice:
-          pool.balance_cacao && pool.balance_asset
-            ? (parseFloat(pool.balance_cacao) / parseFloat(pool.balance_asset)).toString()
-            : '0',
-
+        status: (pool.status || 'available').toLowerCase(),
+        assetPrice,
         annualPercentageRate: '0',
         assetPriceUSD: '0',
-        nativeDecimal,
+        nativeDecimal: String(assetDecimals),
         poolAPY: '0',
         saversAPR: '0',
         saversDepth: '0',
         saversUnits: '0',
-        synthSupply: '0',
+        synthSupply: pool.synth_supply || '0',
         synthUnits,
         totalCollateral: '0',
         totalDebtTor: '0',
-        units: new BigNumber(liquidityUnits || '0').plus(new BigNumber(synthUnits || '0')).toString(),
+        units: pool.pool_units || new BigNumber(liquidityUnits).plus(synthUnits).toString(),
         volume24h: '0',
       } as PoolDetail
     })

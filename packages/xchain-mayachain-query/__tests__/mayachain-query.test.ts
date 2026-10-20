@@ -144,7 +144,7 @@ describe('Mayachain-query tests', () => {
     expect(assetToString(quoteSwap.recommendedMinAmountIn?.asset as Asset)).toBe('ETH.ETH')
     expect(quoteSwap.canSwap).toBe(true)
     expect(quoteSwap.errors.length).toBe(0)
-    expect(quoteSwap.warning).toBe('')
+    expect(quoteSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
   })
 
   it('Should return the number of decimals of Mayachain assets', async () => {

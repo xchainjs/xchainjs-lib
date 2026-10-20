@@ -197,7 +197,7 @@ export class MayachainQuery {
       totalSwapSeconds: swapQuote.total_swap_seconds || 0,
       canSwap: !(!swapQuote.memo || errors.length > 0),
       errors,
-      warning: '',
+      warning: swapQuote.warning || '',
     }
   }
 
@@ -210,7 +210,7 @@ export class MayachainQuery {
       [ThorChain]: new AssetCryptoAmount(baseAmount(0, 8), RuneAsset),
       [MayaChain]: new AssetCryptoAmount(baseAmount(0, 10), CacaoAsset),
       [ArbChain]: new AssetCryptoAmount(baseAmount(0, 18), ArbAsset),
-      [ZecChain]: new AssetCryptoAmount(baseAmount(1000, 8), ZecAsset),
+      [ZecChain]: new AssetCryptoAmount(baseAmount(10000, 8), ZecAsset),
       // 1 ADA in lovelace (6 decimals); matches MAYAChain's 1 ADA inbound minimum.
       [AdaChain]: new AssetCryptoAmount(baseAmount(1000000, 6), AdaAsset),
     }
@@ -253,9 +253,10 @@ export class MayachainQuery {
 
     try {
       const assetsDecimals = await this.mayachainCache.getAssetDecimals()
-      if (assetsDecimals[assetNotation]) {
-        return assetsDecimals[assetNotation]
-      }
+      if (assetsDecimals[assetNotation] !== undefined) return assetsDecimals[assetNotation]
+      const upper = assetNotation.toUpperCase()
+      const key = Object.keys(assetsDecimals).find((candidate) => candidate.toUpperCase() === upper)
+      if (key !== undefined && assetsDecimals[key] !== undefined) return assetsDecimals[key]
 
       console.warn(`No decimal mapping found for ${assetNotation}, using chain default`)
       return this.getChainDefaultDecimals(asset.chain)
@@ -274,6 +275,7 @@ export class MayachainQuery {
       MAYA: 10,
       DASH: 8,
       ZEC: 8,
+      ADA: 6,
     }
 
     return chainDefaults[chain] || 8
@@ -446,7 +448,9 @@ export class MayachainQuery {
       value: new AssetCryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), CacaoAsset),
       memo: `~:${name}:${isUpdate ? chain || details?.aliases[0].chain : chain}:${
         isUpdate ? chainAddress || details?.aliases[0].address : chainAddress
-      }:${isUpdate ? owner || details?.owner : owner}:${preferredAsset ? assetToString(preferredAsset) : 'MAYA.CACAO'}`,
+      }:${isUpdate ? owner || details?.owner : owner}:${
+        preferredAsset ? assetToString(preferredAsset) : isUpdate ? '' : 'MAYA.CACAO'
+      }`,
     }
   }
 
