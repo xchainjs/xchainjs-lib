@@ -1,37 +1,30 @@
-# XChainJS API UTXO providers Interface
+# `@xchainjs/xchain-evm-providers`
 
-A specification for a generalised interface for api providers, to be used by XChainJS implementations. The providers should not have any functionality to generate a key, instead, the `xchain-crypto` library should be used to ensure cross-chain compatible keystores are handled. The providers is only ever passed a master BIP39 phrase, from which a temporary key and address is decoded.
+Data providers for XChainJS EVM clients. A provider reads balances, transactions, and fee rates. It does not derive keys.
 
-## Documentation
-
-## Design
-
-The OnlineDataProvider has the following signature:
+## Interface
 
 ```typescript
-export interface OnlineDataProvider {
-  getBalance(address: Address, assets?: Asset[]): Promise<Balance[]>
+export interface EvmOnlineDataProvider {
+  getBalance(address: Address, assets?: CompatibleAsset[]): Promise<Balance[]>
   getTransactions(params: TxHistoryParams): Promise<TxsPage>
   getTransactionData(txId: string, assetAddress?: Address): Promise<Tx>
+  getFeeRates(): Promise<FeeRates>
 }
 ```
 
 ## Implementations
 
-### Etherscan / bscscan / snowtrace
+### EtherscanProviderV2
 
-```
-Websites:         https://snowtrace.io/ , https://bscscan.com/ , https://etherscan.io/
-Status:           Complete
-FreeTier:         Yes
-Chains supported: ETH, BSC, ETH
-```
+Etherscan API v2 at `https://api.etherscan.io/v2`. Requests send a `chainid` query parameter, so one API key covers every supported chain. The Ethereum, BSC, Base, and Avalanche clients use this provider. Set `ETHERSCAN_API_KEY`.
 
-### Covalent
+Chain ids: https://docs.etherscan.io/etherscan-v2/getting-started/supported-chains
 
-```
-Website:          https://www.covalenthq.com/
-Status:           Complete
-FreeTier:         Yes
-Chains supported: ETH, BSC, ETH
-```
+### EtherscanProvider and RoutescanProvider
+
+`EtherscanProvider` speaks the older Etherscan URL shape, which has no `chainid` parameter. `RoutescanProvider` extends it and points the same calls at Routescan's Etherscan-compatible endpoint (`https://api.routescan.io`). The Arbitrum client uses Routescan. Avalanche registers Routescan beside Etherscan v2.
+
+### CovalentProvider
+
+Balance and transaction history from Covalent (GoldRush), https://goldrush.dev/. No chain package wires this provider in by default. Construct it with a Covalent API key and pass it in `dataProviders`.

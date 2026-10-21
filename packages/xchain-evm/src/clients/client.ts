@@ -544,6 +544,8 @@ export class Client extends BaseXChainClient implements EVMClient {
       } else if (maxPriorityFeePerGas && baseFee != null) {
         const maxPriority = BigInt(maxPriorityFeePerGas.amount().toFixed())
         feeData.maxFeePerGas = baseFee * BigInt(2) + maxPriority
+      } else if (maxPriorityFeePerGas && BigInt(maxPriorityFeePerGas.amount().toFixed()) > BigInt(0)) {
+        throw new Error('maxPriorityFeePerGas requires a block base fee or maxFeePerGas')
       }
       feeData.maxPriorityFeePerGas = maxPriorityFeePerGas
         ? BigInt(maxPriorityFeePerGas.amount().toFixed())

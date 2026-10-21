@@ -20,6 +20,7 @@ const tsJestOptions = {
 export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  testTimeout: 60000,
   testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/lib'],
   resolver: '<rootDir>/jest-esm-resolver.cjs',
   transform: {

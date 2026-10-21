@@ -21,7 +21,7 @@ export const AssetARB: TokenAsset = {
 }
 
 const ARBITRUM_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider('https://arb1.arbitrum.io/rpc')
-const ARBITRUM_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://goerli-rollup.arbitrum.io/rpc')
+const ARBITRUM_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://sepolia-rollup.arbitrum.io/rpc')
 
 const ethersJSProviders = {
   [Network.Mainnet]: ARBITRUM_MAINNET_ETHERS_PROVIDER,
@@ -42,7 +42,7 @@ const ROUTESCAN_PROVIDER_MAINNET = new RoutescanProvider(
 const ROUTESCAN_PROVIDER_TESTNET = new RoutescanProvider(
   ARBITRUM_TESTNET_ETHERS_PROVIDER,
   'https://api.routescan.io',
-  421613,
+  421614,
   AssetAETH,
   ARB_DECIMAL,
   true,
@@ -61,9 +61,9 @@ const ARB_MAINNET_EXPLORER = new ExplorerProvider(
 )
 
 const ARB_TESTNET_EXPLORER = new ExplorerProvider(
-  'https://goerli.arbiscan.io',
-  'https://goerli.arbiscan.io/address/%%ADDRESS%%',
-  'https://goerli.arbiscan.io/tx/%%TX_ID%%',
+  'https://sepolia.arbiscan.io/',
+  'https://sepolia.arbiscan.io/address/%%ADDRESS%%',
+  'https://sepolia.arbiscan.io/tx/%%TX_ID%%',
 )
 
 const arbExplorerProviders = {

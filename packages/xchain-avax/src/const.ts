@@ -35,7 +35,7 @@ const AVAX_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   process.env.ETHERSCAN_API_KEY || '',
   AVAXChain,
   AssetAVAX,
-  18,
+  AVAX_GAS_ASSET_DECIMAL,
   43113,
 )
 const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
@@ -44,7 +44,7 @@ const AVAX_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   process.env.ETHERSCAN_API_KEY || '',
   AVAXChain,
   AssetAVAX,
-  18,
+  AVAX_GAS_ASSET_DECIMAL,
   43114,
 )
 

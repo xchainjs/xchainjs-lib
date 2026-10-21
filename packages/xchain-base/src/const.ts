@@ -5,10 +5,11 @@ import { Asset, AssetType } from '@xchainjs/xchain-util'
 import { JsonRpcProvider } from 'ethers'
 import BigNumber from 'bignumber.js'
 
-export const BASE_DECIMAL = 18
 export const LOWER_FEE_BOUND = 1_000_000
 export const UPPER_FEE_BOUND = 1_000_000_000
 export const BASE_GAS_ASSET_DECIMAL = 18
+/** @deprecated Use BASE_GAS_ASSET_DECIMAL instead. Will be removed in the next major version. */
+export const BASE_DECIMAL = BASE_GAS_ASSET_DECIMAL
 export const BASEChain = 'BASE' as const
 // BASE ETH Gas asset
 export const AssetBETH: Asset = { chain: BASEChain, symbol: 'ETH', ticker: 'ETH', type: AssetType.NATIVE }
@@ -28,7 +29,7 @@ const BASE_ONLINE_PROVIDER_MAINNET = new EtherscanProviderV2(
   process.env.ETHERSCAN_API_KEY || '',
   BASEChain,
   AssetBETH,
-  18,
+  BASE_GAS_ASSET_DECIMAL,
   8453,
 )
 
@@ -38,7 +39,7 @@ const BASE_ONLINE_PROVIDER_TESTNET = new EtherscanProviderV2(
   process.env.ETHERSCAN_API_KEY || '',
   BASEChain,
   AssetBETH,
-  18,
+  BASE_GAS_ASSET_DECIMAL,
   84532,
 )
 

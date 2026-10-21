@@ -22,7 +22,7 @@ describe('etherscan Integration Tests (AVAX)', () => {
   const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVAX', type: AssetType.NATIVE }
   const avaxProvider = new EtherscanProviderV2(
     AVALANCHE_TESTNET_ETHERS_PROVIDER,
-    'https://api-testnet.snowtrace.io',
+    'https://api.etherscan.io/v2',
     'fake',
     AVAXChain,
     AssetAVAX,
@@ -82,7 +82,7 @@ describe('etherscan Integration Tests (BSC)', () => {
   }
   const provider = new EtherscanProviderV2(
     BSC_TESTNET_ETHERS_PROVIDER,
-    'https://api-testnet.bscscan.com',
+    'https://api.etherscan.io/v2',
     process.env.BSCSCAN_API_KEY || '',
     BSCChain,
     AssetBSC,
@@ -127,7 +127,7 @@ describe('etherscan Integration Tests (ETH)', () => {
   }
   const provider = new EtherscanProviderV2(
     ETH_TESTNET_ETHERS_PROVIDER,
-    'https://api-sepolia.etherscan.io/',
+    'https://api.etherscan.io/v2',
     process.env.ETHERSCAN_API_KEY || '',
     ETHChain,
     AssetETH,

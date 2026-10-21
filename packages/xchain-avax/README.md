@@ -33,15 +33,15 @@ yarn add @xchainjs/xchain-evm @xchainjs/xchain-client @xchainjs/xchain-crypto @x
 
 This package uses the following service providers:
 
-| Function                  | Service   | Notes                                                                              |
-| ------------------------- | --------- | ---------------------------------------------------------------------------------- |
-| ETH balances              | Etherscan | https://api.snowtrace.io/apis#accounts (module=`account`, action=`balance`)        |
-| Token balances            | Etherscan | https://api.snowtrace.io/apis#tokens (module=`account`, action=`tokenbalance`)     |
-| ETH transaction history   | Etherscan | https://api.snowtrace.io/apis#accounts (module=`account`, action=`txlistinternal`) |
-| Token transaction history | Etherscan | https://api.snowtrace.io/apis#accounts (module=`account`, action=`tokentx`)        |
-| Explorer                  | Etherscan | https://snowtrace.io/                                                              |
+| Function                  | Service   | Notes                                                                          |
+| ------------------------- | --------- | ------------------------------------------------------------------------------ |
+| AVAX balances             | Ankr RPC  | https://rpc.ankr.com/avalanche (`ANKR_API_KEY`)                                |
+| Token balances            | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokenbalance (chainid `43114`) |
+| AVAX transaction history  | Etherscan | https://docs.etherscan.io/api-reference/endpoint/txlist (chainid `43114`)      |
+| Token transaction history | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokentx (chainid `43114`)     |
+| Explorer                  | Snowtrace | https://snowtrace.dev/                                                         |
 
-Etherscan API rate limits: https://snowtrace.io/apis
+History and token balances use Etherscan API v2 (`https://api.etherscan.io/v2`). Routescan is also registered. Etherscan API rate limits: https://docs.etherscan.io/resources/rate-limits
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
 
@@ -49,14 +49,14 @@ Etherscan API rate limits: https://snowtrace.io/apis
 
 
 ```sh
-SNOWTRACE_API_KEY={YOUR_SNOWTRACE_API_KEY}
-COVALENT_API_KEY={YOUR_COVALENT_API_KEY}
+ETHERSCAN_API_KEY={YOUR_ETHERSCAN_API_KEY}
+ANKR_API_KEY={YOUR_ANKR_API_KEY}
 ```
 
 Default config can access.
 
 ```sh
-process.env.SNOWTRACE_API_KEY
-process.env.COVALENT_API_KEY
+process.env.ETHERSCAN_API_KEY
+process.env.ANKR_API_KEY
 ```
 
