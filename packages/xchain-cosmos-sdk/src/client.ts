@@ -100,6 +100,9 @@ export default abstract class Client extends BaseXChainClient implements XChainC
   }
 
   private async mapIndexedTxToTx(indexedTx: IndexedTx): Promise<Tx> {
+    if (indexedTx.code !== 0) {
+      throw new Error(`Tx ${indexedTx.hash} failed with code ${indexedTx.code}: ${indexedTx.rawLog}`)
+    }
     const mapTo: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
     const mapFrom: Map<string, { amount: BaseAmount; asset: CompatibleAsset | undefined; address: Address }> = new Map()
 
@@ -208,12 +211,8 @@ export default abstract class Client extends BaseXChainClient implements XChainC
       txDate = new Date(0)
     }
     return {
-      asset:
-        txFrom[0]?.asset ??
-        txTo[0]?.asset ??
-        (() => {
-          throw new Error(`No transfer events found in tx ${indexedTx.hash}`)
-        })(),
+      // Txs without transfers (e.g. zero-amount deposits) fall back to the native asset
+      asset: txFrom[0]?.asset ?? txTo[0]?.asset ?? this.getAssetInfo().asset,
       from: txFrom,
       to: txTo,
       date: txDate,
