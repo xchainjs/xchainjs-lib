@@ -67,7 +67,7 @@ export class KeystoreSigner extends Signer implements IKeystoreSigner {
   }
 
   public async signApprove({ walletIndex, tx }: SignApproveParams): Promise<string> {
-    return this.getWallet().signTransaction({
+    return this.getWallet(walletIndex).signTransaction({
       from: await this.getAddressAsync(walletIndex),
       to: tx.to,
       value: tx.value,
