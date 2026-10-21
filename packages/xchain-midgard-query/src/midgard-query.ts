@@ -58,8 +58,9 @@ export class MidgardQuery {
 
       'BSC.BNB': 18,
       'BSC.BUSD-0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56': 18,
-      'BSC.USDT-0x55d398326f99059fF775485246999027B3197955': 6,
-      'BSC.USDC-0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d': 6,
+      // Binance-peg USDT and USDC are 18 decimals. THORNode omits decimals on these pools.
+      'BSC.USDT-0x55d398326f99059fF775485246999027B3197955': 18,
+      'BSC.USDC-0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d': 18,
 
       'GAIA.ATOM': 6,
 
@@ -70,16 +71,17 @@ export class MidgardQuery {
       'BASE.USDC-0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913': 6,
 
       'TRON.TRX': 6,
-      'TRON.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7': 6,
+      'TRON.USDT-TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t': 6,
 
       'XRP.XRP': 6,
 
       'SOL.SOL': 9,
     }
 
-    if (fallbackDecimalMap[assetString]) {
-      return fallbackDecimalMap[assetString]
-    }
+    const known = Object.keys(fallbackDecimalMap).find(
+      (candidate) => candidate.toUpperCase() === assetString.toUpperCase(),
+    )
+    if (known !== undefined) return fallbackDecimalMap[known]
 
     const chainDefaults: Record<string, number> = {
       BTC: 8,
@@ -116,33 +118,30 @@ export class MidgardQuery {
     const errors: string[] = []
 
     const saversPositions: SaversPosition[] = []
-    const allPositionsPromises = saversDetail.pools.map(async (saver) => {
+    for (const saver of saversDetail.pools) {
       const asset = assetFromString(saver.pool) as Asset | TokenAsset
+      if (!asset) continue
 
-      if (asset) {
-        const poolDetail = await this.getPool(saver.pool)
-        const depositAmount = new CryptoAmount(baseAmount(saver.assetAdded).minus(saver.assetWithdrawn), asset)
-        const ownerUnits = Number(saver?.saverUnits)
-        const saverUnits = Number(poolDetail.saversUnits)
-        const assetDepth = Number(poolDetail.saversDepth)
-        const redeemableValue = (ownerUnits / saverUnits) * assetDepth
-        const redeemableAssetAmount = new CryptoAmount(baseAmount(redeemableValue), asset)
-        const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
-        const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
+      // assetRedeem is the 1e8 amount Midgard already calculated. Rebuilding it from
+      // units and depth with Number() drops integers past 2^53.
+      const depositAmount = new CryptoAmount(baseAmount(saver.assetAdded).minus(saver.assetWithdrawn), asset)
+      const redeemableAssetAmount = new CryptoAmount(baseAmount(saver.assetRedeem ? saver.assetRedeem : '0'), asset)
+      const saverGrowth = depositAmount.baseAmount.amount().gt(0)
+        ? redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
+        : undefined
+      const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
 
-        saversPositions.push({
-          depositValue: depositAmount,
-          redeemableValue: redeemableAssetAmount,
-          lastAddHeight: -1,
-          percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
-          ageInYears: saversAge,
-          ageInDays: saversAge * 365,
-          asset,
-          errors,
-        })
-      }
-    })
-    await Promise.all(allPositionsPromises)
+      saversPositions.push({
+        depositValue: depositAmount,
+        redeemableValue: redeemableAssetAmount,
+        lastAddHeight: -1,
+        percentageGrowth: saverGrowth ? saverGrowth.assetAmount.amount().toNumber() : 0,
+        ageInYears: saversAge,
+        ageInDays: saversAge * 365,
+        asset,
+        errors,
+      })
+    }
     return saversPositions
   }
 
@@ -170,7 +169,7 @@ export class MidgardQuery {
   }
 
   /**
-   * Paginated by 50. address, asset, type, and affiliate are comma-separated; asset also accepts synth, nosynth, norune.
+   * Paginated by 50. address, asset, type, txType, and affiliate are comma-separated; asset also accepts synth, nosynth, norune.
    * timestamp/height are older-than; fromTimestamp/fromHeight are newer-than. limit defaults to 50, offset to 0.
    */
   public async getActions({
@@ -178,6 +177,7 @@ export class MidgardQuery {
     txid,
     asset,
     type,
+    txType,
     affiliate,
     limit,
     offset,
@@ -193,6 +193,7 @@ export class MidgardQuery {
       txid,
       asset,
       type,
+      txType,
       affiliate,
       limit,
       offset,

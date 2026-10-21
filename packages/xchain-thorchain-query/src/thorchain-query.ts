@@ -1,4 +1,4 @@
-import { SwapMetadata, Transaction } from '@xchainjs/xchain-midgard'
+import { SwapMetadata } from '@xchainjs/xchain-midgard'
 import { LastBlock, TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
 import {
   Address,
@@ -14,9 +14,7 @@ import {
   TRADE_ASSET_DELIMITER,
   TokenAsset,
   TradeAsset,
-  assetAmount,
   assetFromStringEx,
-  assetToBase,
   assetToString,
   baseAmount,
   isSynthAsset,
@@ -81,7 +79,14 @@ import {
   isAssetRuneNative,
 } from './utils'
 import { getLiquidityProtectionData, getLiquidityUnits, getPoolShare, getSlipOnLiquidity } from './utils/liquidity'
-import { calcNetworkFee, calcOutboundFee, getBaseAmountWithDiffDecimals, getChainAsset } from './utils/utils'
+import {
+  calcNetworkFee,
+  calcOutboundFee,
+  chainNativeDecimals,
+  fromThorBase,
+  getBaseAmountWithDiffDecimals,
+  getChainAsset,
+} from './utils/utils'
 
 const defaultCache = new ThorchainCache()
 
@@ -308,6 +313,8 @@ export class ThorchainQuery {
     const amountInGasAsset = await this.thorchainCache.convert(inbound, chainGasAsset)
     const amountInGasAssetInAsset = amountInGasAsset.assetAmount
     const confConfig = this.chainAttributes[inbound.asset.chain]
+    // Account chains have no block subsidy in this table. Dividing by 0 yields Infinity.
+    if (!(confConfig.blockReward > 0)) return confConfig.avgBlockTimeInSecs
     const requiredConfs = Math.ceil(amountInGasAssetInAsset.amount().div(confConfig.blockReward).toNumber())
     return requiredConfs * confConfig.avgBlockTimeInSecs
   }
@@ -432,7 +439,6 @@ export class ThorchainQuery {
     // Caution Dust Limits: BTC,BCH,LTC chains 10k sats; DOGE 1m Sats; ETH 0 wei; THOR 0 RUNE.
     const assetOrRuneAddress = params.assetAddress ? params.assetAddress : params.runeAddress
     const memberDetail = await this.checkLiquidityPosition(params.asset, assetOrRuneAddress)
-    const dustValues = await this.getDustValues(getChainAsset(params.asset.chain))
     const assetPool = await this.thorchainCache.getPoolForAsset(params.asset)
     const poolShare = getPoolShare(
       {
@@ -461,6 +467,7 @@ export class ThorchainQuery {
     }
     const allInboundDetails = await this.thorchainCache.getInboundDetails()
     const inboundDetails = allInboundDetails[params.asset.chain]
+    const dustValues = this.dustValues(getChainAsset(params.asset.chain), inboundDetails)
     const runeInbound = calcNetworkFee(AssetRuneNative, inboundDetails)
     const assetInbound = calcNetworkFee(params.asset, inboundDetails)
     const runeOutbound = calcOutboundFee(AssetRuneNative, inboundDetails)
@@ -495,52 +502,32 @@ export class ThorchainQuery {
     }
     return estimateLP
   }
-  // Can this become a queried constant? added to inbound_addresses or something
-  private async getDustValues(asset: Asset): Promise<DustValues> {
-    const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(asset)
-    switch (asset.chain) {
-      case 'BTC':
-      case `BCH`:
-      case `LTC`:
-      case 'ZEC':
-        // Dust value: 10k sats / zats (THORNode common UTXO dust)
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0.0001, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      case 'ETH':
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      case 'THOR':
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      case 'GAIA':
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      case 'DOGE':
-        // Dust value: 1 million sats
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0.01, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      case 'AVAX':
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      case 'BSC':
-        return {
-          asset: new AssetCryptoAmount(assetToBase(assetAmount(0, assetDecimals)), asset),
-          rune: new AssetCryptoAmount(assetToBase(assetAmount(0)), AssetRuneNative),
-        }
-      default:
-        throw Error('Unknown chain')
+  // 1e8 fallback when an inbound address omits dust_threshold. Live values as of 2026-10-20.
+  private dustValues(asset: Asset, inbound?: InboundDetail): DustValues {
+    const fallback1e8: Record<string, string> = {
+      BTC: '1000',
+      BCH: '10000',
+      LTC: '100000',
+      DOGE: '100000000',
+      ETH: '1000',
+      AVAX: '100000',
+      BSC: '10000',
+      BASE: '1000',
+      GAIA: '1000000',
+      XRP: '100000000',
+      SOL: '100000',
+      TRON: '10000000',
+      ZEC: '15000',
+      THOR: '0',
+    }
+    const oneE8 =
+      inbound?.dustThreshold ?? (fallback1e8[asset.chain] ? new BigNumber(fallback1e8[asset.chain]) : undefined)
+    if (!oneE8) throw Error(`Unknown chain ${asset.chain}`)
+    const decimals = chainNativeDecimals(asset.chain)
+    const zeroRune = new AssetCryptoAmount(baseAmount(0, THORCHAIN_DECIMAL), AssetRuneNative)
+    return {
+      asset: new AssetCryptoAmount(baseAmount(fromThorBase(oneE8, decimals), decimals), asset),
+      rune: zeroRune,
     }
   }
 
@@ -656,7 +643,8 @@ export class ThorchainQuery {
         aliases: thornameAliases || [],
       }
       return thornameDetails
-    } catch (_e) {
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : 'THORNode is not responding')
       const errorResp: ThornameDetails = {
         name: '',
         expireBlockHeight: 0,
@@ -701,13 +689,16 @@ export class ThorchainQuery {
     )
     const txFee = baseAmount(constantsDetails['NativeTransactionFee'], THORCHAIN_DECIMAL)
     const totalCost = new CryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), AssetRuneNative)
+    // An update that paid TNSFeePerBlock must write the new expiry. Blank leaves the registered height.
+    const expiryField =
+      params.isUpdate && numberOfBlocksToAddToExpirity <= 0
+        ? ''
+        : currentHeightForExpirity + numberOfBlocksToAddToExpirity
     const thornameMemo = `~:${params.name}:${
       params.isUpdate ? params.chain || thornameDetails?.aliases[0].chain : params.chain
     }:${params.isUpdate ? params.chainAddress || thornameDetails?.aliases[0].address : params.chainAddress}:${
       params.owner ? params.owner : ''
-    }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${
-      params.isUpdate ? '' : currentHeightForExpirity + numberOfBlocksToAddToExpirity
-    }`.replace(/^:+|:+$/g, '')
+    }:${params.preferredAsset ? assetToString(params.preferredAsset) : ''}:${expiryField}`.replace(/^:+|:+$/g, '')
     return {
       memo: thornameMemo,
       value: totalCost,
@@ -736,7 +727,9 @@ export class ThorchainQuery {
       asset: string,
       amount: string,
     ): CryptoAmount => {
-      const decimals = asset in pools ? pools[asset].thornodeDetails.decimals || THORCHAIN_DECIMAL : THORCHAIN_DECIMAL
+      // Pools are keyed chain.ticker. Midgard coins use the full symbol, so ETH.USDT-0X… misses ETH.USDT.
+      const pool = pools[asset] ?? pools[asset.split('-')[0]]
+      const decimals = pool?.thornodeDetails.decimals || THORCHAIN_DECIMAL
       return decimals === THORCHAIN_DECIMAL
         ? new CryptoAmount(baseAmount(amount), assetFromStringEx(asset))
         : getCryptoAmountWithNotation(new CryptoAmount(baseAmount(amount), assetFromStringEx(asset)), decimals)
@@ -764,9 +757,20 @@ export class ThorchainQuery {
           }
         }
 
-        const transaction: Transaction = action.out
-          .filter((out) => out.coins[0].asset === assetToString(toAsset))
+        const transaction = (action.out ?? [])
+          .filter((out) => out.coins?.[0]?.asset === assetToString(toAsset))
           .sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+
+        // A refund pays the source asset back, so it has no outbound of the destination asset.
+        if (!transaction?.coins?.[0]) {
+          return {
+            date: new Date(Number(action.date) / 10 ** 6),
+            status: 'pending' as const,
+            fromAsset,
+            toAsset,
+            inboundTx,
+          }
+        }
 
         return {
           date: new Date(Number(action.date) / 10 ** 6),
@@ -940,7 +944,8 @@ export class ThorchainQuery {
       }
 
       const splitedAlias = alias.split(delimiter)
-      const poolId = Object.keys(pools).find((pool) => pool === `${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`)
+      const poolKey = `${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`.toUpperCase()
+      const poolId = Object.keys(pools).find((pool) => pool.toUpperCase() === poolKey)
 
       if (poolId) return pools[poolId].assetString.replace('.', delimiter)
 

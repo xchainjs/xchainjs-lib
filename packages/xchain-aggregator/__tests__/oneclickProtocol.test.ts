@@ -54,6 +54,13 @@ const mockTokens: OneClickToken[] = [
     decimals: 6,
     contractAddress: '17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1',
   },
+  {
+    assetId: 'nep141:usdt.tether-token.near',
+    blockchain: 'near',
+    symbol: 'USDT',
+    decimals: 6,
+    contractAddress: 'usdt.tether-token.near',
+  },
 ]
 
 describe('OneClick utils', () => {
@@ -69,6 +76,9 @@ describe('OneClick utils', () => {
       expect(xChainToOneClickBlockchain('ADA')).toBe('cardano')
       expect(xChainToOneClickBlockchain('SUI')).toBe('sui')
       expect(xChainToOneClickBlockchain('NEAR')).toBe('near')
+      expect(xChainToOneClickBlockchain('BASE')).toBe('base')
+      expect(xChainToOneClickBlockchain('TRON')).toBe('tron')
+      expect(xChainToOneClickBlockchain('ZEC')).toBe('zec')
     })
 
     it('should return null for unsupported chains', () => {
@@ -85,6 +95,9 @@ describe('OneClick utils', () => {
       expect(oneClickBlockchainToXChain('sol')).toBe('SOL')
       expect(oneClickBlockchainToXChain('cardano')).toBe('ADA')
       expect(oneClickBlockchainToXChain('near')).toBe('NEAR')
+      expect(oneClickBlockchainToXChain('base')).toBe('BASE')
+      expect(oneClickBlockchainToXChain('tron')).toBe('TRON')
+      expect(oneClickBlockchainToXChain('zec')).toBe('ZEC')
     })
 
     it('should return null for unknown blockchains', () => {
@@ -119,6 +132,12 @@ describe('OneClick utils', () => {
       const token = findOneClickToken(usdt, mockTokens)
       expect(token).toBeDefined()
       expect(token?.assetId).toBe('nep141:eth-0xdac17f958d2ee523a2206206994597c13d831ec7.omft.near')
+    })
+
+    it('should keep a hyphenated NEAR account id', () => {
+      const usdt = assetFromStringEx('NEAR.USDT-usdt.tether-token.near')
+      const token = findOneClickToken(usdt, mockTokens)
+      expect(token?.contractAddress).toBe('usdt.tether-token.near')
     })
 
     it('should return undefined for synth assets', () => {

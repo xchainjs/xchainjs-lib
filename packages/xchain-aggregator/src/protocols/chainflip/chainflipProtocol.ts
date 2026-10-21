@@ -27,6 +27,8 @@ const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
   switch (network) {
     case Network.Stagenet:
       return 'perseverance'
+    case Network.Testnet:
+      throw new Error('Chainflip has no testnet. Use mainnet or stagenet')
     case Network.Mainnet:
     default:
       return 'mainnet'

@@ -149,13 +149,20 @@ export class Aggregator {
         .map((result) => result.value)
     }
 
-    if (successfulQuotes.length === 0) {
+    const executableQuotes = successfulQuotes.filter(
+      (quote) => quote.canSwap && quote.expectedAmount.baseAmount.amount().gt(0),
+    )
+
+    if (executableQuotes.length === 0) {
+      const reasons = successfulQuotes.flatMap((quote) => quote.errors.map((error) => `${quote.protocol}: ${error}`))
       throw Error(
-        `Cannot estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
+        reasons.length > 0
+          ? reasons.join('\n')
+          : `Cannot estimate swap from ${assetToString(params.fromAsset)} to ${assetToString(params.destinationAsset)}`,
       )
     }
 
-    const bestQuote = successfulQuotes.reduce((best, current) =>
+    const bestQuote = executableQuotes.reduce((best, current) =>
       current.expectedAmount.gt(best.expectedAmount) ? current : best,
     )
 

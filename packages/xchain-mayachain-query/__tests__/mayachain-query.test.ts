@@ -12,6 +12,7 @@ import {
   baseToAsset,
 } from '@xchainjs/xchain-util'
 
+import mockAdapter from '../__mocks__/axios-adapter'
 import mockMayanodeApi from '../__mocks__/mayanode-api'
 import mockMayamidgardApi from '../__mocks__/midgard-api'
 import { BtcAsset, EthAsset, PendingSwap, RuneAsset, SuccessSwap } from '../src/'
@@ -144,7 +145,7 @@ describe('Mayachain-query tests', () => {
     expect(assetToString(quoteSwap.recommendedMinAmountIn?.asset as Asset)).toBe('ETH.ETH')
     expect(quoteSwap.canSwap).toBe(true)
     expect(quoteSwap.errors.length).toBe(0)
-    expect(quoteSwap.warning).toBe('')
+    expect(quoteSwap.warning).toBe('Do not cache this response. Do not send funds after the expiry.')
   })
 
   it('Should return the number of decimals of Mayachain assets', async () => {
@@ -350,5 +351,51 @@ describe('Mayachain-query tests', () => {
         owner: 'mayaOwner',
       }),
     ).rejects.toThrow(/MAYAName already registered/)
+  })
+
+  function quoteParams() {
+    const request = mockAdapter.history.get.find((call) => `${call.url}`.includes('/mayachain/quote'))
+    return new URL(`${request?.url}`).searchParams
+  }
+
+  it('omits an empty affiliate instead of sending basis points alone', async () => {
+    mockAdapter.resetHistory()
+    await mayachainQuery.quoteSwap({
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(1)), BtcAsset),
+      fromAsset: BtcAsset,
+      destinationAsset: EthAsset,
+      affiliateAddress: '   ',
+      affiliateBps: 0,
+    })
+
+    expect(quoteParams().get('affiliate')).toBeNull()
+    expect(quoteParams().get('affiliate_bps')).toBeNull()
+  })
+
+  it('omits basis points when no affiliate name is set', async () => {
+    mockAdapter.resetHistory()
+    await mayachainQuery.quoteSwap({
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(1)), BtcAsset),
+      fromAsset: BtcAsset,
+      destinationAsset: EthAsset,
+      affiliateBps: 0,
+    })
+
+    expect(quoteParams().get('affiliate')).toBeNull()
+    expect(quoteParams().get('affiliate_bps')).toBeNull()
+  })
+
+  it('keeps a named affiliate when the fee is 0 bps', async () => {
+    mockAdapter.resetHistory()
+    await mayachainQuery.quoteSwap({
+      amount: new AssetCryptoAmount(assetToBase(assetAmount(1)), BtcAsset),
+      fromAsset: BtcAsset,
+      destinationAsset: EthAsset,
+      affiliateAddress: 'dx',
+      affiliateBps: 0,
+    })
+
+    expect(quoteParams().get('affiliate')).toBe('dx')
+    expect(quoteParams().get('affiliate_bps')).toBe('0')
   })
 })

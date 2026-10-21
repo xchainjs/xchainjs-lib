@@ -82,19 +82,9 @@ export const getLiquidityProtectionData = (
   return ILProtection
 }
 
-/** @see https://docs.thorchain.org/thorchain-finance/continuous-liquidity-pools#calculating-pool-ownership */
+// Share of LP units after this deposit. Units use the same formula as getLiquidityUnits.
 export const getPoolOwnership = (liquidity: LiquidityToAdd, pool: LiquidityPool): number => {
-  const P = new BigNumber(pool.thornodeDetails.LP_units)
-  const r = liquidity.rune.baseAmount.amount()
-  const a = liquidity.asset.baseAmount.amount()
-  const R = pool.runeBalance.amount().plus(r) // Must add r first
-  const A = pool.assetBalance.amount().plus(a) // Must add t first
-  const part1 = R.plus(a)
-  const part2 = r.times(A)
-
-  const numerator = P.times(part1.plus(part2))
-  const denominator = R.times(A).times(2)
-  const lpUnits = numerator.div(denominator)
-  const percent = lpUnits.div(P)
-  return percent.toNumber()
+  const units = getLiquidityUnits(liquidity, pool)
+  const total = new BigNumber(pool.thornodeDetails.LP_units).plus(units)
+  return units.div(total).toNumber()
 }

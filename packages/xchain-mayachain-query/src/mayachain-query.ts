@@ -1,5 +1,6 @@
 import { Network } from '@xchainjs/xchain-client'
-import { Action, PoolDetail, SwapMetadata, Transaction } from '@xchainjs/xchain-mayamidgard'
+import BigNumber from 'bignumber.js'
+import { Action, PoolDetail, SwapMetadata } from '@xchainjs/xchain-mayamidgard'
 import { QuoteSwapResponse } from '@xchainjs/xchain-mayanode'
 import {
   Address,
@@ -197,7 +198,7 @@ export class MayachainQuery {
       totalSwapSeconds: swapQuote.total_swap_seconds || 0,
       canSwap: !(!swapQuote.memo || errors.length > 0),
       errors,
-      warning: '',
+      warning: swapQuote.warning || '',
     }
   }
 
@@ -210,7 +211,7 @@ export class MayachainQuery {
       [ThorChain]: new AssetCryptoAmount(baseAmount(0, 8), RuneAsset),
       [MayaChain]: new AssetCryptoAmount(baseAmount(0, 10), CacaoAsset),
       [ArbChain]: new AssetCryptoAmount(baseAmount(0, 18), ArbAsset),
-      [ZecChain]: new AssetCryptoAmount(baseAmount(1000, 8), ZecAsset),
+      [ZecChain]: new AssetCryptoAmount(baseAmount(10000, 8), ZecAsset),
       // 1 ADA in lovelace (6 decimals); matches MAYAChain's 1 ADA inbound minimum.
       [AdaChain]: new AssetCryptoAmount(baseAmount(1000000, 6), AdaAsset),
     }
@@ -253,9 +254,10 @@ export class MayachainQuery {
 
     try {
       const assetsDecimals = await this.mayachainCache.getAssetDecimals()
-      if (assetsDecimals[assetNotation]) {
-        return assetsDecimals[assetNotation]
-      }
+      if (assetsDecimals[assetNotation] !== undefined) return assetsDecimals[assetNotation]
+      const upper = assetNotation.toUpperCase()
+      const key = Object.keys(assetsDecimals).find((candidate) => candidate.toUpperCase() === upper)
+      if (key !== undefined && assetsDecimals[key] !== undefined) return assetsDecimals[key]
 
       console.warn(`No decimal mapping found for ${assetNotation}, using chain default`)
       return this.getChainDefaultDecimals(asset.chain)
@@ -274,6 +276,7 @@ export class MayachainQuery {
       MAYA: 10,
       DASH: 8,
       ZEC: 8,
+      ADA: 6,
     }
 
     return chainDefaults[chain] || 8
@@ -312,9 +315,9 @@ export class MayachainQuery {
           if (index === -1) return [...prev, current]
 
           for (let i = 0; i < current.in.length; i++) {
-            prev[index].in[i].coins[0].amount = String(
-              Number(prev[index].in[i].coins[0].amount) + Number(current.in[i].coins[0].amount),
-            )
+            prev[index].in[i].coins[0].amount = new BigNumber(prev[index].in[i].coins[0].amount)
+              .plus(current.in[i].coins[0].amount)
+              .toFixed(0)
           }
           return prev
         }, [] as Action[])
@@ -341,9 +344,20 @@ export class MayachainQuery {
             }
           }
 
-          const transaction: Transaction = action.out
-            .filter((out) => out.coins[0].asset === assetToString(toAsset))
+          const transaction = (action.out ?? [])
+            .filter((out) => out.coins?.[0]?.asset === assetToString(toAsset))
             .sort((out1, out2) => Number(out2.coins[0].amount) - Number(out1.coins[0].amount))[0]
+
+          // A refund pays the source asset back, so it has no outbound of the destination asset.
+          if (!transaction?.coins?.[0]) {
+            return {
+              date: new Date(Number(action.date) / 10 ** 6),
+              status: 'pending' as const,
+              fromAsset,
+              toAsset,
+              inboundTx,
+            }
+          }
 
           return {
             date: new Date(Number(action.date) / 10 ** 6),
@@ -372,7 +386,8 @@ export class MayachainQuery {
       }
 
       const splitedAlias = alias.split(delimiter)
-      const pool = pools.find((pool) => pool.asset.includes(`${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`))
+      const poolKey = `${splitedAlias[0]}.${splitedAlias[1].split('-')[0]}`.toUpperCase()
+      const pool = pools.find((pool) => pool.asset.toUpperCase().includes(poolKey))
 
       if (pool) return pool.asset.replace('.', delimiter)
 
@@ -446,7 +461,9 @@ export class MayachainQuery {
       value: new AssetCryptoAmount(oneTimeFee.plus(totalFeePerBlock).plus(txFee), CacaoAsset),
       memo: `~:${name}:${isUpdate ? chain || details?.aliases[0].chain : chain}:${
         isUpdate ? chainAddress || details?.aliases[0].address : chainAddress
-      }:${isUpdate ? owner || details?.owner : owner}:${preferredAsset ? assetToString(preferredAsset) : 'MAYA.CACAO'}`,
+      }:${isUpdate ? owner || details?.owner : owner}:${
+        preferredAsset ? assetToString(preferredAsset) : isUpdate ? '' : 'MAYA.CACAO'
+      }`,
     }
   }
 

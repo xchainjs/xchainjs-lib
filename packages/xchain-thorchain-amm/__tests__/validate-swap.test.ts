@@ -161,5 +161,39 @@ describe('ThorchainAMM', () => {
       expect(params.get('affiliate')).toBe('odin/thor1s76zxv0kpr78za293kvj0eep4tfqljacknsjzc')
       expect(params.get('affiliate_bps')).toBe('10/20')
     })
+
+    it('omits affiliate params when no affiliate is set', async () => {
+      mockAdapter.resetHistory()
+      const tAvax = assetFromStringEx('AVAX~AVAX')
+      await thorchainAMM.estimateSwap({
+        fromAsset: tAvax,
+        amount: new CryptoAmount(assetToBase(assetAmount('100')), tAvax),
+        destinationAddress: 'thor12fw3syyy4ff78llh3fvhrvdy7xnqlegvru7seg',
+        destinationAsset: assetFromStringEx('ETH~ETH'),
+      })
+
+      const quoteRequest = mockAdapter.history.get.find((request) => `${request.url}`.includes('/thorchain/quote/swap'))
+      const params = new URL(`${quoteRequest?.url}`).searchParams
+      expect(params.get('affiliate')).toBeNull()
+      expect(params.get('affiliate_bps')).toBeNull()
+    })
+
+    it('keeps a named affiliate when the fee is 0 bps', async () => {
+      mockAdapter.resetHistory()
+      const tAvax = assetFromStringEx('AVAX~AVAX')
+      await thorchainAMM.estimateSwap({
+        fromAsset: tAvax,
+        amount: new CryptoAmount(assetToBase(assetAmount('100')), tAvax),
+        destinationAddress: 'thor12fw3syyy4ff78llh3fvhrvdy7xnqlegvru7seg',
+        destinationAsset: assetFromStringEx('ETH~ETH'),
+        affiliateAddress: 'odin',
+        affiliateBps: 0,
+      })
+
+      const quoteRequest = mockAdapter.history.get.find((request) => `${request.url}`.includes('/thorchain/quote/swap'))
+      const params = new URL(`${quoteRequest?.url}`).searchParams
+      expect(params.get('affiliate')).toBe('odin')
+      expect(params.get('affiliate_bps')).toBe('0')
+    })
   })
 })

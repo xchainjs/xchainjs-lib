@@ -25,6 +25,9 @@ const X_TO_ONECLICK: Record<string, string> = {
   ADA: 'cardano',
   SUI: 'sui',
   NEAR: 'near',
+  BASE: 'base',
+  TRON: 'tron',
+  ZEC: 'zec',
 }
 
 const ONECLICK_TO_X: Record<string, string> = Object.fromEntries(Object.entries(X_TO_ONECLICK).map(([k, v]) => [v, k]))
@@ -83,7 +86,9 @@ export const findOneClickToken = (asset: AnyAsset, tokens: OneClickToken[]): One
     if (token.blockchain !== blockchain) return false
 
     if (isTokenAsset(asset)) {
-      const assetContract = asset.symbol.includes('-') ? asset.symbol.split('-')[1] : undefined
+      // ticker + '-' + contract. split('-')[1] drops the rest of a hyphenated NEAR account.
+      const assetContract =
+        asset.symbol.length > asset.ticker.length ? asset.symbol.slice(asset.ticker.length + 1) : undefined
       return assetContract && token.contractAddress
         ? token.contractAddress.toLowerCase() === assetContract.toLowerCase()
         : false

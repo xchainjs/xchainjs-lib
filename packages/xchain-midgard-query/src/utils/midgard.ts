@@ -22,9 +22,10 @@ const defaultMidgardConfig: Record<Network, MidgardConfig> = {
     apiRetries: 3,
     midgardBaseUrls: [],
   },
+  // THORChain has no testnet. An empty list fails the lookup instead of requesting a host named deprecated.
   testnet: {
     apiRetries: 3,
-    midgardBaseUrls: ['deprecated'],
+    midgardBaseUrls: [],
   },
 }
 
@@ -77,7 +78,7 @@ export class Midgard {
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (e.response.status == 404) {
+        if (e?.response?.status == 404) {
           return undefined
         }
       }
@@ -96,7 +97,7 @@ export class Midgard {
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (e.response.status == 404) {
+        if (e?.response?.status == 404) {
           return []
         }
       }

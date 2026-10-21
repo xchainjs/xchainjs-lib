@@ -4,11 +4,11 @@ import { ChainAttributes } from './types'
 
 const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
   BCH: {
-    blockReward: 6.25,
+    blockReward: 3.125,
     avgBlockTimeInSecs: 600,
   },
   BTC: {
-    blockReward: 6.25,
+    blockReward: 3.125,
     avgBlockTimeInSecs: 600,
   },
   ETH: {
@@ -20,7 +20,7 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     avgBlockTimeInSecs: 3,
   },
   LTC: {
-    blockReward: 12.5,
+    blockReward: 6.25,
     avgBlockTimeInSecs: 150,
   },
   DOGE: {
@@ -56,7 +56,7 @@ const DefaultChainAttributes: Record<Chain, ChainAttributes> = {
     avgBlockTimeInSecs: 3,
   },
   ZEC: {
-    blockReward: 1.5625, // Block reward for Zcash (post-Canopy halving)
+    blockReward: 1.5625, // Zcash block subsidy after the November 2024 halving
     avgBlockTimeInSecs: 75,
   },
 }

@@ -149,8 +149,7 @@ export class ThorchainCache {
         !inbound.address ||
         !inbound.gas_rate_units ||
         !inbound.outbound_tx_size ||
-        !inbound.outbound_fee ||
-        !inbound.gas_rate_units
+        !inbound.outbound_fee
       )
         throw new Error(`Missing required inbound info`)
       const details: InboundDetail = {
@@ -164,6 +163,7 @@ export class ThorchainCache {
         haltedChain: inbound?.halted || !!mimirDetails[`HALT${chain}CHAIN`] || !!mimirDetails['HALTCHAINGLOBAL'],
         haltedTrading: !!mimirDetails['HALTTRADING'] || !!mimirDetails[`HALT${chain}TRADING`],
         haltedLP: !!mimirDetails['PAUSELP'] || !!mimirDetails[`PAUSELP${chain}`],
+        dustThreshold: inbound.dust_threshold ? new BigNumber(inbound.dust_threshold) : undefined,
       }
       inboundDetails[chain] = details
     }

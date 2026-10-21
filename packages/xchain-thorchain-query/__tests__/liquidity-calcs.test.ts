@@ -174,7 +174,7 @@ describe(`Liquidity calc tests`, () => {
       rune: new CryptoAmount(assetToBase(assetAmount('50')), AssetRuneNative),
     }
     const onwershipPercent = getPoolOwnership(liquidityToAdd, BusdPool)
-    const correctOwership = 0.00000997909552651165
+    const correctOwership = 0.00001660329967926868
     expect(onwershipPercent).toEqual(correctOwership)
   })
 })
