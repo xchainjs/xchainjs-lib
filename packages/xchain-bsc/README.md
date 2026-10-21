@@ -39,7 +39,7 @@ History and token balances use Etherscan API v2 (`https://api.etherscan.io/v2`).
 
 - This package uses `etherjs` library, by default it uses several providers. (`https://docs.ethers.io/v5/api-keys/`)
 
-### Enviroment variables
+### Environment variables
 
 ```sh
 ETHERSCAN_API_KEY={YOUR_ETHERSCAN_API_KEY}
