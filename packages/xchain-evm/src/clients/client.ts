@@ -416,113 +416,21 @@ export class Client extends BaseXChainClient implements EVMClient {
     throw new Error('No provider available to getFeeRates')
   }
 
-  async prepareTx({
-    sender,
-    asset = this.config.gasAsset,
-    memo,
-    amount,
-    recipient,
-    isMemoEncoded = false,
-  }: TxParams & {
-    sender: Address
-  }): Promise<PreparedTx> {
-    if (asset.chain !== this.chain)
-      throw new Error(`This client can only prepare transactions on chain: ${this.chain}. Bad asset: ${asset.chain}`)
-
-    if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
-    if (!this.validateAddress(recipient)) throw new Error('Invalid recipient address')
-
-    const nonce = await this.getProvider().getTransactionCount(sender)
-
-    if (this.isGasAsset(asset)) {
-      let stringEncodedMemo
-      if (memo) {
-        stringEncodedMemo = toUtf8Bytes(memo)
-      }
-      const parsedMemo = memo ? (isMemoEncoded ? memo : stringEncodedMemo) : undefined
-
-      const tx = new Transaction()
-      tx.chainId = await this.cachedNetworkId.getValue()
-      tx.to = recipient
-      tx.value = amount.amount().toFixed()
-      tx.nonce = nonce
-
-      if (parsedMemo) {
-        tx.data = parsedMemo
-      }
-
-      return {
-        rawUnsignedTx: tx.unsignedSerialized,
-      }
-    } else {
-      const assetAddress = getTokenAddress(asset)
-      if (!assetAddress) throw new Error(`Can't parse address from asset ${assetToString(asset)}`)
-
-      const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
-
-      const amountToTransfer = BigInt(amount.amount().toFixed())
-      const unsignedTx = await contract.getFunction('transfer').populateTransaction(recipient, amountToTransfer)
-
-      unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
-      unsignedTx.nonce = nonce
-
-      const tx = Transaction.from(unsignedTx)
-
-      return {
-        rawUnsignedTx: tx.unsignedSerialized,
-      }
-    }
-  }
-
-  public async prepareApprove({
-    contractAddress,
-    spenderAddress,
-    amount,
-    sender,
-  }: ApproveParams & { sender: string }): Promise<PreparedTx> {
-    if (!this.validateAddress(contractAddress)) throw new Error('Invalid contractAddress address')
-    if (!this.validateAddress(spenderAddress)) throw new Error('Invalid spenderAddress address')
-    if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
-
-    const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
-    const valueToApprove = getApprovalAmount(amount)
-
-    const unsignedTx = await contract
-      .getFunction('approve')
-      .populateTransaction(spenderAddress, BigInt(valueToApprove.toFixed()))
-
-    const nonce = await this.getProvider().getTransactionCount(sender)
-
-    unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
-    unsignedTx.nonce = nonce
-
-    const tx = Transaction.from(unsignedTx)
-
-    return {
-      rawUnsignedTx: tx.unsignedSerialized,
-    }
-  }
-
-  async call<T>({ contractAddress, abi, funcName, funcParams = [], signer }: CallParams): Promise<T> {
-    return call({ provider: this.getProvider(), signer, contractAddress, abi, funcName, funcParams })
-  }
-
-  public async transfer({
-    walletIndex = 0,
-    asset = this.getAssetInfo().asset,
-    memo,
-    amount,
-    recipient,
-    feeOption = FeeOption.Fast,
-    gasPrice,
-    maxFeePerGas,
-    maxPriorityFeePerGas,
-    gasLimit,
-    isMemoEncoded,
-  }: TxParams): Promise<string> {
-    if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
-      throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
-    }
+  private async applyTransferGas(
+    tx: Transaction,
+    {
+      sender,
+      asset = this.config.gasAsset,
+      memo,
+      amount,
+      recipient,
+      feeOption = FeeOption.Fast,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      gasLimit,
+    }: TxParams & { sender: Address },
+  ): Promise<void> {
     const feeData: {
       maxFeePerGas: bigint | null
       maxPriorityFeePerGas: bigint | null
@@ -559,7 +467,7 @@ export class Client extends BaseXChainClient implements EVMClient {
       checkFeeBounds(this.feeBounds, Number(txGasPrice))
       feeData.gasPrice = txGasPrice
     }
-    const sender = await this.getAddressAsync(walletIndex)
+
     let txGasLimit: BigNumber
     if (!gasLimit) {
       try {
@@ -572,17 +480,6 @@ export class Client extends BaseXChainClient implements EVMClient {
     } else {
       txGasLimit = gasLimit
     }
-
-    const { rawUnsignedTx } = await this.prepareTx({
-      sender,
-      recipient,
-      amount,
-      asset,
-      memo,
-      isMemoEncoded,
-    })
-
-    const tx = Transaction.from(rawUnsignedTx)
 
     tx.type = feeData.gasPrice ? 1 : 2
     tx.gasLimit = BigInt(txGasLimit.toFixed())
@@ -597,7 +494,150 @@ export class Client extends BaseXChainClient implements EVMClient {
       tx.maxPriorityFeePerGas = feeData.gasPrice
       tx.gasPrice = null
     }
+  }
 
+  async prepareTx({
+    sender,
+    asset = this.config.gasAsset,
+    memo,
+    amount,
+    recipient,
+    isMemoEncoded = false,
+    feeOption = FeeOption.Fast,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    gasLimit,
+  }: TxParams & {
+    sender: Address
+  }): Promise<PreparedTx> {
+    if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
+      throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
+    }
+    if (asset.chain !== this.chain)
+      throw new Error(`This client can only prepare transactions on chain: ${this.chain}. Bad asset: ${asset.chain}`)
+
+    if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
+    if (!this.validateAddress(recipient)) throw new Error('Invalid recipient address')
+    // ERC-20 transfer() has no memo argument. Attaching nothing would broadcast a plain transfer
+    // that a THORChain or MAYAChain vault cannot credit.
+    if (!this.isGasAsset(asset) && memo) throw new Error('Token transfers cannot include a memo')
+
+    let tx: Transaction
+    if (this.isGasAsset(asset)) {
+      let stringEncodedMemo
+      if (memo) {
+        stringEncodedMemo = toUtf8Bytes(memo)
+      }
+      const parsedMemo = memo ? (isMemoEncoded ? memo : stringEncodedMemo) : undefined
+
+      tx = new Transaction()
+      tx.chainId = await this.cachedNetworkId.getValue()
+      tx.to = recipient
+      tx.value = amount.amount().toFixed()
+
+      if (parsedMemo) {
+        tx.data = parsedMemo
+      }
+    } else {
+      const assetAddress = getTokenAddress(asset)
+      if (!assetAddress) throw new Error(`Can't parse address from asset ${assetToString(asset)}`)
+
+      const contract = new Contract(assetAddress, erc20ABI, this.getProvider())
+
+      const amountToTransfer = BigInt(amount.amount().toFixed())
+      const unsignedTx = await contract.getFunction('transfer').populateTransaction(recipient, amountToTransfer)
+
+      unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
+
+      tx = Transaction.from(unsignedTx)
+    }
+
+    await this.applyTransferGas(tx, {
+      sender,
+      asset,
+      memo,
+      amount,
+      recipient,
+      feeOption,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      gasLimit,
+    })
+    // After fee estimation, so a transaction broadcast while estimating is included.
+    tx.nonce = await this.getProvider().getTransactionCount(sender, 'pending')
+
+    return {
+      rawUnsignedTx: tx.unsignedSerialized,
+    }
+  }
+
+  public async prepareApprove({
+    contractAddress,
+    spenderAddress,
+    amount,
+    sender,
+  }: ApproveParams & { sender: string }): Promise<PreparedTx> {
+    if (!this.validateAddress(contractAddress)) throw new Error('Invalid contractAddress address')
+    if (!this.validateAddress(spenderAddress)) throw new Error('Invalid spenderAddress address')
+    if (!this.validateAddress(sender)) throw new Error('Invalid sender address')
+
+    const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
+    const valueToApprove = getApprovalAmount(amount)
+
+    const unsignedTx = await contract
+      .getFunction('approve')
+      .populateTransaction(spenderAddress, BigInt(valueToApprove.toFixed()))
+
+    const nonce = await this.getProvider().getTransactionCount(sender, 'pending')
+
+    unsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
+    unsignedTx.nonce = nonce
+
+    const tx = Transaction.from(unsignedTx)
+
+    return {
+      rawUnsignedTx: tx.unsignedSerialized,
+    }
+  }
+
+  async call<T>({ contractAddress, abi, funcName, funcParams = [], signer }: CallParams): Promise<T> {
+    return call({ provider: this.getProvider(), signer, contractAddress, abi, funcName, funcParams })
+  }
+
+  public async transfer({
+    walletIndex = 0,
+    asset = this.getAssetInfo().asset,
+    memo,
+    amount,
+    recipient,
+    feeOption = FeeOption.Fast,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    gasLimit,
+    isMemoEncoded,
+  }: TxParams): Promise<string> {
+    if (gasPrice && (maxFeePerGas || maxPriorityFeePerGas)) {
+      throw new Error('gasPrice is not compatible with EIP 1559 (maxFeePerGas and maxPriorityFeePerGas) params')
+    }
+    const sender = await this.getAddressAsync(walletIndex)
+    const { rawUnsignedTx } = await this.prepareTx({
+      sender,
+      recipient,
+      amount,
+      asset,
+      memo,
+      isMemoEncoded,
+      feeOption,
+      gasPrice,
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+      gasLimit,
+    })
+
+    const tx = Transaction.from(rawUnsignedTx)
     const signedTx = await this.getSigner().signTransfer({
       walletIndex,
       tx,
@@ -642,7 +682,7 @@ export class Client extends BaseXChainClient implements EVMClient {
         const contract = new Contract(contractAddress, erc20ABI, this.getProvider())
         const resetUnsignedTx = await contract.getFunction('approve').populateTransaction(spenderAddress, BigInt(0))
         resetUnsignedTx.chainId = BigInt(await this.cachedNetworkId.getValue())
-        resetUnsignedTx.nonce = await this.getProvider().getTransactionCount(sender)
+        resetUnsignedTx.nonce = await this.getProvider().getTransactionCount(sender, 'pending')
 
         const resetTx = Transaction.from(resetUnsignedTx)
         resetTx.type = 1

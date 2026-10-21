@@ -284,7 +284,7 @@ describe('EVM client', () => {
 
       const mockProvider = avaxClient.getProvider()
       const waitSpy = jest.spyOn(mockProvider, 'waitForTransaction').mockResolvedValue({} as never)
-      jest.spyOn(mockProvider, 'getTransactionCount').mockResolvedValue(0)
+      const nonceSpy = jest.spyOn(mockProvider, 'getTransactionCount').mockResolvedValue(0)
       jest.spyOn(mockProvider, 'getNetwork').mockResolvedValue({ chainId: BigInt(43113) } as never)
 
       await avaxClient.approve({
@@ -309,6 +309,7 @@ describe('EVM client', () => {
       // waitForTransaction must be called for the reset tx before the second broadcast
       expect(waitSpy).toHaveBeenCalledTimes(1)
       expect(waitSpy).toHaveBeenCalledWith(fakeTxHash)
+      expect(nonceSpy).toHaveBeenCalledWith(address, 'pending')
 
       getAllowanceSpy.mockRestore()
     })
@@ -384,15 +385,6 @@ describe('EVM client', () => {
     const fakeTxHash = '0xfaketxhash'
     const tip = baseAmount(1_000_000_000, 18)
 
-    const buildMockUnsignedTx = (): string => {
-      const tx = new Transaction()
-      tx.to = recipient
-      tx.chainId = BigInt(43113)
-      tx.nonce = 0
-      tx.value = 1n
-      return tx.unsignedSerialized
-    }
-
     const mockTransferDeps = (baseFeePerGas: bigint | null) => {
       const provider = avaxClient.getProvider()
       jest.spyOn(provider, 'getFeeData').mockResolvedValue({
@@ -402,8 +394,9 @@ describe('EVM client', () => {
         toJSON: () => ({}),
       })
       jest.spyOn(provider, 'getBlock').mockResolvedValue({ baseFeePerGas } as never)
+      jest.spyOn(provider, 'getTransactionCount').mockResolvedValue(0)
+      jest.spyOn(provider, 'getNetwork').mockResolvedValue({ chainId: BigInt(43113) } as never)
       jest.spyOn(avaxClient, 'estimateGasLimit').mockResolvedValue(new BigNumber(21000))
-      jest.spyOn(avaxClient, 'prepareTx').mockResolvedValue({ rawUnsignedTx: buildMockUnsignedTx() })
       jest.spyOn(avaxClient, 'broadcastTx').mockResolvedValue(fakeTxHash)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const signer = (avaxClient as any).getSigner()
@@ -424,6 +417,7 @@ describe('EVM client', () => {
 
       const tx = signedTx(signSpy)
       expect(tx.type).toBe(2)
+      expect(tx.gasLimit).toBe(21000n)
       expect(tx.maxFeePerGas).toBe(1_000_000_000n)
       expect(tx.maxPriorityFeePerGas).toBe(1_000_000_000n)
     })
@@ -441,6 +435,21 @@ describe('EVM client', () => {
       expect(signedTx(signSpy).maxFeePerGas).toBe(2n * 3n + 1_000_000_000n)
     })
 
+    it('requests the pending nonce', async () => {
+      const signSpy = mockTransferDeps(0n)
+      const nonceSpy = jest.spyOn(avaxClient.getProvider(), 'getTransactionCount')
+
+      await avaxClient.transfer({
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxPriorityFeePerGas: tip,
+      })
+
+      expect(signSpy).toHaveBeenCalled()
+      expect(nonceSpy).toHaveBeenCalledWith(address, 'pending')
+    })
+
     it('rejects a positive priority fee when the block has no base fee', async () => {
       const signSpy = mockTransferDeps(null)
 
@@ -453,6 +462,115 @@ describe('EVM client', () => {
         }),
       ).rejects.toThrow('maxPriorityFeePerGas requires a block base fee or maxFeePerGas')
       expect(signSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('prepareTx', () => {
+    const recipient = '0x3624525075b88B24ecc29CE226b0CEc1fFcB6976'
+    const tip = baseAmount(1_000_000_000, 18)
+    const tokenAsset: Asset = {
+      chain: AVAXChain,
+      symbol: 'USDC-0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
+      ticker: 'USDC',
+      type: AssetType.TOKEN,
+    }
+
+    const mockPrepareDeps = (baseFeePerGas: bigint | null = 0n) => {
+      const provider = avaxClient.getProvider()
+      const nonceSpy = jest.spyOn(provider, 'getTransactionCount').mockResolvedValue(4)
+      jest.spyOn(provider, 'getFeeData').mockResolvedValue({
+        gasPrice: 1n,
+        maxFeePerGas: null,
+        maxPriorityFeePerGas: null,
+        toJSON: () => ({}),
+      })
+      jest.spyOn(provider, 'getBlock').mockResolvedValue({ baseFeePerGas } as never)
+      jest.spyOn(provider, 'getNetwork').mockResolvedValue({ chainId: BigInt(43113) } as never)
+      jest.spyOn(avaxClient, 'estimateGasLimit').mockResolvedValue(new BigNumber(21000))
+      return nonceSpy
+    }
+
+    it('serializes the gas limit and EIP-1559 fees', async () => {
+      const nonceSpy = mockPrepareDeps()
+
+      const { rawUnsignedTx } = await avaxClient.prepareTx({
+        sender: address,
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxPriorityFeePerGas: tip,
+      })
+
+      const tx = Transaction.from(rawUnsignedTx)
+      expect(tx.gasLimit).toBe(21000n)
+      expect(tx.type).toBe(2)
+      expect(tx.maxFeePerGas).toBe(1_000_000_000n)
+      expect(tx.maxPriorityFeePerGas).toBe(1_000_000_000n)
+      expect(tx.nonce).toBe(4)
+      expect(nonceSpy).toHaveBeenCalledWith(address, 'pending')
+    })
+
+    it('serializes a legacy gas price', async () => {
+      mockPrepareDeps()
+
+      const { rawUnsignedTx } = await avaxClient.prepareTx({
+        sender: address,
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        gasPrice: baseAmount(1, 18),
+      })
+
+      const tx = Transaction.from(rawUnsignedTx)
+      expect(tx.type).toBe(1)
+      expect(tx.gasLimit).toBe(21000n)
+      expect(tx.gasPrice).toBe(1n)
+    })
+
+    it('uses the default gas limit when estimation fails', async () => {
+      mockPrepareDeps()
+      jest.spyOn(avaxClient, 'estimateGasLimit').mockRejectedValue(new Error('rpc'))
+
+      const { rawUnsignedTx } = await avaxClient.prepareTx({
+        sender: address,
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxPriorityFeePerGas: tip,
+      })
+
+      expect(Transaction.from(rawUnsignedTx).gasLimit).toBe(23000n)
+    })
+
+    it('rejects a token transfer that includes a memo before asking for a nonce', async () => {
+      const nonceSpy = jest.spyOn(avaxClient.getProvider(), 'getTransactionCount').mockResolvedValue(0)
+
+      await expect(
+        avaxClient.prepareTx({
+          sender: address,
+          asset: tokenAsset,
+          amount: baseAmount(1, 6),
+          recipient,
+          memo: '=:ETH.ETH:0x0000000000000000000000000000000000000000',
+        }),
+      ).rejects.toThrow('Token transfers cannot include a memo')
+      expect(nonceSpy).not.toHaveBeenCalled()
+    })
+
+    it('prepareApprove requests the pending nonce', async () => {
+      const provider = avaxClient.getProvider()
+      const nonceSpy = jest.spyOn(provider, 'getTransactionCount').mockResolvedValue(3)
+      jest.spyOn(provider, 'getNetwork').mockResolvedValue({ chainId: BigInt(43113) } as never)
+
+      const { rawUnsignedTx } = await avaxClient.prepareApprove({
+        contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        spenderAddress: recipient,
+        amount: baseAmount(1, 6),
+        sender: address,
+      })
+
+      expect(nonceSpy).toHaveBeenCalledWith(address, 'pending')
+      expect(Transaction.from(rawUnsignedTx).nonce).toBe(3)
     })
   })
 })
