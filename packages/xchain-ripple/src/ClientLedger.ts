@@ -1,9 +1,10 @@
 import AppXrp from '@ledgerhq/hw-app-xrp'
 import { FeeRate, TxHash, TxParams } from '@xchainjs/xchain-client'
-import { Address } from '@xchainjs/xchain-util'
+import { Address, eqAsset } from '@xchainjs/xchain-util'
 import { encode, type Payment } from 'xrpl'
 
 import { Client } from './client'
+import { AssetXRP } from './const'
 import { SignedTransaction, XRPClientParams, XRPTxParams } from './types'
 
 class ClientLedger extends Client {
@@ -66,6 +67,11 @@ class ClientLedger extends Client {
   }
 
   async transfer(params: TxParams & XRPTxParams & { feeRate?: FeeRate }): Promise<TxHash> {
+    // Amount is a drops string. A trust-line asset would be paid as native XRP.
+    if (!eqAsset(params.asset || AssetXRP, AssetXRP)) {
+      throw Error('Asset not supported')
+    }
+
     const fromAddressIndex = params?.walletIndex || 0
 
     const sender = await this.getAddressAsync(fromAddressIndex)
