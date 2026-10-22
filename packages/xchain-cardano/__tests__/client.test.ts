@@ -185,6 +185,39 @@ describe('Cardano client', () => {
       expect(chunks.every((chunk) => new TextEncoder().encode(chunk).length <= 64)).toBe(true)
     })
 
+    it('Should refuse to add change below min-ADA to the fee', async () => {
+      const sender =
+        'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
+      const cardanoLib = await getCardano()
+      const configs = (cardanoLib as unknown as { __configs: { _doNotBurnExtraChange?: boolean }[] }).__configs
+
+      await client.prepareTx({
+        sender,
+        recipient: sender,
+        amount: assetToBase(assetAmount(1, 6)),
+      })
+
+      expect(configs[configs.length - 1]._doNotBurnExtraChange).toBe(true)
+
+      const newBuilder = cardanoLib.TransactionBuilder.new as jest.Mock
+      const implementation = newBuilder.getMockImplementation()
+      newBuilder.mockImplementationOnce((config) => {
+        const builder = implementation?.(config)
+        builder.add_change_if_needed.mockImplementation(() => {
+          throw new Error('Not enough ADA leftover to include a new change output')
+        })
+        return builder
+      })
+
+      await expect(
+        client.prepareTx({
+          sender,
+          recipient: sender,
+          amount: assetToBase(assetAmount(1, 6)),
+        }),
+      ).rejects.toThrow(/would be added to the fee/)
+    })
+
     it('Should reject a prepareTx that drains the wallet (amount > balance - fee)', async () => {
       const sender =
         'addr1qy8ac7qqy0vtulyl7wntmsxc6wex80gvcyjy33qffrhm7sh927ysx5sftuw0dlft05dz3c7revpf7jx0xnlcjz3g69mq4afdhv'
