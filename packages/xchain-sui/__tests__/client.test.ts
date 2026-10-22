@@ -1,4 +1,5 @@
-import { Network } from '@xchainjs/xchain-client'
+import { FeeOption, Network } from '@xchainjs/xchain-client'
+import { Transaction } from '@mysten/sui/transactions'
 import { TokenAsset, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import {
@@ -417,6 +418,72 @@ describe('Sui client', () => {
 
       expect(calls).toBe(2)
       expect(coins).toHaveLength(2)
+    })
+  })
+
+  describe('Gas budget', () => {
+    const phrase = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+    const recipient = '0xdfd6914c9e8f2d2485eb34ce3a4997d15352cd9e2fca6425717815259aeb2459'
+    const coin = {
+      objectId: '0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e',
+      version: '1',
+      digest: '3Tsu2vJq1MbGZkPGSMBrcpBuNJ8qJcGh7ZJbHfY5mEV6',
+    }
+
+    function clientWithGasPrice(gasPrice: bigint) {
+      const client = new Client({ ...defaultSuiParams, phrase, transport: 'jsonRpc' })
+      const internals = client as unknown as {
+        getReferenceGasPrice(): Promise<bigint>
+        getCoins(): Promise<(typeof coin)[]>
+      }
+      internals.getReferenceGasPrice = async () => gasPrice
+      internals.getCoins = async () => [coin]
+      return client
+    }
+
+    async function budgetOf(rawUnsignedTx: string): Promise<string> {
+      const tx = Transaction.from(Uint8Array.from(Buffer.from(rawUnsignedTx, 'hex')))
+      return String(tx.getData().gasData.budget)
+    }
+
+    it('Should reserve the flat budget when that is more than gasPrice * 2000', async () => {
+      const client = clientWithGasPrice(BigInt(1000))
+      const fees = await client.getFees()
+
+      expect(fees[FeeOption.Average].amount().toFixed(0)).toBe('10000000')
+      expect(fees[FeeOption.Fast].amount().toFixed(0)).toBe('10000000')
+      expect(fees[FeeOption.Fastest].amount().toFixed(0)).toBe('10000000')
+
+      const prepared = await client.prepareTx({
+        walletIndex: 0,
+        recipient,
+        amount: baseAmount(1, 9),
+      })
+      await expect(budgetOf(prepared.rawUnsignedTx)).resolves.toBe('10000000')
+    })
+
+    it('Should reserve gasPrice * 2000 when that exceeds the flat budget', async () => {
+      const client = clientWithGasPrice(BigInt(6000))
+      const fees = await client.getFees()
+
+      expect(fees[FeeOption.Average].amount().toFixed(0)).toBe('12000000')
+      const prepared = await client.prepareTx({
+        walletIndex: 0,
+        recipient,
+        amount: baseAmount(1, 9),
+      })
+      await expect(budgetOf(prepared.rawUnsignedTx)).resolves.toBe('12000000')
+    })
+
+    it('Should keep an explicit gas budget', async () => {
+      const client = clientWithGasPrice(BigInt(1000))
+      const prepared = await client.prepareTx({
+        walletIndex: 0,
+        recipient,
+        amount: baseAmount(1, 9),
+        gasBudget: baseAmount(4_000_000, 9),
+      })
+      await expect(budgetOf(prepared.rawUnsignedTx)).resolves.toBe('4000000')
     })
   })
 })
