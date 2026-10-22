@@ -285,8 +285,9 @@ export class Client extends BaseXChainClient {
     }
     if (memo) transferArgs.memo = memo
 
-    // Use callFunction so optional NEP-141 memo is preserved (FungibleToken.transfer omits it).
-    const result = await account.callFunction({
+    // callFunction returns the contract result. ft_transfer returns nothing, so the
+    // hash is on the execution outcome. FungibleToken.transfer also drops memo.
+    const result = await account.callFunctionRaw({
       contractId,
       methodName: 'ft_transfer',
       args: transferArgs,

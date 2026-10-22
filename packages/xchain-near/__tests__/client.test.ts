@@ -289,6 +289,7 @@ describe('NEAR client', () => {
     beforeEach(() => {
       Account.transfer.mockReset()
       Account.callFunction.mockReset()
+      Account.callFunctionRaw.mockReset()
       Account.createTransaction.mockReset()
       Account.createSignedTransaction.mockReset()
     })
@@ -305,9 +306,11 @@ describe('NEAR client', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(client as any).provider = provider
 
-      Account.callFunction
-        .mockResolvedValueOnce({ transaction: { hash: 'storage-hash' } }) // registerAccount
-        .mockResolvedValueOnce({ transaction: { hash: 'ft-hash' } }) // ft_transfer
+      Account.callFunction.mockResolvedValueOnce({ transaction: { hash: 'storage-hash' } })
+      Account.callFunctionRaw.mockResolvedValueOnce({
+        status: { SuccessValue: '' },
+        transaction: { hash: 'ft-hash' },
+      })
 
       const hash = await client.transfer({
         recipient: 'bob.near',
@@ -317,16 +320,15 @@ describe('NEAR client', () => {
       })
 
       expect(hash).toBe('ft-hash')
-      expect(Account.callFunction).toHaveBeenCalledTimes(2)
-      expect(Account.callFunction).toHaveBeenNthCalledWith(
-        1,
+      expect(Account.callFunction).toHaveBeenCalledTimes(1)
+      expect(Account.callFunction).toHaveBeenCalledWith(
         expect.objectContaining({
           contractId: '17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1',
           methodName: 'storage_deposit',
         }),
       )
-      expect(Account.callFunction).toHaveBeenNthCalledWith(
-        2,
+      expect(Account.callFunctionRaw).toHaveBeenCalledTimes(1)
+      expect(Account.callFunctionRaw).toHaveBeenCalledWith(
         expect.objectContaining({
           contractId: '17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1',
           methodName: 'ft_transfer',
@@ -353,7 +355,7 @@ describe('NEAR client', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(client as any).provider = provider
 
-      Account.callFunction.mockResolvedValue({ transaction: { hash: 'wrap-ft-hash' } })
+      Account.callFunctionRaw.mockResolvedValue({ transaction_outcome: { id: 'wrap-ft-hash' } })
 
       const hash = await client.transfer({
         recipient: 'alice.near',
@@ -362,8 +364,9 @@ describe('NEAR client', () => {
       })
 
       expect(hash).toBe('wrap-ft-hash')
-      expect(Account.callFunction).toHaveBeenCalledTimes(1)
-      expect(Account.callFunction).toHaveBeenCalledWith(
+      expect(Account.callFunction).not.toHaveBeenCalled()
+      expect(Account.callFunctionRaw).toHaveBeenCalledTimes(1)
+      expect(Account.callFunctionRaw).toHaveBeenCalledWith(
         expect.objectContaining({
           methodName: 'ft_transfer',
           args: {
