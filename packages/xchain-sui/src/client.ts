@@ -17,14 +17,7 @@ import {
   TxType,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import {
-  Address,
-  TokenAsset,
-  assetFromStringEx,
-  baseAmount,
-  eqAsset,
-  getContractAddressFromAsset,
-} from '@xchainjs/xchain-util'
+import { Address, TokenAsset, assetFromStringEx, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import slip10 from 'micro-key-producer/slip10.js'
 
 import { DEFAULT_GAS_BUDGET, SUIAsset, SUIChain, SUI_DECIMALS, SUI_TYPE_TAG, defaultSuiParams } from './const'
@@ -498,7 +491,7 @@ export class Client extends BaseXChainClient {
       const [coin] = tx.splitCoins(tx.gas, [amount.amount().toString()])
       tx.transferObjects([coin], recipient)
     } else {
-      const coinType = getContractAddressFromAsset(asset as TokenAsset)
+      const coinType = this.coinTypeFromAsset(asset as TokenAsset)
       const tokenCoins = await this.getCoins(sender, coinType)
       if (tokenCoins.length === 0) {
         throw Error('No coins found for the specified asset')
@@ -796,5 +789,11 @@ export class Client extends BaseXChainClient {
     const parts = coinType.split('::')
     const typeName = parts[parts.length - 1] || coinType
     return `${typeName}-${coinType}`
+  }
+
+  // Symbol form is TYPE-0xpackage::module::Type. listCoins needs that 0x prefix.
+  private coinTypeFromAsset(asset: TokenAsset): string {
+    const raw = asset.symbol.slice(asset.ticker.length + 1)
+    return /^0x/i.test(raw) ? raw : `0x${raw}`
   }
 }
