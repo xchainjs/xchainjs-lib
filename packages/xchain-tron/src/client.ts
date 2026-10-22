@@ -24,8 +24,8 @@ import {
   TRON_DERIVATION_PATH,
   TRX_DECIMAL,
   tronExplorerProviders,
-  TRON_DEFAULT_RPC,
-  TRON_USDT_CONTRACT,
+  getTronRpc,
+  getTronUsdtContract,
   TRX_TRANSFER_BANDWIDTH,
   TRC20_TRANSFER_ENERGY,
   TRC20_TRANSFER_ENERGY_EMPTY,
@@ -70,8 +70,14 @@ export abstract class Client extends BaseXChainClient {
 
     super(TRONChain, clientParams)
     this.explorerProviders = clientParams.explorerProviders
-    this.tronWeb = new TronWeb({ fullHost: TRON_DEFAULT_RPC })
-    this.tronGrid = new TronGrid()
+    this.tronWeb = new TronWeb({ fullHost: getTronRpc(this.network) })
+    this.tronGrid = new TronGrid(this.network)
+  }
+
+  public setNetwork(network: Network): void {
+    super.setNetwork(network)
+    this.tronWeb = new TronWeb({ fullHost: getTronRpc(network) })
+    this.tronGrid = new TronGrid(network)
   }
 
   getAssetInfo(): AssetInfo {
@@ -317,12 +323,13 @@ export abstract class Client extends BaseXChainClient {
         })
       }
 
-      const usdtBalance = await this.fetchTokenBalance({ address, contractAddress: TRON_USDT_CONTRACT })
+      const usdtContract = getTronUsdtContract(this.network)
+      const usdtBalance = await this.fetchTokenBalance({ address, contractAddress: usdtContract })
       if (usdtBalance) {
         balances.push({
           asset: {
             chain: TRONChain,
-            symbol: `USDT-${TRON_USDT_CONTRACT}`,
+            symbol: `USDT-${usdtContract}`,
             ticker: 'USDT',
             type: AssetType.TOKEN,
           },
@@ -372,7 +379,7 @@ export abstract class Client extends BaseXChainClient {
       } else {
         // TRC20 transfer. A constant call includes the dynamic energy penalty.
         // Without a recipient or amount, scale the base energy by the contract factor.
-        const contractAddress = asset ? getTRC20AssetContractAddress(asset) : TRON_USDT_CONTRACT
+        const contractAddress = asset ? getTRC20AssetContractAddress(asset) : getTronUsdtContract(this.network)
         if (!contractAddress) {
           throw new Error('TRC20 Asset Contract Address is not valid')
         }

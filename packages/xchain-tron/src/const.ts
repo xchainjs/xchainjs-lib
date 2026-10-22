@@ -34,6 +34,14 @@ const TRON_TESTNET_EXPLORER = new ExplorerProvider(
 )
 
 export const TRON_DEFAULT_RPC = 'https://tron-rpc.publicnode.com'
+// Nile is the testnet the explorer already points at. https://developers.tron.network/docs/networks
+export const TRON_NILE_RPC = 'https://nile.trongrid.io'
+export const TRONGRID_API_BASE_URL = 'https://api.trongrid.io'
+
+export const getTronRpc = (network: Network): string => (network === Network.Testnet ? TRON_NILE_RPC : TRON_DEFAULT_RPC)
+
+export const getTronGridUrl = (network: Network): string =>
+  network === Network.Testnet ? TRON_NILE_RPC : TRONGRID_API_BASE_URL
 
 export const tronExplorerProviders = {
   [Network.Mainnet]: TRON_MAINNET_EXPLORER,
@@ -62,6 +70,11 @@ export const applyDynamicEnergy = (baseEnergy: number, energyFactor: number): nu
 }
 
 export const TRON_USDT_CONTRACT = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
+// Official Nile USDT from the Tron quickstart. The mainnet contract does not exist on Nile.
+export const TRON_NILE_USDT_CONTRACT = 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf'
+
+export const getTronUsdtContract = (network: Network): string =>
+  network === Network.Testnet ? TRON_NILE_USDT_CONTRACT : TRON_USDT_CONTRACT
 
 export const MAX_APPROVAL = '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 export const TRX_FEE_LIMIT = 100_000_000
@@ -73,6 +86,10 @@ export interface TokenMetadata {
 
 export const TRON_TOKEN_WHITELIST: Record<string, TokenMetadata> = {
   [TRON_USDT_CONTRACT]: {
+    symbol: 'USDT',
+    decimals: 6,
+  },
+  [TRON_NILE_USDT_CONTRACT]: {
     symbol: 'USDT',
     decimals: 6,
   },
