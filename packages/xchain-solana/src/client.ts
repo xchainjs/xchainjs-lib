@@ -7,10 +7,10 @@ import {
   TOKEN_PROGRAM_ID,
   TokenAccountNotFoundError,
   TokenInvalidAccountOwnerError,
+  createAssociatedTokenAccountInstruction,
   createTransferInstruction,
   getAccount,
   getAssociatedTokenAddressSync,
-  getOrCreateAssociatedTokenAccount,
 } from '@solana/spl-token'
 import {
   ComputeBudgetProgram,
@@ -40,6 +40,7 @@ import {
 import { getSeed } from '@xchainjs/xchain-crypto'
 import {
   Address,
+  BaseAmount,
   TokenAsset,
   assetAmount,
   assetFromStringEx,
@@ -535,36 +536,22 @@ export class Client extends BaseXChainClient {
   }: TxParams): Promise<string> {
     try {
       const senderKeyPair = this.getPrivateKeyPair(walletIndex || 0)
-      for (const provider of this.providers) {
-        if (asset && !eqAsset(asset, this.getAssetInfo().asset)) {
-          const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
+      const { rawUnsignedTx } = await this.prepareTx({
+        sender: senderKeyPair.publicKey.toBase58(),
+        recipient,
+        asset,
+        amount,
+        memo,
+        limit,
+        priorityFee,
+        allowOwnerOffCurve,
+      })
 
-          await getOrCreateAssociatedTokenAccount(
-            provider.solanaProvider,
-            senderKeyPair,
-            mintAddress,
-            new PublicKey(recipient),
-            allowOwnerOffCurve,
-          )
-        }
+      const transaction = Transaction.from(bs58.decode(rawUnsignedTx))
 
-        const { rawUnsignedTx } = await this.prepareTx({
-          sender: senderKeyPair.publicKey.toBase58(),
-          recipient,
-          asset,
-          amount,
-          memo,
-          limit,
-          priorityFee,
-          allowOwnerOffCurve,
-        })
+      transaction.sign(senderKeyPair)
 
-        const transaction = Transaction.from(bs58.decode(rawUnsignedTx))
-
-        transaction.sign(senderKeyPair)
-
-        return this.broadcastTx(bs58.encode(transaction.serialize()))
-      }
+      return this.broadcastTx(bs58.encode(transaction.serialize()))
     } catch {}
 
     throw Error('No provider able to transfer.')
@@ -618,36 +605,14 @@ export class Client extends BaseXChainClient {
             }),
           )
         } else {
-          const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
-          const fromAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, fromPubkey)
-          let fromTokenAccount: Account
-          try {
-            fromTokenAccount = await getAccount(provider.solanaProvider, fromAssociatedAccount)
-          } catch (error) {
-            if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-              throw Error('Can not find sender Token account')
-            }
-            throw error
-          }
-
-          const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey, allowOwnerOffCurve)
-          let toTokenAccount: Account
-          try {
-            toTokenAccount = await getAccount(provider.solanaProvider, toAssociatedAccount)
-          } catch (error) {
-            if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-              throw Error('Can not find recipient Token account. Create it first')
-            }
-            throw error
-          }
-
-          transaction.add(
-            createTransferInstruction(
-              fromTokenAccount.address,
-              toTokenAccount.address,
-              fromPubkey,
-              amount.amount().toNumber(),
-            ),
+          await this.addSplTransferInstructions(
+            transaction,
+            provider.solanaProvider,
+            fromPubkey,
+            toPubkey,
+            asset as TokenAsset,
+            amount,
+            allowOwnerOffCurve,
           )
         }
 
@@ -684,5 +649,43 @@ export class Client extends BaseXChainClient {
     }
 
     throw Error('No provider able to prepare transaction')
+  }
+
+  // The recipient ATA is created in this transaction when it does not exist yet.
+  protected async addSplTransferInstructions(
+    transaction: Transaction,
+    connection: Connection,
+    fromPubkey: PublicKey,
+    toPubkey: PublicKey,
+    asset: TokenAsset,
+    amount: BaseAmount,
+    allowOwnerOffCurve?: boolean,
+  ): Promise<void> {
+    const mintAddress = new PublicKey(getContractAddressFromAsset(asset))
+    const fromAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, fromPubkey)
+    let fromTokenAccount: Account
+    try {
+      fromTokenAccount = await getAccount(connection, fromAssociatedAccount)
+    } catch (error) {
+      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+        throw Error('Can not find sender Token account')
+      }
+      throw error
+    }
+
+    const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey, allowOwnerOffCurve)
+    try {
+      await getAccount(connection, toAssociatedAccount)
+    } catch (error) {
+      if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
+        transaction.add(createAssociatedTokenAccountInstruction(fromPubkey, toAssociatedAccount, toPubkey, mintAddress))
+      } else {
+        throw error
+      }
+    }
+
+    transaction.add(
+      createTransferInstruction(fromTokenAccount.address, toAssociatedAccount, fromPubkey, amount.amount().toNumber()),
+    )
   }
 }
