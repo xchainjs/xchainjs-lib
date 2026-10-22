@@ -430,24 +430,45 @@ export class Client extends BaseXChainClient {
   }
 
   private async getCoins(owner: string, coinType: string): Promise<GasCoinRef[]> {
-    if (this.transport === 'jsonRpc') {
-      const page = await (await this.getJsonRpcClient()).getCoins({ owner, coinType })
-      return page.data.map((c) => ({
-        objectId: c.coinObjectId,
-        version: c.version,
-        digest: c.digest,
-      }))
+    const coins: GasCoinRef[] = []
+    let cursor: string | null = null
+    // Cap pages so pathological addresses cannot hang the client.
+    for (let pageNum = 0; pageNum < 20; pageNum++) {
+      if (this.transport === 'jsonRpc') {
+        const page = await (
+          await this.getJsonRpcClient()
+        ).getCoins({
+          owner,
+          coinType,
+          cursor: cursor ?? undefined,
+        })
+        coins.push(
+          ...page.data.map((c) => ({
+            objectId: c.coinObjectId,
+            version: c.version,
+            digest: c.digest,
+          })),
+        )
+        if (!page.hasNextPage || !page.nextCursor || page.nextCursor === cursor) break
+        cursor = page.nextCursor
+      } else {
+        const page = await this.requireGrpc().listCoins({
+          owner,
+          coinType,
+          cursor: cursor ?? undefined,
+        })
+        coins.push(
+          ...page.objects.map((c) => ({
+            objectId: c.objectId,
+            version: c.version,
+            digest: c.digest,
+          })),
+        )
+        if (!page.hasNextPage || !page.cursor || page.cursor === cursor) break
+        cursor = page.cursor
+      }
     }
-
-    const page = await this.requireGrpc().listCoins({
-      owner,
-      coinType,
-    })
-    return page.objects.map((c) => ({
-      objectId: c.objectId,
-      version: c.version,
-      digest: c.digest,
-    }))
+    return coins
   }
 
   /** Explicit gas payment. Public gRPC/GraphQL clients cannot resolve transactions. */
