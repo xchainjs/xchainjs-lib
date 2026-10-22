@@ -10,6 +10,7 @@ export const STOKENET_GATEWAY_URL = 'https://stokenet.radixdlt.com'
 export const XRD_DECIMAL = 18
 
 export const RADIX_ASSET_RESOURCE = 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd'
+export const STOKENET_XRD_RESOURCE = 'resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc'
 
 export const AssetXRD: Asset = {
   symbol: `XRD`,
@@ -53,7 +54,7 @@ export const feesEstimationPublicKeys: { [networkId: number]: FeesEstimationPara
   [NetworkId.Stokenet]: {
     from: 'account_tdx_2_12927ya6vxtmhu8w0qkwtumw8kjmlv930agjzezfgg6yp3j6agn3gfc',
     to: 'account_tdx_2_12xnfu4evyseqeq57rzhrh8ls6wy76vvc4jnw2kzx3l5ka7wyddxh3l',
-    resourceAddress: RADIX_ASSET_RESOURCE,
+    resourceAddress: STOKENET_XRD_RESOURCE,
     publicKey: '3ce4d36fd8bf40fa6f9b0cf2ef8d11853d088589ebdc79055f5a0af55bf7e758',
   },
 }
