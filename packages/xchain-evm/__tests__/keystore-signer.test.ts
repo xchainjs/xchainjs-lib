@@ -1,4 +1,4 @@
-import { JsonRpcProvider } from 'ethers'
+import { JsonRpcProvider, Transaction } from 'ethers'
 
 import { KeystoreSigner } from '../src'
 
@@ -37,6 +37,31 @@ describe('EVM KeystoreSigner derivation paths', () => {
     it('derives a different account from the standard path at index 1', () => {
       // Ledger Live index 1 => m/44'/60'/1'/0/0, standard index 1 => m/44'/60'/0'/0/1
       expect(makeSigner(ledgerLivePath).getAddress(1)).not.toBe(makeSigner(standardPath).getAddress(1))
+    })
+  })
+
+  describe('signApprove', () => {
+    const approvalTx = (): Transaction => {
+      const tx = new Transaction()
+      tx.to = '0x3624525075b88B24ecc29CE226b0CEc1fFcB6976'
+      tx.chainId = 43114n
+      tx.nonce = 1
+      tx.gasLimit = 50000n
+      tx.gasPrice = 1n
+      tx.data = '0x095ea7b3'
+      return tx
+    }
+
+    it('signs with the requested account', async () => {
+      const signer = makeSigner(standardPath)
+      const signed = await signer.signApprove({ walletIndex: 1, tx: approvalTx() })
+      expect(Transaction.from(signed).from?.toLowerCase()).toBe(signer.getAddress(1))
+    })
+
+    it('signs account 0 when the index is 0', async () => {
+      const signer = makeSigner(standardPath)
+      const signed = await signer.signApprove({ walletIndex: 0, tx: approvalTx() })
+      expect(Transaction.from(signed).from?.toLowerCase()).toBe(signer.getAddress(0))
     })
   })
 
