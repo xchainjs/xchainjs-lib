@@ -261,4 +261,170 @@ describe('Sui client', () => {
       ).toBeInstanceOf(Client)
     })
   })
+
+  describe('Coin metadata', () => {
+    const owner = '0xdfd6914c9e8f2d2485eb34ce3a4997d15352cd9e2fca6425717815259aeb2459'
+    const usdc = '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC'
+
+    function jsonRpcClient(getCoinMetadata: () => Promise<{ decimals?: number } | null>) {
+      const client = new Client({ ...defaultSuiParams, transport: 'jsonRpc' })
+      const internals = client as unknown as {
+        getJsonRpcClient(): Promise<{
+          getBalance(): Promise<{ totalBalance: string }>
+          getAllBalances(): Promise<{ coinType: string; totalBalance: string }[]>
+          getCoinMetadata(): Promise<{ decimals?: number } | null>
+        }>
+      }
+      internals.getJsonRpcClient = async () => ({
+        getBalance: async () => ({ totalBalance: '5000000000' }),
+        getAllBalances: async () => [{ coinType: usdc, totalBalance: '1000000' }],
+        getCoinMetadata,
+      })
+      return client
+    }
+
+    it('Should keep a token when metadata reports its decimals', async () => {
+      const client = jsonRpcClient(async () => ({ decimals: 6 }))
+      const balances = await client.getBalance(owner)
+      const token = balances.find((balance) => balance.asset.ticker === 'USDC')
+
+      expect(token?.amount.decimal).toBe(6)
+      expect(token?.amount.amount().toFixed(0)).toBe('1000000')
+    })
+
+    it('Should keep a token whose metadata decimals are zero', async () => {
+      const client = jsonRpcClient(async () => ({ decimals: 0 }))
+      const balances = await client.getBalance(owner)
+
+      expect(balances.find((balance) => balance.asset.ticker === 'USDC')?.amount.decimal).toBe(0)
+    })
+
+    it('Should omit a token when JSON-RPC metadata is missing', async () => {
+      const client = jsonRpcClient(async () => null)
+      const balances = await client.getBalance(owner)
+
+      expect(balances.map((balance) => balance.asset.ticker)).toEqual(['SUI'])
+      expect(balances[0].amount.amount().toFixed(0)).toBe('5000000000')
+    })
+
+    it('Should omit a token when JSON-RPC metadata throws', async () => {
+      const client = jsonRpcClient(async () => {
+        throw Error('metadata down')
+      })
+      const balances = await client.getBalance(owner)
+
+      expect(balances.map((balance) => balance.asset.ticker)).toEqual(['SUI'])
+    })
+
+    it('Should omit a token when GraphQL and gRPC metadata both fail', async () => {
+      const client = new Client({ ...defaultSuiParams })
+      const originalFetch = globalThis.fetch
+      globalThis.fetch = async () => {
+        throw Error('graphql down')
+      }
+      try {
+        const internals = client as unknown as {
+          requireGrpc(): {
+            getBalance(): Promise<{ balance: { balance: string } }>
+            listBalances(): Promise<{
+              balances: { coinType: string; balance: string }[]
+              hasNextPage: boolean
+              cursor: null
+            }>
+            getCoinMetadata(): Promise<never>
+          }
+        }
+        internals.requireGrpc = () => ({
+          getBalance: async () => ({ balance: { balance: '5000000000' } }),
+          listBalances: async () => ({
+            balances: [{ coinType: usdc, balance: '1000000' }],
+            hasNextPage: false,
+            cursor: null,
+          }),
+          getCoinMetadata: async () => {
+            throw Error('grpc metadata down')
+          },
+        })
+
+        const balances = await client.getBalance(owner)
+
+        expect(balances.map((balance) => balance.asset.ticker)).toEqual(['SUI'])
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it('Should omit a token when both metadata calls return no decimals', async () => {
+      const client = new Client({ ...defaultSuiParams })
+      const originalFetch = globalThis.fetch
+      globalThis.fetch = (async () => ({
+        ok: true,
+        json: async () => ({ data: { coinMetadata: null } }),
+      })) as typeof fetch
+      try {
+        const internals = client as unknown as {
+          requireGrpc(): {
+            getBalance(): Promise<{ balance: { balance: string } }>
+            listBalances(): Promise<{
+              balances: { coinType: string; balance: string }[]
+              hasNextPage: boolean
+              cursor: null
+            }>
+            getCoinMetadata(): Promise<{ coinMetadata: null }>
+          }
+        }
+        internals.requireGrpc = () => ({
+          getBalance: async () => ({ balance: { balance: '5000000000' } }),
+          listBalances: async () => ({
+            balances: [{ coinType: usdc, balance: '1000000' }],
+            hasNextPage: false,
+            cursor: null,
+          }),
+          getCoinMetadata: async () => ({ coinMetadata: null }),
+        })
+
+        const balances = await client.getBalance(owner)
+
+        expect(balances.map((balance) => balance.asset.ticker)).toEqual(['SUI'])
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it('Should skip a history leg whose decimals are unknown', async () => {
+      const client = new Client({ ...defaultSuiParams, transport: 'jsonRpc' })
+      const internals = client as unknown as {
+        getCoinDecimals(coinType: string): Promise<number | undefined>
+        parseGraphqlTransactionNode(node: unknown): Promise<{
+          from: { amount: { decimal: number } }[]
+          to: { amount: { decimal: number } }[]
+        }>
+        parseJsonRpcTransaction(tx: unknown): Promise<{ from: { amount: { decimal: number } }[] }>
+      }
+      internals.getCoinDecimals = async (coinType) => (coinType === usdc ? undefined : 9)
+
+      const graphqlTx = await internals.parseGraphqlTransactionNode({
+        digest: 'd',
+        effects: {
+          timestamp: null,
+          status: 'success',
+          balanceChanges: {
+            nodes: [
+              { amount: '-1000000', coinType: { repr: usdc }, owner: { address: '0xsender' } },
+              { amount: '1000000000', coinType: { repr: '0x2::sui::SUI' }, owner: { address: '0xrecipient' } },
+            ],
+          },
+        },
+      })
+      const jsonTx = await internals.parseJsonRpcTransaction({
+        digest: 'd',
+        timestampMs: '1',
+        balanceChanges: [{ coinType: usdc, amount: '-1000000', owner: { AddressOwner: '0xsender' } }],
+      })
+
+      expect(graphqlTx.from).toEqual([])
+      expect(graphqlTx.to[0].amount.decimal).toBe(9)
+      expect(jsonTx.from).toEqual([])
+    })
+  })
 })

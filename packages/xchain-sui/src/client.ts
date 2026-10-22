@@ -170,6 +170,7 @@ export class Client extends BaseXChainClient {
         if (assets && !assets.some((a) => eqAsset(a, tokenAsset))) continue
 
         const decimals = await this.getCoinDecimals(coinBalance.coinType)
+        if (decimals === undefined) continue
         balances.push({
           asset: tokenAsset,
           amount: baseAmount(coinBalance.totalBalance, decimals),
@@ -189,7 +190,7 @@ export class Client extends BaseXChainClient {
     })
 
     let cursor: string | null = null
-    const decimalsCache = new Map<string, number>()
+    const decimalsCache = new Map<string, number | undefined>()
     // Cap pages so pathological addresses cannot hang the client.
     for (let pageNum = 0; pageNum < 20; pageNum++) {
       const page = await grpc.listBalances({
@@ -202,11 +203,11 @@ export class Client extends BaseXChainClient {
         const tokenAsset = assetFromStringEx(`SUI.${this.coinTypeToSymbol(coinBalance.coinType)}`) as TokenAsset
         if (assets && !assets.some((a) => eqAsset(a, tokenAsset))) continue
 
-        let decimals = decimalsCache.get(coinBalance.coinType)
-        if (decimals === undefined) {
-          decimals = await this.getCoinDecimals(coinBalance.coinType)
-          decimalsCache.set(coinBalance.coinType, decimals)
+        if (!decimalsCache.has(coinBalance.coinType)) {
+          decimalsCache.set(coinBalance.coinType, await this.getCoinDecimals(coinBalance.coinType))
         }
+        const decimals = decimalsCache.get(coinBalance.coinType)
+        if (decimals === undefined) continue
         balances.push({
           asset: tokenAsset,
           amount: baseAmount(coinBalance.balance, decimals),
@@ -270,7 +271,7 @@ export class Client extends BaseXChainClient {
 
     // GraphQL supports affectedAddress (sent + received). Core API only supports sender.
     const nodes = await this.fetchGraphqlTransactions(address, limit + offset)
-    const decimalsCache = new Map<string, number>()
+    const decimalsCache = new Map<string, number | undefined>()
 
     const txs: Tx[] = []
     for (const node of nodes) {
@@ -399,16 +400,18 @@ export class Client extends BaseXChainClient {
     return BigInt(referenceGasPrice)
   }
 
-  private async getCoinDecimals(coinType: string): Promise<number> {
+  // Missing metadata has no decimals. Callers skip the coin instead of labeling its base units as 9.
+  private async getCoinDecimals(coinType: string): Promise<number | undefined> {
     if (this.isSuiCoinType(coinType)) return SUI_DECIMALS
 
     if (this.transport === 'jsonRpc') {
       try {
         const metadata = await (await this.getJsonRpcClient()).getCoinMetadata({ coinType })
-        return metadata?.decimals ?? SUI_DECIMALS
+        if (metadata?.decimals != null) return metadata.decimals
       } catch {
-        return SUI_DECIMALS
+        // fall through
       }
+      return undefined
     }
 
     // Prefer a single GraphQL metadata lookup (lighter than full CoinInfo over gRPC).
@@ -431,9 +434,9 @@ export class Client extends BaseXChainClient {
       const { coinMetadata } = await this.requireGrpc().getCoinMetadata({ coinType })
       if (coinMetadata?.decimals != null) return coinMetadata.decimals
     } catch {
-      return SUI_DECIMALS
+      return undefined
     }
-    return SUI_DECIMALS
+    return undefined
   }
 
   private async getCoins(owner: string, coinType: string): Promise<GasCoinRef[]> {
@@ -658,7 +661,7 @@ export class Client extends BaseXChainClient {
 
   private async parseGraphqlTransactionNode(
     node: GraphqlTxNode,
-    decimalsCache: Map<string, number> = new Map(),
+    decimalsCache: Map<string, number | undefined> = new Map(),
   ): Promise<Tx> {
     const from: TxFrom[] = []
     const to: TxTo[] = []
@@ -667,11 +670,11 @@ export class Client extends BaseXChainClient {
     for (const change of changes) {
       const coinType = change.coinType?.repr || SUI_TYPE_TAG
       const isSui = this.isSuiCoinType(coinType)
-      let decimals = decimalsCache.get(coinType)
-      if (decimals === undefined) {
-        decimals = await this.getCoinDecimals(coinType)
-        decimalsCache.set(coinType, decimals)
+      if (!decimalsCache.has(coinType)) {
+        decimalsCache.set(coinType, await this.getCoinDecimals(coinType))
       }
+      const decimals = decimalsCache.get(coinType)
+      if (decimals === undefined) continue
       const asset = isSui ? SUIAsset : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(coinType)}`) as TokenAsset)
       const changeAmount = BigInt(change.amount)
       const ownerAddress = change.owner?.address || ''
@@ -709,6 +712,7 @@ export class Client extends BaseXChainClient {
       for (const change of txResponse.balanceChanges) {
         const isSui = this.isSuiCoinType(change.coinType)
         const decimals = await this.getCoinDecimals(change.coinType)
+        if (decimals === undefined) continue
         const asset = isSui
           ? SUIAsset
           : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(change.coinType)}`) as TokenAsset)
