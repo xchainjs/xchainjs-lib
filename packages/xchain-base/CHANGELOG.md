@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.25
+
+### Patch Changes
+
+- 2ce0f23: Reject a positive priority fee when the block has no base fee and no max fee is set, before the transaction is signed.
+
+  Drop unused EVM helpers and share one Etherscan address helper and ERC-20 ABI. Point Arbitrum testnet at Sepolia. Base default-exports its keystore client and declares the Ledger transport dependency. `BASE_DECIMAL` stays as a deprecated alias of `BASE_GAS_ASSET_DECIMAL`.
+
+- Updated dependencies [4fe01d4]
+- Updated dependencies [2ce0f23]
+- Updated dependencies [f5b7fd3]
+  - @xchainjs/xchain-evm@2.1.3
+  - @xchainjs/xchain-evm-providers@2.0.23
+
 ## 1.0.24
 
 ### Patch Changes

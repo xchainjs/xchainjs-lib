@@ -1,5 +1,30 @@
 # Changelog
 
+## 4.0.1
+
+### Patch Changes
+
+- 0632d09: Fix quote, fee, and deposit bugs across the THORChain and MAYAChain query, AMM, and aggregator packages.
+
+  THORChain inbound and outbound fees now use each chain's native decimals, including BASE priced in mwei and EVM gas in wei. Empty affiliate names are omitted from quotes, while a named affiliate with 0 bps is still sent. RUNE-only liquidity sends RUNE, and a withdraw carrier is at least the chain dust amount. MAYA pool prices use human balances, ZEC deposits skip fee-rate lookups, and the aggregator only executes a quote that can swap.
+
+- Updated dependencies [0632d09]
+- Updated dependencies [0632d09]
+- Updated dependencies [0632d09]
+- Updated dependencies [0632d09]
+- Updated dependencies [4fe01d4]
+- Updated dependencies [2ce0f23]
+- Updated dependencies [f5b7fd3]
+  - @xchainjs/xchain-thorchain-query@4.0.1
+  - @xchainjs/xchain-evm@2.1.3
+  - @xchainjs/xchain-base@1.0.25
+  - @xchainjs/xchain-cosmos@3.1.3
+  - @xchainjs/xchain-thorchain@3.1.3
+  - @xchainjs/xchain-avax@2.0.25
+  - @xchainjs/xchain-bsc@2.0.26
+  - @xchainjs/xchain-ethereum@2.1.3
+  - @xchainjs/xchain-wallet@2.0.38
+
 ## 4.0.0
 
 ### Major Changes

@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.0.1
+
+### Patch Changes
+
+- 0632d09: Fix quote, fee, and deposit bugs across the THORChain and MAYAChain query, AMM, and aggregator packages.
+
+  THORChain inbound and outbound fees now use each chain's native decimals, including BASE priced in mwei and EVM gas in wei. Empty affiliate names are omitted from quotes, while a named affiliate with 0 bps is still sent. RUNE-only liquidity sends RUNE, and a withdraw carrier is at least the chain dust amount. MAYA pool prices use human balances, ZEC deposits skip fee-rate lookups, and the aggregator only executes a quote that can swap.
+
+- 0632d09: Price MAYA pools from 1e8 asset depth. Classify a THORChain limit swap as a swap, and read outbound coin amounts as 1e8. Match a swap-history destination to its pool when the memo asset is lowercase.
+- 0632d09: Read a THORChain swap limit from the amount before the streaming fields, and treat the affiliate field as basis points. A swap or withdraw with no outbound no longer throws. MAYA quotes omit an empty affiliate. Saver value uses the redeem amount Midgard reports.
+- Updated dependencies [0632d09]
+  - @xchainjs/xchain-mayamidgard-query@1.0.21
+
 ## 3.0.0
 
 ### Major Changes

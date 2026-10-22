@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.3
+
+### Patch Changes
+
+- efad026: `getTransactionData` no longer throws for successful transactions without transfer events (e.g. zero-amount THORChain/MAYAChain `MsgDeposit` such as UNBOND or LEAVE); it returns the tx with empty `from`/`to` and the chain's native asset. Transactions that failed on-chain now throw an error with their result code.
+
 ## 2.1.2
 
 ### Patch Changes
