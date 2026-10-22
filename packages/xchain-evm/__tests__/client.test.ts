@@ -187,8 +187,31 @@ describe('EVM client', () => {
     expect(newAddress).toBe('0xd7aa2e8903782e02f3cee4fa3f317f5bcfd62a4d')
   })
 
+  it('returns the requested account from setPhrase', () => {
+    const signer = new KeystoreSigner({
+      phrase: newPhrase,
+      provider: ethersJSProviders[Network.Testnet],
+      derivationPath: ethRootDerivationPaths[Network.Testnet],
+    })
+    expect(signer.getAddress(1)).not.toBe(signer.getAddress(0))
+    expect(avaxClient.setPhrase(newPhrase, 1)).toBe(signer.getAddress(1))
+    expect(avaxClient.getAddress(1)).toBe(signer.getAddress(1))
+  })
+
+  it('sets a phrase after purge', () => {
+    avaxClient.purgeClient()
+    const signer = new KeystoreSigner({
+      phrase,
+      provider: ethersJSProviders[Network.Testnet],
+      derivationPath: ethRootDerivationPaths[Network.Testnet],
+    })
+    expect(avaxClient.setPhrase(phrase, 2)).toBe(signer.getAddress(2))
+    expect(avaxClient.getAddress(2)).toBe(signer.getAddress(2))
+  })
+
   it('should fail to set new phrase', async () => {
     expect(() => avaxClient.setPhrase('bad bad phrase')).toThrow()
+    expect(avaxClient.getAddress()).toBe(address)
   })
 
   it('Should get network', () => {

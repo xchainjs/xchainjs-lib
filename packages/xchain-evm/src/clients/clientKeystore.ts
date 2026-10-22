@@ -15,15 +15,15 @@ export class ClientKeystore extends Client {
     this.signer = params.signer
   }
 
-  public setPhrase(phrase: string, walletIndex?: number): Address {
-    super.setPhrase(phrase, walletIndex)
-    this.signer = new KeystoreSigner({
+  public setPhrase(phrase: string, walletIndex = 0): Address {
+    // super.setPhrase calls getAddress, so the signer has to exist first.
+    const signer = new KeystoreSigner({
       phrase,
       provider: this.getProvider(),
       derivationPath: this.rootDerivationPaths ? this.rootDerivationPaths[this.network] : '', // TODO: Avoid this empty derivation path
     })
-
-    return this.signer.getAddress()
+    this.signer = signer
+    return super.setPhrase(phrase, walletIndex)
   }
 
   /**
