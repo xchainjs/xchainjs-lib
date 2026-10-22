@@ -744,16 +744,22 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  private parseCoreTransaction(
+  private async parseCoreTransaction(
     digest: string,
     balanceChanges: { coinType: string; address: string; amount: string }[] | undefined,
     timestamp: string | number | null,
-  ): Tx {
+  ): Promise<Tx> {
     const from: TxFrom[] = []
     const to: TxTo[] = []
+    const decimalsCache = new Map<string, number>()
 
     for (const change of balanceChanges || []) {
       const isSui = this.isSuiCoinType(change.coinType)
+      let decimals = decimalsCache.get(change.coinType)
+      if (decimals === undefined) {
+        decimals = await this.getCoinDecimals(change.coinType)
+        decimalsCache.set(change.coinType, decimals)
+      }
       const asset = isSui
         ? SUIAsset
         : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(change.coinType)}`) as TokenAsset)
@@ -762,13 +768,13 @@ export class Client extends BaseXChainClient {
       if (changeAmount < BigInt(0)) {
         from.push({
           from: change.address,
-          amount: baseAmount((-changeAmount).toString(), SUI_DECIMALS),
+          amount: baseAmount((-changeAmount).toString(), decimals),
           asset,
         })
       } else if (changeAmount > BigInt(0)) {
         to.push({
           to: change.address,
-          amount: baseAmount(changeAmount.toString(), SUI_DECIMALS),
+          amount: baseAmount(changeAmount.toString(), decimals),
           asset,
         })
       }
