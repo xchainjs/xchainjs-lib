@@ -573,4 +573,28 @@ describe('EVM client', () => {
       expect(Transaction.from(rawUnsignedTx).nonce).toBe(3)
     })
   })
+
+  describe('awaitTxConfirmed', () => {
+    const hash = '0xabc'
+
+    it('resolves when the receipt succeeded', async () => {
+      jest.spyOn(avaxClient.getProvider(), 'waitForTransaction').mockResolvedValue({ status: 1 } as never)
+      await expect(avaxClient.awaitTxConfirmed(hash)).resolves.toBeUndefined()
+    })
+
+    it('throws when the receipt reverted', async () => {
+      jest.spyOn(avaxClient.getProvider(), 'waitForTransaction').mockResolvedValue({ status: 0 } as never)
+      await expect(avaxClient.awaitTxConfirmed(hash)).rejects.toThrow(`Transaction ${hash} reverted`)
+    })
+
+    it('throws when the receipt has no status', async () => {
+      jest.spyOn(avaxClient.getProvider(), 'waitForTransaction').mockResolvedValue({ status: null } as never)
+      await expect(avaxClient.awaitTxConfirmed(hash)).rejects.toThrow(`Transaction ${hash} reverted`)
+    })
+
+    it('throws when the transaction is not mined', async () => {
+      jest.spyOn(avaxClient.getProvider(), 'waitForTransaction').mockResolvedValue(null)
+      await expect(avaxClient.awaitTxConfirmed(hash)).rejects.toThrow(`Transaction ${hash} was not confirmed`)
+    })
+  })
 })
