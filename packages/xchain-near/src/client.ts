@@ -359,21 +359,18 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  /** Accepts base64 of a signed transaction, or an unsigned prepared tx signed with wallet index 0. */
+  /** Accepts base64 of a signed transaction, or an unsigned prepared tx signed with its own access key. */
   public async broadcastTx(txHex: string): Promise<TxHash> {
-    const keyPair = this.getKeyPair(0)
-    const sender = this.getImplicitAccountId(0)
-    const account = new Account(sender, this.provider, new KeyPairSigner(keyPair))
+    const bytes = Buffer.from(txHex, 'base64')
 
     let signed: SignedTransaction
     try {
-      signed = decodeSignedTransaction(Buffer.from(txHex, 'base64'))
+      signed = decodeSignedTransaction(bytes)
     } catch {
-      const unsigned = decodeTransaction(Buffer.from(txHex, 'base64'))
-      signed = await account.createSignedTransaction({
-        receiverId: unsigned.receiverId,
-        actions: unsigned.actions,
-      })
+      const unsigned = decodeTransaction(bytes)
+      // Sign the prepared transaction itself so its nonce, block hash, and access key stay put.
+      const keyPair = this.getKeyPairForPublicKey(unsigned.publicKey)
+      signed = (await new KeyPairSigner(keyPair).signTransaction(unsigned)).signedTransaction
     }
 
     const result = await this.provider.sendTransaction(signed)
@@ -422,6 +419,16 @@ export class Client extends BaseXChainClient {
     const { privateKey } = this.getDerivedKey(index)
     // KeyPairEd25519 accepts base58 of the 32-byte secret (pubkey is derived).
     return new KeyPairEd25519(baseEncode(privateKey))
+  }
+
+  // broadcastTx has no wallet index. Match the access key prepareTx embedded.
+  private getKeyPairForPublicKey(publicKey: { toString(): string }): KeyPair {
+    const target = publicKey.toString()
+    for (let index = 0; index <= 100; index++) {
+      const keyPair = this.getKeyPair(index)
+      if (keyPair.getPublicKey().toString() === target) return keyPair
+    }
+    throw Error('No derived key matches the prepared transaction')
   }
 
   private async tryGetSignerAddress(): Promise<string | undefined> {
