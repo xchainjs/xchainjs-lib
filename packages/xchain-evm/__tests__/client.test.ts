@@ -385,12 +385,12 @@ describe('EVM client', () => {
     const fakeTxHash = '0xfaketxhash'
     const tip = baseAmount(1_000_000_000, 18)
 
-    const mockTransferDeps = (baseFeePerGas: bigint | null) => {
+    const mockTransferDeps = (baseFeePerGas: bigint | null, suggestedTip: bigint | null = null) => {
       const provider = avaxClient.getProvider()
       jest.spyOn(provider, 'getFeeData').mockResolvedValue({
         gasPrice: 1n,
         maxFeePerGas: null,
-        maxPriorityFeePerGas: null,
+        maxPriorityFeePerGas: suggestedTip,
         toJSON: () => ({}),
       })
       jest.spyOn(provider, 'getBlock').mockResolvedValue({ baseFeePerGas } as never)
@@ -461,6 +461,51 @@ describe('EVM client', () => {
           maxPriorityFeePerGas: tip,
         }),
       ).rejects.toThrow('maxPriorityFeePerGas requires a block base fee or maxFeePerGas')
+      expect(signSpy).not.toHaveBeenCalled()
+    })
+
+    it('caps a copied priority fee at maxFeePerGas', async () => {
+      const signSpy = mockTransferDeps(0n, 5_000_000_000n)
+
+      await avaxClient.transfer({
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxFeePerGas: baseAmount(1_000_000_000, 18),
+      })
+
+      const tx = signedTx(signSpy)
+      expect(tx.maxFeePerGas).toBe(1_000_000_000n)
+      expect(tx.maxPriorityFeePerGas).toBe(1_000_000_000n)
+    })
+
+    it('keeps a copied priority fee that is within maxFeePerGas', async () => {
+      const signSpy = mockTransferDeps(0n, 2n)
+
+      await avaxClient.transfer({
+        asset: AssetAVAX,
+        amount: baseAmount(1, 18),
+        recipient,
+        maxFeePerGas: baseAmount(10, 18),
+      })
+
+      const tx = signedTx(signSpy)
+      expect(tx.maxFeePerGas).toBe(10n)
+      expect(tx.maxPriorityFeePerGas).toBe(2n)
+    })
+
+    it('rejects an explicit priority fee above maxFeePerGas', async () => {
+      const signSpy = mockTransferDeps(0n)
+
+      await expect(
+        avaxClient.transfer({
+          asset: AssetAVAX,
+          amount: baseAmount(1, 18),
+          recipient,
+          maxFeePerGas: baseAmount(1, 18),
+          maxPriorityFeePerGas: baseAmount(2, 18),
+        }),
+      ).rejects.toThrow('maxPriorityFeePerGas cannot be greater than maxFeePerGas')
       expect(signSpy).not.toHaveBeenCalled()
     })
   })

@@ -455,9 +455,16 @@ export class Client extends BaseXChainClient implements EVMClient {
       } else if (maxPriorityFeePerGas && BigInt(maxPriorityFeePerGas.amount().toFixed()) > BigInt(0)) {
         throw new Error('maxPriorityFeePerGas requires a block base fee or maxFeePerGas')
       }
-      feeData.maxPriorityFeePerGas = maxPriorityFeePerGas
+      const priorityFee = maxPriorityFeePerGas
         ? BigInt(maxPriorityFeePerGas.amount().toFixed())
         : feeInfo.maxPriorityFeePerGas
+      // A node-suggested tip above the caller's cap cannot be signed.
+      if (feeData.maxFeePerGas != null && priorityFee != null && priorityFee > feeData.maxFeePerGas) {
+        if (maxPriorityFeePerGas) throw new Error('maxPriorityFeePerGas cannot be greater than maxFeePerGas')
+        feeData.maxPriorityFeePerGas = feeData.maxFeePerGas
+      } else {
+        feeData.maxPriorityFeePerGas = priorityFee
+      }
     } else {
       const txGasPrice = gasPrice
         ? BigInt(gasPrice.amount().toFixed())
