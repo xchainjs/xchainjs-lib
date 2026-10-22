@@ -219,15 +219,23 @@ export class Client extends BaseXChainClient {
     return balances
   }
 
+  // Sui withdraws the gas budget from the gas coin before splitCoins.
+  // getFees reports that reservation, otherwise balance - fee aborts.
+  private reservedGasBudget(gasPrice: bigint): bigint {
+    const estimated = gasPrice * BigInt(2000)
+    const floor = BigInt(DEFAULT_GAS_BUDGET)
+    return estimated > floor ? estimated : floor
+  }
+
   public async getFees(): Promise<Fees> {
-    const gasPrice = await this.getReferenceGasPrice()
-    const baseFee = BigInt(gasPrice) * BigInt(2000)
+    const reserved = this.reservedGasBudget(await this.getReferenceGasPrice())
+    const fee = baseAmount(reserved.toString(), SUI_DECIMALS)
 
     return {
       type: FeeType.FlatFee,
-      [FeeOption.Average]: baseAmount(baseFee.toString(), SUI_DECIMALS),
-      [FeeOption.Fast]: baseAmount(baseFee.toString(), SUI_DECIMALS),
-      [FeeOption.Fastest]: baseAmount(baseFee.toString(), SUI_DECIMALS),
+      [FeeOption.Average]: fee,
+      [FeeOption.Fast]: fee,
+      [FeeOption.Fastest]: fee,
     }
   }
 
@@ -471,8 +479,8 @@ export class Client extends BaseXChainClient {
     amount: TxParams['amount']
     gasBudget?: TxParams['gasBudget']
   }): Promise<{ bytes: Uint8Array }> {
-    const budget = gasBudget?.amount().toNumber() ?? DEFAULT_GAS_BUDGET
     const gasPrice = await this.getReferenceGasPrice()
+    const budget = gasBudget ? BigInt(gasBudget.amount().toFixed(0)) : this.reservedGasBudget(gasPrice)
     const gasCoins = await this.getCoins(sender, SUI_TYPE_TAG)
     if (gasCoins.length === 0) {
       throw Error('No SUI coins available for gas')
