@@ -486,4 +486,56 @@ describe('Sui client', () => {
       await expect(budgetOf(prepared.rawUnsignedTx)).resolves.toBe('4000000')
     })
   })
+
+  describe('gRPC history decimals', () => {
+    const usdc = '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC'
+
+    it('Should keep each coin decimals when GraphQL history falls back to gRPC', async () => {
+      const client = new Client({ ...defaultSuiParams })
+      const lookedUp: string[] = []
+      const internals = client as unknown as {
+        getTransactionDataFromGraphql(): Promise<never>
+        getCoinDecimals(coinType: string): Promise<number>
+        requireGrpc(): {
+          getTransaction(): Promise<{
+            Transaction: {
+              digest: string
+              timestampMs: string
+              balanceChanges: { coinType: string; address: string; amount: string }[]
+            }
+          }>
+        }
+      }
+      internals.getTransactionDataFromGraphql = async () => {
+        throw Error('graphql down')
+      }
+      internals.getCoinDecimals = async (coinType) => {
+        lookedUp.push(coinType)
+        return coinType === usdc ? 6 : 9
+      }
+      internals.requireGrpc = () => ({
+        getTransaction: async () => ({
+          Transaction: {
+            digest: 'digest',
+            timestampMs: '1700000000000',
+            balanceChanges: [
+              { coinType: '0x2::sui::SUI', address: '0xsender', amount: '-1000000000' },
+              { coinType: usdc, address: '0xsender', amount: '-1000000' },
+              { coinType: usdc, address: '0xrecipient', amount: '1000000' },
+            ],
+          },
+        }),
+      })
+
+      const tx = await client.getTransactionData('digest')
+
+      expect(tx.from[0].amount.decimal).toBe(9)
+      expect(tx.from[0].amount.amount().toFixed(0)).toBe('1000000000')
+      expect(tx.from[1].amount.decimal).toBe(6)
+      expect(tx.from[1].amount.amount().toFixed(0)).toBe('1000000')
+      expect(tx.to[0].amount.decimal).toBe(6)
+      expect(tx.to[0].amount.amount().toFixed(0)).toBe('1000000')
+      expect(lookedUp.filter((coinType) => coinType === usdc)).toEqual([usdc])
+    })
+  })
 })
