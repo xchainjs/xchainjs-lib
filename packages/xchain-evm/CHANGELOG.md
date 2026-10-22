@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.1.3
+
+### Patch Changes
+
+- 4fe01d4: Keystore approvals are signed with the requested wallet index. Every approval was signed by account 0, so any other account failed with a from-address mismatch.
+- 2ce0f23: Reject a positive priority fee when the block has no base fee and no max fee is set, before the transaction is signed.
+
+  Drop unused EVM helpers and share one Etherscan address helper and ERC-20 ABI. Point Arbitrum testnet at Sepolia. Base default-exports its keystore client and declares the Ledger transport dependency. `BASE_DECIMAL` stays as a deprecated alias of `BASE_GAS_ASSET_DECIMAL`.
+
+- f5b7fd3: `prepareTx` now serializes the gas limit and fee fields, so a signed raw transaction is not broadcast with gas limit 0. A token transfer that includes a memo throws before broadcast. Nonces are taken from the pending transaction count.
+- Updated dependencies [2ce0f23]
+  - @xchainjs/xchain-evm-providers@2.0.23
+
 ## 2.1.2
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.2.3
+
+### Patch Changes
+
+- Updated dependencies [efad026]
+  - @xchainjs/xchain-cosmos-sdk@2.1.3
+
 ## 4.2.2
 
 ### Patch Changes

@@ -1,5 +1,34 @@
 # testing-gui
 
+## 1.0.28
+
+### Patch Changes
+
+- Updated dependencies [0632d09]
+- Updated dependencies [0632d09]
+- Updated dependencies [0632d09]
+- Updated dependencies [0632d09]
+- Updated dependencies [4fe01d4]
+- Updated dependencies [2ce0f23]
+- Updated dependencies [f5b7fd3]
+  - @xchainjs/xchain-thorchain-query@4.0.1
+  - @xchainjs/xchain-thorchain-amm@4.0.1
+  - @xchainjs/xchain-mayachain-query@3.0.1
+  - @xchainjs/xchain-mayachain-amm@5.0.1
+  - @xchainjs/xchain-midgard-query@2.0.23
+  - @xchainjs/xchain-mayamidgard-query@1.0.21
+  - @xchainjs/xchain-evm@2.1.3
+  - @xchainjs/xchain-evm-providers@2.0.23
+  - @xchainjs/xchain-arbitrum@2.1.11
+  - @xchainjs/xchain-base@1.0.25
+  - @xchainjs/xchain-cosmos@3.1.3
+  - @xchainjs/xchain-mayachain@4.2.3
+  - @xchainjs/xchain-thorchain@3.1.3
+  - @xchainjs/xchain-avax@2.0.25
+  - @xchainjs/xchain-bsc@2.0.26
+  - @xchainjs/xchain-ethereum@2.1.3
+  - @xchainjs/xchain-wallet@2.0.38
+
 ## 1.0.27
 
 ### Patch Changes
