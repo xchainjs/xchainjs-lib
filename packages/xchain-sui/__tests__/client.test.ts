@@ -1,8 +1,9 @@
 import { Network } from '@xchainjs/xchain-client'
-import { assetToString } from '@xchainjs/xchain-util'
+import { TokenAsset, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
 
 import {
   Client,
+  SUI_TYPE_TAG,
   defaultSuiParams,
   formatGrpcExecutionFailure,
   getDefaultGraphqlUrl,
@@ -259,6 +260,47 @@ describe('Sui client', () => {
           transport: 'jsonRpc',
         }),
       ).toBeInstanceOf(Client)
+    })
+  })
+
+  describe('Token coin type', () => {
+    const phrase = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about'
+    const coinType = '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC'
+    const recipient = '0xdfd6914c9e8f2d2485eb34ce3a4997d15352cd9e2fca6425717815259aeb2459'
+    const coin = {
+      objectId: '0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e',
+      version: '1',
+      digest: '3Tsu2vJq1MbGZkPGSMBrcpBuNJ8qJcGh7ZJbHfY5mEV6',
+    }
+
+    async function prepareToken(symbolCoinType: string): Promise<string[]> {
+      const client = new Client({ ...defaultSuiParams, phrase, transport: 'jsonRpc' })
+      const queried: string[] = []
+      const internals = client as unknown as {
+        getCoins(owner: string, type: string): Promise<(typeof coin)[]>
+        getReferenceGasPrice(): Promise<bigint>
+      }
+      internals.getReferenceGasPrice = async () => 1000n
+      internals.getCoins = async (_owner, type) => {
+        queried.push(type)
+        return [coin]
+      }
+
+      await client.prepareTx({
+        walletIndex: 0,
+        recipient,
+        asset: assetFromStringEx(`SUI.USDC-${symbolCoinType}`) as TokenAsset,
+        amount: baseAmount(1, 6),
+      })
+      return queried
+    }
+
+    it('Should query coins with the 0x coin type carried on the asset', async () => {
+      await expect(prepareToken(coinType)).resolves.toEqual([SUI_TYPE_TAG, coinType])
+    })
+
+    it('Should restore 0x when the asset symbol omitted it', async () => {
+      await expect(prepareToken(coinType.slice(2))).resolves.toEqual([SUI_TYPE_TAG, coinType])
     })
   })
 })
