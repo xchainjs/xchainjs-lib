@@ -29,7 +29,7 @@ This package uses the following service providers:
 
 | Function                  | Service   | Notes                                                                       |
 | ------------------------- | --------- | --------------------------------------------------------------------------- |
-| BNB balances              | Ankr RPC  | https://rpc.ankr.com/bsc (`ANKR_API_KEY`)                                   |
+| BNB balances              | Public RPC, or Ankr | https://bsc-dataseed.binance.org, or https://rpc.ankr.com/bsc when `ANKR_API_KEY` is set |
 | Token balances            | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokenbalance (chainid `56`) |
 | BNB transaction history   | Etherscan | https://docs.etherscan.io/api-reference/endpoint/txlist (chainid `56`)      |
 | Token transaction history | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokentx (chainid `56`)     |

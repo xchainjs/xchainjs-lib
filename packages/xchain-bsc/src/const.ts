@@ -20,7 +20,10 @@ export const AssetBSC: Asset = {
 }
 const ankrApiKey = process.env.ANKR_API_KEY
 
-const BSC_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/bsc/${ankrApiKey}`)
+// Keyless Ankr answers Unauthorized. An unset key must not become the path segment "undefined".
+const bscMainnetRpc = ankrApiKey ? `https://rpc.ankr.com/bsc/${ankrApiKey}` : 'https://bsc-dataseed.binance.org'
+
+const BSC_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(bscMainnetRpc)
 const BSC_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider('https://bsc-testnet.public.blastapi.io')
 
 const ethersJSProviders = {

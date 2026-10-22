@@ -35,7 +35,7 @@ This package uses the following service providers:
 
 | Function                  | Service   | Notes                                                                          |
 | ------------------------- | --------- | ------------------------------------------------------------------------------ |
-| AVAX balances             | Ankr RPC  | https://rpc.ankr.com/avalanche (`ANKR_API_KEY`)                                |
+| AVAX balances             | Public RPC, or Ankr | https://api.avax.network/ext/bc/C/rpc, or https://rpc.ankr.com/avalanche when `ANKR_API_KEY` is set |
 | Token balances            | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokenbalance (chainid `43114`) |
 | AVAX transaction history  | Etherscan | https://docs.etherscan.io/api-reference/endpoint/txlist (chainid `43114`)      |
 | Token transaction history | Etherscan | https://docs.etherscan.io/api-reference/endpoint/tokentx (chainid `43114`)     |
