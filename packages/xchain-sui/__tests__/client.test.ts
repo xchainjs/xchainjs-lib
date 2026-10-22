@@ -261,4 +261,120 @@ describe('Sui client', () => {
       ).toBeInstanceOf(Client)
     })
   })
+
+  describe('Coin pages', () => {
+    const owner = '0xdfd6914c9e8f2d2485eb34ce3a4997d15352cd9e2fca6425717815259aeb2459'
+    const coinType = '0x2::sui::SUI'
+
+    function coin(objectId: string) {
+      return { objectId, version: '1', digest: '3Tsu2vJq1MbGZkPGSMBrcpBuNJ8qJcGh7ZJbHfY5mEV6' }
+    }
+
+    it('Should follow JSON-RPC getCoins cursors past the first page', async () => {
+      const client = new Client({ ...defaultSuiParams, transport: 'jsonRpc' })
+      const cursors: Array<string | null | undefined> = []
+      const internals = client as unknown as {
+        getJsonRpcClient(): Promise<{
+          getCoins(args: { cursor?: string | null }): Promise<{
+            data: { coinObjectId: string; version: string; digest: string }[]
+            hasNextPage: boolean
+            nextCursor: string | null
+          }>
+        }>
+        getCoins(owner: string, type: string): Promise<{ objectId: string }[]>
+      }
+      internals.getJsonRpcClient = async () => ({
+        getCoins: async ({ cursor }) => {
+          cursors.push(cursor)
+          if (!cursor) {
+            return {
+              data: [
+                { coinObjectId: '0x01', version: '1', digest: 'd1' },
+                { coinObjectId: '0x02', version: '2', digest: 'd2' },
+              ],
+              hasNextPage: true,
+              nextCursor: '0x02',
+            }
+          }
+          return {
+            data: [{ coinObjectId: '0x03', version: '3', digest: 'd3' }],
+            hasNextPage: false,
+            nextCursor: null,
+          }
+        },
+      })
+
+      const coins = await internals.getCoins(owner, coinType)
+
+      expect(coins.map((c) => c.objectId)).toEqual(['0x01', '0x02', '0x03'])
+      expect(cursors).toEqual([undefined, '0x02'])
+    })
+
+    it('Should follow gRPC listCoins cursors past the first page', async () => {
+      const client = new Client({ ...defaultSuiParams })
+      const cursors: Array<string | null | undefined> = []
+      const internals = client as unknown as {
+        requireGrpc(): {
+          listCoins(args: { cursor?: string | null }): Promise<{
+            objects: { objectId: string; version: string; digest: string }[]
+            hasNextPage: boolean
+            cursor: string | null
+          }>
+        }
+        getCoins(owner: string, type: string): Promise<{ objectId: string }[]>
+      }
+      internals.requireGrpc = () => ({
+        listCoins: async ({ cursor }) => {
+          cursors.push(cursor)
+          if (!cursor) {
+            return {
+              objects: [coin('0x11'), coin('0x12')],
+              hasNextPage: true,
+              cursor: 'page-2',
+            }
+          }
+          return {
+            objects: [coin('0x13')],
+            hasNextPage: false,
+            cursor: null,
+          }
+        },
+      })
+
+      const coins = await internals.getCoins(owner, coinType)
+
+      expect(coins.map((c) => c.objectId)).toEqual(['0x11', '0x12', '0x13'])
+      expect(cursors).toEqual([undefined, 'page-2'])
+    })
+
+    it('Should stop when a page repeats its cursor', async () => {
+      const client = new Client({ ...defaultSuiParams })
+      let calls = 0
+      const internals = client as unknown as {
+        requireGrpc(): {
+          listCoins(): Promise<{
+            objects: { objectId: string; version: string; digest: string }[]
+            hasNextPage: boolean
+            cursor: string
+          }>
+        }
+        getCoins(owner: string, type: string): Promise<{ objectId: string }[]>
+      }
+      internals.requireGrpc = () => ({
+        listCoins: async () => {
+          calls += 1
+          return {
+            objects: [coin('0x21')],
+            hasNextPage: true,
+            cursor: 'same',
+          }
+        },
+      })
+
+      const coins = await internals.getCoins(owner, coinType)
+
+      expect(calls).toBe(2)
+      expect(coins).toHaveLength(2)
+    })
+  })
 })
