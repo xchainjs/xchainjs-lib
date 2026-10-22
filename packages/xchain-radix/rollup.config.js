@@ -32,7 +32,9 @@ export default {
     resolve({ preferBuiltins: true, browser: true }),
     typescript({
       declarationDir: 'lib',
-      exclude: '__tests__/**',
+      // Mocks sit beside src. Leaving them in the program makes the declaration
+      // root the package directory, so types land in lib/src instead of lib/.
+      exclude: ['__tests__/**', '__mocks__/**'],
     }),
     commonjs(),
     visualizer({
