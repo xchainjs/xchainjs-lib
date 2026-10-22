@@ -83,8 +83,6 @@ export default class Client extends BaseXChainClient {
   }
 
   async getFees(): Promise<Fees> {
-    // TODO: This can fail if we use it on stokenet, we need to replace these with network aware
-    // addresses.
     const feesInXrd = await this.radixSpecificClient
       .constructTransferIntent(
         feesEstimationPublicKeys[this.getRadixNetwork()].from,
@@ -390,7 +388,7 @@ export default class Client extends BaseXChainClient {
       .constructTransferIntent(
         from,
         params.recipient,
-        getAssetResource(params.asset || this.getAssetInfo().asset),
+        getAssetResource(params.asset || this.getAssetInfo().asset, this.getRadixNetwork()),
         transferAmmount,
         this.getRadixPrivateKey(walletIndex).publicKey(),
         params.memo,

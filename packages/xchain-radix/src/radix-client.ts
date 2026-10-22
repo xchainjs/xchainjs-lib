@@ -30,8 +30,9 @@ import {
 } from '@radixdlt/radix-engine-toolkit'
 import { AssetType, assetAmount, assetToBase } from '@xchainjs/xchain-util'
 
-import { AssetXRD, RADIX_ASSET_RESOURCE, RadixChain } from './const'
+import { AssetXRD, RadixChain } from './const'
 import { Balance, CompatibleAsset, MethodToCall } from './types/radix'
+import { getXrdResource } from './utils'
 
 type PartialTransactionPreviewResponse = {
   receipt: {
@@ -121,7 +122,7 @@ export class RadixSpecificClient {
       batch.forEach((item) => {
         if (item.aggregation_level === 'Global') {
           const asset: CompatibleAsset =
-            item.resource_address === RADIX_ASSET_RESOURCE
+            item.resource_address === getXrdResource(this.networkId)
               ? AssetXRD
               : {
                   chain: RadixChain,

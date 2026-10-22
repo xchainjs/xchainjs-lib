@@ -14,7 +14,17 @@ import {
   stateEntityFungiblesPageResponse,
   stateEntityNonFungiblesPageResponse,
 } from '../__mocks__/mocks'
-import { AssetXRD, Client, RadixChain, Tx, TxParams, XRD_DECIMAL, feesEstimationPublicKeys } from '../src'
+import {
+  AssetXRD,
+  Client,
+  RADIX_ASSET_RESOURCE,
+  RadixChain,
+  STOKENET_XRD_RESOURCE,
+  Tx,
+  TxParams,
+  XRD_DECIMAL,
+  feesEstimationPublicKeys,
+} from '../src'
 
 describe('RadixClient Test', () => {
   const createClient = (): Client => {
@@ -248,7 +258,13 @@ describe('RadixClient Test', () => {
   it('client should be able to get filtered balances for an account', async () => {
     const client = createClient()
 
-    const stateEntityFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityFungiblesPageResponse)
+    const fungibles = {
+      ...stateEntityFungiblesPageResponse,
+      items: stateEntityFungiblesPageResponse.items.map((item) =>
+        item.resource_address === RADIX_ASSET_RESOURCE ? { ...item, resource_address: STOKENET_XRD_RESOURCE } : item,
+      ),
+    }
+    const stateEntityFungiblesPageResponseMock = jest.fn().mockResolvedValue(fungibles)
     client.radixClient.gateway.getEntityFungiblesPage = stateEntityFungiblesPageResponseMock
 
     const stateEntityNonFungiblesPageResponseMock = jest.fn().mockResolvedValue(stateEntityNonFungiblesPageResponse)
@@ -337,6 +353,10 @@ describe('RadixClient Test', () => {
     if (instructions[1].kind === 'CallMethod') {
       const takeFromWorktopInstruction = instructions[1] as { kind: 'CallMethod'; methodName: string }
       expect(takeFromWorktopInstruction.methodName).toBe('withdraw')
+    }
+    expect(instructions[2].kind).toBe('TakeFromWorktop')
+    if (instructions[2].kind === 'TakeFromWorktop') {
+      expect(instructions[2].resourceAddress).toBe(STOKENET_XRD_RESOURCE)
     }
   })
 
