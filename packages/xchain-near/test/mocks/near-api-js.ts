@@ -46,11 +46,13 @@ export class Account {
   static createTransaction = jest.fn()
   static createSignedTransaction = jest.fn()
   static callFunction = jest.fn()
+  static callFunctionRaw = jest.fn()
 
   transfer = Account.transfer
   createTransaction = Account.createTransaction
   createSignedTransaction = Account.createSignedTransaction
   callFunction = Account.callFunction
+  callFunctionRaw = Account.callFunctionRaw
 
   constructor(
     public accountId: string,
