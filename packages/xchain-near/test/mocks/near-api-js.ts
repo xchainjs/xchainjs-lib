@@ -36,8 +36,14 @@ export const KeyPair = {
 }
 
 export class KeyPairSigner {
-  // eslint-disable-next-line @typescript-eslint/no-useless-constructor, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
-  constructor(_key: unknown) {}
+  static signTransaction = jest.fn()
+  static lastKey: unknown
+
+  constructor(key: unknown) {
+    KeyPairSigner.lastKey = key
+  }
+
+  signTransaction = KeyPairSigner.signTransaction
 }
 
 export class Account {

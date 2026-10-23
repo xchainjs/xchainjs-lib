@@ -1,6 +1,6 @@
 import { FeeType, Network } from '@xchainjs/xchain-client'
 import { AssetType, TokenAsset, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
-import { Account } from 'near-api-js'
+import { Account, KeyPairSigner, decodeSignedTransaction, decodeTransaction } from 'near-api-js'
 
 import {
   Client,
@@ -282,6 +282,89 @@ describe('NEAR client', () => {
       const balances = await client.getBalance('missing.near', [CIRCLE_USDC])
       expect(balances).toHaveLength(2)
       expect(balances[1].amount.amount().toFixed(0)).toBe('0')
+    })
+  })
+
+  describe('broadcastTx', () => {
+    const payload = Buffer.from('near-tx').toString('base64')
+
+    beforeEach(() => {
+      ;(decodeSignedTransaction as jest.Mock).mockReset()
+      ;(decodeTransaction as jest.Mock).mockReset()
+      KeyPairSigner.signTransaction.mockReset()
+      KeyPairSigner.lastKey = undefined
+    })
+
+    it('Should broadcast a signed transaction without a phrase', async () => {
+      const client = new Client()
+      const signed = { kind: 'signed' }
+      const sendTransaction = jest.fn().mockResolvedValue({ transaction: { hash: 'signed-hash' } })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(client as any).provider = { sendTransaction }
+      ;(decodeSignedTransaction as jest.Mock).mockReturnValue(signed)
+
+      const hash = await client.broadcastTx(payload)
+
+      expect(hash).toBe('signed-hash')
+      expect(sendTransaction).toHaveBeenCalledWith(signed)
+      expect(decodeTransaction).not.toHaveBeenCalled()
+      expect(KeyPairSigner.signTransaction).not.toHaveBeenCalled()
+    })
+
+    it('Should sign an unsigned prepared tx with the access key it already carries', async () => {
+      const client = new Client({ ...defaultNearParams, phrase: PHRASE })
+      const sendTransaction = jest.fn().mockResolvedValue({ transaction: { hash: 'idx-hash' } })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(client as any).provider = { sendTransaction }
+
+      const keyPair = (
+        client as unknown as { getKeyPair(index: number): { getPublicKey(): { toString(): string } } }
+      ).getKeyPair(1)
+      const unsigned = {
+        signerId: 'index-1',
+        publicKey: keyPair.getPublicKey(),
+        nonce: 7n,
+        receiverId: 'bob.near',
+        actions: [{ transfer: { deposit: 1n } }],
+        blockHash: new Uint8Array([1]),
+      }
+      ;(decodeSignedTransaction as jest.Mock).mockImplementation(() => {
+        throw new Error('unsigned')
+      })
+      ;(decodeTransaction as jest.Mock).mockReturnValue(unsigned)
+      KeyPairSigner.signTransaction.mockImplementation(async (transaction: unknown) => ({
+        signedTransaction: { transaction, signature: 'sig' },
+      }))
+
+      const hash = await client.broadcastTx(payload)
+
+      const index0 = (
+        client as unknown as { getKeyPair(index: number): { getPublicKey(): { toString(): string } } }
+      ).getKeyPair(0)
+
+      expect(hash).toBe('idx-hash')
+      expect(KeyPairSigner.signTransaction).toHaveBeenCalledWith(unsigned)
+      // getKeyPair builds a new object on each call, so compare the secret it carries.
+      expect(KeyPairSigner.lastKey).toEqual(keyPair)
+      expect(KeyPairSigner.lastKey).not.toEqual(index0)
+      expect(Account.createSignedTransaction).not.toHaveBeenCalled()
+      expect(sendTransaction.mock.calls[0][0].transaction).toBe(unsigned)
+    })
+
+    it('Should refuse an unsigned tx whose access key is not derived from the phrase', async () => {
+      const client = new Client({ ...defaultNearParams, phrase: PHRASE })
+      const sendTransaction = jest.fn()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(client as any).provider = { sendTransaction }
+      ;(decodeSignedTransaction as jest.Mock).mockImplementation(() => {
+        throw new Error('unsigned')
+      })
+      ;(decodeTransaction as jest.Mock).mockReturnValue({
+        publicKey: { toString: () => 'ed25519:not-ours' },
+      })
+
+      await expect(client.broadcastTx(payload)).rejects.toThrow(/No derived key matches the prepared transaction/)
+      expect(sendTransaction).not.toHaveBeenCalled()
     })
   })
 
