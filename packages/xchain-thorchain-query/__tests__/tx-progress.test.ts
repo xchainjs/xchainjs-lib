@@ -176,14 +176,4 @@ describe('TransactionStage', () => {
     expect(progress.withdrawLpInfo?.withdrawalAmount.baseAmount.decimal).toBe(18)
     expect(progress.withdrawLpInfo?.withdrawalAmount.baseAmount.amount().toString()).toBe('1000000000000000000')
   })
-
-  it('scales a saver withdraw from 1e8 to native decimals', async () => {
-    const progress = await stageFor(
-      observedTx('-:ETH/ETH:1000', [outTx('100000000', 'OUT:one', 'ETH/ETH')]),
-    ).checkTxProgress('hash')
-
-    expect(progress.txType).toBe(TxType.WithdrawSaver)
-    expect(progress.withdrawSaverInfo?.withdrawalAmount.baseAmount.decimal).toBe(18)
-    expect(progress.withdrawSaverInfo?.withdrawalAmount.baseAmount.amount().toString()).toBe('1000000000000000000')
-  })
 })

@@ -6,25 +6,18 @@ import { ThorchainQuery } from '../src/thorchain-query'
 import {
   AddliquidityPosition,
   EstimateAddLP,
-  EstimateAddSaver,
   EstimateWithdrawLP,
-  EstimateWithdrawSaver,
   LiquidityPosition,
-  SaversPosition,
-  SaversWithdraw,
   WithdrawLiquidityPosition,
-  getSaver,
 } from '../src/types'
 import {
   AssetAVAX,
   AssetBCH,
-  AssetBNB,
   AssetBTC,
   AssetDOGE,
   AssetETH,
   AssetLTC,
   AssetRuneNative,
-  assetUSDC,
 } from '../src/utils/const'
 import { Thornode } from '../src/utils/thornode'
 
@@ -87,61 +80,6 @@ function printWithdraw(withdraw: EstimateWithdrawLP) {
       totalDays: withdraw.impermanentLossProtection.totalDays,
     },
     estimatedWait: withdraw.estimatedWaitSeconds.toFixed(),
-  }
-  console.log(expanded)
-}
-
-function printSaver(saver: EstimateAddSaver) {
-  const expanded = {
-    assetAmount: saver.assetAmount.formatedAssetString(),
-    fee: {
-      affiliateFee: saver.fee.affiliate.formatedAssetString(),
-      asset: saver.fee.asset,
-      liquidity: saver.fee.liquidity.formatedAssetString(),
-      outbound: saver.fee.outbound.formatedAssetString(),
-      totalBps: saver.fee.totalBps,
-    },
-    expiry: saver.expiry,
-    toAddress: saver.toAddress,
-    slippage: saver.slipBasisPoints,
-    memo: saver.memo,
-    estimateWaitTime: saver.estimatedWaitTime,
-    recommendedMinAmountIn: saver.recommendedMinAmountIn,
-    canAdd: saver.canAddSaver,
-    errors: saver.errors,
-  }
-  console.log(expanded)
-}
-function printWithdrawSaver(saver: EstimateWithdrawSaver) {
-  const expanded = {
-    assetAmount: saver.expectedAssetAmount.formatedAssetString(),
-    fee: {
-      affiliate: saver.fee.affiliate.formatedAssetString(),
-      liquidityFee: saver.fee.asset,
-      totalFees: saver.fee.outbound.formatedAssetString(),
-      outbound: saver.fee.outbound.formatedAssetString(),
-      totalBps: saver.fee.totalBps,
-    },
-    expiry: saver.expiry,
-    toAddress: saver.toAddress,
-    memo: saver.memo,
-    inboundDelaySeconds: saver.inboundDelaySeconds,
-    inboundDelayBlocks: saver.inboundDelayBlocks,
-    outBoundDelaySeconds: saver.outBoundDelaySeconds,
-    outBoundDelayBlocks: saver.outBoundDelayBlocks,
-    error: saver.errors,
-  }
-  console.log(expanded)
-}
-function printSaversPosition(saver: SaversPosition) {
-  const expanded = {
-    depositValue: saver.depositValue.formatedAssetString(),
-    redeemableValue: saver.redeemableValue.formatedAssetString(),
-    lastAddHeight: saver.lastAddHeight,
-    percentageGrowth: saver.percentageGrowth,
-    ageInYears: saver.ageInYears,
-    ageInDays: saver.ageInDays,
-    asset: saver.asset,
   }
   console.log(expanded)
 }
@@ -277,33 +215,5 @@ describe('Thorchain-query liquidity action end to end Tests', () => {
     const checkLP = await thorchainQuery.estimateWithdrawLP(removeLp)
     printWithdraw(checkLP)
     expect(checkLP).toBeTruthy()
-  })
-
-  it(`Should estimate saver addition`, async () => {
-    try {
-      const addAssetAmount = new CryptoAmount(assetToBase(assetAmount(20, 6)), USDC)
-      const estimateAddsSaver = await thorchainQuery.estimateAddSaver(addAssetAmount)
-      printSaver(estimateAddsSaver)
-    } catch (error) {
-      console.error(error)
-    }
-  })
-  it(`Should estimate saver withdrawal`, async () => {
-    const withdrawPos: SaversWithdraw = {
-      address: `0xe282cb156555bba777f58dfd40671363e4ae0519`,
-      asset: assetUSDC,
-      withdrawBps: 10000,
-    }
-    const estimateWithdrawSaver = await thorchainQuery.estimateWithdrawSaver(withdrawPos)
-    printWithdrawSaver(estimateWithdrawSaver)
-  })
-  it(`Should get saver position`, async () => {
-    const address = '0xe282cb156555bba777f58dfd40671363e4ae0519'
-    const saver: getSaver = {
-      asset: AssetBNB,
-      address: address,
-    }
-    const getSavers = await thorchainQuery.getSaverPosition(saver)
-    printSaversPosition(getSavers)
   })
 })

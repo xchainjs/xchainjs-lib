@@ -1,5 +1,5 @@
 import { SwapMetadata } from '@xchainjs/xchain-midgard'
-import { LastBlock, TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
+import { TradeAccountResponse, TradeUnitResponse } from '@xchainjs/xchain-thornode'
 import {
   Address,
   Asset,
@@ -33,9 +33,7 @@ import {
   CompatibleAsset,
   DustValues,
   EstimateAddLP,
-  EstimateAddSaver,
   EstimateWithdrawLP,
-  EstimateWithdrawSaver,
   InboundDetail,
   LiquidityPosition,
   LoanCloseParams,
@@ -52,8 +50,6 @@ import {
   RunePoolProvider,
   RunePoolProviderParams,
   RunePoolProvidersParams,
-  SaversPosition,
-  SaversWithdraw,
   SwapHistoryParams,
   SwapsHistory,
   ThornameAlias,
@@ -68,7 +64,6 @@ import {
   TxDetails,
   UnitData,
   WithdrawLiquidityPosition,
-  getSaver,
 } from './types'
 import {
   AssetRuneNative,
@@ -529,72 +524,6 @@ export class ThorchainQuery {
       asset: new AssetCryptoAmount(baseAmount(fromThorBase(oneE8, decimals), decimals), asset),
       rune: zeroRune,
     }
-  }
-
-  /** @deprecated Saver quote endpoints were removed from THORNode API in v3.15.0 */
-  public async estimateAddSaver(_addAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
-    throw new Error(
-      'Saver deposit quotes are no longer available. THORNode removed the /quote/saver/deposit endpoint in API v3.15.0.',
-    )
-  }
-
-  /** @deprecated Saver quote endpoints were removed from THORNode API in v3.15.0 */
-  public async estimateWithdrawSaver(_withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
-    throw new Error(
-      'Saver withdraw quotes are no longer available. THORNode removed the /quote/saver/withdraw endpoint in API v3.15.0.',
-    )
-  }
-
-  public async getSaverPosition(params: getSaver): Promise<SaversPosition> {
-    const errors: string[] = []
-    const inboundDetails = await this.thorchainCache.getInboundDetails()
-    const assetDecimals = await this.thorchainCache.midgardQuery.getDecimalForAsset(params.asset)
-    const blockData = (await this.thorchainCache.thornode.getLastBlock()).find(
-      (item: LastBlock) => item.chain === params.asset.chain,
-    )
-    const savers = (await this.thorchainCache.thornode.getSavers(`${params.asset.chain}.${params.asset.symbol}`)).find(
-      (item) => item.asset_address.toLowerCase() === params.address.toLowerCase(),
-    )
-    const pool = (await this.thorchainCache.getPoolForAsset(params.asset)).thornodeDetails
-    if (!savers) errors.push(`Could not find position for ${params.address}`)
-    if (!savers?.last_add_height) errors.push(`Could not find position for ${params.address}`)
-    if (!blockData?.thorchain) errors.push(`Could not get thorchain block height`)
-    const outboundFee = calcOutboundFee(params.asset, inboundDetails[params.asset.chain])
-    const convertToBaseEight = getBaseAmountWithDiffDecimals(outboundFee, 8)
-    if (Number(savers?.asset_redeem_value) < convertToBaseEight.toNumber())
-      errors.push(`Unlikely to withdraw balance as outbound fee is greater than redeemable amount`)
-    const ownerUnits = Number(savers?.units)
-    const lastAdded = Number(savers?.last_add_height)
-    const saverUnits = Number(pool.savers_units)
-    const assetDepth = Number(pool.savers_depth)
-
-    const redeemableValue = (ownerUnits / saverUnits) * assetDepth
-
-    const depositAmount = getCryptoAmountWithNotation(
-      new CryptoAmount(baseAmount(savers?.asset_deposit_value), params.asset),
-      assetDecimals,
-    )
-    const redeemableAssetAmount = getCryptoAmountWithNotation(
-      new CryptoAmount(baseAmount(redeemableValue), params.asset),
-      assetDecimals,
-    )
-
-    const saversAge = (Number(blockData?.thorchain) - lastAdded) / ((365 * 86400) / 6)
-
-    const saverGrowth = redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
-
-    const saversPos: SaversPosition = {
-      depositValue: depositAmount,
-      redeemableValue: redeemableAssetAmount,
-      lastAddHeight: Number(savers?.last_add_height),
-      percentageGrowth: saverGrowth.assetAmount.amount().toNumber(),
-      ageInYears: saversAge,
-      ageInDays: saversAge * 365,
-      asset: params.asset,
-      errors,
-    }
-
-    return saversPos
   }
 
   /** @deprecated Loan endpoints were removed from THORNode API in v3.15.0 */

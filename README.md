@@ -81,7 +81,7 @@ Examples:
 
 - [Estimate Thorchain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/estimate-swap)
 - [THORChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-swap)
-- [Liquidity and savers](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/liquidity)
+- [Liquidity](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/liquidity)
 - [Loans](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/loans)
 - [THORChain transaction status](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/check-tx)
 - [MAYAChain swap](https://codesandbox.io/p/devbox/github/xchainjs/xchainjs-lib/tree/master/examples/do-maya-swap)

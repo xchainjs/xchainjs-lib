@@ -5,7 +5,6 @@ import {
   MidgardApi,
   PoolDetail,
   ReverseTHORNames,
-  SaverDetails,
   THORNameDetails,
 } from '@xchainjs/xchain-midgard'
 import axios from 'axios'
@@ -41,19 +40,6 @@ export class Midgard {
     this.midgardApis = this.config.midgardBaseUrls.map(
       (url: string) => new MidgardApi(new Configuration({ basePath: url })),
     )
-  }
-
-  // comma-separated addresses
-  public async getSavers(address: string): Promise<SaverDetails> {
-    for (const api of this.midgardApis) {
-      try {
-        const saverDetails = (await api.getSaverDetail(address)).data
-        return saverDetails
-      } catch (_e) {
-        // console.error(_e)
-      }
-    }
-    throw Error(`Midgard not responding`)
   }
 
   async getPools(): Promise<PoolDetail[]> {
