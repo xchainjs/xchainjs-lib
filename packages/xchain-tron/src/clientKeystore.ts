@@ -4,7 +4,7 @@ import { TronWeb } from 'tronweb'
 
 import { TronTransaction, TronSignedTransaction, TRONClientParams } from './types'
 import { Client, defaultTRONParams } from './client'
-import { TRON_DEFAULT_RPC } from './const'
+import { getTronRpc } from './const'
 
 export class ClientKeystore extends Client {
   constructor(params: TRONClientParams = defaultTRONParams) {
@@ -27,7 +27,7 @@ export class ClientKeystore extends Client {
     const privateKeyHex = Buffer.from(derived.privateKey).toString('hex')
 
     const isolatedTronWeb = new TronWeb({
-      fullHost: TRON_DEFAULT_RPC,
+      fullHost: getTronRpc(this.network),
       privateKey: privateKeyHex,
     })
 

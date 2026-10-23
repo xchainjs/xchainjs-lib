@@ -1,21 +1,21 @@
-import { Tx, TxType, TxFrom, TxTo, TxsPage } from '@xchainjs/xchain-client'
+import { Network, Tx, TxType, TxFrom, TxTo, TxsPage } from '@xchainjs/xchain-client'
 import { AssetType, baseAmount } from '@xchainjs/xchain-util'
 import TW, { TronWeb } from 'tronweb'
 import type { TronGridAccountResponse, TronGridTransaction } from './types'
-import { AssetTRX, TRX_DECIMAL, TRON_DEFAULT_RPC } from '../../const'
-
-const TRONGRID_API_BASE_URL = 'https://api.trongrid.io'
+import { AssetTRX, TRX_DECIMAL, getTronGridUrl, getTronRpc } from '../../const'
 
 export class TronGrid {
   public tronWeb: TronWeb
+  private apiBaseUrl: string
 
-  constructor() {
-    this.tronWeb = new TronWeb({ fullHost: TRON_DEFAULT_RPC })
+  constructor(network: Network = Network.Mainnet) {
+    this.apiBaseUrl = getTronGridUrl(network)
+    this.tronWeb = new TronWeb({ fullHost: getTronRpc(network) })
   }
 
   public async getAccount(address: string) {
     try {
-      const response = await fetch(`${TRONGRID_API_BASE_URL}/v1/accounts/${address}`)
+      const response = await fetch(`${this.apiBaseUrl}/v1/accounts/${address}`)
 
       if (!response.ok) {
         throw new Error(`TronGrid API error: ${response.status} ${response.statusText}`)
@@ -51,7 +51,7 @@ export class TronGrid {
 
   public async getTransactions(params: { address: string; limit: number; offset: number }): Promise<TxsPage> {
     const { address, offset, limit } = params
-    const url = `https://api.trongrid.io/v1/accounts/${address}/transactions?limit=${limit}&start=${offset}`
+    const url = `${this.apiBaseUrl}/v1/accounts/${address}/transactions?limit=${limit}&start=${offset}`
     const res = await fetch(url)
     const { data }: { data: TronGridTransaction[] } = await res.json()
 
@@ -129,7 +129,7 @@ export class TronGrid {
   }
 
   public async getTransactionData(txId: string): Promise<Tx> {
-    const url = `${TRONGRID_API_BASE_URL}/walletsolidity/gettransactionbyid`
+    const url = `${this.apiBaseUrl}/walletsolidity/gettransactionbyid`
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
