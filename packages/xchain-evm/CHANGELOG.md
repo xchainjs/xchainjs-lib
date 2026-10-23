@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.4
+
+### Patch Changes
+
+- 0d16f1e: `awaitTxConfirmed` rejects a mined revert and a transaction that never produces a receipt. A receipt is confirmed only when its status is success.
+
 ## 2.1.3
 
 ### Patch Changes
