@@ -63,14 +63,23 @@ const Cardano = {
     }),
   },
   TransactionBuilderConfigBuilder: {
-    new: jest.fn().mockReturnValue({
-      fee_algo: jest.fn().mockReturnThis(),
-      pool_deposit: jest.fn().mockReturnThis(),
-      key_deposit: jest.fn().mockReturnThis(),
-      coins_per_utxo_byte: jest.fn().mockReturnThis(),
-      max_value_size: jest.fn().mockReturnThis(),
-      max_tx_size: jest.fn().mockReturnThis(),
-      build: jest.fn().mockReturnValue({}),
+    new: jest.fn().mockImplementation(() => {
+      const config = {
+        _doNotBurnExtraChange: false,
+        fee_algo: jest.fn().mockReturnThis(),
+        pool_deposit: jest.fn().mockReturnThis(),
+        key_deposit: jest.fn().mockReturnThis(),
+        coins_per_utxo_byte: jest.fn().mockReturnThis(),
+        max_value_size: jest.fn().mockReturnThis(),
+        max_tx_size: jest.fn().mockReturnThis(),
+        do_not_burn_extra_change: jest.fn(function (value) {
+          this._doNotBurnExtraChange = value
+          return this
+        }),
+        build: jest.fn().mockReturnValue({}),
+      }
+      Cardano.__configs.push(config)
+      return config
     }),
   },
   LinearFee: {
@@ -202,5 +211,6 @@ const Cardano = {
 // Records every TransactionBuilder created during a test so assertions can inspect the auxiliary
 // data attached to the builder for a given prepareTx/prepareMaxTx call.
 Cardano.__builders = []
+Cardano.__configs = []
 
 module.exports = Cardano

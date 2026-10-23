@@ -394,7 +394,19 @@ export class Client extends BaseXChainClient {
       )
     }
 
-    txBuilder.add_change_if_needed(senderAddr)
+    try {
+      txBuilder.add_change_if_needed(senderAddr)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      // With do_not_burn_extra_change, CSL throws instead of adding this leftover to the fee.
+      if (message.includes('Not enough ADA leftover to include a new change output')) {
+        throw Error(
+          `Change is below the minimum ADA for an output and would be added to the fee. ` +
+            `Reduce the amount or use prepareMaxTx. ${message}`,
+        )
+      }
+      throw error
+    }
 
     return {
       rawUnsignedTx: txBuilder.build_tx().to_hex(),
@@ -635,6 +647,8 @@ export class Client extends BaseXChainClient {
         .coins_per_utxo_byte(cardanoLib.BigNum.from_str(protocolParams.coins_per_utxo_size!))
         .max_value_size(parseInt(protocolParams.max_val_size!))
         .max_tx_size(protocolParams.max_tx_size)
+        // Leftover below a change output's min-ADA must not be added to the fee.
+        .do_not_burn_extra_change(true)
         .build(),
     )
   }
