@@ -1,5 +1,17 @@
 # Changelog
 
+## 5.0.2
+
+### Patch Changes
+
+- Updated dependencies [4cba811]
+- Updated dependencies [0d16f1e]
+  - @xchainjs/xchain-cardano@1.2.7
+  - @xchainjs/xchain-evm@2.1.4
+  - @xchainjs/xchain-arbitrum@2.1.12
+  - @xchainjs/xchain-ethereum@2.1.4
+  - @xchainjs/xchain-wallet@2.0.39
+
 ## 5.0.1
 
 ### Patch Changes

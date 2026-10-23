@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.0.2
+
+### Patch Changes
+
+- Updated dependencies [0d16f1e]
+- Updated dependencies [0bdb640]
+- Updated dependencies [0baa9ff]
+  - @xchainjs/xchain-evm@2.1.4
+  - @xchainjs/xchain-ripple@1.0.22
+  - @xchainjs/xchain-tron@3.0.13
+  - @xchainjs/xchain-avax@2.0.26
+  - @xchainjs/xchain-base@1.0.26
+  - @xchainjs/xchain-bsc@2.0.27
+  - @xchainjs/xchain-ethereum@2.1.4
+  - @xchainjs/xchain-wallet@2.0.39
+
 ## 4.0.1
 
 ### Patch Changes

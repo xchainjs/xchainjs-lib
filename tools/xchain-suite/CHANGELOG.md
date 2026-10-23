@@ -1,5 +1,29 @@
 # testing-gui
 
+## 1.0.29
+
+### Patch Changes
+
+- Updated dependencies [4cba811]
+- Updated dependencies [0d16f1e]
+- Updated dependencies [94599ee]
+- Updated dependencies [085ce00]
+- Updated dependencies [0bdb640]
+- Updated dependencies [0baa9ff]
+  - @xchainjs/xchain-cardano@1.2.7
+  - @xchainjs/xchain-evm@2.1.4
+  - @xchainjs/xchain-near@0.3.3
+  - @xchainjs/xchain-ripple@1.0.22
+  - @xchainjs/xchain-tron@3.0.13
+  - @xchainjs/xchain-mayachain-amm@5.0.2
+  - @xchainjs/xchain-arbitrum@2.1.12
+  - @xchainjs/xchain-avax@2.0.26
+  - @xchainjs/xchain-base@1.0.26
+  - @xchainjs/xchain-bsc@2.0.27
+  - @xchainjs/xchain-ethereum@2.1.4
+  - @xchainjs/xchain-thorchain-amm@4.0.2
+  - @xchainjs/xchain-wallet@2.0.39
+
 ## 1.0.28
 
 ### Patch Changes
