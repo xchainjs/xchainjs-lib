@@ -1,24 +1,7 @@
 import { GetActions200Response } from '@xchainjs/xchain-midgard'
-import { Address, Asset, CryptoAmount, SecuredAsset, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
+import { Asset, SecuredAsset, SynthAsset, TokenAsset, TradeAsset } from '@xchainjs/xchain-util'
 
 export type CompatibleAsset = Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset
-
-export type getSaver = {
-  asset: Asset | TokenAsset
-  address: Address
-  height?: number
-}
-
-export type SaversPosition = {
-  depositValue: CryptoAmount<Asset | TokenAsset>
-  redeemableValue: CryptoAmount<Asset | TokenAsset>
-  lastAddHeight: number
-  percentageGrowth: number
-  ageInYears: number
-  ageInDays: number
-  asset: Asset | TokenAsset
-  errors: string[]
-}
 
 export type MidgardConfig = {
   apiRetries: number

@@ -1,4 +1,4 @@
-import { PoolDetail, SaverDetails } from '@xchainjs/xchain-midgard'
+import { PoolDetail } from '@xchainjs/xchain-midgard'
 import { CachedValue } from '@xchainjs/xchain-util'
 
 import { Midgard } from './utils/midgard'
@@ -18,10 +18,5 @@ export class MidgardCache {
 
   public async getPools(): Promise<PoolDetail[]> {
     return this.cachedPools.getValue()
-  }
-
-  // One cache slot cannot key by address, so a hit would return another member's savers.
-  public async getSavers(address: string): Promise<SaverDetails> {
-    return this.midgard.getSavers(address)
   }
 }

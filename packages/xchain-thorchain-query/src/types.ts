@@ -229,74 +229,11 @@ export type PoolRatios = {
   runeToAsset: BigNumber
 }
 
-export type getSaver = {
-  asset: Asset | TokenAsset
-  address: Address
-  height?: number
-}
-
-export type EstimateAddSaver = {
-  assetAmount: CryptoAmount<Asset | TokenAsset>
-  estimatedDepositValue: CryptoAmount<Asset | TokenAsset>
-  slipBasisPoints: number
-  fee: SaverFees
-  expiry: Date
-  toAddress: Address
-  memo: string
-  saverCapFilledPercent: number
-  estimatedWaitTime: number
-  recommendedMinAmountIn?: string
-  canAddSaver: boolean
-  errors: string[]
-}
-
-export type EstimateWithdrawSaver = {
-  dustAmount: AssetCryptoAmount
-  dustThreshold: AssetCryptoAmount
-  expectedAssetAmount: CryptoAmount<Asset | TokenAsset>
-  fee: SaverFees
-  expiry: Date
-  toAddress: Address
-  memo: string
-  inboundDelayBlocks: number
-  inboundDelaySeconds: number
-  outBoundDelayBlocks: number
-  outBoundDelaySeconds: number
-  slipBasisPoints: number
-  errors: string[]
-}
-
-export type SaverFees = {
-  affiliate: CryptoAmount<Asset | TokenAsset>
-  asset: Asset | TokenAsset
-  liquidity: CryptoAmount<Asset | TokenAsset>
-  outbound: CryptoAmount<Asset | TokenAsset>
-  totalBps: number
-}
-
 export type QuoteFees = {
   asset: string
   liquidity?: string
   outbound?: string
   total_bps?: number
-}
-
-export type SaversPosition = {
-  depositValue: CryptoAmount<Asset | TokenAsset>
-  redeemableValue: CryptoAmount<Asset | TokenAsset>
-  lastAddHeight: number
-  percentageGrowth: number
-  ageInYears: number
-  ageInDays: number
-  asset: Asset | TokenAsset
-  errors: string[]
-}
-
-export type SaversWithdraw = {
-  height?: number
-  asset: Asset | TokenAsset
-  address: Address
-  withdrawBps: number
 }
 
 export type LoanOpenParams = {

@@ -1,18 +1,8 @@
 import { PoolDetail } from '@xchainjs/xchain-midgard'
-import {
-  Asset,
-  CryptoAmount,
-  TokenAsset,
-  assetFromString,
-  assetToString,
-  baseAmount,
-  isSecuredAsset,
-  isSynthAsset,
-  isTradeAsset,
-} from '@xchainjs/xchain-util'
+import { assetToString, isSecuredAsset, isSynthAsset, isTradeAsset } from '@xchainjs/xchain-util'
 
 import { MidgardCache } from './midgard-cache'
-import { ActionHistory, CompatibleAsset, GetActionsParams, SaversPosition, getSaver } from './types'
+import { ActionHistory, CompatibleAsset, GetActionsParams } from './types'
 import { isAssetRuneNative } from './utils/const'
 
 const DEFAULT_THORCHAIN_DECIMALS = 8
@@ -108,41 +98,6 @@ export class MidgardQuery {
 
     console.warn(`No fallback decimal configured for ${assetString}, using 8 decimals`)
     return 8
-  }
-
-  public async getSaverPositions(params: getSaver[]): Promise<SaversPosition[]> {
-    const addresses: Set<string> = new Set<string>()
-    params.forEach((param) => addresses.add(param.address))
-    const addressesString: string = Array.from(addresses).join(',')
-    const saversDetail = await this.midgardCache.getSavers(addressesString)
-    const errors: string[] = []
-
-    const saversPositions: SaversPosition[] = []
-    for (const saver of saversDetail.pools) {
-      const asset = assetFromString(saver.pool) as Asset | TokenAsset
-      if (!asset) continue
-
-      // assetRedeem is the 1e8 amount Midgard already calculated. Rebuilding it from
-      // units and depth with Number() drops integers past 2^53.
-      const depositAmount = new CryptoAmount(baseAmount(saver.assetAdded).minus(saver.assetWithdrawn), asset)
-      const redeemableAssetAmount = new CryptoAmount(baseAmount(saver.assetRedeem ? saver.assetRedeem : '0'), asset)
-      const saverGrowth = depositAmount.baseAmount.amount().gt(0)
-        ? redeemableAssetAmount.minus(depositAmount).div(depositAmount).times(100)
-        : undefined
-      const saversAge = (Date.now() / 1000 - Number(saver.dateLastAdded)) / (365 * 86400)
-
-      saversPositions.push({
-        depositValue: depositAmount,
-        redeemableValue: redeemableAssetAmount,
-        lastAddHeight: -1,
-        percentageGrowth: saverGrowth ? saverGrowth.assetAmount.amount().toNumber() : 0,
-        ageInYears: saversAge,
-        ageInDays: saversAge * 365,
-        asset,
-        errors,
-      })
-    }
-    return saversPositions
   }
 
   // https://gitlab.com/thorchain/midgard#refresh-native-decimals

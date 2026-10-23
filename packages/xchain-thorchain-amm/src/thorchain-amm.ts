@@ -23,9 +23,7 @@ import {
 import {
   AddliquidityPosition,
   EstimateAddLP,
-  EstimateAddSaver,
   EstimateWithdrawLP,
-  EstimateWithdrawSaver,
   InboundDetail,
   LoanCloseParams,
   LoanCloseQuote,
@@ -33,19 +31,14 @@ import {
   LoanOpenQuote,
   QuoteSwapParams,
   RegisterTHORName,
-  SaversPosition,
-  SaversWithdraw,
   ThorchainQuery,
   TxDetails,
   UpdateTHORName,
   WithdrawLiquidityPosition,
-  getSaver,
 } from '@xchainjs/xchain-thorchain-query'
 import {
-  Asset,
   AssetCryptoAmount,
   CryptoAmount,
-  TokenAsset,
   assetToString,
   baseAmount,
   eqAsset,
@@ -432,40 +425,6 @@ export class ThorchainAMM {
       )
       return txSubmitted
     }
-  }
-
-  public async estimateAddSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<EstimateAddSaver> {
-    return await this.thorchainQuery.estimateAddSaver(addAssetAmount)
-  }
-  public async estimateWithdrawSaver(withdrawParams: SaversWithdraw): Promise<EstimateWithdrawSaver> {
-    return await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
-  }
-
-  public async getSaverPosition(getsaver: getSaver): Promise<SaversPosition> {
-    return await this.thorchainQuery.getSaverPosition(getsaver)
-  }
-
-  public async addSaver(addAssetAmount: CryptoAmount<Asset | TokenAsset>): Promise<TxSubmitted> {
-    const addEstimate = await this.thorchainQuery.estimateAddSaver(addAssetAmount)
-    if (!addEstimate.canAddSaver) throw Error(`Cannot add to savers`)
-
-    return ThorchainAction.makeAction({
-      wallet: this.wallet,
-      recipient: addEstimate.toAddress,
-      assetAmount: addAssetAmount,
-      memo: addEstimate.memo,
-    })
-  }
-  public async withdrawSaver(withdrawParams: SaversWithdraw): Promise<TxSubmitted> {
-    const withdrawEstimate = await this.thorchainQuery.estimateWithdrawSaver(withdrawParams)
-    if (withdrawEstimate.errors.length > 0) throw Error(withdrawEstimate.errors.join(', '))
-
-    return ThorchainAction.makeAction({
-      wallet: this.wallet,
-      recipient: withdrawEstimate.toAddress,
-      assetAmount: withdrawEstimate.dustAmount,
-      memo: withdrawEstimate.memo,
-    })
   }
 
   public async getLoanQuoteOpen(loanOpenParams: LoanOpenParams): Promise<LoanOpenQuote> {

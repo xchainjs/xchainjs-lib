@@ -1,4 +1,4 @@
-import { Saver, Tx, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
+import { Tx, TxDetailsResponse, TxSignersResponse } from '@xchainjs/xchain-thornode'
 import {
   Asset,
   Chain,
@@ -19,8 +19,6 @@ export enum TxType {
   Swap = 'Swap',
   AddLP = 'AddLP',
   WithdrawLP = 'WithdrawLP',
-  AddSaver = 'AddSaver',
-  WithdrawSaver = 'WithdrawSaver',
   Refund = 'Refund',
   Other = 'Other',
   Unknown = 'Unknown',
@@ -41,11 +39,12 @@ export const txTypeFromMemo = (memo: string): TxType => {
     case '+':
     case 'a':
     case 'add':
-      return synth ? TxType.AddSaver : TxType.AddLP
+      // Synth liquidity memos were Savers deposits. Savers are no longer a protocol feature.
+      return synth ? TxType.Unknown : TxType.AddLP
     case '-':
     case 'wd':
     case 'withdraw':
-      return synth ? TxType.WithdrawSaver : TxType.WithdrawLP
+      return synth ? TxType.Unknown : TxType.WithdrawLP
     case 'refund':
       return TxType.Refund
     case 'out':
@@ -82,12 +81,6 @@ export enum RefundStatus {
   Incomplete = 'Incomplete',
   Complete_Refunded = 'Complete_Refunded',
 }
-export enum AddSaverStatus {
-  Complete = 'Complete',
-  Complete_Refunded = 'Complete_Refunded',
-  Complete_Below_Dust = 'Complete_Below_Dust',
-  Incomplete = 'Incomplete',
-}
 export type SwapInfo = {
   status: SwapStatus
   toAddress: string
@@ -107,15 +100,6 @@ export type AddLpInfo = {
   assetConfirmationDate?: Date
   pool: Asset | TokenAsset
 }
-export type WithdrawSaverInfo = {
-  status: WithdrawStatus
-  withdrawalAmount: CryptoAmount
-  expectedConfirmationDate: Date
-  thorchainHeight: number
-  finalisedHeight: number
-  outboundBlock: number
-  estimatedWaitTime: number
-}
 export type WithdrawInfo = {
   status: WithdrawStatus
   withdrawalAmount: CryptoAmount
@@ -134,11 +118,6 @@ export type RefundInfo = {
   outboundBlock: number
   estimatedWaitTime: number
 }
-export type AddSaverInfo = {
-  status: AddSaverStatus
-  assetTx?: InboundTx
-  saverPos?: Saver
-}
 type InboundTx = {
   status: InboundStatus
   date: Date
@@ -154,9 +133,7 @@ export type TXProgress = {
   inboundObserved?: InboundTx
   swapInfo?: SwapInfo
   addLpInfo?: AddLpInfo
-  addSaverInfo?: AddSaverInfo
   withdrawLpInfo?: WithdrawInfo
-  withdrawSaverInfo?: WithdrawSaverInfo
   refundInfo?: RefundInfo
 }
 export class TransactionStage {
@@ -188,12 +165,6 @@ export class TransactionStage {
         break
       case TxType.WithdrawLP:
         await this.checkWithdrawLpProgress(txData, progress)
-        break
-      case TxType.AddSaver:
-        await this.checkAddSaverProgress(txData, progress)
-        break
-      case TxType.WithdrawSaver:
-        await this.checkWithdrawSaverProgress(txData, progress)
         break
       case TxType.Refund:
         await this.checkRefund(txData, progress)
@@ -388,57 +359,6 @@ export class TransactionStage {
         estimatedWaitTime,
       }
       progress.withdrawLpInfo = withdrawLpInfo
-    }
-  }
-  private async checkAddSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const assetTx = !isAssetRuneNative(progress.inboundObserved.amount.asset) ? progress.inboundObserved : undefined
-      const checkSaverVaults = await this.thorchainCache.thornode.getSaver(
-        txData.tx.tx.coins[0].asset,
-        `${assetTx?.fromAddress}`,
-      )
-      const status = checkSaverVaults ? AddSaverStatus.Complete : AddSaverStatus.Incomplete
-      const addSaverInfo: AddSaverInfo = {
-        status: status,
-        assetTx,
-        saverPos: checkSaverVaults,
-      }
-      progress.addSaverInfo = addSaverInfo
-    }
-  }
-  private async checkWithdrawSaverProgress(txData: TxSignersResponse, progress: TXProgress) {
-    if (progress.inboundObserved) {
-      const memo = txData.tx.tx.memo ?? ''
-      const memoFields = this.parseWithdrawLpMemo(memo)
-      const asset = assetFromStringEx(memoFields.asset)
-      const lastBlockObj = await this.thorchainCache.thornode.getLastBlock()
-      const currentHeight = lastBlockObj.find((obj) => obj)
-
-      const outboundHeight = txData.tx.status === 'done' ? txData.finalised_height : Number(`${txData.outbound_height}`)
-
-      const expectedConfirmationDate = await this.blockToDate(THORChain, txData, outboundHeight) // always pass in thorchain
-      const outAmount = txData.out_txs?.[0]?.coins?.[0]?.amount ?? '0'
-      const outboundBlock = Number(txData.outbound_height)
-      const finalisedHeight = Number(txData.finalised_height)
-      const currentTCHeight = Number(`${currentHeight?.thorchain}`)
-      const estimatedWaitTime =
-        outboundBlock > currentTCHeight
-          ? (outboundBlock - currentTCHeight) * this.chainAttributes[THORChain].avgBlockTimeInSecs +
-            this.chainAttributes[asset.chain].avgBlockTimeInSecs
-          : 0
-
-      const status = txData.out_txs ? WithdrawStatus.Complete : WithdrawStatus.Incomplete
-      const withdrawalAmount = await this.protocolAmount(outAmount, asset)
-      const withdrawSaverInfo: WithdrawSaverInfo = {
-        status,
-        withdrawalAmount,
-        expectedConfirmationDate,
-        thorchainHeight: currentTCHeight,
-        finalisedHeight,
-        outboundBlock,
-        estimatedWaitTime,
-      }
-      progress.withdrawSaverInfo = withdrawSaverInfo
     }
   }
   private async checkRefund(txData: TxSignersResponse, progress: TXProgress) {
