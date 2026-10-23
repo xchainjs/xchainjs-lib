@@ -1,0 +1,7 @@
+---
+'@xchainjs/xchain-utxo': minor
+---
+
+One fee and size model for every UTXO send path. The deprecated legacy `prepareTx` and `buildTx` (coinselect) on LTC, BCH, DOGE and DASH are unchanged. `TxSizeConstants` is a new exported type, and the selector, every strategy and `UtxoSelector.calculateFee` accept optional `sizes` (the selector and strategies also take a `dustThreshold` for change absorption). `TX_SIZE_CONSTANTS` is unchanged, and the 3-argument `UtxoSelector.calculateFee` keeps its signature and default sizes but now rounds a fractional rate up before multiplying. Fees are `ceil(size × ceil(rate))` for the estimate, the selector and the max path alike. Change at or below the chain's dust is added to the fee instead of creating a dust output. Memo outputs of any length are sized exactly. `SmallFirstStrategy` now prices the change output when it keeps change.
+
+Protected API changes for subclassers: `getFeeFromUtxos` is now concrete (one recipient, one change output and the memo, at least one input, no minimum fee); `calculateMaxSendableAmount(utxos, feeRate, memoBytes: number, preferences?, recipient?)` replaces the boolean `hasMemo`, passing a boolean now throws, and a fee rate that is not finite and positive is rejected; new hooks `getTxSizeConstants`, `getDustThreshold`, `getRecipientOutputBytes` and `getSendSizes`; `selectUtxosForTransaction` gains a trailing `sizes`.

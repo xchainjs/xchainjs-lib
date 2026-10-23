@@ -11,27 +11,6 @@ import accumulative from 'coinselect/accumulative.js'
 
 import * as insight from './insight-api'
 
-/** Byte sizes of Dash transaction components. */
-export const TransactionBytes = {
-  Version: 2,
-  Type: 2,
-  InputCount: 1,
-  OutputCount: 1,
-  LockTime: 4,
-  InputPrevOutputHash: 32,
-  InputPrevOutputIndex: 4,
-  InputScriptLength: 1,
-  InputSequence: 4,
-  InputPubkeyHash: 107,
-  OutputPubkeyHash: 25,
-  OutputValue: 8,
-  OutputOpReturn: 1,
-  OutputScriptLength: 1,
-}
-
-/** Duff, the smallest unit of Dash. */
-export const TX_MIN_FEE = 1000
-
 export const TX_DUST_THRESHOLD = dashcore.Transaction.DUST_AMOUNT
 
 export const dashNetwork = (network: Network): Dash.Network => {

@@ -1,6 +1,7 @@
 import { UTXO } from './types'
 import { UtxoError } from './errors'
-import { DUST_THRESHOLD, TX_SIZE_CONSTANTS } from './constants'
+import { DUST_THRESHOLD, TX_SIZE_CONSTANTS, TxSizeConstants } from './constants'
+import { calculateTxFee } from './fee'
 import {
   UtxoSelectionStrategy,
   UtxoSelectionResult,
@@ -37,6 +38,8 @@ export class UtxoSelector {
     feeRate: number,
     preferences: UtxoSelectionPreferences = {},
     extraOutputs: number = 1, // recipient output + possible change output
+    sizes: TxSizeConstants = TX_SIZE_CONSTANTS,
+    dustThreshold: number = DUST_THRESHOLD, // change at or below this is absorbed into the fee
   ): UtxoSelectionResult {
     if (utxos.length === 0) {
       throw UtxoError.utxoSelectionFailed(targetValue, 0, 'no UTXOs available')
@@ -56,7 +59,7 @@ export class UtxoSelector {
 
     for (const strategy of this.strategies) {
       try {
-        const result = strategy.select(filteredUtxos, targetValue, feeRate, extraOutputs)
+        const result = strategy.select(filteredUtxos, targetValue, feeRate, extraOutputs, sizes, dustThreshold)
         if (result && this.isValidResult(result, targetValue)) {
           results.push(result)
         }
@@ -157,11 +160,12 @@ export class UtxoSelector {
     return Math.abs(inputSum - expectedTotal) <= 1
   }
 
-  static calculateFee(inputCount: number, outputCount: number, feeRate: number): number {
-    const txSize =
-      UtxoSelector.BASE_TX_SIZE +
-      inputCount * UtxoSelector.BYTES_PER_INPUT +
-      outputCount * UtxoSelector.BYTES_PER_OUTPUT
-    return Math.ceil(txSize * feeRate)
+  static calculateFee(
+    inputCount: number,
+    outputCount: number,
+    feeRate: number,
+    sizes: TxSizeConstants = TX_SIZE_CONSTANTS,
+  ): number {
+    return calculateTxFee(inputCount, outputCount, feeRate, sizes)
   }
 }

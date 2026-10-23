@@ -5,6 +5,7 @@ import {
   Client as UTXOClient,
   PreparedTx,
   TxParams,
+  TxSizeConstants,
   UTXO,
   UtxoClientParams,
   UtxoError,
@@ -164,14 +165,8 @@ abstract class Client extends UTXOClient {
     const script = bitcore.Script.buildDataOut(data)
     return script.toBuffer()
   }
-  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-    let totalWeight = Utils.TX_EMPTY_SIZE
-    totalWeight += (Utils.TX_INPUT_PUBKEYHASH + Utils.TX_INPUT_BASE) * inputs.length
-    totalWeight += (Utils.TX_OUTPUT_BASE + Utils.TX_OUTPUT_PUBKEYHASH) * 2
-    if (data) {
-      totalWeight += 9 + data.length
-    }
-    return Math.ceil(totalWeight * feeRate)
+  protected getTxSizeConstants(): TxSizeConstants {
+    return { BASE_TX_SIZE: 10, BYTES_PER_INPUT: 148, BYTES_PER_OUTPUT: 34 }
   }
 
   async buildTxEnhanced({
@@ -219,14 +214,13 @@ abstract class Client extends UTXOClient {
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
-      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
-
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
         Math.ceil(feeRate),
-        extraOutputs,
+        0,
         utxoSelectionPreferences,
+        this.getSendSizes(recipient, compiledMemo?.length),
       )
 
       const tx = new bitcore.Transaction().from(
@@ -341,9 +335,15 @@ abstract class Client extends UTXOClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
-
       const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      const maxCalc = this.calculateMaxSendableAmount(
+        utxos,
+        Math.ceil(feeRate),
+        compiledMemo?.length ?? 0,
+        utxoSelectionPreferences,
+        recipient,
+      )
 
       const tx = new bitcore.Transaction().from(
         maxCalc.inputs.map(

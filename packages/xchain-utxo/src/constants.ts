@@ -12,6 +12,16 @@
  */
 export const DUST_THRESHOLD = 546 // satoshis
 
+/** Transaction size model in virtual bytes. Chains and address formats supply their own. */
+export type TxSizeConstants = {
+  /** Base transaction overhead */
+  BASE_TX_SIZE: number
+  /** Bytes per input */
+  BYTES_PER_INPUT: number
+  /** Bytes per output */
+  BYTES_PER_OUTPUT: number
+}
+
 export const TX_SIZE_CONSTANTS = {
   /** Base transaction overhead in virtual bytes */
   BASE_TX_SIZE: 10,
@@ -19,7 +29,7 @@ export const TX_SIZE_CONSTANTS = {
   BYTES_PER_INPUT: 68,
   /** Virtual bytes per P2WPKH output */
   BYTES_PER_OUTPUT: 31,
-} as const
+} as const satisfies TxSizeConstants
 
 /**
  * Maximum reasonable amount (21M BTC equivalent in satoshis)
