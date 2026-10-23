@@ -360,7 +360,9 @@ export class Client extends BaseXChainClient implements EVMClient {
   }
 
   public async awaitTxConfirmed(hash: string): Promise<void> {
-    await this.getProvider().waitForTransaction(hash)
+    const receipt = await this.getProvider().waitForTransaction(hash)
+    if (!receipt) throw new Error(`Transaction ${hash} was not confirmed`)
+    if (receipt.status !== 1) throw new Error(`Transaction ${hash} reverted`)
   }
 
   getFees(): never
