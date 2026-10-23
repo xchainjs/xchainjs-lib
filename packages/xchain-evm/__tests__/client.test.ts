@@ -214,6 +214,11 @@ describe('EVM client', () => {
     expect(avaxClient.getAddress()).toBe(address)
   })
 
+  it('keeps the current account when setPhrase rejects the index', () => {
+    expect(() => avaxClient.setPhrase(newPhrase, -1)).toThrow('Index must be greater than or equal to zero')
+    expect(avaxClient.getAddress()).toBe(address)
+  })
+
   it('Should get network', () => {
     expect(avaxClient.getNetwork()).toEqual('testnet')
   })
