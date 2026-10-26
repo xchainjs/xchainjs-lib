@@ -2,16 +2,7 @@ import SolanaLedgerApp from '@ledgerhq/hw-app-solana'
 import Transport from '@ledgerhq/hw-transport'
 import bs58 from 'bs58'
 import { ComputeBudgetProgram, PublicKey, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js'
-import {
-  Account,
-  TokenAccountNotFoundError,
-  TokenInvalidAccountOwnerError,
-  createTransferInstruction,
-  getAccount,
-  getAssociatedTokenAddressSync,
-} from '@solana/spl-token'
-
-import { Address, TokenAsset, eqAsset, getContractAddressFromAsset } from '@xchainjs/xchain-util'
+import { Address, TokenAsset, eqAsset } from '@xchainjs/xchain-util'
 
 import { Client } from './client'
 import { defaultSolanaParams } from './const'
@@ -88,36 +79,14 @@ class ClientLedger extends Client {
             }),
           )
         } else {
-          const mintAddress = new PublicKey(getContractAddressFromAsset(asset as TokenAsset))
-          const fromAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, fromPubkey)
-          let fromTokenAccount: Account
-          try {
-            fromTokenAccount = await getAccount(provider.solanaProvider, fromAssociatedAccount)
-          } catch (error) {
-            if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-              throw Error('Can not find sender Token account')
-            }
-            throw error
-          }
-
-          const toAssociatedAccount = getAssociatedTokenAddressSync(mintAddress, toPubkey, allowOwnerOffCurve)
-          let toTokenAccount: Account
-          try {
-            toTokenAccount = await getAccount(provider.solanaProvider, toAssociatedAccount)
-          } catch (error) {
-            if (error instanceof TokenAccountNotFoundError || error instanceof TokenInvalidAccountOwnerError) {
-              throw Error('Can not find recipient Token account. Create it first')
-            }
-            throw error
-          }
-
-          transaction.add(
-            createTransferInstruction(
-              fromTokenAccount.address,
-              toTokenAccount.address,
-              fromPubkey,
-              amount.amount().toNumber(),
-            ),
+          await this.addSplTransferInstructions(
+            transaction,
+            provider.solanaProvider,
+            fromPubkey,
+            toPubkey,
+            asset as TokenAsset,
+            amount,
+            allowOwnerOffCurve,
           )
         }
 
