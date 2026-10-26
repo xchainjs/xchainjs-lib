@@ -14,14 +14,24 @@ export const AssetAVAX: Asset = { chain: AVAXChain, symbol: 'AVAX', ticker: 'AVA
 
 const ankrApiKey = process.env.ANKR_API_KEY
 
-const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche/${ankrApiKey}`, {
-  name: 'avalanche',
-  chainId: 43114,
-})
-const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider(`https://rpc.ankr.com/avalanche_fuji/${ankrApiKey}`, {
-  name: 'fuji',
-  chainId: 43113,
-})
+// Keyless Ankr answers Unauthorized. An unset key must not become the path segment "undefined".
+const rpcUrl = (ankrPath: string, publicUrl: string): string =>
+  ankrApiKey ? `https://rpc.ankr.com/${ankrPath}/${ankrApiKey}` : publicUrl
+
+const AVALANCHE_MAINNET_ETHERS_PROVIDER = new JsonRpcProvider(
+  rpcUrl('avalanche', 'https://api.avax.network/ext/bc/C/rpc'),
+  {
+    name: 'avalanche',
+    chainId: 43114,
+  },
+)
+const AVALANCHE_TESTNET_ETHERS_PROVIDER = new JsonRpcProvider(
+  rpcUrl('avalanche_fuji', 'https://api.avax-test.network/ext/bc/C/rpc'),
+  {
+    name: 'fuji',
+    chainId: 43113,
+  },
+)
 
 const ethersJSProviders = {
   [Network.Mainnet]: AVALANCHE_MAINNET_ETHERS_PROVIDER,
