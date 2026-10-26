@@ -32,6 +32,38 @@ import {
 } from './utils'
 
 type GasCoinRef = { objectId: string; version: string | number; digest: string }
+type SpendCoin = GasCoinRef & { balance: bigint }
+
+// Gas payment rejects more than 256 objects, and smashing merges every coin that is passed in.
+// mergeCoins spends one argument on the destination, inside a 512-argument command, so a token
+// spend uses at most 511 coins.
+const MAX_GAS_COINS = 256
+const MAX_TOKEN_COINS = 511
+
+function coinBalance(value: string | number | bigint | undefined): bigint {
+  if (value === undefined || value === '') return BigInt(0)
+  return BigInt(value)
+}
+
+function sumBalances(coins: SpendCoin[]): bigint {
+  let total = BigInt(0)
+  for (const coin of coins) total += coin.balance
+  return total
+}
+
+/** Largest coins first. Stops once `target` is covered and never returns more than `limit`. */
+function takeEnough(coins: SpendCoin[], target: bigint, limit: number): SpendCoin[] {
+  const sorted = [...coins].sort((a, b) => (a.balance < b.balance ? 1 : a.balance > b.balance ? -1 : 0))
+  const picked: SpendCoin[] = []
+  let total = BigInt(0)
+  for (const coin of sorted) {
+    if (picked.length >= limit) break
+    picked.push(coin)
+    total += coin.balance
+    if (total >= target) break
+  }
+  return picked
+}
 
 type GraphqlTxNode = {
   digest: string
@@ -401,7 +433,9 @@ export class Client extends BaseXChainClient {
     return BigInt(referenceGasPrice)
   }
 
-  // Missing metadata has no decimals. Callers skip the coin instead of labeling its base units as 9.
+  // No decimal means the coin is left out of balances and history. A missing metadata
+  // record and a failed lookup are treated the same, so a held token can be absent
+  // until the lookup succeeds. A reported decimal, including 0, is kept.
   private async getCoinDecimals(coinType: string): Promise<number | undefined> {
     if (this.isSuiCoinType(coinType)) return SUI_DECIMALS
 
@@ -440,11 +474,20 @@ export class Client extends BaseXChainClient {
     return undefined
   }
 
-  private async getCoins(owner: string, coinType: string): Promise<GasCoinRef[]> {
-    const coins: GasCoinRef[] = []
+  private async getCoins(
+    owner: string,
+    coinType: string,
+    options?: { maxCoins?: number; targetBalance?: bigint },
+  ): Promise<SpendCoin[]> {
+    const maxCoins = options?.maxCoins
+    const targetBalance = options?.targetBalance
+    const coins: SpendCoin[] = []
     let cursor: string | null = null
     // Cap pages so pathological addresses cannot hang the client.
     for (let pageNum = 0; pageNum < 20; pageNum++) {
+      let pageCoins: SpendCoin[]
+      let hasNextPage: boolean
+      let nextCursor: string | null
       if (this.transport === 'jsonRpc') {
         const page = await (
           await this.getJsonRpcClient()
@@ -453,32 +496,41 @@ export class Client extends BaseXChainClient {
           coinType,
           cursor: cursor ?? undefined,
         })
-        coins.push(
-          ...page.data.map((c) => ({
-            objectId: c.coinObjectId,
-            version: c.version,
-            digest: c.digest,
-          })),
-        )
-        if (!page.hasNextPage || !page.nextCursor || page.nextCursor === cursor) break
-        cursor = page.nextCursor
+        pageCoins = page.data.map((c) => ({
+          objectId: c.coinObjectId,
+          version: c.version,
+          digest: c.digest,
+          balance: coinBalance(c.balance),
+        }))
+        hasNextPage = page.hasNextPage
+        nextCursor = page.nextCursor ?? null
       } else {
         const page = await this.requireGrpc().listCoins({
           owner,
           coinType,
           cursor: cursor ?? undefined,
         })
-        coins.push(
-          ...page.objects.map((c) => ({
-            objectId: c.objectId,
-            version: c.version,
-            digest: c.digest,
-          })),
-        )
-        if (!page.hasNextPage || !page.cursor || page.cursor === cursor) break
-        cursor = page.cursor
+        pageCoins = page.objects.map((c) => ({
+          objectId: c.objectId,
+          version: c.version,
+          digest: c.digest,
+          balance: coinBalance(c.balance),
+        }))
+        hasNextPage = page.hasNextPage
+        nextCursor = page.cursor
       }
+      coins.push(...pageCoins)
+      if (maxCoins !== undefined && coins.length > maxCoins) {
+        coins.sort((a, b) => (a.balance < b.balance ? 1 : a.balance > b.balance ? -1 : 0))
+        coins.length = maxCoins
+      }
+      if (targetBalance !== undefined && sumBalances(coins) >= targetBalance) {
+        return takeEnough(coins, targetBalance, maxCoins ?? coins.length)
+      }
+      if (!hasNextPage || !nextCursor || nextCursor === cursor) break
+      cursor = nextCursor
     }
+    if (targetBalance !== undefined) return takeEnough(coins, targetBalance, maxCoins ?? coins.length)
     return coins
   }
 
@@ -498,17 +550,24 @@ export class Client extends BaseXChainClient {
   }): Promise<{ bytes: Uint8Array }> {
     const gasPrice = await this.getReferenceGasPrice()
     const budget = gasBudget ? BigInt(gasBudget.amount().toFixed(0)) : this.reservedGasBudget(gasPrice)
-    const gasCoins = await this.getCoins(sender, SUI_TYPE_TAG)
+    const sendingSui = !asset || eqAsset(asset, SUIAsset)
+    const spend = coinBalance(amount.amount().toFixed(0))
+    const gasTarget = budget + (sendingSui ? spend : BigInt(0))
+    const gasCoins = await this.getCoins(sender, SUI_TYPE_TAG, {
+      maxCoins: MAX_GAS_COINS,
+      targetBalance: gasTarget,
+    })
     if (gasCoins.length === 0) {
       throw Error('No SUI coins available for gas')
+    }
+    if (sumBalances(gasCoins) < gasTarget) {
+      throw Error('Insufficient SUI for the amount and gas budget')
     }
 
     const tx = new Transaction()
     tx.setSender(sender)
-    // Use ALL SUI coin objects as gas payment. Native transfers split the send
-    // amount from `tx.gas`; if only the first coin is set, fragmented balances
-    // fail with InsufficientCoinBalance even when total SUI is enough (common
-    // after many receives / swaps). Multiple gas inputs are merged by the PTB.
+    // Pass only the coins this spend needs. Gas smashing merges every coin in the
+    // payment, and the payment cannot hold more than 256 objects.
     tx.setGasPayment(
       gasCoins.map((c) => ({
         objectId: c.objectId,
@@ -519,14 +578,20 @@ export class Client extends BaseXChainClient {
     tx.setGasBudget(budget)
     tx.setGasPrice(gasPrice)
 
-    if (!asset || eqAsset(asset, SUIAsset)) {
+    if (sendingSui) {
       const [coin] = tx.splitCoins(tx.gas, [amount.amount().toString()])
       tx.transferObjects([coin], recipient)
     } else {
       const coinType = this.coinTypeFromAsset(asset as TokenAsset)
-      const tokenCoins = await this.getCoins(sender, coinType)
+      const tokenCoins = await this.getCoins(sender, coinType, {
+        maxCoins: MAX_TOKEN_COINS,
+        targetBalance: spend,
+      })
       if (tokenCoins.length === 0) {
         throw Error('No coins found for the specified asset')
+      }
+      if (sumBalances(tokenCoins) < spend) {
+        throw Error('Insufficient coin balance for the specified asset')
       }
 
       const primary = tx.objectRef({

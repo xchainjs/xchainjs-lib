@@ -272,6 +272,7 @@ describe('Sui client', () => {
       objectId: '0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e',
       version: '1',
       digest: '3Tsu2vJq1MbGZkPGSMBrcpBuNJ8qJcGh7ZJbHfY5mEV6',
+      balance: 10_000_000_000n,
     }
 
     async function prepareToken(symbolCoinType: string): Promise<string[]> {
@@ -419,6 +420,83 @@ describe('Sui client', () => {
       expect(calls).toBe(2)
       expect(coins).toHaveLength(2)
     })
+
+    it('Should stop once the largest coins cover the target', async () => {
+      const client = new Client({ ...defaultSuiParams, transport: 'jsonRpc' })
+      let calls = 0
+      const internals = client as unknown as {
+        getJsonRpcClient(): Promise<{
+          getCoins(): Promise<{
+            data: { coinObjectId: string; version: string; digest: string; balance: string }[]
+            hasNextPage: boolean
+            nextCursor: string | null
+          }>
+        }>
+        getCoins(
+          owner: string,
+          type: string,
+          options?: { maxCoins?: number; targetBalance?: bigint },
+        ): Promise<{ objectId: string }[]>
+      }
+      internals.getJsonRpcClient = async () => ({
+        getCoins: async () => {
+          calls += 1
+          return {
+            data: [
+              { coinObjectId: '0x01', version: '1', digest: 'd1', balance: '5' },
+              { coinObjectId: '0x02', version: '1', digest: 'd2', balance: '40' },
+              { coinObjectId: '0x03', version: '1', digest: 'd3', balance: '30' },
+            ],
+            hasNextPage: true,
+            nextCursor: 'next',
+          }
+        },
+      })
+
+      const selected = await internals.getCoins(owner, coinType, { maxCoins: 256, targetBalance: 50n })
+
+      expect(calls).toBe(1)
+      expect(selected.map((c) => c.objectId)).toEqual(['0x02', '0x03'])
+    })
+
+    it('Should keep a later large coin and stay within the cap', async () => {
+      const client = new Client({ ...defaultSuiParams })
+      const pages = [
+        {
+          objects: [coin('0x01'), coin('0x02'), coin('0x03')].map((c) => ({ ...c, balance: '1' })),
+          hasNextPage: true,
+          cursor: 'page-2',
+        },
+        {
+          objects: [{ ...coin('0x99'), balance: '100' }],
+          hasNextPage: true,
+          cursor: 'page-3',
+        },
+      ]
+      let calls = 0
+      const internals = client as unknown as {
+        requireGrpc(): {
+          listCoins(): Promise<(typeof pages)[number]>
+        }
+        getCoins(
+          owner: string,
+          type: string,
+          options?: { maxCoins?: number; targetBalance?: bigint },
+        ): Promise<{ objectId: string }[]>
+      }
+      internals.requireGrpc = () => ({
+        listCoins: async () => {
+          const page = pages[calls] ?? pages[pages.length - 1]
+          calls += 1
+          return page
+        },
+      })
+
+      const selected = await internals.getCoins(owner, coinType, { maxCoins: 2, targetBalance: 50n })
+
+      expect(calls).toBe(2)
+      expect(selected.map((c) => c.objectId)).toEqual(['0x99'])
+    })
   })
 
   describe('Gas budget', () => {
@@ -428,6 +506,7 @@ describe('Sui client', () => {
       objectId: '0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e',
       version: '1',
       digest: '3Tsu2vJq1MbGZkPGSMBrcpBuNJ8qJcGh7ZJbHfY5mEV6',
+      balance: 100_000_000_000n,
     }
 
     function clientWithGasPrice(gasPrice: bigint) {
@@ -484,6 +563,24 @@ describe('Sui client', () => {
         gasBudget: baseAmount(4_000_000, 9),
       })
       await expect(budgetOf(prepared.rawUnsignedTx)).resolves.toBe('4000000')
+    })
+
+    it('Should refuse a send the selected SUI coins cannot cover', async () => {
+      const client = new Client({ ...defaultSuiParams, phrase, transport: 'jsonRpc' })
+      const internals = client as unknown as {
+        getReferenceGasPrice(): Promise<bigint>
+        getCoins(): Promise<(typeof coin)[]>
+      }
+      internals.getReferenceGasPrice = async () => 1000n
+      internals.getCoins = async () => [{ ...coin, balance: 1n }]
+
+      await expect(
+        client.prepareTx({
+          walletIndex: 0,
+          recipient,
+          amount: baseAmount(1_000_000_000, 9),
+        }),
+      ).rejects.toThrow('Insufficient SUI for the amount and gas budget')
     })
   })
 

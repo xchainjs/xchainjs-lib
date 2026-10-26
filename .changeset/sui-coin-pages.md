@@ -2,4 +2,4 @@
 '@xchainjs/xchain-sui': patch
 ---
 
-Page through every Sui coin object when selecting coins to spend
+Select only the Sui coins a transfer needs, capped at 256 gas coins and 511 token coins
