@@ -76,12 +76,6 @@ Using THORChain AMM package, you could easily implement the following features
 - Withdraw Rune from Rune pool
 
 
-### Savers
-
-- Add a position in a THORChain savers vault
-- Withdraw a position from a THORChain savers vault
-
-
 ### Trade assets
 
 - Deposit L1 assets into the THORChain network to mint trade assets to receive accredited shares

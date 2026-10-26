@@ -18,9 +18,6 @@ import {
   RUNEPoolResponse,
   RUNEProvider,
   RUNEProvidersResponse,
-  Saver,
-  SaversApi,
-  SaversResponse,
   Thorname,
   ThornamesApi,
   TradeAccountApi,
@@ -67,7 +64,6 @@ export class Thornode {
   private networkApi: NetworkApi[]
   private poolsApi: PoolsApi[]
   private liquidityProvidersApi: LiquidityProvidersApi[]
-  private saversApi: SaversApi[]
   private quoteApi: QuoteApi[]
   private mimirApi: MimirApi[]
   private tradeUnitApi: TradeUnitApi[]
@@ -90,7 +86,6 @@ export class Thornode {
     this.liquidityProvidersApi = this.config.thornodeBaseUrls.map(
       (url) => new LiquidityProvidersApi(new Configuration({ basePath: url })),
     )
-    this.saversApi = this.config.thornodeBaseUrls.map((url) => new SaversApi(new Configuration({ basePath: url })))
     this.quoteApi = this.config.thornodeBaseUrls.map((url) => new QuoteApi(new Configuration({ basePath: url })))
     this.mimirApi = this.config.thornodeBaseUrls.map((url) => new MimirApi(new Configuration({ basePath: url })))
     this.thornamesApi = this.config.thornodeBaseUrls.map(
@@ -246,28 +241,6 @@ export class Thornode {
     for (const api of this.networkApi) {
       try {
         const resp = (await api.inboundAddresses()).data
-        return resp
-      } catch (_e) {
-        //console.error(_e)
-      }
-    }
-    throw new Error(`THORNode not responding`)
-  }
-  async getSavers(asset: string, height?: number): Promise<SaversResponse> {
-    for (const api of this.saversApi) {
-      try {
-        const resp = (await api.savers(asset, height)).data
-        return resp
-      } catch (_e) {
-        //console.error(_e)
-      }
-    }
-    throw new Error(`THORNode not responding`)
-  }
-  async getSaver(asset: string, address: string, height?: number): Promise<Saver> {
-    for (const api of this.saversApi) {
-      try {
-        const resp = (await api.saver(asset, address, height)).data
         return resp
       } catch (_e) {
         //console.error(_e)

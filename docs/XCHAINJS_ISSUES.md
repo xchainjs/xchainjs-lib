@@ -87,18 +87,9 @@ export type MAYANameDetails = {
 
 ---
 
-## 4. Missing AssetBNB Import (MAJOR)
+## 4. Missing AssetBNB Import (resolved)
 
-**Location:** `packages/xchain-thorchain-amm/__e2e__/thorchain-savers-e2e.ts` (line 59)
-
-**Issue:** `AssetBNB` is used without being imported.
-
-**Fix:** Add import:
-```typescript
-import { AssetBNB } from '@xchainjs/xchain-binance'
-// OR
-import { AssetBNB } from '@xchainjs/xchain-thorchain-query'
-```
+The THORChain savers end-to-end test that used `AssetBNB` without importing it was removed with the Savers feature.
 
 ---
 

@@ -20,15 +20,6 @@ describe('Midgard fallbacks', () => {
     expect(await query.getDecimalForAsset(gusd)).toBe(2)
   })
 
-  it('asks saver details for the address it was given', async () => {
-    const getSavers = jest.fn(async (address: string) => ({ pools: [], address }))
-    const cache = new MidgardCache({ getSavers } as unknown as Midgard)
-    await cache.getSavers('thor1a')
-    await cache.getSavers('thor1b')
-    expect(getSavers).toHaveBeenNthCalledWith(1, 'thor1a')
-    expect(getSavers).toHaveBeenNthCalledWith(2, 'thor1b')
-  })
-
   it('forwards txType to Midgard', async () => {
     const getActions = jest.fn(async () => ({ actions: [] }))
     const actionsQuery = new MidgardQuery({ midgard: { getActions } } as unknown as MidgardCache)

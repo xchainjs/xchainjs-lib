@@ -1,7 +1,7 @@
 # `@xchainjs/xchain-mayachain-query`
 
 Mayachain-query module to query mayachain for estimation of swaps/ add and remove Liquidity and checking a transaction stage. 
-Returns a TxDetail object with all the information needed to conduct a swap, or add liquidity. This includes estimateAddSavers()
+Returns a TxDetail object with all the information needed to conduct a swap, or add liquidity.
 
 ## Installation
 
@@ -84,27 +84,6 @@ Estimation of remove Liquidity
 }
 ```
 
-Estimation of Add Saver
-```ts
-{
-  assetAmount: '₿ 0.5',
-  estimatedDepositValue: '₿ 0.49937395',
-  fee: {
-    affiliateFee: '⚡ 0',
-    asset: { chain: 'BTC', symbol: 'BTC', ticker: 'BTC', synth: true },
-    outbound: '⚡ 0'
-  },
-  expiry: 2023-03-29T05:58:34.415Z,
-  toAddress: 'bc1qucjrczghvwl5d66klz6npv7tshkpwpzlw0zzj8',
-  memo: '+:BTC/BTC',
-  estimateWaitTime: 600,
-  saverCapFilledPercent: 266.3662135203711,
-  slipBasisPoints: 12,
-  canAdd: true,
-  errors: []
-}
-```
-
 ## Trade Accounts
 
 Query trade account information and trade asset units:
@@ -155,8 +134,6 @@ Estimate withdraw: https://replit.com/@thorchain/estimateWithdrawLiquidity\
 Check liquidity: https://replit.com/@thorchain/checkLiquidity\
 List pools: https://replit.com/@thorchain/listPools#package.json\
 Get Network Values: https://replit.com/@thorchain/networkValues#index.ts\
-
-Estimate AddSaver() & WithdrawSaver() & getSaverPosition() https://replit.com/@thorchain/quoteDepositTS#index.ts
 
 Check transaction Stage 
 
