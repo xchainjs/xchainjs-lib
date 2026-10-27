@@ -8,6 +8,7 @@ import {
   UTXO,
   UtxoClientParams,
   UtxoError,
+  TxSizeConstants,
   UtxoSelectionPreferences,
   UtxoTransactionValidator,
 } from '@xchainjs/xchain-utxo'
@@ -21,7 +22,6 @@ import {
   BlockbookDataProviders,
   BlockcypherDataProviders,
   LOWER_FEE_BOUND,
-  MIN_TX_FEE,
   UPPER_FEE_BOUND,
   blockstreamExplorerProviders,
 } from './const'
@@ -97,24 +97,23 @@ abstract class Client extends UTXOClient {
     return Bitcoin.script.compile([Bitcoin.opcodes.OP_RETURN, data])
   }
 
-  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-    const inputSizeBasedOnInputs =
-      inputs.length > 0
-        ? inputs.reduce((a, x) => a + Utils.inputBytes(x), 0) + inputs.length // +1 byte for each input signature
-        : 0
-    let sum =
-      Utils.TX_EMPTY_SIZE +
-      inputSizeBasedOnInputs +
-      Utils.TX_OUTPUT_BASE +
-      Utils.TX_OUTPUT_PUBKEYHASH +
-      Utils.TX_OUTPUT_BASE +
-      Utils.TX_OUTPUT_PUBKEYHASH
-
-    if (data) {
-      sum += Utils.TX_OUTPUT_BASE + data.length
+  /** Sizes in vbytes per address format, measured by signing synthetic transactions. */
+  protected getTxSizeConstants(): TxSizeConstants {
+    switch (this.addressFormat) {
+      case AddressFormat.P2TR:
+        return { BASE_TX_SIZE: 11, BYTES_PER_INPUT: 58, BYTES_PER_OUTPUT: 43 }
+      case AddressFormat.P2SH_P2WPKH:
+        return { BASE_TX_SIZE: 11, BYTES_PER_INPUT: 91, BYTES_PER_OUTPUT: 32 }
+      case AddressFormat.P2PKH:
+        return { BASE_TX_SIZE: 10, BYTES_PER_INPUT: 148, BYTES_PER_OUTPUT: 34 }
+      default:
+        return { BASE_TX_SIZE: 11, BYTES_PER_INPUT: 68, BYTES_PER_OUTPUT: 31 }
     }
-    const fee = sum * feeRate
-    return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
+  }
+
+  protected getRecipientOutputBytes(recipient?: Address): number {
+    if (!recipient) return super.getRecipientOutputBytes()
+    return 9 + Bitcoin.address.toOutputScript(recipient, Utils.btcNetwork(this.network)).length
   }
 
   /**
@@ -209,14 +208,14 @@ abstract class Client extends UTXOClient {
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
-      const extraOutputs = 1 + (compiledMemo ? 1 : 0) // recipient + optional memo (change calculated separately)
 
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
         Math.ceil(feeRate),
-        extraOutputs,
+        0,
         utxoSelectionPreferences,
+        this.getSendSizes(recipient, compiledMemo?.length),
       )
 
       const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
@@ -308,7 +307,7 @@ abstract class Client extends UTXOClient {
         throw UtxoError.invalidAddress(sender, this.network)
       }
 
-      // Memo validation is handled by validateTransactionInputs
+      // The max path does not validate the memo length; the memo is only sized
 
       let utxos: UTXO[]
       if (selectedUtxos && selectedUtxos.length > 0) {
@@ -319,9 +318,15 @@ abstract class Client extends UTXOClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
-
       const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      const maxCalc = this.calculateMaxSendableAmount(
+        utxos,
+        Math.ceil(feeRate),
+        compiledMemo?.length ?? 0,
+        utxoSelectionPreferences,
+        recipient,
+      )
       const psbt = new Bitcoin.Psbt({ network: Utils.btcNetwork(this.network) })
 
       this.addInputsToPsbt(psbt, maxCalc.inputs, sender)

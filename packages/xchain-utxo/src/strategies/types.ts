@@ -1,8 +1,17 @@
+import { TxSizeConstants } from '../constants'
 import { UTXO } from '../types'
 
 export interface UtxoSelectionStrategy {
   name: string
-  select(utxos: UTXO[], targetValue: number, feeRate: number, extraOutputs?: number): UtxoSelectionResult | null
+  /** `sizes` defaults to P2WPKH sizes, `dustThreshold` to 546. */
+  select(
+    utxos: UTXO[],
+    targetValue: number,
+    feeRate: number,
+    extraOutputs?: number,
+    sizes?: TxSizeConstants,
+    dustThreshold?: number,
+  ): UtxoSelectionResult | null
 }
 
 export interface UtxoSelectionResult {
