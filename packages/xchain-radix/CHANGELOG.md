@@ -1,5 +1,13 @@
 # @xchainjs/xchain-radix
 
+## 2.0.21
+
+### Patch Changes
+
+- ac5b5ee: Use the stokenet XRD resource for stokenet withdrawals, fee previews, and balance labels
+
+  Emit TypeScript declarations at lib/index.d.ts so other packages can import this client
+
 ## 2.0.20
 
 ### Patch Changes

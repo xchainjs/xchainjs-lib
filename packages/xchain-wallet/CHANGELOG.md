@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.39
+
+### Patch Changes
+
+- 01c6670: Drop the `@xchainjs/xchain-radix` dependency. `transfer` no longer forwards `methodToCall`. Call the Radix client directly for that field.
+- Updated dependencies [0d16f1e]
+- Updated dependencies [797e798]
+- Updated dependencies [8669194]
+  - @xchainjs/xchain-evm@2.1.4
+
 ## 2.0.38
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @xchainjs/xchain-ripple
 
+## 1.0.22
+
+### Patch Changes
+
+- 0bdb640: Ledger transfers reject any asset other than XRP. The payment amount was always encoded as XRP drops, so a trust-line asset was paid in XRP.
+
 ## 1.0.21
 
 ### Patch Changes

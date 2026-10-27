@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.26
+
+### Patch Changes
+
+- fff0b9a: Avalanche and BSC no longer call Ankr at `.../undefined` when `ANKR_API_KEY` is unset. A set key still uses Ankr. Without a key, Avalanche uses the public Avalanche API and BSC mainnet uses the public Binance dataseed.
+- Updated dependencies [0d16f1e]
+- Updated dependencies [797e798]
+- Updated dependencies [8669194]
+  - @xchainjs/xchain-evm@2.1.4
+
 ## 2.0.25
 
 ### Patch Changes

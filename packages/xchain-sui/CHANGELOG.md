@@ -1,5 +1,15 @@
 # @xchainjs/xchain-sui
 
+## 0.2.4
+
+### Patch Changes
+
+- f8102ba: Omit a Sui token from balances and history when its decimals are unknown. A missing metadata record and a failed lookup are treated the same, so a token the address holds can be absent until the lookup succeeds. A reported decimal, including 0, is unchanged.
+- f8102ba: Select only the Sui coins a transfer needs, capped at 256 gas coins and 511 token coins
+- f8102ba: Query Sui token coins with the 0x coin type from the asset
+- f8102ba: Reserve the same SUI gas budget that getFees reports
+- f8102ba: Use each coin's decimals when gRPC history is the fallback
+
 ## 0.2.3
 
 ### Patch Changes
