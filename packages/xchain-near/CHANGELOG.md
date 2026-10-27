@@ -1,5 +1,12 @@
 # @xchainjs/xchain-near
 
+## 0.3.3
+
+### Patch Changes
+
+- 94599ee: Sign a prepared NEAR transaction with the access key it already carries
+- 085ce00: Read the NEP-141 transfer hash from the execution outcome. `ft_transfer` returns nothing, so reading the hash from `callFunction` failed after the transfer had already succeeded.
+
 ## 0.3.2
 
 ### Patch Changes

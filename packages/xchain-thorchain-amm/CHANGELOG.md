@@ -1,5 +1,35 @@
 # Changelog
 
+## 5.0.0
+
+### Major Changes
+
+- 009d935: Remove Savers. THORChain and MAYAChain no longer support saver deposits, withdrawals, or position lookups.
+
+  `estimateAddSaver`, `estimateWithdrawSaver`, `getSaverPosition`, `addSaver`, and `withdrawSaver` are gone, along with the saver quote and position types. Synth liquidity memos such as `+:BTC/BTC` are no longer classified as saver transactions. Midgard saver position lookups are removed as well.
+
+### Patch Changes
+
+- Updated dependencies [fff0b9a]
+- Updated dependencies [0d16f1e]
+- Updated dependencies [797e798]
+- Updated dependencies [8669194]
+- Updated dependencies [009d935]
+- Updated dependencies [0bdb640]
+- Updated dependencies [cd7b311]
+- Updated dependencies [0baa9ff]
+- Updated dependencies [01c6670]
+  - @xchainjs/xchain-avax@2.0.26
+  - @xchainjs/xchain-bsc@2.0.27
+  - @xchainjs/xchain-evm@2.1.4
+  - @xchainjs/xchain-thorchain-query@5.0.0
+  - @xchainjs/xchain-ripple@1.0.22
+  - @xchainjs/xchain-solana@1.1.12
+  - @xchainjs/xchain-tron@3.0.13
+  - @xchainjs/xchain-wallet@2.0.39
+  - @xchainjs/xchain-base@1.0.26
+  - @xchainjs/xchain-ethereum@2.1.4
+
 ## 4.0.1
 
 ### Patch Changes
