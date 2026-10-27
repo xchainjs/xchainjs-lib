@@ -17,14 +17,7 @@ import {
   TxType,
 } from '@xchainjs/xchain-client'
 import { getSeed } from '@xchainjs/xchain-crypto'
-import {
-  Address,
-  TokenAsset,
-  assetFromStringEx,
-  baseAmount,
-  eqAsset,
-  getContractAddressFromAsset,
-} from '@xchainjs/xchain-util'
+import { Address, TokenAsset, assetFromStringEx, baseAmount, eqAsset } from '@xchainjs/xchain-util'
 import slip10 from 'micro-key-producer/slip10.js'
 
 import { DEFAULT_GAS_BUDGET, SUIAsset, SUIChain, SUI_DECIMALS, SUI_TYPE_TAG, defaultSuiParams } from './const'
@@ -39,6 +32,38 @@ import {
 } from './utils'
 
 type GasCoinRef = { objectId: string; version: string | number; digest: string }
+type SpendCoin = GasCoinRef & { balance: bigint }
+
+// Gas payment rejects more than 256 objects, and smashing merges every coin that is passed in.
+// mergeCoins spends one argument on the destination, inside a 512-argument command, so a token
+// spend uses at most 511 coins.
+const MAX_GAS_COINS = 256
+const MAX_TOKEN_COINS = 511
+
+function coinBalance(value: string | number | bigint | undefined): bigint {
+  if (value === undefined || value === '') return BigInt(0)
+  return BigInt(value)
+}
+
+function sumBalances(coins: SpendCoin[]): bigint {
+  let total = BigInt(0)
+  for (const coin of coins) total += coin.balance
+  return total
+}
+
+/** Largest coins first. Stops once `target` is covered and never returns more than `limit`. */
+function takeEnough(coins: SpendCoin[], target: bigint, limit: number): SpendCoin[] {
+  const sorted = [...coins].sort((a, b) => (a.balance < b.balance ? 1 : a.balance > b.balance ? -1 : 0))
+  const picked: SpendCoin[] = []
+  let total = BigInt(0)
+  for (const coin of sorted) {
+    if (picked.length >= limit) break
+    picked.push(coin)
+    total += coin.balance
+    if (total >= target) break
+  }
+  return picked
+}
 
 type GraphqlTxNode = {
   digest: string
@@ -170,6 +195,7 @@ export class Client extends BaseXChainClient {
         if (assets && !assets.some((a) => eqAsset(a, tokenAsset))) continue
 
         const decimals = await this.getCoinDecimals(coinBalance.coinType)
+        if (decimals === undefined) continue
         balances.push({
           asset: tokenAsset,
           amount: baseAmount(coinBalance.totalBalance, decimals),
@@ -189,7 +215,7 @@ export class Client extends BaseXChainClient {
     })
 
     let cursor: string | null = null
-    const decimalsCache = new Map<string, number>()
+    const decimalsCache = new Map<string, number | undefined>()
     // Cap pages so pathological addresses cannot hang the client.
     for (let pageNum = 0; pageNum < 20; pageNum++) {
       const page = await grpc.listBalances({
@@ -202,11 +228,11 @@ export class Client extends BaseXChainClient {
         const tokenAsset = assetFromStringEx(`SUI.${this.coinTypeToSymbol(coinBalance.coinType)}`) as TokenAsset
         if (assets && !assets.some((a) => eqAsset(a, tokenAsset))) continue
 
-        let decimals = decimalsCache.get(coinBalance.coinType)
-        if (decimals === undefined) {
-          decimals = await this.getCoinDecimals(coinBalance.coinType)
-          decimalsCache.set(coinBalance.coinType, decimals)
+        if (!decimalsCache.has(coinBalance.coinType)) {
+          decimalsCache.set(coinBalance.coinType, await this.getCoinDecimals(coinBalance.coinType))
         }
+        const decimals = decimalsCache.get(coinBalance.coinType)
+        if (decimals === undefined) continue
         balances.push({
           asset: tokenAsset,
           amount: baseAmount(coinBalance.balance, decimals),
@@ -219,15 +245,23 @@ export class Client extends BaseXChainClient {
     return balances
   }
 
+  // Sui withdraws the gas budget from the gas coin before splitCoins.
+  // getFees reports that reservation, otherwise balance - fee aborts.
+  private reservedGasBudget(gasPrice: bigint): bigint {
+    const estimated = gasPrice * BigInt(2000)
+    const floor = BigInt(DEFAULT_GAS_BUDGET)
+    return estimated > floor ? estimated : floor
+  }
+
   public async getFees(): Promise<Fees> {
-    const gasPrice = await this.getReferenceGasPrice()
-    const baseFee = BigInt(gasPrice) * BigInt(2000)
+    const reserved = this.reservedGasBudget(await this.getReferenceGasPrice())
+    const fee = baseAmount(reserved.toString(), SUI_DECIMALS)
 
     return {
       type: FeeType.FlatFee,
-      [FeeOption.Average]: baseAmount(baseFee.toString(), SUI_DECIMALS),
-      [FeeOption.Fast]: baseAmount(baseFee.toString(), SUI_DECIMALS),
-      [FeeOption.Fastest]: baseAmount(baseFee.toString(), SUI_DECIMALS),
+      [FeeOption.Average]: fee,
+      [FeeOption.Fast]: fee,
+      [FeeOption.Fastest]: fee,
     }
   }
 
@@ -270,7 +304,7 @@ export class Client extends BaseXChainClient {
 
     // GraphQL supports affectedAddress (sent + received). Core API only supports sender.
     const nodes = await this.fetchGraphqlTransactions(address, limit + offset)
-    const decimalsCache = new Map<string, number>()
+    const decimalsCache = new Map<string, number | undefined>()
 
     const txs: Tx[] = []
     for (const node of nodes) {
@@ -399,16 +433,20 @@ export class Client extends BaseXChainClient {
     return BigInt(referenceGasPrice)
   }
 
-  private async getCoinDecimals(coinType: string): Promise<number> {
+  // No decimal means the coin is left out of balances and history. A missing metadata
+  // record and a failed lookup are treated the same, so a held token can be absent
+  // until the lookup succeeds. A reported decimal, including 0, is kept.
+  private async getCoinDecimals(coinType: string): Promise<number | undefined> {
     if (this.isSuiCoinType(coinType)) return SUI_DECIMALS
 
     if (this.transport === 'jsonRpc') {
       try {
         const metadata = await (await this.getJsonRpcClient()).getCoinMetadata({ coinType })
-        return metadata?.decimals ?? SUI_DECIMALS
+        if (metadata?.decimals != null) return metadata.decimals
       } catch {
-        return SUI_DECIMALS
+        // fall through
       }
+      return undefined
     }
 
     // Prefer a single GraphQL metadata lookup (lighter than full CoinInfo over gRPC).
@@ -431,30 +469,69 @@ export class Client extends BaseXChainClient {
       const { coinMetadata } = await this.requireGrpc().getCoinMetadata({ coinType })
       if (coinMetadata?.decimals != null) return coinMetadata.decimals
     } catch {
-      return SUI_DECIMALS
+      return undefined
     }
-    return SUI_DECIMALS
+    return undefined
   }
 
-  private async getCoins(owner: string, coinType: string): Promise<GasCoinRef[]> {
-    if (this.transport === 'jsonRpc') {
-      const page = await (await this.getJsonRpcClient()).getCoins({ owner, coinType })
-      return page.data.map((c) => ({
-        objectId: c.coinObjectId,
-        version: c.version,
-        digest: c.digest,
-      }))
+  private async getCoins(
+    owner: string,
+    coinType: string,
+    options?: { maxCoins?: number; targetBalance?: bigint },
+  ): Promise<SpendCoin[]> {
+    const maxCoins = options?.maxCoins
+    const targetBalance = options?.targetBalance
+    const coins: SpendCoin[] = []
+    let cursor: string | null = null
+    // Cap pages so pathological addresses cannot hang the client.
+    for (let pageNum = 0; pageNum < 20; pageNum++) {
+      let pageCoins: SpendCoin[]
+      let hasNextPage: boolean
+      let nextCursor: string | null
+      if (this.transport === 'jsonRpc') {
+        const page = await (
+          await this.getJsonRpcClient()
+        ).getCoins({
+          owner,
+          coinType,
+          cursor: cursor ?? undefined,
+        })
+        pageCoins = page.data.map((c) => ({
+          objectId: c.coinObjectId,
+          version: c.version,
+          digest: c.digest,
+          balance: coinBalance(c.balance),
+        }))
+        hasNextPage = page.hasNextPage
+        nextCursor = page.nextCursor ?? null
+      } else {
+        const page = await this.requireGrpc().listCoins({
+          owner,
+          coinType,
+          cursor: cursor ?? undefined,
+        })
+        pageCoins = page.objects.map((c) => ({
+          objectId: c.objectId,
+          version: c.version,
+          digest: c.digest,
+          balance: coinBalance(c.balance),
+        }))
+        hasNextPage = page.hasNextPage
+        nextCursor = page.cursor
+      }
+      coins.push(...pageCoins)
+      if (maxCoins !== undefined && coins.length > maxCoins) {
+        coins.sort((a, b) => (a.balance < b.balance ? 1 : a.balance > b.balance ? -1 : 0))
+        coins.length = maxCoins
+      }
+      if (targetBalance !== undefined && sumBalances(coins) >= targetBalance) {
+        return takeEnough(coins, targetBalance, maxCoins ?? coins.length)
+      }
+      if (!hasNextPage || !nextCursor || nextCursor === cursor) break
+      cursor = nextCursor
     }
-
-    const page = await this.requireGrpc().listCoins({
-      owner,
-      coinType,
-    })
-    return page.objects.map((c) => ({
-      objectId: c.objectId,
-      version: c.version,
-      digest: c.digest,
-    }))
+    if (targetBalance !== undefined) return takeEnough(coins, targetBalance, maxCoins ?? coins.length)
+    return coins
   }
 
   /** Explicit gas payment. Public gRPC/GraphQL clients cannot resolve transactions. */
@@ -471,19 +548,26 @@ export class Client extends BaseXChainClient {
     amount: TxParams['amount']
     gasBudget?: TxParams['gasBudget']
   }): Promise<{ bytes: Uint8Array }> {
-    const budget = gasBudget?.amount().toNumber() ?? DEFAULT_GAS_BUDGET
     const gasPrice = await this.getReferenceGasPrice()
-    const gasCoins = await this.getCoins(sender, SUI_TYPE_TAG)
+    const budget = gasBudget ? BigInt(gasBudget.amount().toFixed(0)) : this.reservedGasBudget(gasPrice)
+    const sendingSui = !asset || eqAsset(asset, SUIAsset)
+    const spend = coinBalance(amount.amount().toFixed(0))
+    const gasTarget = budget + (sendingSui ? spend : BigInt(0))
+    const gasCoins = await this.getCoins(sender, SUI_TYPE_TAG, {
+      maxCoins: MAX_GAS_COINS,
+      targetBalance: gasTarget,
+    })
     if (gasCoins.length === 0) {
       throw Error('No SUI coins available for gas')
+    }
+    if (sumBalances(gasCoins) < gasTarget) {
+      throw Error('Insufficient SUI for the amount and gas budget')
     }
 
     const tx = new Transaction()
     tx.setSender(sender)
-    // Use ALL SUI coin objects as gas payment. Native transfers split the send
-    // amount from `tx.gas`; if only the first coin is set, fragmented balances
-    // fail with InsufficientCoinBalance even when total SUI is enough (common
-    // after many receives / swaps). Multiple gas inputs are merged by the PTB.
+    // Pass only the coins this spend needs. Gas smashing merges every coin in the
+    // payment, and the payment cannot hold more than 256 objects.
     tx.setGasPayment(
       gasCoins.map((c) => ({
         objectId: c.objectId,
@@ -494,14 +578,20 @@ export class Client extends BaseXChainClient {
     tx.setGasBudget(budget)
     tx.setGasPrice(gasPrice)
 
-    if (!asset || eqAsset(asset, SUIAsset)) {
+    if (sendingSui) {
       const [coin] = tx.splitCoins(tx.gas, [amount.amount().toString()])
       tx.transferObjects([coin], recipient)
     } else {
-      const coinType = getContractAddressFromAsset(asset as TokenAsset)
-      const tokenCoins = await this.getCoins(sender, coinType)
+      const coinType = this.coinTypeFromAsset(asset as TokenAsset)
+      const tokenCoins = await this.getCoins(sender, coinType, {
+        maxCoins: MAX_TOKEN_COINS,
+        targetBalance: spend,
+      })
       if (tokenCoins.length === 0) {
         throw Error('No coins found for the specified asset')
+      }
+      if (sumBalances(tokenCoins) < spend) {
+        throw Error('Insufficient coin balance for the specified asset')
       }
 
       const primary = tx.objectRef({
@@ -658,7 +748,7 @@ export class Client extends BaseXChainClient {
 
   private async parseGraphqlTransactionNode(
     node: GraphqlTxNode,
-    decimalsCache: Map<string, number> = new Map(),
+    decimalsCache: Map<string, number | undefined> = new Map(),
   ): Promise<Tx> {
     const from: TxFrom[] = []
     const to: TxTo[] = []
@@ -667,11 +757,11 @@ export class Client extends BaseXChainClient {
     for (const change of changes) {
       const coinType = change.coinType?.repr || SUI_TYPE_TAG
       const isSui = this.isSuiCoinType(coinType)
-      let decimals = decimalsCache.get(coinType)
-      if (decimals === undefined) {
-        decimals = await this.getCoinDecimals(coinType)
-        decimalsCache.set(coinType, decimals)
+      if (!decimalsCache.has(coinType)) {
+        decimalsCache.set(coinType, await this.getCoinDecimals(coinType))
       }
+      const decimals = decimalsCache.get(coinType)
+      if (decimals === undefined) continue
       const asset = isSui ? SUIAsset : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(coinType)}`) as TokenAsset)
       const changeAmount = BigInt(change.amount)
       const ownerAddress = change.owner?.address || ''
@@ -709,6 +799,7 @@ export class Client extends BaseXChainClient {
       for (const change of txResponse.balanceChanges) {
         const isSui = this.isSuiCoinType(change.coinType)
         const decimals = await this.getCoinDecimals(change.coinType)
+        if (decimals === undefined) continue
         const asset = isSui
           ? SUIAsset
           : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(change.coinType)}`) as TokenAsset)
@@ -744,16 +835,22 @@ export class Client extends BaseXChainClient {
     }
   }
 
-  private parseCoreTransaction(
+  private async parseCoreTransaction(
     digest: string,
     balanceChanges: { coinType: string; address: string; amount: string }[] | undefined,
     timestamp: string | number | null,
-  ): Tx {
+  ): Promise<Tx> {
     const from: TxFrom[] = []
     const to: TxTo[] = []
+    const decimalsCache = new Map<string, number | undefined>()
 
     for (const change of balanceChanges || []) {
       const isSui = this.isSuiCoinType(change.coinType)
+      if (!decimalsCache.has(change.coinType)) {
+        decimalsCache.set(change.coinType, await this.getCoinDecimals(change.coinType))
+      }
+      const decimals = decimalsCache.get(change.coinType)
+      if (decimals === undefined) continue
       const asset = isSui
         ? SUIAsset
         : (assetFromStringEx(`SUI.${this.coinTypeToSymbol(change.coinType)}`) as TokenAsset)
@@ -762,13 +859,13 @@ export class Client extends BaseXChainClient {
       if (changeAmount < BigInt(0)) {
         from.push({
           from: change.address,
-          amount: baseAmount((-changeAmount).toString(), SUI_DECIMALS),
+          amount: baseAmount((-changeAmount).toString(), decimals),
           asset,
         })
       } else if (changeAmount > BigInt(0)) {
         to.push({
           to: change.address,
-          amount: baseAmount(changeAmount.toString(), SUI_DECIMALS),
+          amount: baseAmount(changeAmount.toString(), decimals),
           asset,
         })
       }
@@ -796,5 +893,11 @@ export class Client extends BaseXChainClient {
     const parts = coinType.split('::')
     const typeName = parts[parts.length - 1] || coinType
     return `${typeName}-${coinType}`
+  }
+
+  // Symbol form is TYPE-0xpackage::module::Type. listCoins needs that 0x prefix.
+  private coinTypeFromAsset(asset: TokenAsset): string {
+    const raw = asset.symbol.slice(asset.ticker.length + 1)
+    return /^0x/i.test(raw) ? raw : `0x${raw}`
   }
 }
