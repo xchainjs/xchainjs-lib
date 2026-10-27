@@ -12,7 +12,6 @@ import {
 } from '@xchainjs/xchain-client'
 import { Client as EvmClient, GasPrices, isApproved } from '@xchainjs/xchain-evm'
 import { DepositParam, MayachainClient } from '@xchainjs/xchain-mayachain'
-import { Client as RadixClient } from '@xchainjs/xchain-radix'
 import {
   Address,
   AnyAsset,
@@ -25,7 +24,7 @@ import {
 import { Client as UtxoClient } from '@xchainjs/xchain-utxo'
 import BigNumber from 'bignumber.js'
 
-import { ChainBalances, CosmosTxParams, EvmTxParams, RadixTxParams, UtxoTxParams } from './types'
+import { ChainBalances, CosmosTxParams, EvmTxParams, UtxoTxParams } from './types'
 import { getAddress } from 'ethers'
 
 export type NodeUrls = Record<Network, string>
@@ -226,9 +225,7 @@ export class Wallet {
     throw Error(`getFeeRates method not supported in ${chain} chain`)
   }
 
-  public async estimateTransferFees(
-    params: UtxoTxParams | EvmTxParams | CosmosTxParams | RadixTxParams,
-  ): Promise<Fees> {
+  public async estimateTransferFees(params: UtxoTxParams | EvmTxParams | CosmosTxParams): Promise<Fees> {
     const client = this.getClient(params.asset.chain)
     if (this.isEvmClient(client)) {
       if (!this.isEvmTxParams(params)) throw Error(`Invalid params for estimating ${params.asset.chain} transfer`)
@@ -269,7 +266,7 @@ export class Wallet {
     })
   }
 
-  public async transfer(params: UtxoTxParams | EvmTxParams | CosmosTxParams | RadixTxParams): Promise<string> {
+  public async transfer(params: UtxoTxParams | EvmTxParams | CosmosTxParams): Promise<string> {
     const client = this.getClient(params.asset.chain)
     if (this.isEvmClient(client)) {
       if (!this.isEvmTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
@@ -293,17 +290,6 @@ export class Wallet {
         recipient: params.recipient,
         memo: params.memo,
         feeRate: params.feeRate ? params.feeRate.amount().toNumber() : undefined,
-      })
-    }
-    if (this.isRadixClient(client)) {
-      if (!this.isRadixTxParams(params)) throw Error(`Invalid params for ${params.asset.chain} transfer`)
-      return client.transfer({
-        walletIndex: params.walletIndex,
-        asset: params.asset,
-        amount: params.amount,
-        recipient: params.recipient,
-        memo: params.memo,
-        methodToCall: params.methodToCall,
       })
     }
     return client.transfer({
@@ -372,18 +358,12 @@ export class Wallet {
     return client
   }
 
-  private isEvmTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams | RadixTxParams): params is EvmTxParams {
+  private isEvmTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams): params is EvmTxParams {
     return !('feeRate' in params)
   }
 
-  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams | RadixTxParams): params is UtxoTxParams {
+  private isUtxoTxParams(params: EvmTxParams | UtxoTxParams | CosmosTxParams): params is UtxoTxParams {
     return !('gasPrice' in params)
-  }
-
-  private isRadixTxParams(
-    params: EvmTxParams | UtxoTxParams | CosmosTxParams | RadixTxParams,
-  ): params is RadixTxParams {
-    return !this.isEvmTxParams(params) && !this.isUtxoTxParams(params)
   }
 
   // TEMPORAL APPROACH UNTIL A NEW ONE
@@ -394,10 +374,5 @@ export class Wallet {
   // TEMPORAL APPROACH UNTIL A NEW ONE
   private isUtxoClient(client: XChainClient): client is UtxoClient {
     return 'getFeeRates' in client
-  }
-
-  // TEMPORAL APPROACH UNTIL A NEW ONE
-  private isRadixClient(client: XChainClient): client is RadixClient {
-    return 'radixClient' in client
   }
 }
