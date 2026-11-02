@@ -1,5 +1,44 @@
 # testing-gui
 
+## 1.0.29
+
+### Patch Changes
+
+- Updated dependencies [fff0b9a]
+- Updated dependencies [4cba811]
+- Updated dependencies [0d16f1e]
+- Updated dependencies [797e798]
+- Updated dependencies [8669194]
+- Updated dependencies [94599ee]
+- Updated dependencies [085ce00]
+- Updated dependencies [009d935]
+- Updated dependencies [0bdb640]
+- Updated dependencies [cd7b311]
+- Updated dependencies [f8102ba]
+- Updated dependencies [f8102ba]
+- Updated dependencies [f8102ba]
+- Updated dependencies [f8102ba]
+- Updated dependencies [f8102ba]
+- Updated dependencies [0baa9ff]
+- Updated dependencies [01c6670]
+  - @xchainjs/xchain-avax@2.0.26
+  - @xchainjs/xchain-bsc@2.0.27
+  - @xchainjs/xchain-cardano@1.2.7
+  - @xchainjs/xchain-evm@2.1.4
+  - @xchainjs/xchain-near@0.3.3
+  - @xchainjs/xchain-thorchain-query@5.0.0
+  - @xchainjs/xchain-thorchain-amm@5.0.0
+  - @xchainjs/xchain-midgard-query@3.0.0
+  - @xchainjs/xchain-ripple@1.0.22
+  - @xchainjs/xchain-solana@1.1.12
+  - @xchainjs/xchain-sui@0.2.4
+  - @xchainjs/xchain-tron@3.0.13
+  - @xchainjs/xchain-wallet@2.0.39
+  - @xchainjs/xchain-mayachain-amm@5.0.2
+  - @xchainjs/xchain-arbitrum@2.1.12
+  - @xchainjs/xchain-base@1.0.26
+  - @xchainjs/xchain-ethereum@2.1.4
+
 ## 1.0.28
 
 ### Patch Changes

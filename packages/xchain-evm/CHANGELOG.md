@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.4
+
+### Patch Changes
+
+- 0d16f1e: `awaitTxConfirmed` rejects a mined revert and a transaction that never produces a receipt. A receipt is confirmed only when its status is success.
+- 797e798: A transfer that sets only `maxFeePerGas` no longer copies a node tip above that cap, so the transaction can be signed. An explicit tip above `maxFeePerGas` is rejected.
+- 8669194: `setPhrase` returns the address at the requested wallet index. Calling it after `purgeClient` no longer throws before the signer exists. An invalid wallet index throws before the current signer is replaced.
+
 ## 2.1.3
 
 ### Patch Changes

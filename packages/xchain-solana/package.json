@@ -1,6 +1,6 @@
 {
   "name": "@xchainjs/xchain-solana",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "Solana client for XChainJS",
   "keywords": [
     "Solana",

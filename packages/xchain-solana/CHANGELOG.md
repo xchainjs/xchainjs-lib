@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.12
+
+### Patch Changes
+
+- cd7b311: Create a missing recipient token account in the same SPL transfer
+
 ## 1.1.11
 
 ### Patch Changes

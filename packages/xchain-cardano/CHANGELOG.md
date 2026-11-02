@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.7
+
+### Patch Changes
+
+- 4cba811: Refuse to add change below the minimum ADA to the transaction fee
+
 ## 1.2.6
 
 ### Patch Changes
