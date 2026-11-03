@@ -18,6 +18,11 @@ const meta = 'xchain-keystore'
 export const KEYSTORE_VERSION = 2
 const SUPPORTED_VERSIONS = [1, 2]
 const IV_LENGTH = 16
+// Accepted PBKDF2 iteration range. The upper bound stops a crafted keystore from hanging the unlock.
+// The lower bound is deliberately just 1 (not the current default of 600,000): the iteration count is
+// stored in each keystore and older files were written with much lower counts (e.g. 262,144), and
+// possibly lower still in the earliest releases. Raising the floor would lock users out of legacy files.
+const MIN_PBKDF2_ITERATIONS = 1
 const MAX_PBKDF2_ITERATIONS = 10_000_000
 
 export type Keystore = {
@@ -81,15 +86,19 @@ const validateKeystore = (keystore: Keystore): { version: number; iv: Buffer; sa
   if (!kdfparams || typeof kdfparams !== 'object') throw new Error('Invalid keystore: missing kdfparams')
   if (kdfparams.prf !== prf) throw new Error(`Invalid keystore: unsupported prf ${String(kdfparams.prf)}`)
   if (kdfparams.dklen !== dklen) throw new Error(`Invalid keystore: dklen must be ${dklen}`)
-  if (!Number.isInteger(kdfparams.c) || kdfparams.c < 1 || kdfparams.c > MAX_PBKDF2_ITERATIONS)
-    throw new Error(`Invalid keystore: iteration count must be an integer between 1 and ${MAX_PBKDF2_ITERATIONS}`)
+  if (!Number.isInteger(kdfparams.c) || kdfparams.c < MIN_PBKDF2_ITERATIONS || kdfparams.c > MAX_PBKDF2_ITERATIONS)
+    throw new Error(
+      `Invalid keystore: iteration count must be an integer between ${MIN_PBKDF2_ITERATIONS} and ${MAX_PBKDF2_ITERATIONS}`,
+    )
   if (typeof kdfparams.salt !== 'string' || kdfparams.salt.length === 0 || !isHex(kdfparams.salt))
     throw new Error('Invalid keystore: missing or malformed salt')
   const ivHex = cryptoSection.cipherparams?.iv
   if (!isHex(ivHex) || ivHex.length !== IV_LENGTH * 2)
     throw new Error(`Invalid keystore: iv must be ${IV_LENGTH} bytes`)
-  if (!isHex(cryptoSection.ciphertext)) throw new Error('Invalid keystore: malformed ciphertext')
-  if (!isHex(cryptoSection.mac)) throw new Error('Invalid keystore: malformed mac')
+  if (!isHex(cryptoSection.ciphertext) || cryptoSection.ciphertext.length === 0)
+    throw new Error('Invalid keystore: missing or malformed ciphertext')
+  if (!isHex(cryptoSection.mac) || cryptoSection.mac.length === 0)
+    throw new Error('Invalid keystore: missing or malformed mac')
   return { version, iv: Buffer.from(ivHex, 'hex'), salt: Buffer.from(kdfparams.salt, 'hex') }
 }
 

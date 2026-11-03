@@ -296,6 +296,31 @@ describe('Keystore v2 (MAC covers the IV)', () => {
       await expect(decryptFromKeystore(ks2, password)).rejects.toThrow('malformed ciphertext')
     })
 
+    it('empty ciphertext', async () => {
+      const ks = clone()
+      ks.crypto.ciphertext = ''
+      await expect(decryptFromKeystore(ks, password)).rejects.toThrow('missing or malformed ciphertext')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (ks.crypto as any).ciphertext
+      await expect(decryptFromKeystore(ks, password)).rejects.toThrow('missing or malformed ciphertext')
+    })
+
+    it('empty mac', async () => {
+      const ks = clone()
+      ks.crypto.mac = ''
+      await expect(decryptFromKeystore(ks, password)).rejects.toThrow('missing or malformed mac')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (ks.crypto as any).mac
+      await expect(decryptFromKeystore(ks, password)).rejects.toThrow('missing or malformed mac')
+    })
+
+    it('accepts the lowest legacy iteration count (c=1) past validation', async () => {
+      const ks = clone()
+      ks.crypto.kdfparams.c = 1
+      // passes validation; MAC no longer matches because the key differs
+      await expect(decryptFromKeystore(ks, password)).rejects.toThrow('Invalid password')
+    })
+
     it('missing crypto section', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(decryptFromKeystore({ version: 2 } as any, password)).rejects.toThrow('missing crypto section')
