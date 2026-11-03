@@ -38,7 +38,7 @@
   "dependencies": {
     "@bitcoin-js/tiny-secp256k1-asmjs": "^2.2.3",
     "@cosmjs/crypto": "0.37.0",
-    "@cosmjs/encoding": "0.37.0",
+    "@cosmjs/encoding": "0.39.0",
     "@cosmjs/proto-signing": "0.37.0",
     "@cosmjs/stargate": "0.37.0",
     "@scure/base": "1.1.5",
