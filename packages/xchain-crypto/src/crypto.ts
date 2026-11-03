@@ -23,7 +23,7 @@ const IV_LENGTH = 16
 // stored in each keystore and older files were written with much lower counts (e.g. 262,144), and
 // possibly lower still in the earliest releases. Raising the floor would lock users out of legacy files.
 const MIN_PBKDF2_ITERATIONS = 1
-const MAX_PBKDF2_ITERATIONS = 10_000_000
+const MAX_PBKDF2_ITERATIONS = 2_000_000
 
 export type Keystore = {
   crypto: {
@@ -105,6 +105,16 @@ const validateKeystore = (keystore: Keystore): { version: number; iv: Buffer; sa
 /**
  * Whether the keystore was written in an older format and should be re-encrypted
  * (via `encryptToKeyStore`) after a successful unlock.
+ *
+ * Wallets should call this after every successful `decryptFromKeystore`; when it returns true,
+ * re-encrypt the recovered phrase with `encryptToKeyStore(phrase, password)` and persist the result.
+ * Until a v1 keystore is re-encrypted its IV stays unauthenticated (see #1721). Note that v2 keystores
+ * cannot be read by older `xchain-crypto` releases, so upgrade the library everywhere first.
+ *
+ * Returns true for any version below 2 (not just exactly 1) on purpose: every pre-v2 format uses the
+ * MAC that does not cover the IV, so all of them need upgrading. A missing or non-numeric version is
+ * treated the same way (fail towards upgrading); `decryptFromKeystore` itself still rejects anything
+ * that is not version 1 or 2.
  */
 export const keystoreNeedsUpgrade = (keystore: Pick<Keystore, 'version'>): boolean =>
   typeof keystore.version !== 'number' || keystore.version < KEYSTORE_VERSION

@@ -235,11 +235,14 @@ describe('Keystore v2 (MAC covers the IV)', () => {
       },
     )
 
-    it.each([0, -1, 10_000_001, 1.5, Infinity, NaN, 1e12])('invalid iteration count c=%p', async (c) => {
-      const ks = clone()
-      ks.crypto.kdfparams.c = c
-      await expect(decryptFromKeystore(ks, password)).rejects.toThrow('iteration count')
-    })
+    it.each([0, -1, 2_000_001, 10_000_000, 10_000_001, 1.5, Infinity, NaN, 1e12])(
+      'invalid iteration count c=%p',
+      async (c) => {
+        const ks = clone()
+        ks.crypto.kdfparams.c = c
+        await expect(decryptFromKeystore(ks, password)).rejects.toThrow('iteration count')
+      },
+    )
 
     it('huge c is rejected before any key derivation', async () => {
       const ks = clone()
@@ -321,6 +324,13 @@ describe('Keystore v2 (MAC covers the IV)', () => {
       await expect(decryptFromKeystore(ks, password)).rejects.toThrow('Invalid password')
     })
 
+    it('accepts the maximum iteration count (c=2,000,000) past validation', async () => {
+      const ks = clone()
+      ks.crypto.kdfparams.c = 2_000_000
+      // passes validation; MAC no longer matches because the derived key differs
+      await expect(decryptFromKeystore(ks, password)).rejects.toThrow('Invalid password')
+    })
+
     it('missing crypto section', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await expect(decryptFromKeystore({ version: 2 } as any, password)).rejects.toThrow('missing crypto section')
@@ -331,6 +341,7 @@ describe('Keystore v2 (MAC covers the IV)', () => {
     it('is true for v1 and false for v2', () => {
       expect(keystoreNeedsUpgrade({ version: 1 })).toBe(true)
       expect(keystoreNeedsUpgrade({ version: 2 })).toBe(false)
+      expect(keystoreNeedsUpgrade({ version: 0 })).toBe(true)
     })
 
     it('lets callers migrate a v1 keystore to v2 after unlocking', async () => {
