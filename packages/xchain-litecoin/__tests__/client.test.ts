@@ -5,14 +5,7 @@ import { UtxoClientParams } from '@xchainjs/xchain-utxo'
 import mockSochainApi from '../__mocks__/sochain'
 import mockThornodeApi from '../__mocks__/thornode-api'
 import { ClientKeystore as Client } from '../src'
-import {
-  AssetLTC,
-  LOWER_FEE_BOUND,
-  MIN_TX_FEE,
-  UPPER_FEE_BOUND,
-  explorerProviders,
-  sochainDataProviders,
-} from '../src/const'
+import { AssetLTC, LOWER_FEE_BOUND, UPPER_FEE_BOUND, explorerProviders, sochainDataProviders } from '../src/const'
 
 export const defaultLTCParams: UtxoClientParams = {
   network: Network.Mainnet,
@@ -222,41 +215,29 @@ describe('LitecoinClient Test', () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
     const estimates = await ltcClient.getFees()
-    expect(estimates.fast.amount().toString()).toEqual('26910')
-    expect(estimates.fastest.amount().toString()).toEqual('134550')
-    expect(estimates.average.amount().toString()).toEqual('13455')
+    // 141 vbytes (one P2WPKH input, recipient and change) × rates 345 / 1725 / ceil(172.5)
+    expect(estimates.fast.amount().toString()).toEqual('48645')
+    expect(estimates.fastest.amount().toString()).toEqual('243225')
+    expect(estimates.average.amount().toString()).toEqual('24393')
 
     const estimatesWithSender = await ltcClient.getFees({
       sender: await ltcClient.getAddressAsync(0),
     })
-    expect(estimatesWithSender.fast.amount().toString()).toEqual('71760')
-    expect(estimatesWithSender.fastest.amount().toString()).toEqual('358800')
-    expect(estimatesWithSender.average.amount().toString()).toEqual('35880')
+    // 209 vbytes (two P2WPKH inputs, recipient and change)
+    expect(estimatesWithSender.fast.amount().toString()).toEqual('72105')
+    expect(estimatesWithSender.fastest.amount().toString()).toEqual('360525')
+    expect(estimatesWithSender.average.amount().toString()).toEqual('36157')
   })
 
-  it('should return estimated fees of a vault tx that are more expensive than a normal tx (in case of > MIN_TX_FEE only)', async () => {
+  it('should return estimated fees of a vault tx that are more expensive than a normal tx', async () => {
     ltcClient.setNetwork(Network.Testnet)
     ltcClient.setPhrase(phraseOne)
     const normalTx = await ltcClient.getFees()
     const vaultTx = await ltcClient.getFees({ memo: MEMO })
 
-    if (vaultTx.average.amount().isGreaterThan(MIN_TX_FEE)) {
-      expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
-    } else {
-      expect(vaultTx.average.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
-    }
-
-    if (vaultTx.fast.amount().isGreaterThan(MIN_TX_FEE)) {
-      expect(vaultTx.fast.amount().isGreaterThan(normalTx.fast.amount())).toBeTruthy()
-    } else {
-      expect(vaultTx.fast.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
-    }
-
-    if (vaultTx.fastest.amount().isGreaterThan(MIN_TX_FEE)) {
-      expect(vaultTx.fastest.amount().isGreaterThan(normalTx.fastest.amount())).toBeTruthy()
-    } else {
-      expect(vaultTx.fastest.amount().isEqualTo(MIN_TX_FEE)).toBeTruthy()
-    }
+    expect(vaultTx.average.amount().isGreaterThan(normalTx.average.amount())).toBeTruthy()
+    expect(vaultTx.fast.amount().isGreaterThan(normalTx.fast.amount())).toBeTruthy()
+    expect(vaultTx.fastest.amount().isGreaterThan(normalTx.fastest.amount())).toBeTruthy()
   })
 
   it('returns different fee rates for a normal tx', async () => {

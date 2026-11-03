@@ -16,7 +16,9 @@ import { Address, Asset, Chain, baseAmount } from '@xchainjs/xchain-util'
 import { UtxoOnlineDataProviders } from '@xchainjs/xchain-utxo-providers'
 
 import { Balance, PreparedTx, Tx, TxParams, TxsPage, UTXO, UtxoClientParams } from './types'
+import { DUST_THRESHOLD, TX_SIZE_CONSTANTS, TxSizeConstants } from './constants'
 import { UtxoError } from './errors'
+import { calculateTxFee, outputBytes } from './fee'
 import { UtxoTransactionValidator } from './validators'
 import { UtxoSelector } from './utxo-selector'
 import { UtxoSelectionPreferences, UtxoSelectionResult } from './strategies'
@@ -71,6 +73,32 @@ export abstract class Client extends BaseXChainClient {
     void _confirmedOnly
     return await this.roundRobinGetBalance(address)
   }
+
+  /** Size model for this chain and address format. Defaults to P2WPKH. */
+  protected getTxSizeConstants(): TxSizeConstants {
+    return TX_SIZE_CONSTANTS
+  }
+
+  /** Change at or below this is added to the fee instead of creating a change output. */
+  protected getDustThreshold(): number {
+    return DUST_THRESHOLD
+  }
+
+  /** Size of the recipient output (8 value + 1 script length + script). Defaults to the sender format's output, also used when the recipient is unknown. */
+  protected getRecipientOutputBytes(_recipient?: Address): number {
+    return this.getTxSizeConstants().BYTES_PER_OUTPUT
+  }
+
+  /**
+   * Size model for one send: the recipient and memo outputs are folded into `BASE_TX_SIZE`, so
+   * `BYTES_PER_OUTPUT` is the change output. Select with `extraOutputs` 0.
+   */
+  protected getSendSizes(recipient?: Address, memoBytes: number = 0): TxSizeConstants {
+    const sizes = this.getTxSizeConstants()
+    const memoOutBytes = memoBytes > 0 ? outputBytes(memoBytes) : 0
+    return { ...sizes, BASE_TX_SIZE: sizes.BASE_TX_SIZE + this.getRecipientOutputBytes(recipient) + memoOutBytes }
+  }
+
   protected async scanUTXOs(address: string, confirmedOnly = true): Promise<UTXO[]> {
     return this.roundRobinGetUnspentTxs(address, confirmedOnly)
   }
@@ -191,13 +219,17 @@ export abstract class Client extends BaseXChainClient {
     }
     throw Error('no provider able to BroadcastTx')
   }
-  /** `targetValue` is satoshis, `feeRate` is sat/byte. `extraOutputs` defaults to recipient + change. */
+  /**
+   * `targetValue` is satoshis, `feeRate` is sat/byte. Pass `getSendSizes(...)` as `sizes` with `extraOutputs` 0 to
+   * price the recipient and memo outputs.
+   */
   protected selectUtxosForTransaction(
     utxos: UTXO[],
     targetValue: number,
     feeRate: number,
     extraOutputs: number = 2,
     preferences?: UtxoSelectionPreferences,
+    sizes: TxSizeConstants = this.getTxSizeConstants(),
   ): UtxoSelectionResult {
     const selector = new UtxoSelector()
 
@@ -209,7 +241,15 @@ export abstract class Client extends BaseXChainClient {
     }
 
     try {
-      return selector.selectOptimal(utxos, targetValue, feeRate, defaultPreferences, extraOutputs)
+      return selector.selectOptimal(
+        utxos,
+        targetValue,
+        feeRate,
+        defaultPreferences,
+        extraOutputs,
+        sizes,
+        this.getDustThreshold(),
+      )
     } catch (error) {
       if (UtxoError.isUtxoError(error)) {
         throw error
@@ -237,13 +277,22 @@ export abstract class Client extends BaseXChainClient {
 
   /**
    * Sweep spends every UTXO. That is simpler and more correct than binary search over selections.
+   * `memoBytes` is the compiled memo script length (0 for none).
    */
   protected calculateMaxSendableAmount(
     utxos: UTXO[],
     feeRate: number,
-    hasMemo: boolean,
+    memoBytes: number,
     preferences?: UtxoSelectionPreferences,
+    recipient?: Address,
   ): { amount: number; fee: number; inputs: UTXO[] } {
+    if (!Number.isInteger(memoBytes) || memoBytes < 0) {
+      throw UtxoError.validationError(`memoBytes must be a non-negative integer, got ${String(memoBytes)}`)
+    }
+    if (typeof feeRate !== 'number' || !Number.isFinite(feeRate) || feeRate <= 0) {
+      throw UtxoError.invalidFeeRate(feeRate, 'Fee rate must be a positive finite number')
+    }
+
     const inputUtxos = preferences?.avoidDust
       ? utxos.filter((utxo) => utxo.value >= UtxoSelector.DUST_THRESHOLD)
       : utxos
@@ -254,10 +303,9 @@ export abstract class Client extends BaseXChainClient {
 
     const totalValue = inputUtxos.reduce((sum, utxo) => sum + utxo.value, 0)
 
-    // Recipient plus optional memo. No change output.
-    const outputCount = hasMemo ? 2 : 1
-
-    const fee = UtxoSelector.calculateFee(inputUtxos.length, outputCount, feeRate)
+    // Recipient and optional memo are in the base size. No change output.
+    const sizes = this.getSendSizes(recipient, memoBytes)
+    const fee = calculateTxFee(inputUtxos.length, 0, feeRate, sizes)
 
     const maxAmount = totalValue - fee
 
@@ -326,15 +374,14 @@ export abstract class Client extends BaseXChainClient {
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
-      // Recipient + change + optional memo
-      const extraOutputs = 2 + (compiledMemo ? 1 : 0)
 
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
         Math.ceil(feeRate),
-        extraOutputs,
+        0,
         utxoSelectionPreferences,
+        this.getSendSizes(recipient, compiledMemo?.length),
       )
 
       const rawUnsignedTx = await this.buildTxPsbt({
@@ -398,9 +445,15 @@ export abstract class Client extends BaseXChainClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      const maxCalc = this.calculateMaxSendableAmount(utxos, validatedFeeRate, !!memo, utxoSelectionPreferences)
-
       const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      const maxCalc = this.calculateMaxSendableAmount(
+        utxos,
+        validatedFeeRate,
+        compiledMemo?.length ?? 0,
+        utxoSelectionPreferences,
+        recipient,
+      )
 
       // Max send has no change output
       const rawUnsignedTx = await this.buildTxPsbt({
@@ -442,7 +495,21 @@ export abstract class Client extends BaseXChainClient {
     throw new Error(`buildTxPsbt not implemented for ${this.chain}. Override in chain client to use enhanced methods.`)
   }
 
-  protected abstract getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null): number
+  /**
+   * Fee estimate for a send with a recipient output, a change output and an optional memo, spending all `inputs`.
+   * Sizes come from `getTxSizeConstants()`; with no known UTXOs one input is assumed. There is no minimum fee.
+   * For a MAX send (no change output), subtract one `BYTES_PER_OUTPUT` × rate.
+   */
+  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
+    const sizes = this.getTxSizeConstants()
+    const memoOutBytes = data ? outputBytes(data.length) : 0
+    const txSize =
+      sizes.BASE_TX_SIZE +
+      Math.max(inputs.length, 1) * sizes.BYTES_PER_INPUT +
+      2 * sizes.BYTES_PER_OUTPUT +
+      memoOutBytes
+    return Math.ceil(txSize * Math.ceil(feeRate))
+  }
 
   protected async roundRobinGetFeeRates(): Promise<FeeRates> {
     for (const provider of this.dataProviders) {

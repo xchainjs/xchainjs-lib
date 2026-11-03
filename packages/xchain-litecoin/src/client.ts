@@ -4,6 +4,7 @@ import {
   Client as UTXOClient,
   PreparedTx,
   TxParams,
+  TxSizeConstants,
   UTXO,
   UtxoClientParams,
   UtxoError,
@@ -21,7 +22,6 @@ import {
   LOWER_FEE_BOUND,
   LTCChain,
   LTC_DECIMAL,
-  MIN_TX_FEE,
   UPPER_FEE_BOUND,
   explorerProviders,
 } from './const'
@@ -158,24 +158,18 @@ abstract class Client extends UTXOClient {
     return Litecoin.script.compile([Litecoin.opcodes.OP_RETURN, data])
   }
 
-  protected getFeeFromUtxos(inputs: UTXO[], feeRate: FeeRate, data: Buffer | null = null): number {
-    const inputSizeBasedOnInputs =
-      inputs.length > 0
-        ? inputs.reduce((a, x) => a + Utils.inputBytes(x), 0) + inputs.length // +1 byte for each input signature
-        : 0
-    let sum =
-      Utils.TX_EMPTY_SIZE +
-      inputSizeBasedOnInputs +
-      inputs.length + // +1 byte for each input signature
-      Utils.TX_OUTPUT_BASE +
-      Utils.TX_OUTPUT_PUBKEYHASH +
-      Utils.TX_OUTPUT_BASE +
-      Utils.TX_OUTPUT_PUBKEYHASH
-    if (data) {
-      sum += Utils.TX_OUTPUT_BASE + data.length
-    }
-    const fee = sum * feeRate
-    return fee > MIN_TX_FEE ? fee : MIN_TX_FEE
+  protected getTxSizeConstants(): TxSizeConstants {
+    return { BASE_TX_SIZE: 11, BYTES_PER_INPUT: 68, BYTES_PER_OUTPUT: 31 }
+  }
+
+  /** Litecoin relays outputs from 5460 litoshi (`DUST_RELAY_TX_FEE` 30000), which also covers P2PKH recipients. */
+  protected getDustThreshold(): number {
+    return 5460
+  }
+
+  protected getRecipientOutputBytes(recipient?: Address): number {
+    if (!recipient) return super.getRecipientOutputBytes()
+    return 9 + Litecoin.address.toOutputScript(recipient, Utils.ltcNetwork(this.network)).length
   }
 
   async buildTxEnhanced({
@@ -214,14 +208,13 @@ abstract class Client extends UTXOClient {
 
       const compiledMemo = memo ? this.compileMemo(memo) : null
       const targetValue = amount.amount().toNumber()
-      const extraOutputs = 1 + (compiledMemo ? 1 : 0)
-
       const selectionResult = this.selectUtxosForTransaction(
         utxos,
         targetValue,
         Math.ceil(feeRate),
-        extraOutputs,
+        0,
         utxoSelectionPreferences,
+        this.getSendSizes(recipient, compiledMemo?.length),
       )
 
       const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) })
@@ -336,9 +329,15 @@ abstract class Client extends UTXOClient {
         utxos = await this.getValidatedUtxos(sender, confirmedOnly)
       }
 
-      const maxCalc = this.calculateMaxSendableAmount(utxos, Math.ceil(feeRate), !!memo, utxoSelectionPreferences)
-
       const compiledMemo = memo ? this.compileMemo(memo) : null
+
+      const maxCalc = this.calculateMaxSendableAmount(
+        utxos,
+        Math.ceil(feeRate),
+        compiledMemo?.length ?? 0,
+        utxoSelectionPreferences,
+        recipient,
+      )
       const psbt = new Litecoin.Psbt({ network: Utils.ltcNetwork(this.network) })
 
       maxCalc.inputs.forEach((utxo: UTXO) =>

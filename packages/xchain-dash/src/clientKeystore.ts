@@ -115,7 +115,7 @@ export class ClientKeystore extends Client {
 
     tx.sign(`${dashKeys.privateKey?.toString('hex')}`)
 
-    const txHex = tx.checkedSerialize({})
+    const txHex = tx.checkedSerialize({ disableLargeFees: true })
     return await this.broadcastTx(txHex)
   }
 
@@ -170,7 +170,7 @@ export class ClientKeystore extends Client {
     const dashKeys = this.getDashKeys(this.phrase, fromAddressIndex)
     tx.sign(`${dashKeys.privateKey?.toString('hex')}`)
 
-    const txHex = tx.checkedSerialize({})
+    const txHex = tx.checkedSerialize({ disableLargeFees: true })
     const hash = await this.broadcastTx(txHex)
 
     return { hash, maxAmount, fee }

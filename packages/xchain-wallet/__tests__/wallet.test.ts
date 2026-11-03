@@ -1,7 +1,8 @@
-import { Client as BtcClient, defaultBTCParams } from '@xchainjs/xchain-bitcoin'
-import { Network } from '@xchainjs/xchain-client'
+import { AssetBTC, Client as BtcClient, defaultBTCParams } from '@xchainjs/xchain-bitcoin'
+import { FeeType, Network } from '@xchainjs/xchain-client'
 import { Client as EthClient, defaultEthParams } from '@xchainjs/xchain-ethereum'
 import { Client as ThorClient } from '@xchainjs/xchain-thorchain'
+import { assetToBase, assetAmount, baseAmount } from '@xchainjs/xchain-util'
 
 import { Wallet } from '@xchainjs/xchain-wallet'
 
@@ -128,6 +129,52 @@ describe('Wallet', () => {
       await expect(async () => {
         await wallet.getExplorerTxUrl('THOR', 'A4A8EB504016E930C10C8E5A5AC2980F89FBE10CF2861D99524574B32E009EA3')
       }).rejects.toThrow(/Client not found for THOR chain/)
+    })
+  })
+
+  describe('UTXO fees', () => {
+    let btc: BtcClient
+    let wallet: Wallet
+    beforeEach(() => {
+      btc = new BtcClient({ ...defaultBTCParams, network: Network.Mainnet })
+      wallet = new Wallet({ BTC: btc })
+    })
+
+    it('Should round UTXO fee rates up', async () => {
+      jest.spyOn(btc, 'getFeeRates').mockResolvedValue({ average: 1.4, fast: 2.2, fastest: 0.4 })
+      const rates = await wallet.getFeeRates('BTC')
+      expect(rates.average.amount().toNumber()).toBe(2)
+      expect(rates.fast.amount().toNumber()).toBe(3)
+      expect(rates.fastest.amount().toNumber()).toBe(1)
+    })
+
+    it('Should estimate transfer fees for the requested wallet index', async () => {
+      const fees = { average: baseAmount(1), fast: baseAmount(2), fastest: baseAmount(3), type: FeeType.PerByte }
+      const getAddressAsync = jest.spyOn(btc, 'getAddressAsync').mockResolvedValue('bc1qsender')
+      const getFees = jest.spyOn(btc, 'getFees').mockResolvedValue(fees)
+      const result = await wallet.estimateTransferFees({
+        asset: AssetBTC,
+        recipient: 'bc1qrecipient',
+        amount: assetToBase(assetAmount(0.001, 8)),
+        memo: 'memo',
+        walletIndex: 3,
+      })
+      expect(getAddressAsync).toHaveBeenCalledWith(3)
+      expect(getFees).toHaveBeenCalledWith({ sender: 'bc1qsender', memo: 'memo' })
+      expect(result).toBe(fees)
+    })
+
+    it('Should not swallow address errors when estimating transfer fees', async () => {
+      jest.spyOn(btc, 'getAddressAsync').mockRejectedValue(new Error('no address'))
+      const getFees = jest.spyOn(btc, 'getFees')
+      await expect(
+        wallet.estimateTransferFees({
+          asset: AssetBTC,
+          recipient: 'bc1qrecipient',
+          amount: assetToBase(assetAmount(0.001, 8)),
+        }),
+      ).rejects.toThrow('no address')
+      expect(getFees).not.toHaveBeenCalled()
     })
   })
 })

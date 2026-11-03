@@ -72,7 +72,11 @@ class ClientLedger extends Client {
   }
 
   async transfer(
-    params: TxParams & { feeRate?: FeeRate; utxoSelectionPreferences?: UtxoSelectionPreferences },
+    params: TxParams & {
+      feeRate?: FeeRate
+      utxoSelectionPreferences?: UtxoSelectionPreferences
+      selectedUtxos?: UTXO[]
+    },
   ): Promise<TxHash> {
     const app = await this.getApp()
     const fromAddressIndex = params?.walletIndex || 0

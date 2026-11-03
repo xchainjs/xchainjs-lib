@@ -7,7 +7,10 @@ import {
   UtxoOnlineDataProviders,
 } from '@xchainjs/xchain-utxo-providers'
 
-/** 1000 duff/kB, similar to `minrelaytxfee`. @see https://github.com/dashpay/dash/blob/master/src/validation.h */
+/**
+ * @deprecated No longer applied as a fee floor.
+ * 1000 duff/kB, similar to `minrelaytxfee`. @see https://github.com/dashpay/dash/blob/master/src/validation.h
+ */
 export const MIN_TX_FEE = 1000
 
 export const DASH_DECIMAL = 8

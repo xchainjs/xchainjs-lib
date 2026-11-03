@@ -1,19 +1,8 @@
 import { Network } from '@xchainjs/xchain-client'
 import { Address } from '@xchainjs/xchain-util'
-import { UTXO } from '@xchainjs/xchain-utxo'
 import * as Bitcoin from 'bitcoinjs-lib'
 
 import { AddressFormat } from './types'
-
-export const TX_EMPTY_SIZE = 4 + 1 + 1 + 4
-export const TX_INPUT_BASE = 32 + 4 + 1 + 4
-export const TX_INPUT_PUBKEYHASH = 107
-export const TX_OUTPUT_BASE = 8 + 1
-export const TX_OUTPUT_PUBKEYHASH = 25
-
-export const inputBytes = (input: UTXO): number => {
-  return TX_INPUT_BASE + (input.witnessUtxo?.script ? input.witnessUtxo?.script.length : TX_INPUT_PUBKEYHASH)
-}
 
 export const arrayAverage = (array: number[]): number => {
   let sum = 0
