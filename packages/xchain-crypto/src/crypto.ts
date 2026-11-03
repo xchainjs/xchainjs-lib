@@ -14,6 +14,16 @@ const dklen = 32
 const c = 600000 // OWASP-recommended minimum for PBKDF2-HMAC-SHA256
 const hashFunction = 'sha256'
 const meta = 'xchain-keystore'
+/** Keystore version written by `encryptToKeyStore`. v2 adds the IV to the MAC input. */
+export const KEYSTORE_VERSION = 2
+const SUPPORTED_VERSIONS = [1, 2]
+const IV_LENGTH = 16
+// Accepted PBKDF2 iteration range. The upper bound stops a crafted keystore from hanging the unlock.
+// The lower bound is deliberately just 1 (not the current default of 600,000): the iteration count is
+// stored in each keystore and older files were written with much lower counts (e.g. 262,144), and
+// possibly lower still in the earliest releases. Raising the floor would lock users out of legacy files.
+const MIN_PBKDF2_ITERATIONS = 1
+const MAX_PBKDF2_ITERATIONS = 2_000_000
 
 export type Keystore = {
   crypto: {
@@ -48,6 +58,66 @@ const constantTimeEqual = (a: Buffer, b: Buffer): boolean => {
   for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i]
   return diff === 0
 }
+
+const isHex = (value: unknown): value is string =>
+  typeof value === 'string' && value.length % 2 === 0 && /^[0-9a-fA-F]*$/.test(value)
+
+// Compute the keystore MAC. macKey is the second half of the derived key (bytes 16..32).
+// v1: blake2b(macKey || ciphertext); v2+: blake2b(macKey || iv || ciphertext).
+const computeMac = (version: number, macKey: Buffer, iv: Buffer, ciphertext: Buffer): Buffer => {
+  const parts = version >= 2 ? [macKey, iv, ciphertext] : [macKey, ciphertext]
+  return Buffer.from(blake2b(Buffer.concat(parts), { dkLen: 32 }))
+}
+
+/**
+ * Strictly validate the untrusted keystore parameters before any key derivation happens.
+ * Throws a descriptive error if anything is unexpected.
+ */
+const validateKeystore = (keystore: Keystore): { version: number; iv: Buffer; salt: Buffer } => {
+  const cryptoSection = keystore?.crypto
+  if (!cryptoSection || typeof cryptoSection !== 'object') throw new Error('Invalid keystore: missing crypto section')
+  const version = keystore.version
+  if (typeof version !== 'number' || !SUPPORTED_VERSIONS.includes(version))
+    throw new Error(`Invalid keystore: unsupported version ${String(version)}`)
+  if (cryptoSection.cipher !== cipher)
+    throw new Error(`Invalid keystore: unsupported cipher ${String(cryptoSection.cipher)}`)
+  if (cryptoSection.kdf !== kdf) throw new Error(`Invalid keystore: unsupported kdf ${String(cryptoSection.kdf)}`)
+  const kdfparams = cryptoSection.kdfparams
+  if (!kdfparams || typeof kdfparams !== 'object') throw new Error('Invalid keystore: missing kdfparams')
+  if (kdfparams.prf !== prf) throw new Error(`Invalid keystore: unsupported prf ${String(kdfparams.prf)}`)
+  if (kdfparams.dklen !== dklen) throw new Error(`Invalid keystore: dklen must be ${dklen}`)
+  if (!Number.isInteger(kdfparams.c) || kdfparams.c < MIN_PBKDF2_ITERATIONS || kdfparams.c > MAX_PBKDF2_ITERATIONS)
+    throw new Error(
+      `Invalid keystore: iteration count must be an integer between ${MIN_PBKDF2_ITERATIONS} and ${MAX_PBKDF2_ITERATIONS}`,
+    )
+  if (typeof kdfparams.salt !== 'string' || kdfparams.salt.length === 0 || !isHex(kdfparams.salt))
+    throw new Error('Invalid keystore: missing or malformed salt')
+  const ivHex = cryptoSection.cipherparams?.iv
+  if (!isHex(ivHex) || ivHex.length !== IV_LENGTH * 2)
+    throw new Error(`Invalid keystore: iv must be ${IV_LENGTH} bytes`)
+  if (!isHex(cryptoSection.ciphertext) || cryptoSection.ciphertext.length === 0)
+    throw new Error('Invalid keystore: missing or malformed ciphertext')
+  if (!isHex(cryptoSection.mac) || cryptoSection.mac.length === 0)
+    throw new Error('Invalid keystore: missing or malformed mac')
+  return { version, iv: Buffer.from(ivHex, 'hex'), salt: Buffer.from(kdfparams.salt, 'hex') }
+}
+
+/**
+ * Whether the keystore was written in an older format and should be re-encrypted
+ * (via `encryptToKeyStore`) after a successful unlock.
+ *
+ * Wallets should call this after every successful `decryptFromKeystore`; when it returns true,
+ * re-encrypt the recovered phrase with `encryptToKeyStore(phrase, password)` and persist the result.
+ * Until a v1 keystore is re-encrypted its IV stays unauthenticated (see #1721). Note that v2 keystores
+ * cannot be read by older `xchain-crypto` releases, so upgrade the library everywhere first.
+ *
+ * Returns true for any version below 2 (not just exactly 1) on purpose: every pre-v2 format uses the
+ * MAC that does not cover the IV, so all of them need upgrading. A missing or non-numeric version is
+ * treated the same way (fail towards upgrading); `decryptFromKeystore` itself still rejects anything
+ * that is not version 1 or 2.
+ */
+export const keystoreNeedsUpgrade = (keystore: Pick<Keystore, 'version'>): boolean =>
+  typeof keystore.version !== 'number' || keystore.version < KEYSTORE_VERSION
 
 export const generatePhrase = (size = 12): string => {
   const strength = size === 12 ? 128 : 256
@@ -91,10 +161,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfParams.c, kdfParams.dklen, hashFunction)
   const cipherIV = crypto.createCipheriv(cipher, derivedKey.slice(0, 16), iv)
   const cipherText = Buffer.concat([cipherIV.update(Buffer.from(phrase, 'utf8')), cipherIV.final()])
-  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), Buffer.from(cipherText)]), {
-    dkLen: 32,
-  })
-  const mac: string = Buffer.from(mac_bytes).toString('hex')
+  const mac: string = computeMac(KEYSTORE_VERSION, derivedKey.slice(16, 32), iv, cipherText).toString('hex')
 
   const cryptoStruct = {
     cipher: cipher,
@@ -108,7 +175,7 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
   const keystore = {
     crypto: cryptoStruct,
     id: ID,
-    version: 1,
+    version: KEYSTORE_VERSION,
     meta: meta,
   }
 
@@ -116,28 +183,17 @@ export const encryptToKeyStore = async (phrase: string, password: string): Promi
 }
 
 export const decryptFromKeystore = async (keystore: Keystore, password: string): Promise<string> => {
+  const { version, iv, salt } = validateKeystore(keystore)
   const kdfparams = keystore.crypto.kdfparams
-  const derivedKey = await pbkdf2Async(
-    Buffer.from(password),
-    Buffer.from(kdfparams.salt, 'hex'),
-    kdfparams.c,
-    kdfparams.dklen,
-    hashFunction,
-  )
+  const derivedKey = await pbkdf2Async(Buffer.from(password), salt, kdfparams.c, dklen, hashFunction)
 
   const ciphertext = Buffer.from(keystore.crypto.ciphertext, 'hex')
-  const mac_bytes: Uint8Array = blake2b(Buffer.concat([derivedKey.slice(16, 32), ciphertext]), { dkLen: 32 })
-  const computedMac = Buffer.from(mac_bytes)
+  const computedMac = computeMac(version, derivedKey.slice(16, 32), iv, ciphertext)
   const expectedMac = Buffer.from(keystore.crypto.mac, 'hex')
 
   // Constant-time comparison to avoid leaking MAC bytes via timing
-  if (computedMac.length !== expectedMac.length || !constantTimeEqual(computedMac, expectedMac))
-    throw new Error('Invalid password')
-  const decipher = crypto.createDecipheriv(
-    keystore.crypto.cipher,
-    derivedKey.slice(0, 16),
-    Buffer.from(keystore.crypto.cipherparams.iv, 'hex'),
-  )
+  if (!constantTimeEqual(computedMac, expectedMac)) throw new Error('Invalid password')
+  const decipher = crypto.createDecipheriv(cipher, derivedKey.slice(0, 16), iv)
 
   const phrase = Buffer.concat([decipher.update(ciphertext), decipher.final()])
   return phrase.toString('utf8')
