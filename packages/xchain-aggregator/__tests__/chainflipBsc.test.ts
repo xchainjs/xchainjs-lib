@@ -8,7 +8,15 @@ import { Chains, ChainflipIds } from '@chainflip/sdk/swap'
 import { AssetBTC } from '@xchainjs/xchain-bitcoin'
 import { AssetBSC, BSC_GAS_ASSET_DECIMAL } from '@xchainjs/xchain-bsc'
 import { Network } from '@xchainjs/xchain-client'
-import { CryptoAmount, TokenAsset, assetFromStringEx, assetToString, baseAmount } from '@xchainjs/xchain-util'
+import {
+  Asset,
+  AssetType,
+  CryptoAmount,
+  TokenAsset,
+  assetFromStringEx,
+  assetToString,
+  baseAmount,
+} from '@xchainjs/xchain-util'
 import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import BigNumber from 'bignumber.js'
@@ -248,6 +256,25 @@ describe('Chainflip protocol - BSC (real @chainflip/sdk)', () => {
       await protocol.isAssetSupported(assetFromStringEx('BSC.BNB-0x00000000000000000000000000000000000000ff')),
     ).toBe(false)
     expect(await protocol.isAssetSupported(assetFromStringEx('BSC.USDT'))).toBe(false)
+  })
+
+  it('matches native BNB only for the exact BSC.BNB identity, including hand-built assets', async () => {
+    const protocol = newProtocol()
+    const handBuilt = (symbol: string): Asset => ({ chain: 'BSC', ticker: 'BNB', symbol, type: AssetType.NATIVE })
+    expect(await protocol.isAssetSupported(handBuilt('BNB'))).toBe(true)
+    // assetFromString would type these as tokens; a directly constructed NATIVE asset must not slip through
+    expect(await protocol.isAssetSupported(handBuilt('BNB-0x00000000000000000000000000000000000000ff'))).toBe(false)
+    expect(await protocol.isAssetSupported(handBuilt('WBNB'))).toBe(false)
+
+    const destinationAsset = handBuilt('BNB-0x00000000000000000000000000000000000000ff')
+    await expect(
+      protocol.estimateSwap({
+        fromAsset: AssetBTC,
+        destinationAsset,
+        amount: new CryptoAmount(baseAmount('1000000', 8), AssetBTC),
+      }),
+    ).rejects.toThrow('BNB asset not supported in BSC chain')
+    expect(quoteRequests).toHaveLength(0)
   })
 
   it('rejects a look-alike BSC USDT contract before requesting a quote or channel', async () => {

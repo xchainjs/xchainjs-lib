@@ -62,12 +62,20 @@ export const xAssetToCAsset = (asset: XAsset | XTokenAsset): CAsset => {
 
 /**
  * BSC only: the Chainflip BscUsdt token matches only the xchainjs BSC token carrying the same
- * contract (case-insensitive), and native Bnb matches only the native xchainjs BSC asset. Ticker
+ * contract (case-insensitive), and native Bnb matches only the exact native BSC.BNB asset. Ticker
  * and chain alone are not enough on BSC. Other chains keep their existing ticker + chain matching.
  */
 export const isSameBscAsset = (asset: XAsset | XTokenAsset, assetData: AssetData): boolean => {
   if (assetData.chain !== Chains.Bsc) return true
-  if (!assetData.contractAddress) return !isTokenAsset(asset)
+  if (!assetData.contractAddress) {
+    // Exact native identity (BSC.BNB): a hand-built NATIVE asset with an extra symbol suffix must not match
+    return (
+      asset.type === AssetType.NATIVE &&
+      asset.chain === 'BSC' &&
+      asset.ticker === assetData.symbol &&
+      asset.symbol === assetData.symbol
+    )
+  }
   if (!isTokenAsset(asset)) return false
   const contract = asset.symbol.slice(asset.ticker.length + 1)
   return contract.toLowerCase() === assetData.contractAddress.toLowerCase()
