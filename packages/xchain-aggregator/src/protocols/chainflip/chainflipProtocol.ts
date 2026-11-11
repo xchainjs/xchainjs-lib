@@ -20,7 +20,7 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
 
 import { ChainflipDepositChannel, CompatibleAsset } from './types'
-import { cChainToXChain, xAssetToCAsset } from './utils'
+import { cChainToXChain, isSameBscAsset, xAssetToCAsset } from './utils'
 import { assetUSDC } from '@xchainjs/xchain-thorchain-query'
 
 const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
@@ -34,6 +34,29 @@ const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
       return 'mainnet'
   }
 }
+
+type ChainflipNetwork = ReturnType<typeof networkToChainflip>
+
+/**
+ * BSC through Chainflip is mainnet only. Chainflip perseverance (xchainjs stagenet) runs on BSC
+ * testnet (chain id 97), while the xchainjs BSC client on stagenet uses BSC mainnet, so a stagenet
+ * deposit would go to a testnet channel address on mainnet. xchainjs testnet has no Chainflip network.
+ */
+export const CHAINFLIP_BSC_SUPPORTED_NETWORK: ChainflipNetwork = 'mainnet'
+
+export class ChainflipUnsupportedNetworkError extends Error {
+  constructor(chain: Chain, network: ChainflipNetwork, walletNetwork?: Network) {
+    super(
+      walletNetwork
+        ? `${chain} is not supported by the Chainflip protocol with a "${walletNetwork}" wallet. ${chain} is supported on mainnet only`
+        : `${chain} is not supported by the Chainflip protocol on Chainflip network "${network}". ${chain} is supported on mainnet only`,
+    )
+    this.name = 'ChainflipUnsupportedNetworkError'
+  }
+}
+
+const isBscSwap = (params: QuoteSwapParams): boolean =>
+  params.fromAsset.chain === 'BSC' || params.destinationAsset.chain === 'BSC'
 
 /**
  * Broker-mode `requestDepositAddressV2` omits `estimatedDepositChannelExpiryTime`.
@@ -53,6 +76,7 @@ type SelectedQuoteContext = {
 export class ChainflipProtocol implements IProtocol {
   public readonly name = 'Chainflip'
   private sdk: SwapSDK
+  private network: ChainflipNetwork
   private wallet?: Wallet
   private assetsData: CachedValue<AssetData[]>
   private affiliateBrokers?: {
@@ -61,8 +85,9 @@ export class ChainflipProtocol implements IProtocol {
   }[]
 
   constructor(configuration?: ProtocolConfig) {
+    this.network = networkToChainflip(configuration?.network)
     this.sdk = new SwapSDK({
-      network: networkToChainflip(configuration?.network),
+      network: this.network,
       broker: configuration?.brokerUrl ? { url: configuration.brokerUrl } : undefined,
     })
     this.wallet = configuration?.wallet
@@ -94,7 +119,9 @@ export class ChainflipProtocol implements IProtocol {
 
   public async getSupportedChains(): Promise<Chain[]> {
     const chains = await this.sdk.getChains()
-    return chains.map((chain) => cChainToXChain(chain.chain)).filter((chain) => chain !== null) as Chain[]
+    return chains
+      .map((chain) => cChainToXChain(chain.chain))
+      .filter((chain) => chain !== null && this.isChainAllowedOnNetwork(chain)) as Chain[]
   }
 
   /**
@@ -103,6 +130,7 @@ export class ChainflipProtocol implements IProtocol {
    * `toAddress` and `depositChannelId` stay empty until a channel is opened.
    */
   public async estimateSwap(params: QuoteSwapParams): Promise<QuoteSwap> {
+    this.assertNetworkSupported(params)
     const srcAssetData = await this.getAssetData(params.fromAsset)
     const destAssetData = await this.getAssetData(params.destinationAsset)
 
@@ -124,6 +152,7 @@ export class ChainflipProtocol implements IProtocol {
    * `params` must include `fromAddress` and `destinationAddress`.
    */
   public async openDepositChannel(params: QuoteSwapParams): Promise<ChainflipDepositChannel> {
+    this.assertNetworkSupported(params)
     if (!params.fromAddress) throw Error('fromAddress is required to open a Chainflip deposit channel')
     if (!params.destinationAddress) throw Error('destinationAddress is required to open a Chainflip deposit channel')
 
@@ -176,7 +205,12 @@ export class ChainflipProtocol implements IProtocol {
    * `doSwap` does not return channel metadata.
    */
   public async doSwap(params: QuoteSwapParams): Promise<TxSubmitted> {
+    this.assertNetworkSupported(params)
     if (!this.wallet) throw Error('Wallet not configured. Can not do swap')
+    const walletNetwork = this.wallet.getNetwork()
+    if (isBscSwap(params) && walletNetwork !== Network.Mainnet) {
+      throw new ChainflipUnsupportedNetworkError('BSC', this.network, walletNetwork)
+    }
 
     const channel = await this.openDepositChannel(params)
 
@@ -197,6 +231,18 @@ export class ChainflipProtocol implements IProtocol {
     throw new Error('Method not implemented.')
   }
 
+  private isChainAllowedOnNetwork(chain: Chain): boolean {
+    return chain !== 'BSC' || this.network === CHAINFLIP_BSC_SUPPORTED_NETWORK
+  }
+
+  /** Runs before any SDK, backend, broker or wallet call. */
+  private assertNetworkSupported(params: QuoteSwapParams): void {
+    for (const asset of [params.fromAsset, params.destinationAsset]) {
+      if (!this.isChainAllowedOnNetwork(asset.chain))
+        throw new ChainflipUnsupportedNetworkError(asset.chain, this.network)
+    }
+  }
+
   private async getAssetData(asset: Asset | TokenAsset | SynthAsset | TradeAsset | SecuredAsset): Promise<AssetData> {
     if (isSynthAsset(asset)) {
       throw Error('Synth asset not supported in Chainflip protocol')
@@ -207,9 +253,15 @@ export class ChainflipProtocol implements IProtocol {
     if (isSecuredAsset(asset)) {
       throw Error('Secured asset not supported in Chainflip protocol')
     }
+    if (!this.isChainAllowedOnNetwork(asset.chain))
+      throw new ChainflipUnsupportedNetworkError(asset.chain, this.network)
     const chainAssets = await this.assetsData.getValue()
     const assetData = chainAssets.find((chainAsset) => {
-      return chainAsset.asset === xAssetToCAsset(asset) && asset.chain === cChainToXChain(chainAsset.chain)
+      return (
+        chainAsset.asset === xAssetToCAsset(asset) &&
+        asset.chain === cChainToXChain(chainAsset.chain) &&
+        isSameBscAsset(asset, chainAsset)
+      )
     })
     if (!assetData) throw Error(`${asset.ticker} asset not supported in ${asset.chain} chain`)
     return assetData
