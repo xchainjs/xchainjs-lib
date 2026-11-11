@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.0.3
+
+### Patch Changes
+
+- Updated dependencies [91a799b]
+  - @xchainjs/xchain-bitcoin@2.4.2
+  - @xchainjs/xchain-wallet@2.0.39
+
 ## 5.0.2
 
 ### Patch Changes

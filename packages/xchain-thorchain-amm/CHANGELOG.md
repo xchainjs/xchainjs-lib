@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies [91a799b]
+  - @xchainjs/xchain-bitcoin@2.4.2
+  - @xchainjs/xchain-doge@2.3.4
+  - @xchainjs/xchain-litecoin@2.4.4
+  - @xchainjs/xchain-wallet@2.0.39
+
 ## 5.0.0
 
 ### Major Changes
