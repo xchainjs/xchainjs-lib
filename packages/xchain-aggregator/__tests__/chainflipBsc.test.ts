@@ -13,11 +13,15 @@ import axios from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import BigNumber from 'bignumber.js'
 
+import { Wallet } from '@xchainjs/xchain-wallet'
+
 import { ChainflipProtocol } from '../src/protocols/chainflip'
+import { ChainflipUnsupportedNetworkError } from '../src/protocols/chainflip/chainflipProtocol'
 import { cChainToXChain, xChainToCChain } from '../src/protocols/chainflip/utils'
 
 const BROKER_URL = 'http://chainflip-broker.invalid/rpc'
 const STATE_CHAIN_RPC = 'https://rpc.mainnet.chainflip.io'
+const STATE_CHAIN_RPC_PERSEVERANCE = 'https://archive.perseverance.chainflip.io'
 
 const BSC_USDT_MAINNET = '0x55d398326f99059fF775485246999027B3197955'
 const AssetBSCUSDT = assetFromStringEx(`BSC.USDT-${BSC_USDT_MAINNET}`) as TokenAsset
@@ -165,11 +169,11 @@ describe('Chainflip protocol - BSC (real @chainflip/sdk)', () => {
     fetchSpy = jest.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
       if (url.endsWith('/networkInfo')) return jsonResponse(networkInfo)
-      if (url === STATE_CHAIN_RPC || url === BROKER_URL) {
+      if (url === STATE_CHAIN_RPC || url === STATE_CHAIN_RPC_PERSEVERANCE || url === BROKER_URL) {
         const batch = JSON.parse(init?.body as string) as RpcRequest[]
         return jsonResponse(
           batch.map((req) => {
-            if (url === STATE_CHAIN_RPC && req.method === 'cf_environment') {
+            if (url !== BROKER_URL && req.method === 'cf_environment') {
               return { id: req.id, jsonrpc: '2.0', result: cfEnvironment }
             }
             if (url === BROKER_URL && req.method === 'broker_request_swap_deposit_address') {
@@ -433,5 +437,119 @@ describe('Chainflip protocol - BSC (real @chainflip/sdk)', () => {
       }),
     ).rejects.toThrow('AVAX asset not supported in AVAX chain')
     expect(quoteRequests).toHaveLength(0)
+  })
+
+  it('keeps the prior ticker + chain matching for non-BSC tokens (unchanged by this patch)', async () => {
+    const protocol = newProtocol()
+    expect(
+      await protocol.isAssetSupported(assetFromStringEx('ETH.USDT-0xdAC17F958D2ee523a2206206994597C13D831ec7')),
+    ).toBe(true)
+    // Prior behaviour, intentionally not tightened here: non-BSC tokens still match on ticker + chain.
+    expect(await protocol.isAssetSupported(assetFromStringEx('ETH.USDT'))).toBe(true)
+  })
+
+  const stubWallet = (network: Network) => {
+    const transfer = jest.fn().mockResolvedValue('0xhash')
+    const getExplorerTxUrl = jest.fn().mockResolvedValue('https://explorer.invalid/tx/0xhash')
+    const wallet = { getNetwork: () => network, transfer, getExplorerTxUrl } as unknown as Wallet
+    return { wallet, transfer, getExplorerTxUrl }
+  }
+
+  const bscSourceParams = {
+    fromAsset: AssetBSC,
+    destinationAsset: AssetBTC,
+    amount: new CryptoAmount(baseAmount(ONE_BNB, BSC_GAS_ASSET_DECIMAL), AssetBSC),
+    fromAddress: BSC_ADDRESS,
+    destinationAddress: BTC_ADDRESS,
+  }
+  const bscDestinationParams = {
+    fromAsset: AssetBTC,
+    destinationAsset: AssetBSCUSDT,
+    amount: new CryptoAmount(baseAmount('1000000', 8), AssetBTC),
+    fromAddress: BTC_ADDRESS,
+    destinationAddress: BSC_ADDRESS,
+  }
+
+  it('mainnet doSwap BNB -> BTC opens the channel and transfers BNB to the deposit address (stub wallet)', async () => {
+    const { wallet, transfer } = stubWallet(Network.Mainnet)
+    const protocol = new ChainflipProtocol({ network: Network.Mainnet, brokerUrl: BROKER_URL, wallet })
+    const tx = await protocol.doSwap(bscSourceParams)
+    expect(tx.hash).toBe('0xhash')
+    expect(brokerRequests).toHaveLength(1)
+    expect(transfer).toHaveBeenCalledTimes(1)
+    const [call] = transfer.mock.calls[0]
+    expect(call.recipient).toBe(BSC_DEPOSIT_ADDRESS)
+    expect(call.asset).toBe(AssetBSC)
+    expect(call.amount.amount().toFixed()).toBe(ONE_BNB)
+    expect(call.amount.decimal).toBe(18)
+  })
+
+  describe('BSC is mainnet only', () => {
+    const expectNoDispatch = (transfer?: jest.Mock) => {
+      expect(fetchSpy).not.toHaveBeenCalled()
+      expect(axiosMock.history.get).toHaveLength(0)
+      expect(quoteRequests).toHaveLength(0)
+      expect(brokerRequests).toHaveLength(0)
+      if (transfer) expect(transfer).not.toHaveBeenCalled()
+    }
+    const stagenetError = /BSC is not supported by the Chainflip protocol on Chainflip network "perseverance"/
+
+    it('xchainjs testnet has no Chainflip network, so no BSC request can be built', () => {
+      expect(() => new ChainflipProtocol({ network: Network.Testnet, brokerUrl: BROKER_URL })).toThrow(
+        'Chainflip has no testnet. Use mainnet or stagenet',
+      )
+      expectNoDispatch()
+    })
+
+    it('stagenet: BSC assets are unsupported without any network call', async () => {
+      const protocol = new ChainflipProtocol({ network: Network.Stagenet, brokerUrl: BROKER_URL })
+      expect(await protocol.isAssetSupported(AssetBSC)).toBe(false)
+      expect(await protocol.isAssetSupported(AssetBSCUSDT)).toBe(false)
+      expectNoDispatch()
+    })
+
+    it('stagenet: BSC is dropped from supported chains even when the SDK reports Bsc', async () => {
+      const chains = await new ChainflipProtocol({
+        network: Network.Stagenet,
+        brokerUrl: BROKER_URL,
+      }).getSupportedChains()
+      expect(chains).toEqual(expect.arrayContaining(['BTC', 'ETH', 'ARB', 'SOL', 'TRON']))
+      expect(chains).not.toContain('BSC')
+      expect(fetchSpy).toHaveBeenCalled() // the real SDK did list Bsc from the stubbed perseverance data
+    })
+
+    it.each([
+      ['source', bscSourceParams],
+      ['destination', bscDestinationParams],
+    ])(
+      'stagenet: BSC %s rejects estimateSwap, openDepositChannel and doSwap before any dispatch',
+      async (_side, params) => {
+        const { wallet, transfer } = stubWallet(Network.Stagenet)
+        const protocol = new ChainflipProtocol({ network: Network.Stagenet, brokerUrl: BROKER_URL, wallet })
+
+        await expect(protocol.estimateSwap(params)).rejects.toThrow(ChainflipUnsupportedNetworkError)
+        await expect(protocol.estimateSwap(params)).rejects.toThrow(stagenetError)
+        await expect(protocol.openDepositChannel(params)).rejects.toThrow(stagenetError)
+        await expect(protocol.doSwap(params)).rejects.toThrow(stagenetError)
+        expectNoDispatch(transfer)
+      },
+    )
+
+    it.each([
+      ['source', Network.Stagenet, bscSourceParams],
+      ['destination', Network.Stagenet, bscDestinationParams],
+      ['source', Network.Testnet, bscSourceParams],
+      ['destination', Network.Testnet, bscDestinationParams],
+    ])(
+      'mainnet protocol with a non-mainnet wallet: BSC %s doSwap (%s wallet) is rejected before any dispatch',
+      async (_side, walletNetwork, params) => {
+        const { wallet, transfer } = stubWallet(walletNetwork)
+        const protocol = new ChainflipProtocol({ network: Network.Mainnet, brokerUrl: BROKER_URL, wallet })
+        await expect(protocol.doSwap(params)).rejects.toThrow(
+          `BSC is not supported by the Chainflip protocol with a "${walletNetwork}" wallet`,
+        )
+        expectNoDispatch(transfer)
+      },
+    )
   })
 })
