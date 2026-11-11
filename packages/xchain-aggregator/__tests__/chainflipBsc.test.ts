@@ -232,6 +232,35 @@ describe('Chainflip protocol - BSC (real @chainflip/sdk)', () => {
     expect(await protocol.isAssetSupported(assetFromStringEx('AVAX.AVAX'))).toBe(false)
   })
 
+  it('binds BSC USDT to its contract: look-alike contracts and a bare ticker are not supported', async () => {
+    const protocol = newProtocol()
+    expect(await protocol.isAssetSupported(assetFromStringEx(`BSC.USDT-${BSC_USDT_MAINNET.toLowerCase()}`))).toBe(true)
+    expect(await protocol.isAssetSupported(assetFromStringEx(`BSC.USDT-${BSC_USDT_MAINNET.toUpperCase()}`))).toBe(true)
+    expect(
+      await protocol.isAssetSupported(assetFromStringEx('BSC.USDT-0x00000000000000000000000000000000000000ff')),
+    ).toBe(false)
+    // A token asset claiming the native BNB ticker must not map to native BNB
+    expect(
+      await protocol.isAssetSupported(assetFromStringEx('BSC.BNB-0x00000000000000000000000000000000000000ff')),
+    ).toBe(false)
+    expect(await protocol.isAssetSupported(assetFromStringEx('BSC.USDT'))).toBe(false)
+  })
+
+  it('rejects a look-alike BSC USDT contract before requesting a quote or channel', async () => {
+    const fakeUsdt = assetFromStringEx('BSC.USDT-0x00000000000000000000000000000000000000ff') as TokenAsset
+    await expect(
+      newProtocol().openDepositChannel({
+        fromAsset: fakeUsdt,
+        destinationAsset: AssetBTC,
+        amount: new CryptoAmount(baseAmount(MIN_BSC_USDT, 18), fakeUsdt),
+        fromAddress: BSC_ADDRESS,
+        destinationAddress: BTC_ADDRESS,
+      }),
+    ).rejects.toThrow('USDT asset not supported in BSC chain')
+    expect(quoteRequests).toHaveLength(0)
+    expect(brokerRequests).toHaveLength(0)
+  })
+
   it('quotes BNB -> BTC with BNB 18-decimal input and BTC 8-decimal output', async () => {
     const estimated = await newProtocol().estimateSwap({
       fromAsset: AssetBSC,

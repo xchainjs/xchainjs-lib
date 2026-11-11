@@ -20,7 +20,7 @@ import { Wallet } from '@xchainjs/xchain-wallet'
 import { IProtocol, ProtocolConfig, QuoteSwap, QuoteSwapParams, SwapHistory, TxSubmitted } from '../../types'
 
 import { ChainflipDepositChannel, CompatibleAsset } from './types'
-import { cChainToXChain, xAssetToCAsset } from './utils'
+import { cChainToXChain, isSameContract, xAssetToCAsset } from './utils'
 import { assetUSDC } from '@xchainjs/xchain-thorchain-query'
 
 const networkToChainflip = (network?: Network): 'mainnet' | 'perseverance' => {
@@ -209,7 +209,11 @@ export class ChainflipProtocol implements IProtocol {
     }
     const chainAssets = await this.assetsData.getValue()
     const assetData = chainAssets.find((chainAsset) => {
-      return chainAsset.asset === xAssetToCAsset(asset) && asset.chain === cChainToXChain(chainAsset.chain)
+      return (
+        chainAsset.asset === xAssetToCAsset(asset) &&
+        asset.chain === cChainToXChain(chainAsset.chain) &&
+        isSameContract(asset, chainAsset)
+      )
     })
     if (!assetData) throw Error(`${asset.ticker} asset not supported in ${asset.chain} chain`)
     return assetData

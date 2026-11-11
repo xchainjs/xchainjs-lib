@@ -1,5 +1,11 @@
 import { Asset as CAsset, AssetData, Chain as CChain, Chains } from '@chainflip/sdk/swap'
-import { Asset as XAsset, AssetType, Chain as XChain, TokenAsset as XTokenAsset } from '@xchainjs/xchain-util'
+import {
+  Asset as XAsset,
+  AssetType,
+  Chain as XChain,
+  TokenAsset as XTokenAsset,
+  isTokenAsset,
+} from '@xchainjs/xchain-util'
 
 export const cChainToXChain = (chain: CChain): XChain | null => {
   switch (chain) {
@@ -52,4 +58,18 @@ export const cAssetToXAsset = (asset: AssetData): XAsset | XTokenAsset => {
 
 export const xAssetToCAsset = (asset: XAsset | XTokenAsset): CAsset => {
   return asset.ticker as CAsset
+}
+
+/**
+ * A Chainflip token is only the same asset when the xchainjs token carries the same contract.
+ * A native Chainflip asset only matches a native xchainjs asset. Ticker and chain alone are not
+ * enough: another token with the same ticker on the same chain must not resolve to it.
+ * Compared case-insensitively because xchainjs asset strings are often upper-cased (for example
+ * from THORChain pool ids). A case-only collision with a real base58 mint is not practical to create.
+ */
+export const isSameContract = (asset: XAsset | XTokenAsset, assetData: AssetData): boolean => {
+  if (!assetData.contractAddress) return !isTokenAsset(asset)
+  if (!isTokenAsset(asset)) return false
+  const contract = asset.symbol.slice(asset.ticker.length + 1)
+  return contract.toLowerCase() === assetData.contractAddress.toLowerCase()
 }
