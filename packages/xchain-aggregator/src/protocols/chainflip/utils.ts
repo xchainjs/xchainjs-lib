@@ -13,6 +13,8 @@ export const cChainToXChain = (chain: CChain): XChain | null => {
       return 'SOL'
     case 'Tron':
       return 'TRON'
+    case 'Bsc':
+      return 'BSC'
     default:
       return null
   }
@@ -30,6 +32,8 @@ export const xChainToCChain = (chain: XChain): CChain | null => {
       return Chains.Solana
     case 'TRON':
       return Chains.Tron
+    case 'BSC':
+      return Chains.Bsc
     default:
       return null
   }
